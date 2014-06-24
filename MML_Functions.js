@@ -1279,36 +1279,6 @@ MML.rollHitPosition = function rollHitPosition(elevation, defender){
     return position;
 };
 
-//Probably not needed due to APVs as attributes
-MML.damageTypeToNumber = function damageTypeToNumber(type) {
-    //***could be replaced with enum in database***
-	
-    switch(type) {
-        case "Surface":
-            number =  0;
-            break;
-        case "Cut":
-            number =  1;
-            break;
-        case "Chop":
-            number =  2;
-            break;
-        case "Pierce":
-            number =  3;
-            break;
-        case "Thrust":
-            number =  4;
-            break;
-        case "Impact":
-            number =  5;
-            break;
-        case "Flanged":
-            number =  6;
-            break;
-    }
-    return number;
-};
-
 MML.apvAttributeToArray = function apvAttributeToArray(defender, position, type) {
 	apvArray = MML.getCharAttribute(defender, position + " " + type).get("current").split(";");
     for (var apv in apvArray){
@@ -1320,7 +1290,6 @@ MML.apvAttributeToArray = function apvAttributeToArray(defender, position, type)
 }
 
 MML.armorPenetration = function armorPenetration(defender, position, damage, type) {
-    //type = MML.damageTypeToNumber(type);
 	damageApplied = false; //Accounts for partial coverage, once true the loop stops
     coverageRoll = randomInteger(100);    
 	
