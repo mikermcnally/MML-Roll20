@@ -60,7 +60,7 @@ MML.setAttributeFromTable = function setAttributeFromTable(attributeArray, attri
 };
 
 MML.createAPVAttributes = function createAPVAttributes(character){
-    apvArray = [];
+    var apvArray = [];
 	for (var index in MML.hitPositions) {
         apvArray.push({ name: index + " Surface" , current: 0, max: 0 });
 		apvArray.push({ name: index + " Cut" , current: 0, max: 0 });
@@ -75,12 +75,12 @@ MML.createAPVAttributes = function createAPVAttributes(character){
 }
 
 MML.getAttributeAsInt = function getAttributeAsInt(charName, attribute){
-    result = MML.getCharAttribute(charName, attribute).get("current")*1;
+    var result = MML.getCharAttribute(charName, attribute).get("current")*1;
     return result;
 };
 
 MML.equipmentStringToArray = function equipmentStringToArray(equipment){
-    equipmentArray = equipment.split("; ");
+    var equipmentArray = equipment.split("; ");
     
     for (var item in equipmentArray){
         equipmentArray[item] = equipmentArray[item].split(":");
@@ -90,72 +90,72 @@ MML.equipmentStringToArray = function equipmentStringToArray(equipment){
 };
 
 MML.initChar = function initChar(character){
-    primary = MML.getAttributesFromArray(MML.primaryAttributes, character);
-    secondary = MML.getAttributesFromArray(MML.secondaryAttributes, character);
-    hitPoints = MML.getAttributesFromArray(MML.hitPoints, character);
-    movement = MML.getAttributesFromArray(MML.movement, character);
-    skills = MML.getAttributesFromArray(MML.skills, character);
+    var primary = MML.getAttributesFromArray(MML.primaryAttributes, character);
+    var secondary = MML.getAttributesFromArray(MML.secondaryAttributes, character);
+    var hitPoints = MML.getAttributesFromArray(MML.hitPoints, character);
+    var movement = MML.getAttributesFromArray(MML.movement, character);
+    var skills = MML.getAttributesFromArray(MML.skills, character);
     
     MML.setStature(character);
-    stature = primary["Stature"].get("current")*1;
-    strength = primary["Strength"].get("current")*1;
-    coordination = primary["Coordination"].get("current")*1;
-    health = primary["Health"].get("current")*1;
-    beauty = primary["Beauty"].get("current")*1;
-    intellect = primary["Intellect"].get("current")*1;
-    reason = primary["Reason"].get("current")*1;
-    creativity = primary["Creativity"].get("current")*1;
-    presence = primary["Presence"].get("current")*1;
+    var stature = primary["Stature"].get("current")*1;
+    var strength = primary["Strength"].get("current")*1;
+    var coordination = primary["Coordination"].get("current")*1;
+    var health = primary["Health"].get("current")*1;
+    var beauty = primary["Beauty"].get("current")*1;
+    var intellect = primary["Intellect"].get("current")*1;
+    var reason = primary["Reason"].get("current")*1;
+    var creativity = primary["Creativity"].get("current")*1;
+    var presence = primary["Presence"].get("current")*1;
     
-    willpower = Math.round((2*presence + health)/3);
+    var willpower = Math.round((2*presence + health)/3);
     secondary["Willpower"].set("current", willpower);
     
-    evocation = Math.round(health + intellect + reason + creativity + willpower);
+    var evocation = Math.round(health + intellect + reason + creativity + willpower);
     secondary["Evocation"].set("current", evocation);
     
-    perception = Math.round((intellect + reason + creativity)/3);
+    var perception = Math.round((intellect + reason + creativity)/3);
     secondary["Perception"].set("current", perception);
     
-    systemStrength = Math.round((presence + 2*health)/3);
+    var systemStrength = Math.round((presence + 2*health)/3);
     secondary["System Strength"].set("current", systemStrength);
     
-    fitness = Math.round((health + strength)/2);
+    var fitness = Math.round((health + strength)/2);
     secondary["Fitness"].set("current", fitness);
     
     MML.setAttributeFromTable([secondary["Fitness Modifier"]], "current", ["mod"], fitness, MML.fitnessModLookup);
-    fitnessMod = secondary["Fitness Modifier"].get("current");
+    var fitnessMod = secondary["Fitness Modifier"].get("current");
     
-    load = Math.round(fitnessMod * stature);
+    var load = Math.round(fitnessMod * stature);
     secondary["Load"].set("current", load);
     
-    overhead =  Math.round(2 * fitnessMod * stature);
+    var overhead =  Math.round(2 * fitnessMod * stature);
     secondary["Maximum Overhead Lift"].set("current", overhead);
     
-    deadlift = Math.round(4 * fitnessMod * stature);
+    var deadlift = Math.round(4 * fitnessMod * stature);
     secondary["Maximum Dead Lift"].set("current", deadlift);
     
-    multipleWounds = Math.round((health + stature + willpower)/2);
+    var multipleWounds = Math.round((health + stature + willpower)/2);
     hitPoints["Multiple Wounds"].set("current", multipleWounds);
     hitPoints["Multiple Wounds"].set("max", multipleWounds);
     
-    headHP = MML.setHP(character, MML.getCharAttribute(character, "Head HP"), Math.round(health + stature/3));
-    chestHP = MML.setHP(character, MML.getCharAttribute(character, "Chest HP"), Math.round(health + stature + strength));
-    abHP = MML.setHP(character, MML.getCharAttribute(character, "Abdomen HP"), Math.round(health + stature));
-    laHP = MML.setHP(character, MML.getCharAttribute(character, "Left Arm HP"), Math.round(health + stature));
-    raHP = MML.setHP(character, MML.getCharAttribute(character, "Right Arm HP"), Math.round(health + stature));
-    llHP = MML.setHP(character, MML.getCharAttribute(character, "Left Leg HP"), Math.round(health + stature));
-    rlHP = MML.setHP(character, MML.getCharAttribute(character, "Right Leg HP"), Math.round(health + stature));
+    var headHP = MML.setHP(character, MML.getCharAttribute(character, "Head HP"), Math.round(health + stature/3));
+    var chestHP = MML.setHP(character, MML.getCharAttribute(character, "Chest HP"), Math.round(health + stature + strength));
+    var abHP = MML.setHP(character, MML.getCharAttribute(character, "Abdomen HP"), Math.round(health + stature));
+    var laHP = MML.setHP(character, MML.getCharAttribute(character, "Left Arm HP"), Math.round(health + stature));
+    var raHP = MML.setHP(character, MML.getCharAttribute(character, "Right Arm HP"), Math.round(health + stature));
+    var llHP = MML.setHP(character, MML.getCharAttribute(character, "Left Leg HP"), Math.round(health + stature));
+    var rlHP = MML.setHP(character, MML.getCharAttribute(character, "Right Leg HP"), Math.round(health + stature));
 		
     MML.SetAPVs(character);
    
 };
 
 MML.setStature = function setStature(character){
-    stature = MML.getCharAttribute(character, "Stature");
-    race = MML.getCharAttribute(character, "Race");
-    gender = MML.getCharAttribute(character, "Gender");
-    height = MML.getCharAttribute(character, "Height");
-    weight = MML.getCharAttribute(character, "Weight");
+    var stature = MML.getCharAttribute(character, "Stature");
+    var race = MML.getCharAttribute(character, "Race");
+    var gender = MML.getCharAttribute(character, "Gender");
+    var height = MML.getCharAttribute(character, "Height");
+    var weight = MML.getCharAttribute(character, "Weight");
     
     stature.set("max", stature.get("current"));
     
@@ -222,7 +222,7 @@ MML.setStature = function setStature(character){
 };
 
 MML.setHP = function setHP(character, bodyPart, inputValue){
-    race = MML.getCharAttribute(character, "Race");
+    var race = MML.getCharAttribute(character, "Race");
     
     if (race.get("current") === "Human"){ 
         MML.setAttributeFromTable([bodyPart], "current", ["hp"], inputValue, MML.HPTableHuman);
@@ -264,14 +264,14 @@ MML.setEquipmentStats = function setEquipmentStats(charName){
 
 //needs shield support. Both stats intimately related, only one function needed
 MML.setMoveRatioAndKnockdown = function setMoveRatioAndKnockdown(charName){
-    moveRatio = MML.getCharAttribute(charName, "Movement Ratio");
-    knockdown = MML.getCharAttribute(charName, "Knockdown");
-    stature = MML.getAttributeAsInt(charName, "Stature");
-    load = MML.getAttributeAsInt(charName, "Load");
-    armorList = MML.equipmentStringToArray(MML.getCharAttribute(charName, "Equipped Armor").get("current"));
-    weaponList = MML.equipmentStringToArray(MML.getCharAttribute(charName, "Equipped Weapons").get("current"));
-    shield = MML.getCharAttribute(charName, "Equipped Shield").get("current");
-    totalWeight = 0;
+    var moveRatio = MML.getCharAttribute(charName, "Movement Ratio");
+    var knockdown = MML.getCharAttribute(charName, "Knockdown");
+    var stature = MML.getAttributeAsInt(charName, "Stature");
+    var load = MML.getAttributeAsInt(charName, "Load");
+    var armorList = MML.equipmentStringToArray(MML.getCharAttribute(charName, "Equipped Armor").get("current"));
+    var weaponList = MML.equipmentStringToArray(MML.getCharAttribute(charName, "Equipped Weapons").get("current"));
+    var shield = MML.getCharAttribute(charName, "Equipped Shield").get("current");
+    var totalWeight = 0;
     
     if (armorList[0][0] !== "None"){       
         for (var piece in armorList){
@@ -299,8 +299,8 @@ MML.setMoveRatioAndKnockdown = function setMoveRatioAndKnockdown(charName){
 };
 
 MML.SetAPVs = function SetAPVs(character){
-    armorArray = MML.equipmentStringToArray(MML.getCharAttribute(character, "Equipped Armor").get("current"));
-    mat = [];
+    var armorArray = MML.equipmentStringToArray(MML.getCharAttribute(character, "Equipped Armor").get("current"));
+    var mat = [];
     
     //Initialize APV Matrix: [Position [Damage Type [APVs [Value, Coverage]]]]
     for (i=0; i<46; i++){
@@ -310,8 +310,8 @@ MML.SetAPVs = function SetAPVs(character){
 	//Creates raw matrix of individual pieces of armor (no layering or partial coverage)
     if (armorArray[0][0] !== "None"){    
         for(var piece in armorArray){
-            style = MML.armorStyleList[armorArray[piece][0]];
-            material = MML.APVList[armorArray[piece][1]];
+            var style = MML.armorStyleList[armorArray[piece][0]];
+            var material = MML.APVList[armorArray[piece][1]];
             
             for(var position in style.coverage){
                 mat[style.coverage[position][0]-1][0].push([material.surface, style.coverage[position][1]]);
@@ -328,9 +328,9 @@ MML.SetAPVs = function SetAPVs(character){
 	//This loop accounts for layered armor and partial coverage and outputs final APVs
     for (var position in mat){
         for (var type in mat[position]){
-            rawAPVArray = mat[position][type];
-            apvFinalArray = [];
-            coverageArray = [];
+            var rawAPVArray = mat[position][type];
+            var apvFinalArray = [];
+            var coverageArray = [];
             
             //Creates an array of armor coverage in ascending order.
             for (var apv in rawAPVArray){
@@ -342,9 +342,9 @@ MML.SetAPVs = function SetAPVs(character){
             
             //Creates APV array per damage type per position
             for (var value in coverageArray){
-                apvToLayerArray = [];
-                apvValue = 0;
-                coverageValue = coverageArray[value];
+                var apvToLayerArray = [];
+                var apvValue = 0;
+                var coverageValue = coverageArray[value];
                 
                 //Builds an array of APVs that meet or exceed the coverage value
                 for (var apv in rawAPVArray){
@@ -366,11 +366,11 @@ MML.SetAPVs = function SetAPVs(character){
         }
     }
     
-	damageTypeArray = [" Surface", " Cut", " Chop", " Pierce", " Thrust", " Impact", " Flanged"];
+	var damageTypeArray = [" Surface", " Cut", " Chop", " Pierce", " Thrust", " Impact", " Flanged"];
 	//APV attribute format "value,coverage;value,coverage"
 	for (var position in mat){
 		for (var type in damageTypeArray){
-			attributeString = "";
+			var attributeString = "";
 			if (mat[position][type].length > 1){
 				for (var apv in mat[position][type]){
 					attributeString += mat[position][type][apv].toString() + ";";
@@ -381,10 +381,10 @@ MML.SetAPVs = function SetAPVs(character){
 				attributeString = mat[position][type].toString();
 			}
 			
-			positionName = position*1 + 1;
+			var positionName = position*1 + 1;
 			positionName = positionName + damageTypeArray[type];
 			
-			apvAttribute = MML.getCharAttribute(character, positionName);
+			var apvAttribute = MML.getCharAttribute(character, positionName);
 			apvAttribute.set("current", attributeString);
 		}
 	}
@@ -392,12 +392,12 @@ MML.SetAPVs = function SetAPVs(character){
 
 //Need Freedom of Movement Bonus. Do it manually for now
 MML.setArmorInitiativeBonuses = function setArmorInitativeBonuses(charName){
-    senseBonus = MML.getCharAttribute(charName, "Sense Initiative Bonus");
-    fomBonus = MML.getCharAttribute(charName, "FoM Initiative Bonus");
-    armorList = MML.equipmentStringToArray(MML.getCharAttribute(charName, "Equipped Armor").get("current"));
-    bitsOfHelm = ["Barbute Helm", "Bascinet Helm", "Camail", "Camail-Conical", "Cap", "Cheeks", "Conical Helm", "Duerne Helm", "Dwarven War Hood", "Face Plate", "Great Helm", "Half-Face Plate", "Hood", "Nose Guard", "Pot Helm", "Sallet Helm", "Throat Guard", "War Hat"];
-    senseArray = [];
-    fomArray = [];
+    var senseBonus = MML.getCharAttribute(charName, "Sense Initiative Bonus");
+    var fomBonus = MML.getCharAttribute(charName, "FoM Initiative Bonus");
+    var armorList = MML.equipmentStringToArray(MML.getCharAttribute(charName, "Equipped Armor").get("current"));
+    var bitsOfHelm = ["Barbute Helm", "Bascinet Helm", "Camail", "Camail-Conical", "Cap", "Cheeks", "Conical Helm", "Duerne Helm", "Dwarven War Hood", "Face Plate", "Great Helm", "Half-Face Plate", "Hood", "Nose Guard", "Pot Helm", "Sallet Helm", "Throat Guard", "War Hat"];
+    var senseArray = [];
+    var fomArray = [];
     
     //Senses
     for (var bit in bitsOfHelm){
@@ -477,8 +477,8 @@ MML.setArmorInitiativeBonuses = function setArmorInitativeBonuses(charName){
 };
 
 MML.universalRoll = function universalRoll(mods){
-    roll = randomInteger(100);
-    totalTarget = 0;
+    var roll = randomInteger(100);
+    var totalTarget = 0;
     
     for(var mod in mods){
         totalTarget += mods[mod];
@@ -496,8 +496,8 @@ MML.universalRoll = function universalRoll(mods){
 };
 
 MML.attributeCheckRoll = function attributeCheckRoll(attribute, mods){
-    roll = randomInteger(20);
-    totalTarget = attribute;
+    var roll = randomInteger(20);
+    var totalTarget = attribute;
     
     for(var mod in mods){
         totalTarget += mods[mod];
@@ -515,22 +515,21 @@ MML.attributeCheckRoll = function attributeCheckRoll(attribute, mods){
 };
 
 MML.rollDice = function rollDice(amount, size) {
-    value = 0;
+    var value = 0;
     
     for (i = 0; i < amount; i++){
         value += randomInteger(size);
     }
     return value;
 };
-
+//Rework this with character sheet, rolling and determining the bonus should be different
 MML.rollInitiative = function rollInitiative(character, action, situationMods){
-    weapons = MML.equipmentStringToArray(MML.getCharAttribute(character, "Equipped Weapons").get("current"));
-    attributeArray = [MML.getAttributeAsInt(character, "Strength"), MML.getAttributeAsInt(character, "Coordination"), MML.getAttributeAsInt(character, "Reason"), MML.getAttributeAsInt(character, "Perception")];
-    rankingAttribute = attributeArray.sort(function(a,b){return a-b})[0];
-    moveRatio = MML.getAttributeAsInt(character, "Movement Ratio");
-    weaponSkill = MML.getAttributeAsInt(character, "Current Weapon Skill");
-    totalBonus = MML.getAttributeAsInt(character, "Sense Initiative Bonus") + MML.getAttributeAsInt(character, "FoM Initiative Bonus");
-    log(MML.getAttributeAsInt(character, "Movement Ratio"));
+    var weapons = MML.equipmentStringToArray(MML.getCharAttribute(character, "Equipped Weapons").get("current"));
+    var attributeArray = [MML.getAttributeAsInt(character, "Strength"), MML.getAttributeAsInt(character, "Coordination"), MML.getAttributeAsInt(character, "Reason"), MML.getAttributeAsInt(character, "Perception")];
+    var rankingAttribute = attributeArray.sort(function(a,b){return a-b})[0];
+    var moveRatio = MML.getAttributeAsInt(character, "Movement Ratio");
+    var weaponSkill = MML.getAttributeAsInt(character, "Current Weapon Skill");
+    var totalBonus = MML.getAttributeAsInt(character, "Sense Initiative Bonus") + MML.getAttributeAsInt(character, "FoM Initiative Bonus");
     //Weapon
     if (action === "Attack"){
         //Unarmed
@@ -543,7 +542,7 @@ MML.rollInitiative = function rollInitiative(character, action, situationMods){
         }
         //Dual Wield, take slower weapon
         else if (weapons.length === 2){
-            weaponInits = [MML.meleeWeaponStats[weapons[0][0]].initiative, MML.meleeWeaponStats[weapons[0][0]].initiative];
+            var weaponInits = [MML.meleeWeaponStats[weapons[0][0]].initiative, MML.meleeWeaponStats[weapons[0][0]].initiative];
             totalBonus += weaponInits.sort(function(a,b){return b-a})[0];
         }
         else {
@@ -616,7 +615,6 @@ MML.rollInitiative = function rollInitiative(character, action, situationMods){
     //Weapon Skill
     if (weaponSkill <= 9){
         totalBonus += 0;
-        return totalBonus;
     }
     else if (weaponSkill > 9 && weaponSkill <= 19){
         totalBonus += 1;
@@ -641,8 +639,8 @@ MML.rollInitiative = function rollInitiative(character, action, situationMods){
         totalBonus += situationMods[mod];
     }
     
-    roll = MML.rollDice(1, 10);
-    initiative = roll + totalBonus;
+    var roll = MML.rollDice(1, 10);
+    var initiative = roll + totalBonus;
     sendChat("", "Initiative = 1d10 + bonus = " + roll + " + " + totalBonus + " = " + initiative);
     return initiative;
 };
@@ -653,8 +651,8 @@ MML.trackInitiative = function trackInitiative(){};
 MML.rollHitPosition = function rollHitPosition(elevation, defender){
     var position;
     var defenderEquipment;
-    defenderWeapons = MML.equipmentStringToArray(MML.getCharAttribute(defender, "Equipped Weapons").get("current"));
-    defenderShield = MML.equipmentStringToArray(MML.getCharAttribute(defender, "Equipped Shield").get("current"));
+    var defenderWeapons = MML.equipmentStringToArray(MML.getCharAttribute(defender, "Equipped Weapons").get("current"));
+    var defenderShield = MML.equipmentStringToArray(MML.getCharAttribute(defender, "Equipped Shield").get("current"));
     
     //This looks at the defenders stuff and decides which column to use (A, B, or C)
     //Defender has a shield
@@ -1280,7 +1278,7 @@ MML.rollHitPosition = function rollHitPosition(elevation, defender){
 };
 
 MML.apvAttributeToArray = function apvAttributeToArray(defender, position, type) {
-	apvArray = MML.getCharAttribute(defender, position + " " + type).get("current").split(";");
+	var apvArray = MML.getCharAttribute(defender, position + " " + type).get("current").split(";");
     for (var apv in apvArray){
         apvArray[apv] = apvArray[apv].split(",");
 		apvArray[apv][0] = apvArray[apv][0]*1; //Convert string to int
@@ -1290,14 +1288,15 @@ MML.apvAttributeToArray = function apvAttributeToArray(defender, position, type)
 }
 
 MML.armorPenetration = function armorPenetration(defender, position, damage, type) {
-	damageApplied = false; //Accounts for partial coverage, once true the loop stops
-    coverageRoll = randomInteger(100);    
+	var damageApplied = false; //Accounts for partial coverage, once true the loop stops
+    var coverageRoll = randomInteger(100);    
 	
     //iterates over apv values at given position (accounting for partial coverage)
-    for (var apv in MML.apvAttributeToArray(defender, position, type)){ //state.MML.characterAPVList[MML.getCharFromName(defender).id][position-1][type]
+	var apv;
+    for (apv in MML.apvAttributeToArray(defender, position, type)){ //state.MML.characterAPVList[MML.getCharFromName(defender).id][position-1][type]
         if (damageApplied === false){
             if (coverageRoll <= MML.apvAttributeToArray(defender, position, type)[apv][1]) { //if coverage roll is less than apv coverage
-                damageDeflected = MML.apvAttributeToArray(defender, position, type)[apv][0];
+                var damageDeflected = MML.apvAttributeToArray(defender, position, type)[apv][0];
                 
                 //If all damage is deflected, do blunt trauma. Modifies damage variable for next if statement
                 if (damage <= damageDeflected){
@@ -1339,10 +1338,10 @@ MML.armorPenetration = function armorPenetration(defender, position, damage, typ
 };
 
 MML.applyDamage = function applyDamage(defender, position, damage, type){
-    currentHP = MML.getCharAttribute(defender, MML.hitPositions[position].part).get("current")*1;
-    maxHP = MML.getCharAttribute(defender, MML.hitPositions[position].part).get("max")*1;
-    multiWound = MML.getCharAttribute(defender, "Multiple Wounds").get("current")*1;
-    damage = MML.armorPenetration(defender, position, damage, type);
+    var currentHP = MML.getCharAttribute(defender, MML.hitPositions[position].part).get("current")*1;
+    var maxHP = MML.getCharAttribute(defender, MML.hitPositions[position].part).get("max")*1;
+    var multiWound = MML.getCharAttribute(defender, "Multiple Wounds").get("current")*1;
+    var damage = MML.armorPenetration(defender, position, damage, type);
     
     currentHP -= damage;
     multiWound -= damage;
@@ -1356,7 +1355,7 @@ MML.applyDamage = function applyDamage(defender, position, damage, type){
     }
     else if (currentHP < Math.round(maxHP/2) && currentHP >= Math.round(maxHP/2)) {
         sendChat("", defender + "'s " + MML.hitPositions[position].name + " is majorly wounded!");
-        roundsOfEffect = Math.round(maxHP/2) - currentHP; //how long the situation mod lasts
+        var roundsOfEffect = Math.round(maxHP/2) - currentHP; //how long the situation mod lasts
         //state.MML.combat[defender].wounds[part] = "Major";
         //initMod -= 5;
         //situationMod -= 10;
@@ -1364,7 +1363,7 @@ MML.applyDamage = function applyDamage(defender, position, damage, type){
     else if (currentHP < 0 && currentHP >= -1*maxHP) {
         sendChat("", defender + "'s " + MML.hitPositions[position].name + " is disabled!");
         MML.checkStun(defender);
-        roundsOfEffect = Math.round(maxHP/2) - currentHP; //how long the situation mod lasts
+        var roundsOfEffect = Math.round(maxHP/2) - currentHP; //how long the situation mod lasts
         //state.MML.combat[defender].wounds[part] = "Disabled";
         //initMod -= 5;
         //situationMod -= 25;
@@ -1381,7 +1380,7 @@ MML.applyDamage = function applyDamage(defender, position, damage, type){
 
 //Needs work. comments inside.
 MML.checkKnockdown = function checkKnockdown(defender, damage) {
-    mods = 0; //place holder use something like state.combat[defender].knockdownSituationMod
+    var mods = 0; //place holder use something like state.combat[defender].knockdownSituationMod
     
     if (damage > MML.getCharAttribute(defender, "Knockdown").get("current")*1) {
         //defender resists knockdown. System strength check
@@ -1406,15 +1405,46 @@ MML.checkStun = function checkStun(defender) {
     }
 };
 
+MML.actionHandler = function actionHandler(character){
+	//action is an string attribute built from several options selected on the character sheet
+	//Base actions attack, ready item, cast spell, observe
+	
+	//melee attack format: "attack:stance:primary/secondary:standard/called shot;body part/sweep/fend:target:elevation"
+	//ranged attack format: "attack:regular/pop'N'shoot/aim:standard/called shot;body part:target"
+	//ready item format: "ready:item;item"
+	//cast spell format: "cast:spell:meta magic;meta magic:target"
+	//observe format: "observe"
+	
+	var action = getCharAttribute(character, action).get("current").split(":"); //example ["attack", "aggressive", "primary", "called shot;head", "uke"]
+	
+	switch(action[0]){
+        case "attack":
+			MML.attackAction(character, action);
+            break;
+		case "ready":
+			MML.readyItemAction(character, action);
+			break;
+		case "cast":
+			MML.castSpellAction(character, action);
+			break;
+		case "observe":
+			MML.observeAction(character, action);
+			break;
+	}
+}
+
+MML.attackAction = function attackAction(character, action){
+	var weapon = MML.getCharAttribute(attacker, "Equipped Weapons").get("current").split(":")[0];
+	if (MML.meleeWeaponStats.indexOf(weapon)){}
+}
+
 MML.meleeAttack = function meleeAttack(attacker, defender, attSituationMod, defSituationMod, attackType, elevation){
     //Add attribute bonuses and situation modifiers. Compute mods outside this function. 
     //Figure out how to account for secondary attacks
-    attackWeapon = MML.meleeWeaponStats[MML.getCharAttribute(attacker, "Equipped Weapons").get("current").split(":")[0]];
-    attackSkill = MML.getAttributeAsInt(attacker, "Current Weapon Skill");
-    defendWeapon = MML.meleeWeaponStats[MML.getCharAttribute(defender, "Equipped Weapons").get("current").split(":")[0]];
-	log(attackWeapon);
-	log(defendWeapon);
-    defendSkill = Math.round(MML.getAttributeAsInt(defender, "Current Weapon Skill")/2);
+    var attackWeapon = MML.meleeWeaponStats[MML.getCharAttribute(attacker, "Equipped Weapons").get("current").split(":")[0]];
+    var attackSkill = MML.getAttributeAsInt(attacker, "Current Weapon Skill");
+    var defendWeapon = MML.meleeWeaponStats[MML.getCharAttribute(defender, "Equipped Weapons").get("current").split(":")[0]];
+    var defendSkill = Math.round(MML.getAttributeAsInt(defender, "Current Weapon Skill")/2);
     
     sendChat("", attacker + " attacks " + defender + " with a " + attackWeapon.name + "!");
     
@@ -1431,9 +1461,9 @@ MML.meleeAttack = function meleeAttack(attacker, defender, attSituationMod, defS
         //attacker hits
         else{
             sendChat("", attacker + "'s hits " + defender);
-            damageArray = attackWeapon.primaryDamage.split("d"); //[number of dice, size of dice]
-            damage = MML.rollDice(damageArray[0]*1, damageArray[1]*1);
-            position = MML.rollHitPosition(elevation, defender);
+            var damageArray = attackWeapon.primaryDamage.split("d"); //[number of dice, size of dice]
+            var damage = MML.rollDice(damageArray[0]*1, damageArray[1]*1);
+            var position = MML.rollHitPosition(elevation, defender);
             
             MML.applyDamage(defender, position, damage, attackWeapon.primaryType);
             MML.checkKnockdown(defender, damage);
@@ -1450,6 +1480,12 @@ MML.meleeAttack = function meleeAttack(attacker, defender, attSituationMod, defS
     }
     //note that the characters acted in melee for fatigue purposes
 };
+
+MML.readyItemAction = function readyItemAction(character, action){}
+
+MML.castSpellAction = function castSpellAction(character, action){}
+
+MML.observeAction = function observeAction(character, action){}
 
 MML.parseCommand = function parseCommand(msg) {
     if(msg.type === "api" && msg.content.indexOf("!test") !== -1) {
