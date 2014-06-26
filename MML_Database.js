@@ -376,6 +376,8 @@ MML.meleeWeaponStats["Skinning Knife"] = { name: "Skinning Knife" , family: "Kni
 MML.meleeWeaponStats["Butcher's Knife"] = { name: "Butcher's Knife" , family: "Knives", hands: 1, primaryType: "Cut", primaryTask: 15, primaryDamage: "2d6", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defence: 0, weight: 1, initiative: 9, rank: 1};
 MML.meleeWeaponStats["Pitch Fork"] = { name: "Pitch Fork" , family: "Spears", hands: 2, primaryType: "Thrust", primaryTask: 35, primaryDamage: "2d10", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defence: 15, weight: 3, initiative: 3, rank: 1};
 
+MML.rangedWeaponStats = [];
+
 MML.statureTableHumanMale = [];
 MML.statureTableHumanMale["1"] = { height: "4'11", weight: 120, stature: 17 };
 MML.statureTableHumanMale["2"] = { height: "5'0", weight: 123, stature: 18 };
