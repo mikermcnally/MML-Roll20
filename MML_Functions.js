@@ -647,6 +647,257 @@ MML.rollInitiative = function rollInitiative(character, action, situationMods){
 
 MML.trackInitiative = function trackInitiative(){};
 
+MML.apvAttributeToArray = function apvAttributeToArray(defender, position, type) {
+	var apvArray = MML.getCharAttribute(defender, position + " " + type).get("current").split(";");
+    for (var apv in apvArray){
+        apvArray[apv] = apvArray[apv].split(",");
+		apvArray[apv][0] = apvArray[apv][0]*1; //Convert string to int
+		apvArray[apv][1] = apvArray[apv][1]*1; //Convert string to int
+    }    
+    return apvArray;
+}
+
+MML.armorPenetration = function armorPenetration(defender, position, damage, type) {
+	var damageApplied = false; //Accounts for partial coverage, once true the loop stops
+    var coverageRoll = randomInteger(100);    
+	
+    //iterates over apv values at given position (accounting for partial coverage)
+	var apv;
+    for (apv in MML.apvAttributeToArray(defender, position, type)){ //state.MML.characterAPVList[MML.getCharFromName(defender).id][position-1][type]
+        if (damageApplied === false){
+            if (coverageRoll <= MML.apvAttributeToArray(defender, position, type)[apv][1]) { //if coverage roll is less than apv coverage
+                var damageDeflected = MML.apvAttributeToArray(defender, position, type)[apv][0];
+                
+                //If all damage is deflected, do blunt trauma. Modifies damage variable for next if statement
+                if (damage <= damageDeflected){
+                    //If surface, cut, or pierce, cut in half and apply as impact
+                    if (type === "Surface" || type === "Cut" || type === "Pierce"){                        
+                        damage = Math.round(damage/2);
+                        damageDeflected = MML.apvAttributeToArray(defender, position, "Impact")[apv][0];
+                        
+                        if (damage <= damageDeflected){
+                            damage = 0;
+                        }
+                    }
+                    //If chop, or thrust, apply 3/4 as impact
+                    if (type === "Chop" || type === "Thrust"){
+                        damage = Math.round(damage*0.75);
+                        damageDeflected = MML.apvAttributeToArray(defender, position, "Impact")[apv][0];
+                        
+                        if (damage <= damageDeflected){
+                            damage = 0;
+                        }
+                    }
+                    //If impact or flanged, no damage
+                    else {
+                        damage = 0;
+                    }
+                }
+                
+                // if damage gets through, subtract amount deflected by armor
+                if (damage > 0){
+                    damage -= damageDeflected;
+                }
+                
+                sendChat("", "in the " + MML.hitPositions[position].name + " for " + damage + "! " + defender + "'s armor blocked " + damageDeflected + "!");
+                damageApplied = true;
+            }
+        }
+    }    
+    return damage;
+};
+
+MML.applyDamage = function applyDamage(defender, position, damage, type){
+    var currentHP = MML.getCharAttribute(defender, MML.hitPositions[position].part).get("current")*1;
+    var maxHP = MML.getCharAttribute(defender, MML.hitPositions[position].part).get("max")*1;
+    var multiWound = MML.getCharAttribute(defender, "Multiple Wounds").get("current")*1;
+    var damage = MML.armorPenetration(defender, position, damage, type);
+    
+    currentHP -= damage;
+    multiWound -= damage;
+    
+    MML.getCharAttribute(defender, MML.hitPositions[position].part).set("current", currentHP);
+    MML.getCharAttribute(defender, "Multiple Wounds").set("current", multiWound);
+    
+    if (currentHP < maxHP && currentHP >= Math.round(maxHP/2)) {
+        sendChat("", defender + "'s " + MML.hitPositions[position].name + " is minorly wounded!");
+        //state.MML.combat[defender].wounds[part] = "Minor";
+    }
+    else if (currentHP < Math.round(maxHP/2) && currentHP >= Math.round(maxHP/2)) {
+        sendChat("", defender + "'s " + MML.hitPositions[position].name + " is majorly wounded!");
+        var roundsOfEffect = Math.round(maxHP/2) - currentHP; //how long the situation mod lasts
+        //state.MML.combat[defender].wounds[part] = "Major";
+        //initMod -= 5;
+        //situationMod -= 10;
+    }
+    else if (currentHP < 0 && currentHP >= -1*maxHP) {
+        sendChat("", defender + "'s " + MML.hitPositions[position].name + " is disabled!");
+        MML.checkStun(defender);
+        var roundsOfEffect = Math.round(maxHP/2) - currentHP; //how long the situation mod lasts
+        //state.MML.combat[defender].wounds[part] = "Disabled";
+        //initMod -= 5;
+        //situationMod -= 25;
+    }
+    else {
+        sendChat("", defender + "'s " + MML.hitPositions[position].name + " is mortally wounded!");
+        
+        if (MML.attributeCheckRoll(MML.getCharAttribute(defender, "System Strength").get("current")*1, 0) === false){
+            sendChat(defender + " falls unconscious!");
+        }
+        //state.MML.combat[defender].wounds[part] = "Mortal";
+    }
+};
+
+//Needs work. comments inside.
+MML.checkKnockdown = function checkKnockdown(defender, damage) {
+    var mods = 0; //place holder use something like state.combat[defender].knockdownSituationMod
+    
+    if (damage > MML.getCharAttribute(defender, "Knockdown").get("current")*1) {
+        //defender resists knockdown. System strength check
+        if (MML.attributeCheckRoll(MML.getCharAttribute(defender, "System Strength").get("current")*1, mods)){
+            sendChat("", defender + " remains standing!");
+            //state.combat[defender].knockdownSituationMod += -5;
+            //state.combat[defender].initiativeSituationMod += -5;
+            //Defender stumbles. Not sure what that affects...
+        }
+        
+        else {
+            sendChat("", defender + " is knocked down!");
+            //state.combat[defender].position = "prone";
+        }
+    }
+};
+
+MML.checkStun = function checkStun(defender) {    
+    if (MML.attributeCheckRoll(MML.getCharAttribute(defender, "Willpower").get("current")*1, 0) === false) { //the 0 might need to vary
+        sendChat("", defender + " is stunned!");
+        //state.MML.combat[defender].conditions.push("Stunned");
+    }
+};
+
+MML.actionHandler = function actionHandler(character){
+	//action is an string attribute built from several options selected on the character sheet
+	//Base actions attack, ready item, cast spell, observe
+	
+	//melee attack format: "attack:stance:primary/secondary:standard/called shot;body part/sweep/fend:target:elevation"
+	//ranged attack format: "attack:regular/pop'N'shoot/aim:standard/called shot;body part:target"
+	//unarmed attack format: "***look at the rules on this***"
+	//ready item format: "ready:item;item"
+	//cast spell format: "cast:spell:meta magic;meta magic:target"
+	//observe format: "observe"
+	
+	var action = getCharAttribute(character, action).get("current").split(":"); //example ["attack", "aggressive", "primary", "called shot;head", "uke", "level"]
+	
+	switch(action[0]){
+        case "attack":
+			MML.attackAction(character, action);
+            break;
+		case "ready":
+			MML.readyItemAction(character, action);
+			break;
+		case "cast":
+			MML.castSpellAction(character, action);
+			break;
+		case "observe":
+			MML.observeAction(character, action);
+			break;
+	}
+}
+
+MML.attackAction = function attackAction(character, action){
+	var weapon = MML.getCharAttribute(character, "Equipped Weapons").get("current").split(":")[0];
+	if (typeof MML.meleeWeaponStats[weapon] !== "undefined"){
+		MML.meleeAttack(character, action);
+	}
+	/* else if (typeof MML.rangedWeaponStats[weapon] !== "undefined"){
+		MML.rangedAttack(character, action);
+	}
+	else {
+		MML.unarmedAttack(character, action);
+	} */
+}
+
+MML.meleeAttack = function meleeAttack(character, action){
+    //Add situation mod attribute to character sheet. Compute mods outside this function.
+	//action = ["attack", "aggressive", "primary", "standard", "uke", "level"]
+	
+	var attackerStance = action[1];
+    var attackerWeapon = MML.meleeWeaponStats[MML.getCharAttribute(character, "Equipped Weapons").get("current").split(":")[0]];
+	var attackerWeaponFunction = action[2];
+    var attackerSkill = MML.getAttributeAsInt(character, "Current Weapon Skill");
+	//var attackerSitMod = MML.getAttributeAsInt(character, "Melee Attack SitMod");
+	var attackerAttackStyle = action[3];
+	var elevation = action[5];
+	var defender = action[4];
+    var defenderWeapon = MML.meleeWeaponStats[MML.getCharAttribute(defender, "Equipped Weapons").get("current").split(":")[0]];
+    var defenderSkill = Math.round(MML.getAttributeAsInt(defender, "Current Weapon Skill")/2);
+	//var defenderSitMod = MML.getAttributeAsInt(defender, "Melee Defence SitMod");
+    
+	//Primary or secondary attack
+	if (attackerWeaponFunction === "primary"){
+		attackerWeaponFunction = [attackerWeapon.primaryTask, attackerWeapon.primaryDamage, attackerWeapon.primaryType];
+	}
+	else {
+		attackerWeaponFunction = [attackerWeapon.secondaryTask, attackerWeapon.secondaryDamage, attackerWeapon.secondaryType];
+	}
+    sendChat("", character + " attacks " + defender + " with a " + attackerWeapon.name + "!");
+    
+	//Standard, called shot, sweep, or fend
+	switch(attackerAttackStyle){
+        case "standard":
+			if (MML.universalRoll([attackerWeaponFunction[0], attackerSkill])){
+				//if defender parries
+				sendChat("", defender + " attempts to parry " + character + "'s blow!");
+				if (MML.universalRoll([defenderWeapon.defence, defenderSkill])){
+					sendChat("", defender + " parries!");
+					//add to number of attacks defended this round
+					//account for critical success and failure
+				}
+				//attacker hits
+				else{
+					sendChat("", character + "'s hits " + defender);
+					var damageArray = attackerWeaponFunction[1].split("d"); //[number of dice, size of dice]
+					var damage = MML.rollDice(damageArray[0]*1, damageArray[1]*1);
+					var position = MML.rollHitPosition(elevation, defender);
+					
+					MML.applyDamage(defender, position, damage, attackerWeaponFunction[2]);
+					MML.checkKnockdown(defender, damage);
+					//if defender hit in face, throat or nuts
+					if (position === 2 || position === 6 || position === 33) {
+						MML.checkStun(defender);
+					}
+				}
+			}    
+			//attacker misses
+			else{
+				sendChat("", character + " misses!");
+			}
+			//note that the characters acted in melee for fatigue purposes
+            break;
+		case "called shot":
+			//put something here
+			break;
+		case "sweep":
+			//put something here
+			break;
+		case "fend":
+			//put something here
+			break;
+	}
+	
+	//Deal with stances
+};
+
+MML.rangedAttack = function rangedAttack(character, action){}
+
+MML.unarmedAttack = function unarmedAttack(character, action){}
+
+MML.readyItemAction = function readyItemAction(character, action){}
+
+MML.castSpellAction = function castSpellAction(character, action){}
+
+MML.observeAction = function observeAction(character, action){}
+
 //NEEDS WORK. Attacks from above and below need to be added. Level is good to go.
 MML.rollHitPosition = function rollHitPosition(elevation, defender){
     var position;
@@ -1276,216 +1527,6 @@ MML.rollHitPosition = function rollHitPosition(elevation, defender){
     
     return position;
 };
-
-MML.apvAttributeToArray = function apvAttributeToArray(defender, position, type) {
-	var apvArray = MML.getCharAttribute(defender, position + " " + type).get("current").split(";");
-    for (var apv in apvArray){
-        apvArray[apv] = apvArray[apv].split(",");
-		apvArray[apv][0] = apvArray[apv][0]*1; //Convert string to int
-		apvArray[apv][1] = apvArray[apv][1]*1; //Convert string to int
-    }    
-    return apvArray;
-}
-
-MML.armorPenetration = function armorPenetration(defender, position, damage, type) {
-	var damageApplied = false; //Accounts for partial coverage, once true the loop stops
-    var coverageRoll = randomInteger(100);    
-	
-    //iterates over apv values at given position (accounting for partial coverage)
-	var apv;
-    for (apv in MML.apvAttributeToArray(defender, position, type)){ //state.MML.characterAPVList[MML.getCharFromName(defender).id][position-1][type]
-        if (damageApplied === false){
-            if (coverageRoll <= MML.apvAttributeToArray(defender, position, type)[apv][1]) { //if coverage roll is less than apv coverage
-                var damageDeflected = MML.apvAttributeToArray(defender, position, type)[apv][0];
-                
-                //If all damage is deflected, do blunt trauma. Modifies damage variable for next if statement
-                if (damage <= damageDeflected){
-                    //If surface, cut, or pierce, cut in half and apply as impact
-                    if (type === "Surface" || type === "Cut" || type === "Pierce"){                        
-                        damage = Math.round(damage/2);
-                        damageDeflected = MML.apvAttributeToArray(defender, position, "Impact")[apv][0];
-                        
-                        if (damage <= damageDeflected){
-                            damage = 0;
-                        }
-                    }
-                    //If chop, or thrust, apply 3/4 as impact
-                    if (type === "Chop" || type === "Thrust"){
-                        damage = Math.round(damage*0.75);
-                        damageDeflected = MML.apvAttributeToArray(defender, position, "Impact")[apv][0];
-                        
-                        if (damage <= damageDeflected){
-                            damage = 0;
-                        }
-                    }
-                    //If impact or flanged, no damage
-                    else {
-                        damage = 0;
-                    }
-                }
-                
-                // if damage gets through, subtract amount deflected by armor
-                if (damage > 0){
-                    damage -= damageDeflected;
-                }
-                
-                sendChat("", "in the " + MML.hitPositions[position].name + " for " + damage + "! " + defender + "'s armor blocked " + damageDeflected + "!");
-                damageApplied = true;
-            }
-        }
-    }    
-    return damage;
-};
-
-MML.applyDamage = function applyDamage(defender, position, damage, type){
-    var currentHP = MML.getCharAttribute(defender, MML.hitPositions[position].part).get("current")*1;
-    var maxHP = MML.getCharAttribute(defender, MML.hitPositions[position].part).get("max")*1;
-    var multiWound = MML.getCharAttribute(defender, "Multiple Wounds").get("current")*1;
-    var damage = MML.armorPenetration(defender, position, damage, type);
-    
-    currentHP -= damage;
-    multiWound -= damage;
-    
-    MML.getCharAttribute(defender, MML.hitPositions[position].part).set("current", currentHP);
-    MML.getCharAttribute(defender, "Multiple Wounds").set("current", multiWound);
-    
-    if (currentHP < maxHP && currentHP >= Math.round(maxHP/2)) {
-        sendChat("", defender + "'s " + MML.hitPositions[position].name + " is minorly wounded!");
-        //state.MML.combat[defender].wounds[part] = "Minor";
-    }
-    else if (currentHP < Math.round(maxHP/2) && currentHP >= Math.round(maxHP/2)) {
-        sendChat("", defender + "'s " + MML.hitPositions[position].name + " is majorly wounded!");
-        var roundsOfEffect = Math.round(maxHP/2) - currentHP; //how long the situation mod lasts
-        //state.MML.combat[defender].wounds[part] = "Major";
-        //initMod -= 5;
-        //situationMod -= 10;
-    }
-    else if (currentHP < 0 && currentHP >= -1*maxHP) {
-        sendChat("", defender + "'s " + MML.hitPositions[position].name + " is disabled!");
-        MML.checkStun(defender);
-        var roundsOfEffect = Math.round(maxHP/2) - currentHP; //how long the situation mod lasts
-        //state.MML.combat[defender].wounds[part] = "Disabled";
-        //initMod -= 5;
-        //situationMod -= 25;
-    }
-    else {
-        sendChat("", defender + "'s " + MML.hitPositions[position].name + " is mortally wounded!");
-        
-        if (MML.attributeCheckRoll(MML.getCharAttribute(defender, "System Strength").get("current")*1, 0) === false){
-            sendChat(defender + " falls unconscious!");
-        }
-        //state.MML.combat[defender].wounds[part] = "Mortal";
-    }
-};
-
-//Needs work. comments inside.
-MML.checkKnockdown = function checkKnockdown(defender, damage) {
-    var mods = 0; //place holder use something like state.combat[defender].knockdownSituationMod
-    
-    if (damage > MML.getCharAttribute(defender, "Knockdown").get("current")*1) {
-        //defender resists knockdown. System strength check
-        if (MML.attributeCheckRoll(MML.getCharAttribute(defender, "System Strength").get("current")*1, mods)){
-            sendChat("", defender + " remains standing!");
-            //state.combat[defender].knockdownSituationMod += -5;
-            //state.combat[defender].initiativeSituationMod += -5;
-            //Defender stumbles. Not sure what that affects...
-        }
-        
-        else {
-            sendChat("", defender + " is knocked down!");
-            //state.combat[defender].position = "prone";
-        }
-    }
-};
-
-MML.checkStun = function checkStun(defender) {    
-    if (MML.attributeCheckRoll(MML.getCharAttribute(defender, "Willpower").get("current")*1, 0) === false) { //the 0 might need to vary
-        sendChat("", defender + " is stunned!");
-        //state.MML.combat[defender].conditions.push("Stunned");
-    }
-};
-
-MML.actionHandler = function actionHandler(character){
-	//action is an string attribute built from several options selected on the character sheet
-	//Base actions attack, ready item, cast spell, observe
-	
-	//melee attack format: "attack:stance:primary/secondary:standard/called shot;body part/sweep/fend:target:elevation"
-	//ranged attack format: "attack:regular/pop'N'shoot/aim:standard/called shot;body part:target"
-	//ready item format: "ready:item;item"
-	//cast spell format: "cast:spell:meta magic;meta magic:target"
-	//observe format: "observe"
-	
-	var action = getCharAttribute(character, action).get("current").split(":"); //example ["attack", "aggressive", "primary", "called shot;head", "uke"]
-	
-	switch(action[0]){
-        case "attack":
-			MML.attackAction(character, action);
-            break;
-		case "ready":
-			MML.readyItemAction(character, action);
-			break;
-		case "cast":
-			MML.castSpellAction(character, action);
-			break;
-		case "observe":
-			MML.observeAction(character, action);
-			break;
-	}
-}
-
-MML.attackAction = function attackAction(character, action){
-	var weapon = MML.getCharAttribute(attacker, "Equipped Weapons").get("current").split(":")[0];
-	if (MML.meleeWeaponStats.indexOf(weapon)){}
-}
-
-MML.meleeAttack = function meleeAttack(attacker, defender, attSituationMod, defSituationMod, attackType, elevation){
-    //Add attribute bonuses and situation modifiers. Compute mods outside this function. 
-    //Figure out how to account for secondary attacks
-    var attackWeapon = MML.meleeWeaponStats[MML.getCharAttribute(attacker, "Equipped Weapons").get("current").split(":")[0]];
-    var attackSkill = MML.getAttributeAsInt(attacker, "Current Weapon Skill");
-    var defendWeapon = MML.meleeWeaponStats[MML.getCharAttribute(defender, "Equipped Weapons").get("current").split(":")[0]];
-    var defendSkill = Math.round(MML.getAttributeAsInt(defender, "Current Weapon Skill")/2);
-    
-    sendChat("", attacker + " attacks " + defender + " with a " + attackWeapon.name + "!");
-    
-    //if attacker hits. 
-    //Account for crits
-    if (MML.universalRoll([attackWeapon.primaryTask, attackSkill])){
-        //if defender parries
-        sendChat("", defender + " attempts to parry " + attacker + "'s blow!");
-        if (MML.universalRoll([defendWeapon.defence, defendSkill])){
-            sendChat("", defender + " parries!");
-            //add to number of attacks defended this round
-            //account for critical success and failure
-        }
-        //attacker hits
-        else{
-            sendChat("", attacker + "'s hits " + defender);
-            var damageArray = attackWeapon.primaryDamage.split("d"); //[number of dice, size of dice]
-            var damage = MML.rollDice(damageArray[0]*1, damageArray[1]*1);
-            var position = MML.rollHitPosition(elevation, defender);
-            
-            MML.applyDamage(defender, position, damage, attackWeapon.primaryType);
-            MML.checkKnockdown(defender, damage);
-            //if defender hit in face, throat or nuts
-            if (position === 2 || position === 6 || position === 33) {
-                MML.checkStun(defender);
-            }
-        }
-    }
-    
-    //attacker misses
-    else{
-        sendChat("", attacker + " misses!");
-    }
-    //note that the characters acted in melee for fatigue purposes
-};
-
-MML.readyItemAction = function readyItemAction(character, action){}
-
-MML.castSpellAction = function castSpellAction(character, action){}
-
-MML.observeAction = function observeAction(character, action){}
 
 MML.parseCommand = function parseCommand(msg) {
     if(msg.type === "api" && msg.content.indexOf("!test") !== -1) {
