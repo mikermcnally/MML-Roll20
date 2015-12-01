@@ -46,8 +46,14 @@ MML.getCharAttribute = function getCharAttribute(charName, attribute){
     return charAttribute[0];
 };
 
+MML.getCurrentAttribute = function getCurrentAttribute(charName, attribute){
+    var result = MML.getCharAttribute(charName, attribute).get("current");
+    return result;
+};
+
 MML.getCurrentAttributeAsInt = function getCurrentAttributeAsInt(charName, attribute){
-    var result = MML.getCharAttribute(charName, attribute).get("current")*1;
+    log(MML.getCharAttribute(charName, attribute));
+    var result = parseInt(MML.getCharAttribute(charName, attribute).get("current"));
     return result;
 };
 
@@ -235,23 +241,17 @@ MML.displayRoll = function displayRoll(){
 };
 
 //Menu Functions
-MML.displayMenu = function displayMenu(message, options){
-    var menu = '/w "' + this.player + '" &{template:charMenu} {{name=' + message + '}} '; //"/ &{template:charMenu} {{name=" + message + "}} "
-    var menuType = '';
+MML.displayMenu = function displayMenu(){
+    this.setMenu();
 
-    if(this.name === 'GM'){
-        menuType = '!gmMenu';
-    }
-    else{
-        menuType = '!characterMenu|' + this.name;
-    }
+    var menu = '/w "' + this.name + '" &{template:charMenu} {{name=' + this.message + '}} '; //"/ &{template:charMenu} {{name=" + message + "}} "
     
     var index;
-    for(index in options){
-        var noSpace = options[index].replace(/\s+/g, '');
-        menu = menu + '{{' + noSpace + '=[' + options[index] + '](' + menuType + '|' + options[index] + ')}} ';
+    for(index in this.buttons){
+        var noSpace = this.buttons[index].text.replace(/\s+/g, '');
+        menu = menu + '{{' + noSpace + '=[' + this.buttons[index].text + '](!menu|' + this.character + '|' + this.buttons[index].text + ')}} ';
     }
-    
+
     sendChat(this.name, menu, null, {noarchive: false}); //Change to true this when they fix the bug
 };
 
