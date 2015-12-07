@@ -1,449 +1,462 @@
 var MML = MML || {};
 
-MML.charClasses = ['peasant', 'merchant', 'noble'];
+MML.skills = {};
+MML.skills["Acrobatics"] = {attribute: "coordination"};
+MML.skills["Acting"] = {attribute: "presence"};
+MML.skills["Alchemy"] = {attribute: "intellect"};
+MML.skills["Animal Handling"] = {attribute: "presence"};
+MML.skills["Animal Husbandry"] = {attribute: "reason"};
+MML.skills["Armorer"] = {attribute: "reason"};
+MML.skills["Blacksmith"] = {attribute: "coordination"};
+MML.skills["Botany"] = {attribute: "intellect"};
+MML.skills["Bowyer"] = {attribute: "coordination"};
+MML.skills["Brawling"] = {attribute: "combat"};
+MML.skills["Brewing"] = {attribute: "reason"};
+MML.skills["Bureaucracy"] = {attribute: "creativity"};
+MML.skills["Caligraphy"] = {attribute: "creativity"};
+MML.skills["Camouflage"] = {attribute: "reason"};
+MML.skills["Carpentry"] = {attribute: "coordination"};
+MML.skills["Cartography"] = {attribute: "reason"};
+MML.skills["Climbing"] = {attribute: "coordination"};
+MML.skills["Cooking"] = {attribute: "reason"};
+MML.skills["Dancing"] = {attribute: "creativity"};
+MML.skills["Diplomacy"] = {attribute: "presence"};
+MML.skills["Disguise"] = {attribute: "creativity"};
+MML.skills["Dowsing"] = {attribute: "reason"};
+MML.skills["Ecology, Specific"] = {attribute: "intellect"};
+MML.skills["Earth Elementalism"] = {attribute: "intellect"};
+MML.skills["Air Elementalism"] = {attribute: "intellect"};
+MML.skills["Fire Elementalism"] = {attribute: "intellect"};
+MML.skills["Water Elementalism"] = {attribute: "intellect"};
+MML.skills["Life Elementalism"] = {attribute: "intellect"};
+MML.skills["Engineering"] = {attribute: "intellect"};
+MML.skills["Etiquette"] = {attribute: "presence"};
+MML.skills["Falconry"] = {attribute: "reason"};
+MML.skills["First Aid"] = {attribute: "reason"};
+MML.skills["Fishing"] = {attribute: "reason"};
+MML.skills["Fletchery"] = {attribute: "coordination"};
+MML.skills["Foraging"] = {attribute: "reason"};
+MML.skills["Forced March"] = {attribute: "Health"};
+MML.skills["Forgery"] = {attribute: "creativity"};
+MML.skills["Gambling"] = {attribute: "reason"};
+MML.skills["Gem Cutting"] = {attribute: "reason"};
+MML.skills["Geology"] = {attribute: "intellect"};
+MML.skills["Hand Signalling"] = {attribute: "coordination"};
+MML.skills["Heraldry"] = {attribute: "reason"};
+MML.skills["Herbalism"] = {attribute: "reason"};
+MML.skills["History"] = {attribute: "intellect"};
+MML.skills["Horsemanship"] = {attribute: "coordination"};
+MML.skills["Hunting and Trapping"] = {attribute: "reason"};
+MML.skills["Jeweler"] = {attribute: "creativity"};
+MML.skills["Knowledge"] = {attribute: "intellect"};
+MML.skills["Language"] = {attribute: "creativity"};
+MML.skills["Leatherworking"] = {attribute: "coordination"};
+MML.skills["Literacy"] = {attribute: "intellect"};
+MML.skills["Literature"] = {attribute: "intellect"};
+MML.skills["Lock Picking"] = {attribute: "coordination"};
+MML.skills["Lore"] = {attribute: "reason"};
+MML.skills["Mathematics"] = {attribute: "intellect"};
+MML.skills["Metallurgy"] = {attribute: "intellect"};
+MML.skills["Mimicry"] = {attribute: "presence"};
+MML.skills["Musical Instrument"] = {attribute: "creativity"};
+MML.skills["Navigation"] = {attribute: "reason"};
+MML.skills["Negotiation"] = {attribute: "presence"};
+MML.skills["Oration"] = {attribute: "presence"};
+MML.skills["Persuasion"] = {attribute: "presence"};
+MML.skills["Physician"] = {attribute: "reason"};
+MML.skills["Pick Pocket"] = {attribute: "coordination"};
+MML.skills["Running"] = {attribute: "health"};
+MML.skills["Scrounging"] = {attribute: "reason"};
+MML.skills["Sculpture"] = {attribute: "creativity"};
+MML.skills["Seamanship"] = {attribute: "reason"};
+MML.skills["Sewing"] = {attribute: "coordination"};
+MML.skills["Singing"] = {attribute: "presence"};
+MML.skills["Sleight of Hand"] = {attribute: "coordination"};
+MML.skills["Stalking"] = {attribute: "coordination"};
+MML.skills["Stealth"] = {attribute: "coordination"};
+MML.skills["Survival"] = {attribute: "reason"};
+MML.skills["Swimming"] = {attribute: "coordination"};
+MML.skills["Symbol Magic"] = {attribute: "intellect"};
+MML.skills["Tactical"] = {attribute: "reason"};
+MML.skills["Teamster"] = {attribute: "reason"};
+MML.skills["Tracking"] = {attribute: "reason"};
+MML.skills["Veterinary"] = {attribute: "reason"};
+MML.skills["Weapon Smith"] = {attribute: "coordination"};
+MML.skills["Sword Smith"] = {attribute: "coordination"};
+MML.skills["Wizardry"] = {attribute: "intellect"};
 
-MML.charTraits = [];
-MML.charTraits["race"] = { name: "race", current: "", max: "" };
-MML.charTraits["gender"] = { name: "gender", current: "", max: "" };
-MML.charTraits["height"] = { name: "height", current: 0, max: "" };
-MML.charTraits["weight"] = { name: "weight", current: 0, max: "" };
-MML.charTraits["handedness"] = { name: "handedness", current: "", max: "" };
-
-MML.primaryAttributes = [];
-MML.primaryAttributes["stature"] = { name: "stature", current: 1, max: 0 };
-MML.primaryAttributes["strength"] = { name: "strength", current: 0, max: 0 };
-MML.primaryAttributes["coordination"] = { name: "coordination", current: 0, max: 0 };
-MML.primaryAttributes["health"] = { name: "health", current: 0, max: 0 };
-MML.primaryAttributes["beauty"] = { name: "beauty", current: 0, max: 0 };
-MML.primaryAttributes["intellect"] = { name: "intellect", current: 0, max: 0 };
-MML.primaryAttributes["reason"] = { name: "reason", current: 0, max: 0 };
-MML.primaryAttributes["creativity"] = { name: "creativity", current: 0, max: 0 };
-MML.primaryAttributes["presence"] = { name: "presence", current: 0, max: 0 };
-
-MML.secondaryAttributes = [];
-MML.secondaryAttributes["willpower"] = {name: "willpower", current: 0, max: 0};
-MML.secondaryAttributes["evocation"] = {name: "evocation", current: 0, max: 0};
-MML.secondaryAttributes["perception"] = {name: "perception", current: 0, max: 0};
-MML.secondaryAttributes["systemStrength"] = {name: "systemStrength", current: 0, max: 0};
-MML.secondaryAttributes["fitness"] = {name: "fitness", current: 0, max: 0};
-MML.secondaryAttributes["fitnessMod"] = {name: "fitnessMod", current: 0, max: 0};
-MML.secondaryAttributes["load"] = {name: "load", current: 0, max: 0};
-MML.secondaryAttributes["overhead"] = {name: "overhead", current: 0, max: 0};
-MML.secondaryAttributes["deadLift"] = {name: "deadLift", current: 0, max: 0};
-
-MML.hitPoints = [];
-MML.hitPoints["multiWound"] = { name:"multiWound", current: 0, max: 0};
-MML.hitPoints["hpHead"] = { name: "hpHead", current: 0, max: 0 };
-MML.hitPoints["hpChest"] = { name: "hpChest", current: 0, max: 0 };
-MML.hitPoints["hpAb"] = { name: "hpAb", current: 0, max: 0 };
-MML.hitPoints["hpLA"] = { name: "hpLA", current: 0, max: 0 };
-MML.hitPoints["hpRA"] = { name: "hpRA", current: 0, max: 0 };
-MML.hitPoints["hpLL"] = { name: "hpLL", current: 0, max: 0 };
-MML.hitPoints["hpRL"] = { name: "hpRL", current: 0, max: 0 };
-
-MML.movement = [];
-MML.movement["totalWeightCarried"] = { name: "totalWeightCarried", current: 0, max: 0 };
-MML.movement["movementRatio"] = { name: "movementRatio", current: 0, max: 0 };
-MML.movement["crawlStalk"] = { name: "crawlStalk", current: 0, max: 0 };
-MML.movement["walk"] = { name: "walk", current: 0, max: 0 };
-MML.movement["jog"] = { name: "jog", current: 0, max: 0 };
-MML.movement["run"] = { name: "run", current: 0, max: 0 };
-MML.movement["knockdown"] = { name: "knockdown", current: 0, max: 0 };
-
-MML.skills = [];
-MML.skills["acrobatics"] = { name: "Acrobatics", current: 0, attribute: "coordination"};
-MML.skills["acting"] = { name: "Acting", current: 0, attribute: "presence"};
-MML.skills["alchemy"] = { name: "Alchemy", current: 0, attribute: "intellect"};
-MML.skills["animalHandling"] = { name: "Animal Handling", current: 0, attribute: "presence"};
-MML.skills["animalHusbandry"] = { name: "Animal Husbandry", current: 0, attribute: "reason"};
-MML.skills["armorer"] = { name: "Armorer", current: 0, attribute: "reason"};
-MML.skills["blacksmith"] = { name: "Blacksmith", current: 0, attribute: "coordination"};
-MML.skills["botany"] = { name: "Botany", current: 0, attribute: "intellect"};
-MML.skills["bowyer"] = { name: "Bowyer", current: 0, attribute: "coordination"};
-MML.skills["brawling"] = { name: "Brawling", current: 0, attribute: "combat"};
-MML.skills["brewing"] = { name: "Brewing", current: 0, attribute: "reason"};
-MML.skills["bureaucracy"] = { name: "Bureaucracy", current: 0, attribute: "creativity"};
-MML.skills["caligraphy"] = { name: "Caligraphy", current: 0, attribute: "creativity"};
-MML.skills["camouflage"] = { name: "Camouflage", current: 0, attribute: "reason"};
-MML.skills["carpentry"] = { name: "Carpentry", current: 0, attribute: "coordination"};
-MML.skills["cartography"] = { name: "Cartography", current: 0, attribute: "reason"};
-MML.skills["climbing"] = { name: "Climbing", current: 0, attribute: "coordination"};
-MML.skills["cooking"] = { name: "Cooking", current: 0, attribute: "reason"};
-MML.skills["dancing"] = { name: "Dancing", current: 0, attribute: "creativity"};
-MML.skills["diplomacy"] = { name: "Diplomacy", current: 0, attribute: "presence"};
-MML.skills["disguise"] = { name: "Disguise", current: 0, attribute: "creativity"};
-MML.skills["dowsing"] = { name: "Dowsing", current: 0, attribute: "reason"};
-MML.skills["ecologySpecific"] = { name: "Ecology, Specific", current: 0, attribute: "intellect"};
-MML.skills["elementalism"] = { name: "Elementalism", current: 0, attribute: "intellect"};
-MML.skills["engineering"] = { name: "Engineering", current: 0, attribute: "intellect"};
-MML.skills["etiquette"] = { name: "Etiquette", current: 0, attribute: "presence"};
-MML.skills["falconry"] = { name: "Falconry", current: 0, attribute: "reason"};
-MML.skills["firstAid"] = { name: "First Aid", current: 0, attribute: "reason"};
-MML.skills["fishing"] = { name: "Fishing", current: 0, attribute: "reason"};
-MML.skills["fletchery"] = { name: "Fletchery", current: 0, attribute: "coordination"};
-MML.skills["foraging"] = { name: "Foraging", current: 0, attribute: "reason"};
-MML.skills["forcedMarch"] = { name: "Forced March", current: 0, attribute: "Health"};
-MML.skills["forgery"] = { name: "Forgery", current: 0, attribute: "creativity"};
-MML.skills["gambling"] = { name: "Gambling", current: 0, attribute: "reason"};
-MML.skills["gemCutting"] = { name: "Gem Cutting", current: 0, attribute: "reason"};
-MML.skills["geology"] = { name: "Geology", current: 0, attribute: "intellect"};
-MML.skills["handSignaling"] = { name: "Hand Signalling", current: 0, attribute: "coordination"};
-MML.skills["heraldry"] = { name: "Heraldry", current: 0, attribute: "reason"};
-MML.skills["herbalism"] = { name: "Herbalism", current: 0, attribute: "reason"};
-MML.skills["history"] = { name: "History", current: 0, attribute: "intellect"};
-MML.skills["horsemanship"] = { name: "Horsemanship", current: 0, attribute: "coordination"};
-MML.skills["huntingTrapping"] = { name: "Hunting and Trapping", current: 0, attribute: "reason"};
-MML.skills["jeweler"] = { name: "Jeweler", current: 0, attribute: "creativity"};
-MML.skills["knowledge"] = { name: "Knowledge", current: 0, attribute: "intellect"};
-MML.skills["language"] = { name: "Language", current: 0, attribute: "creativity"};
-MML.skills["leatherworking"] = { name: "Leatherworking", current: 0, attribute: "coordination"};
-MML.skills["literacy"] = { name: "Literacy", current: 0, attribute: "intellect"};
-MML.skills["literature"] = { name: "Literature", current: 0, attribute: "intellect"};
-MML.skills["lockPicking"] = { name: "Lock Picking", current: 0, attribute: "coordination"};
-MML.skills["lore"] = { name: "Lore", current: 0, attribute: "reason"};
-MML.skills["mathematics"] = { name: "Mathematics", current: 0, attribute: "intellect"};
-MML.skills["metallurgy"] = { name: "Metallurgy", current: 0, attribute: "intellect"};
-MML.skills["mimicry"] = { name: "Mimicry", current: 0, attribute: "presence"};
-MML.skills["musicalInstrument"] = { name: "Musical Instrument", current: 0, attribute: "creativity"};
-MML.skills["navigation"] = { name: "Navigation", current: 0, attribute: "reason"};
-MML.skills["negotiation"] = { name: "Negotiation", current: 0, attribute: "presence"};
-MML.skills["oration"] = { name: "Oration", current: 0, attribute: "presence"};
-MML.skills["physician"] = { name: "Physician", current: 0, attribute: "reason"};
-MML.skills["pickPocket"] = { name: "Pick Pocket", current: 0, attribute: "coordination"};
-MML.skills["running"] = { name: "Running", current: 0, attribute: "health"};
-MML.skills["scrounging"] = { name: "Scrounging", current: 0, attribute: "reason"};
-MML.skills["sculpture"] = { name: "Sculpture", current: 0, attribute: "creativity"};
-MML.skills["seamanship"] = { name: "Seamanship", current: 0, attribute: "reason"};
-MML.skills["sewing"] = { name: "Sewing", current: 0, attribute: "coordination"};
-MML.skills["singing"] = { name: "Singing", current: 0, attribute: "presence"};
-MML.skills["sleightOfHand"] = { name: "Sleight of Hand", current: 0, attribute: "coordination"};
-MML.skills["smallBoatHandling"] = { name: "Small Boat Handling", current: 0, attribute: "coordination"};
-MML.skills["stalking"] = { name: "Stalking", current: 0, attribute: "coordination"};
-MML.skills["stealth"] = { name: "Stealth", current: 0, attribute: "coordination"};
-MML.skills["survival"] = { name: "Survival", current: 0, attribute: "reason"};
-MML.skills["swimming"] = { name: "Swimming", current: 0, attribute: "coordination"};
-MML.skills["symbolMagic"] = { name: "Symbol Magic", current: 0, attribute: "intellect"};
-MML.skills["tactical"] = { name: "Tactical", current: 0, attribute: "reason"};
-MML.skills["teamster"] = { name: "Teamster", current: 0, attribute: "reason"};
-MML.skills["tracking"] = { name: "Tracking", current: 0, attribute: "reason"};
-MML.skills["veterinary"] = { name: "Veterinary", current: 0, attribute: "reason"};
-MML.skills["weaponSmith"] = { name: "Weapon Smith", current: 0, attribute: "coordination"};
-MML.skills["wizardry"] = { name: "Wizardry", current: 0, attribute: "intellect"};
+MML.attributeMods = {};
+MML.attributeMods.strength = [];
+MML.attributeMods.strength[0] = -10;
+MML.attributeMods.strength[1] = -10;
+MML.attributeMods.strength[2] = -10;
+MML.attributeMods.strength[3] = -10;
+MML.attributeMods.strength[4] = -10;
+MML.attributeMods.strength[5] = -10;
+MML.attributeMods.strength[6] = -10;
+MML.attributeMods.strength[7] = -5;
+MML.attributeMods.strength[8] = -3;
+MML.attributeMods.strength[9] = -3;
+MML.attributeMods.strength[10] = 0;
+MML.attributeMods.strength[11] = 0;
+MML.attributeMods.strength[12] = 3;
+MML.attributeMods.strength[13] = 3;
+MML.attributeMods.strength[14] = 3;
+MML.attributeMods.strength[15] = 5;
+MML.attributeMods.strength[16] = 5;
+MML.attributeMods.strength[17] = 5;
+MML.attributeMods.strength[18] = 8;
+MML.attributeMods.strength[19] = 8;
+MML.attributeMods.strength[20] = 8;
+MML.attributeMods.strength[21] = 10;
+MML.attributeMods.strength[22] = 10;
+MML.attributeMods.strength[23] = 15;
+MML.attributeMods.coordination = [];
+MML.attributeMods.coordination[0] = -10;
+MML.attributeMods.coordination[1] = -10;
+MML.attributeMods.coordination[2] = -10;
+MML.attributeMods.coordination[3] = -10;
+MML.attributeMods.coordination[4] = -10;
+MML.attributeMods.coordination[5] = -10;
+MML.attributeMods.coordination[6] = -10;
+MML.attributeMods.coordination[7] = -5;
+MML.attributeMods.coordination[8] = -3;
+MML.attributeMods.coordination[9] = -3;
+MML.attributeMods.coordination[10] = 0;
+MML.attributeMods.coordination[11] = 0;
+MML.attributeMods.coordination[12] = 3;
+MML.attributeMods.coordination[13] = 3;
+MML.attributeMods.coordination[14] = 3;
+MML.attributeMods.coordination[15] = 5;
+MML.attributeMods.coordination[16] = 5;
+MML.attributeMods.coordination[17] = 5;
+MML.attributeMods.coordination[18] = 8;
+MML.attributeMods.coordination[19] = 8;
+MML.attributeMods.coordination[20] = 8;
+MML.attributeMods.coordination[21] = 10;
+MML.attributeMods.coordination[22] = 10;
+MML.attributeMods.coordination[23] = 15;
+MML.attributeMods.beauty = [];
+MML.attributeMods.beauty[0] = -10;
+MML.attributeMods.beauty[1] = -10;
+MML.attributeMods.beauty[2] = -10;
+MML.attributeMods.beauty[3] = -10;
+MML.attributeMods.beauty[4] = -10;
+MML.attributeMods.beauty[5] = -10;
+MML.attributeMods.beauty[6] = -10;
+MML.attributeMods.beauty[7] = -5;
+MML.attributeMods.beauty[8] = -3;
+MML.attributeMods.beauty[9] = -3;
+MML.attributeMods.beauty[10] = 0;
+MML.attributeMods.beauty[11] = 0;
+MML.attributeMods.beauty[12] = 3;
+MML.attributeMods.beauty[13] = 3;
+MML.attributeMods.beauty[14] = 3;
+MML.attributeMods.beauty[15] = 5;
+MML.attributeMods.beauty[16] = 5;
+MML.attributeMods.beauty[17] = 5;
+MML.attributeMods.beauty[18] = 8;
+MML.attributeMods.beauty[19] = 8;
+MML.attributeMods.beauty[20] = 8;
+MML.attributeMods.beauty[21] = 10;
+MML.attributeMods.beauty[22] = 10;
+MML.attributeMods.beauty[23] = 15;
+MML.attributeMods.intellect = [];
+MML.attributeMods.intellect[0] = -10;
+MML.attributeMods.intellect[1] = -10;
+MML.attributeMods.intellect[2] = -10;
+MML.attributeMods.intellect[3] = -10;
+MML.attributeMods.intellect[4] = -10;
+MML.attributeMods.intellect[5] = -10;
+MML.attributeMods.intellect[6] = -10;
+MML.attributeMods.intellect[7] = -5;
+MML.attributeMods.intellect[8] = -3;
+MML.attributeMods.intellect[9] = -3;
+MML.attributeMods.intellect[10] = 0;
+MML.attributeMods.intellect[11] = 0;
+MML.attributeMods.intellect[12] = 3;
+MML.attributeMods.intellect[13] = 3;
+MML.attributeMods.intellect[14] = 3;
+MML.attributeMods.intellect[15] = 5;
+MML.attributeMods.intellect[16] = 5;
+MML.attributeMods.intellect[17] = 5;
+MML.attributeMods.intellect[18] = 8;
+MML.attributeMods.intellect[19] = 8;
+MML.attributeMods.intellect[20] = 8;
+MML.attributeMods.intellect[21] = 10;
+MML.attributeMods.intellect[22] = 10;
+MML.attributeMods.intellect[23] = 15;
+MML.attributeMods.reason = [];
+MML.attributeMods.reason[0] = -10;
+MML.attributeMods.reason[1] = -10;
+MML.attributeMods.reason[2] = -10;
+MML.attributeMods.reason[3] = -10;
+MML.attributeMods.reason[4] = -10;
+MML.attributeMods.reason[5] = -10;
+MML.attributeMods.reason[6] = -10;
+MML.attributeMods.reason[7] = -5;
+MML.attributeMods.reason[8] = -3;
+MML.attributeMods.reason[9] = -3;
+MML.attributeMods.reason[10] = 0;
+MML.attributeMods.reason[11] = 0;
+MML.attributeMods.reason[12] = 3;
+MML.attributeMods.reason[13] = 3;
+MML.attributeMods.reason[14] = 3;
+MML.attributeMods.reason[15] = 5;
+MML.attributeMods.reason[16] = 5;
+MML.attributeMods.reason[17] = 5;
+MML.attributeMods.reason[18] = 8;
+MML.attributeMods.reason[19] = 8;
+MML.attributeMods.reason[20] = 8;
+MML.attributeMods.reason[21] = 10;
+MML.attributeMods.reason[22] = 10;
+MML.attributeMods.reason[23] = 15;
+MML.attributeMods.creativity = [];
+MML.attributeMods.creativity[0] = -10;
+MML.attributeMods.creativity[1] = -10;
+MML.attributeMods.creativity[2] = -10;
+MML.attributeMods.creativity[3] = -10;
+MML.attributeMods.creativity[4] = -10;
+MML.attributeMods.creativity[5] = -10;
+MML.attributeMods.creativity[6] = -10;
+MML.attributeMods.creativity[7] = -5;
+MML.attributeMods.creativity[8] = -3;
+MML.attributeMods.creativity[9] = -3;
+MML.attributeMods.creativity[10] = 0;
+MML.attributeMods.creativity[11] = 0;
+MML.attributeMods.creativity[12] = 3;
+MML.attributeMods.creativity[13] = 3;
+MML.attributeMods.creativity[14] = 3;
+MML.attributeMods.creativity[15] = 5;
+MML.attributeMods.creativity[16] = 5;
+MML.attributeMods.creativity[17] = 5;
+MML.attributeMods.creativity[18] = 8;
+MML.attributeMods.creativity[19] = 8;
+MML.attributeMods.creativity[20] = 8;
+MML.attributeMods.creativity[21] = 10;
+MML.attributeMods.creativity[22] = 10;
+MML.attributeMods.creativity[23] = 15;
+MML.attributeMods.presence = [];
+MML.attributeMods.presence[0] = -10;
+MML.attributeMods.presence[1] = -10;
+MML.attributeMods.presence[2] = -10;
+MML.attributeMods.presence[3] = -10;
+MML.attributeMods.presence[4] = -10;
+MML.attributeMods.presence[5] = -10;
+MML.attributeMods.presence[6] = -10;
+MML.attributeMods.presence[7] = -5;
+MML.attributeMods.presence[8] = -3;
+MML.attributeMods.presence[9] = -3;
+MML.attributeMods.presence[10] = 0;
+MML.attributeMods.presence[11] = 0;
+MML.attributeMods.presence[12] = 3;
+MML.attributeMods.presence[13] = 3;
+MML.attributeMods.presence[14] = 3;
+MML.attributeMods.presence[15] = 5;
+MML.attributeMods.presence[16] = 5;
+MML.attributeMods.presence[17] = 5;
+MML.attributeMods.presence[18] = 8;
+MML.attributeMods.presence[19] = 8;
+MML.attributeMods.presence[20] = 8;
+MML.attributeMods.presence[21] = 10;
+MML.attributeMods.presence[22] = 10;
+MML.attributeMods.presence[23] = 15;
+MML.attributeMods.perception = [];
+MML.attributeMods.perception[0] = -10;
+MML.attributeMods.perception[1] = -10;
+MML.attributeMods.perception[2] = -10;
+MML.attributeMods.perception[3] = -10;
+MML.attributeMods.perception[4] = -10;
+MML.attributeMods.perception[5] = -10;
+MML.attributeMods.perception[6] = -10;
+MML.attributeMods.perception[7] = -10;
+MML.attributeMods.perception[8] = -5;
+MML.attributeMods.perception[9] = -5;
+MML.attributeMods.perception[10] = 0;
+MML.attributeMods.perception[11] = 0;
+MML.attributeMods.perception[12] = 3;
+MML.attributeMods.perception[13] = 3;
+MML.attributeMods.perception[14] = 5;
+MML.attributeMods.perception[15] = 5;
+MML.attributeMods.perception[16] = 8;
+MML.attributeMods.perception[17] = 8;
+MML.attributeMods.perception[18] = 10;
+MML.attributeMods.perception[19] = 10;
+MML.attributeMods.perception[20] = 15;
+MML.attributeMods.perception[21] = 15;
+MML.attributeMods.perception[22] = 15;
+MML.attributeMods.perception[23] = 20;
 
 MML.skillMods = {};
-MML.skillMods.strength = [];
-MML.skillMods.strength[0] = -10;
-MML.skillMods.strength[1] = -10;
-MML.skillMods.strength[2] = -10;
-MML.skillMods.strength[3] = -10;
-MML.skillMods.strength[4] = -10;
-MML.skillMods.strength[5] = -10;
-MML.skillMods.strength[6] = -10;
-MML.skillMods.strength[7] = -5;
-MML.skillMods.strength[8] = -3;
-MML.skillMods.strength[9] = -3;
-MML.skillMods.strength[10] = 0;
-MML.skillMods.strength[11] = 0;
-MML.skillMods.strength[12] = 3;
-MML.skillMods.strength[13] = 3;
-MML.skillMods.strength[14] = 3;
-MML.skillMods.strength[15] = 5;
-MML.skillMods.strength[16] = 5;
-MML.skillMods.strength[17] = 5;
-MML.skillMods.strength[18] = 8;
-MML.skillMods.strength[19] = 8;
-MML.skillMods.strength[20] = 8;
-MML.skillMods.strength[21] = 10;
-MML.skillMods.strength[22] = 10;
-MML.skillMods.strength[23] = 15;
-MML.skillMods.coordination = [];
-MML.skillMods.coordination[0] = -10;
-MML.skillMods.coordination[1] = -10;
-MML.skillMods.coordination[2] = -10;
-MML.skillMods.coordination[3] = -10;
-MML.skillMods.coordination[4] = -10;
-MML.skillMods.coordination[5] = -10;
-MML.skillMods.coordination[6] = -10;
-MML.skillMods.coordination[7] = -5;
-MML.skillMods.coordination[8] = -3;
-MML.skillMods.coordination[9] = -3;
-MML.skillMods.coordination[10] = 0;
-MML.skillMods.coordination[11] = 0;
-MML.skillMods.coordination[12] = 3;
-MML.skillMods.coordination[13] = 3;
-MML.skillMods.coordination[14] = 3;
-MML.skillMods.coordination[15] = 5;
-MML.skillMods.coordination[16] = 5;
-MML.skillMods.coordination[17] = 5;
-MML.skillMods.coordination[18] = 8;
-MML.skillMods.coordination[19] = 8;
-MML.skillMods.coordination[20] = 8;
-MML.skillMods.coordination[21] = 10;
-MML.skillMods.coordination[22] = 10;
-MML.skillMods.coordination[23] = 15;
-MML.skillMods.beauty = [];
-MML.skillMods.beauty[0] = -10;
-MML.skillMods.beauty[1] = -10;
-MML.skillMods.beauty[2] = -10;
-MML.skillMods.beauty[3] = -10;
-MML.skillMods.beauty[4] = -10;
-MML.skillMods.beauty[5] = -10;
-MML.skillMods.beauty[6] = -10;
-MML.skillMods.beauty[7] = -5;
-MML.skillMods.beauty[8] = -3;
-MML.skillMods.beauty[9] = -3;
-MML.skillMods.beauty[10] = 0;
-MML.skillMods.beauty[11] = 0;
-MML.skillMods.beauty[12] = 3;
-MML.skillMods.beauty[13] = 3;
-MML.skillMods.beauty[14] = 3;
-MML.skillMods.beauty[15] = 5;
-MML.skillMods.beauty[16] = 5;
-MML.skillMods.beauty[17] = 5;
-MML.skillMods.beauty[18] = 8;
-MML.skillMods.beauty[19] = 8;
-MML.skillMods.beauty[20] = 8;
-MML.skillMods.beauty[21] = 10;
-MML.skillMods.beauty[22] = 10;
-MML.skillMods.beauty[23] = 15;
-MML.skillMods.intellect = [];
-MML.skillMods.intellect[0] = -10;
-MML.skillMods.intellect[1] = -10;
-MML.skillMods.intellect[2] = -10;
-MML.skillMods.intellect[3] = -10;
-MML.skillMods.intellect[4] = -10;
-MML.skillMods.intellect[5] = -10;
-MML.skillMods.intellect[6] = -10;
-MML.skillMods.intellect[7] = -5;
-MML.skillMods.intellect[8] = -3;
-MML.skillMods.intellect[9] = -3;
-MML.skillMods.intellect[10] = 0;
-MML.skillMods.intellect[11] = 0;
-MML.skillMods.intellect[12] = 3;
-MML.skillMods.intellect[13] = 3;
-MML.skillMods.intellect[14] = 3;
-MML.skillMods.intellect[15] = 5;
-MML.skillMods.intellect[16] = 5;
-MML.skillMods.intellect[17] = 5;
-MML.skillMods.intellect[18] = 8;
-MML.skillMods.intellect[19] = 8;
-MML.skillMods.intellect[20] = 8;
-MML.skillMods.intellect[21] = 10;
-MML.skillMods.intellect[22] = 10;
-MML.skillMods.intellect[23] = 15;
-MML.skillMods.reason = [];
-MML.skillMods.reason[0] = -10;
-MML.skillMods.reason[1] = -10;
-MML.skillMods.reason[2] = -10;
-MML.skillMods.reason[3] = -10;
-MML.skillMods.reason[4] = -10;
-MML.skillMods.reason[5] = -10;
-MML.skillMods.reason[6] = -10;
-MML.skillMods.reason[7] = -5;
-MML.skillMods.reason[8] = -3;
-MML.skillMods.reason[9] = -3;
-MML.skillMods.reason[10] = 0;
-MML.skillMods.reason[11] = 0;
-MML.skillMods.reason[12] = 3;
-MML.skillMods.reason[13] = 3;
-MML.skillMods.reason[14] = 3;
-MML.skillMods.reason[15] = 5;
-MML.skillMods.reason[16] = 5;
-MML.skillMods.reason[17] = 5;
-MML.skillMods.reason[18] = 8;
-MML.skillMods.reason[19] = 8;
-MML.skillMods.reason[20] = 8;
-MML.skillMods.reason[21] = 10;
-MML.skillMods.reason[22] = 10;
-MML.skillMods.reason[23] = 15;
-MML.skillMods.creativity = [];
-MML.skillMods.creativity[0] = -10;
-MML.skillMods.creativity[1] = -10;
-MML.skillMods.creativity[2] = -10;
-MML.skillMods.creativity[3] = -10;
-MML.skillMods.creativity[4] = -10;
-MML.skillMods.creativity[5] = -10;
-MML.skillMods.creativity[6] = -10;
-MML.skillMods.creativity[7] = -5;
-MML.skillMods.creativity[8] = -3;
-MML.skillMods.creativity[9] = -3;
-MML.skillMods.creativity[10] = 0;
-MML.skillMods.creativity[11] = 0;
-MML.skillMods.creativity[12] = 3;
-MML.skillMods.creativity[13] = 3;
-MML.skillMods.creativity[14] = 3;
-MML.skillMods.creativity[15] = 5;
-MML.skillMods.creativity[16] = 5;
-MML.skillMods.creativity[17] = 5;
-MML.skillMods.creativity[18] = 8;
-MML.skillMods.creativity[19] = 8;
-MML.skillMods.creativity[20] = 8;
-MML.skillMods.creativity[21] = 10;
-MML.skillMods.creativity[22] = 10;
-MML.skillMods.creativity[23] = 15;
-MML.skillMods.presence = [];
-MML.skillMods.presence[0] = -10;
-MML.skillMods.presence[1] = -10;
-MML.skillMods.presence[2] = -10;
-MML.skillMods.presence[3] = -10;
-MML.skillMods.presence[4] = -10;
-MML.skillMods.presence[5] = -10;
-MML.skillMods.presence[6] = -10;
-MML.skillMods.presence[7] = -5;
-MML.skillMods.presence[8] = -3;
-MML.skillMods.presence[9] = -3;
-MML.skillMods.presence[10] = 0;
-MML.skillMods.presence[11] = 0;
-MML.skillMods.presence[12] = 3;
-MML.skillMods.presence[13] = 3;
-MML.skillMods.presence[14] = 3;
-MML.skillMods.presence[15] = 5;
-MML.skillMods.presence[16] = 5;
-MML.skillMods.presence[17] = 5;
-MML.skillMods.presence[18] = 8;
-MML.skillMods.presence[19] = 8;
-MML.skillMods.presence[20] = 8;
-MML.skillMods.presence[21] = 10;
-MML.skillMods.presence[22] = 10;
-MML.skillMods.presence[23] = 15;
-MML.skillMods.perception = [];
-MML.skillMods.perception[0] = -10;
-MML.skillMods.perception[1] = -10;
-MML.skillMods.perception[2] = -10;
-MML.skillMods.perception[3] = -10;
-MML.skillMods.perception[4] = -10;
-MML.skillMods.perception[5] = -10;
-MML.skillMods.perception[6] = -10;
-MML.skillMods.perception[7] = -10;
-MML.skillMods.perception[8] = -5;
-MML.skillMods.perception[9] = -5;
-MML.skillMods.perception[10] = 0;
-MML.skillMods.perception[11] = 0;
-MML.skillMods.perception[12] = 3;
-MML.skillMods.perception[13] = 3;
-MML.skillMods.perception[14] = 5;
-MML.skillMods.perception[15] = 5;
-MML.skillMods.perception[16] = 8;
-MML.skillMods.perception[17] = 8;
-MML.skillMods.perception[18] = 10;
-MML.skillMods.perception[19] = 10;
-MML.skillMods.perception[20] = 15;
-MML.skillMods.perception[21] = 15;
-MML.skillMods.perception[22] = 15;
-MML.skillMods.perception[23] = 20;
-MML.skillMods.dwarf = [];
-MML.skillMods.dwarf["armorer"] = 10;
-MML.skillMods.dwarf["engineering"] = 5;
-MML.skillMods.dwarf["elementalism"] = 3;
-MML.skillMods.dwarf["forcedMarch"] = 10;
-MML.skillMods.dwarf["gemCutting"] = 10;
-MML.skillMods.dwarf["jeweler"] = 10;
-MML.skillMods.dwarf["mathematics"] = 5;
-MML.skillMods.dwarf["metallurgy"] = 10;
-MML.skillMods.dwarf["mining"] = 5;
-MML.skillMods.dwarf["mineralogy"] = 3;
-MML.skillMods.dwarf["drums"] = 5;
-MML.skillMods.dwarf["shieldUse"] = 10;
-MML.skillMods.dwarf["symbolism"] = 3;
-MML.skillMods.dwarf["weaponSmith"] = 10;
-MML.skillMods.dwarf["brawling"] = 10;
-// MML.skillMods.dwarf["MissileWeaponMechanical"] = 3;
-// MML.skillMods.dwarf["MeleeWeapons"] = 5; These need special logic page 36
-MML.skillMods.gnome = [];
-MML.skillMods.gnome["animalHusbandryMule"] = 5;
-MML.skillMods.gnome["armorer"] = 5;
-MML.skillMods.gnome["blacksmith"] = 10;
-MML.skillMods.gnome["barter"] = 10;
-MML.skillMods.gnome["diplomacy"] = 5;
-MML.skillMods.gnome["economics"] = 10;
-MML.skillMods.gnome["engineering"] = 10;
-MML.skillMods.gnome["gemCutting"] = 5;
-MML.skillMods.gnome["glassblowing"] = 3;
-MML.skillMods.gnome["jeweler"] = 10;
-MML.skillMods.gnome["mathematics"] = 3;
-MML.skillMods.gnome["mercantile"] = 10;
-MML.skillMods.gnome["negotiation"] = 10;
-MML.skillMods.gnome["teamster"] = 5;
-//MML.skillMods.gnome["MeleeWeapons"] = 5;
-MML.skillMods.grayElf = [];
-//MML.skillMods.grayElf["animalHusbandry"] = 5;
-MML.skillMods.grayElf["bowyer"] = 5;
-MML.skillMods.grayElf["elementalism"] = 5;
-MML.skillMods.grayElf["etiquette"] = 5;
-MML.skillMods.grayElf["herbalism"] = 3;
-//MML.skillMods.grayElf["history"] = 10;
-//MML.skillMods.grayElf["instrument"] = 5;
-MML.skillMods.grayElf["literacy"] = 10;
-MML.skillMods.grayElf["lore"] = 10;
-//MML.skillMods.grayElf["meleeWeapons"] = 10;
-MML.skillMods.grayElf["navigation"] = 10;
-MML.skillMods.grayElf["physician"] = 3;
-MML.skillMods.grayElf["seamanship"] = 10;
-MML.skillMods.grayElf["singing"] = 5;
-MML.skillMods.grayElf["symbolism"] = 5;
-//MML.skillMods.grayElf["weaponSmithSwords"] = 3;
-MML.skillMods.grayElf["wizardry"] = 5;
-MML.skillMods.hobbit = [];
-MML.skillMods.hobbit["agriculture"] = 10;
-MML.skillMods.hobbit["animalHusbandry"] = 3;
-MML.skillMods.hobbit["bureaucracy"] = 3;
-MML.skillMods.hobbit["brewing"] = 5;
-MML.skillMods.hobbit["calligraphy"] = 5;
-MML.skillMods.hobbit["cooking"] = 5;
-MML.skillMods.hobbit["dancing"] = 10;
-MML.skillMods.hobbit["gambling"] = 10;
-MML.skillMods.hobbit["leatherworking"] = 3;
-MML.skillMods.hobbit["literacy"] = 10;
-//MML.skillMods.hobbit["missileWeaponDrawn"] = 3;
-//MML.skillMods.hobbit["MissileWeaponThrown"] = 3;
-//MML.skillMods.hobbit["sling"] = 10;
-MML.skillMods.hobbit["negotiation"] = 10;
-MML.skillMods.hobbit["oration"] = 3;
-MML.skillMods.hobbit["singing"] = 5;
-MML.skillMods.hobbit["stealth"] = 10;
-MML.skillMods.hobbit["tailoring"] = 10;
-MML.skillMods.hobbit[""] = 10;
-MML.skillMods.human = [];
-MML.skillMods.human["animalHusbandry"] = 5;
-MML.skillMods.human["bureaucracy"] = 5;
-MML.skillMods.human["falconry"] = 3;
-MML.skillMods.human["foraging"] = 5;
-MML.skillMods.human["heraldry"] = 3;
-MML.skillMods.human["herbalism"] = 3;
-MML.skillMods.human["horsemanship"] = 10;
-MML.skillMods.human["leatherworking"] = 10;
-MML.skillMods.human["oration"] = 5;
-MML.skillMods.human["persuasion"] = 10;
-MML.skillMods.human["scrounging"] = 5;
-MML.skillMods.human["teamster"] = 5;
-MML.skillMods.woodElf = [];
-MML.skillMods.woodElf["animalHusbandry"] = 10;
-MML.skillMods.woodElf["bowyer"] = 10;
-//MML.skillMods.woodElf["elementalism"] = 5;
-MML.skillMods.woodElf["falconry"] = 5;
-MML.skillMods.woodElf["fletchery"] = 10;
-MML.skillMods.woodElf["foraging"] = 5;
-MML.skillMods.woodElf["handSignaling"] = 5;
-MML.skillMods.woodElf["herbalism"] = 5;
-MML.skillMods.woodElf["huntingTrapping"] = 10;
-//MML.skillMods.woodElf["MeleeWeaponSpears"] = 3;
-//MML.skillMods.woodElf["MissileWeapon"] = 5;
-MML.skillMods.woodElf["navigation"] = 10;
-//MML.skillMods.woodElf["thrownWeaponSpears"] = 10;
-MML.skillMods.woodElf["tracking"] = 3;
-MML.skillMods.woodElf["stealth"] = 10;
-MML.skillMods.woodElf["survival"] = 10;
+MML.skillMods["Dwarf"] = {};
+MML.skillMods["Dwarf"]["Armorer"] = 10;
+MML.skillMods["Dwarf"]["Earth Elementalism"] = 3;
+MML.skillMods["Dwarf"]["Air Elementalism"] = 3;
+MML.skillMods["Dwarf"]["Fire Elementalism"] = 3;
+MML.skillMods["Dwarf"]["Water Elementalism"] = 3;
+MML.skillMods["Dwarf"]["Life Elementalism"] = 3;
+MML.skillMods["Dwarf"]["Engineering"] = 5;
+MML.skillMods["Dwarf"]["Forced March"] = 10;
+MML.skillMods["Dwarf"]["Gem Cutting"] = 10;
+MML.skillMods["Dwarf"]["Geology"] = 5;
+MML.skillMods["Dwarf"]["Jeweler"] = 10;
+MML.skillMods["Dwarf"]["Mathematics"] = 5;
+MML.skillMods["Dwarf"]["Metallurgy"] = 10;
+MML.skillMods["Dwarf"]["Musical Instrument"] = 5;
+MML.skillMods["Dwarf"]["Symbol Magic"] = 3;
+MML.skillMods["Dwarf"]["Weapon Smith"] = 10;
+MML.skillMods["Gnome"] = {};
+MML.skillMods["Gnome"]["Animal Husbandry"] = 5;
+MML.skillMods["Gnome"]["Armorer"] = 5;
+MML.skillMods["Gnome"]["Blacksmith"] = 10;
+MML.skillMods["Gnome"]["Diplomacy"] = 5;
+MML.skillMods["Gnome"]["Engineering"] = 10;
+MML.skillMods["Gnome"]["Gem Cutting"] = 5;
+MML.skillMods["Gnome"]["Jeweler"] = 10;
+MML.skillMods["Gnome"]["Mathematics"] = 3;
+MML.skillMods["Gnome"]["Negotiation"] = 10;
+MML.skillMods["Gnome"]["Teamster"] = 5;
+MML.skillMods["Gray Elf"] = {};
+MML.skillMods["Gray Elf"]["Animal Husbandry"] = 5;
+MML.skillMods["Gray Elf"]["Bowyer"] = 5;
+MML.skillMods["Gray Elf"]["Earth Elementalism"] = 5;
+MML.skillMods["Gray Elf"]["Air Elementalism"] = 5;
+MML.skillMods["Gray Elf"]["Fire Elementalism"] = 5;
+MML.skillMods["Gray Elf"]["Water Elementalism"] = 5;
+MML.skillMods["Gray Elf"]["Life Elementalism"] = 5;
+MML.skillMods["Gray Elf"]["Etiquette"] = 5;
+MML.skillMods["Gray Elf"]["Herbalism"] = 3;
+MML.skillMods["Gray Elf"]["History"] = 10;
+MML.skillMods["Gray Elf"]["Literacy"] = 10;
+MML.skillMods["Gray Elf"]["Lore"] = 10;
+MML.skillMods["Gray Elf"]["Musical Instrument"] = 5;
+MML.skillMods["Gray Elf"]["Navigation"] = 10;
+MML.skillMods["Gray Elf"]["Physician"] = 3;
+MML.skillMods["Gray Elf"]["Seamanship"] = 10;
+MML.skillMods["Gray Elf"]["Singing"] = 5;
+MML.skillMods["Gray Elf"]["Symbol Magic"] = 5;
+MML.skillMods["Gray Elf"]["Sword Smith"] = 3;
+MML.skillMods["Gray Elf"]["Wizardry"] = 5;
+MML.skillMods["Hobbit"] = {};
+MML.skillMods["Hobbit"]["Animal Husbandry"] = 3;
+MML.skillMods["Hobbit"]["Botany"] = 10;
+MML.skillMods["Hobbit"]["Brewing"] = 5;
+MML.skillMods["Hobbit"]["Bureaucracy"] = 3;
+MML.skillMods["Hobbit"]["Calligraphy"] = 5;
+MML.skillMods["Hobbit"]["Cooking"] = 5;
+MML.skillMods["Hobbit"]["Dancing"] = 10;
+MML.skillMods["Hobbit"]["Gambling"] = 10;
+MML.skillMods["Hobbit"]["Leatherworking"] = 3;
+MML.skillMods["Hobbit"]["Literacy"] = 10;
+MML.skillMods["Hobbit"]["Negotiation"] = 10;
+MML.skillMods["Hobbit"]["Oration"] = 3;
+MML.skillMods["Hobbit"]["Singing"] = 5;
+MML.skillMods["Hobbit"]["Stealth"] = 10;
+MML.skillMods["Hobbit"]["Sewing"] = 10;
+MML.skillMods["Human"] = {};
+MML.skillMods["Human"]["Animal Husbandry"] = 5;
+MML.skillMods["Human"]["Bureaucracy"] = 5;
+MML.skillMods["Human"]["Falconry"] = 3;
+MML.skillMods["Human"]["Foraging"] = 5;
+MML.skillMods["Human"]["Heraldry"] = 3;
+MML.skillMods["Human"]["Herbalism"] = 3;
+MML.skillMods["Human"]["Horsemanship"] = 10;
+MML.skillMods["Human"]["Leatherworking"] = 10;
+MML.skillMods["Human"]["Oration"] = 5;
+MML.skillMods["Human"]["Persuasion"] = 10;
+MML.skillMods["Human"]["Scrounging"] = 5;
+MML.skillMods["Human"]["Teamster"] = 5;
+MML.skillMods["Wood Elf"] = {};
+MML.skillMods["Wood Elf"]["Animal Husbandry"] = 10;
+MML.skillMods["Wood Elf"]["Bowyer"] = 10;
+MML.skillMods["Wood Elf"]["Air Elementalism"] = 5;
+MML.skillMods["Wood Elf"]["Life Elementalism"] = 5;
+MML.skillMods["Wood Elf"]["Falconry"] = 5;
+MML.skillMods["Wood Elf"]["Fletchery"] = 10;
+MML.skillMods["Wood Elf"]["Foraging"] = 5;
+MML.skillMods["Wood Elf"]["Hand Signalling"] = 5;
+MML.skillMods["Wood Elf"]["Herbalism"] = 5;
+MML.skillMods["Wood Elf"]["Hunting and Trapping"] = 10;
+MML.skillMods["Wood Elf"]["Navigation"] = 10;
+MML.skillMods["Wood Elf"]["Stealth"] = 10;
+MML.skillMods["Wood Elf"]["Survival"] = 10;
+MML.skillMods["Wood Elf"]["Tracking"] = 3;
+MML.skillMods["Female"] = []
+MML.skillMods["Female"]["Life Elementalism"] = 5;
+MML.skillMods["Female"]["Symbol Magic"] = 5;
+
+MML.weaponSkillMods = {};
+MML.weaponSkillMods["Dwarf"] = {};
+MML.weaponSkillMods["Dwarf"]["Light Cross Bow"] = 3;
+MML.weaponSkillMods["Dwarf"]["Medium Cross Bow"] = 3;
+MML.weaponSkillMods["Dwarf"]["Heavy Cross Bow"] = 3;
+MML.weaponSkillMods["Dwarf"]["Battle Axe"] = 5;
+MML.weaponSkillMods["Dwarf"]["Two-Handed Axe"] = 5;
+MML.weaponSkillMods["Dwarf"]["Bardiche"] = 5;
+MML.weaponSkillMods["Dwarf"]["Pole Axe"] = 5;
+MML.weaponSkillMods["Dwarf"]["Maul"] = 5;
+MML.weaponSkillMods["Dwarf"]["War Hammer"] = 5;
+MML.weaponSkillMods["Dwarf"]["Glaive"] = 5;
+MML.weaponSkillMods["Dwarf"]["Halberd"] = 5;
+MML.weaponSkillMods["Dwarf"]["Brawling"] = 10;
+MML.weaponSkillMods["Dwarf"]["Round Target Shield"] = 10;
+MML.weaponSkillMods["Dwarf"]["Small Round Shield"] = 10;
+MML.weaponSkillMods["Dwarf"]["Medium Round Shield"] = 10;
+MML.weaponSkillMods["Dwarf"]["Large Round Shield"] = 10;
+MML.weaponSkillMods["Dwarf"]["Small Rectangular Shield"] = 10;
+MML.weaponSkillMods["Dwarf"]["Medium Rectangular Shield"] = 10;
+MML.weaponSkillMods["Dwarf"]["Large Rectangular Shield"] = 10;
+MML.weaponSkillMods["Dwarf"]["Heater Shield"] = 10;
+MML.weaponSkillMods["Gnome"] = {};
+MML.weaponSkillMods["Gnome"]["Fauchard"] = 5;
+MML.weaponSkillMods["Gnome"]["Bill"] = 5;
+MML.weaponSkillMods["Gnome"]["Glaive"] = 5;
+MML.weaponSkillMods["Gnome"]["Halberd"] = 5;
+MML.weaponSkillMods["Gnome"]["Pole Hammer"] = 5;
+MML.weaponSkillMods["Gnome"]["War Spear, One Hand"] = 5;
+MML.weaponSkillMods["Gnome"]["War Spear, Two Hands"] = 5;
+MML.weaponSkillMods["Gnome"]["Boar Spear, One Hand"] = 5;
+MML.weaponSkillMods["Gnome"]["Boar Spear, Two Hands"] = 5;
+MML.weaponSkillMods["Gnome"]["Military Fork, One Hand"] = 5;
+MML.weaponSkillMods["Gnome"]["Military Fork, Two Hands"] = 5;
+MML.weaponSkillMods["Gnome"]["Spetum"] = 5;
+MML.weaponSkillMods["Gnome"]["Pitch Fork"] = 5;
+MML.weaponSkillMods["Gray Elf"] = {};
+MML.weaponSkillMods["Gray Elf"]["Short Sword"] = 10;
+MML.weaponSkillMods["Gray Elf"]["Long Sword"] = 10;
+MML.weaponSkillMods["Gray Elf"]["Falchion"] = 10;
+MML.weaponSkillMods["Gray Elf"]["Broadsword"] = 10;
+MML.weaponSkillMods["Hobbit"] = {};
+MML.weaponSkillMods["Hobbit"]["Short Bow"] = 3;
+MML.weaponSkillMods["Hobbit"]["Medium Bow"] = 3;
+MML.weaponSkillMods["Hobbit"]["Long Bow"] = 3;
+MML.weaponSkillMods["Hobbit"]["Heavy Long Bow"] = 3;
+MML.weaponSkillMods["Hobbit"]["Short Composite Bow"] = 3;
+MML.weaponSkillMods["Hobbit"]["Medium Composite Bow"] = 3;
+// MML.weaponSkillMods["Hobbit"]["MissileWeaponThrown"] = 3;
+// MML.weaponSkillMods["Hobbit"]["Sling"] = 10;
+MML.weaponSkillMods["Wood Elf"] = {};
+MML.weaponSkillMods["Wood Elf"]["War Spear, One Hand"] = 5;
+MML.weaponSkillMods["Wood Elf"]["War Spear, Two Hands"] = 5;
+MML.weaponSkillMods["Wood Elf"]["Boar Spear, One Hand"] = 5;
+MML.weaponSkillMods["Wood Elf"]["Boar Spear, Two Hands"] = 5;
+MML.weaponSkillMods["Wood Elf"]["Short Bow"] = 10;
+MML.weaponSkillMods["Wood Elf"]["Medium Bow"] = 10;
+MML.weaponSkillMods["Wood Elf"]["Long Bow"] = 10;
+MML.weaponSkillMods["Wood Elf"]["Short Composite Bow"] = 10;
+MML.weaponSkillMods["Wood Elf"]["Medium Composite Bow"] = 10;
+//MML.weaponSkillMods["Wood Elf"]["thrownWeaponSpears"] = 3;
 
 MML.movementRates = {};
-MML.movementRates.dwarf = { 
-	Prone: 0,
+MML.movementRates["Dwarf"] = { 
+    Prone: 0,
 	Crawl: 1.75,
 	Stalk: 1.75,
 	Walk: 6,
 	Jog: 14,
 	Run: 34	
 };
-MML.movementRates.gnome = { 
+MML.movementRates["Gnome"] = { 
 	Prone: 0,
 	Crawl: 1.75,
 	Stalk: 1.75,
@@ -451,7 +464,7 @@ MML.movementRates.gnome = {
 	Jog: 14,
 	Run: 32
 };
-MML.movementRates.grayElf = { 
+MML.movementRates["Gray Elf"] = { 
 	Prone: 0,
 	Crawl: 2,
 	Stalk: 2,
@@ -459,7 +472,7 @@ MML.movementRates.grayElf = {
 	Jog: 20,
 	Run: 36
 };
-MML.movementRates.hobbit = { 
+MML.movementRates["Hobbit"] = { 
 	Prone: 0,
 	Crawl: 2,
 	Stalk: 2,
@@ -467,7 +480,7 @@ MML.movementRates.hobbit = {
 	Jog: 8,
 	Run: 18
 };
-MML.movementRates.human = { 
+MML.movementRates["Human"] = { 
 	Prone: 0,
 	Crawl: 1.75,
 	Stalk: 1.75,
@@ -475,7 +488,7 @@ MML.movementRates.human = {
 	Jog: 16,
 	Run: 28
 };
-MML.movementRates.woodElf = { 
+MML.movementRates["Wood Elf"] = { 
 	Prone: 0,
 	Crawl: 2,
 	Stalk: 2,
@@ -510,68 +523,70 @@ MML.recoveryMods[20] = { hp: 4, ep:  8 };
 MML.recoveryMods[21] = { hp: 5, ep:  10 };
 MML.recoveryMods[22] = { hp: 5, ep:  10 };
 MML.recoveryMods[23] = { hp: 5, ep:  10 };
-
-MML.combatAttributes = [];
-MML.combatAttributes["initiative.fom"] = { name: "initiative.fom", current: 0, max: "" };
-MML.combatAttributes["weaponSkill"] = { name: "currentWeaponSkill", current: 0, max: "" };
-MML.combatAttributes["actionTempo"] = { name: "actionTempo", current: 25, max: "" };
-MML.combatAttributes["situationMod"] = { name: "situationMod", current: 0, max: "" };
-MML.combatAttributes["attackMod"] = { name: "attackMod", current: 0, max: "" };
-MML.combatAttributes["defenseMod"] = { name: "defenseMod", current: 0, max: "" };
-MML.combatAttributes["status"] = { name: "status", current: "", max: "" };
+MML.recoveryMods[24] = { hp: 5, ep:  10 };
+MML.recoveryMods[25] = { hp: 5, ep:  10 };
 
 MML.attackTempoTable = [-25, -22, -18, -16, -14, -12, -11, -10, -9, -9];
 
-MML.hitPositions = [];
-MML.hitPositions[1] = { name: "Top of Head", part: "hpHead" };
-MML.hitPositions[2] = { name: "Face", part: "hpHead" };
-MML.hitPositions[3] = { name: "Rear of Head", part: "hpHead" };
-MML.hitPositions[4] = { name: "Right Side of Head", part: "hpHead" };
-MML.hitPositions[5] = { name: "Left Side of Head", part: "hpHead" };
-MML.hitPositions[6] = { name: "Neck, Throat", part: "hpHead" };
-MML.hitPositions[7] = { name: "Rear of Neck", part: "hpHead" };
-MML.hitPositions[8] = { name: "Right Shoulder", part: "hpRA" };
-MML.hitPositions[9] = { name: "Right Upper Chest", part: "hpChest" };
-MML.hitPositions[10] = { name: "Right Upper Back", part: "hpChest" };
-MML.hitPositions[11] = { name: "Left Upper Chest", part: "hpChest" };
-MML.hitPositions[12] = { name: "Left Upper Back", part: "hpChest" };
-MML.hitPositions[13] = { name: "Left Shoulder", part: "hpLA" };
-MML.hitPositions[14] = { name: "Right Upper Arm", part: "hpRA" };
-MML.hitPositions[15] = { name: "Right Lower Chest", part: "hpChest" };
-MML.hitPositions[16] = { name: "Right Mid Back", part: "hpChest" };
-MML.hitPositions[17] = { name: "Left Lower Chest", part: "hpChest" };
-MML.hitPositions[18] = { name: "Left Mid Back", part: "hpChest" };
-MML.hitPositions[19] = { name: "Left Upper Arm", part: "hpLA" };
-MML.hitPositions[20] = { name: "Right Elbow", part: "hpRA" };
-MML.hitPositions[21] = { name: "Right Abdomen", part: "hpAb" };
-MML.hitPositions[22] = { name: "Right Lower Back", part: "hpAb" };
-MML.hitPositions[23] = { name: "Left Abdomen", part: "hpAb" };
-MML.hitPositions[24] = { name: "Left Lower Back", part: "hpAb" };
-MML.hitPositions[25] = { name: "Left Elbow", part: "hpLA" };
-MML.hitPositions[26] = { name: "Right Forearm", part: "hpRA" };
-MML.hitPositions[27] = { name: "Right Hip", part: "hpAb" };
-MML.hitPositions[28] = { name: "Right Buttock", part: "hpAb" };
-MML.hitPositions[29] = { name: "Left Hip", part: "hpAb" };
-MML.hitPositions[30] = { name: "Left Buttock", part: "hpAb" };
-MML.hitPositions[31] = { name: "Left Forearm", part: "hpLA" };
-MML.hitPositions[32] = { name: "Right Hand/Wrist", part: "hpRA" };
-MML.hitPositions[33] = { name: "Groin", part: "hpAb" };
-MML.hitPositions[34] = { name: "Left Hand/Wrist", part: "hpLA" };
-MML.hitPositions[35] = { name: "Right Upper Thigh", part: "hpRL" };
-MML.hitPositions[36] = { name: "Left Upper Thigh", part: "hpLL" };
-MML.hitPositions[37] = { name: "Right Lower Thigh", part: "hpRL" };
-MML.hitPositions[38] = { name: "Left Lower Thigh", part: "hpLL" };
-MML.hitPositions[39] = { name: "Right Knee", part: "hpRL" };
-MML.hitPositions[40] = { name: "Left Knee", part: "hpLL" };
-MML.hitPositions[41] = { name: "Right Upper Shin", part: "hpRL" };
-MML.hitPositions[42] = { name: "Left Upper Shin", part: "hpLL" };
-MML.hitPositions[43] = { name: "Right Lower Shin", part: "hpRL" };
-MML.hitPositions[44] = { name: "Left Lower Shin", part: "hpLL" };
-MML.hitPositions[45] = { name: "Right Foot/Ankle", part: "hpRL" };
-MML.hitPositions[46] = { name: "Left Foot/Ankle", part: "hpLL" };
+MML.bodyTypes = {};
+MML.bodyTypes["Dwarf"] = "humanoid";
+MML.bodyTypes["Gnome"] = "humanoid";
+MML.bodyTypes["Gray Elf"] = "humanoid";
+MML.bodyTypes["Human"] = "humanoid";
+MML.bodyTypes["Hobbit"] = "humanoid";
+MML.bodyTypes["Wood Elf"] = "humanoid";
+
+MML.hitPositions = {};
+MML.hitPositions.humanoid = [];
+MML.hitPositions.humanoid[1] = { name: "Top of Head", part: "hpHead" };
+MML.hitPositions.humanoid[2] = { name: "Face", part: "hpHead" };
+MML.hitPositions.humanoid[3] = { name: "Rear of Head", part: "hpHead" };
+MML.hitPositions.humanoid[4] = { name: "Right Side of Head", part: "hpHead" };
+MML.hitPositions.humanoid[5] = { name: "Left Side of Head", part: "hpHead" };
+MML.hitPositions.humanoid[6] = { name: "Neck, Throat", part: "hpHead" };
+MML.hitPositions.humanoid[7] = { name: "Rear of Neck", part: "hpHead" };
+MML.hitPositions.humanoid[8] = { name: "Right Shoulder", part: "hpRA" };
+MML.hitPositions.humanoid[9] = { name: "Right Upper Chest", part: "hpChest" };
+MML.hitPositions.humanoid[10] = { name: "Right Upper Back", part: "hpChest" };
+MML.hitPositions.humanoid[11] = { name: "Left Upper Chest", part: "hpChest" };
+MML.hitPositions.humanoid[12] = { name: "Left Upper Back", part: "hpChest" };
+MML.hitPositions.humanoid[13] = { name: "Left Shoulder", part: "hpLA" };
+MML.hitPositions.humanoid[14] = { name: "Right Upper Arm", part: "hpRA" };
+MML.hitPositions.humanoid[15] = { name: "Right Lower Chest", part: "hpChest" };
+MML.hitPositions.humanoid[16] = { name: "Right Mid Back", part: "hpChest" };
+MML.hitPositions.humanoid[17] = { name: "Left Lower Chest", part: "hpChest" };
+MML.hitPositions.humanoid[18] = { name: "Left Mid Back", part: "hpChest" };
+MML.hitPositions.humanoid[19] = { name: "Left Upper Arm", part: "hpLA" };
+MML.hitPositions.humanoid[20] = { name: "Right Elbow", part: "hpRA" };
+MML.hitPositions.humanoid[21] = { name: "Right Abdomen", part: "hpAb" };
+MML.hitPositions.humanoid[22] = { name: "Right Lower Back", part: "hpAb" };
+MML.hitPositions.humanoid[23] = { name: "Left Abdomen", part: "hpAb" };
+MML.hitPositions.humanoid[24] = { name: "Left Lower Back", part: "hpAb" };
+MML.hitPositions.humanoid[25] = { name: "Left Elbow", part: "hpLA" };
+MML.hitPositions.humanoid[26] = { name: "Right Forearm", part: "hpRA" };
+MML.hitPositions.humanoid[27] = { name: "Right Hip", part: "hpAb" };
+MML.hitPositions.humanoid[28] = { name: "Right Buttock", part: "hpAb" };
+MML.hitPositions.humanoid[29] = { name: "Left Hip", part: "hpAb" };
+MML.hitPositions.humanoid[30] = { name: "Left Buttock", part: "hpAb" };
+MML.hitPositions.humanoid[31] = { name: "Left Forearm", part: "hpLA" };
+MML.hitPositions.humanoid[32] = { name: "Right Hand/Wrist", part: "hpRA" };
+MML.hitPositions.humanoid[33] = { name: "Groin", part: "hpAb" };
+MML.hitPositions.humanoid[34] = { name: "Left Hand/Wrist", part: "hpLA" };
+MML.hitPositions.humanoid[35] = { name: "Right Upper Thigh", part: "hpRL" };
+MML.hitPositions.humanoid[36] = { name: "Left Upper Thigh", part: "hpLL" };
+MML.hitPositions.humanoid[37] = { name: "Right Lower Thigh", part: "hpRL" };
+MML.hitPositions.humanoid[38] = { name: "Left Lower Thigh", part: "hpLL" };
+MML.hitPositions.humanoid[39] = { name: "Right Knee", part: "hpRL" };
+MML.hitPositions.humanoid[40] = { name: "Left Knee", part: "hpLL" };
+MML.hitPositions.humanoid[41] = { name: "Right Upper Shin", part: "hpRL" };
+MML.hitPositions.humanoid[42] = { name: "Left Upper Shin", part: "hpLL" };
+MML.hitPositions.humanoid[43] = { name: "Right Lower Shin", part: "hpRL" };
+MML.hitPositions.humanoid[44] = { name: "Left Lower Shin", part: "hpLL" };
+MML.hitPositions.humanoid[45] = { name: "Right Foot/Ankle", part: "hpRL" };
+MML.hitPositions.humanoid[46] = { name: "Left Foot/Ankle", part: "hpLL" };
 
 // Armor Styles
-MML.items = [];
+MML.items = {};
 MML.items["Barbute Helm"] = { name: "Barbute Helm", type: "armor", protection: [{position: 1, coverage: 100}, {position: 2, coverage: 85}, {position: 3, coverage: 100}, {position: 5, coverage: 100}, {position: 4, coverage: 100}], totalPostitions: 4.85 };
 MML.items["Bascinet Helm"] = { name: "Bascinet Helm", type: "armor", protection: [{position: 1, coverage: 100},{position: 3, coverage: 100}, {position: 4, coverage: 100}, {position: 5, coverage: 100}], totalPostitions: 4 };
 MML.items["Camail"] = { name: "Camail", type: "armor", protection: [{position: 6, coverage: 100}, {position: 7, coverage: 100}], totalPostitions: 2 };
@@ -613,7 +628,7 @@ MML.items["Knee Guards"] = { name: "Knee Guards", type: "armor", protection: [{p
 MML.items["Shoulder Guards"] = { name: "Shoulder Guards", type: "armor", protection: [{position: 8, coverage: 100}, {position: 13, coverage: 100}], totalPostitions: 2 };
 MML.items["Socks"] = { name: "Socks", type: "armor", protection: [{position: 45, coverage: 100}, {position: 46, coverage: 100}], totalPostitions: 2 };
 
-MML.APVList = [];
+MML.APVList = {};
 MML.APVList["None"] = { family: "None", name: "None", surface: 0, cut: 0, chop: 0, pierce: 0, thrust: 0, impact: 0, flanged: 0, weightPerPosition: 0};
 MML.APVList["Greater Steel Coat of Lames, Leather, Medium"] = { family: "Coat of Lames", name: "Greater Steel Coat of Lames, Leather, Medium", surface: 34, cut: 29, chop: 19, pierce: 30, thrust: 19, impact: 18, flanged: 13, weightPerPosition: 2.12};
 MML.APVList["Greater Steel Coat of Lames, Cloth, Medium"] = { family: "Coat of Lames", name: "Greater Steel Coat of Lames, Cloth, Medium", surface: 33, cut: 28, chop: 18, pierce: 30, thrust: 19, impact: 16, flanged: 12, weightPerPosition: 1.87};
@@ -701,76 +716,1243 @@ MML.APVList["Elven Padded"] = { family: "Padded", name: "Elven Padded", surface:
 MML.APVList["Elven Quilt"] = { family: "Cloth", name: "Elven Quilt", surface: 10, cut: 12, chop: 10, pierce: 12, thrust: 8, impact: 10, flanged: 9, weightPerPosition: 0.12};
 MML.APVList["Elven Silk"] = { family: "Cloth", name: "Elven Silk", surface: 5, cut: 7, chop: 5, pierce: 7, thrust: 6, impact: 3, flanged: 4, weightPerPosition: 0.12};
 MML.APVList["Fine Mail, Elven Travel Steel"] = { family: "Light Mail", name: "Fine Mail, Elven Travel Steel", surface: 28, cut: 25, chop: 15, pierce: 27, thrust: 19, impact: 7, flanged: 7, weightPerPosition: 0.95};
-MML.APVList["Fine Mail, Greater Steal(Mannish)"] = { family: "Light Mail", name: "Fine Mail, Greater Steal(Mannish)", surface: 24, cut: 22, chop: 13, pierce: 23, thrust: 17, impact: 6, flanged: 6, weightPerPosition: 0.95};
+MML.APVList["Fine Mail, Mannish Greater Steel"] = { family: "Light Mail", name: "Fine Mail, Mannish Greater Steel", surface: 24, cut: 22, chop: 13, pierce: 23, thrust: 17, impact: 6, flanged: 6, weightPerPosition: 0.95};
 MML.APVList["Lames of Elven Bronze"] = { family: "Lames", name: "Lames of Elven Bronze", surface: 28, cut: 22, chop: 14, pierce: 23, thrust: 14, impact: 13, flanged: 10, weightPerPosition: 0.95};
 
 // Weapon Stats
-MML.items["Hand Axe"] = { name: "Hand Axe" , type: "weapon", family: "Axe", hands: 1, primaryType: "Chop", primaryTask: 35, primaryDamage: "1d20", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 3, combatAttributes: 6, rank: 1};
-MML.items["Battle Axe"] = { name: "Battle Axe" , type: "weapon", family: "Axe", hands: 1, primaryType: "Chop", primaryTask: 35, primaryDamage: "3d10", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 5, initiative: 5, rank: 1};
-MML.items["Pick"] = { name: "Pick" , type: "weapon", family: "Axe", hands: 1, primaryType: "Flanged", primaryTask: 35, primaryDamage: "2d10", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 4.5, initiative: 5, rank: 1};
-MML.items["Two-Handed Axe"] = { name: "Two-Handed Axe" , type: "weapon", family: "Axe", hands: 2, primaryType: "Chop", primaryTask: 25, primaryDamage: "4d10", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 6.5, initiative: 4, rank: 2};
-MML.items["Bardiche"] = { name: "Bardiche" , type: "weapon", family: "Axe", hands: 2, primaryType: "Chop", primaryTask: 25, primaryDamage: "5d10", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 7.5, initiative: 3, rank: 2};
-MML.items["Pole Axe"] = { name: "Pole Axe" , type: "weapon", family: "Axe", hands: 2, primaryType: "Chop", primaryTask: 25, primaryDamage: "4d12", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 7, initiative: 3, rank: 2};
-MML.items["Club"] = { name: "Club" , type: "weapon", family: "Bludgeoning", hands: 1, primaryType: "Impact", primaryTask: 45, primaryDamage: "2d8", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 2, initiative: 7, rank: 1};
-MML.items["Cudgel, Light"] = { name: "Cudgel, Light" , type: "weapon", family: "Bludgeoning", hands: 1, primaryType: "Impact", primaryTask: 45, primaryDamage: "2d10", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 3, initiative: 6, rank: 1};
-MML.items["Cudgel, Heavy"] = { name: "Cudgel, Heavy" , type: "weapon", family: "Bludgeoning", hands: 2, primaryType: "Impact", primaryTask: 35, primaryDamage: "4d8", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 7, initiative: 4, rank: 2};
-MML.items["Mace"] = { name: "Mace" , type: "weapon", family: "Bludgeoning", hands: 1, primaryType: "Flanged", primaryTask: 45, primaryDamage: "2d10", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 5, initiative: 5, rank: 1};
-MML.items["Maul"] = { name: "Maul" , type: "weapon", family: "Bludgeoning", hands: 2, primaryType: "Impact", primaryTask: 25, primaryDamage: "4d10", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 9, initiative: 4, rank: 2};
-MML.items["Morningstar"] = { name: "Morningstar" , type: "weapon", family: "Bludgeoning", hands: 1, primaryType: "Thrust", primaryTask: 45, primaryDamage: "3d10", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 5, initiative: 5, rank: 1};
-MML.items["War Hammer"] = { name: "War Hammer" , type: "weapon", family: "Bludgeoning", hands: 1, primaryType: "Impact", primaryTask: 35, primaryDamage: "3d10", secondaryType: "Flanged", secondaryTask: 25, secondaryDamage: "2d8", defense: 15, weight: 5.5, initiative: 5, rank: 1};
-MML.items["Ball & Chain, Footman's"] = { name: "Ball & Chain, Footman's" , type: "weapon", family: "Flexible", hands: 2, primaryType: "Impact", primaryTask: 15, primaryDamage: "3d12", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 5, initiative: 4, rank: 2};
-MML.items["Ball & Chain, Horseman's"] = { name: "Ball & Chain, Horseman's" , type: "weapon", family: "Flexible", hands: 1, primaryType: "Impact", primaryTask: 25, primaryDamage: "2d12", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 0, weight: 3.5, initiative: 5, rank: 1};
-MML.items["Flail, Footman's"] = { name: "Flail, Footman's" , type: "weapon", family: "Flexible", hands: 2, primaryType: "Impact", primaryTask: 25, primaryDamage: "3d10", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 5, initiative: 4, rank: 2};
-MML.items["Flail, Horseman's"] = { name: "Flail, Horseman's" , type: "weapon", family: "Flexible", hands: 1, primaryType: "Impact", primaryTask: 35, primaryDamage: "1d20", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 0, weight: 2.5, initiative: 5, rank: 1};
-MML.items["Mace & Chain"] = { name: "Mace & Chain" , type: "weapon", family: "Flexible", hands: 1, primaryType: "Flanged", primaryTask: 25, primaryDamage: "2d12", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 0, weight: 3.5, initiative: 5, rank: 1};
-MML.items["Morningstar & Chain"] = { name: "Morningstar & Chain" , type: "weapon", family: "Flexible", hands: 1, primaryType: "Thrust", primaryTask: 25, primaryDamage: "3d12", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 0, weight: 4, initiative: 5, rank: 1};
-MML.items["Boot Knife"] = { name: "Boot Knife" , type: "weapon", family: "Knives", hands: 1, primaryType: "Thrust", primaryTask: 15, primaryDamage: "1d8", secondaryType: "Cut", secondaryTask: 15, secondaryDamage: "1d6", defense: 0, weight: 0.5, initiative: 10, rank: 1};
-MML.items["Dagger"] = { name: "Dagger" , type: "weapon", family: "Knives", hands: 1, primaryType: "Thrust", primaryTask: 15, primaryDamage: "2d6", secondaryType: "Cut", secondaryTask: 15, secondaryDamage: "1d8", defense: 0, weight: 1, initiative: 10, rank: 1};
-MML.items["Knife"] = { name: "Knife" , type: "weapon", family: "Knives", hands: 1, primaryType: "Cut", primaryTask: 25, primaryDamage: "2d6", secondaryType: "Thrust", secondaryTask: 15, secondaryDamage: "2d6", defense: 0, weight: 1.5, initiative: 10, rank: 1};
-MML.items["Dirk"] = { name: "Dirk" , type: "weapon", family: "Knives", hands: 1, primaryType: "Cut", primaryTask: 25, primaryDamage: "2d8", secondaryType: "Thrust", secondaryTask: 15, secondaryDamage: "2d6", defense: 15, weight: 1.5, initiative: 9, rank: 1};
-MML.items["Fauchard"] = { name: "Fauchard" , type: "weapon", family: "Pole Arms", hands: 2, primaryType: "Cut", primaryTask: 15, primaryDamage: "2d12", secondaryType: "Thrust", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 5, initiative: 4, rank: 2};
-MML.items["Bill"] = { name: "Bill" , type: "weapon", family: "Pole Arms", hands: 2, primaryType: "Cut", primaryTask: 25, primaryDamage: "2d12", secondaryType: "Thrust", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 5, initiative: 4, rank: 2};
-MML.items["Glaive"] = { name: "Glaive" , type: "weapon", family: "Pole Arms", hands: 2, primaryType: "Chop", primaryTask: 25, primaryDamage: "3d20", secondaryType: "Thrust", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 6, initiative: 4, rank: 2};
-MML.items["Halberd"] = { name: "Halberd" , type: "weapon", family: "Pole Arms", hands: 2, primaryType: "Chop", primaryTask: 25, primaryDamage: "3d20", secondaryType: "Thrust", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 6, initiative: 4, rank: 2};
-MML.items["Pole Hammer"] = { name: "Pole Hammer" , type: "weapon", family: "Pole Hammers", hands: 2, primaryType: "Flanged", primaryTask: 25, primaryDamage: "3d10", secondaryType: "Thrust", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 6, initiative: 4, rank: 2};
-MML.items["War Spear, One Hand"] = { name: "War Spear, One Hand" , type: "weapon", family: "Spears", hands: 1, primaryType: "Thrust", primaryTask: 35, primaryDamage: "2d8", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 2, initiative: 3, rank: 1};
-MML.items["War Spear, Two Hands"] = { name: "War Spear, Two Hands" , type: "weapon", family: "Spears", hands: 2, primaryType: "Thrust", primaryTask: 45, primaryDamage: "3d8", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 2, initiative: 5, rank: 2};
-MML.items["Boar Spear, One Hand"] = { name: "Boar Spear, One Hand" , type: "weapon", family: "Spears", hands: 1, primaryType: "Thrust", primaryTask: 25, primaryDamage: "2d10", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 3.5, initiative: 2, rank: 1};
-MML.items["Boar Spear, Two Hands"] = { name: "Boar Spear, Two Hands" , type: "weapon", family: "Spears", hands: 2, primaryType: "Thrust", primaryTask: 45, primaryDamage: "3d10", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 3.5, initiative: 4, rank: 2};
-MML.items["Military Fork, One Hand"] = { name: "Military Fork, One Hand" , type: "weapon", family: "Spears", hands: 1, primaryType: "Thrust", primaryTask: 15, primaryDamage: "2d12", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 3.5, initiative: 2, rank: 1};
-MML.items["Military Fork, Two Hands"] = { name: "Military Fork, Two Hands" , type: "weapon", family: "Spears", hands: 2, primaryType: "Thrust", primaryTask: 35, primaryDamage: "3d10", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 3.5, initiative: 4, rank: 2};
-MML.items["Spetum"] = { name: "Spetum" , type: "weapon", family: "Spears", hands: 2, primaryType: "Thrust", primaryTask: 35, primaryDamage: "3d10", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 4, initiative: 4, rank: 2};
-MML.items["Quarter Staff"] = { name: "Quarter Staff" , type: "weapon", family: "Staves", hands: 2, primaryType: "Impact", primaryTask: 45, primaryDamage: "3d8", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 35, weight: 2, initiative: 9, rank: 2};
-MML.items["Scimitar"] = { name: "Scimitar" , type: "weapon", family: "Swords", hands: 1, primaryType: "Cut", primaryTask: 35, primaryDamage: "2d12", secondaryType: "Thrust", secondaryTask: 25, secondaryDamage: "2d6", defense: 35, weight: 3.5, initiative: 7, rank: 1};
-MML.items["Short Sword"] = { name: "Short Sword" , type: "weapon", family: "Swords", hands: 1, primaryType: "Thrust", primaryTask: 35, primaryDamage: "3d8", secondaryType: "Cut", secondaryTask: 35, secondaryDamage: "3d6", defense: 35, weight: 3.5, initiative: 1, rank: 1};
-MML.items["Long Sword"] = { name: "Long Sword" , type: "weapon", family: "Swords", hands: 1, primaryType: "Cut", primaryTask: 45, primaryDamage: "3d10", secondaryType: "Thrust", secondaryTask: 35, secondaryDamage: "2d6", defense: 25, weight: 3, initiative: 5, rank: 1};
-MML.items["Falchion"] = { name: "Falchion" , type: "weapon", family: "Swords", hands: 1, primaryType: "Chop", primaryTask: 35, primaryDamage: "4d8", secondaryType: "Thrust", secondaryTask: 25, secondaryDamage: "3d6", defense: 25, weight: 3.5, initiative: 5, rank: 1};
-MML.items["Bastard Sword, One Hand"] = { name: "Bastard Sword, One Hand" , type: "weapon", family: "Swords", hands: 1, primaryType: "Cut", primaryTask: 25, primaryDamage: "5d6", secondaryType: "Thrust", secondaryTask: 15, secondaryDamage: "3d6", defense: 15, weight: 6, initiative: 4, rank: 1};
-MML.items["Bastard Sword, Two Hands"] = { name: "Bastard Sword, Two Hands" , type: "weapon", family: "Swords", hands: 2, primaryType: "Cut", primaryTask: 35, primaryDamage: "4d10", secondaryType: "Thrust", secondaryTask: 25, secondaryDamage: "4d6", defense: 25, weight: 6, initiative: 5, rank: 1};
-MML.items["Broadsword"] = { name: "Broadsword" , type: "weapon", family: "Swords", hands: 1, primaryType: "Chop", primaryTask: 25, primaryDamage: "3d12", secondaryType: "Thrust", secondaryTask: 15, secondaryDamage: "1d12", defense: 15, weight: 5, initiative: 4, rank: 1};
-MML.items["Two-Handed Broadsword"] = { name: "Two-Handed Broadsword" , type: "weapon", family: "Swords", hands: 2, primaryType: "Chop", primaryTask: 35, primaryDamage: "4d12", secondaryType: "Thrust", secondaryTask: 25, secondaryDamage: "1d20", defense: 25, weight: 7.5, initiative: 3, rank: 1};
-MML.items["Great Sword"] = { name: "Great Sword" , type: "weapon", family: "Swords", hands: 2, primaryType: "Chop", primaryTask: 15, primaryDamage: "6d10", secondaryType: "Thrust", secondaryTask: 15, secondaryDamage: "3d10", defense: 35, weight: 13, initiative: 2, rank: 2};
-MML.items["Whip"] = { name: "Whip" , type: "weapon", family: "Whip", hands: 1, primaryType: "Surface", primaryTask: 35, primaryDamage: "2d4", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 0, weight: 1, initiative: 8, rank: 3};
-MML.items["Cleaver"] = { name: "Cleaver" , type: "weapon", family: "Axe", hands: 1, primaryType: "Chop", primaryTask: 25, primaryDamage: "1d10", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 0, weight: 2, initiative: 8, rank: 1};
-MML.items["Hatchet"] = { name: "Hatchet" , type: "weapon", family: "Axe", hands: 1, primaryType: "Chop", primaryTask: 25, primaryDamage: "1d12", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 0, weight: 2.5, initiative: 7, rank: 1};
-MML.items["Hoe"] = { name: "Hoe" , type: "weapon", family: "Axe", hands: 2, primaryType: "Flanged", primaryTask: 35, primaryDamage: "1d10", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 4, initiative: 4, rank: 1};
-MML.items["Pick"] = { name: "Pick" , type: "weapon", family: "Axe", hands: 2, primaryType: "Flanged", primaryTask: 25, primaryDamage: "1d20", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 6, initiative: 4, rank: 1};
-MML.items["Wood Axe"] = { name: "Wood Axe" , type: "weapon", family: "Axe", hands: 2, primaryType: "Chop", primaryTask: 35, primaryDamage: "2d12", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 3, initiative: 4, rank: 1};
-MML.items["Hammer, Medium"] = { name: "Hammer, Medium" , type: "weapon", family: "Bludgeoning", hands: 1, primaryType: "Impact", primaryTask: 25, primaryDamage: "1d10", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 0, weight: 2.5, initiative: 7, rank: 1};
-MML.items["Shovel"] = { name: "Shovel" , type: "weapon", family: "Bludgeoning", hands: 2, primaryType: "Impact", primaryTask: 35, primaryDamage: "", secondaryType: "1d8", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 6, initiative: 4, rank: 1};
-MML.items["Skinning Knife"] = { name: "Skinning Knife" , type: "weapon", family: "Knives", hands: 1, primaryType: "Cut", primaryTask: 15, primaryDamage: "1d8", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 0, weight: 0.5, initiative: 9, rank: 1};
-MML.items["Butcher's Knife"] = { name: "Butcher's Knife" , type: "weapon", family: "Knives", hands: 1, primaryType: "Cut", primaryTask: 15, primaryDamage: "2d6", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 0, weight: 1, initiative: 9, rank: 1};
-MML.items["Pitch Fork"] = { name: "Pitch Fork" , type: "weapon", family: "Spears", hands: 2, primaryType: "Thrust", primaryTask: 35, primaryDamage: "2d10", secondaryType: "", secondaryTask: 0, secondaryDamage: "", defense: 15, weight: 3, initiative: 3, rank: 1};
-MML.items["Short Bow"] = { name: "Short Bow", type: "weapon", family: "MWD", hands: 2, pull: 45, initiative: 8, reload: 1, primaryType: "Pierce", range: { pointBlank: { task: 15, range: 74, damage: "3d6"}, effective: { task: 45, range: 149, damage: "2d8"}, long: { task: 25, range: 299, damage: "2d6"}, extreme: { task: 0, range: 300, damage: "1d6"} } };
-MML.items["Medium Bow"] = { name: "Medium Bow", type: "weapon", family: "MWD", hands: 2, pull: 60, initiative: 7, reload: 1, primaryType: "Pierce", range: { pointBlank: { task: 15, range: 89, damage: "3d8"}, effective: { task: 45, range: 179, damage: "2d10"}, long: { task: 25, range: 449, damage: "2d8"}, extreme: { task: 0, range: 450, damage: "1d8"} } };
-MML.items["Long Bow"] = { name: "Long Bow", type: "weapon", family: "MWD", hands: 2, pull: 80, initiative: 6, reload: 1, primaryType: "Pierce", range: { pointBlank: { task: 15, range: 149, damage: "3d10"}, effective: { task: 45, range: 269, damage: "3d8"}, long: { task: 25, range: 599, damage: "3d6"}, extreme: { task: 0, range: 600, damage: "1d10"} } };
-MML.items["Heavy Long Bow"] = { name: "Heavy Long Bow", type: "weapon", family: "MWD", hands: 2, pull: 100, initiative: 4, reload: 1, primaryType: "Pierce", range: { pointBlank: { task: 15, range: 179, damage: "3d12"}, effective: { task: 45, range: 299, damage: "3d10"}, long: { task: 25, range: 674, damage: "3d8"}, extreme: { task: 0, range: 675, damage: "1d10"} } };
-MML.items["Short Composite Bow"] = { name: "Short Composite Bow", type: "weapon", family: "MWD", hands: 2, pull: 60, initiative: 7, reload: 1, primaryType: "Pierce", range: { pointBlank: { task: 15, range: 89, damage: "3d8"}, effective: { task: 45, range: 179, damage: "2d10"}, long: { task: 25, range: 449, damage: "2d8"}, extreme: { task: 0, range: 450, damage: "1d8"} } };
-MML.items["Medium Composite Bow"] = { name: "Medium Composite Bow", type: "weapon", family: "MWD", hands: 2, pull: 80, initiative: 6, reload: 1, primaryType: "Pierce", range: { pointBlank: { task: 15, range: 149, damage: "3d10"}, effective: { task: 45, range: 269, damage: "3d8"}, long: { task: 25, range: 599, damage: "3d6"}, extreme: { task: 0, range: 600, damage: "1d10"} } };
-MML.items["Light Cross Bow"] = { name: "Light Cross Bow", type: "weapon", family: "MWM", hands: 2, pull: 80, initiative: 10, reload: 4, primaryType: "Pierce", range: { pointBlank: { task: 15, range: 179, damage: "3d10"}, effective: { task: 45, range: 299, damage: "3d8"}, long: { task: 25, range: 674, damage: "3d6"}, extreme: { task: 0, range: 675, damage: "1d10"} } };
-MML.items["Medium Cross Bow"] = { name: "Medium Cross Bow", type: "weapon", family: "MWM", hands: 2, pull: 100, initiative: 10, reload: 6, primaryType: "Pierce", range: { pointBlank: { task: 15, range: 224, damage: "3d12"}, effective: { task: 45, range: 374, damage: "3d10"}, long: { task: 25, range: 899, damage: "3d8"}, extreme: { task: 0, range: 900, damage: "1d10"} } };
-MML.items["Heavy Cross Bow"] = { name: "Heavy Cross Bow", type: "weapon", family: "MWM", hands: 2, pull: 120, initiative: 8, reload: 12, primaryType: "Pierce", range: { pointBlank: { task: 15, range: 269, damage: "4d10"}, effective: { task: 45, range: 449, damage: "3d12"}, long: { task: 25, range: 1199, damage: "3d10"}, extreme: { task: 0, range: 1200, damage: "1d12"} } };
-MML.items["Battle Axe, Thrown"] = { name: "Battle Axe, Thrown", type: "weapon", family: "TWH", hands: 1, initiative: 3, accuracyMod: -8, primaryType: "Chop", range: { pointBlank: { task: 35, loadDivider: 8, damage: "2d12"}, effective: { task: 45, loadDivider: 4, damage: "2d10"}, long: { task: 25, loadDivider: 3, damage: "2d6"}, extreme: { task: 0, loadDivider: 2, damage: "1d6"} } };
+MML.items["Hand Axe"] = {
+    name: "Hand Axe",
+    type: "weapon",
+    weight: 3,
+    grips: {
+        "One Hand":{
+            family: "Axe",
+            hands: 1,
+            primaryType: "Chop",
+            primaryTask: 35,
+            primaryDamage: "1d20",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 6,
+            rank: 1}
+       }
+    };
+MML.items["Battle Axe"] = {
+    name: "Battle Axe",
+    type: "weapon",
+    weight: 5,
+    grips: {
+        "One Hand":{
+            family: "Axe",
+            hands: 1,
+            primaryType: "Chop",
+            primaryTask: 35,
+            primaryDamage: "3d10",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 5,
+            rank: 1}
+       }
+    };
+MML.items["Pick"] = {
+    name: "Pick",
+    type: "weapon",
+    weight: 6,
+    grips: {
+        "Two Hands":{
+            family: "Axe",
+            hands: 2,
+            primaryType: "Flanged",
+            primaryTask: 25,
+            primaryDamage: "1d20",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 4,
+            rank: 1}
+       }
+    };
+MML.items["Two-Handed Axe"] = {
+    name: "Two-Handed Axe",
+    type: "weapon",
+    weight: 6.5,
+    grips: {
+        "Two Hands":{
+            family: "Axe",
+            hands: 2,
+            primaryType: "Chop",
+            primaryTask: 25,
+            primaryDamage: "4d10",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 4,
+            rank: 2}
+       }
+    };
+MML.items["Bardiche"] = {
+    name: "Bardiche",
+    type: "weapon",
+    weight: 7.5,
+    grips: {
+        "Two Hands":{
+            family: "Axe",
+            hands: 2,
+            primaryType: "Chop",
+            primaryTask: 25,
+            primaryDamage: "5d10",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 3,
+            rank: 2}
+       }
+    };
+MML.items["Pole Axe"] = {
+    name: "Pole Axe",
+    type: "weapon",
+    weight: 7,
+    grips: {
+        "Two Hands":{
+            family: "Axe",
+            hands: 2,
+            primaryType: "Chop",
+            primaryTask: 25,
+            primaryDamage: "4d12",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 3,
+            rank: 2}
+       }
+    };
+MML.items["Club"] = {
+    name: "Club",
+    type: "weapon",
+    weight: 2,
+    grips: {
+        "One Hand":{
+            family: "Bludgeoning",
+            hands: 1,
+            primaryType: "Impact",
+            primaryTask: 45,
+            primaryDamage: "2d8",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 7,
+            rank: 1}
+       }
+    };
+MML.items["Cudgel, Light"] = {
+    name: "Cudgel, Light",
+    type: "weapon",
+    weight: 3,
+    grips: {
+        "One Hand":{
+            family: "Bludgeoning",
+            hands: 1,
+            primaryType: "Impact",
+            primaryTask: 45,
+            primaryDamage: "2d10",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 6,
+            rank: 1}
+       }
+    };
+MML.items["Cudgel, Heavy"] = {
+    name: "Cudgel, Heavy",
+    type: "weapon",
+    weight: 7,
+    grips: {
+        "Two Hands":{
+            family: "Bludgeoning",
+            hands: 2,
+            primaryType: "Impact",
+            primaryTask: 35,
+            primaryDamage: "4d8",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 4,
+            rank: 2}
+       }
+    };
+MML.items["Mace"] = {
+    name: "Mace",
+    type: "weapon",
+    weight: 5,
+    grips: {
+        "One Hand":{
+            family: "Bludgeoning",
+            hands: 1,
+            primaryType: "Flanged",
+            primaryTask: 45,
+            primaryDamage: "2d10",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 5,
+            rank: 1}
+       }
+    };
+MML.items["Maul"] = {
+    name: "Maul",
+    type: "weapon",
+    weight: 9,
+    grips: {
+        "Two Hands":{
+            family: "Bludgeoning",
+            hands: 2,
+            primaryType: "Impact",
+            primaryTask: 25,
+            primaryDamage: "4d10",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 4,
+            rank: 2}
+       }
+    };
+MML.items["Morningstar"] = {
+    name: "Morningstar",
+    type: "weapon",
+    weight: 5,
+    grips: {
+        "One Hand":{
+            family: "Bludgeoning",
+            hands: 1,
+            primaryType: "Thrust",
+            primaryTask: 45,
+            primaryDamage: "3d10",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 5,
+            rank: 1}
+       }
+    };
+MML.items["War Hammer"] = {
+    name: "War Hammer",
+    type: "weapon",
+    weight: 5.5,
+    grips: {
+        "One Hand":{
+            family: "Bludgeoning",
+            hands: 1,
+            primaryType: "Impact",
+            primaryTask: 35,
+            primaryDamage: "3d10",
+            secondaryType: "Flanged",
+            secondaryTask: 25,
+            secondaryDamage: "2d8",
+            defense: 15,
+            initiative: 5,
+            rank: 1}
+       }
+    };
+MML.items["Ball & Chain, Footman's"] = {
+    name: "Ball & Chain, Footman's",
+    type: "weapon",
+    weight: 5,
+    grips: {
+        "Two Hands":{
+            family: "Flexible",
+            hands: 2,
+            primaryType: "Impact",
+            primaryTask: 15,
+            primaryDamage: "3d12",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 4,
+            rank: 2}
+       }
+    };
+MML.items["Ball & Chain, Horseman's"] = {
+    name: "Ball & Chain, Horseman's",
+    type: "weapon",
+    weight: 3.5,
+    grips: {
+        "One Hand":{
+            family: "Flexible",
+            hands: 1,
+            primaryType: "Impact",
+            primaryTask: 25,
+            primaryDamage: "2d12",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 0,
+            initiative: 5,
+            rank: 1}
+       }
+    };
+MML.items["Flail, Footman's"] = {
+    name: "Flail, Footman's",
+    type: "weapon",
+    weight: 5,
+    grips: {
+        "Two Hands":{
+            family: "Flexible",
+            hands: 2,
+            primaryType: "Impact",
+            primaryTask: 25,
+            primaryDamage: "3d10",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 4,
+            rank: 2}
+       }
+    };
+MML.items["Flail, Horseman's"] = {
+    name: "Flail, Horseman's",
+    type: "weapon",
+    weight: 2.5,
+    grips: {
+        "One Hand":{
+            family: "Flexible",
+            hands: 1,
+            primaryType: "Impact",
+            primaryTask: 35,
+            primaryDamage: "1d20",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 0,
+            initiative: 5,
+            rank: 1}
+       }
+    };
+MML.items["Mace & Chain"] = {
+    name: "Mace & Chain",
+    type: "weapon",
+    weight: 3.5,
+    grips: {
+        "One Hand":{
+            family: "Flexible",
+            hands: 1,
+            primaryType: "Flanged",
+            primaryTask: 25,
+            primaryDamage: "2d12",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 0,
+            initiative: 5,
+            rank: 1}
+       }
+    };
+MML.items["Morningstar & Chain"] = {
+    name: "Morningstar & Chain",
+    type: "weapon",
+    weight: 4,
+    grips: {
+        "One Hand":{
+            family: "Flexible",
+            hands: 1,
+            primaryType: "Thrust",
+            primaryTask: 25,
+            primaryDamage: "3d12",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 0,
+            initiative: 5,
+            rank: 1}
+       }
+    };
+MML.items["Boot Knife"] = {
+    name: "Boot Knife",
+    type: "weapon",
+    weight: 0.5,
+    grips: {
+        "One Hand":{
+            family: "Knives",
+            hands: 1,
+            primaryType: "Thrust",
+            primaryTask: 15,
+            primaryDamage: "1d8",
+            secondaryType: "Cut",
+            secondaryTask: 15,
+            secondaryDamage: "1d6",
+            defense: 0,
+            initiative: 10,
+            rank: 1}
+       }
+    };
+MML.items["Dagger"] = {
+    name: "Dagger",
+    type: "weapon",
+    weight: 1,
+    grips: {
+        "One Hand":{
+            family: "Knives",
+            hands: 1,
+            primaryType: "Thrust",
+            primaryTask: 15,
+            primaryDamage: "2d6",
+            secondaryType: "Cut",
+            secondaryTask: 15,
+            secondaryDamage: "1d8",
+            defense: 0,
+            initiative: 10,
+            rank: 1}
+       }
+    };
+MML.items["Knife"] = {
+    name: "Knife",
+    type: "weapon",
+    weight: 1.5,
+    grips: {
+        "One Hand":{
+            family: "Knives",
+            hands: 1,
+            primaryType: "Cut",
+            primaryTask: 25,
+            primaryDamage: "2d6",
+            secondaryType: "Thrust",
+            secondaryTask: 15,
+            secondaryDamage: "2d6",
+            defense: 0,
+            initiative: 10,
+            rank: 1}
+       }
+    };
+MML.items["Dirk"] = {
+    name: "Dirk",
+    type: "weapon",
+    weight: 1.5,
+    grips: {
+        "One Hand":{
+            family: "Knives",
+            hands: 1,
+            primaryType: "Cut",
+            primaryTask: 25,
+            primaryDamage: "2d8",
+            secondaryType: "Thrust",
+            secondaryTask: 15,
+            secondaryDamage: "2d6",
+            defense: 15,
+            initiative: 9,
+            rank: 1}
+       }
+    };
+MML.items["Fauchard"] = {
+    name: "Fauchard",
+    type: "weapon",
+    weight: 5,
+    grips: {
+        "Two Hands":{
+            family: "Pole Arms",
+            hands: 2,
+            primaryType: "Cut",
+            primaryTask: 15,
+            primaryDamage: "2d12",
+            secondaryType: "Thrust",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 4,
+            rank: 2}
+       }
+    };
+MML.items["Bill"] = {
+    name: "Bill",
+    type: "weapon",
+    weight: 5,
+    grips: {
+        "Two Hands":{
+            family: "Pole Arms",
+            hands: 2,
+            primaryType: "Cut",
+            primaryTask: 25,
+            primaryDamage: "2d12",
+            secondaryType: "Thrust",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 4,
+            rank: 2}
+       }
+    };
+MML.items["Glaive"] = {
+    name: "Glaive",
+    type: "weapon",
+    weight: 6,
+    grips: {
+        "Two Hands":{
+            family: "Pole Arms",
+            hands: 2,
+            primaryType: "Chop",
+            primaryTask: 25,
+            primaryDamage: "3d20",
+            secondaryType: "Thrust",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 4,
+            rank: 2}
+       }
+    };
+MML.items["Halberd"] = {
+    name: "Halberd",
+    type: "weapon",
+    weight: 6,
+    grips: {
+        "Two Hands":{
+            family: "Pole Arms",
+            hands: 2,
+            primaryType: "Chop",
+            primaryTask: 25,
+            primaryDamage: "3d20",
+            secondaryType: "Thrust",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 4,
+            rank: 2}
+       }
+    };
+MML.items["Pole Hammer"] = {
+    name: "Pole Hammer",
+    type: "weapon",
+    weight: 6,
+    grips: {
+        "Two Hands":{
+            family: "Pole Hammers",
+            hands: 2,
+            primaryType: "Flanged",
+            primaryTask: 25,
+            primaryDamage: "3d10",
+            secondaryType: "Thrust",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 4,
+            rank: 2}
+       }
+    };
+MML.items["War Spear"] = {
+    name: "War Spear",
+    type: "weapon",
+    weight: 2,
+    grips: {
+        "One Hand":{
+            family: "Spears",
+            hands: 1,
+            primaryType: "Thrust",
+            primaryTask: 35,
+            primaryDamage: "2d8",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 3,
+            rank: 1},
+        "Two Hands":{
+            family: "Spears",
+            hands: 2,
+            primaryType: "Thrust",
+            primaryTask: 45,
+            primaryDamage: "3d8",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 5,
+            rank: 2}
+       }
+    };
+MML.items["Boar Spear"] = {
+    name: "Boar Spear",
+    type: "weapon",
+    weight: 3.5,
+    grips: {
+        "One Hand":{
+            family: "Spears",
+            hands: 1,
+            primaryType: "Thrust",
+            primaryTask: 25,
+            primaryDamage: "2d10",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 2,
+            rank: 1},
+        "Two Hands":{
+            family: "Spears",
+            hands: 2,
+            primaryType: "Thrust",
+            primaryTask: 45,
+            primaryDamage: "3d10",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 4,
+            rank: 2}
+       }
+    };
+MML.items["Military Fork"] = {
+    name: "Military Fork",
+    type: "weapon",
+    weight: 3.5,
+    grips: {
+        "One Hand":{
+            family: "Spears",
+            hands: 1,
+            primaryType: "Thrust",
+            primaryTask: 15,
+            primaryDamage: "2d12",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 2,
+            rank: 1}
+       }
+    };
+MML.items["Military Fork, Two Hands"] = {
+    name: "Military Fork, Two Hands",
+    type: "weapon",
+    weight: 3.5,
+    grips: {
+        "Two Hands":{
+            family: "Spears",
+            hands: 2,
+            primaryType: "Thrust",
+            primaryTask: 35,
+            primaryDamage: "3d10",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 4,
+            rank: 2}
+       }
+    };
+MML.items["Spetum"] = {
+    name: "Spetum",
+    type: "weapon",
+    weight: 4,
+    grips: {
+        "Two Hands":{
+            family: "Spears",
+            hands: 2,
+            primaryType: "Thrust",
+            primaryTask: 35,
+            primaryDamage: "3d10",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 4,
+            rank: 2}
+       }
+    };
+MML.items["Quarter Staff"] = {
+    name: "Quarter Staff",
+    type: "weapon",
+    weight: 2,
+    grips: {
+        "Two Hands":{
+            family: "Staves",
+            hands: 2,
+            primaryType: "Impact",
+            primaryTask: 45,
+            primaryDamage: "3d8",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 35,
+            initiative: 9,
+            rank: 2}
+       }
+    };
+MML.items["Scimitar"] = {
+    name: "Scimitar",
+    type: "weapon",
+    weight: 3.5,
+    grips: {
+        "One Hand":{
+            family: "Swords",
+            hands: 1,
+            primaryType: "Cut",
+            primaryTask: 35,
+            primaryDamage: "2d12",
+            secondaryType: "Thrust",
+            secondaryTask: 25,
+            secondaryDamage: "2d6",
+            defense: 35,
+            initiative: 7,
+            rank: 1}
+       }
+    };
+MML.items["Short Sword"] = {
+    name: "Short Sword",
+    type: "weapon",
+    weight: 3.5,
+    grips: {
+        "One Hand":{
+            family: "Swords",
+            hands: 1,
+            primaryType: "Thrust",
+            primaryTask: 35,
+            primaryDamage: "3d8",
+            secondaryType: "Cut",
+            secondaryTask: 35,
+            secondaryDamage: "3d6",
+            defense: 35,
+            initiative: 1,
+            rank: 1}
+       }
+    };
+MML.items["Long Sword"] = {
+    name: "Long Sword",
+    type: "weapon",
+    weight: 3,
+    grips: {
+        "One Hand":{
+            family: "Swords",
+            hands: 1,
+            primaryType: "Cut",
+            primaryTask: 45,
+            primaryDamage: "3d10",
+            secondaryType: "Thrust",
+            secondaryTask: 35,
+            secondaryDamage: "2d6",
+            defense: 25,
+            initiative: 5,
+            rank: 1}
+       }
+    };
+MML.items["Falchion"] = {
+    name: "Falchion",
+    type: "weapon",
+    weight: 3.5,
+    grips: {
+        "One Hand":{
+            family: "Swords",
+            hands: 1,
+            primaryType: "Chop",
+            primaryTask: 35,
+            primaryDamage: "4d8",
+            secondaryType: "Thrust",
+            secondaryTask: 25,
+            secondaryDamage: "3d6",
+            defense: 25,
+            initiative: 5,
+            rank: 1}
+       }
+    };
+MML.items["Bastard Sword"] = {
+    name: "Bastard Sword",
+    type: "weapon",
+    weight: 6,
+    grips: {
+        "One Hand":{
+            family: "Swords",
+            hands: 1,
+            primaryType: "Cut",
+            primaryTask: 25,
+            primaryDamage: "5d6",
+            secondaryType: "Thrust",
+            secondaryTask: 15,
+            secondaryDamage: "3d6",
+            defense: 15,
+            initiative: 4,
+            rank: 1},
+        "Two Hands":{
+            family: "Swords",
+            hands: 2,
+            primaryType: "Cut",
+            primaryTask: 35,
+            primaryDamage: "4d10",
+            secondaryType: "Thrust",
+            secondaryTask: 25,
+            secondaryDamage: "4d6",
+            defense: 25,
+            initiative: 5,
+            rank: 1}
+       }
+    };
+MML.items["Broadsword"] = {
+    name: "Broadsword",
+    type: "weapon",
+    weight: 5,
+    grips: {
+        "One Hand":{
+            family: "Swords",
+            hands: 1,
+            primaryType: "Chop",
+            primaryTask: 25,
+            primaryDamage: "3d12",
+            secondaryType: "Thrust",
+            secondaryTask: 15,
+            secondaryDamage: "1d12",
+            defense: 15,
+            initiative: 4,
+            rank: 1}
+       }
+    };
+MML.items["Two-Handed Broadsword"] = {
+    name: "Two-Handed Broadsword",
+    type: "weapon",
+    weight: 7.5,
+    grips: {
+        "Two Hands":{
+            family: "Swords",
+            hands: 2,
+            primaryType: "Chop",
+            primaryTask: 35,
+            primaryDamage: "4d12",
+            secondaryType: "Thrust",
+            secondaryTask: 25,
+            secondaryDamage: "1d20",
+            defense: 25,
+            initiative: 3,
+            rank: 1}
+       }
+    };
+MML.items["Great Sword"] = {
+    name: "Great Sword",
+    type: "weapon",
+    weight: 13,
+    grips: {
+        "Two Hands":{
+            family: "Swords",
+            hands: 2,
+            primaryType: "Chop",
+            primaryTask: 15,
+            primaryDamage: "6d10",
+            secondaryType: "Thrust",
+            secondaryTask: 15,
+            secondaryDamage: "3d10",
+            defense: 35,
+            initiative: 2,
+            rank: 2}
+       }
+    };
+MML.items["Whip"] = {
+    name: "Whip",
+    type: "weapon",
+    weight: 1,
+    grips: {
+        "One Hand":{
+            family: "Whip",
+            hands: 1,
+            primaryType: "Surface",
+            primaryTask: 35,
+            primaryDamage: "2d4",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 0,
+            initiative: 8,
+            rank: 3}
+       }
+    };
+MML.items["Cleaver"] = {
+    name: "Cleaver",
+    type: "weapon",
+    weight: 2,
+    grips: {
+        "One Hand":{
+            family: "Axe",
+            hands: 1,
+            primaryType: "Chop",
+            primaryTask: 25,
+            primaryDamage: "1d10",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 0,
+            initiative: 8,
+            rank: 1}
+       }
+    };
+MML.items["Hatchet"] = {
+    name: "Hatchet",
+    type: "weapon",
+    weight: 2.5,
+    grips: {
+        "One Hand":{
+            family: "Axe",
+            hands: 1,
+            primaryType: "Chop",
+            primaryTask: 25,
+            primaryDamage: "1d12",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 0,
+            initiative: 7,
+            rank: 1}
+       }
+    };
+MML.items["Hoe"] = {
+    name: "Hoe",
+    type: "weapon",
+    weight: 4,
+    grips: {
+        "Two Hands":{
+            family: "Axe",
+            hands: 2,
+            primaryType: "Flanged",
+            primaryTask: 35,
+            primaryDamage: "1d10",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 4,
+            rank: 1}
+       }
+    };
+MML.items["Wood Axe"] = {
+    name: "Wood Axe",
+    type: "weapon",
+    weight: 3,
+    grips: {
+        "Two Hands":{
+            family: "Axe",
+            hands: 2,
+            primaryType: "Chop",
+            primaryTask: 35,
+            primaryDamage: "2d12",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 4,
+            rank: 1}
+       }
+    };
+MML.items["Hammer, Medium"] = {
+    name: "Hammer, Medium",
+    type: "weapon",
+    weight: 2.5,
+    grips: {
+        "One Hand":{
+            family: "Bludgeoning",
+            hands: 1,
+            primaryType: "Impact",
+            primaryTask: 25,
+            primaryDamage: "1d10",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 0,
+            initiative: 7,
+            rank: 1}
+       }
+    };
+MML.items["Shovel"] = {
+    name: "Shovel",
+    type: "weapon",
+    weight: 6,
+    grips: {
+        "Two Hands":{
+            family: "Bludgeoning",
+            hands: 2,
+            primaryType: "Impact",
+            primaryTask: 35,
+            primaryDamage: "",
+            secondaryType: "1d8",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 4,
+            rank: 1}
+       }
+    };
+MML.items["Skinning Knife"] = {
+    name: "Skinning Knife",
+    type: "weapon",
+    weight: 0.5,
+    grips: {
+        "One Hand":{
+            family: "Knives",
+            hands: 1,
+            primaryType: "Cut",
+            primaryTask: 15,
+            primaryDamage: "1d8",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 0,
+            initiative: 9,
+            rank: 1}
+       }
+    };
+MML.items["Butcher's Knife"] = {
+    name: "Butcher's Knife",
+    type: "weapon",
+    weight: 1,
+    grips: {
+        "One Hand":{
+            family: "Knives",
+            hands: 1,
+            primaryType: "Cut",
+            primaryTask: 15,
+            primaryDamage: "2d6",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 0,
+            initiative: 9,
+            rank: 1}
+       }
+    };
+MML.items["Pitch Fork"] = {
+    name: "Pitch Fork",
+    type: "weapon",
+    weight: 3,
+    grips: {
+        "Two Hands":{
+            family: "Spears",
+            hands: 2,
+            primaryType: "Thrust",
+            primaryTask: 35,
+            primaryDamage: "2d10",
+            secondaryType: "",
+            secondaryTask: 0,
+            secondaryDamage: "",
+            defense: 15,
+            initiative: 3,
+            rank: 1}
+       }
+    };
+MML.items["Short Bow"] = {
+    name: "Short Bow", 
+    type: "weapon",
+    weight: 0,
+    grips: {
+        "Two Hands": {
+            family: "MWD", 
+            hands: 2, 
+            pull: 45, 
+            initiative: 8, 
+            reload: 1, 
+            primaryType: "Pierce", 
+            range: { 
+                pointBlank: { task: 15, range: 74, damage: "3d6"}, 
+                effective: { task: 45, range: 149, damage: "2d8"}, 
+                long: { task: 25, range: 299, damage: "2d6"}, 
+                extreme: { task: 0, range: 300, damage: "1d6"}
+            }
+        }
+    }
+};
+MML.items["Medium Bow"] = {
+    name: "Medium Bow", 
+    type: "weapon",
+    weight: 0,
+    grips: {
+        "Two Hands": { 
+            family: "MWD", 
+            hands: 2, 
+            pull: 60, 
+            initiative: 7, 
+            reload: 1, 
+            primaryType: "Pierce", 
+            range: { 
+                pointBlank: { task: 15, range: 89, damage: "3d8"}, 
+                effective: { task: 45, range: 179, damage: "2d10"}, 
+                long: { task: 25, range: 449, damage: "2d8"}, 
+                extreme: { task: 0, range: 450, damage: "1d8"} 
+            }
+        }
+    }
+};
+MML.items["Long Bow"] = { 
+    name: "Long Bow", 
+    type: "weapon", 
+    weight: 0, 
+    grips: {
+        "Two Hands": {
+            family: "MWD",
+            hands: 2, 
+            pull: 80, 
+            initiative: 6, 
+            reload: 1, 
+            primaryType: "Pierce", 
+            range: { 
+                pointBlank: { task: 15, range: 149, damage: "3d10"}, 
+                effective: { task: 45, range: 269, damage: "3d8"}, 
+                long: { task: 25, range: 599, damage: "3d6"}, 
+                extreme: { task: 0, range: 600, damage: "1d10"} 
+            }
+        }
+    }
+};
+MML.items["Heavy Long Bow"] = { 
+    name: "Heavy Long Bow", 
+    type: "weapon", 
+    weight: 0, 
+    grips: {
+        "Two Hands": {
+            family: "MWD", 
+            hands: 2, 
+            pull: 100, 
+            initiative: 4,
+            reload: 1, 
+            primaryType: "Pierce", 
+            range: { 
+                pointBlank: { task: 15, range: 179, damage: "3d12"}, 
+                effective: { task: 45, range: 299, damage: "3d10"}, 
+                long: { task: 25, range: 674, damage: "3d8"}, 
+                extreme: { task: 0, range: 675, damage: "1d10"} 
+            }
+        }
+    }
+};
+MML.items["Short Composite Bow"] = {
+    name: "Short Composite Bow", 
+    type: "weapon",
+    weight: 0, 
+    grips: {
+        "Two Hands": {
+            family: "MWD", 
+            hands: 2, 
+            pull: 60, 
+            initiative: 7, 
+            reload: 1, 
+            primaryType: "Pierce", 
+            range: { 
+                pointBlank: { task: 15, range: 89, damage: "3d8"},
+                effective: { task: 45, range: 179, damage: "2d10"},
+                long: { task: 25, range: 449, damage: "2d8"},
+                extreme: { task: 0, range: 450, damage: "1d8"}
+            }
+        }
+    }
+};
+MML.items["Medium Composite Bow"] = {
+    name: "Medium Composite Bow",
+    type: "weapon",
+    weight: 0, 
+    grips: {
+        "Two Hands": {
+            family: "MWD",
+            hands: 2,
+            pull: 80,
+            initiative: 6,
+            reload: 1,
+            primaryType: "Pierce",
+            range: {
+                pointBlank: { task: 15, range: 149, damage: "3d10"},
+                effective: { task: 45, range: 269, damage: "3d8"},
+                long: { task: 25, range: 599, damage: "3d6"},
+                extreme: { task: 0, range: 600, damage: "1d10"}
+            }
+        }
+    }
+};
+MML.items["Light Cross Bow"] = {
+    name: "Light Cross Bow",
+    type: "weapon",
+    weight: 0, 
+    grips: {
+        "Two Hands": {
+            family: "MWM",
+            hands: 2,
+            pull: 80,
+            initiative: 10,
+            reload: 4,
+            primaryType: "Pierce",
+            range: {
+                pointBlank: { task: 15, range: 179, damage: "3d10"}, 
+                effective: { task: 45, range: 299, damage: "3d8"}, 
+                long: { task: 25, range: 674, damage: "3d6"}, 
+                extreme: { task: 0, range: 675, damage: "1d10"} 
+            }
+        }
+    } 
+};
+MML.items["Medium Cross Bow"] = {
+    name: "Medium Cross Bow", 
+    type: "weapon",
+    weight: 0, 
+    grips: {
+        "Two Hands": { 
+            family: "MWM", 
+            hands: 2, 
+            pull: 100, 
+            initiative: 10, 
+            reload: 6, 
+            primaryType: "Pierce", 
+            range: {
+                pointBlank: { task: 15, range: 224, damage: "3d12"},
+                effective: { task: 45, range: 374, damage: "3d10"},
+                long: { task: 25, range: 899, damage: "3d8"},
+                extreme: { task: 0, range: 900, damage: "1d10"}
+            }
+        }
+    }
+};
+MML.items["Heavy Cross Bow"] = {
+    name: "Heavy Cross Bow",
+    type: "weapon",
+    weight: 0, 
+    grips: {
+        "Two Hands": {
+            family: "MWM",
+            hands: 2,
+            pull: 120,
+            initiative: 8,
+            reload: 12,
+            primaryType: "Pierce",
+            range: {
+                pointBlank: { task: 15, range: 269, damage: "4d10"},
+                effective: { task: 45, range: 449, damage: "3d12"},
+                long: { task: 25, range: 1199, damage: "3d10"},
+                extreme: { task: 0, range: 1200, damage: "1d12"}
+            }
+        }
+    }
+};
+MML.items["Battle Axe, Thrown"] = { 
+    name: "Battle Axe, Thrown", 
+    type: "weapon",
+    weight: 0, 
+    grips: {
+        "Two Hands": { 
+            family: "TWH", 
+            hands: 1, 
+            initiative: 3, 
+            accuracyMod: -8, 
+            primaryType: "Chop", 
+            range: { 
+                pointBlank: { task: 35, loadDivider: 8, damage: "2d12"}, 
+                effective: { task: 45, loadDivider: 4, damage: "2d10"}, 
+                long: { task: 25, loadDivider: 3, damage: "2d6"}, 
+                extreme: { task: 0, loadDivider: 2, damage: "1d6"}
+            }
+        }
+    }
+};
 
 //Spell Components
 MML.items["Dart"] = {name: "Dart", spell: "Dart"};
@@ -1632,3 +2814,309 @@ MML.meleeDamageMods = [
 	{low: 106, high: 120, value: 4},
 	{low: 121, high: 999, value: 5},
 ];
+
+MML.hitTables = {};
+MML.hitTables.humanoid = {};
+MML.hitTables.humanoid.A = [];
+MML.hitTables.humanoid.A[1] = 1;
+MML.hitTables.humanoid.A[2] = 1;
+MML.hitTables.humanoid.A[3] = 2;
+MML.hitTables.humanoid.A[4] = 3;
+MML.hitTables.humanoid.A[5] = 3;
+MML.hitTables.humanoid.A[6] = 4;
+MML.hitTables.humanoid.A[7] = 4;
+MML.hitTables.humanoid.A[8] = 5;
+MML.hitTables.humanoid.A[9] = 5;
+MML.hitTables.humanoid.A[10] = 6;
+MML.hitTables.humanoid.A[11] = 7;
+MML.hitTables.humanoid.A[12] = 8;
+MML.hitTables.humanoid.A[13] = 8;
+MML.hitTables.humanoid.A[14] = 8;
+MML.hitTables.humanoid.A[15] = 8;
+MML.hitTables.humanoid.A[16] = 9;
+MML.hitTables.humanoid.A[17] = 9;
+MML.hitTables.humanoid.A[18] = 9;
+MML.hitTables.humanoid.A[19] = 9;
+MML.hitTables.humanoid.A[20] = 10;
+MML.hitTables.humanoid.A[21] = 10;
+MML.hitTables.humanoid.A[22] = 11;
+MML.hitTables.humanoid.A[23] = 11;
+MML.hitTables.humanoid.A[24] = 11;
+MML.hitTables.humanoid.A[25] = 11;
+MML.hitTables.humanoid.A[26] = 12;
+MML.hitTables.humanoid.A[27] = 12;
+MML.hitTables.humanoid.A[28] = 13;
+MML.hitTables.humanoid.A[29] = 13;
+MML.hitTables.humanoid.A[30] = 13;
+MML.hitTables.humanoid.A[31] = 13;
+MML.hitTables.humanoid.A[32] = 14;
+MML.hitTables.humanoid.A[33] = 14;
+MML.hitTables.humanoid.A[34] = 14;
+MML.hitTables.humanoid.A[35] = 15;
+MML.hitTables.humanoid.A[36] = 15;
+MML.hitTables.humanoid.A[37] = 16;
+MML.hitTables.humanoid.A[38] = 16;
+MML.hitTables.humanoid.A[39] = 17;
+MML.hitTables.humanoid.A[40] = 17;
+MML.hitTables.humanoid.A[41] = 17;
+MML.hitTables.humanoid.A[42] = 18;
+MML.hitTables.humanoid.A[43] = 18;
+MML.hitTables.humanoid.A[44] = 19;
+MML.hitTables.humanoid.A[45] = 19;
+MML.hitTables.humanoid.A[46] = 19;
+MML.hitTables.humanoid.A[47] = 19;
+MML.hitTables.humanoid.A[48] = 20;
+MML.hitTables.humanoid.A[49] = 20;
+MML.hitTables.humanoid.A[50] = 21;
+MML.hitTables.humanoid.A[51] = 21;
+MML.hitTables.humanoid.A[52] = 21;
+MML.hitTables.humanoid.A[53] = 22;
+MML.hitTables.humanoid.A[54] = 22;
+MML.hitTables.humanoid.A[55] = 23;
+MML.hitTables.humanoid.A[56] = 23;
+MML.hitTables.humanoid.A[57] = 23;
+MML.hitTables.humanoid.A[58] = 24;
+MML.hitTables.humanoid.A[59] = 24;
+MML.hitTables.humanoid.A[60] = 25;
+MML.hitTables.humanoid.A[61] = 25;
+MML.hitTables.humanoid.A[62] = 26;
+MML.hitTables.humanoid.A[63] = 26;
+MML.hitTables.humanoid.A[64] = 27;
+MML.hitTables.humanoid.A[65] = 27;
+MML.hitTables.humanoid.A[66] = 27;
+MML.hitTables.humanoid.A[67] = 28;
+MML.hitTables.humanoid.A[68] = 28;
+MML.hitTables.humanoid.A[69] = 29;
+MML.hitTables.humanoid.A[70] = 29;
+MML.hitTables.humanoid.A[71] = 29;
+MML.hitTables.humanoid.A[72] = 30;
+MML.hitTables.humanoid.A[73] = 30;
+MML.hitTables.humanoid.A[74] = 31;
+MML.hitTables.humanoid.A[75] = 31;
+MML.hitTables.humanoid.A[76] = 32;
+MML.hitTables.humanoid.A[77] = 32;
+MML.hitTables.humanoid.A[78] = 33;
+MML.hitTables.humanoid.A[79] = 34;
+MML.hitTables.humanoid.A[80] = 34;
+MML.hitTables.humanoid.A[81] = 35;
+MML.hitTables.humanoid.A[82] = 35;
+MML.hitTables.humanoid.A[83] = 35;
+MML.hitTables.humanoid.A[84] = 36;
+MML.hitTables.humanoid.A[85] = 36;
+MML.hitTables.humanoid.A[86] = 36;
+MML.hitTables.humanoid.A[87] = 37;
+MML.hitTables.humanoid.A[88] = 37;
+MML.hitTables.humanoid.A[89] = 38;
+MML.hitTables.humanoid.A[90] = 38;
+MML.hitTables.humanoid.A[91] = 39;
+MML.hitTables.humanoid.A[92] = 39;
+MML.hitTables.humanoid.A[93] = 40;
+MML.hitTables.humanoid.A[94] = 40;
+MML.hitTables.humanoid.A[95] = 41;
+MML.hitTables.humanoid.A[96] = 42;
+MML.hitTables.humanoid.A[97] = 43;
+MML.hitTables.humanoid.A[98] = 44;
+MML.hitTables.humanoid.A[99] = 45;
+MML.hitTables.humanoid.A[100] = 46;
+MML.hitTables.humanoid.B = [];
+MML.hitTables.humanoid.B[1] = 1;
+MML.hitTables.humanoid.B[2] = 1;
+MML.hitTables.humanoid.B[3] = 2;
+MML.hitTables.humanoid.B[4] = 3;
+MML.hitTables.humanoid.B[5] = 3;
+MML.hitTables.humanoid.B[6] = 4;
+MML.hitTables.humanoid.B[7] = 4;
+MML.hitTables.humanoid.B[8] = 5;
+MML.hitTables.humanoid.B[9] = 5;
+MML.hitTables.humanoid.B[10] = 6;
+MML.hitTables.humanoid.B[11] = 7;
+MML.hitTables.humanoid.B[12] = 8;
+MML.hitTables.humanoid.B[13] = 8;
+MML.hitTables.humanoid.B[14] = 8;
+MML.hitTables.humanoid.B[15] = 8;
+MML.hitTables.humanoid.B[16] = 9;
+MML.hitTables.humanoid.B[17] = 9;
+MML.hitTables.humanoid.B[18] = 10;
+MML.hitTables.humanoid.B[19] = 10;
+MML.hitTables.humanoid.B[20] = 11;
+MML.hitTables.humanoid.B[21] = 11;
+MML.hitTables.humanoid.B[22] = 12;
+MML.hitTables.humanoid.B[23] = 12;
+MML.hitTables.humanoid.B[24] = 13;
+MML.hitTables.humanoid.B[25] = 13;
+MML.hitTables.humanoid.B[26] = 13;
+MML.hitTables.humanoid.B[27] = 13;
+MML.hitTables.humanoid.B[28] = 14;
+MML.hitTables.humanoid.B[29] = 14;
+MML.hitTables.humanoid.B[30] = 14;
+MML.hitTables.humanoid.B[31] = 14;
+MML.hitTables.humanoid.B[32] = 15;
+MML.hitTables.humanoid.B[33] = 15;
+MML.hitTables.humanoid.B[34] = 16;
+MML.hitTables.humanoid.B[35] = 16;
+MML.hitTables.humanoid.B[36] = 17;
+MML.hitTables.humanoid.B[37] = 17;
+MML.hitTables.humanoid.B[38] = 18;
+MML.hitTables.humanoid.B[39] = 18;
+MML.hitTables.humanoid.B[40] = 19;
+MML.hitTables.humanoid.B[41] = 19;
+MML.hitTables.humanoid.B[42] = 19;
+MML.hitTables.humanoid.B[43] = 19;
+MML.hitTables.humanoid.B[44] = 20;
+MML.hitTables.humanoid.B[45] = 21;
+MML.hitTables.humanoid.B[46] = 21;
+MML.hitTables.humanoid.B[47] = 22;
+MML.hitTables.humanoid.B[48] = 22;
+MML.hitTables.humanoid.B[49] = 23;
+MML.hitTables.humanoid.B[50] = 23;
+MML.hitTables.humanoid.B[51] = 24;
+MML.hitTables.humanoid.B[52] = 24;
+MML.hitTables.humanoid.B[53] = 25;
+MML.hitTables.humanoid.B[54] = 26;
+MML.hitTables.humanoid.B[55] = 26;
+MML.hitTables.humanoid.B[56] = 26;
+MML.hitTables.humanoid.B[57] = 26;
+MML.hitTables.humanoid.B[58] = 27;
+MML.hitTables.humanoid.B[59] = 27;
+MML.hitTables.humanoid.B[60] = 28;
+MML.hitTables.humanoid.B[61] = 28;
+MML.hitTables.humanoid.B[62] = 29;
+MML.hitTables.humanoid.B[63] = 29;
+MML.hitTables.humanoid.B[64] = 30;
+MML.hitTables.humanoid.B[65] = 30;
+MML.hitTables.humanoid.B[66] = 31;
+MML.hitTables.humanoid.B[67] = 31;
+MML.hitTables.humanoid.B[68] = 31;
+MML.hitTables.humanoid.B[69] = 31;
+MML.hitTables.humanoid.B[70] = 32;
+MML.hitTables.humanoid.B[71] = 32;
+MML.hitTables.humanoid.B[72] = 32;
+MML.hitTables.humanoid.B[73] = 33;
+MML.hitTables.humanoid.B[74] = 34;
+MML.hitTables.humanoid.B[75] = 34;
+MML.hitTables.humanoid.B[76] = 34;
+MML.hitTables.humanoid.B[77] = 35;
+MML.hitTables.humanoid.B[78] = 35;
+MML.hitTables.humanoid.B[79] = 35;
+MML.hitTables.humanoid.B[80] = 35;
+MML.hitTables.humanoid.B[81] = 36;
+MML.hitTables.humanoid.B[82] = 36;
+MML.hitTables.humanoid.B[83] = 36;
+MML.hitTables.humanoid.B[84] = 36;
+MML.hitTables.humanoid.B[85] = 37;
+MML.hitTables.humanoid.B[86] = 37;
+MML.hitTables.humanoid.B[87] = 37;
+MML.hitTables.humanoid.B[88] = 38;
+MML.hitTables.humanoid.B[89] = 38;
+MML.hitTables.humanoid.B[90] = 38;
+MML.hitTables.humanoid.B[91] = 39;
+MML.hitTables.humanoid.B[92] = 39;
+MML.hitTables.humanoid.B[93] = 40;
+MML.hitTables.humanoid.B[94] = 40;
+MML.hitTables.humanoid.B[95] = 41;
+MML.hitTables.humanoid.B[96] = 42;
+MML.hitTables.humanoid.B[97] = 43;
+MML.hitTables.humanoid.B[98] = 44;
+MML.hitTables.humanoid.B[99] = 45;
+MML.hitTables.humanoid.B[100] = 46;
+MML.hitTables.humanoid.C = [];
+MML.hitTables.humanoid.C[1] = 1;
+MML.hitTables.humanoid.C[2] = 1;
+MML.hitTables.humanoid.C[3] = 2;
+MML.hitTables.humanoid.C[4] = 3;
+MML.hitTables.humanoid.C[5] = 3;
+MML.hitTables.humanoid.C[6] = 4;
+MML.hitTables.humanoid.C[7] = 4;
+MML.hitTables.humanoid.C[8] = 5;
+MML.hitTables.humanoid.C[9] = 5;
+MML.hitTables.humanoid.C[10] = 6;
+MML.hitTables.humanoid.C[11] = 7;
+MML.hitTables.humanoid.C[12] = 8;
+MML.hitTables.humanoid.C[13] = 8;
+MML.hitTables.humanoid.C[14] = 8;
+MML.hitTables.humanoid.C[15] = 8;
+MML.hitTables.humanoid.C[16] = 8;
+MML.hitTables.humanoid.C[17] = 9;
+MML.hitTables.humanoid.C[18] = 9;
+MML.hitTables.humanoid.C[19] = 9;
+MML.hitTables.humanoid.C[20] = 9;
+MML.hitTables.humanoid.C[21] = 10;
+MML.hitTables.humanoid.C[22] = 10;
+MML.hitTables.humanoid.C[23] = 10;
+MML.hitTables.humanoid.C[24] = 11;
+MML.hitTables.humanoid.C[25] = 11;
+MML.hitTables.humanoid.C[26] = 12;
+MML.hitTables.humanoid.C[27] = 12;
+MML.hitTables.humanoid.C[28] = 12;
+MML.hitTables.humanoid.C[29] = 12;
+MML.hitTables.humanoid.C[30] = 13;
+MML.hitTables.humanoid.C[31] = 13;
+MML.hitTables.humanoid.C[32] = 13;
+MML.hitTables.humanoid.C[33] = 14;
+MML.hitTables.humanoid.C[34] = 14;
+MML.hitTables.humanoid.C[35] = 14;
+MML.hitTables.humanoid.C[36] = 14;
+MML.hitTables.humanoid.C[37] = 14;
+MML.hitTables.humanoid.C[38] = 15;
+MML.hitTables.humanoid.C[39] = 15;
+MML.hitTables.humanoid.C[40] = 16;
+MML.hitTables.humanoid.C[41] = 17;
+MML.hitTables.humanoid.C[42] = 18;
+MML.hitTables.humanoid.C[43] = 18;
+MML.hitTables.humanoid.C[44] = 19;
+MML.hitTables.humanoid.C[45] = 20;
+MML.hitTables.humanoid.C[46] = 20;
+MML.hitTables.humanoid.C[47] = 21;
+MML.hitTables.humanoid.C[48] = 21;
+MML.hitTables.humanoid.C[49] = 21;
+MML.hitTables.humanoid.C[50] = 21;
+MML.hitTables.humanoid.C[51] = 21;
+MML.hitTables.humanoid.C[52] = 22;
+MML.hitTables.humanoid.C[53] = 23;
+MML.hitTables.humanoid.C[54] = 23;
+MML.hitTables.humanoid.C[55] = 24;
+MML.hitTables.humanoid.C[56] = 24;
+MML.hitTables.humanoid.C[57] = 24;
+MML.hitTables.humanoid.C[58] = 25;
+MML.hitTables.humanoid.C[59] = 26;
+MML.hitTables.humanoid.C[60] = 26;
+MML.hitTables.humanoid.C[61] = 26;
+MML.hitTables.humanoid.C[62] = 26;
+MML.hitTables.humanoid.C[63] = 26;
+MML.hitTables.humanoid.C[64] = 27;
+MML.hitTables.humanoid.C[65] = 27;
+MML.hitTables.humanoid.C[66] = 27;
+MML.hitTables.humanoid.C[67] = 27;
+MML.hitTables.humanoid.C[68] = 27;
+MML.hitTables.humanoid.C[69] = 28;
+MML.hitTables.humanoid.C[70] = 29;
+MML.hitTables.humanoid.C[71] = 30;
+MML.hitTables.humanoid.C[72] = 30;
+MML.hitTables.humanoid.C[73] = 30;
+MML.hitTables.humanoid.C[74] = 30;
+MML.hitTables.humanoid.C[75] = 31;
+MML.hitTables.humanoid.C[76] = 32;
+MML.hitTables.humanoid.C[77] = 32;
+MML.hitTables.humanoid.C[78] = 32;
+MML.hitTables.humanoid.C[79] = 32;
+MML.hitTables.humanoid.C[80] = 33;
+MML.hitTables.humanoid.C[81] = 34;
+MML.hitTables.humanoid.C[82] = 35;
+MML.hitTables.humanoid.C[83] = 35;
+MML.hitTables.humanoid.C[84] = 35;
+MML.hitTables.humanoid.C[85] = 35;
+MML.hitTables.humanoid.C[86] = 36;
+MML.hitTables.humanoid.C[87] = 37;
+MML.hitTables.humanoid.C[88] = 37;
+MML.hitTables.humanoid.C[89] = 37;
+MML.hitTables.humanoid.C[90] = 37;
+MML.hitTables.humanoid.C[91] = 38;
+MML.hitTables.humanoid.C[92] = 39;
+MML.hitTables.humanoid.C[93] = 39;
+MML.hitTables.humanoid.C[94] = 40;
+MML.hitTables.humanoid.C[95] = 41;
+MML.hitTables.humanoid.C[96] = 42;
+MML.hitTables.humanoid.C[97] = 43;
+MML.hitTables.humanoid.C[98] = 44;
+MML.hitTables.humanoid.C[99] = 45;
+MML.hitTables.humanoid.C[100] = 46;
