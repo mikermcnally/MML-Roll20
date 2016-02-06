@@ -450,7 +450,7 @@ MML.weaponSkillMods["Wood Elf"]["Medium Composite Bow"] = 10;
 MML.movementRates = {};
 MML.movementRates["Dwarf"] = { 
     Prone: 0,
-	Crawl: 1.75,
+    Crawl: 1.75,
 	Stalk: 1.75,
 	Walk: 6,
 	Jog: 14,
@@ -1763,8 +1763,7 @@ MML.items["Short Bow"] = {
                 extreme: { task: 0, range: 300, damage: "1d6"}
             }
         }
-    }
-};
+    }};
 MML.items["Medium Bow"] = {
     name: "Medium Bow", 
     type: "weapon",
@@ -1784,8 +1783,7 @@ MML.items["Medium Bow"] = {
                 extreme: { task: 0, range: 450, damage: "1d8"} 
             }
         }
-    }
-};
+    }};
 MML.items["Long Bow"] = { 
     name: "Long Bow", 
     type: "weapon", 
@@ -1805,8 +1803,7 @@ MML.items["Long Bow"] = {
                 extreme: { task: 0, range: 600, damage: "1d10"} 
             }
         }
-    }
-};
+    }};
 MML.items["Heavy Long Bow"] = { 
     name: "Heavy Long Bow", 
     type: "weapon", 
@@ -1826,8 +1823,7 @@ MML.items["Heavy Long Bow"] = {
                 extreme: { task: 0, range: 675, damage: "1d10"} 
             }
         }
-    }
-};
+    }};
 MML.items["Short Composite Bow"] = {
     name: "Short Composite Bow", 
     type: "weapon",
@@ -1847,8 +1843,7 @@ MML.items["Short Composite Bow"] = {
                 extreme: { task: 0, range: 450, damage: "1d8"}
             }
         }
-    }
-};
+    }};
 MML.items["Medium Composite Bow"] = {
     name: "Medium Composite Bow",
     type: "weapon",
@@ -1868,8 +1863,7 @@ MML.items["Medium Composite Bow"] = {
                 extreme: { task: 0, range: 600, damage: "1d10"}
             }
         }
-    }
-};
+    }};
 MML.items["Light Cross Bow"] = {
     name: "Light Cross Bow",
     type: "weapon",
@@ -1889,8 +1883,7 @@ MML.items["Light Cross Bow"] = {
                 extreme: { task: 0, range: 675, damage: "1d10"} 
             }
         }
-    } 
-};
+    } };
 MML.items["Medium Cross Bow"] = {
     name: "Medium Cross Bow", 
     type: "weapon",
@@ -1910,8 +1903,7 @@ MML.items["Medium Cross Bow"] = {
                 extreme: { task: 0, range: 900, damage: "1d10"}
             }
         }
-    }
-};
+    }};
 MML.items["Heavy Cross Bow"] = {
     name: "Heavy Cross Bow",
     type: "weapon",
@@ -1931,8 +1923,7 @@ MML.items["Heavy Cross Bow"] = {
                 extreme: { task: 0, range: 1200, damage: "1d12"}
             }
         }
-    }
-};
+    }};
 MML.items["Battle Axe, Thrown"] = { 
     name: "Battle Axe, Thrown", 
     type: "weapon",
@@ -1951,12 +1942,11 @@ MML.items["Battle Axe, Thrown"] = {
                 extreme: { task: 0, loadDivider: 2, damage: "1d6"}
             }
         }
-    }
-};
+    }};
 
 //Spell Components
-MML.items["Dart"] = {name: "Dart", spell: "Dart"};
-MML.items["Drop of Mercury"] = {name: "Drop of Mercury", spell: "Quick Action"};
+MML.items["Dart"] = {name: "Dart", type: "spellComponent", spell: "Dart"};
+MML.items["Drop of Mercury"] = {name: "Drop of Mercury", type: "spellComponent", spell: "Quick Action"};
 
 //Miscellaneous Items
 
