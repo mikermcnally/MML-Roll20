@@ -20,9 +20,9 @@ MML.createAttribute = function createAttribute(name, current, max, character){
 };
 
 MML.createAttributesFromArray = function createAttributesFromArray(inputArray, character){
-    for (var index in inputArray) {
-        MML.createAttribute(inputArray[index].name, inputArray[index].current, inputArray[index].max, character);
-    }
+    _.each(inputArray, function(attribute){
+        MML.createAttribute(attribute.name, attribute.current, attribute.max, character);
+    });
 };
 
 MML.createAbility = function createAbility(name, action, istokenaction, character){
@@ -41,33 +41,87 @@ MML.getCharAttribute = function getCharAttribute(charName, attribute){
         _type: "attribute",
         _characterid: character.get("_id"),
         name: attribute
-    }, {caseInsensitive: false});
+    }, {caseInsensitive: false})[0];
     
-    return charAttribute[0];
+    if(typeof(charAttribute) === "undefined"){
+        MML.createAttribute(attribute, "", "", MML.getCharFromName(charName));
+        charAttribute = MML.getCharAttribute(charName, attribute);
+    }
+
+    return charAttribute;
 };
 
 MML.getCurrentAttribute = function getCurrentAttribute(charName, attribute){
-    var result = MML.getCharAttribute(charName, attribute).get("current");
-    return result;
+    return MML.getCharAttribute(charName, attribute).get("current");
 };
 
-MML.getCurrentAttributeAsInt = function getCurrentAttributeAsInt(charName, attribute){
-    log(MML.getCharAttribute(charName, attribute));
-    var result = parseInt(MML.getCharAttribute(charName, attribute).get("current"));
-    return result;
-};
+MML.getCurrentAttributeAsFloat = function getCurrentAttributeAsFloat(charName, attribute){
+    var result = parseFloat(MML.getCurrentAttribute(charName, attribute));
 
-MML.getMaxAttributeAsInt = function getMaxAttributeAsInt(charName, attribute){
-    state.MML.GM.characters[charName][attribute] = MML.getCharAttribute(charName, attribute).get("max")*1;
-};
-
-MML.getAttributesFromArray = function getAttributesFromArray(inputArray, charName){
-    var outputArray = [];    
-    for (var index in inputArray) {
-        var attribute =  MML.getCharAttribute(charName, inputArray[index].name);
-        outputArray[attribute.get("name")] = attribute;
+    if(isNaN(result)){
+        MML.setCurrentAttribute(charName, attribute, 0);
+        result = 0;
     }
-    return outputArray;
+    return result;
+};
+
+MML.getMaxAttributeAsFloat = function getMaxAttributeAsFloat(charName, attribute){
+    var result =  parseFloat(MML.getCharAttribute(charName, attribute).get("max"));
+    return result;
+};
+
+MML.getCurrentAttributeAsBool = function getCurrentAttributeAsBool(charName, attribute){
+    var result = MML.getCurrentAttribute(charName, attribute);
+    if(result === "true"){ return true; }
+    else{ return false; }
+};
+
+MML.getCurrentAttributeJSON = function getCurrentAttributeJSON(charName, attribute){
+    var result = MML.getCurrentAttribute(charName, attribute);
+
+    if(result === ""){
+        MML.setCurrentAttribute(charName, attribute, "{}");
+        result = MML.getCurrentAttribute(charName, attribute);
+    }
+    return JSON.parse(result);
+};
+
+MML.getSkillAttributes = function getSkillAttributes(charName, skillType){
+    var character = MML.getCharFromName(charName);
+    var attributes = findObjs({
+        _type: "attribute",
+        _characterid: character.get("_id")
+    }, {caseInsensitive: false});
+    var skills = {};
+    
+    _.each(attributes, function(attribute){
+        var attributeName = attribute.get("name");
+
+        if(attributeName.indexOf("repeating_" + skillType) !== -1){
+            var attributeString = attributeName.split("_");
+            var _id = attributeString[2];
+            var property = attributeString[3];
+            var value = attribute.get("current");
+            _.each(skills, function(skill, key){
+                if(key.toLowerCase() === _id){
+                    _id = key;
+                }
+            });
+            if(_.isUndefined(skills[_id])){
+                skills[_id] = {name: "Acrobatics", input: 0, level: 0};
+            }
+            if(property === "name"){
+                skills[_id][property] = value;
+            }
+            else if(isNaN(parseFloat(value))){
+                skills[_id][property] = 0;
+            }
+            else{
+                skills[_id][property] = parseFloat(value);
+            }
+        }
+    });
+    return skills;
 };
 
 MML.setCurrentAttribute = function setCurrentAttribute(charName, attribute, value){
@@ -107,20 +161,27 @@ MML.getSelectedTokens = function getSelectedTokens(selected){
     tokens = [];
     
     var index;
-    for (index in selected){
-        
+    for(index in selected){
         tokens.push(getObj("graphic", selected[index]._id));
     }
     return tokens;
 };
 
+MML.getSelectedCharNames = function getSelectedCharNames(selected){
+    characters = [];
+    
+    var index;
+    for(index in selected){
+        characters.push(MML.getCharFromToken(getObj("graphic", selected[index]._id)));
+    }
+    return characters;
+};
+
 MML.getDistance = function getDistance(left1, left2, top1, top2){
     var pixelPerFoot = 14;
-    var leftDistance = Math.abs(left1 - left2);
-    var topDistance = Math.abs(top1 - top2);
-    var distance = 0;
-    
-    distance = Math.sqrt(leftDistance*leftDistance + topDistance*topDistance)/pixelPerFoot;
+    var leftDistance = Math.abs(left2 - left1);
+    var topDistance = Math.abs(top2 - top1);
+    var distance = Math.sqrt(leftDistance*leftDistance + topDistance*topDistance)/pixelPerFoot;
     distance = Math.floor(distance + 0.5);
     return distance;
 };
@@ -130,6 +191,14 @@ MML.getDistanceBetweenChars = function getDistanceBetweenChars(charName, targetN
     var targetToken = MML.getTokenFromChar(targetName);
     
     return MML.getDistance(charToken.get("left"), targetToken.get("left"), charToken.get("top"), targetToken.get("top")); 
+};
+
+MML.createItemId = function createItemId() {
+    //Based on this code: http://stackoverflow.com/a/10727155
+    var result = '';
+    var chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+    for (var i = 19; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
+    return result;
 };
 
 // Rolling Functions
@@ -210,7 +279,7 @@ MML.attributeCheckRoll = function attributeCheckRoll(attribute, mods){
     var roll = { name: "attribute", player: this.player, value: MML.rollDice(1, 20), range: "1-20", target: target, result: "", accepted: false };
     
     roll = MML.attributeCheckResult(roll);
-    
+    log(attribute + ": " +roll.result);
     return roll;
 };
 
@@ -221,39 +290,60 @@ MML.attributeCheckResult = function attributeCheckResult(roll){
     else {
         roll.result = "Failure";
     }
-    
     return roll;
 };
 
-MML.displayRoll = function displayRoll(){
-    this.currentRoll.accepted = false;
-
-    if(this.currentRoll.name === "damage"){
-        sendChat(this.name, '/w "' + this.player + '" &{template:damage} {{title=' + this.currentRoll.title + "}} {{value=" + this.currentRoll.value + "}} {{type=" + this.currentRoll.type + "}} {{range=" + this.currentRoll.range + "}} ");
-    }
-    else if(this.currentRoll.name === "universal" || this.currentRoll.name === "attribute"){
-        sendChat(this.name, '/w "' + this.player + '" &{template:universal} {{title=' + this.currentRoll.title + "}} {{result=" + this.currentRoll.result + "}} {{target=" + this.currentRoll.target + "}} {{range=" + this.currentRoll.range + "}} {{value=" + this.currentRoll.value + "}} ");
-    }
-    else if(this.currentRoll.name === "hitPosition"){
-        sendChat(this.name, '/w "' + this.player + '" &{template:hitPosition} {{title=' + this.currentRoll.title + "}} {{result=" + this.currentRoll.result + "}} {{range=" + this.currentRoll.range + "}} {{value=" + this.currentRoll.value + "}} ");
-    }
+MML.displayGmRoll = function displayGmRoll(input){
+    sendChat(this.name, '/w "' + this.name + '" &{template:rollMenu} {{title=' + this.currentRoll.message + "}}");
+    // if(this.currentRoll.name === "damage"){
+    //     sendChat(this.name, '/w "' + this.player + '" &{template:damage} {{title=' + this.currentRoll.title + "}} {{value=" + this.currentRoll.value + "}} {{type=" + this.currentRoll.type + "}} {{range=" + this.currentRoll.range + "}} ");
+    // }
+    // else if(this.currentRoll.name === "universal" || this.currentRoll.name === "attribute"){
+    //     sendChat(this.name, '/w "' + this.player + '" &{template:universal} {{title=' + this.currentRoll.title + "}} {{result=" + this.currentRoll.result + "}} {{target=" + this.currentRoll.target + "}} {{range=" + this.currentRoll.range + "}} {{value=" + this.currentRoll.value + "}} ");
+    // }
+    // else if(this.currentRoll.name === "hitPosition"){
+    //     sendChat(this.name, '/w "' + this.player + '" &{template:hitPosition} {{title=' + this.currentRoll.title + "}} {{result=" + this.currentRoll.result + "}} {{range=" + this.currentRoll.range + "}} {{value=" + this.currentRoll.value + "}} ");
+    // }
     
 };
 
 //Menu Functions
-MML.displayMenu = function displayMenu(){
-    this.setMenu();
+MML.displayMenu = function displayMenu(input){
+    var toChat = '/w "' + this.name + '" &{template:charMenu} {{name=' + this.message + '}} ';
 
-    var menu = '/w "' + this.name + '" &{template:charMenu} {{name=' + this.message + '}} '; //"/ &{template:charMenu} {{name=" + message + "}} "
-    
-    var index;
-    for(index in this.buttons){
-        var noSpace = this.buttons[index].text.replace(/\s+/g, '');
-        menu = menu + '{{' + noSpace + '=[' + this.buttons[index].text + '](!menu|' + this.character + '|' + this.buttons[index].text + ')}} ';
-    }
+    _.each(this.buttons, function(button){
+        var noSpace = button.text.replace(/\s+/g, '');
+        var command = JSON.stringify({
+                type: "player",
+                who: this.name,
+                input: {
+                    who: this.who,
+                    buttonText: button.text
+                },
+                triggeredFunction: "menuCommand"
+            });
 
-    sendChat(this.name, menu, null, {noarchive: false}); //Change to true this when they fix the bug
+        // JSON strings screw up Command Buttons, convert to hex
+        var hex, i;
+        var result = "";
+        for (i=0; i<command.length; i++){
+            result += ("000"+command.charCodeAt(i).toString(16)).slice(-4);
+        }
+
+        
+        toChat = toChat + '{{' + noSpace + '=[' + button.text + '](!' + result + ')}} ';
+    }, this);
+    sendChat(this.name, toChat, null, {noarchive: false}); //Change to true this when they fix the bug
 };
+
+// MML.displayMenu = function displayMenu(){
+//     var toChat = '/w "' + this.name + '" &{template:charMenu} {{name=' + this.message + '}} ';
+//     _.each(this.buttons, function(button){
+//         var noSpace = button.text.replace(/\s+/g, '');
+//         toChat = toChat + '{{' + noSpace + '=[' + button.text + '](!menu ' +  button.text + ')}} ';
+//     }, this);
+//     sendChat(this.name, toChat, null, {noarchive: false}); //Change to true this when they fix the bug
+// };
 
 // NEEDS WORK. Attacks from above and below need to be added. Use arrays instead of switches on the hit positions for cleaner code
 MML.rollHitPosition = function rollHitPosition(){
@@ -261,604 +351,7 @@ MML.rollHitPosition = function rollHitPosition(){
     var defender = state.MML.GM.characters[this.action.targets[0]];
       
     switch(this.action.calledShot){            
-        case "standard":
-            switch (defender.defense.hitTable){
-                case "A":
-                    switch (randomInteger(100)) {
-                        case 1:
-                        case 2:
-                            position = 1;
-                            break;
-                        case 3:
-                            position = 2;
-                            break;
-                        case 4:
-                        case 5:
-                            position = 3;
-                            break;
-                        case 6:
-                        case 7:
-                            position = 4;
-                            break;
-                        case 8:
-                        case 9:
-                            position = 5;
-                            break;
-                        case 10:
-                            position = 6;
-                            break;
-                        case 11:
-                            position = 7;
-                            break;
-                        case 12:
-                        case 13:
-                        case 14:
-                        case 15:
-                            position = 8;
-                            break;
-                        case 16:
-                        case 17:
-                        case 18:
-                        case 19:
-                            position = 9;
-                            break;
-                        case 20:
-                        case 21:
-                            position = 10;
-                            break;
-                        case 22:
-                        case 23:
-                        case 24:
-                        case 25:
-                            position = 11;
-                            break;
-                        case 26:
-                        case 27:
-                            position = 12;
-                            break;
-                        case 28:
-                        case 29:
-                        case 30:
-                        case 31:
-                            position = 13;
-                            break;
-                        case 32:
-                        case 33:
-                        case 34:
-                            position = 14;
-                            break;
-                        case 35:
-                        case 36:
-                            position = 15;
-                            break;
-                        case 37:
-                        case 38:
-                            position = 16;
-                            break;
-                        case 39:
-                        case 40:
-                        case 41:
-                            position = 17;
-                            break;
-                        case 42:
-                        case 43:
-                            position = 18;
-                            break;
-                        case 44:
-                        case 45:
-                        case 46:
-                        case 47:
-                            position = 19;
-                            break;
-                        case 48:
-                        case 49:
-                            position = 20;
-                            break;
-                        case 50:
-                        case 51:
-                        case 52:
-                            position = 21;
-                            break;
-                        case 53:
-                        case 54:
-                            position = 22;
-                            break;
-                        case 55:
-                        case 56:
-                        case 57:
-                            position = 23;
-                            break;
-                        case 58:
-                        case 59:
-                            position = 24;
-                            break;
-                        case 60:
-                        case 61:
-                            position = 25;
-                            break;
-                        case 62:
-                        case 63:
-                            position = 26;
-                            break;
-                        case 64:
-                        case 65:
-                        case 66:
-                            position = 27;
-                            break;
-                        case 67:
-                        case 68:
-                            position = 28;
-                            break;
-                        case 69:
-                        case 70:
-                        case 71:
-                            position = 29;
-                            break;
-                        case 72:
-                        case 73:
-                            position = 30;
-                            break;
-                        case 74:
-                        case 75:
-                            position = 31;
-                            break;
-                        case 76:
-                        case 77:
-                            position = 32;
-                            break;
-                        case 78:
-                            position = 33;
-                            break;
-                        case 79:
-                        case 80:
-                            position = 34;
-                            break;
-                        case 81:
-                        case 82:
-                        case 83:
-                            position = 35;
-                            break;
-                        case 84:
-                        case 85:
-                        case 86:
-                            position = 36;
-                            break;
-                        case 87:
-                        case 88:
-                            position = 37;
-                            break;
-                        case 89:
-                        case 90:
-                            position = 38;
-                            break;
-                        case 91:
-                        case 92:
-                            position = 39;
-                            break;
-                        case 93:
-                        case 94:
-                            position = 40;
-                            break;
-                        case 95:
-                            position = 41;
-                            break;
-                        case 96:
-                            position = 42;
-                            break;
-                        case 97:
-                            position = 43;
-                            break;
-                        case 98:
-                            position = 44;
-                            break;
-                        case 99:
-                            position = 45;
-                            break;
-                        case 100:
-                            position = 46;
-                            break;
-                        default:
-                            log("wut?");
-                    }
-                    break;
-                case "B":
-                    switch (randomInteger(100)) {
-                        case 1:
-                        case 2:
-                            position = 1;
-                            break;
-                        case 3:
-                            position = 2;
-                            break;
-                        case 4:
-                        case 5:
-                            position = 3;
-                            break;
-                        case 6:
-                        case 7:
-                            position = 4;
-                            break;
-                        case 8:
-                        case 9:
-                            position = 5;
-                            break;
-                        case 10:
-                            position = 6;
-                            break;
-                        case 11:
-                            position = 7;
-                            break;
-                        case 12:
-                        case 13:
-                        case 14:
-                        case 15:
-                            position = 8;
-                            break;
-                        case 16:
-                        case 17:
-                            position = 9;
-                            break;
-                        case 18:
-                        case 19:
-                            position = 10;
-                            break;
-                        case 20:
-                        case 21:
-                            position = 11;
-                            break;
-                        case 22:
-                        case 23:
-                            position = 12;
-                            break;
-                        case 24:
-                        case 25:
-                        case 26:
-                        case 27:
-                            position = 13;
-                            break;
-                        case 28:
-                        case 29:
-                        case 30:
-                        case 31:
-                            position = 14;
-                            break;
-                        case 32:
-                        case 33:
-                            position = 15;
-                            break;
-                        case 34:                        
-                        case 35:
-                            position = 16;
-                            break;
-                        case 36:
-                        case 37:
-                            position = 17;
-                            break;
-                        case 38:                            
-                        case 39:
-                            position = 18;
-                            break;
-                        case 40:
-                        case 41:                            
-                        case 42:
-                        case 43:
-                            position = 19;
-                            break;
-                        case 44:
-                            position = 20;
-                            break;
-                        case 45:
-                        case 46:
-                            position = 21;
-                            break;
-                        case 47:                            
-                        case 48:
-                            position = 22;
-                            break;
-                        case 49:                            
-                        case 50:
-                            position = 23;
-                            break;
-                        case 51:
-                        case 52:
-                            position = 24;
-                            break;
-                        case 53:
-                            position = 25;
-                            break;
-                        case 54:
-                        case 55:
-                        case 56:
-                        case 57:
-                            position = 26;
-                            break;
-                        case 58:
-                        case 59:
-                            position = 27;
-                            break;
-                        case 60:
-                        case 61:
-                            position = 28;
-                            break;
-                        case 62:
-                        case 63:
-                            position = 29;
-                            break;
-                        case 64:
-                        case 65:
-                            position = 30;
-                            break;
-                        case 66:
-                        case 67:
-                        case 68:
-                        case 69:
-                            position = 31;
-                            break;
-                        case 70:
-                        case 71:
-                        case 72:
-                            position = 32;
-                            break;
-                        case 73:
-                            position = 33;
-                            break;
-                        case 74:
-                        case 75:
-                        case 76:
-                            position = 34;
-                            break;
-                        case 77:
-                        case 78:
-                        case 79:
-                        case 80:
-                            position = 35;
-                            break;
-                        case 81:
-                        case 82:
-                        case 83:
-                        case 84:
-                            position = 36;
-                            break;
-                        case 85:
-                        case 86:
-                        case 87:
-                            position = 37;
-                            break;
-                        case 88:
-                        case 89:
-                        case 90:
-                            position = 38;
-                            break;
-                        case 91:
-                        case 92:
-                            position = 39;
-                            break;
-                        case 93:
-                        case 94:
-                            position = 40;
-                            break;
-                        case 95:
-                            position = 41;
-                            break;
-                        case 96:
-                            position = 42;
-                            break;
-                        case 97:
-                            position = 43;
-                            break;
-                        case 98:
-                            position = 44;
-                            break;
-                        case 99:
-                            position = 45;
-                            break;
-                        case 100:
-                            position = 46;
-                            break;
-                        default:
-                            log("wut?");
-                    }
-                    break;
-                case "C":
-                    switch (randomInteger(100)) {
-                        case 1:
-                        case 2:
-                            position = 1;
-                            break;
-                        case 3:
-                            position = 2;
-                            break;
-                        case 4:
-                        case 5:
-                            position = 3;
-                            break;
-                        case 6:
-                        case 7:
-                            position = 4;
-                            break;
-                        case 8:
-                        case 9:
-                            position = 5;
-                            break;
-                        case 10:
-                            position = 6;
-                            break;
-                        case 11:
-                            position = 7;
-                            break;
-                        case 12:
-                        case 13:
-                        case 14:
-                        case 15:
-                        case 16:
-                            position = 8;
-                            break;
-                        case 17:
-                        case 18:
-                        case 19:
-                        case 20:
-                            position = 9;
-                            break;
-                        case 21:
-                        case 22:
-                        case 23:
-                            position = 10;
-                            break;
-                        case 24:
-                        case 25:
-                            position = 11;
-                            break;
-                        case 26:
-                        case 27:
-                        case 28:
-                        case 29:
-                            position = 12;
-                            break;
-                        case 30:
-                        case 31:
-                        case 32:
-                            position = 13;
-                            break;
-                        case 33:
-                        case 34:
-                        case 35:
-                        case 36:
-                        case 37:
-                            position = 14;
-                            break;
-                        case 38:
-                        case 39:
-                            position = 15;
-                            break;
-                        case 40:
-                            position = 16;
-                            break;
-                        case 41:
-                            position = 17;
-                            break;
-                        case 42:
-                        case 43:
-                            position = 18;
-                            break;
-                        case 44:
-                            position = 19;
-                            break;
-                        case 45:
-                        case 46:
-                            position = 20;
-                            break;
-                        case 47:
-                        case 48:
-                        case 49:
-                        case 50:
-                        case 51:
-                            position = 21;
-                            break;
-                        case 52:
-                            position = 22;
-                            break;
-                        case 53:
-                        case 54:
-                            position = 23;
-                            break;
-                        case 55:
-                        case 56:
-                        case 57:
-                            position = 24;
-                            break;
-                        case 58:
-                            position = 25;
-                            break;
-                        case 59:
-                        case 60:
-                        case 61:
-                        case 62:
-                        case 63:
-                            position = 26;
-                            break;
-                        case 64:
-                        case 65:
-                        case 66:
-                        case 67:
-                        case 68:
-                            position = 27;
-                            break;
-                        case 69:
-                            position = 28;
-                            break;
-                        case 70:
-                            position = 29;
-                            break;
-                        case 71:
-                        case 72:
-                        case 73:
-                        case 74:
-                            position = 30;
-                            break;
-                        case 75:
-                            position = 31;
-                            break;
-                        case 76:
-                        case 77:
-                        case 78:
-                        case 79:
-                            position = 32;
-                            break;
-                        case 80:
-                            position = 33;
-                            break;
-                        case 81:
-                            position = 34;
-                            break;
-                        case 82:
-                        case 83:
-                        case 84:
-                        case 85:
-                            position = 35;
-                            break;
-                        case 86:
-                            position = 36;
-                            break;
-                        case 87:
-                        case 88:
-                        case 89:
-                        case 90:                            
-                            position = 37;
-                            break;
-                        case 91:
-                            position = 38;
-                            break;
-                        case 92:
-                        case 93:
-                            position = 39;
-                            break;
-                        case 94:
-                            position = 40;
-                            break;
-                        case 95:
-                            position = 41;
-                            break;
-                        case 96:
-                            position = 42;
-                            break;
-                        case 97:
-                            position = 43;
-                            break;
-                        case 98:
-                            position = 44;
-                            break;
-                        case 99:
-                            position = 45;
-                            break;
-                        case 100:
-                            position = 46;
-                            break;
-                        default:
-                            log("wut?");
-                    }
-                    break;
-            }
-            break;
+        
         case "head":
             positionArray = [1, 2, 3, 4, 5, 6, 7];
             position = positionArray[MML.rollDice(1, 7) - 1];

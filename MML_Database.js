@@ -1,5 +1,3 @@
-var MML = MML || {};
-
 MML.skills = {};
 MML.skills["Acrobatics"] = {attribute: "coordination"};
 MML.skills["Acting"] = {attribute: "presence"};

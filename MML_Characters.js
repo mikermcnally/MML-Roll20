@@ -1,963 +1,913 @@
 // Character Creation
 MML.characterConstructor = function characterConstructor(charName){
-    //Functions aren't saved in state variable between sessions. In the name of good form dependents and compute should stored outside the character object.
-    //This has the advantage of simplifiying attribute value references and making them consistent with the player and GM class.
-    //
-    //all attributes should have the following forms:
-    //
-    //this.attribute = getCurrentAttribute;
-    //
-    //MML.computeAttribute.attribute = { depedents: [], compute: function(){} };
-
     // Basic Info 
-    this.name = {
-        value: charName,
-        dependents: [],
-        compute: function(){
-            return this.name.value;
-        }};
-    this.player = {
-        value: MML.getCurrentAttribute(this.name.value, "player"),
-        dependents: [],
-        compute: function(){
-            return this.player.value;
-        }};
-    this.race = { 
-        value: MML.getCurrentAttribute(this.name.value, "race"), 
-        dependents: ["stature",
-                    "strength",
-                    "coordination",
-                    "health",
-                    "beauty",
-                    "intellect",
-                    "reason",
-                    "creativity",
-                    "presence",
-                    "willpower",
-                    "evocation",
-                    "perception",
-                    "systemStrength",
-                    "fitness",
-                    "load",
-                    "bodyType"],
-        compute: function(){
-            return MML.getCurrentAttribute(this.name.value, "race");
-        }};
-    this.bodyType = {
-        value: MML.getCurrentAttribute(this.name.value, "bodyType"),
-        dependents: ["hitTable"],
-        compute: function() {
-            return MML.bodyTypes[this.race.value];   
-        }};
-    this.gender = { 
-        value: MML.getCurrentAttribute(this.name.value, "gender"), 
-        dependents: ["stature"], //"magic bonus for females"],
-        compute: function(){
-            return MML.getCurrentAttribute(this.name.value, "gender");
-        } };
-    this.height = { 
-        value: MML.getCurrentAttribute(this.name.value, "height"), 
-        dependents: [], 
-        compute: function(){
-            return MML.statureTables[this.race.value][this.gender.value][MML.getCurrentAttributeAsFloat(this.name.value, "statureRoll")].height;
-        }};
-    this.weight = { 
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "weight"), 
-        dependents: [], 
-        compute: function(){
-            return MML.statureTables[this.race.value][this.gender.value][MML.getCurrentAttributeAsFloat(this.name.value, "statureRoll")].weight;
-        } };
-    this.handedness = { 
-        value: MML.getCurrentAttribute(this.name.value, "handedness"), 
-        dependents: [], // "meleeAttackMod"
-        compute: function(){
-            return MML.getCurrentAttributeAsFloat(this.name.value, "handedness");
-        }};
-    
-    //Primary Attributes
-    this.stature = { 
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "stature"), 
-        dependents: ["load",
-                    "headHPMax",
-                    "chestHPMax",
-                    "abdomenHPMax",
-                    "leftArmHPMax",
-                    "rightArmHPMax",
-                    "leftLegHPMax",
-                    "rightLegHPMax",
-                    "multiWoundMax",
-                    "knockdownMax",
-                    "height",
-                    "weight"], 
-        compute: function(){
-            return MML.statureTables[this.race.value][this.gender.value][MML.getCurrentAttributeAsFloat(this.name.value, "statureRoll")].stature;
-        } };
-    this.strength = { 
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "strength"), 
-        dependents: ["fitness",
-                    "chestHPMax",
-                    "attributeDefenseMod",
-                    "attributeMeleeAttackMod",
-                    "attributeMissileAttackMod",
-                    "attributeInitBonus"],
-        compute: function(){
-            return MML.getCurrentAttributeAsFloat(this.name.value, "strengthRoll") + MML.racialAttributeBonuses[this.race.value].strength;
-        } };
-    this.coordination = { 
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "coordination"), 
-        dependents: ["attributeMeleeAttackMod",
-                    "attributeMissileAttackMod",
-                    "attributeDefenseMod",
-                    "attributeInitBonus"], //skill mods
-        compute: function(){
-            return MML.getCurrentAttributeAsFloat(this.name.value, "coordinationRoll") + MML.racialAttributeBonuses[this.race.value].coordination;
-        } };
-    this.health = { 
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "health"), 
-        dependents: ["willpower",
-                    "evocation",
-                    "systemStrength",
-                    "fitness",
-                    "headHPMax",
-                    "chestHPMax",
-                    "abdomenHPMax",
-                    "leftArmHPMax",
-                    "rightArmHPMax",
-                    "leftLegHPMax",
-                    "rightLegHPMax",
-                    "multiWoundMax",
-                    "hpRecovery",
-                    "epRecovery"
-                    ], 
-        compute: function(){
-            return MML.getCurrentAttributeAsFloat(this.name.value, "healthRoll") + MML.racialAttributeBonuses[this.race.value].health;
-        } };
-    this.beauty = { 
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "beauty"), 
-        dependents: [], //skill mods
-        compute: function(){
-            return MML.getCurrentAttributeAsFloat(this.name.value, "beautyRoll") + MML.racialAttributeBonuses[this.race.value].beauty;
-        } };
-    this.intellect = { 
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "intellect"), 
-        dependents: ["perception",
-                    "evocation",
-                    "spellLearningMod"], //spell learning/skill mods
-        compute: function(){
-            return MML.getCurrentAttributeAsFloat(this.name.value, "intellectRoll") + MML.racialAttributeBonuses[this.race.value].intellect;
-        } };
-    this.reason = { 
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "reason"), 
-        dependents: ["perception",
-                    "evocation",
-                    "castingMod",
-                    "attributeInitBonus"], //skill mods
-        compute: function(){
-            return MML.getCurrentAttributeAsFloat(this.name.value, "reasonRoll") + MML.racialAttributeBonuses[this.race.value].reason;
-        } };
-    this.creativity = { 
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "creativity"), 
-        dependents: ["perception",
-                    "evocation"], //skill mods
-        compute: function(){
-            return MML.getCurrentAttributeAsFloat(this.name.value, "creativityRoll") + MML.racialAttributeBonuses[this.race.value].creativity;
-        } };
-    this.presence = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "presence"),
-        dependents: ["willpower",
-                    "systemStrength"],
-        compute: function(){
-            return MML.getCurrentAttributeAsFloat(this.name.value, "presenceRoll") + MML.racialAttributeBonuses[this.race.value].presence;
-        } };
+    this.name = charName;
+    this.player = MML.getCurrentAttribute(this.name, "player");
+    this.race = MML.getCurrentAttribute(this.name, "race");
+    this.bodyType = MML.getCurrentAttribute(this.name, "bodyType");
+    this.gender = MML.getCurrentAttribute(this.name, "gender");
+    this.height = MML.getCurrentAttribute(this.name, "height");
+    this.weight = MML.getCurrentAttributeAsFloat(this.name, "weight");
+    this.handedness = MML.getCurrentAttribute(this.name, "handedness");
+    this.stature = MML.getCurrentAttributeAsFloat(this.name, "stature");
+    this.strength = MML.getCurrentAttributeAsFloat(this.name, "strength");
+    this.coordination = MML.getCurrentAttributeAsFloat(this.name, "coordination");
+    this.health = MML.getCurrentAttributeAsFloat(this.name, "health");
+    this.beauty = MML.getCurrentAttributeAsFloat(this.name, "beauty");
+    this.intellect = MML.getCurrentAttributeAsFloat(this.name, "intellect");
+    this.reason = MML.getCurrentAttributeAsFloat(this.name, "reason");
+    this.creativity = MML.getCurrentAttributeAsFloat(this.name, "creativity");
+    this.presence = MML.getCurrentAttributeAsFloat(this.name, "presence");
+    this.willpower = MML.getCurrentAttributeAsFloat(this.name, "willpower");
+    this.evocation = MML.getCurrentAttributeAsFloat(this.name, "evocation");
+    this.perception = MML.getCurrentAttributeAsFloat(this.name, "perception");
+    this.systemStrength = MML.getCurrentAttributeAsFloat(this.name, "systemStrength");
+    this.fitness = MML.getCurrentAttributeAsFloat(this.name, "fitness");
+    this.fitnessMod = MML.getCurrentAttributeAsFloat(this.name, "fitnessMod");
+    this.load = MML.getCurrentAttributeAsFloat(this.name, "load");
+    this.overhead = MML.getCurrentAttributeAsFloat(this.name, "overhead");
+    this.deadLift = MML.getCurrentAttributeAsFloat(this.name, "deadLift");
+    this.multiWoundMax = MML.getCurrentAttributeAsFloat(this.name, "multiWoundMax");
+    this.multiWound = MML.getCurrentAttributeAsFloat(this.name, "multiWound");
+    this.headHPMax = MML.getCurrentAttributeAsFloat(this.name, "headHPMax");
+    this.headHP = MML.getCurrentAttributeAsFloat(this.name, "headHP");
+    this.chestHPMax = MML.getCurrentAttributeAsFloat(this.name, "chestHPMax");
+    this.chestHP = MML.getCurrentAttributeAsFloat(this.name, "chestHP");
+    this.abdomenHPMax = MML.getCurrentAttributeAsFloat(this.name, "abdomenHPMax");
+    this.abdomenHP = MML.getCurrentAttributeAsFloat(this.name, "abdomenHP");
+    this.leftArmHPMax = MML.getCurrentAttributeAsFloat(this.name, "leftArmHPMax");
+    this.leftArmHP = MML.getCurrentAttributeAsFloat(this.name, "leftArmHP");
+    this.rightArmHPMax = MML.getCurrentAttributeAsFloat(this.name, "rightArmHPMax");
+    this.rightArmHP = MML.getCurrentAttributeAsFloat(this.name, "rightArmHP");
+    this.leftLegHPMax = MML.getCurrentAttributeAsFloat(this.name, "leftLegHPMax");
+    this.leftLegHP = MML.getCurrentAttributeAsFloat(this.name, "leftLegHP");
+    this.rightLegHPMax = MML.getCurrentAttributeAsFloat(this.name, "rightLegHPMax");
+    this.rightLegHP = MML.getCurrentAttributeAsFloat(this.name, "rightLegHP");
+    this.epMax = MML.getCurrentAttributeAsFloat(this.name, "epMax");
+    this.ep = MML.getCurrentAttributeAsFloat(this.name, "ep");
+    this.fatigueMax = MML.getCurrentAttributeAsFloat(this.name, "fatigueMax");
+    this.fatigue = MML.getCurrentAttributeAsFloat(this.name, "fatigue");
+    this.hpRecovery = MML.getCurrentAttributeAsFloat(this.name, "hpRecovery");
+    this.epRecovery = MML.getCurrentAttributeAsFloat(this.name, "epRecovery");
+    this.inventory = MML.getCurrentAttributeJSON(this.name, "inventory");
+    this.totalWeightCarried = MML.getCurrentAttributeAsFloat(this.name, "totalWeightCarried");
+    this.knockdownMax = MML.getCurrentAttributeAsFloat(this.name, "knockdownMax");
+    this.knockdown = MML.getCurrentAttributeAsFloat(this.name, "knockdown");
+    this.apv = MML.getCurrentAttributeJSON(this.name, "apv");
+    this.leftHand = MML.getCurrentAttributeJSON(this.name, "leftHand");
+    this.rightHand = MML.getCurrentAttributeJSON(this.name, "rightHand");
+    this.hitTable = MML.getCurrentAttribute(this.name, "hitTable");
+    this.movementRatio = MML.getCurrentAttributeAsFloat(this.name, "movementRatio");
+    this.movementAvailable = MML.getCurrentAttributeAsFloat(this.name, "movementAvailable");
+    this.movementPosition = MML.getCurrentAttribute(this.name, "movementPosition");
+    this.situationalMod = MML.getCurrentAttributeAsFloat(this.name, "situationalMod");
+    this.attributeDefenseMod = MML.getCurrentAttributeAsFloat(this.name, "attributeDefenseMod");
+    this.meleeDefenseMod = MML.getCurrentAttributeAsFloat(this.name, "meleeDefenseMod");
+    this.missileDefenseMod = MML.getCurrentAttributeAsFloat(this.name, "missileDefenseMod");
+    this.meleeAttackMod = MML.getCurrentAttributeAsFloat(this.name, "meleeAttackMod");
+    this.missileAttackMod = MML.getCurrentAttributeAsFloat(this.name, "missileAttackMod");
+    this.attributeMeleeAttackMod = MML.getCurrentAttributeAsFloat(this.name, "attributeMeleeAttackMod");
+    this.meleeDamageMod = MML.getCurrentAttributeAsFloat(this.name, "meleeDamageMod");
+    this.attributeMissileAttackMod = MML.getCurrentAttributeAsFloat(this.name, "attributeMissileAttackMod");
+    this.castingMod = MML.getCurrentAttributeAsFloat(this.name, "castingMod");
+    this.spellLearningMod = MML.getCurrentAttributeAsFloat(this.name, "spellLearningMod");
+    this.statureCheckMod = MML.getCurrentAttributeAsFloat(this.name, "statureCheckMod");
+    this.strengthCheckMod = MML.getCurrentAttributeAsFloat(this.name, "strengthCheckMod");
+    this.coordinationCheckMod = MML.getCurrentAttributeAsFloat(this.name, "coordinationCheckMod");
+    this.healthCheckMod = MML.getCurrentAttributeAsFloat(this.name, "healthCheckMod");
+    this.beautyCheckMod = MML.getCurrentAttributeAsFloat(this.name, "beautyCheckMod");
+    this.intellectCheckMod = MML.getCurrentAttributeAsFloat(this.name, "intellectCheckMod");
+    this.reasonCheckMod = MML.getCurrentAttributeAsFloat(this.name, "reasonCheckMod");
+    this.creativityCheckMod = MML.getCurrentAttributeAsFloat(this.name, "creativityCheckMod");
+    this.presenceCheckMod = MML.getCurrentAttributeAsFloat(this.name, "presenceCheckMod");
+    this.willpowerCheckMod = MML.getCurrentAttributeAsFloat(this.name, "willpowerCheckMod");
+    this.evocationCheckMod = MML.getCurrentAttributeAsFloat(this.name, "evocationCheckMod");
+    this.perceptionCheckMod = MML.getCurrentAttributeAsFloat(this.name, "perceptionCheckMod");
+    this.systemStrengthCheckMod = MML.getCurrentAttributeAsFloat(this.name, "systemStrengthCheckMod");
+    this.fitnessCheckMod = MML.getCurrentAttributeAsFloat(this.name, "fitnessCheckMod");
+    this.statusEffects = MML.getCurrentAttributeJSON(this.name, "statusEffects");
+    this.initiative = MML.getCurrentAttributeAsFloat(this.name, "initiative");
+    this.initiativeRoll = MML.getCurrentAttributeAsFloat(this.name, "initiativeRoll");
+    this.situationalInitBonus = MML.getCurrentAttributeAsFloat(this.name, "situationalInitBonus");
+    this.movementRatioInitBonus = MML.getCurrentAttributeAsFloat(this.name, "movementRatioInitBonus");
+    this.attributeInitBonus = MML.getCurrentAttributeAsFloat(this.name, "attributeInitBonus");
+    this.senseInitBonus = MML.getCurrentAttributeAsFloat(this.name, "senseInitBonus");
+    this.fomInitBonus = MML.getCurrentAttributeAsFloat(this.name, "fomInitBonus");
+    this.firstActionInitBonus = MML.getCurrentAttributeAsFloat(this.name, "firstActionInitBonus");
+    this.spentInitiative = MML.getCurrentAttributeAsFloat(this.name, "spentInitiative");
+    this.actionTempo = MML.getCurrentAttributeAsFloat(this.name, "actionTempo");
+    this.ready = MML.getCurrentAttribute(this.name, "ready");
+    this.action = MML.getCurrentAttributeJSON(this.name, "action");   
+    this.defensesThisRound = MML.getCurrentAttributeAsFloat(this.name, "defensesThisRound");
+    this.dodgedThisRound = MML.getCurrentAttributeAsBool(this.name, "dodgedThisRound");
+    this.meleeThisRound = MML.getCurrentAttributeAsBool(this.name, "meleeThisRound");
+    this.fatigueLevel = MML.getCurrentAttributeAsFloat(this.name, "fatigueLevel");
+    this.roundsRest = MML.getCurrentAttributeAsFloat(this.name, "roundsRest");
+    this.roundsExertion = MML.getCurrentAttributeAsFloat(this.name, "roundsExertion");
+    this.damagedThisRound = MML.getCurrentAttributeAsBool(this.name, "damagedThisRound");
+    this.skills = MML.getSkillAttributes(this.name, "skills");
+    this.weaponSkills = MML.getSkillAttributes(this.name, "weaponskills");
+};
 
-    // Secondary Attributes
-    this.willpower = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "willpower"),
-        dependents: ["evocation",
-                    "multiWound"],
-        compute: function(){
-            return Math.round((2*this.presence.value + this.health.value)/3);
-        } };
-    this.evocation = { 
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "evocation"), 
-        dependents: ["epMax"], //skill mods
-        compute: function(){
-            return this.intellect.value + 
-                    this.reason.value + 
-                    this.creativity.value + 
-                    this.health.value + 
-                    this.willpower.value + 
-                    MML.racialAttributeBonuses[this.race.value].evocation;
-        } };
-    this.perception = { 
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "perception"), 
-        dependents: ["missileAttackMod",
-                    "attributeInitBonus"],
-        compute: function(){
-            return Math.round((this.intellect.value + this.reason.value + this.creativity.value)/3) + MML.racialAttributeBonuses[this.race.value].perception;
-        } };
-    this.systemStrength = { 
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "systemStrength"), 
-        dependents: [], 
-        compute: function(){
-            return Math.round((this.presence.value + 2*this.health.value)/3);
-        } };
-    this.fitness = { 
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "fitness"), 
-        dependents: ["fitnessMod", "fatigueMax"], //skill mods
-        compute: function(){
-            return Math.round((this.health.value + this.strength.value)/2) + MML.racialAttributeBonuses[this.race.value].fitness;
-        }};
-    this.fitnessMod = { 
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "fitnessMod"), 
-        dependents: ["load"], //skill mods
-        compute: function(){
-            return MML.fitnessModLookup[this.fitness.value];
-        }};
-    this.load = { 
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "load"), 
-        dependents: ["overhead",
-                    "deadLift",
-                    "meleeDamageMod",
-                    "movementRatio"],
-        compute: function(){
-            return Math.round(this.stature.value * this.fitnessMod.value) + MML.racialAttributeBonuses[this.race.value].load;
-        }};
-    this.overhead = { 
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "overhead"), 
-        dependents: [], 
-        compute: function(){
-            return this.load.value*2;
-        }};
-    this.deadLift = { 
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "deadLift"), 
-        dependents: [], 
-        compute: function(){
-            return this.load.value*4;
-        }};
-    
-    // HP stuff
-    this.multiWoundMax = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "multiWoundMax"),
-        dependents: ["multiWound"],
-        compute: function(){
-            var multiWoundMax = Math.round((this.health.value + this.stature.value + this.willpower.value)/2);
-            this.multiWound.value = multiWoundMax;
-            return multiWoundMax;
-        }};
-    this.multiWound = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "multiWound"),
-        dependents: [],
-        compute: function(){
-            return this.multiWound.value;
-        }};
-    this.headHPMax = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "headHPMax"),
-        dependents: ["headHP"],
-        compute: function(){
-            var headHPMax = MML.HPTables[this.race.value][Math.round(this.health.value + this.stature.value/3)];
-            this.headHP.value = headHPMax;
-            return headHPMax;
-        }};
-    this.headHP = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "headHP"),
-        dependents: [],
-        compute: function(){
-            return this.headHP.value;
-        }};
-    this.chestHPMax = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "chestHPMax"),
-        dependents: ["chestHP"],
-        compute: function(){
-            var chestHPMax = MML.HPTables[this.race.value][Math.round((this.health.value + this.stature.value + this.strength.value)/2)];
-            this.chestHP.value = chestHPMax;
-            return chestHPMax;
-        }};
-    this.chestHP = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "chestHP"),
-        dependents: [],
-        compute: function(){
-            return this.chestHP.value;
-        }};
-    this.abdomenHPMax = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "abdomenHPMax"),
-        dependents: ["abdomenHP"],
-        compute: function(){
-            var abdomenHPMax = MML.HPTables[this.race.value][Math.round(this.health.value + this.stature.value)];
-            this.abdomenHP.value = abdomenHPMax;
-            return abdomenHPMax;
-        }};
-    this.abdomenHP = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "abdomenHP"),
-        dependents: [],
-        compute: function(){
-            return this.abdomenHP.value;
-        }};
-    this.leftArmHPMax = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "leftArmHPMax"),
-        dependents: ["leftArmHP"],
-        compute: function(){
-            var leftArmHPMax = MML.HPTables[this.race.value][Math.round(this.health.value + this.stature.value)];
-            this.leftArmHP.value = leftArmHPMax;
-            return leftArmHPMax;
-        }};
-    this.leftArmHP = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "leftArmHP"),
-        dependents: [],
-        compute: function(){
-            return this.leftArmHP.value;
-        }};
-    this.rightArmHPMax = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "rightArmHPMax"),
-        dependents: ["rightArmHP"],
-        compute: function(){
-            var rightArmHPMax = MML.HPTables[this.race.value][Math.round(this.health.value + this.stature.value)];
-            this.rightArmHP.value = rightArmHPMax;
-            return rightArmHPMax;
-        }};
-    this.rightArmHP = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "rightArmHP"),
-        dependents: [],
-        compute: function(){
-            return this.rightArmHP.value;
-        }};
-    this.leftLegHPMax = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "leftLegHPMax"),
-        dependents: ["leftLegHP"],
-        compute: function(){
-            var leftLegHPMax = MML.HPTables[this.race.value][Math.round(this.health.value + this.stature.value)];
-            this.leftLegHP.value = leftLegHPMax;
-            return leftLegHPMax;
-        }};
-    this.leftLegHP = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "leftLegHP"),
-        dependents: [],
-        compute: function(){
-            return this.leftLegHP.value;
-        }};
-    this.rightLegHPMax = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "rightLegHPMax"),
-        dependents: ["rightLegHP"],
-        compute: function(){
-            var rightLegHPMax = MML.HPTables[this.race.value][Math.round(this.health.value + this.stature.value)];
-            this.rightLegHP.value = rightLegHPMax;
-            return rightLegHPMax;
-        }};
-    this.rightLegHP = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "rightLegHP"),
-        dependents: [],
-        compute: function(){
-            return this.rightLegHP.value;
-        }};
-    this.epMax = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "epMax"),
-        dependents: ["ep"],
-        compute: function(){
-            var epMax = this.evocation.value;
-            this.ep.value = epMax;
-            return epMax;
-        }};
-    this.ep = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "ep"),
-        dependents: [],
-        compute: function(){
-            return this.ep.value;
-        }};
-    this.fatigueMax = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "fatigueMax"),
-        dependents: ["fatigue"],
-        compute: function(){
-            var fatigueMax = this.fitness.value;
-            this.fatigue.value = fatigueMax;
-            return fatigueMax;
-        }};
-    this.fatigue = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "fatigue"),
-        dependents: [],
-        compute: function(){
-            return this.fatigue.value;
-        }};
-    this.hpRecovery = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "hpRecovery"),
-        dependents: [],
-        compute: function(){
-            return MML.recoveryMods[this.health.value].hp;
-        }};
-    this.epRecovery = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "epRecovery"),
-        dependents: [],
-        compute: function(){
-            return MML.recoveryMods[this.health.value].ep;
-        }};
+MML.updateCharacter = function(input){
+    var attributeArray = [input.attribute];
 
-    // Inventory stuff    
-    this.inventory = {
-        value: MML.getCurrentAttributeJSON(this.name.value, "inventory"),
-        dependents: ["totalWeightCarried",
-                     "apv",
-                     "leftHand",
-                     "rightHand",
-                     "senseInitBonus"],
-        compute: function(){
-            var items = this.inventory.value;
+    for(var i = 0; i < attributeArray.length; i++){ //length of array is dynamic, for-in doesn't work here
+        var localAttribute = MML.computeAttribute[attributeArray[i]];
+        attributeArray = _.union(attributeArray, localAttribute.dependents);    
+    }
+    // log(attributeArray);
+    _.each(
+        attributeArray,
+        function(attribute) {
+            var value = MML.computeAttribute[attribute].compute.apply(this, []); // Run compute function from character scope
+            // log(attribute + " " + value);
+            this[attribute] = value;
+            if(typeof(value) === "object"){
+                value = JSON.stringify(value);
+            }     
+            MML.setCurrentAttribute(this.name, attribute, value);
+        },
+        this
+    );};
 
-            _.each(
-                items,
-                function(item, _id) {
-                    MML.setCurrentAttribute(this.name.value, "repeating_items_" + _id + "_itemName", item.name);
-                    MML.setCurrentAttribute(this.name.value, "repeating_items_" + _id + "_itemId", _id);
-                },
-                this
-            );
-            return items;
-        }};
-    this.totalWeightCarried = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "totalWeightCarried"),
-        dependents: ["knockdownMax", "movementRatio"],
-        compute: function(){
-            var totalWeightCarried = 0;
+MML.setApiCharAttribute = function(input){
+    this[input.attribute] = input.value;
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "updateCharacter",
+        input: input
+    });
+};
 
-            _.each(this.inventory.value, function(item) {
-                totalWeightCarried += item.weight;
+MML.setApiCharAttributeJSON = function(input){
+    this[input.attribute][input.index] = input.value;
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "updateCharacter",
+        input: input
+    });
+};
+
+MML.computeAttribute = {};
+MML.computeAttribute.name = {
+    dependents: [],
+    compute: function(){
+        return this.name;
+    }
+};
+
+MML.computeAttribute.player = { 
+    dependents: [],
+    compute: function(){
+        return this.player;
+    }
+};
+
+MML.computeAttribute.race = {
+    dependents: ["stature",
+                "strength",
+                "coordination",
+                "health",
+                "beauty",
+                "intellect",
+                "reason",
+                "creativity",
+                "presence",
+                "willpower",
+                "evocation",
+                "perception",
+                "systemStrength",
+                "fitness",
+                "load",
+                "bodyType"],
+    compute: function(){
+        return MML.getCurrentAttribute(this.name, "race");
+    }
+};
+
+MML.computeAttribute.bodyType = { 
+    dependents: ["hitTable"],
+    compute: function() {
+        return MML.bodyTypes[this.race];   
+    }
+};
+
+MML.computeAttribute.gender = { dependents: ["stature"], //"magic bonus for females"],
+    compute: function(){
+        return MML.getCurrentAttribute(this.name, "gender");
+    } };
+MML.computeAttribute.height = { dependents: [], 
+    compute: function(){
+        return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, "statureRoll")].height;
+    }};
+MML.computeAttribute.weight = { dependents: [], 
+    compute: function(){
+        return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, "statureRoll")].weight;
+    } };
+MML.computeAttribute.handedness = { dependents: [], // "meleeAttackMod"
+    compute: function(){
+        return MML.getCurrentAttributeAsFloat(this.name, "handedness");
+    }};
+
+//Primary Attributes
+MML.computeAttribute.stature = { dependents: ["load",
+                "headHPMax",
+                "chestHPMax",
+                "abdomenHPMax",
+                "leftArmHPMax",
+                "rightArmHPMax",
+                "leftLegHPMax",
+                "rightLegHPMax",
+                "multiWoundMax",
+                "knockdownMax",
+                "height",
+                "weight"], 
+    compute: function(){
+        return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, "statureRoll")].stature;
+    } };
+MML.computeAttribute.strength = { dependents: ["fitness",
+                "chestHPMax",
+                "attributeDefenseMod",
+                "attributeMeleeAttackMod",
+                "attributeMissileAttackMod",
+                "attributeInitBonus"],
+    compute: function(){
+        return MML.getCurrentAttributeAsFloat(this.name, "strengthRoll") + MML.racialAttributeBonuses[this.race].strength;
+    } };
+MML.computeAttribute.coordination = { dependents: ["attributeMeleeAttackMod",
+                "attributeMissileAttackMod",
+                "attributeDefenseMod",
+                "attributeInitBonus"], //skill mods
+    compute: function(){
+        return MML.getCurrentAttributeAsFloat(this.name, "coordinationRoll") + MML.racialAttributeBonuses[this.race].coordination;
+    } };
+MML.computeAttribute.health = { dependents: ["willpower",
+                "evocation",
+                "systemStrength",
+                "fitness",
+                "headHPMax",
+                "chestHPMax",
+                "abdomenHPMax",
+                "leftArmHPMax",
+                "rightArmHPMax",
+                "leftLegHPMax",
+                "rightLegHPMax",
+                "multiWoundMax",
+                "hpRecovery",
+                "epRecovery"
+                ], 
+    compute: function(){
+        return MML.getCurrentAttributeAsFloat(this.name, "healthRoll") + MML.racialAttributeBonuses[this.race].health;
+    } };
+MML.computeAttribute.beauty = { dependents: [], //skill mods
+    compute: function(){
+        return MML.getCurrentAttributeAsFloat(this.name, "beautyRoll") + MML.racialAttributeBonuses[this.race].beauty;
+    } };
+MML.computeAttribute.intellect = { dependents: ["perception",
+                "evocation",
+                "spellLearningMod"], //spell learning/skill mods
+    compute: function(){
+        return MML.getCurrentAttributeAsFloat(this.name, "intellectRoll") + MML.racialAttributeBonuses[this.race].intellect;
+    } };
+MML.computeAttribute.reason = { dependents: ["perception",
+                "evocation",
+                "castingMod",
+                "attributeInitBonus"], //skill mods
+    compute: function(){
+        return MML.getCurrentAttributeAsFloat(this.name, "reasonRoll") + MML.racialAttributeBonuses[this.race].reason;
+    } };
+MML.computeAttribute.creativity = { dependents: ["perception",
+                "evocation"], //skill mods
+    compute: function(){
+        return MML.getCurrentAttributeAsFloat(this.name, "creativityRoll") + MML.racialAttributeBonuses[this.race].creativity;
+    } };
+MML.computeAttribute.presence = { dependents: ["willpower",
+                "systemStrength"],
+    compute: function(){
+        return MML.getCurrentAttributeAsFloat(this.name, "presenceRoll") + MML.racialAttributeBonuses[this.race].presence;
+    } };
+
+// Secondary Attributes
+MML.computeAttribute.willpower = { dependents: ["evocation",
+                "multiWound"],
+    compute: function(){
+        return Math.round((2*this.presence + this.health)/3);
+    } };
+MML.computeAttribute.evocation = { dependents: ["epMax"], //skill mods
+    compute: function(){
+        return this.intellect + 
+                this.reason + 
+                this.creativity + 
+                this.health + 
+                this.willpower + 
+                MML.racialAttributeBonuses[this.race].evocation;
+    } };
+MML.computeAttribute.perception = { dependents: ["missileAttackMod",
+                "attributeInitBonus"],
+    compute: function(){
+        return Math.round((this.intellect + this.reason + this.creativity)/3) + MML.racialAttributeBonuses[this.race].perception;
+    } };
+MML.computeAttribute.systemStrength = { dependents: [], 
+    compute: function(){
+        return Math.round((this.presence + 2*this.health)/3);
+    } };
+MML.computeAttribute.fitness = { dependents: ["fitnessMod", "fatigueMax"], //skill mods
+    compute: function(){
+        return Math.round((this.health + this.strength)/2) + MML.racialAttributeBonuses[this.race].fitness;
+    }};
+MML.computeAttribute.fitnessMod = { dependents: ["load"], //skill mods
+    compute: function(){
+        return MML.fitnessModLookup[this.fitness];
+    }};
+MML.computeAttribute.load = { dependents: ["overhead",
+                "deadLift",
+                "meleeDamageMod",
+                "movementRatio"],
+    compute: function(){
+        return Math.round(this.stature * this.fitnessMod) + MML.racialAttributeBonuses[this.race].load;
+    }};
+MML.computeAttribute.overhead = { dependents: [], 
+    compute: function(){
+        return this.load*2;
+    }};
+MML.computeAttribute.deadLift = { dependents: [], 
+    compute: function(){
+        return this.load*4;
+    }};
+
+// HP stuff
+MML.computeAttribute.multiWoundMax = { dependents: ["multiWound"],
+    compute: function(){
+        var multiWoundMax = Math.round((this.health + this.stature + this.willpower)/2);
+        this.multiWound = multiWoundMax;
+        return multiWoundMax;
+    }};
+MML.computeAttribute.multiWound = { dependents: [],
+    compute: function(){
+        return this.multiWound;
+    }};
+MML.computeAttribute.headHPMax = { dependents: ["headHP"],
+    compute: function(){
+        var headHPMax = MML.HPTables[this.race][Math.round(this.health + this.stature/3)];
+        this.headHP = headHPMax;
+        return headHPMax;
+    }};
+MML.computeAttribute.headHP = { dependents: [],
+    compute: function(){
+        return this.headHP;
+    }};
+MML.computeAttribute.chestHPMax = { dependents: ["chestHP"],
+    compute: function(){
+        var chestHPMax = MML.HPTables[this.race][Math.round((this.health + this.stature + this.strength)/2)];
+        this.chestHP = chestHPMax;
+        return chestHPMax;
+    }};
+MML.computeAttribute.chestHP = { dependents: [],
+    compute: function(){
+        return this.chestHP;
+    }};
+MML.computeAttribute.abdomenHPMax = { dependents: ["abdomenHP"],
+    compute: function(){
+        var abdomenHPMax = MML.HPTables[this.race][Math.round(this.health + this.stature)];
+        this.abdomenHP = abdomenHPMax;
+        return abdomenHPMax;
+    }};
+MML.computeAttribute.abdomenHP = { dependents: [],
+    compute: function(){
+        return this.abdomenHP;
+    }};
+MML.computeAttribute.leftArmHPMax = { dependents: ["leftArmHP"],
+    compute: function(){
+        var leftArmHPMax = MML.HPTables[this.race][Math.round(this.health + this.stature)];
+        this.leftArmHP = leftArmHPMax;
+        return leftArmHPMax;
+    }};
+MML.computeAttribute.leftArmHP = { dependents: [],
+    compute: function(){
+        return this.leftArmHP;
+    }};
+MML.computeAttribute.rightArmHPMax = { dependents: ["rightArmHP"],
+    compute: function(){
+        var rightArmHPMax = MML.HPTables[this.race][Math.round(this.health + this.stature)];
+        this.rightArmHP = rightArmHPMax;
+        return rightArmHPMax;
+    }};
+MML.computeAttribute.rightArmHP = { dependents: [],
+    compute: function(){
+        return this.rightArmHP;
+    }};
+MML.computeAttribute.leftLegHPMax = { dependents: ["leftLegHP"],
+    compute: function(){
+        var leftLegHPMax = MML.HPTables[this.race][Math.round(this.health + this.stature)];
+        this.leftLegHP = leftLegHPMax;
+        return leftLegHPMax;
+    }};
+MML.computeAttribute.leftLegHP = { dependents: [],
+    compute: function(){
+        return this.leftLegHP;
+    }};
+MML.computeAttribute.rightLegHPMax = { dependents: ["rightLegHP"],
+    compute: function(){
+        var rightLegHPMax = MML.HPTables[this.race][Math.round(this.health + this.stature)];
+        this.rightLegHP = rightLegHPMax;
+        return rightLegHPMax;
+    }};
+MML.computeAttribute.rightLegHP = { dependents: [],
+    compute: function(){
+        return this.rightLegHP;
+    }};
+MML.computeAttribute.epMax = { dependents: ["ep"],
+    compute: function(){
+        var epMax = this.evocation;
+        this.ep = epMax;
+        return epMax;
+    }};
+MML.computeAttribute.ep = { dependents: [],
+    compute: function(){
+        return this.ep;
+    }};
+MML.computeAttribute.fatigueMax = { dependents: ["fatigue"],
+    compute: function(){
+        var fatigueMax = this.fitness;
+        this.fatigue = fatigueMax;
+        return fatigueMax;
+    }};
+MML.computeAttribute.fatigue = { dependents: [],
+    compute: function(){
+        return this.fatigue;
+    }};
+MML.computeAttribute.hpRecovery = { dependents: [],
+    compute: function(){
+        return MML.recoveryMods[this.health].hp;
+    }};
+MML.computeAttribute.epRecovery = { dependents: [],
+    compute: function(){
+        return MML.recoveryMods[this.health].ep;
+    }};
+
+// Inventory stuff    
+MML.computeAttribute.inventory = { dependents: ["totalWeightCarried",
+                 "apv",
+                 "leftHand",
+                 "rightHand",
+                 "senseInitBonus"],
+    compute: function(){
+        var items = this.inventory;
+
+        _.each(
+            items,
+            function(item, _id) {
+                MML.setCurrentAttribute(this.name, "repeating_items_" + _id + "_itemName", item.name);
+                MML.setCurrentAttribute(this.name, "repeating_items_" + _id + "_itemId", _id);
+            },
+            this
+        );
+        return items;
+    }};
+MML.computeAttribute.totalWeightCarried = { dependents: ["knockdownMax", "movementRatio"],
+    compute: function(){
+        var totalWeightCarried = 0;
+
+        _.each(this.inventory, function(item) {
+            totalWeightCarried += item.weight;
+        });
+        return totalWeightCarried;
+    }};
+MML.computeAttribute.knockdownMax = { dependents: ["knockdown"],
+    compute: function(){
+        var knockdownMax = Math.round(this.stature + (this.totalWeightCarried/10));
+        this.knockdown = knockdownMax;
+        return knockdownMax;
+    }};
+MML.computeAttribute.knockdown = { dependents: [],
+    compute: function(){
+        if (this.knockdown < 0) {
+            MML.knockdownRoll.apply(this, []);
+        }       
+        else{
+            return false;
+        }
+        return this.knockdown;
+    }};
+MML.computeAttribute.apv = { dependents: [],
+    compute: function(){
+        var armor = [];
+        _.each(
+            this.inventory, 
+            function(item){
+                if(item.type === "armor"){
+                    armor.push(item);
+                }
+            },
+            this);
+
+        var mat = [];
+        
+        // Initialize APV Matrix
+        _.each(MML.hitPositions[this.bodyType], function(position){
+            mat.push({
+                Surface: [{ value: 0, coverage: 100}],
+                Cut: [{ value: 0, coverage: 100}],
+                Chop: [{ value: 0, coverage: 100}],
+                Pierce: [{ value: 0, coverage: 100}],
+                Thrust: [{ value: 0, coverage: 100}],
+                Impact: [{ value: 0, coverage: 100}],
+                Flanged: [{ value: 0, coverage: 100}]
             });
-            return totalWeightCarried;
-        }};
-    this.knockdownMax = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "knockdownMax"),
-        dependents: ["knockdown"],
-        compute: function(){
-            var knockdownMax = Math.round(this.stature.value + (this.totalWeightCarried.value/10));
-            this.knockdown.value = knockdownMax;
-            return knockdownMax;
-        }};
-    this.knockdown = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "knockdown"),
-        dependents: [],
-        compute: function(){
-            if (this.knockdown.value < 0) {
-                MML.knockdownRoll.apply(this, []);
-            }       
-            else{
-                return false;
-            }
-            return this.knockdown.value;
-        }};
-    this.apv = {
-        value: MML.getCurrentAttributeJSON(this.name.value, "apv"),
-        dependents: [],
-        compute: function(){
-            var armor = [];
-            _.each(
-                this.inventory.value, 
-                function(item){
-                    if(item.type === "armor"){
-                        armor.push(item);
+        });
+        
+        //Creates raw matrix of individual pieces of armor (no layering or partial coverage)
+           
+        _.each(armor, function(piece){
+            var material = MML.APVList[piece.material];
+
+            _.each(piece.protection, function(protection){
+                mat[protection.position].Surface.push({ value: material.surface, coverage: protection.coverage });
+                mat[protection.position].Cut.push({ value: material.cut, coverage: protection.coverage });
+                mat[protection.position].Chop.push({ value: material.chop, coverage: protection.coverage });
+                mat[protection.position].Pierce.push({ value: material.pierce, coverage: protection.coverage });
+                mat[protection.position].Thrust.push({ value: material.thrust, coverage: protection.coverage });
+                mat[protection.position].Impact.push({ value: material.impact, coverage: protection.coverage });
+                mat[protection.position].Flanged.push({ value: material.flanged, coverage: protection.coverage });
+            });
+        });
+        
+        //This loop accounts for layered armor and partial coverage and outputs final APVs
+        var position = 0;
+        for (position in mat){
+            for (var type in mat[position]){
+                var rawAPVArray = mat[position][type];
+                var apvFinalArray = [];
+                var coverageArray = [];
+                
+                //Creates an array of armor coverage in ascending order.
+                var apv;
+                for (apv in rawAPVArray){
+                    if (coverageArray.indexOf(rawAPVArray[apv].coverage) === -1){
+                        coverageArray.push(rawAPVArray[apv].coverage);
                     }
-                },
-                this);
-
-            var mat = [];
-            
-            // Initialize APV Matrix
-            _.each(MML.hitPositions[this.bodyType.value], function(position){
-                mat.push({
-                    Surface: [{ value: 0, coverage: 100}],
-                    Cut: [{ value: 0, coverage: 100}],
-                    Chop: [{ value: 0, coverage: 100}],
-                    Pierce: [{ value: 0, coverage: 100}],
-                    Thrust: [{ value: 0, coverage: 100}],
-                    Impact: [{ value: 0, coverage: 100}],
-                    Flanged: [{ value: 0, coverage: 100}]
-                });
-            });
-            
-            //Creates raw matrix of individual pieces of armor (no layering or partial coverage)
-               
-            _.each(armor, function(piece){
-                var material = MML.APVList[piece.material];
-
-                _.each(piece.protection, function(protection){
-                    mat[protection.position].Surface.push({ value: material.surface, coverage: protection.coverage });
-                    mat[protection.position].Cut.push({ value: material.cut, coverage: protection.coverage });
-                    mat[protection.position].Chop.push({ value: material.chop, coverage: protection.coverage });
-                    mat[protection.position].Pierce.push({ value: material.pierce, coverage: protection.coverage });
-                    mat[protection.position].Thrust.push({ value: material.thrust, coverage: protection.coverage });
-                    mat[protection.position].Impact.push({ value: material.impact, coverage: protection.coverage });
-                    mat[protection.position].Flanged.push({ value: material.flanged, coverage: protection.coverage });
-                });
-            });
-            
-            //This loop accounts for layered armor and partial coverage and outputs final APVs
-            var position = 0;
-            for (position in mat){
-                for (var type in mat[position]){
-                    var rawAPVArray = mat[position][type];
-                    var apvFinalArray = [];
-                    var coverageArray = [];
+                }
+                coverageArray = coverageArray.sort(function(a,b){return a-b;});
+                
+                //Creates APV array per damage type per position
+                var value;
+                for (value in coverageArray){
+                    var apvToLayerArray = [];
+                    var apvValue = 0;
+                    var apvCoverage = coverageArray[value];
                     
-                    //Creates an array of armor coverage in ascending order.
-                    var apv;
+                    //Builds an array of APVs that meet or exceed the coverage value
+                    apv = 0;
                     for (apv in rawAPVArray){
-                        if (coverageArray.indexOf(rawAPVArray[apv].coverage) === -1){
-                            coverageArray.push(rawAPVArray[apv].coverage);
+                        if (rawAPVArray[apv].coverage >= apvCoverage){
+                            apvToLayerArray.push(rawAPVArray[apv]);
                         }
                     }
-                    coverageArray = coverageArray.sort(function(a,b){return a-b;});
+                    apvToLayerArray = apvToLayerArray.sort(function(a,b){return b-a;});
                     
-                    //Creates APV array per damage type per position
-                    var value;
-                    for (value in coverageArray){
-                        var apvToLayerArray = [];
-                        var apvValue = 0;
-                        var apvCoverage = coverageArray[value];
-                        
-                        //Builds an array of APVs that meet or exceed the coverage value
-                        apv = 0;
-                        for (apv in rawAPVArray){
-                            if (rawAPVArray[apv].coverage >= apvCoverage){
-                                apvToLayerArray.push(rawAPVArray[apv].value);
-                            }
-                        }
-                        apvToLayerArray = apvToLayerArray.sort(function(a,b){return b-a;});
-                        
-                        //Adds the values at coverage value with diminishing returns on layered armor
-                        value = 0;
-                        for (value in apvToLayerArray){
-                            apvValue += apvToLayerArray[value] * Math.pow(2, -value);
-                            apvValue = Math.round(apvValue);
-                        }
-                        //Puts final APV and associated Coverage into final APV array for that damage type.
-                        apvFinalArray.push({ value: apvValue, coverage: apvCoverage});
+                    //Adds the values at coverage value with diminishing returns on layered armor
+                    value = 0;
+                    for (value in apvToLayerArray){
+                        apvValue += apvToLayerArray[value] * Math.pow(2, -value);
+                        apvValue = Math.round(apvValue);
                     }
-                    mat[position][type] = apvFinalArray;
+                    //Puts final APV and associated Coverage into final APV array for that damage type.
+                    apvFinalArray.push({ value: apvValue, coverage: apvCoverage});
                 }
+                mat[position][type] = apvFinalArray;
             }
-            return mat;
-        }};
-    this.leftHand = {
-        value: MML.getCurrentAttributeJSON(this.name.value, "leftHand"),
-        dependents: ["hitTable"],
-        compute: function(){
-            return this.leftHand.value;
-        }};
-    this.rightHand = {
-        value: MML.getCurrentAttributeJSON(this.name.value, "rightHand"),
-        dependents: ["hitTable"],
-        compute: function(){
-            return this.rightHand.value;
-        }};
-    this.hitTable = {
-        value: MML.getCurrentAttribute(this.name.value, "hitTable"),
-        dependents: [],
-        compute: function() {
-            return MML.hitTables[this.bodyType.value].A;   
-        }};
-    
-    // Movement
-    this.movementRatio = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "movementRatio"),
-        dependents: ["movementRatioInitBonus"],
-        compute: function(){
-            var movementRatio = Math.round(10*this.load.value/this.totalWeightCarried.value)/10;
-            if(movementRatio > 4.0){
-                movementRatio = 4.0;
-            }
-            return movementRatio;
-        }};
-    this.movementAvailable = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "movementAvailable"),
-        dependents: [],
-        compute: function() {
-            return this.movementAvailable.value;   
-        }};
-    this.movementPosition = {
-        value: MML.getCurrentAttribute(this.name.value, "movementPosition"),
-        dependents: [],
-        compute: function() {
-            return this.movementPosition.value;   
-        }};
+        }
+        return mat;
+    }};
+MML.computeAttribute.leftHand = { dependents: ["hitTable"],
+    compute: function(){
+        return this.leftHand;
+    }};
+MML.computeAttribute.rightHand = { dependents: ["hitTable"],
+    compute: function(){
+        return this.rightHand;
+    }};
+MML.computeAttribute.hitTable = { dependents: [],
+    compute: function() {
+        return MML.hitTables[this.bodyType].A;   
+    }};
 
-    // Roll Modifiers
-    this.situationalMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "situationalMod"),
-        dependents: [],
-        compute: function() {
-            return this.situationalMod.value;   
-        }};
-    this.attributeDefenseMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "attributeDefenseMod"),
-        dependents: [],
-        compute: function() {
-            return MML.attributeMods.strength[this.strength.value] + MML.attributeMods.coordination[this.coordination.value];   
-        }};
-    this.meleeDefenseMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "meleeDefenseMod"),
-        dependents: [],
-        compute: function() {
-            return this.meleeDefenseMod.value;   
-        }};
-    this.missileDefenseMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "missileDefenseMod"),
-        dependents: [],
-        compute: function() {
-            return this.missileDefenseMod.value;   
-        }};
-     this.meleeAttackMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "meleeAttackMod"),
-        dependents: [],
-        compute: function() {
-            return this.meleeAttackMod.value;   
-        }};
-    this.missileAttackMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "missileAttackMod"),
-        dependents: [],
-        compute: function() {
-            return this.missileAttackMod.value;   
-        }};
-    this.attributeMeleeAttackMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "attributeMeleeAttackMod"),
-        dependents: [],
-        compute: function() {
-            return MML.attributeMods.strength[this.strength.value] + MML.attributeMods.coordination[this.coordination.value];   
-        }};
-    this.meleeDamageMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "meleeDamageMod"),
-        dependents: [],
-        compute: function() {
-            var meleeDamageMod;
-            var load = this.load.value;
+// Movement
+MML.computeAttribute.movementRatio = { dependents: ["movementRatioInitBonus"],
+    compute: function(){
+        var movementRatio = Math.round(10*this.load/this.totalWeightCarried)/10;
+        if(movementRatio > 4.0){
+            movementRatio = 4.0;
+        }
+        return movementRatio;
+    }};
+MML.computeAttribute.movementAvailable = { dependents: [],
+    compute: function() {
+        return this.movementAvailable;   
+    }};
+MML.computeAttribute.movementPosition = { dependents: [],
+    compute: function() {
+        return this.movementPosition;   
+    }};
 
-            var index;
-             for(index in MML.meleeDamageMods){
-                 var data = MML.meleeDamageMods[index];
+// Roll Modifiers
+MML.computeAttribute.situationalMod = { dependents: [],
+    compute: function() {
+        return this.situationalMod;   
+    }};
+MML.computeAttribute.attributeDefenseMod = { dependents: [],
+    compute: function() {
+        return MML.attributeMods.strength[this.strength] + MML.attributeMods.coordination[this.coordination];   
+    }};
+MML.computeAttribute.meleeDefenseMod = { dependents: [],
+    compute: function() {
+        return this.meleeDefenseMod;   
+    }};
+MML.computeAttribute.missileDefenseMod = { dependents: [],
+    compute: function() {
+        return this.missileDefenseMod;   
+    }};
+ MML.computeAttribute.meleeAttackMod = { dependents: [],
+    compute: function() {
+        return this.meleeAttackMod;   
+    }};
+MML.computeAttribute.missileAttackMod = { dependents: [],
+    compute: function() {
+        return this.missileAttackMod;   
+    }};
+MML.computeAttribute.attributeMeleeAttackMod = { dependents: [],
+    compute: function() {
+        return MML.attributeMods.strength[this.strength] + MML.attributeMods.coordination[this.coordination];   
+    }};
+MML.computeAttribute.meleeDamageMod = { dependents: [],
+    compute: function() {
+        var meleeDamageMod;
+        var load = this.load;
 
-                 if(load >= data.low && load <= data.high){
-                    meleeDamageMod = data.value;
-                    break;
-                 }
+        var index;
+         for(index in MML.meleeDamageMods){
+             var data = MML.meleeDamageMods[index];
+
+             if(load >= data.low && load <= data.high){
+                meleeDamageMod = data.value;
+                break;
              }
-            return meleeDamageMod;   
-        }};
-    this.attributeMissileAttackMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "attributeMissileAttackMod"),
-        dependents: [],
-        compute: function() {
-            return MML.attributeMods.perception[this.perception.value] + MML.attributeMods.coordination[this.coordination.value] + MML.attributeMods.strength[this.strength.value];   
-        }};
-    this.castingMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "castingMod"),
-        dependents: [],
-        compute: function() {
-            var castingMod = MML.attributeMods.reason[this.reason.value];
+         }
+        return meleeDamageMod;   
+    }};
+MML.computeAttribute.attributeMissileAttackMod = { dependents: [],
+    compute: function() {
+        return MML.attributeMods.perception[this.perception] + MML.attributeMods.coordination[this.coordination] + MML.attributeMods.strength[this.strength];   
+    }};
+MML.computeAttribute.castingMod = { dependents: [],
+    compute: function() {
+        var castingMod = MML.attributeMods.reason[this.reason];
 
-            if(this.senseInitBonus.value < 3 || this.senseInitBonus.value > 0){
-                castingMod -= 10;
-            }
-            else if(this.senseInitBonus.value < 0 || this.senseInitBonus.value > -2){
-                castingMod -= 20;
-            }
-            else{
-                castingMod -= 30;
-            }
+        if(this.senseInitBonus < 3 || this.senseInitBonus > 0){
+            castingMod -= 10;
+        }
+        else if(this.senseInitBonus < 0 || this.senseInitBonus > -2){
+            castingMod -= 20;
+        }
+        else{
+            castingMod -= 30;
+        }
 
-            if(this.fomInitBonus.value === 3 || this.fomInitBonus.value === 2){
-                castingMod -= 5;
-            }
-            else if(this.fomInitBonus.value === 1){
-                castingMod -= 10;
-            }
-            else if(this.fomInitBonus.value === 0){
-                castingMod -= 15;
-            }
-            else if(this.fomInitBonus.value === -1){
-                castingMod -= 20;
-            }
-            else if(this.fomInitBonus.value === -2){
-                castingMod -= 30;
-            }
+        if(this.fomInitBonus === 3 || this.fomInitBonus === 2){
+            castingMod -= 5;
+        }
+        else if(this.fomInitBonus === 1){
+            castingMod -= 10;
+        }
+        else if(this.fomInitBonus === 0){
+            castingMod -= 15;
+        }
+        else if(this.fomInitBonus === -1){
+            castingMod -= 20;
+        }
+        else if(this.fomInitBonus === -2){
+            castingMod -= 30;
+        }
 
-            return castingMod;
-        }};
-    this.spellLearningMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "spellLearningMod"),
-        dependents: [],
-        compute: function() {
-            return MML.attributeMods.intellect[this.intellect.value];   
-        }};
-    this.statureCheckMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "statureCheckMod"),
-        dependents: [],
-        compute: function() {
-            return this.situationalMod.value;   
-        }};
-    this.strengthCheckMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "strengthCheckMod"),
-        dependents: [],
-        compute: function() {
-            return this.situationalMod.value;   
-        }};
-    this.coordinationCheckMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "coordinationCheckMod"),
-        dependents: [],
-        compute: function() {
-            return this.situationalMod.value;   
-        }};
-    this.healthCheckMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "healthCheckMod"),
-        dependents: [],
-        compute: function() {
-            return this.situationalMod.value;   
-        }};
-    this.beautyCheckMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "beautyCheckMod"),
-        dependents: [],
-        compute: function() {
-            return this.situationalMod.value;   
-        }};
-    this.intellectCheckMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "intellectCheckMod"),
-        dependents: [],
-        compute: function() {
-            return this.situationalMod.value;   
-        }};
-    this.reasonCheckMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "reasonCheckMod"),
-        dependents: [],
-        compute: function() {
-            return this.situationalMod.value;   
-        }};
-    this.creativityCheckMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "creativityCheckMod"),
-        dependents: [],
-        compute: function() {
-            return this.situationalMod.value;   
-        }};
-    this.presenceCheckMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "presenceCheckMod"),
-        dependents: [],
-        compute: function() {
-            return this.situationalMod.value;   
-        }};
-    this.willpowerCheckMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "willpowerCheckMod"),
-        dependents: [],
-        compute: function() {
-            return this.situationalMod.value;   
-        }};
-    this.evocationCheckMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "evocationCheckMod"),
-        dependents: [],
-        compute: function() {
-            return this.situationalMod.value;   
-        }};
-    this.perceptionCheckMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "perceptionCheckMod"),
-        dependents: [],
-        compute: function() {
-            return this.situationalMod.value;   
-        }};
-    this.systemStrengthCheckMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "systemStrengthCheckMod"),
-        dependents: [],
-        compute: function() {
-            return this.situationalMod.value;   
-        }};
-    this.fitnessCheckMod = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "fitnessCheckMod"),
-        dependents: [],
-        compute: function() {
-            return this.situationalMod.value;   
-        }};
-    this.statusEffects = {
-        value: MML.getCurrentAttributeJSON(this.name.value, "statusEffects"),
-        dependents: ["situationalInitBonus",
-                     "situationalMod",
-                     "missileDefenseMod",
-                     "meleeDefenseMod",
-                     "missileAttackMod",
-                     "meleeAttackMod",
-                     "perceptionCheckMod",
-                     "roundsExertion"
-                     ],
-        compute: function() {
-            _.each(this.statusEffects.dependents, function(dependent){
-                this[dependent].value = 0;
-            }, this);
-            _.each(this.statusEffects.value, function(effect, index){
-                MML.statusEffects[effect.name].apply(this, [effect, index]);
-            }, this);
-            return this.statusEffects.value;   
-        }};
-    
-    // Initiative
-    this.initiative = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "initiative"),
-        dependents: [],
-        compute: function(){
-             var initiative = this.initiativeRoll.value + 
-                    this.situationalInitBonus.value + 
-                    this.movementRatioInitBonus.value +
-                    this.attributeInitBonus.value + 
-                    this.senseInitBonus.value +
-                    this.fomInitBonus.value +
-                    this.firstActionInitBonus.value +
-                    this.spentInitiative.value;
-            if(initiative < 0 ||
-                state.MML.GM.roundStarted === false ||
-                this.situationalInitBonus === "No Combat" || 
-                this.movementRatioInitBonus === "No Combat"){
-                return 0;
-            }
-            else{
-                return initiative;
-            }
-        }};
-    this.initiativeRoll = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "initiativeRoll"),
-        dependents: ["initiative"],
-        compute: function(){
-            return this.initiativeRoll.value;
-        }}; 
-    this.situationalInitBonus = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "situationalInitBonus"),
-        dependents: ["initiative"],
-        compute: function(){
-            return this.situationalInitBonus.value;
-        }}; 
-    this.movementRatioInitBonus = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "movementRatioInitBonus"),
-        dependents: ["initiative"],
-        compute: function(){
-            if(this.movementRatio.value < 0.6){
-                return "No Combat";
-            }
-            else if (this.movementRatio.value === 0.6){
-               return -4;
-            }
-            else if (this.movementRatio.value < 0.7 && this.movementRatio.value <= 0.8){
-               return -3;
-            }
-            else if (this.movementRatio.value > 0.8 && this.movementRatio.value <= 1.0){
-               return -2;
-            }
-            else if (this.movementRatio.value > 1.0 && this.movementRatio.value <= 1.2){
-               return -1;
-            }
-            else if (this.movementRatio.value > 1.2 && this.movementRatio.value <= 1.4){
-               return 0;
-            }
-            else if (this.movementRatio.value > 1.4 && this.movementRatio.value <= 1.7){
-               return 1;
-            }
-            else if (this.movementRatio.value > 1.7 && this.movementRatio.value <= 2.0){
-               return 2;
-            }
-            else if (this.movementRatio.value > 2.0 && this.movementRatio.value <= 2.5){
-               return 3;
-            }
-            else if (this.movementRatio.value > 2.5 && this.movementRatio.value <= 3.2){
-               return 4;
-            }
-            else if (this.movementRatio.value > 3.2){
-               return 5;
-            }
-        }};  
-    this.attributeInitBonus = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "attributeInitBonus"),
-        dependents: ["initiative"],
-        compute: function(){
-            var attributeArray = [this.strength.value, this.coordination.value, this.reason.value, this.perception.value];
-            var rankingAttribute = attributeArray.sort(function(a,b){return a-b;})[0];
-            
-            if (rankingAttribute <= 9){
-                return -1;
-            }
-            else if (rankingAttribute === 10 || rankingAttribute === 11){
-                return 0;
-            }
-            else if (rankingAttribute === 12 || rankingAttribute === 13){
-                return 1;
-            }
-            else if (rankingAttribute === 14 || rankingAttribute === 15){
-                return 2;
-            }
-            else if (rankingAttribute === 16 || rankingAttribute === 17){
-                return 3;
-            }
-            else if (rankingAttribute === 18 || rankingAttribute === 19){ 
-                return 4;
-            }
-            else if (rankingAttribute >= 20){
-                return 5;
-            }
-                }};  
-    this.senseInitBonus = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "senseInitBonus"),
-        dependents: ["initiative",
-                    "castingMod"],
-        compute: function(){
-            var armorList = _.where(this.inventory.value, {type: "armor"});    
-            var bitsOfHelm = ["Barbute Helm", "Bascinet Helm", "Camail", "Camail-Conical", "Cap", "Cheeks", "Conical Helm", "Duerne Helm", "Dwarven War Hood", "Face Plate", "Great Helm", "Half-Face Plate", "Hood", "Nose Guard", "Pot Helm", "Sallet Helm", "Throat Guard", "War Hat"];
-            var senseArray = [];
-            
-            _.each(bitsOfHelm, function(bit){
-                _.each(armorList, function(piece){
-                    if (bit === piece.name){
-                        senseArray.push(bit);
-                    }
-                });
-            });
+        return castingMod;
+    }};
+MML.computeAttribute.spellLearningMod = { dependents: [],
+    compute: function() {
+        return MML.attributeMods.intellect[this.intellect];   
+    }};
+MML.computeAttribute.statureCheckMod = { dependents: [],
+    compute: function() {
+        return this.situationalMod;   
+    }};
+MML.computeAttribute.strengthCheckMod = { dependents: [],
+    compute: function() {
+        return this.situationalMod;   
+    }};
+MML.computeAttribute.coordinationCheckMod = { dependents: [],
+    compute: function() {
+        return this.situationalMod;   
+    }};
+MML.computeAttribute.healthCheckMod = { dependents: [],
+    compute: function() {
+        return this.situationalMod;   
+    }};
+MML.computeAttribute.beautyCheckMod = { dependents: [],
+    compute: function() {
+        return this.situationalMod;   
+    }};
+MML.computeAttribute.intellectCheckMod = { dependents: [],
+    compute: function() {
+        return this.situationalMod;   
+    }};
+MML.computeAttribute.reasonCheckMod = { dependents: [],
+    compute: function() {
+        return this.situationalMod;   
+    }};
+MML.computeAttribute.creativityCheckMod = { dependents: [],
+    compute: function() {
+        return this.situationalMod;   
+    }};
+MML.computeAttribute.presenceCheckMod = { dependents: [],
+    compute: function() {
+        return this.situationalMod;   
+    }};
+MML.computeAttribute.willpowerCheckMod = { dependents: [],
+    compute: function() {
+        return this.situationalMod;   
+    }};
+MML.computeAttribute.evocationCheckMod = { dependents: [],
+    compute: function() {
+        return this.situationalMod;   
+    }};
+MML.computeAttribute.perceptionCheckMod = { dependents: [],
+    compute: function() {
+        return this.situationalMod;   
+    }};
+MML.computeAttribute.systemStrengthCheckMod = { dependents: [],
+    compute: function() {
+        return this.situationalMod;   
+    }};
+MML.computeAttribute.fitnessCheckMod = { dependents: [],
+    compute: function() {
+        return this.situationalMod;   
+    }};
+MML.computeAttribute.statusEffects = { dependents: ["situationalInitBonus",
+                 "situationalMod",
+                 "missileDefenseMod",
+                 "meleeDefenseMod",
+                 "missileAttackMod",
+                 "meleeAttackMod",
+                 "perceptionCheckMod",
+                 "roundsExertion"
+                 ],
+    compute: function() {
+        _.each(this.statusEffects.dependents, function(dependent){
+            this[dependent] = 0;
+        }, this);
+        _.each(this.statusEffects, function(effect, index){
+            MML.statusEffects[effect.name].apply(this, [effect, index]);
+        }, this);
+        return this.statusEffects;   
+    }};
 
-            //nothing on head
-            if (senseArray.length === 0){
-                return 4;
-            }
-            else {
-                //Head fully encased in metal
-                if (senseArray.indexOf("Great Helm") !== -1 || (senseArray.indexOf("Sallet Helm") !== -1 && senseArray.indexOf("Throat Guard") !== -1)){
-                    return -2;
+// Initiative
+MML.computeAttribute.initiative = { dependents: [],
+    compute: function(){
+         var initiative = this.initiativeRoll + 
+                this.situationalInitBonus + 
+                this.movementRatioInitBonus +
+                this.attributeInitBonus + 
+                this.senseInitBonus +
+                this.fomInitBonus +
+                this.firstActionInitBonus +
+                this.spentInitiative;
+        if(initiative < 0 ||
+            state.MML.GM.roundStarted === false ||
+            this.situationalInitBonus === "No Combat" || 
+            this.movementRatioInitBonus === "No Combat"){
+            return 0;
+        }
+        else{
+            return initiative;
+        }
+    }};
+MML.computeAttribute.initiativeRoll = { dependents: ["initiative"],
+    compute: function(){
+        return this.initiativeRoll;
+    }}; 
+MML.computeAttribute.situationalInitBonus = { dependents: ["initiative"],
+    compute: function(){
+        return this.situationalInitBonus;
+    }}; 
+MML.computeAttribute.movementRatioInitBonus = { dependents: ["initiative"],
+    compute: function(){
+        if(this.movementRatio < 0.6){
+            return "No Combat";
+        }
+        else if (this.movementRatio === 0.6){
+           return -4;
+        }
+        else if (this.movementRatio < 0.7 && this.movementRatio <= 0.8){
+           return -3;
+        }
+        else if (this.movementRatio > 0.8 && this.movementRatio <= 1.0){
+           return -2;
+        }
+        else if (this.movementRatio > 1.0 && this.movementRatio <= 1.2){
+           return -1;
+        }
+        else if (this.movementRatio > 1.2 && this.movementRatio <= 1.4){
+           return 0;
+        }
+        else if (this.movementRatio > 1.4 && this.movementRatio <= 1.7){
+           return 1;
+        }
+        else if (this.movementRatio > 1.7 && this.movementRatio <= 2.0){
+           return 2;
+        }
+        else if (this.movementRatio > 2.0 && this.movementRatio <= 2.5){
+           return 3;
+        }
+        else if (this.movementRatio > 2.5 && this.movementRatio <= 3.2){
+           return 4;
+        }
+        else if (this.movementRatio > 3.2){
+           return 5;
+        }
+    }};  
+MML.computeAttribute.attributeInitBonus = { dependents: ["initiative"],
+    compute: function(){
+        var attributeArray = [this.strength, this.coordination, this.reason, this.perception];
+        var rankingAttribute = attributeArray.sort(function(a,b){return a-b;})[0];
+        
+        if (rankingAttribute <= 9){
+            return -1;
+        }
+        else if (rankingAttribute === 10 || rankingAttribute === 11){
+            return 0;
+        }
+        else if (rankingAttribute === 12 || rankingAttribute === 13){
+            return 1;
+        }
+        else if (rankingAttribute === 14 || rankingAttribute === 15){
+            return 2;
+        }
+        else if (rankingAttribute === 16 || rankingAttribute === 17){
+            return 3;
+        }
+        else if (rankingAttribute === 18 || rankingAttribute === 19){ 
+            return 4;
+        }
+        else if (rankingAttribute >= 20){
+            return 5;
+        }
+            }};  
+MML.computeAttribute.senseInitBonus = { dependents: ["initiative",
+                "castingMod"],
+    compute: function(){
+        var armorList = _.where(this.inventory, {type: "armor"});    
+        var bitsOfHelm = ["Barbute Helm", "Bascinet Helm", "Camail", "Camail-Conical", "Cap", "Cheeks", "Conical Helm", "Duerne Helm", "Dwarven War Hood", "Face Plate", "Great Helm", "Half-Face Plate", "Hood", "Nose Guard", "Pot Helm", "Sallet Helm", "Throat Guard", "War Hat"];
+        var senseArray = [];
+        
+        _.each(bitsOfHelm, function(bit){
+            _.each(armorList, function(piece){
+                if (bit === piece.name){
+                    senseArray.push(bit);
                 }
-                //wearing a helm
-                else if (senseArray.indexOf("Barbute Helm") !== -1 || senseArray.indexOf("Sallet Helm") !== -1 || senseArray.indexOf("Bascinet Helm") !== -1 || senseArray.indexOf("Duerne Helm") !== -1 || senseArray.indexOf("Cap") !== -1 || senseArray.indexOf("Pot Helm") !== -1 || senseArray.indexOf("Conical Helm") !== -1 || senseArray.indexOf("War Hat") !== -1){
-                    //Has faceplate
-                    if (senseArray.indexOf("Face Plate") !== -1 ){
-                        //Enclosed Sides
-                        if (senseArray.indexOf("Barbute Helm") !== -1 || senseArray.indexOf("Bascinet Helm") !== -1 || senseArray.indexOf("Duerne Helm") !== -1){
-                            return -2;
-                        }
-                        else {
-                            return -1;
-                        }
+            });
+        });
+
+        //nothing on head
+        if (senseArray.length === 0){
+            return 4;
+        }
+        else {
+            //Head fully encased in metal
+            if (senseArray.indexOf("Great Helm") !== -1 || (senseArray.indexOf("Sallet Helm") !== -1 && senseArray.indexOf("Throat Guard") !== -1)){
+                return -2;
+            }
+            //wearing a helm
+            else if (senseArray.indexOf("Barbute Helm") !== -1 || senseArray.indexOf("Sallet Helm") !== -1 || senseArray.indexOf("Bascinet Helm") !== -1 || senseArray.indexOf("Duerne Helm") !== -1 || senseArray.indexOf("Cap") !== -1 || senseArray.indexOf("Pot Helm") !== -1 || senseArray.indexOf("Conical Helm") !== -1 || senseArray.indexOf("War Hat") !== -1){
+                //Has faceplate
+                if (senseArray.indexOf("Face Plate") !== -1 ){
+                    //Enclosed Sides
+                    if (senseArray.indexOf("Barbute Helm") !== -1 || senseArray.indexOf("Bascinet Helm") !== -1 || senseArray.indexOf("Duerne Helm") !== -1){
+                        return -2;
                     }
-                    //These types of helms or half face plate
-                    else if (senseArray.indexOf("Barbute Helm") !== -1 || senseArray.indexOf("Sallet Helm") !== -1 || senseArray.indexOf("Bascinet Helm") !== -1 || senseArray.indexOf("Duerne Helm") !== -1 || senseArray.indexOf("Half-Face Plate") !== -1){
-                        return 0;
-                    }
-                    //has camail or cheeks
-                    else if (senseArray.indexOf("Camail") !== -1 || senseArray.indexOf("Camail-Conical") !== -1 || senseArray.indexOf("Cheeks") !== -1){
-                        return 1;
-                    }
-                    //Wearing a hood
-                    else if (senseArray.indexOf("Dwarven War Hood") !== -1 || senseArray.indexOf("Hood") !== -1){
-                        _.each(armorList, function(piece){
-                            if (piece.name === "Dwarven War Hood" || piece.name === "Hood"){
-                                if (piece.family === "Cloth"){
-                                    return 2;
-                                }
-                                else {
-                                    return 1;
-                                }
-                            }
-                        });
-                    }  
-                    //has nose guard
-                    else if (senseArray.indexOf("Nose Guard") !== -1){
-                        return 2;
-                    }
-                    // just a cap
                     else {
-                        return 3;
+                        return -1;
                     }
+                }
+                //These types of helms or half face plate
+                else if (senseArray.indexOf("Barbute Helm") !== -1 || senseArray.indexOf("Sallet Helm") !== -1 || senseArray.indexOf("Bascinet Helm") !== -1 || senseArray.indexOf("Duerne Helm") !== -1 || senseArray.indexOf("Half-Face Plate") !== -1){
+                    return 0;
+                }
+                //has camail or cheeks
+                else if (senseArray.indexOf("Camail") !== -1 || senseArray.indexOf("Camail-Conical") !== -1 || senseArray.indexOf("Cheeks") !== -1){
+                    return 1;
                 }
                 //Wearing a hood
                 else if (senseArray.indexOf("Dwarven War Hood") !== -1 || senseArray.indexOf("Hood") !== -1){
@@ -971,236 +921,201 @@ MML.characterConstructor = function characterConstructor(charName){
                             }
                         }
                     });
+                }  
+                //has nose guard
+                else if (senseArray.indexOf("Nose Guard") !== -1){
+                    return 2;
+                }
+                // just a cap
+                else {
+                    return 3;
                 }
             }
-        }};  
-    this.fomInitBonus = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "fomInitBonus"),
-        dependents: ["initiative",
-                    "castingMod"],
-        compute: function(){
-            return this.fomInitBonus.value;
-        }};  
-    this.firstActionInitBonus = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "firstActionInitBonus"),
-        dependents: ["initiative"],
-        compute: function(){
-            if(state.MML.GM.roundStarted === false){
-                this.firstActionInitBonus.value = this.action.value.initBonus;
+            //Wearing a hood
+            else if (senseArray.indexOf("Dwarven War Hood") !== -1 || senseArray.indexOf("Hood") !== -1){
+                _.each(armorList, function(piece){
+                    if (piece.name === "Dwarven War Hood" || piece.name === "Hood"){
+                        if (piece.family === "Cloth"){
+                            return 2;
+                        }
+                        else {
+                            return 1;
+                        }
+                    }
+                });
             }
-            return this.firstActionInitBonus.value;
-        }};
-    this.spentInitiative = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "spentInitiative"),
-        dependents: ["initiative"],
-        compute: function(){
-            return this.spentInitiative.value;
-        }};
-    this.actionTempo = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "actionTempo"),
-        dependents: [],
-        compute: function(){
-            var tempo;
-    
-            if (this.action.value.skill < 30){ tempo = 0; }
-            else if (this.action.value.skill < 40){ tempo = 1; }
-            else if (this.action.value.skill < 50){ tempo = 2; }
-            else if (this.action.value.skill < 60){ tempo = 3; }
-            else if (this.action.value.skill < 70){ tempo = 4; }
-            else{ tempo = 5; }
-            
-            // If Dual Wielding
-            if (this.action.value.name === "Attack" && MML.isDualWielding.apply(this,[])){
-                var twfSkill = this.weaponskills.value["Two Weapon Fighting"].level;
-                if (twfSkill > 19 && twfSkill){ tempo += 1; }
-                else if (twfSkill >= 40 && twfSkill < 60){ tempo += 2; }
-                else if (twfSkill >= 60){ tempo += 3; }
-                // If Dual Wielding identical weapons
-                if (this.inventory.value[this.leftHand.value._id].name === this.inventory.value[this.rightHand.value._id].name){ tempo += 1; }   
-            }
-            return MML.attackTempoTable[tempo];
-        }};
+        }
+    }};  
+MML.computeAttribute.fomInitBonus = { dependents: ["initiative",
+                "castingMod"],
+    compute: function(){
+        return this.fomInitBonus;
+    }};  
+MML.computeAttribute.firstActionInitBonus = { dependents: ["initiative"],
+    compute: function(){
+        if(state.MML.GM.roundStarted === false){
+            this.firstActionInitBonus = this.action.initBonus;
+        }
+        return this.firstActionInitBonus;
+    }};
+MML.computeAttribute.spentInitiative = { dependents: ["initiative"],
+    compute: function(){
+        return this.spentInitiative;
+    }};
+MML.computeAttribute.actionTempo = { dependents: [],
+    compute: function(){
+        var tempo;
 
-    // Combat
-    this.ready = {
-        value: MML.getCurrentAttribute(this.name.value, "ready"),
-        dependents: [],
-        compute: function(){
-            if(state.MML.GM.inCombat === true && this.ready.value === false){
-                MML.getTokenFromChar(this.name.value).set("tint_color", "#FF0000");
+        if (this.action.skill < 30){ tempo = 0; }
+        else if (this.action.skill < 40){ tempo = 1; }
+        else if (this.action.skill < 50){ tempo = 2; }
+        else if (this.action.skill < 60){ tempo = 3; }
+        else if (this.action.skill < 70){ tempo = 4; }
+        else{ tempo = 5; }
+        
+        // If Dual Wielding
+        if (this.action.name === "Attack" && MML.isDualWielding.apply(this,[])){
+            var twfSkill = this.weaponskills["Two Weapon Fighting"].level;
+            if (twfSkill > 19 && twfSkill){ tempo += 1; }
+            else if (twfSkill >= 40 && twfSkill < 60){ tempo += 2; }
+            else if (twfSkill >= 60){ tempo += 3; }
+            // If Dual Wielding identical weapons
+            if (this.inventory[this.leftHand._id].name === this.inventory[this.rightHand._id].name){ tempo += 1; }   
+        }
+        return MML.attackTempoTable[tempo];
+    }};
+
+// Combat
+MML.computeAttribute.ready = { dependents: [],
+    compute: function(){
+        if(state.MML.GM.inCombat === true && this.ready === false){
+            MML.getTokenFromChar(this.name).set("tint_color", "#FF0000");
+        }
+        else{
+            MML.getTokenFromChar(this.name).set("tint_color", "transparent");
+        }
+        return this.ready;
+    }};
+MML.computeAttribute.action = { dependents: ["firstActionInitBonus",
+                "actionTempo",
+                "statusEffects"],
+    compute: function(){
+        var initBonus = 10;
+
+        if(this.action.name === "Attack"){
+            var leftHand = MML.getWeaponFamily.apply(this, ["leftHand"]);
+            var rightHand = MML.getWeaponFamily.apply(this, ["rightHand"]);
+            
+            if(leftHand === "Not a Weapon" && rightHand === "Not a Weapon"){
+                this.action.skill = 0; //this.weaponSkills["Brawling"].level or this.weaponSkills["Default Martial Skill"].level;
+            }
+            else if(leftHand !== "Not a Weapon" && rightHand !== "Not a Weapon"){
+                var weaponInits = [this.inventory[this.leftHand._id].grips[this.leftHand.grip].initiative,
+                                   this.inventory[this.rightHand._id].grips[this.rightHand.grip].initiative];
+                initBonus = _.min(weaponInits);
+                // this.action.skill = this.weaponSkills.[this.inventory[this.leftHand._id].name].level or this.weaponSkills["Default Martial Skill"].level;
+                //Dual Wielding
+            }
+            else if(rightHand !== "Not a Weapon" && leftHand === "Not a Weapon"){
+                initBonus = this.inventory[this.rightHand._id].grips[this.rightHand.grip].initiative;
             }
             else{
-                MML.getTokenFromChar(this.name.value).set("tint_color", "transparent");
+                initBonus = this.inventory[this.leftHand._id].grips[this.leftHand.grip].initiative;
+                //this.action.skill = this.weaponSkills.[this.inventory[this.leftHand._id].name].level or this.weaponSkills["Default Martial Skill"].level;                    
             }
-            return this.ready.value;
-        }};
-    this.action = {
-        value: MML.getCurrentAttributeJSON(this.name.value, "action"),
-        dependents: ["firstActionInitBonus",
-                    "actionTempo",
-                    "statusEffects"],
-        compute: function(){
-            var initBonus = 10;
-
-            if(this.action.value.name === "Attack"){
-                var leftHand = MML.getWeaponFamily.apply(this, ["leftHand"]);
-                var rightHand = MML.getWeaponFamily.apply(this, ["rightHand"]);
-                
-                if(leftHand === "Not a Weapon" && rightHand === "Not a Weapon"){
-                    this.action.value.skill = 0; //this.weaponSkills.value["Brawling"].level or this.weaponSkills.value["Default Martial Skill"].level;
-                }
-                else if(leftHand !== "Not a Weapon" && rightHand !== "Not a Weapon"){
-                    var weaponInits = [this.inventory.value[this.leftHand.value._id].grips[this.leftHand.value.grip].initiative,
-                                       this.inventory.value[this.rightHand.value._id].grips[this.rightHand.value.grip].initiative];
-                    initBonus = _.min(weaponInits);
-                    // this.action.value.skill = this.weaponSkills.value.[this.inventory.value[this.leftHand.value._id].name].level or this.weaponSkills.value["Default Martial Skill"].level;
-                    //Dual Wielding
-                }
-                else if(rightHand !== "Not a Weapon" && leftHand === "Not a Weapon"){
-                    initBonus = this.inventory.value[this.rightHand.value._id].grips[this.rightHand.value.grip].initiative;
-                }
-                else{
-                    initBonus = this.inventory.value[this.leftHand.value._id].grips[this.leftHand.value.grip].initiative;
-                    //this.action.value.skill = this.weaponSkills.value.[this.inventory.value[this.leftHand.value._id].name].level or this.weaponSkills.value["Default Martial Skill"].level;                    
-                }
-            }
-            this.action.value.initBonus = initBonus;
-
-            _.each(this.action.value.modifiers, function(modifier){
-                this.statusEffects.value[modifier] = { name: modifier };
-            }, this);
-
-            return this.action.value;
-        }};
-    this.defensesThisRound = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "defensesThisRound"),
-        dependents: [],
-        compute: function(){
-            return this.defensesThisRound.value;
-        }};
-    this.dodgedThisRound = {
-        value: MML.getCurrentAttributeAsBool(this.name.value, "dodgedThisRound"),
-        dependents: ["situationalInitBonus"],
-        compute: function(){
-            return this.dodgedThisRound.value;
-        }};
-    this.meleeThisRound = {
-        value: MML.getCurrentAttributeAsBool(this.name.value, "meleeThisRound"),
-        dependents: [],
-        compute: function(){
-            return this.meleeThisRound.value;
-        }};
-    this.fatigueLevel = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "fatigueLevel"),
-        dependents: ["statusEffects"],
-        compute: function(){
-            return this.fatigueLevel.value;
-        }};
-    this.roundsRest = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "roundsRest"),
-        dependents: [],
-        compute: function(){
-            return this.roundsRest.value;
-        }};    
-    this.roundsExertion = {
-        value: MML.getCurrentAttributeAsFloat(this.name.value, "roundsExertion"),
-        dependents: [],
-        compute: function(){
-            return this.roundsExertion.value;
-        }};
-    this.damagedThisRound = {
-        value: MML.getCurrentAttributeAsBool(this.name.value, "damagedThisRound"),
-        dependents: [],
-        compute: function(){
-            return this.damagedThisRound.value;
-        }};
-    
-    // Skills
-    this.skills = {
-        value: MML.getSkillAttributes(this.name.value, "skills"),
-        dependents: [],
-        compute: function(){
-            var characterSkills = MML.getSkillAttributes(this.name.value, "skills");
-            _.each(
-                characterSkills,
-                function(characterSkill, _id){
-                    var skillName = characterSkill.name;
-                    var level = characterSkill.input;       
-                    var attribute = MML.skills[skillName].attribute;
-
-                    level += MML.attributeMods[attribute][this[attribute].value];
-
-                    if(_.isUndefined(MML.skillMods[this.race.value]) === false && _.isUndefined(MML.skillMods[this.race.value][skillName]) === false){
-                        level += MML.skillMods[this.race.value][skillName];
-                    }
-                    if(_.isUndefined(MML.skillMods[this.gender.value]) === false && _.isUndefined(MML.skillMods[this.gender.value][skillName]) === false){
-                        level += MML.skillMods[this.gender.value][skillName];
-                    }
-                    characterSkill.level = level;
-                    MML.setCurrentAttribute(charName, "repeating_skills_" + _id + "_level", level);
-                },
-                this
-            );
-
-            this.skills.value = characterSkills;
-            return characterSkills;
-        }};
-    this.weaponSkills = {
-        value: MML.getSkillAttributes(this.name.value, "weaponskills"),
-        dependents: [],
-        compute: function(){
-            var characterSkills = MML.getSkillAttributes(this.name.value, "weaponskills");
-            _.each(
-                characterSkills,
-                function(characterSkill, _id){
-                    var weaponName = characterSkill.name;
-                    var level = characterSkill.input;
-
-                    if(_.isUndefined(MML.weaponSkillMods[this.race.value]) === false && _.isUndefined(MML.weaponSkillMods[this.race.value][weaponName]) === false){
-                        level += MML.weaponSkillMods[this.race.value][weaponName];
-                    }
-                    characterSkill.level = level;
-                    MML.setCurrentAttribute(charName, "repeating_weaponskills_" + _id + "_level", level);
-                },
-                this
-            );
-
-            this.weaponSkills.value = characterSkills;
-            return characterSkills;
-        }};
-
-    this.updateCharacter = function(attribute){
-        var attributeArray = [attribute];
-
-        for(var i = 0; i < attributeArray.length; i++){ //length of array is dynamic, for-in doesn't work here
-            var localAttribute = this[attributeArray[i]];
-            attributeArray = _.union(attributeArray, localAttribute.dependents);    
         }
-        // log(attributeArray);
+        this.action.initBonus = initBonus;
+
+        _.each(this.action.modifiers, function(modifier){
+            this.statusEffects[modifier] = { name: modifier };
+        }, this);
+
+        return this.action;
+    }};
+MML.computeAttribute.defensesThisRound = { dependents: [],
+    compute: function(){
+        return this.defensesThisRound;
+    }};
+MML.computeAttribute.dodgedThisRound = { dependents: ["situationalInitBonus"],
+    compute: function(){
+        return this.dodgedThisRound;
+    }};
+MML.computeAttribute.meleeThisRound = { dependents: [],
+    compute: function(){
+        return this.meleeThisRound;
+    }};
+MML.computeAttribute.fatigueLevel = { dependents: ["statusEffects"],
+    compute: function(){
+        return this.fatigueLevel;
+    }};
+MML.computeAttribute.roundsRest = { dependents: [],
+    compute: function(){
+        return this.roundsRest;
+    }};    
+MML.computeAttribute.roundsExertion = { dependents: [],
+    compute: function(){
+        return this.roundsExertion;
+    }};
+MML.computeAttribute.damagedThisRound = { dependents: [],
+    compute: function(){
+        return this.damagedThisRound;
+    }};
+
+// Skills
+MML.computeAttribute.skills = { dependents: [],
+    compute: function(){
+        var characterSkills = MML.getSkillAttributes(this.name, "skills");
         _.each(
-            attributeArray,
-            function(attribute) {
-                var value = this[attribute].compute.apply(this, []); // Run compute function from character scope
-                // log(attribute + " " + value);
-                this[attribute].value = value;
-                if(typeof(value) === "object"){
-                    value = JSON.stringify(value);
+            characterSkills,
+            function(characterSkill, _id){
+                var skillName = characterSkill.name;
+                var level = characterSkill.input;       
+                var attribute = MML.skills[skillName].attribute;
+
+                level += MML.attributeMods[attribute][this[attribute]];
+
+                if(_.isUndefined(MML.skillMods[this.race]) === false && _.isUndefined(MML.skillMods[this.race][skillName]) === false){
+                    level += MML.skillMods[this.race][skillName];
                 }
-                //log(attribute);       
-                MML.setCurrentAttribute(this.name.value, attribute, value);
+                if(_.isUndefined(MML.skillMods[this.gender]) === false && _.isUndefined(MML.skillMods[this.gender][skillName]) === false){
+                    level += MML.skillMods[this.gender][skillName];
+                }
+                characterSkill.level = level;
+                MML.setCurrentAttribute(charName, "repeating_skills_" + _id + "_level", level);
             },
             this
-        );};
-};
+        );
 
-MML.characterCommand = function characterCommand(){
-    
-};
+        this.skills = characterSkills;
+        return characterSkills;
+    }};
+MML.computeAttribute.weaponSkills = { dependents: [],
+    compute: function(){
+        var characterSkills = MML.getSkillAttributes(this.name, "weaponskills");
+        _.each(
+            characterSkills,
+            function(characterSkill, _id){
+                var weaponName = characterSkill.name;
+                var level = characterSkill.input;
+
+                if(_.isUndefined(MML.weaponSkillMods[this.race]) === false && _.isUndefined(MML.weaponSkillMods[this.race][weaponName]) === false){
+                    level += MML.weaponSkillMods[this.race][weaponName];
+                }
+                characterSkill.level = level;
+                MML.setCurrentAttribute(charName, "repeating_weaponskills_" + _id + "_level", level);
+            },
+            this
+        );
+
+        this.weaponSkills = characterSkills;
+        return characterSkills;
+    }};
+
 
 MML.updateInventory = function updateInventory(charName){
     //Armor
     var armor = [];
-    var item = MML.getCharAttribute(this.name.value, "repeating_item_0_armorStyleName");
+    var item = MML.getCharAttribute(this.name, "repeating_item_0_armorStyleName");
     var index = 0;
     while(typeof item !== "undefined"){
         armor[index] = { style: "", material: "", quality: "" };
@@ -1223,33 +1138,33 @@ MML.updateInventory = function updateInventory(charName){
             if(right === false && left === false){
                 left = true;
                 right = true;
-                state.MML.characters[charName].inventory.weapons.push(weapons[index]);
+                state.MML.GM.characters[charName].inventory.weapons.push(weapons[index]);
             }
             else {
-                state.MML.characters[charName].error = "Equipment Conflict: Hands Full";
+                state.MML.GM.characters[charName].error = "Equipment Conflict: Hands Full";
             }
             
         }
         else if(weapons[index].equipped === "Right"){
             if(right === false){
                 right = true;
-                state.MML.characters[charName].inventory.weapons.push(weapons[index]);
+                state.MML.GM.characters[charName].inventory.weapons.push(weapons[index]);
             }
             else {
-                state.MML.characters[charName].error = "Equipment Conflict: Hands Full";
+                state.MML.GM.characters[charName].error = "Equipment Conflict: Hands Full";
             }
         }
         else if(weapons[index].equipped === "Left"){
             if(left === false){
                 left = true;
-                state.MML.characters[charName].inventory.weapons.push(weapons[index]);
+                state.MML.GM.characters[charName].inventory.weapons.push(weapons[index]);
             }
             else {
-                state.MML.characters[charName].error = "Equipment Conflict: Hands Full";
+                state.MML.GM.characters[charName].error = "Equipment Conflict: Hands Full";
             }
         }
         else{
-            state.MML.characters[charName].inventory.inPack.push(weapons[index]);
+            state.MML.GM.characters[charName].inventory.inPack.push(weapons[index]);
         }
         index++;
         item = MML.getCharAttribute(charName, "repeating_weapons_" + index + "_weaponName");
@@ -1259,67 +1174,67 @@ MML.updateInventory = function updateInventory(charName){
     if(MML.getCharAttribute(charName, "shieldEquipped") === "Right"){
         if(right === false){
             right = true;
-            state.MML.characters[charName].inventory.shield = MML.shieldStats[MML.getCharAttribute(charName, "shieldName")];
+            state.MML.GM.characters[charName].inventory.shield = MML.shieldStats[MML.getCharAttribute(charName, "shieldName")];
         }
         else {
-            state.MML.characters[charName].error = "Equipment Conflict: Hands Full";
+            state.MML.GM.characters[charName].error = "Equipment Conflict: Hands Full";
         }
     }
     else if(MML.getCharAttribute(charName, "shieldEquipped") === "Left"){
         if(left === false){
             left = true;
-            state.MML.characters[charName].inventory.shield = MML.shieldStats[MML.getCharAttribute(charName, "shieldName")];
+            state.MML.GM.characters[charName].inventory.shield = MML.shieldStats[MML.getCharAttribute(charName, "shieldName")];
         }
         else {
-            state.MML.characters[charName].error = "Equipment Conflict: Hands Full";
+            state.MML.GM.characters[charName].error = "Equipment Conflict: Hands Full";
         }
     }
     else{
-        state.MML.characters[charName].inventory.inPack.push(MML.shieldStats[MML.getCharAttribute(charName, "shieldName")]);
+        state.MML.GM.characters[charName].inventory.inPack.push(MML.shieldStats[MML.getCharAttribute(charName, "shieldName")]);
     }
         
     //Other items
     
 
     //This looks at the character's stuff and decides which column on hit table to use (A, B, or C)
-    if(state.MML.characters[charName].inventory.weapons.length === 0){
-        state.MML.characters[charName].defense.hitTable = "A";
+    if(state.MML.GM.characters[charName].inventory.weapons.length === 0){
+        state.MML.GM.characters[charName].defense.hitTable = "A";
     }
-    else if (state.MML.characters[charName].inventory.weapons.length === 2){
-        state.MML.characters[charName].defense.hitTable = "B";
+    else if (state.MML.GM.characters[charName].inventory.weapons.length === 2){
+        state.MML.GM.characters[charName].defense.hitTable = "B";
     }
-    else if(state.MML.characters[charName].inventory.shield !== "None"){
-        state.MML.characters[charName].defense.hitTable = "C";
+    else if(state.MML.GM.characters[charName].inventory.shield !== "None"){
+        state.MML.GM.characters[charName].defense.hitTable = "C";
     }
-    else if(MML.weaponStats[state.MML.characters[charName].inventory.weapons[0]].family === "MWD" || 
-    MML.weaponStats[state.MML.characters[charName].inventory.weapons[0]].family === "MWM" ||
-    MML.weaponStats[state.MML.characters[charName].inventory.weapons[0]].family === "TWH" || 
-    MML.weaponStats[state.MML.characters[charName].inventory.weapons[0]].family === "TWK" || 
-    MML.weaponStats[state.MML.characters[charName].inventory.weapons[0]].family === "TWS" || 
-    MML.weaponStats[state.MML.characters[charName].inventory.weapons[0]].family === "SLI"){
-        state.MML.characters[charName].defense.hitTable = "A";
+    else if(MML.weaponStats[state.MML.GM.characters[charName].inventory.weapons[0]].family === "MWD" || 
+    MML.weaponStats[state.MML.GM.characters[charName].inventory.weapons[0]].family === "MWM" ||
+    MML.weaponStats[state.MML.GM.characters[charName].inventory.weapons[0]].family === "TWH" || 
+    MML.weaponStats[state.MML.GM.characters[charName].inventory.weapons[0]].family === "TWK" || 
+    MML.weaponStats[state.MML.GM.characters[charName].inventory.weapons[0]].family === "TWS" || 
+    MML.weaponStats[state.MML.GM.characters[charName].inventory.weapons[0]].family === "SLI"){
+        state.MML.GM.characters[charName].defense.hitTable = "A";
     }
-    else if(MML.weaponStats[state.MML.characters[charName].inventory.weapons[0]].hands === 2){
-        state.MML.characters[charName].defense.hitTable = "B";
+    else if(MML.weaponStats[state.MML.GM.characters[charName].inventory.weapons[0]].hands === 2){
+        state.MML.GM.characters[charName].defense.hitTable = "B";
     }
     else{
-        state.MML.characters[charName].defense.hitTable = "A";
+        state.MML.GM.characters[charName].defense.hitTable = "A";
     }
 };
 
 //Combat Functions
 MML.displayMovement = function displayMovement(input){
-    if(input){
-        MML.getTokenFromChar(this.name.value).set("aura1_radius", MML.movementRates[this.race.value][this.movementPosition.value]*this.movementAvailable.value);
-        MML.getTokenFromChar(this.name.value).set("aura1_color", "#00FF00");
+    if(input.display){
+        MML.getTokenFromChar(this.name).set("aura1_radius", MML.movementRates[this.race][this.movementPosition]*this.movementAvailable);
+        MML.getTokenFromChar(this.name).set("aura1_color", "#00FF00");
     }
     else{
-        MML.getTokenFromChar(this.name.value).set("aura1_color", "transparent");
+        MML.getTokenFromChar(this.name).set("aura1_color", "transparent");
     }
 };
 
 MML.moveDistance = function moveDistance(distance){
-    this.movementAvailable.value -= (distance)/(MML.movementRates[this.race.value][this.movementPosition.value]);
+    this.movementAvailable -= (distance)/(MML.movementRates[this.race][this.movementPosition]);
     MML.displayMovement.apply(this, [true]);
 };
 
@@ -1334,7 +1249,7 @@ MML.computeSitMods = function computeSitMods(){
     var i;
     for(i in MML.hitPoints){
         if(MML.hitPoints[i].name !== "multiWound"){
-            if(this[MML.hitPoints[i].name].wound.major.value === true){
+            if(this[MML.hitPoints[i].name].wound.major === true){
                 initiative += -5;
                 if(this[MML.hitPoints[i].name].wound.major.duration > 0){
                     situational  += -10;
@@ -1360,7 +1275,7 @@ MML.computeSitMods = function computeSitMods(){
             if(this.inventory.weapons.length === 0){
                 //Unarmed
                 initiative  += 10;
-                this.action.skill = this.skills["brawling"].value;
+                this.action.skill = this.skills["brawling"];
             }
             else if(this.inventory.weapons.length === 2){
                 //Dual Wielding
@@ -1370,7 +1285,7 @@ MML.computeSitMods = function computeSitMods(){
             }
             else{
                 initiative  += MML.weaponStats[this.inventory.weapons[0].name].initiative;
-                this.action.skill = this.skills[this.inventory.weapons[0].name].value;
+                this.action.skill = this.skills[this.inventory.weapons[0].name];
             }
             if (this.action.calledShot === "head" || 
             this.action.calledShot === "chest" || 
@@ -1459,7 +1374,7 @@ MML.computeSitMods = function computeSitMods(){
     this.modifiers.casting = casting;
 };
 
-MML.newRoundUpdate = function newRoundUpdate(){
+MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input){
     //Update wound counters, only major wounds have temporary effects. Disabling wound stun is handled with the .stun.duration property
     // var i;
     // for(i in MML.hitPoints){
@@ -1474,75 +1389,186 @@ MML.newRoundUpdate = function newRoundUpdate(){
     // }
     
     // Handle fatigue don't use the fitness score to track fatigue, just use the combat state
-    if (this.meleeThisRound.value === true){ // Character acted in melee
-        this.roundsExertion.value++;
-        this.updateCharacter("roundsExertion");
-        this.roundsRest.value = 0;
-        this.updateCharacter("roundsRest");
+    if (this.meleeThisRound === true){ // Character acted in melee
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "setApiCharAttribute",
+            input: {
+                attribute: "roundsExertion",
+                value: this.roundsExertion + 1
+            }
+        });
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "setApiCharAttribute",
+            input: {
+                attribute: "roundsRest",
+                value: 0
+            }
+        });
 
-        if (this.fatigueLevel.value < 1){
-            if (this.roundsExertion.value > this.fitness.value){
+        if (this.fatigueLevel < 1){
+            if (this.roundsExertion > this.fitness){
                 if (MML.attributeCheckRoll(charName, "fitness", [0])){
-                    this.fatigueLevel.value++;
-                    this.updateCharacter("fatigueLevel");
-                    this.roundsExertion.value = 0;
-                    this.updateCharacter("roundsExertion");
+                    MML.processCommand({
+                        type: "character",
+                        who: this.name,
+                        triggeredFunction: "setApiCharAttribute",
+                        input: {
+                            attribute: "fatigueLevel",
+                            value: this.fatigueLevel + 1
+                        }
+                    });
+                    MML.processCommand({
+                        type: "character",
+                        who: this.name,
+                        triggeredFunction: "setApiCharAttribute",
+                        input: {
+                            attribute: "roundsExertion",
+                            value: 0
+                        }
+                    });
                 }
             }
         }
         else {
-            if (this.roundsExertion.value > Math.round(this.fitness.value/2)){
+            if (this.roundsExertion > Math.round(this.fitness/2)){
                 if (MML.attributeCheckRoll(charName, "fitness", [-4])){
-                    this.fatigueLevel.value++;
-                    this.updateCharacter("fatigueLevel");
-                    this.roundsExertion.value = 0;
-                    this.updateCharacter("roundsExertion");
+                    MML.processCommand({
+                        type: "character",
+                        who: this.name,
+                        triggeredFunction: "setApiCharAttribute",
+                        input: {
+                            attribute: "fatigueLevel",
+                            value: this.fatigueLevel + 1
+                        }
+                    });
+                    MML.processCommand({
+                        type: "character",
+                        who: this.name,
+                        triggeredFunction: "setApiCharAttribute",
+                        input: {
+                            attribute: "roundsExertion",
+                            value: 0
+                        }
+                    });
                 }
             }
         }
 
-        this.meleeThisRound.value = false;
-        this.updateCharacter("meleeThisRound");
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "setApiCharAttribute",
+            input: {
+                attribute: "meleeThisRound",
+                value: false
+            }
+        });
     }
-    else if (this.fatigueLevel.value > 0){
-        this.roundsRest.value++;
-        this.updateCharacter("roundsRest");
-        if (this.roundsRest.value >= 6 && this.attributeCheckRoll("health", [0])){
-            this.roundsRest.value = 0;
-            this.updateCharacter("roundsRest");
-            this.fatigueLevel.value--;
+    else if (this.fatigueLevel > 0){
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "setApiCharAttribute",
+            input: {
+                attribute: "roundsRest",
+                value: this.roundsRest + 1
+            }
+        });
+        if (this.roundsRest >= 6 && this.attributeCheckRoll("health", [0])){
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                triggeredFunction: "setApiCharAttribute",
+                input: {
+                    attribute: "roundsRest",
+                    value: 0
+                }
+            });
+            this.fatigueLevel--;
             this.updateCharacter("fatigueLevel");
-            this.roundsExertion.value = 0;
-            this.updateCharacter("roundsExertion");
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                triggeredFunction: "setApiCharAttribute",
+                input: {
+                    attribute: "fatigueLevel",
+                    value: this.fatigueLevel - 1
+                }
+            });
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                triggeredFunction: "setApiCharAttribute",
+                input: {
+                    attribute: "roundsExertion",
+                    value: 0
+                }
+            });
         }
     }
     // Reset number of defenses counter
-    this.defensesThisRound.value = 0;
-    this.updateCharacter("defensesThisRound");
-    this.dodgedThisRound.value = false;
-    this.updateCharacter("dodgedThisRound");
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "setApiCharAttribute",
+        input: {
+            attribute: "defensesThisRound",
+            value: 0
+        }
+    });
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "setApiCharAttribute",
+        input: {
+            attribute: "dodgedThisRound",
+            value: false
+        }
+    });
     // Reset knockdown number
-    this.knockdown.value = this.knockdownMax.value;
-    this.updateCharacter("knockdown");
-    // Decrement stumble effect
-    //this.stumble--;
-    // Decrement sensitive area effect
-    //this.sensitive--;
-    // Reset action counter
-    this.spentInitiative.value = 0;
-    this.updateCharacter("spentInitiative");
-    // Reset currentRoll
-    //this.currentRoll = { accepted:false };
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "setApiCharAttribute",
+        input: {
+            attribute: "knockdown",
+            value: this.knockdownMax
+        }
+    });
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "setApiCharAttribute",
+        input: {
+            attribute: "spentInitiative",
+            value: 0
+        }
+    });
+    this.action = {};
+
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "setApiCharAttribute",
+        input: {
+            attribute: "ready",
+            value: false
+        }
+    });
 };
 
 MML.setReady = function setReady(ready){
-    if(state.MML.GM.inCombat === true && this.ready.value === "false"){
-        MML.getTokenFromChar(this.name.value).set("tint_color", "#FF0000");
+    if(state.MML.GM.inCombat === true && this.ready === "false"){
+        MML.getTokenFromChar(this.name).set("tint_color", "#FF0000");
     }
     else{
-        MML.getTokenFromChar(this.name.value).set("tint_color", "transparent");
+        MML.getTokenFromChar(this.name).set("tint_color", "transparent");
     }
-    return this.ready.value;
+    return this.ready;
 };
 
 // Health and Wounds
@@ -1653,13 +1679,13 @@ MML.woundRoll = function woundRoll(woundInfo){
     woundInfo.result = roll.result;
     woundInfo.target = roll.target;
     woundInfo.range = roll.range;
-    woundInfo.value = roll.value;
+    woundInfo = roll;
     return woundInfo;
 };
 
 MML.checkKnockdown = function checkKnockdown(damage){
-    if (this.movementPosition.value !== "Prone"){
-        this.knockdown.value += damage;
+    if (this.movementPosition !== "Prone"){
+        this.knockdown += damage;
         this.updateCharacter("knockdown");
     }
 };
@@ -1691,7 +1717,6 @@ MML.sensitiveAreaRoll = function sensitiveAreaCheck(){
     return roll;
 };
 
-//ToDo: return damage only and send damage deflected to global message handler
 MML.armorPenetration = function armorPenetration(position, damage, type) {
     var damageApplied = false; //Accounts for partial coverage, once true the loop stops
     var coverageRoll = randomInteger(100); 
@@ -1702,14 +1727,14 @@ MML.armorPenetration = function armorPenetration(position, damage, type) {
     for (apv in this.apv[position][type]){
         if (damageApplied === false){
             if (coverageRoll <= this.apv[position][type][apv].coverage) { //if coverage roll is less than apv coverage
-                damageDeflected = this.apv[position][type][apv].value;
+                damageDeflected = this.apv[position][type][apv];
                 
                 //If all damage is deflected, do blunt trauma. Modifies damage variable for next if statement
                 if (damage + damageDeflected >= 0){
                     //If surface, cut, or pierce, cut in half and apply as impact
                     if (type === "Surface" || type === "Cut" || type === "Pierce"){                        
                         damage = Math.ceil(damage/2);
-                        damageDeflected = this.apv[position].Impact[apv].value;
+                        damageDeflected = this.apv[position].Impact[apv];
                         
                         if (damage + damageDeflected >= 0){
                             damageDeflected = -damage;
@@ -1719,7 +1744,7 @@ MML.armorPenetration = function armorPenetration(position, damage, type) {
                     //If chop, or thrust, apply 3/4 as impact
                     else if (type === "Chop" || type === "Thrust"){
                         damage = Math.ceil(damage*0.75);
-                        damageDeflected = this.apv[position].Impact[apv].value;
+                        damageDeflected = this.apv[position].Impact[apv];
                         
                         if (damage + damageDeflected >= 0){
                             damageDeflected = -damage;
@@ -1745,10 +1770,10 @@ MML.armorPenetration = function armorPenetration(position, damage, type) {
 };
 
 MML.getWeaponFamily = function getWeaponFamily(hand){
-    var item = this.inventory.value[this[hand].value._id];
+    var item = this.inventory[this[hand]._id];
 
     if(!_.isUndefined(item) && item.type === "weapon"){
-        return item.grips[this[hand].value.grip].family;
+        return item.grips[this[hand].grip].family;
     }
     else{
         return "Not a Weapon";
@@ -1776,7 +1801,7 @@ MML.isDualWielding = function isDualWielding(){
     var leftHand = MML.getWeaponFamily.apply(this, ["leftHand"]);
     var rightHand = MML.getWeaponFamily.apply(this, ["rightHand"]);
 
-    if(this.leftHand.value._id !== this.rightHand.value._id &&
+    if(this.leftHand._id !== this.rightHand._id &&
         leftHand !== "Not a Weapon" &&
         rightHand !== "Not a Weapon"){
         return true;
@@ -1786,250 +1811,339 @@ MML.isDualWielding = function isDualWielding(){
     }
 };
 
-MML.initiativeRoll = function initiativeRoll(){
+MML.initiativeRoll = function initiativeRoll(input){
     var rollValue = MML.rollDice(1, 10);
-    this.updateCharacter("action");
-    this.ready.value = true;
-    this.updateCharacter("ready");
+    
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "updateCharacter",
+        input: {
+            attribute: "action"
+        }
+    });
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "setApiCharAttribute",
+        input: {
+            attribute: "ready",
+            value: true
+        }
+    });
 
-    state.MML.players[this.player.value].currentRoll = {
-        who: this.who,
-        name: "initiative",
-        value: rollValue,
-        getResult: "initiativeResult",
-        applyResult: "initiativeApply",
-        range: "1-10",
-        accepted: false
-    };
-    MML.initiativeResult.apply(this, []);
+    MML.processCommand({
+        type: "player",
+        who: this.player,
+        triggeredFunction: "setApiPlayerAttribute",
+        input: {
+            attribute: "currentRoll",
+            value: {
+                who: this.name,
+                name: "initiative",
+                value: rollValue,
+                getResult: "initiativeResult",
+                applyResult: "initiativeApply",
+                range: "1-10",
+                accepted: false
+            }
+        }   
+    });
+
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "initiativeResult",
+        input: {}
+    });
 };
 
-MML.initiativeResult = function initiativeResult(){
-    state.MML.players[this.player.value].currentRoll.rollResult = state.MML.players[this.player.value].currentRoll.value + 
-                                this.situationalInitBonus.value + 
-                                this.movementRatioInitBonus.value +
-                                this.attributeInitBonus.value + 
-                                this.senseInitBonus.value +
-                                this.fomInitBonus.value +
-                                this.firstActionInitBonus.value +
-                                this.spentInitiative.value;
+MML.initiativeResult = function initiativeResult(input){
+    var player = state.MML.players[this.player];
+    var currentRoll = player.currentRoll;
 
-    state.MML.players[this.player.value].currentRoll.message = "Roll: " + state.MML.players[this.player.value].currentRoll.value + 
-                                                               "\nResult: " + state.MML.players[this.player.value].currentRoll.rollResult + 
-                                                               "\nRange: " + state.MML.players[this.player.value].currentRoll.range;
+    currentRoll.rollResult = 
+        currentRoll.value + 
+        this.situationalInitBonus + 
+        this.movementRatioInitBonus +
+        this.attributeInitBonus + 
+        this.senseInitBonus +
+        this.fomInitBonus +
+        this.firstActionInitBonus +
+        this.spentInitiative;
 
-    if(state.MML.players[this.player.value].name === state.MML.GM.player){
-        if(state.MML.players[this.player.value].currentRoll.accepted === false){
-            MML.displayGmRoll.apply(state.MML.players[this.player.value], []);
+    currentRoll.message =
+        "Roll: " + currentRoll.value + 
+        "\nResult: " + currentRoll.rollResult + 
+        "\nRange: " + currentRoll.range;
+
+    if(player.name === state.MML.GM.player){
+        if(currentRoll.accepted === false){
+            MML.processCommand({
+                type: "player",
+                who: player.name,
+                triggeredFunction: "displayGmRoll",
+                input: {}
+            });
         }
         else{
-            MML.initiativeApply.apply(this, []);
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                triggeredFunction: "initiativeApply",
+                input: {}
+            });
         }
     }
     else{
-        MML.displayPlayerRoll.apply(state.MML.players[this.player.value], []);
+        MML.processCommand({
+            type: "player",
+            who: player.name,
+            triggeredFunction: "displayPlayerRoll",
+            input: {}
+        });
     }
 };
 
 MML.initiativeApply = function initiativeApply(){
-    this.initiativeRoll.value = state.MML.players[this.player.value].currentRoll.value;
-    this.updateCharacter("initiativeRoll");
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "setApiCharAttribute",
+        input: {
+            attribute: "initiativeRoll",
+            value: state.MML.players[this.player].currentRoll.value
+        }
+    });
+
+    MML.processCommand({
+        type: "player",
+        who: this.player,
+        triggeredFunction: "prepareNextCharacter",
+        input: {}   
+    });
 
     
-    state.MML.players[this.player.value].characterIndex++;
-    if(state.MML.players[this.player.value].characterIndex < state.MML.players[this.player.value].characters.length){
-        MML.charMenuPrepareAction.apply(state.MML.players[this.player.value], [this.name.value]);
-    }
-    else if(state.MML.players[this.player.value].name === state.MML.GM.player){
-        MML.GmMenuStartRound.apply(state.MML.players[this.player.value], ["GM"]);
-    }
-    MML.displayMenu.apply(state.MML.players[this.player.value], []);
 };
 
 MML.startAttackAction = function startAttackAction(){
-    if(_.contains(this.action.value.modifiers, ["Called Shot"])){
-        MML.menuSelectBodyPart.apply(state.MML.players[this.player.value], [this.name.value]);
+    var player = state.MML.players[this.player];
+    if(_.contains(this.action.modifiers, ["Called Shot"])){
+        MML.processCommand({
+            type: "player",
+            who: player.name,
+            triggeredFunction: "menuSelectBodyPart",
+            input: {
+                who: this.name,
+            }   
+        });
     }
-    else if(_.contains(this.action.value.modifiers, ["Called Shot Specific"])){
-        MML.menuSelectHitPosition.apply(state.MML.players[this.player.value], [this.name.value]);
+    else if(_.contains(this.action.modifiers, ["Called Shot Specific"])){
+        MML.processCommand({
+            type: "player",
+            who: player.name,
+            triggeredFunction: "menuSelectHitPosition",
+            input: {
+                who: this.name,
+            }   
+        });
     }
-    else if(_.contains(this.action.value.modifiers, ["Aim"])){
+    else if(_.contains(this.action.modifiers, ["Aim"])){
         if(MML.hasStatusEffect("Taking Aim")){
-            this.statusEffects.value["Taking Aim"].level++;
+            this.statusEffects["Taking Aim"].level++;
         }
         else{
-            this.statusEffects.value["Taking Aim"] = { name: "Taking Aim", level: 1, target: this.action.value.targets[0] };
+            this.statusEffects["Taking Aim"] = { name: "Taking Aim", level: 1, target: this.action.targets[0] };
         }
     }
     else{
-        MML.getAttackRoll.apply(this, []);
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "getAttackRoll",
+            input: {}   
+        });
     }
 };
 
 
 MML.statusEffects = {};
 MML.statusEffects["Major Wound"] = function(effect, index){
-    if(this[effect.bodyPart].value > Math.round(this[effect.bodyPart + "Max"].value/2)){
+    if(this[effect.bodyPart] > Math.round(this[effect.bodyPart + "Max"]/2)){
         delete this.statusEffects[index];
     }
     else{
-        if(this.situationalInitBonus.value !== "No Combat"){
-            this.situationalInitBonus.value += -5;
+        if(this.situationalInitBonus !== "No Combat"){
+            this.situationalInitBonus += -5;
         }
         if(effect.duration > 0){
-            this.situationalMod.value += -10;
+            this.situationalMod += -10;
         }
     }
 };
 MML.statusEffects["Disabling Wound"] = function(effect, index){
-    if(this[effect.bodyPart].value > 0){
+    if(this[effect.bodyPart] > 0){
         delete this.statusEffects[index];
     }
     else{
-        if(this.situationalInitBonus.value !== "No Combat"){
-            this.situationalInitBonus.value += -10;
+        if(this.situationalInitBonus !== "No Combat"){
+            this.situationalInitBonus += -10;
         }
-        this.situationalMod.value += -25;
+        this.situationalMod += -25;
     }
 };
 MML.statusEffects["Mortal Wound"] = function(effect, index){
-    if(this[effect.bodyPart].value <= -this[effect.bodyPart + "Max"].value){
+    if(this[effect.bodyPart] <= -this[effect.bodyPart + "Max"]){
         delete this.statusEffects[index];
     }
     else{
-        this.situationalInitBonus.value = "No Combat";
+        this.situationalInitBonus = "No Combat";
     }
 };
 MML.statusEffects["Wound Fatigue"] = function(effect, index){
-    if(this.situationalInitBonus.value !== "No Combat"){
-        this.situationalInitBonus.value += -5;
+    if(this.situationalInitBonus !== "No Combat"){
+        this.situationalInitBonus += -5;
     }
-    this.situationalMod.value  += -10;
+    this.situationalMod  += -10;
 };
 MML.statusEffects["Number of Defenses"] = function(effect, index){
-    this.missileDefenseMod.value += -20 * effect.number;
-    this.meleeDefenseMod.value += -20 * effect.number;
-};
-MML.statusEffects["Fatigue"] = function(effect, index){
-    if(this.situationalInitBonus.value !== "No Combat"){
-        this.situationalInitBonus.value += -5*effect.level;
-    }
-    this.situationalMod.value  += -10*effect.level;
-};
-MML.statusEffects["Sensitive Area"] = function(effect, index){
-    if(effect.duration < 1){
+    if(state.GM.roundStarted === false){ 
         delete this.statusEffects[index];
     }
+
+    this.missileDefenseMod += -20 * effect.number;
+    this.meleeDefenseMod += -20 * effect.number;
+};
+MML.statusEffects["Fatigue"] = function(effect, index){
+    if(this.situationalInitBonus !== "No Combat"){
+        this.situationalInitBonus += -5*effect.level;
+    }
+    this.situationalMod  += -10*effect.level;
+};
+MML.statusEffects["Sensitive Area"] = function(effect, index){
+    if(state.GM.roundStarted === false){ 
+        effect.duration--;
+        if(effect.duration < 1){
+            delete this.statusEffects[index];
+        }
+    }
     else{
-        if(this.situationalInitBonus.value !== "No Combat"){
-            this.situationalInitBonus.value += -5;
+        if(this.situationalInitBonus !== "No Combat"){
+            this.situationalInitBonus += -5;
         }
     }
     if(effect.duration > 1){
-        this.situationalMod.value  += -10;
+        this.situationalMod  += -10;
     }
 };
 MML.statusEffects["Stumbling"] = function(effect, index){
-    if(effect.duration < 1){
-        delete this.statusEffects[index];
+    if(state.GM.roundStarted === false){ 
+        effect.duration--;
+        if(effect.duration < 1){
+            delete this.statusEffects[index];
+        }
     }
     else{
-        if(this.situationalInitBonus.value !== "No Combat"){
-            this.situationalInitBonus.value += -5;
+        if(this.situationalInitBonus !== "No Combat"){
+            this.situationalInitBonus += -5;
         }
     }
 };
 MML.statusEffects["Called Shot"] = function(effect, index){
-    if(!_.contains(this.action.value.modifiers, "Called Shot")){
+    if(!_.contains(this.action.modifiers, "Called Shot")){
         delete this.statusEffects[index];
     }
 
     else{
-        this.missileDefenseMod.value += -10;
-        this.meleeDefenseMod.value += -10;
-        this.missileAttackMod.value += -10;
-        this.meleeAttackMod.value += -10;
-        if(this.situationalInitBonus.value !== "No Combat"){
-            this.situationalInitBonus.value += -5;
+        this.missileDefenseMod += -10;
+        this.meleeDefenseMod += -10;
+        this.missileAttackMod += -10;
+        this.meleeAttackMod += -10;
+        if(this.situationalInitBonus !== "No Combat"){
+            this.situationalInitBonus += -5;
         }
     }
 };
 MML.statusEffects["Called Shot Specific"] = function(effect, index){
-    if(!_.contains(this.action.value.modifiers, "Called Shot Specific")){
+    if(!_.contains(this.action.modifiers, "Called Shot Specific")){
         delete this.statusEffects[index];
     }
     else{
-        this.missileDefenseMod.value += -30;
-        this.meleeDefenseMod.value += -30;
-        this.meleeAttackMod.value += -30;
-        this.missileAttackMod.value += -30;
-        if(this.situationalInitBonus.value !== "No Combat"){
-            this.situationalInitBonus.value += -5;
+        this.missileDefenseMod += -30;
+        this.meleeDefenseMod += -30;
+        this.meleeAttackMod += -30;
+        this.missileAttackMod += -30;
+        if(this.situationalInitBonus !== "No Combat"){
+            this.situationalInitBonus += -5;
         }
     }
 };
 MML.statusEffects["Aggressive Stance"] = function(effect, index){
-    if(!_.contains(this.action.value.modifiers, "Aggressive Stance")){
+    if(!_.contains(this.action.modifiers, "Aggressive Stance")){
         // log("aggro deleted");
         delete this.statusEffects[index];
         // log(this.statusEffects);
     }
     else{
-        this.missileDefenseMod.value += -40;
-        this.meleeDefenseMod.value += -40;
-        this.meleeAttackMod.value += 10;
-        this.perceptionCheckMod.value += -4;
-        if(this.situationalInitBonus.value !== "No Combat"){
-            this.situationalInitBonus.value += 5;
+        this.missileDefenseMod += -40;
+        this.meleeDefenseMod += -40;
+        this.meleeAttackMod += 10;
+        this.perceptionCheckMod += -4;
+        if(this.situationalInitBonus !== "No Combat"){
+            this.situationalInitBonus += 5;
         }
     }
 };
 MML.statusEffects["Defensive Stance"] = function(effect, index){
-    if(!_.contains(this.action.value.modifiers, "Defensive Stance")){
+    if(!_.contains(this.action.modifiers, "Defensive Stance")){
         delete this.statusEffects[index];
     }
     else{
-        this.missileDefenseMod.value += 40;
-        this.meleeDefenseMod.value += 40;
-        this.meleeAttackMod.value += -30;
-        this.perceptionCheckMod.value += -4;
-        if(this.situationalInitBonus.value !== "No Combat"){
-            this.situationalInitBonus.value += -5;
+        this.missileDefenseMod += 40;
+        this.meleeDefenseMod += 40;
+        this.meleeAttackMod += -30;
+        this.perceptionCheckMod += -4;
+        if(this.situationalInitBonus !== "No Combat"){
+            this.situationalInitBonus += -5;
         }
     }
 };
 MML.statusEffects["Observe"] = function(effect, index){
-    if(effect.duration > 0){
+    if(state.GM.roundStarted === false){ 
+        effect.duration--;
+    }
+    
+    if(effect.duration < 1 || (this.situationalInitBonus !== "No Combat" && !MML.hasStatusEffect("Number of Defenses"))){
+        delete this.statusEffects[index];
+    }
+    else if(effect.duration < 1){
         // Observing this round
-        this.perceptionCheckMod.value += 4;
-        this.missileDefenseMod.value += -10;
-        this.meleeDefenseMod.value += -10;
+        this.perceptionCheckMod += 4;
+        this.missileDefenseMod += -10;
+        this.meleeDefenseMod += -10;
     }
     else{
         //observed previous round
-        if(this.situationalInitBonus.value !== "No Combat" && !MML.hasStatusEffect("Number of Defenses")){
-            this.situationalInitBonus.value += 5;
-            if(MML.isWieldingMissileWeapon.apply(this, [])){
-                this.missileAttackMod.value += 15;
+        this.situationalInitBonus += 5;
+        if(MML.isWieldingMissileWeapon.apply(this, [])){
+                this.missileAttackMod += 15;
             }
-        }
-        delete this.statusEffects[index];    
-    }
+        } 
 };
 MML.statusEffects["Taking Aim"] = function(effect, index){
     if(MML.hasStatusEffect.apply(this, ["Number of Defenses"]) ||
        MML.hasStatusEffect.apply(this, ["Damaged This Round"]) ||
        MML.hasStatusEffect.apply(this, ["Dodged This Round"]) ||
-       this.action.value.targets[0] !== effect.target)
+       this.action.targets[0] !== effect.target)
     {
-        delete this.statusEffects.value[index];
+        delete this.statusEffects[index];
     }
     else{
         if(effect.level === 1){
-            this.missileAttackMod.value += 30;
+            this.missileAttackMod += 30;
         }
         else if(effect.level === 2){
-            this.missileAttackMod.value += 40;
+            this.missileAttackMod += 40;
         }
     }
 };
@@ -2038,14 +2152,14 @@ MML.statusEffects["Aim"] = function(effect, index){
     //    MML.hasStatusEffect.apply(this, ["Damaged This Round"]) ||
     //    MML.hasStatusEffect.apply(this, ["Dodged This Round"]))
     // {
-    //     this.statusEffects.value[index]
+    //     this.statusEffects[index]
     // }
     // else if(state.MML.GM.roundStarted === false){
     //     if(effect.level === 1){
-    //         this.missileAttackMod.value += 30;
+    //         this.missileAttackMod += 30;
     //     }
     //     else if(effect.level === 2){
-    //         this.missileAttackMod.value += 40;
+    //         this.missileAttackMod += 40;
     //     }
     //}
 };
@@ -2057,13 +2171,14 @@ MML.statusEffects["Dodged This Round"] = function(effect, index){
 };
 MML.statusEffects["Melee This Round"] = function(effect, index){
     if(state.MML.GM.roundStarted === false){
-        this.roundsExertion.value++;
-        delete this.statusEffects.value[index];
+        this.roundsExertion++;
+        delete this.statusEffects[index];
     }
 };
 
 // //Give weapons functions and set character's getAttackRoll equal to it
-MML.attackRoll = function attackRoll(){
+MML.getAttackRoll = function getAttackRoll(input){
+    log()
  var roll;
     
  if (this.inventory.weapons.length === 0){
@@ -2087,6 +2202,35 @@ MML.attackRoll = function attackRoll(){
  this.fatigue.inMelee = true;
 
  return roll;
+};
+
+MML.attackRollResult = function attackRollResult(){
+    this.rolls.attack = this.currentRoll.result;
+    if(this.rolls.attack === "Critical Success" || this.rolls.attack === "Success"){
+        var player = state.MML.GM.characters[this.currentTarget].player;
+        state.MML.players[player].menu = "charMenuDefense";
+        MML.displayMenu.apply(state.MML.players[player], []);
+    }
+    else{
+        MML.endAction.apply(this, []);
+    }
+};
+
+MML.getDefenseRoll = function getDefenseRoll(){
+    this.currentRoll = this.characters[this.currentTarget].defenseRoll();
+    this.displayRoll();
+};
+
+MML.defenseRollResult = function defenseRollResult(){
+    this.rolls.defense = this.currentRoll.result;
+    if(this.rolls.defense === "Critical Success" || this.rolls.defense === "Success"){
+        this.endAction();
+    }
+    else{
+        var player = state.MML.GM.characters[this.actor].player;
+        state.MML.players[player].setMenu = MML.charMenuHitPositionRoll;
+        state.MML.players[player].displayMenu();
+    }
 };
 
 // MML.weaponDamageRoll = function weaponDamageRoll(crit){
@@ -2150,10 +2294,10 @@ MML.attackRoll = function attackRoll(){
 // MML.defenseRoll = function defenseRoll(){
 //  var roll = {};
 //  var weapon = this.inventory.weapons[0];
-//     var weaponSkill = Math.round(this.skills[weapon.name].value/2);
+//     var weaponSkill = Math.round(this.skills[weapon.name]/2);
 //  var shieldMod = this.inventory.shield.defenseMod;
-//  var dodgeSkill = this.skills.dodge.value;
-//  var defaultMartialSkill = this.skills.defaultMartial.value;
+//  var dodgeSkill = this.skills.dodge;
+//  var defaultMartialSkill = this.skills.defaultMartial;
 //  var defenseMod = this.modifiers.defense;
 //     var sitMod = this.modifiers.situational;
 //  var dodgeChance;
@@ -2228,7 +2372,7 @@ MML.attackRoll = function attackRoll(){
 //      // defenderSkill = defaultMartialSkill + shieldDefenseMod;
 //  // }
 
-//  //var position = MML.rollHitPosition(state.MML.characters[charName].action.elevation, defender, target);
+//  //var position = MML.rollHitPosition(state.MML.GM.characters[charName].action.elevation, defender, target);
 //  state.MML.Combat.turnInfo.currentRoll = this.universalRoll([task, skill, attackerSitMod, attackMod]);
 
 // };
