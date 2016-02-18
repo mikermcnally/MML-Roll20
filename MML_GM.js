@@ -399,17 +399,17 @@ MML.setTurnOrder = function setTurnOrder(){
 };
 
 MML.changeRoll = function changeRoll(input){
-	var value = input.value;
+	var value = input;
 	var range = this.currentRoll.range.split("-");
 	var low = parseInt(range[0]);
 	var high = parseInt(range[1]);
 
 	if(value >= low && value <= high){
 		if(this.currentRoll.name === "damage"){
-			this.currentRoll.value = -value;
+			this.currentRoll = -value;
 		}
 		else{
-			this.currentRoll.value = value;
+			this.currentRoll = value;
 		}
 	}
 	else{
@@ -555,6 +555,21 @@ MML.parseCommand = function parseCommand(msg) {
 	        }
 	    }
 
+	    else if(msg.type === "api" && msg.content.indexOf("!displayItemOptions") !== -1) {
+	        var input = msg.content.replace("!displayItemOptions ", "").split("|");
+	        var who = input[0];
+	        var itemId = input[1];
+
+	        command = {
+	            	type: "player",
+					who: msg.who.replace(" (GM)", ""),
+					triggeredFunction: "displayItemOptions",
+					input: {
+						who: who,
+						itemId: itemId
+					}
+	            };
+	    }
     	else{
     		var i;
 		    var hexes = msg.content.slice(1).match(/.{1,4}/g) || [];
@@ -563,166 +578,13 @@ MML.parseCommand = function parseCommand(msg) {
 		        command += String.fromCharCode(parseInt(hexes[i], 16));
 		    }
 	        command = JSON.parse(command);
+	        log(command);
 	        command.input.selectedCharNames = MML.getSelectedCharNames(msg.selected);
     	}
 
     	MML.processCommand(command);
     }
-    
-    // else if(msg.type === "api" && msg.content.indexOf("!displayItemOptions") !== -1) {
-    //     var input = msg.content.replace("!displayItemOptions ", "").split("|");
-    //     var who = input[0];
-    //     var itemId = input[1];
-    //     var item = state.MML.characters[who].inventory.value[itemId];
-    //     var player = state.MML.players[msg.who.replace(" (GM)", "")];
-    //     var buttons = [];
-    //     var unequipButton;
-    //     var hands;
-    //     player.menu = "charMenuDisplayItem";
-    //     player.message =  "Item Menu";      
-        
-    //     if(item.type === "weapon"){
-    //         //Weapon already equipped
-    //         if(state.MML.characters[who].leftHand.value._id === itemId || state.MML.characters[who].rightHand.value._id === itemId){
-    //             unequipButton = {
-    //                 text: "Unequip",
-    //                 nextMenu: "menuIdle"};
-
-    //             if(state.MML.characters[who].leftHand.value._id === itemId && state.MML.characters[who].leftHand.value._id === itemId){
-    //                 unequipButton.triggeredMethod = function(text){
-    //                     state.MML.characters[who].leftHand.value = {};
-    //                     state.MML.characters[who].rightHand.value = {};
-    //                     state.MML.characters[who].updateCharacter("leftHand");
-    //                     state.MML.characters[who].updateCharacter("rightHand");
-    //                     MML.displayMenu.apply(this, []);
-    //                     };
-    //             }
-    //             else if(state.MML.characters[who].leftHand.value._id === itemId){
-    //                 unequipButton.triggeredMethod = function(text){
-    //                     state.MML.characters[who].leftHand.value = {};
-    //                     state.MML.characters[who].updateCharacter("leftHand");
-    //                     MML.displayMenu.apply(this, []);
-    //                     };
-    //             }
-    //             else{
-    //                 unequipButton.triggeredMethod = function(text){
-    //                     state.MML.characters[who].rightHand.value = {};
-    //                     state.MML.characters[who].updateCharacter("rightHand");
-    //                     MML.displayMenu.apply(this, []);
-    //                     };
-    //             }
-    //             buttons.push(unequipButton);
-    //         }
-    //         else{
-    //             _.each(item.grips, function(grip, gripName){
-    //                 if(gripName === "One Hand"){
-    //                     buttons.push({
-    //                         text: "Equip Left Hand",
-    //                         nextMenu: "charMenuDisplayItem",
-    //                         triggeredMethod: function(text){
-    //                             if(state.MML.characters[who].rightHand.value.grip !== "One Hand"){
-    //                                 state.MML.characters[who].rightHand.value = {
-    //                                     _id: itemId,
-    //                                     grip: gripName
-    //                                 };
-    //                                 state.MML.characters[who].updateCharacter("rightHand");
-    //                             }
-    //                             state.MML.characters[who].leftHand.value = {
-    //                                 _id: itemId,
-    //                                 grip: gripName
-    //                             };
-    //                             state.MML.characters[who].updateCharacter("leftHand");
-
-    //                             MML.displayMenu.apply(this, []);
-    //                             }
-    //                         });
-    //                     buttons.push({
-    //                         text: "Equip Right Hand",
-    //                         nextMenu: "charMenuDisplayItem",
-    //                         triggeredMethod: function(text){
-    //                             if(state.MML.characters[who].leftHand.value.grip !== "One Hand"){
-    //                                 state.MML.characters[who].leftHand.value = {
-    //                                     _id: itemId,
-    //                                     grip: gripName
-    //                                 };
-    //                                 state.MML.characters[who].updateCharacter("leftHand");
-    //                             }
-    //                             state.MML.characters[who].rightHand.value = {
-    //                                 _id: itemId,
-    //                                 grip: gripName
-    //                             };
-    //                             state.MML.characters[who].updateCharacter("rightHand");
-    //                             MML.displayMenu.apply(this, []);
-    //                             }
-    //                         });
-    //                     }
-    //                 else{
-    //                     buttons.push({
-    //                         text: "Equip " + gripName,
-    //                         nextMenu: "charMenuDisplayItem",
-    //                         triggeredMethod: function(text){
-    //                             state.MML.characters[who].rightHand.value = {
-    //                                 _id: itemId,
-    //                                 grip: gripName
-    //                             };
-    //                             state.MML.characters[who].leftHand.value = state.MML.characters[who].rightHand.value;
-    //                             state.MML.characters[who].updateCharacter("rightHand");                     
-    //                             state.MML.characters[who].updateCharacter("leftHand");
-    //                             MML.displayMenu.apply(this, []);
-    //                             }
-    //                         });
-    //                     }
-    //                 });
-    //             }
-    //         }
-    //     else if(item.type === "armor"){
-    //         log(item.type);
-    //         }
-    //     else if(item.type === "shield"){
-    //         buttons.push({
-    //             text: "Equip Left Hand",
-    //             nextMenu: "charMenuDisplayItem",
-    //             triggeredMethod: function(text){
-    //                 state.MML.characters[who].leftHand.value = {
-    //                     _id: itemId,
-    //                     grip: "One Hand"
-    //                 };
-    //                 state.MML.characters[who].updateCharacter("leftHand");
-    //                 MML.displayMenu.apply(this, []);
-    //                 }
-    //             });
-    //             buttons.push({
-    //             text: "Equip Right Hand",
-    //             nextMenu: "charMenuDisplayItem",
-    //             triggeredMethod: function(text){
-    //                 state.MML.characters[who].rightHand.value = {
-    //                     _id: itemId,
-    //                     grip: "One Hand"
-    //                 };
-    //                 state.MML.characters[who].updateCharacter("rightHand");
-    //                 MML.displayMenu.apply(this, []);
-    //                 }
-    //             });
-    //         }
-    //     else if(item.type === "spellComponent"){
-    //         log(item.type);
-    //         }
-    //     else{
-    //         log(item.type);
-    //         }
-
-    //     buttons.push({
-    //         text: "Exit",
-    //         nextMenu: "menuIdle",
-    //         triggeredMethod: function(text){
-    //             MML.displayMenu.apply(this, []);
-    //             }
-    //         });
-
-    //     player.buttons = buttons;
-    //     state.MML.players[player.name] = player;
-    //     MML.displayMenu.apply(state.MML.players[player.name], []);
-    // }
+	    
 };
 
 on("ready", function() {
@@ -841,7 +703,7 @@ on("ready", function() {
 
         state.MML.characters[newName] = state.MML.characters[oldName];
         delete state.MML.characters[oldName];
-        state.MML.characters[newName].name.value = newName;
+        state.MML.characters[newName].name = newName;
         MML.processCommand({
         	type: "character",
         	who: newName,

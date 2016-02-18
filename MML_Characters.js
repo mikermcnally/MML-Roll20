@@ -69,7 +69,7 @@ MML.characterConstructor = function characterConstructor(charName){
     this.attributeMeleeAttackMod = MML.getCurrentAttributeAsFloat(this.name, "attributeMeleeAttackMod");
     this.meleeDamageMod = MML.getCurrentAttributeAsFloat(this.name, "meleeDamageMod");
     this.attributeMissileAttackMod = MML.getCurrentAttributeAsFloat(this.name, "attributeMissileAttackMod");
-    this.castingMod = MML.getCurrentAttributeAsFloat(this.name, "castingMod");
+    this.attributeCastingMod = MML.getCurrentAttributeAsFloat(this.name, "attributeCastingMod");
     this.spellLearningMod = MML.getCurrentAttributeAsFloat(this.name, "spellLearningMod");
     this.statureCheckMod = MML.getCurrentAttributeAsFloat(this.name, "statureCheckMod");
     this.strengthCheckMod = MML.getCurrentAttributeAsFloat(this.name, "strengthCheckMod");
@@ -274,7 +274,7 @@ MML.computeAttribute.intellect = { dependents: ["perception",
     } };
 MML.computeAttribute.reason = { dependents: ["perception",
                 "evocation",
-                "castingMod",
+                "attributeCastingMod",
                 "attributeInitBonus"], //skill mods
     compute: function(){
         return MML.getCurrentAttributeAsFloat(this.name, "reasonRoll") + MML.racialAttributeBonuses[this.race].reason;
@@ -662,37 +662,37 @@ MML.computeAttribute.attributeMissileAttackMod = { dependents: [],
     compute: function() {
         return MML.attributeMods.perception[this.perception] + MML.attributeMods.coordination[this.coordination] + MML.attributeMods.strength[this.strength];   
     }};
-MML.computeAttribute.castingMod = { dependents: [],
+MML.computeAttribute.attributeCastingMod = { dependents: [],
     compute: function() {
-        var castingMod = MML.attributeMods.reason[this.reason];
+        var attributeCastingMod = MML.attributeMods.reason[this.reason];
 
         if(this.senseInitBonus < 3 || this.senseInitBonus > 0){
-            castingMod -= 10;
+            attributeCastingMod -= 10;
         }
         else if(this.senseInitBonus < 0 || this.senseInitBonus > -2){
-            castingMod -= 20;
+            attributeCastingMod -= 20;
         }
         else{
-            castingMod -= 30;
+            attributeCastingMod -= 30;
         }
 
         if(this.fomInitBonus === 3 || this.fomInitBonus === 2){
-            castingMod -= 5;
+            attributeCastingMod -= 5;
         }
         else if(this.fomInitBonus === 1){
-            castingMod -= 10;
+            attributeCastingMod -= 10;
         }
         else if(this.fomInitBonus === 0){
-            castingMod -= 15;
+            attributeCastingMod -= 15;
         }
         else if(this.fomInitBonus === -1){
-            castingMod -= 20;
+            attributeCastingMod -= 20;
         }
         else if(this.fomInitBonus === -2){
-            castingMod -= 30;
+            attributeCastingMod -= 30;
         }
 
-        return castingMod;
+        return attributeCastingMod;
     }};
 MML.computeAttribute.spellLearningMod = { dependents: [],
     compute: function() {
@@ -866,7 +866,7 @@ MML.computeAttribute.attributeInitBonus = { dependents: ["initiative"],
         }
             }};  
 MML.computeAttribute.senseInitBonus = { dependents: ["initiative",
-                "castingMod"],
+                "attributeCastingMod"],
     compute: function(){
         var armorList = _.where(this.inventory, {type: "armor"});    
         var bitsOfHelm = ["Barbute Helm", "Bascinet Helm", "Camail", "Camail-Conical", "Cap", "Cheeks", "Conical Helm", "Duerne Helm", "Dwarven War Hood", "Face Plate", "Great Helm", "Half-Face Plate", "Hood", "Nose Guard", "Pot Helm", "Sallet Helm", "Throat Guard", "War Hat"];
@@ -947,7 +947,7 @@ MML.computeAttribute.senseInitBonus = { dependents: ["initiative",
         }
     }};  
 MML.computeAttribute.fomInitBonus = { dependents: ["initiative",
-                "castingMod"],
+                "attributeCastingMod"],
     compute: function(){
         return this.fomInitBonus;
     }};  

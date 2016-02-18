@@ -1,0 +1,840 @@
+
+<!-- <rolltemplate class="sheet-rolltemplate-universal">
+    <table>
+        <tr><th>{{title}}</th></tr>
+        <tr>
+            <td><span class="tcat">Result: </span>{{result}}</td>        
+        </tr>
+        <tr>
+            <td><span class="tcat">Range: </span>{{range}}</td>        
+        </tr>
+        <tr>
+            <td><span class="tcat">Target: </span>{{target}}</td>        
+        </tr>
+        <tr>
+            <td><span class="tcat">Roll: </span>{{value}}</td>
+        </tr>
+        <tr>
+            <td><span class="tcat"> </span>[Change](!changeRoll {{charName}}|{{menuInput}}|?{value})</a></td><td><span class="tcat"> </span>[Accept](!acceptRoll {{charName}}|{{menuInput}})</a></td>
+        </tr>
+    </table>
+</rolltemplate>
+
+<rolltemplate class="sheet-rolltemplate-damage">
+    <table>
+        <tr><th>{{title}}</th></tr>
+        <tr>
+            <td><span class="tcat">Range: </span>{{range}}</td>        
+        </tr>
+        <tr>
+            <td><span class="tcat">Damage: </span>{{value}} {{type}}</td>
+        </tr>
+         <tr>
+            <td><span class="tcat"></span>[Change](!changeRoll {{charName}}|{{menuInput}}|?{value})</a></td><td><span class="tcat"> </span>[Accept](!acceptRoll {{charName}}|{{menuInput}})</a></td>
+        </tr>
+    </table>
+</rolltemplate>
+
+<rolltemplate class="sheet-rolltemplate-hitPosition">
+    <table>
+        <tr><th>{{title}}</th></tr>
+        <tr>
+            <td><span class="tcat">Position: </span>{{result}}</td>        
+        </tr>
+        <tr>
+            <td><span class="tcat">Range: </span>{{range}}</td>        
+        </tr>
+        <tr>
+            <td><span class="tcat">Roll: </span>{{value}}</td>
+        </tr>
+         <tr>
+            <td><span class="tcat"> </span>[Change](!changeRoll {{charName}}|{{menuInput}}|?{value})</a></td><td><span class="tcat"> </span>[Accept](!acceptRoll {{charName}}|{{menuInput}})</a></td>
+        </tr>
+    </table>
+</rolltemplate> -->
+
+<rolltemplate class="sheet-rolltemplate-rollMenu">
+    <table>
+        <tr><th>{{title}}</th></tr>
+         <tr>
+            <td><span class="tcat"></span>[Change](!changeRoll ?{value})</a></td><td><span class="tcat"> </span>[Accept](!acceptRoll)</a></td>
+        </tr>
+    </table>
+</rolltemplate>
+
+<rolltemplate class="sheet-rolltemplate-selectTarget">
+    <table>
+        <tr><th>Select a Token</th></tr>
+        <tr>
+            <td><span class="tcat"></span>[Select](!selectTarget {{charName}}|@{target|character_name}|{{triggeredMethod}})</td>        
+        </tr>
+        <tr>
+            <td><span class="tcat"></span>{{back}} </a></td><td><span class="tcat"> </span>{{accept}}</a></td>
+        </tr>
+    </table>
+</rolltemplate>
+
+<rolltemplate class="sheet-rolltemplate-charMenu">
+    <table>
+         <tr><th>{{name}}</th></tr>
+        {{#allprops()}}
+            <tr><td>{{value}}</td></tr>
+        {{/allprops()}}
+    </table>
+</rolltemplate>
+
+
+
+
+
+<!--input type="hidden" class="sheet-module-roll" /><span>Roll Comparisons Support</span-->
+<div class="sheet-wrapper">
+    
+    <!-- ===== ===== ===== ===== TABS ===== ===== ===== ===== -->
+    <input type="radio" name="attr_tab" class="sheet-tab sheet-tab1" value="1" title="General" checked="checked" />
+    <input type="radio" name="attr_tab" class="sheet-tab sheet-tab2" value="2" title="Combat" />
+    <input type="radio" name="attr_tab" class="sheet-tab sheet-tab3" value="3" title="Spells" />
+    <input type="radio" name="attr_tab" class="sheet-tab sheet-tab4" value="4" title="Skills" />
+    <input type="radio" name="attr_tab" class="sheet-tab sheet-tab5" value="5" title="Inventory" />
+    <div class="sheet-tab-br"></div>
+    
+    <div class="sheet-tab1"><!-- ===== ===== ===== ===== GENERAL TAB ===== ===== ===== ===== -->
+    
+        <div class="sheet-box sheet-attribute"><!-- _____ _____ Basic Info BOX _____ _____ -->
+            <div class="sheet-table">
+                <div class="sheet-header">
+					<div class="sheet-cell sheet-col0">Basic Info</div>
+				</div> <!-- .sheet-header -->
+				<div class="sheet-row sheet-row-race"> <!-- race -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Race</div>
+					</div>
+					<div class="sheet-cell sheet-col0">
+					    <select name="attr_race" class="sheet-menuSelect">
+                            <option value="Dwarf">Dwarf</option>
+                            <option value="Gnome">Gnome</option>
+                            <option value="Gray Elf">Gray Elf</option>
+                            <option value="Hobbit">Hobbit</option>
+                            <option value="Human">Human</option>
+                            <option value="Wood Elf">Wood Elf</option>
+                        </select>
+	                </div>
+	            </div> <!-- .sheet-row end race -->
+	            <div class="sheet-row sheet-row-gender"> <!-- gender -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Gender</div>
+					</div>
+					<div class="sheet-cell sheet-col0">
+					    <select name="attr_gender" class="sheet-menuSelect">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+	                </div>
+	            </div> <!-- .sheet-row end gender -->
+	            <div class="sheet-row sheet-row-statureRoll"> <!-- statureRoll -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Stature Roll</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_statureRoll" value="0"  />
+	                </div>
+	            </div> <!-- .sheet-row end statureRoll -->
+	             <div class="sheet-row sheet-row-strengthRoll"> <!-- strengthRoll -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Strength Roll</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_strengthRoll" value="0"  />
+	                </div>
+	            </div> <!-- .sheet-row end coordinationRoll -->
+	            <div class="sheet-row sheet-row-coordinationRoll"> <!-- coordinationRoll -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Coordination Roll</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_coordinationRoll" value="0"  />
+	                </div>
+	            </div> <!-- .sheet-row end coordinationRoll -->
+	            <div class="sheet-row sheet-row-healthRoll"> <!-- healthRoll -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Health Roll</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_healthRoll" value="0"  />
+	                </div>
+	            </div> <!-- .sheet-row end healthRoll -->
+	             <div class="sheet-row sheet-row-beautyRoll"> <!-- beautyRoll -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Beauty Roll</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_beautyRoll" value="0"  />
+	                </div>
+	            </div> <!-- .sheet-row end beautyRoll -->
+	            <div class="sheet-row sheet-row-intellectRoll"> <!-- statureRoll -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Intellect Roll</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_intellectRoll" value="0"  />
+	                </div>
+	            </div> <!-- .sheet-row end intellectRoll -->
+	            <div class="sheet-row sheet-row-reasonRoll"> <!-- reasonRoll -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Reason Roll</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_reasonRoll" value="0"  />
+	                </div>
+	            </div> <!-- .sheet-row end reasonRoll -->
+	            <div class="sheet-row sheet-row-creativityRoll"> <!-- creativityRoll -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Creativity Roll</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_creativityRoll" value="0"  />
+	                </div>
+	            </div> <!-- .sheet-row end creativityRoll -->
+	            <div class="sheet-row sheet-row-presenceRoll"> <!-- presenceRoll -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Presence Roll</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_presenceRoll" value="0"  />
+	                </div>
+	            </div> <!-- .sheet-row end presenceRoll -->
+
+			</div> <!-- .sheet-table -->
+		</div> <!-- .sheet-box .sheet-attributes -->
+
+        <div class="sheet-box sheet-attribute"><!-- _____ _____ Primary ATTRIBUTE BOX _____ _____ -->
+            <div class="sheet-table">
+	            <div class="sheet-header">
+					<div class="sheet-cell sheet-col0">Primary Attributes</div>
+				</div> <!-- .sheet-header -->
+				<div class="sheet-row sheet-row-stature"> <!-- Stature -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Stature</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_stature" value="0"  />
+	                </div>
+	            </div> <!-- .sheet-row end Stature -->
+    			<div class="sheet-row sheet-row-strength"> <!-- Strength -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Strength</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_strength" value="0 "  />
+	                </div>
+	            </div> <!-- .sheet-row end Strength -->
+	            <div class="sheet-row sheet-row-coordination"> <!-- Coordination -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Coordination</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_coordination" value="0 "  />
+	                </div>
+	            </div> <!-- .sheet-row end Coordination -->
+				<div class="sheet-row sheet-row-health"> <!-- Health -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Health</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_health" value="0"  />
+	                </div>
+	            </div> <!-- .sheet-row end Health-->
+                <div class="sheet-row sheet-row-beauty"> <!-- Beauty -->
+    				<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Beauty</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_beauty" value="0"  />
+	                </div>
+	            </div> <!-- .sheet-row end Beauty -->
+	            <div class="sheet-row sheet-row-intelligence"> <!-- Intellect -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Intellect</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_intellect" value="0"  />
+	                </div>
+	            </div> <!-- .sheet-row end Intellect -->
+				<div class="sheet-row sheet-row-reason"> <!-- Reason -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Reason</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_reason" value="0"  />
+	                </div>
+	            </div> <!-- .sheet-row end Reason -->
+				<div class="sheet-row sheet-row-creativity"> <!-- Creativity -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Creativity</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_creativity" value="0"  />
+	                </div>
+	            </div> <!-- .sheet-row end Creativity -->
+				<div class="sheet-row sheet-row-presence"> <!-- Presence -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Presence</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_presence" value="0"  />
+	                </div>
+	            </div> <!-- .sheet-row end Presence -->
+			</div> <!-- .sheet-table -->
+		</div> <!-- .sheet-box .sheet-attributes -->
+		
+		<div class="sheet-box sheet-attribute"> <!-- _____ _____ Secondary ATTRIBUTE BOX _____ _____ -->
+	        <div class="sheet-table">
+	            <div class="sheet-header">
+					<div class="sheet-cell sheet-col0">Secondary Attributes</div>
+					<div class="sheet-cell sheet-col1">Pts</div>
+				</div> <!-- .sheet-header -->
+				<div class="sheet-row sheet-row-willpower"> <!-- Willpower -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Willpower</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_willpower" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row end Willpower-->
+				<div class="sheet-row sheet-row-evocation"> <!-- Evocation -->
+    				<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Evocation</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_evocation" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row -->
+				<div class="sheet-row sheet-row-perception"> <!-- Perception -->
+    				<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Perception</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_perception" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row -->
+				<div class="sheet-row sheet-row-systemStrength"> <!-- System Strength -->
+    				<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">System Strength</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_systemStrength" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row -->
+				<div class="sheet-row sheet-row-fitness"> <!-- Fitness -->
+    				<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Fitness</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_fitness" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row -->
+				<div class="sheet-row sheet-row-fitnessMod"> <!-- Fitness Modifier -->
+    				<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Fitness Mod</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_fitnessMod" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row -->
+				<div class="sheet-row sheet-row-load"> <!-- Load -->
+    				<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Load</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_load" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row -->
+				<div class="sheet-row sheet-row-overhead"> <!-- Overhead -->
+    				<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Overhead</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_overhead" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row -->
+				<div class="sheet-row sheet-row-deadLift"> <!-- Dead Lift -->
+    				<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Dead Lift</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_deadLift" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row -->				
+			</div> <!-- .sheet-table -->
+		</div> <!-- .sheet-box .sheet-attributes -->
+	    
+		<div class="sheet-box sheet-attribute"> <!-- _____ _____ Hit Points ATTRIBUTE BOX _____ _____ -->
+	        <div class="sheet-table">
+	            <div class="sheet-header">
+					<div class="sheet-cell sheet-col0">Hit Points</div>
+					<div class="sheet-cell sheet-col1">Current</div>
+					<div class="sheet-cell sheet-col2">Max</div>
+				</div> <!-- .sheet-header -->
+				<div class="sheet-row sheet-row-headHP"> <!-- Head HP -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Head HP</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_headHP" value="0"  />
+	                </div>
+					<div class="sheet-cell sheet-col2">
+	                    <input type="text" name="attr_headHPMax" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row end Head HP-->
+				<div class="sheet-row sheet-row-chestHP"> <!-- Chest HP -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Chest HP</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_chestHP" value="0" />
+	                </div>
+					<div class="sheet-cell sheet-col2">
+	                    <input type="text" name="attr_chestHPMax" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row end Chest HP-->
+				<div class="sheet-row sheet-row-abdomenHP"> <!-- Abdomen HP -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Abdomen HP</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_abdomenHP" value="0"  />
+	                </div>
+					<div class="sheet-cell sheet-col2">
+	                    <input type="text" name="attr_abdomenHPMax" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row end Abdomen HP-->
+				<div class="sheet-row sheet-row-leftArmHP"> <!-- Left Arm HP -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Left Arm HP</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_leftArmHP" value="0"  />
+	                </div>
+					<div class="sheet-cell sheet-col2">
+	                    <input type="text" name="attr_leftArmHPMax" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row end Left Arm HP-->
+				<div class="sheet-row sheet-row-rightArmHP"> <!-- Right Arm HP -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Right Arm HP</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_rightArmHP" value="0"  />
+	                </div>
+					<div class="sheet-cell sheet-col2">
+	                    <input type="text" name="attr_rightArmHPMax" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row end Right Arm HP-->
+				<div class="sheet-row sheet-row-leftLegHP"> <!-- Left Leg HP -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Left Leg HP</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_leftLegHP" value="0"  />
+	                </div>
+					<div class="sheet-cell sheet-col2">
+	                    <input type="text" name="attr_leftLegHPMax" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row end Left Leg HP-->
+				<div class="sheet-row sheet-row-rightLegHP"> <!-- Right Leg HP -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Right Leg HP</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_rightLegHP" value="0"  />
+	                </div>
+					<div class="sheet-cell sheet-col2">
+	                    <input type="text" name="attr_rightLegHPMax" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row end Right Leg HP-->
+	            <div class="sheet-row sheet-row-multiWound"> <!-- Right Leg HP -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Multiple Wounds</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_multiWound" value="0"  />
+	                </div>
+					<div class="sheet-cell sheet-col2">
+	                    <input type="text" name="attr_multiWoundMax" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row end Right Leg HP-->
+	            <div class="sheet-row sheet-row-hpRecovery"> <!-- Right Leg HP -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">HP Recovery</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_hpRecovery" value="0"  />
+	                </div>
+	            </div> <!-- .sheet-row end Right Leg HP-->
+	            <div class="sheet-row sheet-row-epRecovery"> <!-- Right Leg HP -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">EP Recovery</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_epRecovery" value="0"  />
+	                </div>
+	            </div> <!-- .sheet-row end Right Leg HP-->
+			</div> <!-- .sheet-table -->
+		</div> <!-- .sheet-box .sheet-attributes -->	
+
+		<div class="sheet-box sheet-attribute"> <!-- _____ _____ misc ATTRIBUTE BOX _____ _____ -->
+	        <div class="sheet-table">
+	            <div class="sheet-header">
+					<div class="sheet-cell sheet-col0">Misc. Modifiers</div>
+				</div> <!-- .sheet-header -->
+				<div class="sheet-row"> <!--  -->
+					<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Melee Attack Mod</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_attributeMeleeAttackMod" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row end -->
+				<div class="sheet-row"> <!--  -->
+    				<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Missile Attack Mod</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_attributeMissileAttackMod" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row -->
+	            <div class="sheet-row"> <!--  -->
+    				<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Casting Mod</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_attributeCastingMod" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row -->
+	            <div class="sheet-row"> <!--  -->
+    				<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Spell Learning Mod</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_spellLearningMod" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row -->
+	            <div class="sheet-row"> <!--  -->
+    				<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Melee Damage Mod</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_meleeDamageMod" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row -->		
+	            <div class="sheet-row"> <!--  -->
+    				<div class="sheet-cell sheet-col0 sheet-label">
+						<div class="sheet-popup">Defense Mod</div>
+					</div>
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_attributeDefenseMod" value="0" />
+	                </div>
+	            </div> <!-- .sheet-row -->	
+			</div> <!-- .sheet-table -->
+		</div> <!-- .sheet-box .sheet-attributes -->
+
+
+	</div> <!-- .sheet-tab1 -->
+    
+    <!-- ===== ===== ===== ===== Combat TAB ===== ===== ===== ===== -->
+    <div class="sheet-tab2">
+        
+	    <!-- _____ _____ Action Select Menu _____ _____ -->
+        <table>
+            <input type="radio" name="attr_action" class="sheet-menu sheet-attackButton" title="Attack" value="1" checked="checked" />
+            
+            <div class="sheet-menuBody sheet-attackBody">
+                    <div>
+                        <button type='roll' value='!setTarget @{Name}' name='roll_setTarget'>Set Target</button>
+                        <input type="text" name="attr_target" value="None" />
+                    </div>
+                    <div>
+                        <select name="attr_attackWeapon" class="sheet-menuSelect">
+                            <option value="primary">Primary</option>
+                            <option value="secondary">Secondary</option>
+                        </select>
+                    </div>
+                    <div>
+                        <select name="attr_attackStyle" class="sheet-menuSelect">
+                            <option value="standard">Standard</option>
+                            <option value="sweep">Sweep</option>
+                            <option value="cover">Shoot from Cover</option>
+                        </select>
+                    </div>
+					<div>
+                        <select name="attr_action.calledShot" class="sheet-menuSelect">
+							<option value="standard">Standard</option>
+                            <option value="head">Head</option>
+                            <option value="chest">Chest</option>
+                            <option value="abdomen">Abdomen</option>
+                            <option value="leftArm">Left Arm</option>
+                            <option value="rightArm">Right Arm</option>
+                            <option value="leftLeg">Left Leg</option>
+                            <option value="rightLeg">Right Leg</option>
+                        </select>
+                    </div>
+                    <div>
+                        <select name="attr_attackStance" class="sheet-menuSelect">
+                            <option value="neutral">Neutral</option>
+                            <option value="aggressive">Aggressive</option>
+                            <option value="defensive">Defensive</option>
+                        </select>
+                    </div>
+                    <div>
+                        <select name="attr_attackFlanking" class="sheet-menuSelect">
+                            <option value="none">None</option>
+                            <option value="flanking">Flanking</option>
+                            <option value="rear">Rear</option>
+                        </select>
+                    </div>
+                    <div>
+                        <select name="attr_attackElevation" class="sheet-menuSelect">
+                            <option value="level">Level</option>
+                            <option value="above">Above</option>
+                            <option value="below">Below</option>
+                        </select>
+                    </div>
+                </div>
+            
+            <input type="radio" name="attr_action" class="sheet-menu sheet-castButton" title="Cast Spell" value="2" />
+            <div class="sheet-menuBody sheet-castBody">The Cast Spell Option is selected</div>
+            <input type="radio" name="attr_action" class="sheet-menu sheet-itemButton" title="Ready Item" value="3" />
+            <div class="sheet-menuBody sheet-itemBody">The Ready Item Option is selected</div>
+            <input type="radio" name="attr_action" class="sheet-menu sheet-observeButton" title="Observe" value="4" /> 
+            <div class="sheet-menuBody sheet-observeBody">The Observe Option is selected</div>
+                       
+        </table>
+	</div> <!-- .sheet-tab2 -->
+    
+
+    <!-- ===== ===== ===== ===== Spells TAB ===== ===== ===== ===== -->
+    <div class="sheet-tab3">
+		
+	</div> <!-- .sheet-tab3 -->
+    
+
+    <!-- ===== ===== ===== ===== Skills TAB ===== ===== ===== ===== -->
+    <div class="sheet-tab4">
+		<div class="sheet-box sheet-weapon"> <!-- _____ _____ Weapon Skill Box _____ _____ -->
+			<div class="sheet-table">
+				<div class="sheet-header">
+					<div class="sheet-cell sheet-col0">Weapon</div>
+					<div class="sheet-cell sheet-col1">Input</div>
+					<div class="sheet-cell sheet-col2">Level</div>
+				</div> <!-- .sheet-header -->
+				<fieldset class="repeating_weaponSkills">
+					<div class="sheet-cell sheet-col0">
+						<select name="attr_name" class="weaponSkillName">                
+							<option value="Hand Axe">Hand Axe</option>
+							<option value="Battle Axe">Battle Axe</option>
+							<option value="Pick">Pick</option>
+							<option value="Two-Handed Axe">Two-Handed Axe</option>
+							<option value="Bardiche">Bardiche</option>
+							<option value="Pole Axe">Pole Axe</option>
+							<option value="Club">Club</option>
+							<option value="Cudgel, Light">Cudgel, Light</option>
+							<option value="Cudgel, Heavy">Cudgel, Heavy</option>
+							<option value="Mace">Mace</option>
+							<option value="Maul">Maul</option>
+							<option value="Morningstar">Morningstar</option>
+							<option value="War Hammer">War Hammer</option>
+							<option value="Ball & Chain, Footman's">Ball & Chain, Footman's</option>
+							<option value="Ball & Chain, Horseman's">Ball & Chain, Horseman's</option>
+							<option value="Flail, Footman's">Flail, Footman's</option>
+							<option value="Flail, Horseman's">Flail, Horseman's</option>
+							<option value="Mace & Chain">Mace & Chain</option>
+							<option value="Morningstar & Chain">Morningstar & Chain</option>
+							<option value="Boot Knife">Boot Knife</option>
+							<option value="Dagger">Dagger</option>
+							<option value="Knife">Knife</option>
+							<option value="Dirk">Dirk</option>
+							<option value="Fauchard">Fauchard</option>
+							<option value="Bill">Bill</option>
+							<option value="Glaive">Glaive</option>
+							<option value="Halberd">Halberd</option>
+							<option value="Pole Hammer">Pole Hammer</option>
+							<option value="War Spear, One Hand">War Spear, One Hand</option>
+							<option value="War Spear, Two Hands">War Spear, Two Hands</option>
+							<option value="Boar Spear, One Hand">Boar Spear, One Hand</option>
+							<option value="Boar Spear, Two Hands">Boar Spear, Two Hands</option>
+							<option value="Military Fork, One Hand">Military Fork, One Hand</option>
+							<option value="Military Fork, Two Hands">Military Fork, Two Hands</option>
+							<option value="Spetum">Spetum</option>
+							<option value="Quarter Staff">Quarter Staff</option>
+							<option value="Scimitar">Scimitar</option>
+							<option value="Short Sword">Short Sword</option>
+							<option value="Long Sword">Long Sword</option>
+							<option value="Falchion">Falchion</option>
+							<option value="Bastard Sword, One Hand">Bastard Sword, One Hand</option>
+							<option value="Bastard Sword, Two Hands">Bastard Sword, Two Hands</option>
+							<option value="Broadsword">Broadsword</option>
+							<option value="Two-Handed Broadsword">Two-Handed Broadsword</option>
+							<option value="Great Sword">Great Sword</option>
+							<option value="Whip">Whip</option>
+							<option value="Cleaver">Cleaver</option>
+							<option value="Hatchet">Hatchet</option>
+							<option value="Hoe">Hoe</option>
+							<option value="Wood Axe">Wood Axe</option>
+							<option value="Hammer, Medium">Hammer, Medium</option>
+							<option value="Shovel">Shovel</option>
+							<option value="Skinning Knife">Skinning Knife</option>
+							<option value="Butcher's Knife">Butcher's Knife</option>
+							<option value="Pitch Fork">Pitch Fork</option>
+							<option value="Short Bow">Short Bow</option>
+							<option value="Medium Bow">Medium Bow</option>
+							<option value="Long Bow">Long Bow</option>
+							<option value="Heavy Long Bow">Heavy Long Bow</option>
+							<option value="Short Composite Bow">Short Composite Bow</option>
+							<option value="Medium Composite Bow">Medium Composite Bow</option>
+							<option value="Short Bow">Short Bow</option>
+							<option value="Battle Axe">Battle Axe (Thrown)</option>
+						</select>
+					</div>
+					<div class="sheet-cell sheet-col1">
+						<input type="text" name="attr_input" class="skillInput" value="0" />    
+					</div>
+					<div class="sheet-cell sheet-col2">
+						<input type="text" name="attr_level" class="skillLevel" value="0" />    
+					</div> 
+				</fieldset>
+			</div>
+		</div>
+		<div class="sheet-box sheet-skill"> <!-- _____ _____ Skill Box _____ _____ -->
+			<div class="sheet-table">
+				<div class="sheet-header">
+					<div class="sheet-cell sheet-col0">Skill</div>
+					<div class="sheet-cell sheet-col1">Input</div>
+					<div class="sheet-cell sheet-col2">Level</div>
+				</div> <!-- .sheet-header -->
+				<fieldset class="repeating_skills">
+					<div class="sheet-cell sheet-col0">
+						<select name="attr_name" class="skillName" value="Acrobatics">                
+							<option value="Acrobatics">Acrobatics</option>
+							<option value="Acting">Acting</option>
+							<option value="Alchemy">Alchemy</option>
+							<option value="Animal Handling">Animal Handling</option>
+							<option value="Animal Husbandry">Animal Husbandry</option>
+							<option value="Armorer">Armorer</option>
+							<option value="Blacksmith">Blacksmith</option>
+							<option value="Botany">Botany</option>
+							<option value="Bowyer">Bowyer</option>
+							<option value="Brewing">Brewing</option>
+							<option value="Bureaucracy">Bureaucracy</option>
+							<option value="Caligraphy">Caligraphy</option>
+							<option value="Camouflage">Camouflage</option>
+							<option value="Carpentry">Carpentry</option>
+							<option value="Cartography">Cartography</option>
+							<option value="Climbing">Climbing</option>
+							<option value="Cooking">Cooking</option>
+							<option value="Dancing">Dancing</option>
+							<option value="Diplomacy">Diplomacy</option>
+							<option value="Disguise">Disguise</option>
+							<option value="Dowsing">Dowsing</option>
+							<option value="Ecology, Specific">Ecology, Specific</option>
+							<option value="Earth Elementalism">Earth Elementalism</option>
+							<option value="Air Elementalism">Air Elementalism</option>
+							<option value="Fire Elementalism">Fire Elementalism</option>
+							<option value="Water Elementalism">Water Elementalism</option>
+							<option value="Life Elementalism">Life Elementalism</option>
+							<option value="Engineering">Engineering</option>
+							<option value="Etiquette">Etiquette</option>
+							<option value="Falconry">Falconry</option>
+							<option value="First Aid">First Aid</option>
+							<option value="Fishing">Fishing</option>
+							<option value="Fletchery">Fletchery</option>
+							<option value="Foraging">Foraging</option>
+							<option value="Forced March">Forced March</option>
+							<option value="Forgery">Forgery</option>
+							<option value="Gambling">Gambling</option>
+							<option value="Gem Cutting">Gem Cutting</option>
+							<option value="Geology">Geology</option>
+							<option value="Hand Signalling">Hand Signalling</option>
+							<option value="Heraldry">Heraldry</option>
+							<option value="Herbalism">Herbalism</option>
+							<option value="History">History</option>
+							<option value="Horsemanship">Horsemanship</option>
+							<option value="Hunting and Trapping">Hunting and Trapping</option>
+							<option value="Jeweler">Jeweler</option>
+							<option value="Knowledge">Knowledge</option>
+							<option value="Language">Language</option>
+							<option value="Leatherworking">Leatherworking</option>
+							<option value="Literacy">Literacy</option>
+							<option value="Literature">Literature</option>
+							<option value="Lock Picking">Lock Picking</option>
+							<option value="Lore">Lore</option>
+							<option value="Mathematics">Mathematics</option>
+							<option value="Metallurgy">Metallurgy</option>
+							<option value="Mimicry">Mimicry</option>
+							<option value="Musical Instrument">Musical Instrument</option>
+							<option value="Navigation">Navigation</option>
+							<option value="Negotiation">Negotiation</option>
+							<option value="Oration">Oration</option>
+							<option value="Physician">Physician</option>
+							<option value="Persuasion">Persuasion</option>
+							<option value="Pick Pocket">Pick Pocket</option>
+							<option value="Running">Running</option>
+							<option value="Scrounging">Scrounging</option>
+							<option value="Sculpture">Sculpture</option>
+							<option value="Seamanship">Seamanship</option>
+							<option value="Sewing">Sewing</option>
+							<option value="Singing">Singing</option>
+							<option value="Sleight of Hand">Sleight of Hand</option>
+							<option value="Stalking">Stalking</option>
+							<option value="Stealth">Stealth</option>
+							<option value="Survival">Survival</option>
+							<option value="Swimming">Swimming</option>
+							<option value="Symbol Magic">Symbol Magic</option>
+							<option value="Tactical">Tactical</option>
+							<option value="Teamster">Teamster</option>
+							<option value="Tracking">Tracking</option>
+							<option value="Veterinary">Veterinary</option>
+							<option value="Weapon Smith">Weapon Smith</option>
+							<option value="Sword Smith">Sword Smith</option>
+							<option value="Wizardry">Wizardry</option>
+						</select>
+					</div>
+					<div class="sheet-cell sheet-col1">
+						<input type="text" name="attr_input" class="skillInput" value="0" />    
+					</div>
+					<div class="sheet-cell sheet-col2">
+						<input type="text" name="attr_level" class="skillLevel" value="0" />    
+					</div> 
+				</fieldset>
+			</div>
+		</div>
+	</div> <!-- .sheet-tab4 -->    
+
+
+    <!-- ===== ===== ===== ===== ITEMS TAB ===== ===== ===== ===== -->
+    <div class="sheet-tab5">
+		<div class="sheet-box sheet-weapon"> <!-- _____ _____ Weapon BOX _____ _____ -->
+	        <div class="sheet-table">
+	            <div class="sheet-header">
+					<div class="sheet-cell sheet-col1">Name</div>
+				</div> <!-- .sheet-header -->
+				
+				<fieldset class="repeating_items">
+					<div class="sheet-cell sheet-col1">
+	                    <input type="text" name="attr_itemName" class="itemName"></input>
+	                </div>
+	                <div class="sheet-cell sheet-col2">
+	                    <input type="text" name="attr_itemId" class="itemId"></input>
+	                </div>
+	                <div class="sheet-cell sheet-col3">
+	                	<button type='roll' value='!displayItemOptions @{name}|@{itemId}' name='roll_displayItemOptions'>Options</button>
+	                </div>
+				</fieldset>			
+			</div> <!-- .sheet-table -->
+		</div> <!-- .sheet-box .sheet-weapon -->
+	</div> <!-- .sheet-tab5 -->       
+    
+</div>
+
+<script type="text/worker">
+	
+</script>

@@ -18,6 +18,7 @@ MML.menuCommand = function(input){
     var button = _.findWhere(this.buttons, { text: buttonText });
     if(!_.isUndefined(button)){
         this.menu = button.nextMenu;
+        log(button);
         MML.processCommand({
             type: "player",
 	        who: this.name,
@@ -243,6 +244,247 @@ MML.GmMenuItemQuality = function GmMenuItemQuality(input){
 					MML.menuButtons.itemQualityStandard,
 					MML.menuButtons.itemQualityExcellent,
 					MML.menuButtons.itemQualityMasterWork];
+};
+
+MML.displayItemOptions = function displayItemOptions(input){
+	var who = input.who;
+	var itemId = input.itemId;
+	var item = state.MML.characters[who].inventory[itemId];
+    var buttons = [];
+    var unequipButton;
+    var hands;
+    this.menu = "menuIdle";
+    this.message =  "Item Menu";
+    this.who = who;   
+    
+    if(item.type === "weapon"){
+        //Weapon already equipped
+        if(state.MML.characters[who].leftHand._id === itemId || state.MML.characters[who].rightHand._id === itemId){
+            unequipButton = {
+                text: "Unequip",
+                nextMenu: "menuIdle"
+            };
+
+            if(state.MML.characters[who].leftHand._id === itemId && state.MML.characters[who].leftHand._id === itemId){
+                unequipButton.triggeredMethod = function(text){
+                    MML.processCommand({
+		            	type: "character",
+						who: who,
+						triggeredFunction: "setApiCharAttribute",
+						input: {
+							attribute: "leftHand",
+							value: {}
+						}
+					});
+					MML.processCommand({
+		            	type: "character",
+						who: who,
+						triggeredFunction: "setApiCharAttribute",
+						input: {
+							attribute: "rightHand",
+							value: {}
+						}
+					});
+                    MML.displayMenu.apply(this, []);
+                    };
+            }
+            else if(state.MML.characters[who].leftHand._id === itemId){
+                unequipButton.triggeredMethod = function(text){
+                    MML.processCommand({
+		            	type: "character",
+						who: who,
+						triggeredFunction: "setApiCharAttribute",
+						input: {
+							attribute: "leftHand",
+							value: {}
+						}
+					});
+                    MML.displayMenu.apply(this, []);
+                    };
+            }
+            else{
+                unequipButton.triggeredMethod = function(text){
+                    MML.processCommand({
+		            	type: "character",
+						who: who,
+						triggeredFunction: "setApiCharAttribute",
+						input: {
+							attribute: "rightHand",
+							value: {}
+						}
+					});
+                    MML.displayMenu.apply(this, []);
+                    };
+            }
+            buttons.push(unequipButton);
+        }
+        else{
+            _.each(item.grips, function(grip, gripName){
+                if(gripName === "One Hand"){
+                    buttons.push({
+                        text: "Equip Left Hand",
+                        nextMenu: "menuIdle",
+                        triggeredMethod: function(text){
+                            if(state.MML.characters[who].rightHand.grip !== "One Hand"){
+                                MML.processCommand({
+					            	type: "character",
+									who: who,
+									triggeredFunction: "setApiCharAttribute",
+									input: {
+										attribute: "rightHand",
+										value: {
+	                                        _id: itemId,
+	                                        grip: gripName
+	                                    }
+									}
+								});
+                            }
+                            MML.processCommand({
+				            	type: "character",
+								who: who,
+								triggeredFunction: "setApiCharAttribute",
+								input: {
+									attribute: "leftHand",
+									value: {
+                                        _id: itemId,
+                                        grip: gripName
+                                    }
+								}
+							});
+
+                            MML.displayMenu.apply(this, []);
+                            }
+                        });
+                    buttons.push({
+                        text: "Equip Right Hand",
+                        nextMenu: "menuIdle",
+                        triggeredMethod: function(text){
+                            if(state.MML.characters[who].leftHand.grip !== "One Hand"){
+                                MML.processCommand({
+					            	type: "character",
+									who: who,
+									triggeredFunction: "setApiCharAttribute",
+									input: {
+										attribute: "leftHand",
+										value: {
+	                                        _id: itemId,
+	                                        grip: gripName
+	                                    }
+									}
+								});
+                            }
+                            MML.processCommand({
+				            	type: "character",
+								who: who,
+								triggeredFunction: "setApiCharAttribute",
+								input: {
+									attribute: "rightHand",
+									value: {
+                                        _id: itemId,
+                                        grip: gripName
+                                    }
+								}
+							});
+                            MML.displayMenu.apply(this, []);
+                            }
+                        });
+                    }
+                else{
+                    buttons.push({
+                        text: "Equip " + gripName,
+                        nextMenu: "menuIdle",
+                        triggeredMethod: function(text){
+                            MML.processCommand({
+				            	type: "character",
+								who: who,
+								triggeredFunction: "setApiCharAttribute",
+								input: {
+									attribute: "rightHand",
+									value: {
+                                        _id: itemId,
+                                        grip: gripName
+                                    }
+								}
+							});
+							MML.processCommand({
+				            	type: "character",
+								who: who,
+								triggeredFunction: "setApiCharAttribute",
+								input: {
+									attribute: "leftHand",
+									value: {
+                                        _id: itemId,
+                                        grip: gripName
+                                    }
+								}
+							});
+                            MML.displayMenu.apply(this, []);
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    else if(item.type === "armor"){
+        log(item.type); 
+        }
+    else if(item.type === "shield"){
+        buttons.push({
+            text: "Equip Left Hand",
+            nextMenu: "menuIdle",
+            triggeredMethod: function(text){
+                MML.processCommand({
+	            	type: "character",
+					who: who,
+					triggeredFunction: "setApiCharAttribute",
+					input: {
+						attribute: "leftHand",
+						value: {
+                            _id: itemId,
+                            grip: "One Hand"
+                        }
+					}
+				});
+                MML.displayMenu.apply(this, []);
+                }
+            });
+            buttons.push({
+            text: "Equip Right Hand",
+            nextMenu: "menuIdle",
+            triggeredMethod: function(text){
+                MML.processCommand({
+	            	type: "character",
+					who: who,
+					triggeredFunction: "setApiCharAttribute",
+					input: {
+						attribute: "rightHand",
+						value: {
+                            _id: itemId,
+                            grip: "One Hand"
+                        }
+					}
+				});
+                MML.displayMenu.apply(this, []);
+                }
+            });
+        }
+    else if(item.type === "spellComponent"){
+        log(item.type);
+        }
+    else{
+        log(item.type);
+        }
+
+    buttons.push({
+        text: "Exit",
+        nextMenu: "menuIdle",
+        triggeredMethod: function(text){
+            MML.displayMenu.apply(this, []);
+            }
+        });
+
+    this.buttons = buttons;
+    MML.displayMenu.apply(this, []);
 };
 
 // MML.GmMenupromptInitiativeRolls = function GmMenupromptInitiativeRolls(input){
