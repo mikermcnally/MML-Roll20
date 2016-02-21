@@ -508,16 +508,17 @@ MML.parseCommand = function parseCommand(msg) {
 
     	if(msg.content.indexOf("!selectTarget") !== -1) {
 	        var input = msg.content.replace("!selectTarget ", "").split("|");
-	        var who = input[0];
-	        var targetName = input[1];
+	        var character = input[0];
+	        var target = input[1];
 	        var methodName = input[2];
-	        
+
 	        command = {
 	        	type: "player",
-				who: who,
+				who: msg.who.replace(" (GM)", ""),
 				triggeredFunction: methodName,
 				input: {
-					who: targetName
+					target: target,
+					character: character
 				}
 	        };
 	    }

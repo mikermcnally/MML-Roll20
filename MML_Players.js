@@ -654,29 +654,23 @@ MML.charMenuChooseTarget = function charMenuChooseTarget(input){
 		});
 	}
 };
-MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(targetArray){
-	if(typeof targetArray !== "object"){
-		targetArray = [targetArray];
+MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(input){
+	var targetArray;
+	if(typeof input.who !== "undefined"){
+		targetArray = [input.target];
 	}
-	this.action.targets = targetArray;
-	MML[this.action.triggeredMethod].apply(this, []);
+	else{
+		targetArray = input.targets;
+	}
+
 	MML.processCommand({
     	type: "character",
-    	who: input.who,
-    	triggeredFunction:"setApiCharAttributeJSON",
+    	who: input.character,
+    	triggeredFunction: state.MML.characters[this.characters[this.characterIndex]].action.triggeredMethod,
 		input: {
-	    	attribute: "inventory",
-	    	index: MML.createItemId(),
-	    	value: state.MML.GM.newItem
+	    	targetArray: targetArray
 	  	}
     });
-
-	// state.MML.GM.currentAction = {
-	// 		actor: character.name,
-	// 		targets: targetArray,
-	// 		character.action
-	// 		roll: roll
-	// };
 };
 MML.charMenuAttackRoll = function charMenuAttackRoll(input){
 	this.who = input.who;

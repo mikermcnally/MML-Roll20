@@ -2178,7 +2178,6 @@ MML.statusEffects["Melee This Round"] = function(effect, index){
 
 // //Give weapons functions and set character's getAttackRoll equal to it
 MML.getAttackRoll = function getAttackRoll(input){
-    log()
  var roll;
     
  if (this.inventory.weapons.length === 0){

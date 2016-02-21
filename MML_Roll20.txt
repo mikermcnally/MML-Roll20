@@ -2227,7 +2227,6 @@ MML.statusEffects["Melee This Round"] = function(effect, index){
 
 // //Give weapons functions and set character's getAttackRoll equal to it
 MML.getAttackRoll = function getAttackRoll(input){
-    log()
  var roll;
     
  if (this.inventory.weapons.length === 0){
@@ -6051,16 +6050,17 @@ MML.parseCommand = function parseCommand(msg) {
 
     	if(msg.content.indexOf("!selectTarget") !== -1) {
 	        var input = msg.content.replace("!selectTarget ", "").split("|");
-	        var who = input[0];
-	        var targetName = input[1];
+	        var character = input[0];
+	        var target = input[1];
 	        var methodName = input[2];
-	        
+
 	        command = {
 	        	type: "player",
-				who: who,
+				who: msg.who.replace(" (GM)", ""),
 				triggeredFunction: methodName,
 				input: {
-					who: targetName
+					target: target,
+					character: character
 				}
 	        };
 	    }
@@ -7099,29 +7099,24 @@ MML.charMenuChooseTarget = function charMenuChooseTarget(input){
 		});
 	}
 };
-MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(targetArray){
-	if(typeof targetArray !== "object"){
-		targetArray = [targetArray];
+MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(input){
+	log(this);
+	var targetArray;
+	if(typeof input.who !== "undefined"){
+		targetArray = [input.who];
 	}
-	this.action.targets = targetArray;
-	MML[this.action.triggeredMethod].apply(this, []);
+	else{
+		targetArray = input.targets;
+	}
+
 	MML.processCommand({
     	type: "character",
-    	who: input.who,
-    	triggeredFunction:"setApiCharAttributeJSON",
+    	who: this.characters[this.characterIndex],
+    	triggeredFunction: state.MML.characters[this.characters[this.characterIndex]].action.triggeredMethod,
 		input: {
-	    	attribute: "inventory",
-	    	index: MML.createItemId(),
-	    	value: state.MML.GM.newItem
+	    	targetArray: targetArray
 	  	}
     });
-
-	// state.MML.GM.currentAction = {
-	// 		actor: character.name,
-	// 		targets: targetArray,
-	// 		character.action
-	// 		roll: roll
-	// };
 };
 MML.charMenuAttackRoll = function charMenuAttackRoll(input){
 	this.who = input.who;
