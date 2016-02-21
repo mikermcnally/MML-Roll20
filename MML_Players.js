@@ -666,7 +666,7 @@ MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(input){
 	MML.processCommand({
     	type: "character",
     	who: input.character,
-    	triggeredFunction: state.MML.characters[this.characters[this.characterIndex]].action.triggeredMethod,
+    	triggeredFunction: state.MML.characters[input.character].action.triggeredMethod,
 		input: {
 	    	targetArray: targetArray
 	  	}

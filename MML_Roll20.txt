@@ -47,7 +47,1068 @@ MML.init = function init(){
 	state.MML.characters = characters;
 
 	MML.test();
-};// Character Creation
+};MML.updateInventory = function updateInventory(charName){
+    //Armor
+    var armor = [];
+    var item = MML.getCharAttribute(this.name, "repeating_item_0_armorStyleName");
+    var index = 0;
+    while(typeof item !== "undefined"){
+        armor[index] = { style: "", material: "", quality: "" };
+        index++;
+        item = MML.getCharAttribute(charName, "repeating_armor_" + index + "_armorStyleName");
+    }
+    
+    //Weapons
+    item = MML.getCharAttribute(charName, "repeating_weapons_0_weaponName");
+    index = 0;
+    var weapons = [];
+    var left = false;
+    var right = false;
+    while(typeof item !== "undefined"){
+        weapons[index] = MML.weaponStats[MML.getCharAttribute(charName, "repeating_weapons_" + index + "_weaponName").get("current")];
+        weapons[index].equipped = MML.getCharAttribute(charName, "repeating_weapons_" + index + "_weaponEquipped").get("current");
+        weapons[index].quality = MML.getCharAttribute(charName, "repeating_weapons_" + index + "_weaponQuality").get("current");
+        
+        if (weapons[index].equipped === "Both"){
+            if(right === false && left === false){
+                left = true;
+                right = true;
+                state.MML.GM.characters[charName].inventory.weapons.push(weapons[index]);
+            }
+            else {
+                state.MML.GM.characters[charName].error = "Equipment Conflict: Hands Full";
+            }
+            
+        }
+        else if(weapons[index].equipped === "Right"){
+            if(right === false){
+                right = true;
+                state.MML.GM.characters[charName].inventory.weapons.push(weapons[index]);
+            }
+            else {
+                state.MML.GM.characters[charName].error = "Equipment Conflict: Hands Full";
+            }
+        }
+        else if(weapons[index].equipped === "Left"){
+            if(left === false){
+                left = true;
+                state.MML.GM.characters[charName].inventory.weapons.push(weapons[index]);
+            }
+            else {
+                state.MML.GM.characters[charName].error = "Equipment Conflict: Hands Full";
+            }
+        }
+        else{
+            state.MML.GM.characters[charName].inventory.inPack.push(weapons[index]);
+        }
+        index++;
+        item = MML.getCharAttribute(charName, "repeating_weapons_" + index + "_weaponName");
+    }
+
+    //Shields
+    if(MML.getCharAttribute(charName, "shieldEquipped") === "Right"){
+        if(right === false){
+            right = true;
+            state.MML.GM.characters[charName].inventory.shield = MML.shieldStats[MML.getCharAttribute(charName, "shieldName")];
+        }
+        else {
+            state.MML.GM.characters[charName].error = "Equipment Conflict: Hands Full";
+        }
+    }
+    else if(MML.getCharAttribute(charName, "shieldEquipped") === "Left"){
+        if(left === false){
+            left = true;
+            state.MML.GM.characters[charName].inventory.shield = MML.shieldStats[MML.getCharAttribute(charName, "shieldName")];
+        }
+        else {
+            state.MML.GM.characters[charName].error = "Equipment Conflict: Hands Full";
+        }
+    }
+    else{
+        state.MML.GM.characters[charName].inventory.inPack.push(MML.shieldStats[MML.getCharAttribute(charName, "shieldName")]);
+    }
+        
+    //Other items
+    
+
+    //This looks at the character's stuff and decides which column on hit table to use (A, B, or C)
+    if(state.MML.GM.characters[charName].inventory.weapons.length === 0){
+        state.MML.GM.characters[charName].defense.hitTable = "A";
+    }
+    else if (state.MML.GM.characters[charName].inventory.weapons.length === 2){
+        state.MML.GM.characters[charName].defense.hitTable = "B";
+    }
+    else if(state.MML.GM.characters[charName].inventory.shield !== "None"){
+        state.MML.GM.characters[charName].defense.hitTable = "C";
+    }
+    else if(MML.weaponStats[state.MML.GM.characters[charName].inventory.weapons[0]].family === "MWD" || 
+    MML.weaponStats[state.MML.GM.characters[charName].inventory.weapons[0]].family === "MWM" ||
+    MML.weaponStats[state.MML.GM.characters[charName].inventory.weapons[0]].family === "TWH" || 
+    MML.weaponStats[state.MML.GM.characters[charName].inventory.weapons[0]].family === "TWK" || 
+    MML.weaponStats[state.MML.GM.characters[charName].inventory.weapons[0]].family === "TWS" || 
+    MML.weaponStats[state.MML.GM.characters[charName].inventory.weapons[0]].family === "SLI"){
+        state.MML.GM.characters[charName].defense.hitTable = "A";
+    }
+    else if(MML.weaponStats[state.MML.GM.characters[charName].inventory.weapons[0]].hands === 2){
+        state.MML.GM.characters[charName].defense.hitTable = "B";
+    }
+    else{
+        state.MML.GM.characters[charName].defense.hitTable = "A";
+    }
+};
+
+//Combat Functions
+MML.displayMovement = function displayMovement(input){
+    if(input.display){
+        MML.getTokenFromChar(this.name).set("aura1_radius", MML.movementRates[this.race][this.movementPosition]*this.movementAvailable);
+        MML.getTokenFromChar(this.name).set("aura1_color", "#00FF00");
+    }
+    else{
+        MML.getTokenFromChar(this.name).set("aura1_color", "transparent");
+    }
+};
+
+MML.moveDistance = function moveDistance(distance){
+    this.movementAvailable -= (distance)/(MML.movementRates[this.race][this.movementPosition]);
+    MML.displayMovement.apply(this, [true]);
+};
+
+MML.computeSitMods = function computeSitMods(){
+    var initiative = 0;
+    var situational  = 0;
+    var defense  = 0;
+    var attack  = 0;
+    var casting  = 0;
+
+    //Apply wound effects
+    var i;
+    for(i in MML.hitPoints){
+        if(MML.hitPoints[i].name !== "multiWound"){
+            if(this[MML.hitPoints[i].name].wound.major === true){
+                initiative += -5;
+                if(this[MML.hitPoints[i].name].wound.major.duration > 0){
+                    situational  += -10;
+                }
+            }
+            if(this[MML.hitPoints[i].name].wound.disabling === true){
+                initiative += -10;
+                situational  += -25;
+            }
+        }
+        else{
+            if(this[MML.hitPoints[i].name].wound === true){
+                initiative += -5;
+                situational  += -10;
+            }
+        }
+    }
+
+    //Compute action-based initiative bonus
+    switch(this.action.name){
+        case "attack":
+            //Weapon
+            if(this.inventory.weapons.length === 0){
+                //Unarmed
+                initiative  += 10;
+                this.action.skill = this.skills["brawling"];
+            }
+            else if(this.inventory.weapons.length === 2){
+                //Dual Wielding
+                var weaponInits = [MML.weaponStats[this.inventory.equipped.leftHand.name].initiative, MML.weaponStats[this.inventory.equipped.rightHand.name].initiative];
+                initiative  += weaponInits.sort(function(a,b){return b-a;})[0];
+                //Set action skill here
+            }
+            else{
+                initiative  += MML.weaponStats[this.inventory.weapons[0].name].initiative;
+                this.action.skill = this.skills[this.inventory.weapons[0].name];
+            }
+            if (this.action.calledShot === "head" || 
+            this.action.calledShot === "chest" || 
+            this.action.calledShot === "abdomen" || 
+            this.action.calledShot === "leftArm" || 
+            this.action.calledShot === "rightArm" || 
+            this.action.calledShot === "leftLeg" || 
+            this.action.calledShot === "rightLeg"){
+                defense  += -10;
+                attack  += -10;
+                initiative  += -5;
+            }
+            
+            else if (this.action.calledShot !== "standard"){ //Specific hit position
+                defense  += -10;
+                attack  += -30;
+                initiative  += -5;
+            }
+            
+            // Attack style
+            if (this.action.style === "sweep"){
+                defense  += -20;
+            }
+            else if (this.action.style === "cover"){
+                attack  += -10;
+            }
+            break;
+            
+        case "ready":
+            initiative  += 10;
+            break;
+        case "cast":
+            initiative  += 10;
+            break;
+        case "observe":
+            initiative  += 10;
+            break;
+    }
+    
+    //Action skill bonus
+    if (this.action.skill <= 9){
+        initiative  += 0;
+    }
+    else if (this.action.skill > 9 && this.action.skill <= 19){
+        initiative  +=  1;
+    }
+    else if (this.action.skill > 19 && this.action.skill <= 29){
+        initiative  += 2;
+    }
+    else if (this.action.skill > 29 && this.action.skill <= 39){
+        initiative  += 3;
+    }
+    else if (this.action.skill > 39 && this.action.skill <= 49){
+        initiative  += 4;
+    }
+    else if (this.action.skill > 49 && this.action.skill <= 59){
+        initiative  += 5;
+    }
+    else if (this.action.skill > 59){
+        initiative  += 6;
+    }
+
+    MML.setAttackTempo(this.name);
+    
+    // Compute defense mod
+    defense  = -20 * this.defense.number;
+    
+    // Apply fatigue
+    initiative  += -5*this.fatigue.level;
+    situational  += -10*this.fatigue.level;
+    
+    // Apply sensitive area effect
+    if (this.sensitive > -1){
+        initiative  += -5;
+        situational  += -10;
+    }
+    // Apply stumble effects from knockdown
+    if (this.stumble > -1){
+        initiative  += -5;
+    }
+    
+    this.initiative.situational = initiative;
+    this.modifiers.situational = situational;
+    this.modifiers.defense = defense;
+    this.modifiers.attack = attack;
+    this.modifiers.casting = casting;
+};
+
+MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input){
+    //Update wound counters, only major wounds have temporary effects. Disabling wound stun is handled with the .stun.duration property
+    // var i;
+    // for(i in MML.hitPoints){
+    //  if(MML.hitPoints[i].name !== "multiWound"){
+    //      if(this[MML.hitPoints[i].name].wound.major.duration > 0){
+    //          this[MML.hitPoints[i].name].wound.major.duration--;
+    //      }
+    //  }
+    // }
+    // if(this.stun.duration > 0){ //if stun === -1, then stun is over
+    //  this.stun.duration--;
+    // }
+    
+    // Handle fatigue don't use the fitness score to track fatigue, just use the combat state
+    if (this.meleeThisRound === true){ // Character acted in melee
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "setApiCharAttribute",
+            input: {
+                attribute: "roundsExertion",
+                value: this.roundsExertion + 1
+            }
+        });
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "setApiCharAttribute",
+            input: {
+                attribute: "roundsRest",
+                value: 0
+            }
+        });
+
+        if (this.fatigueLevel < 1){
+            if (this.roundsExertion > this.fitness){
+                if (MML.attributeCheckRoll(charName, "fitness", [0])){
+                    MML.processCommand({
+                        type: "character",
+                        who: this.name,
+                        triggeredFunction: "setApiCharAttribute",
+                        input: {
+                            attribute: "fatigueLevel",
+                            value: this.fatigueLevel + 1
+                        }
+                    });
+                    MML.processCommand({
+                        type: "character",
+                        who: this.name,
+                        triggeredFunction: "setApiCharAttribute",
+                        input: {
+                            attribute: "roundsExertion",
+                            value: 0
+                        }
+                    });
+                }
+            }
+        }
+        else {
+            if (this.roundsExertion > Math.round(this.fitness/2)){
+                if (MML.attributeCheckRoll(charName, "fitness", [-4])){
+                    MML.processCommand({
+                        type: "character",
+                        who: this.name,
+                        triggeredFunction: "setApiCharAttribute",
+                        input: {
+                            attribute: "fatigueLevel",
+                            value: this.fatigueLevel + 1
+                        }
+                    });
+                    MML.processCommand({
+                        type: "character",
+                        who: this.name,
+                        triggeredFunction: "setApiCharAttribute",
+                        input: {
+                            attribute: "roundsExertion",
+                            value: 0
+                        }
+                    });
+                }
+            }
+        }
+
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "setApiCharAttribute",
+            input: {
+                attribute: "meleeThisRound",
+                value: false
+            }
+        });
+    }
+    else if (this.fatigueLevel > 0){
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "setApiCharAttribute",
+            input: {
+                attribute: "roundsRest",
+                value: this.roundsRest + 1
+            }
+        });
+        if (this.roundsRest >= 6 && this.attributeCheckRoll("health", [0])){
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                triggeredFunction: "setApiCharAttribute",
+                input: {
+                    attribute: "roundsRest",
+                    value: 0
+                }
+            });
+            this.fatigueLevel--;
+            this.updateCharacter("fatigueLevel");
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                triggeredFunction: "setApiCharAttribute",
+                input: {
+                    attribute: "fatigueLevel",
+                    value: this.fatigueLevel - 1
+                }
+            });
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                triggeredFunction: "setApiCharAttribute",
+                input: {
+                    attribute: "roundsExertion",
+                    value: 0
+                }
+            });
+        }
+    }
+    // Reset number of defenses counter
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "setApiCharAttribute",
+        input: {
+            attribute: "defensesThisRound",
+            value: 0
+        }
+    });
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "setApiCharAttribute",
+        input: {
+            attribute: "dodgedThisRound",
+            value: false
+        }
+    });
+    // Reset knockdown number
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "setApiCharAttribute",
+        input: {
+            attribute: "knockdown",
+            value: this.knockdownMax
+        }
+    });
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "setApiCharAttribute",
+        input: {
+            attribute: "spentInitiative",
+            value: 0
+        }
+    });
+    this.action = {};
+
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "setApiCharAttribute",
+        input: {
+            attribute: "ready",
+            value: false
+        }
+    });
+};
+
+MML.setReady = function setReady(ready){
+    if(state.MML.GM.inCombat === true && this.ready === "false"){
+        MML.getTokenFromChar(this.name).set("tint_color", "#FF0000");
+    }
+    else{
+        MML.getTokenFromChar(this.name).set("tint_color", "transparent");
+    }
+    return this.ready;
+};
+
+// Health and Wounds
+MML.alterHP = function alterHP(position, hpAmount){
+    var woundInfo = { bodyPart: MML.hitPositions[position].part, type: "none", duration: -1 };
+    
+    if(hpAmount < 0){ //if damage
+        var initialHP = this[woundInfo.bodyPart].current;
+        var currentHP = initialHP + hpAmount;
+        this[woundInfo.bodyPart].current = currentHP;
+        //Wounds
+        if(currentHP < Math.round(this[woundInfo.bodyPart].max/2) && currentHP >= 0){//Major wound
+            woundInfo.type = "major";
+            if(initialHP >= Math.round(this[woundInfo.bodyPart].max/2) && this[woundInfo.bodyPart].wound.major === {}){ //Fresh wound
+                woundInfo.duration = Math.round(this[woundInfo.bodyPart].max/2) - currentHP;
+            }
+            else{ //Add damage to duration of effect
+                woundInfo.duration = -hpAmount;
+            }
+        }
+        
+        else if(currentHP < 0 && currentHP > -this[woundInfo.bodyPart].max){//Disabling wound           
+            if(this[woundInfo.bodyPart].wound.disabling === {} ){ //Fresh wound
+                woundInfo.type = "disabling";
+                woundInfo.duration = -currentHP;
+                
+            }
+            else{ //Add damage to duration of effect
+                woundInfo.type = "disabling";
+                woundInfo.duration = -hpAmount;
+            }
+            
+        }
+        
+        else if(currentHP < -this[woundInfo.bodyPart].max){//Mortal wound
+            woundInfo.type = "mortal";
+        }
+    }
+    else{ //if healing
+        this[woundInfo.bodyPart].current += hpAmount;
+        
+        if(this[woundInfo.bodyPart].current >= -1*this[woundInfo.bodyPart].max){
+            this[woundInfo.bodyPart].wound.mortal = false;
+        }
+        if(this[woundInfo.bodyPart].current >= 0){
+            this[woundInfo.bodyPart].wound.disabling = false;
+        }
+        if(this[woundInfo.bodyPart].current >= Math.round(this[woundInfo.bodyPart].max/2)){
+            this[woundInfo.bodyPart].wound.major = {};
+        }
+        if(this[woundInfo.bodyPart].current > this[woundInfo.bodyPart].max){
+            this[woundInfo.bodyPart].current = this[woundInfo.bodyPart].max;
+        }
+    }
+    return woundInfo;
+};
+
+MML.setMultiWound = function setMultiWound(){
+    var current = this.multiWound.max;
+    var woundInfo = { bodyPart: "multiWound", type: "none", duration: -1 };
+    
+    var i;
+    for(i in MML.hitPoints){
+        if(MML.hitPoints[i].name !== "multiWound"){
+            if(this[MML.hitPoints[i].name].current >= Math.round(this[MML.hitPoints[i].name].max/2)){ //Only minor wounds apply
+                current -= this[MML.hitPoints[i].name].max - this[MML.hitPoints[i].name].current;
+            }
+            else{
+                current -= this[MML.hitPoints[i].name].max - Math.round(this[MML.hitPoints[i].name].max/2);
+            }
+        }
+    }
+    
+    if(this.multiWound.current < 0 && this.multiWound.wound === false){
+        woundInfo.type = "multiWound";
+    }
+    else if(this.multiWound.current >= 0){
+        this.multiWound.wound = false;
+    }
+    this.multiWound.current = current;
+    return woundInfo;
+};
+
+MML.woundRoll = function woundRoll(woundInfo){
+    var roll;
+
+    switch(woundInfo.type){
+        case "major":
+            roll = this.attributeCheckRoll("willpower", [0]);
+            roll.title = this.name + "'s major wound willpower save";
+            break;
+        case "disabling":
+            roll = this.attributeCheckRoll("systemStrength", [0]);
+            roll.title = this.name + "'s disabling wound system strength save";
+            break;
+        case "mortal":
+            roll = this.attributeCheckRoll("systemStrength", [0]);
+            roll.title = this.name + "'s mortal wound system strength save";
+            break;
+        case "multiWound":
+            roll = this.attributeCheckRoll("willpower", [0]);
+            roll.title = this.name + "'s wound fatigue willpower save";
+            break;
+        default:
+        break;
+    }
+    woundInfo.name = roll.name;
+    woundInfo.result = roll.result;
+    woundInfo.target = roll.target;
+    woundInfo.range = roll.range;
+    woundInfo = roll;
+    return woundInfo;
+};
+
+MML.checkKnockdown = function checkKnockdown(damage){
+    if (this.movementPosition !== "Prone"){
+        this.knockdown += damage;
+        this.updateCharacter("knockdown");
+    }
+};
+
+MML.knockdownRoll = function knockdownRoll(){
+    var roll;
+
+    if(MML.hasStatusEffect.apply(this, ["Stumbling"])){
+        //victim saved first knockdown check, harder to save 2nd time
+        roll = MML.attributeCheckRoll(this, ["systemStrength", [-5]]);
+    }   
+    else{
+        roll = MML.attributeCheckRoll(this, ["systemStrength", [0]]);
+    }
+    return roll;
+};
+
+MML.isSensitiveArea = function isSensitiveArea(position){
+    if(position === 2 || position === 6 || position === 33){
+        return true;
+    }
+    else{
+        return false;
+    }
+};
+
+MML.sensitiveAreaRoll = function sensitiveAreaCheck(){ 
+    var roll = this.attributeCheckRoll("willpower", [0]);
+    return roll;
+};
+
+MML.armorPenetration = function armorPenetration(position, damage, type) {
+    var damageApplied = false; //Accounts for partial coverage, once true the loop stops
+    var coverageRoll = randomInteger(100); 
+    var damageDeflected = 0;
+    
+    // Iterates over apv values at given position (accounting for partial coverage)
+    var apv;
+    for (apv in this.apv[position][type]){
+        if (damageApplied === false){
+            if (coverageRoll <= this.apv[position][type][apv].coverage) { //if coverage roll is less than apv coverage
+                damageDeflected = this.apv[position][type][apv];
+                
+                //If all damage is deflected, do blunt trauma. Modifies damage variable for next if statement
+                if (damage + damageDeflected >= 0){
+                    //If surface, cut, or pierce, cut in half and apply as impact
+                    if (type === "Surface" || type === "Cut" || type === "Pierce"){                        
+                        damage = Math.ceil(damage/2);
+                        damageDeflected = this.apv[position].Impact[apv];
+                        
+                        if (damage + damageDeflected >= 0){
+                            damageDeflected = -damage;
+                            damage = 0;
+                        }
+                    }
+                    //If chop, or thrust, apply 3/4 as impact
+                    else if (type === "Chop" || type === "Thrust"){
+                        damage = Math.ceil(damage*0.75);
+                        damageDeflected = this.apv[position].Impact[apv];
+                        
+                        if (damage + damageDeflected >= 0){
+                            damageDeflected = -damage;
+                            damage = 0;
+                        }
+                    }
+                    //If impact or flanged, no damage
+                    else {
+                        damageDeflected = -damage;
+                        damage = 0;
+                    }
+                }
+                
+                // if damage gets through, subtract amount deflected by armor
+                if (damage < 0){
+                    damage += damageDeflected;
+                }
+                damageApplied = true;
+            }
+        }
+    }
+    return damage;
+};
+
+MML.getWeaponFamily = function getWeaponFamily(hand){
+    var item = this.inventory[this[hand]._id];
+
+    if(!_.isUndefined(item) && item.type === "weapon"){
+        return item.grips[this[hand].grip].family;
+    }
+    else{
+        return "Not a Weapon";
+    }
+};
+
+MML.isWieldingMissileWeapon = function isWieldingMissileWeapon(){
+        var leftFamily = MML.getWeaponFamily.apply(this, ["leftHand"]);
+        var rightFamily = MML.getWeaponFamily.apply(this, ["rightHand"]);
+
+        return (leftFamily === "MWD" || 
+                rightFamily === "MWD" ||
+                leftFamily === "MWM" ||
+                rightFamily === "MWM" ||
+                leftFamily === "TWH" ||
+                rightFamily === "TWH" || 
+                leftFamily === "TWK" ||
+                rightFamily === "TWS" ||
+                leftFamily === "TWS" ||
+                rightFamily === "SLI" ||
+                leftFamily === "SLI");
+};
+
+MML.isDualWielding = function isDualWielding(){
+    var leftHand = MML.getWeaponFamily.apply(this, ["leftHand"]);
+    var rightHand = MML.getWeaponFamily.apply(this, ["rightHand"]);
+
+    if(this.leftHand._id !== this.rightHand._id &&
+        leftHand !== "Not a Weapon" &&
+        rightHand !== "Not a Weapon"){
+        return true;
+    }
+    else{
+        return false;
+    }
+};
+
+MML.initiativeRoll = function initiativeRoll(input){
+    var rollValue = MML.rollDice(1, 10);
+    
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "updateCharacter",
+        input: {
+            attribute: "action"
+        }
+    });
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "setApiCharAttribute",
+        input: {
+            attribute: "ready",
+            value: true
+        }
+    });
+
+    MML.processCommand({
+        type: "player",
+        who: this.player,
+        triggeredFunction: "setApiPlayerAttribute",
+        input: {
+            attribute: "currentRoll",
+            value: {
+                who: this.name,
+                name: "initiative",
+                value: rollValue,
+                getResult: "initiativeResult",
+                applyResult: "initiativeApply",
+                range: "1-10",
+                accepted: false
+            }
+        }   
+    });
+
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "initiativeResult",
+        input: {}
+    });
+};
+
+MML.initiativeResult = function initiativeResult(input){
+    var player = state.MML.players[this.player];
+    var currentRoll = player.currentRoll;
+
+    currentRoll.rollResult = 
+        currentRoll.value + 
+        this.situationalInitBonus + 
+        this.movementRatioInitBonus +
+        this.attributeInitBonus + 
+        this.senseInitBonus +
+        this.fomInitBonus +
+        this.firstActionInitBonus +
+        this.spentInitiative;
+
+    currentRoll.message =
+        "Roll: " + currentRoll.value + 
+        "\nResult: " + currentRoll.rollResult + 
+        "\nRange: " + currentRoll.range;
+
+    if(player.name === state.MML.GM.player){
+        if(currentRoll.accepted === false){
+            MML.processCommand({
+                type: "player",
+                who: player.name,
+                triggeredFunction: "displayGmRoll",
+                input: {}
+            });
+        }
+        else{
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                triggeredFunction: "initiativeApply",
+                input: {}
+            });
+        }
+    }
+    else{
+        MML.processCommand({
+            type: "player",
+            who: player.name,
+            triggeredFunction: "displayPlayerRoll",
+            input: {}
+        });
+    }
+};
+
+MML.initiativeApply = function initiativeApply(){
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "setApiCharAttribute",
+        input: {
+            attribute: "initiativeRoll",
+            value: state.MML.players[this.player].currentRoll.value
+        }
+    });
+
+    MML.processCommand({
+        type: "player",
+        who: this.player,
+        triggeredFunction: "prepareNextCharacter",
+        input: {}   
+    });
+
+    
+};
+
+MML.startAttackAction = function startAttackAction(){
+    var player = state.MML.players[this.player];
+    if(_.contains(this.action.modifiers, ["Called Shot"])){
+        MML.processCommand({
+            type: "player",
+            who: player.name,
+            triggeredFunction: "menuSelectBodyPart",
+            input: {
+                who: this.name,
+            }   
+        });
+    }
+    else if(_.contains(this.action.modifiers, ["Called Shot Specific"])){
+        MML.processCommand({
+            type: "player",
+            who: player.name,
+            triggeredFunction: "menuSelectHitPosition",
+            input: {
+                who: this.name,
+            }   
+        });
+    }
+    else if(_.contains(this.action.modifiers, ["Aim"])){
+        if(MML.hasStatusEffect("Taking Aim")){
+            this.statusEffects["Taking Aim"].level++;
+        }
+        else{
+            this.statusEffects["Taking Aim"] = { name: "Taking Aim", level: 1, target: this.action.targets[0] };
+        }
+    }
+    else{
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "getAttackRoll",
+            input: {}   
+        });
+    }
+};
+
+
+// //Give weapons functions and set character's getAttackRoll equal to it
+MML.getAttackRoll = function getAttackRoll(input){
+ var roll;
+    
+ if (this.inventory.weapons.length === 0){
+     roll = this.unarmedAttack();
+ }
+ else if (this.inventory.weapons[0].family === "MWD" || this.inventory.weapons[0].family === "MWM"){
+     roll = this.missileAttack();
+ }
+ else if(this.inventory.weapons[0].family === "TWH" || 
+ this.inventory.weapons[0].family === "TWK" ||
+ this.inventory.weapons[0].family === "TWS" ||
+ this.inventory.weapons[0].family === "SLI"){
+     roll = this.thrownAttack();
+ }
+ else if(this.inventory.weapons.length === 2){
+     roll = this.dualWieldAttack();
+ }
+ else {
+     roll = this.meleeAttack();
+ }
+ this.fatigue.inMelee = true;
+
+ return roll;
+};
+
+MML.attackRollResult = function attackRollResult(){
+    this.rolls.attack = this.currentRoll.result;
+    if(this.rolls.attack === "Critical Success" || this.rolls.attack === "Success"){
+        var player = state.MML.GM.characters[this.currentTarget].player;
+        state.MML.players[player].menu = "charMenuDefense";
+        MML.displayMenu.apply(state.MML.players[player], []);
+    }
+    else{
+        MML.endAction.apply(this, []);
+    }
+};
+
+MML.getDefenseRoll = function getDefenseRoll(){
+    this.currentRoll = this.characters[this.currentTarget].defenseRoll();
+    this.displayRoll();
+};
+
+MML.defenseRollResult = function defenseRollResult(){
+    this.rolls.defense = this.currentRoll.result;
+    if(this.rolls.defense === "Critical Success" || this.rolls.defense === "Success"){
+        this.endAction();
+    }
+    else{
+        var player = state.MML.GM.characters[this.actor].player;
+        state.MML.players[player].setMenu = MML.charMenuHitPositionRoll;
+        state.MML.players[player].displayMenu();
+    }
+};
+
+// MML.weaponDamageRoll = function weaponDamageRoll(crit){
+//     var weapon = this.inventory.weapons[0];
+//     var weaponDamage;
+//  var damageType;
+//  var bonusDamage = 0; // Strength, weapon, and other bonuses
+//  var roll;
+    
+//  if (this.inventory.weapons.length === 0){
+//      log("unarmed");//unarmed damage
+//  }
+//  else if (this.inventory.weapons[0].family === "MWD" || this.inventory.weapons[0].family === "MWM"){
+//      log("missile");//missile damage
+//  }
+//  else if(this.inventory.weapons[0].family === "TWH" || 
+//  this.inventory.weapons[0].family === "TWK" ||
+//  this.inventory.weapons[0].family === "TWS" ||
+//  this.inventory.weapons[0].family === "SLI" ){
+//      log("thrown"); //thrown damage
+//  }
+//  else if(this.inventory.weapons.length === 2){
+//      log("dual"); //dual wield damage
+//  }
+//  else {//Melee Damage
+//      //Primary or secondary attack
+//      if (this.action.damageType === "primary"){
+//          weaponDamage = weapon.primaryDamage;
+//          damageType = weapon.primaryType;
+//      }
+//      else {
+//          weaponDamage = weapon.secondaryDamage;
+//          damageType = weapon.secondaryType;
+//      }
+//  }
+//  roll = MML.rollDamage(weaponDamage, [bonusDamage], crit, damageType);
+//  return roll;
+// };
+
+
+// // Todo: Add sweep attack
+// MML.meleeAttack = function meleeAttack(){ 
+//     this.currentWeapon = this.inventory.weapons[0];
+//     var weapon = this.currentWeapon;
+//     var skill = this.action.skill;
+//  var attackMod = this.modifiers.attack;
+//  var sitMod = this.modifiers.situational;
+    
+//  var roll;
+//     //Primary or secondary attack
+//  if (this.action.damageType === "primary"){
+//      roll = this.universalRoll([weapon.primaryTask, skill, sitMod, attackMod]);
+//  }
+//  else {
+//      roll = this.universalRoll([weapon.secondaryTask, skill, sitMod, attackMod]);
+//  }
+    
+//  return roll;
+// };
+// // Check if missle weapon and maybe magic
+// MML.defenseRoll = function defenseRoll(){
+//  var roll = {};
+//  var weapon = this.inventory.weapons[0];
+//     var weaponSkill = Math.round(this.skills[weapon.name]/2);
+//  var shieldMod = this.inventory.shield.defenseMod;
+//  var dodgeSkill = this.skills.dodge;
+//  var defaultMartialSkill = this.skills.defaultMartial;
+//  var defenseMod = this.modifiers.defense;
+//     var sitMod = this.modifiers.situational;
+//  var dodgeChance;
+//  var blockChance;
+    
+//  if(weaponSkill >= defaultMartialSkill){
+//      blockChance = weapon.defense + weaponSkill + sitMod + defenseMod + shieldMod;
+//  }
+//  else{
+//      blockChance = weapon.defense + defaultMartialSkill + sitMod + defenseMod + shieldMod;
+//  }
+    
+//  if(dodgeSkill >= defaultMartialSkill){
+//      dodgeChance = dodgeSkill + sitMod + defenseMod;
+//  }
+//  else{
+//      dodgeChance = defaultMartialSkill + sitMod + defenseMod;
+//  }
+
+//  switch(this.defense.style){
+//      case "Block":
+//          this.defense.number++;
+//          roll = this.universalRoll([blockChance]);
+//      break;
+//      case "Dodge":
+//          this.defense.number++;
+//          this.defense.dodge = true;
+//          roll = this.universalRoll([dodgeChance]);
+//      break;
+//      case "Take It":
+//          roll = {value: 100, player: this.player, result: "Failure", target: 1};
+//      break;
+//      default:
+//      break;
+//  }
+
+//  return roll;
+// };
+
+// MML.missileAttack = function missileAttack(){
+//  var weapon = this.inventory.weapons[0];
+//  var skill = this.action.skill;
+//  var attackMod = this.modifiers.attack;
+//  var attackerSitMod = this.modifiers.situational;
+//  // var range = MML.getDistanceBetweenChars(this.name, this.);
+//  var task;
+//  //var damageDice;
+    
+//  // Get task and damage from range
+//  if ( range <= attackerWeapon.range.pointBlank.range ){
+//      task = attackerWeapon.range.pointBlank.task;
+//      //damageDice = attackerWeapon.range.pointBlank.damage;
+//  }
+//  else if ( range <= attackerWeapon.range.effective.range ){
+//      task = attackerWeapon.range.effective.task;
+//      //damageDice = attackerWeapon.range.effective.damage;
+//  }
+//  else if ( range <= attackerWeapon.range.long.range ){
+//      task = attackerWeapon.range.long.task;
+//      //damageDice = attackerWeapon.range.long.damage;
+//  }
+//  else {
+//      task = attackerWeapon.range.extreme.task;
+//      //damageDice = attackerWeapon.range.extreme.damage;
+//  }
+    
+//  // // Determine dodge or shield
+//  // if (defenderDodgeSkill > (defaultMartialSkill + shieldDefenseMod)){
+//      // defenderSkill = defenderDodgeSkill;
+//  // }
+//  // else {
+//      // defenderSkill = defaultMartialSkill + shieldDefenseMod;
+//  // }
+
+//  //var position = MML.rollHitPosition(state.MML.GM.characters[charName].action.elevation, defender, target);
+//  state.MML.Combat.turnInfo.currentRoll = this.universalRoll([task, skill, attackerSitMod, attackMod]);
+
+// };
+
+MML.unarmedAttack = function unarmedAttack(charName){};
+
+MML.readyItemAction = function readyItemAction(charName){};
+
+MML.castSpellAction = function castSpellAction(charName){};
+
+MML.observeAction = function observeAction(charName){};// Character Creation
 MML.characterConstructor = function characterConstructor(charName){
     // Basic Info 
     this.name = charName;
@@ -1159,1279 +2220,7 @@ MML.computeAttribute.weaponSkills = { dependents: [],
         this.weaponSkills = characterSkills;
         return characterSkills;
     }};
-
-
-MML.updateInventory = function updateInventory(charName){
-    //Armor
-    var armor = [];
-    var item = MML.getCharAttribute(this.name, "repeating_item_0_armorStyleName");
-    var index = 0;
-    while(typeof item !== "undefined"){
-        armor[index] = { style: "", material: "", quality: "" };
-        index++;
-        item = MML.getCharAttribute(charName, "repeating_armor_" + index + "_armorStyleName");
-    }
-    
-    //Weapons
-    item = MML.getCharAttribute(charName, "repeating_weapons_0_weaponName");
-    index = 0;
-    var weapons = [];
-    var left = false;
-    var right = false;
-    while(typeof item !== "undefined"){
-        weapons[index] = MML.weaponStats[MML.getCharAttribute(charName, "repeating_weapons_" + index + "_weaponName").get("current")];
-        weapons[index].equipped = MML.getCharAttribute(charName, "repeating_weapons_" + index + "_weaponEquipped").get("current");
-        weapons[index].quality = MML.getCharAttribute(charName, "repeating_weapons_" + index + "_weaponQuality").get("current");
-        
-        if (weapons[index].equipped === "Both"){
-            if(right === false && left === false){
-                left = true;
-                right = true;
-                state.MML.GM.characters[charName].inventory.weapons.push(weapons[index]);
-            }
-            else {
-                state.MML.GM.characters[charName].error = "Equipment Conflict: Hands Full";
-            }
-            
-        }
-        else if(weapons[index].equipped === "Right"){
-            if(right === false){
-                right = true;
-                state.MML.GM.characters[charName].inventory.weapons.push(weapons[index]);
-            }
-            else {
-                state.MML.GM.characters[charName].error = "Equipment Conflict: Hands Full";
-            }
-        }
-        else if(weapons[index].equipped === "Left"){
-            if(left === false){
-                left = true;
-                state.MML.GM.characters[charName].inventory.weapons.push(weapons[index]);
-            }
-            else {
-                state.MML.GM.characters[charName].error = "Equipment Conflict: Hands Full";
-            }
-        }
-        else{
-            state.MML.GM.characters[charName].inventory.inPack.push(weapons[index]);
-        }
-        index++;
-        item = MML.getCharAttribute(charName, "repeating_weapons_" + index + "_weaponName");
-    }
-
-    //Shields
-    if(MML.getCharAttribute(charName, "shieldEquipped") === "Right"){
-        if(right === false){
-            right = true;
-            state.MML.GM.characters[charName].inventory.shield = MML.shieldStats[MML.getCharAttribute(charName, "shieldName")];
-        }
-        else {
-            state.MML.GM.characters[charName].error = "Equipment Conflict: Hands Full";
-        }
-    }
-    else if(MML.getCharAttribute(charName, "shieldEquipped") === "Left"){
-        if(left === false){
-            left = true;
-            state.MML.GM.characters[charName].inventory.shield = MML.shieldStats[MML.getCharAttribute(charName, "shieldName")];
-        }
-        else {
-            state.MML.GM.characters[charName].error = "Equipment Conflict: Hands Full";
-        }
-    }
-    else{
-        state.MML.GM.characters[charName].inventory.inPack.push(MML.shieldStats[MML.getCharAttribute(charName, "shieldName")]);
-    }
-        
-    //Other items
-    
-
-    //This looks at the character's stuff and decides which column on hit table to use (A, B, or C)
-    if(state.MML.GM.characters[charName].inventory.weapons.length === 0){
-        state.MML.GM.characters[charName].defense.hitTable = "A";
-    }
-    else if (state.MML.GM.characters[charName].inventory.weapons.length === 2){
-        state.MML.GM.characters[charName].defense.hitTable = "B";
-    }
-    else if(state.MML.GM.characters[charName].inventory.shield !== "None"){
-        state.MML.GM.characters[charName].defense.hitTable = "C";
-    }
-    else if(MML.weaponStats[state.MML.GM.characters[charName].inventory.weapons[0]].family === "MWD" || 
-    MML.weaponStats[state.MML.GM.characters[charName].inventory.weapons[0]].family === "MWM" ||
-    MML.weaponStats[state.MML.GM.characters[charName].inventory.weapons[0]].family === "TWH" || 
-    MML.weaponStats[state.MML.GM.characters[charName].inventory.weapons[0]].family === "TWK" || 
-    MML.weaponStats[state.MML.GM.characters[charName].inventory.weapons[0]].family === "TWS" || 
-    MML.weaponStats[state.MML.GM.characters[charName].inventory.weapons[0]].family === "SLI"){
-        state.MML.GM.characters[charName].defense.hitTable = "A";
-    }
-    else if(MML.weaponStats[state.MML.GM.characters[charName].inventory.weapons[0]].hands === 2){
-        state.MML.GM.characters[charName].defense.hitTable = "B";
-    }
-    else{
-        state.MML.GM.characters[charName].defense.hitTable = "A";
-    }
-};
-
-//Combat Functions
-MML.displayMovement = function displayMovement(input){
-    if(input.display){
-        MML.getTokenFromChar(this.name).set("aura1_radius", MML.movementRates[this.race][this.movementPosition]*this.movementAvailable);
-        MML.getTokenFromChar(this.name).set("aura1_color", "#00FF00");
-    }
-    else{
-        MML.getTokenFromChar(this.name).set("aura1_color", "transparent");
-    }
-};
-
-MML.moveDistance = function moveDistance(distance){
-    this.movementAvailable -= (distance)/(MML.movementRates[this.race][this.movementPosition]);
-    MML.displayMovement.apply(this, [true]);
-};
-
-MML.computeSitMods = function computeSitMods(){
-    var initiative = 0;
-    var situational  = 0;
-    var defense  = 0;
-    var attack  = 0;
-    var casting  = 0;
-
-    //Apply wound effects
-    var i;
-    for(i in MML.hitPoints){
-        if(MML.hitPoints[i].name !== "multiWound"){
-            if(this[MML.hitPoints[i].name].wound.major === true){
-                initiative += -5;
-                if(this[MML.hitPoints[i].name].wound.major.duration > 0){
-                    situational  += -10;
-                }
-            }
-            if(this[MML.hitPoints[i].name].wound.disabling === true){
-                initiative += -10;
-                situational  += -25;
-            }
-        }
-        else{
-            if(this[MML.hitPoints[i].name].wound === true){
-                initiative += -5;
-                situational  += -10;
-            }
-        }
-    }
-
-    //Compute action-based initiative bonus
-    switch(this.action.name){
-        case "attack":
-            //Weapon
-            if(this.inventory.weapons.length === 0){
-                //Unarmed
-                initiative  += 10;
-                this.action.skill = this.skills["brawling"];
-            }
-            else if(this.inventory.weapons.length === 2){
-                //Dual Wielding
-                var weaponInits = [MML.weaponStats[this.inventory.equipped.leftHand.name].initiative, MML.weaponStats[this.inventory.equipped.rightHand.name].initiative];
-                initiative  += weaponInits.sort(function(a,b){return b-a;})[0];
-                //Set action skill here
-            }
-            else{
-                initiative  += MML.weaponStats[this.inventory.weapons[0].name].initiative;
-                this.action.skill = this.skills[this.inventory.weapons[0].name];
-            }
-            if (this.action.calledShot === "head" || 
-            this.action.calledShot === "chest" || 
-            this.action.calledShot === "abdomen" || 
-            this.action.calledShot === "leftArm" || 
-            this.action.calledShot === "rightArm" || 
-            this.action.calledShot === "leftLeg" || 
-            this.action.calledShot === "rightLeg"){
-                defense  += -10;
-                attack  += -10;
-                initiative  += -5;
-            }
-            
-            else if (this.action.calledShot !== "standard"){ //Specific hit position
-                defense  += -10;
-                attack  += -30;
-                initiative  += -5;
-            }
-            
-            // Attack style
-            if (this.action.style === "sweep"){
-                defense  += -20;
-            }
-            else if (this.action.style === "cover"){
-                attack  += -10;
-            }
-            break;
-            
-        case "ready":
-            initiative  += 10;
-            break;
-        case "cast":
-            initiative  += 10;
-            break;
-        case "observe":
-            initiative  += 10;
-            break;
-    }
-    
-    //Action skill bonus
-    if (this.action.skill <= 9){
-        initiative  += 0;
-    }
-    else if (this.action.skill > 9 && this.action.skill <= 19){
-        initiative  +=  1;
-    }
-    else if (this.action.skill > 19 && this.action.skill <= 29){
-        initiative  += 2;
-    }
-    else if (this.action.skill > 29 && this.action.skill <= 39){
-        initiative  += 3;
-    }
-    else if (this.action.skill > 39 && this.action.skill <= 49){
-        initiative  += 4;
-    }
-    else if (this.action.skill > 49 && this.action.skill <= 59){
-        initiative  += 5;
-    }
-    else if (this.action.skill > 59){
-        initiative  += 6;
-    }
-
-    MML.setAttackTempo(this.name);
-    
-    // Compute defense mod
-    defense  = -20 * this.defense.number;
-    
-    // Apply fatigue
-    initiative  += -5*this.fatigue.level;
-    situational  += -10*this.fatigue.level;
-    
-    // Apply sensitive area effect
-    if (this.sensitive > -1){
-        initiative  += -5;
-        situational  += -10;
-    }
-    // Apply stumble effects from knockdown
-    if (this.stumble > -1){
-        initiative  += -5;
-    }
-    
-    this.initiative.situational = initiative;
-    this.modifiers.situational = situational;
-    this.modifiers.defense = defense;
-    this.modifiers.attack = attack;
-    this.modifiers.casting = casting;
-};
-
-MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input){
-    //Update wound counters, only major wounds have temporary effects. Disabling wound stun is handled with the .stun.duration property
-    // var i;
-    // for(i in MML.hitPoints){
-    //  if(MML.hitPoints[i].name !== "multiWound"){
-    //      if(this[MML.hitPoints[i].name].wound.major.duration > 0){
-    //          this[MML.hitPoints[i].name].wound.major.duration--;
-    //      }
-    //  }
-    // }
-    // if(this.stun.duration > 0){ //if stun === -1, then stun is over
-    //  this.stun.duration--;
-    // }
-    
-    // Handle fatigue don't use the fitness score to track fatigue, just use the combat state
-    if (this.meleeThisRound === true){ // Character acted in melee
-        MML.processCommand({
-            type: "character",
-            who: this.name,
-            triggeredFunction: "setApiCharAttribute",
-            input: {
-                attribute: "roundsExertion",
-                value: this.roundsExertion + 1
-            }
-        });
-        MML.processCommand({
-            type: "character",
-            who: this.name,
-            triggeredFunction: "setApiCharAttribute",
-            input: {
-                attribute: "roundsRest",
-                value: 0
-            }
-        });
-
-        if (this.fatigueLevel < 1){
-            if (this.roundsExertion > this.fitness){
-                if (MML.attributeCheckRoll(charName, "fitness", [0])){
-                    MML.processCommand({
-                        type: "character",
-                        who: this.name,
-                        triggeredFunction: "setApiCharAttribute",
-                        input: {
-                            attribute: "fatigueLevel",
-                            value: this.fatigueLevel + 1
-                        }
-                    });
-                    MML.processCommand({
-                        type: "character",
-                        who: this.name,
-                        triggeredFunction: "setApiCharAttribute",
-                        input: {
-                            attribute: "roundsExertion",
-                            value: 0
-                        }
-                    });
-                }
-            }
-        }
-        else {
-            if (this.roundsExertion > Math.round(this.fitness/2)){
-                if (MML.attributeCheckRoll(charName, "fitness", [-4])){
-                    MML.processCommand({
-                        type: "character",
-                        who: this.name,
-                        triggeredFunction: "setApiCharAttribute",
-                        input: {
-                            attribute: "fatigueLevel",
-                            value: this.fatigueLevel + 1
-                        }
-                    });
-                    MML.processCommand({
-                        type: "character",
-                        who: this.name,
-                        triggeredFunction: "setApiCharAttribute",
-                        input: {
-                            attribute: "roundsExertion",
-                            value: 0
-                        }
-                    });
-                }
-            }
-        }
-
-        MML.processCommand({
-            type: "character",
-            who: this.name,
-            triggeredFunction: "setApiCharAttribute",
-            input: {
-                attribute: "meleeThisRound",
-                value: false
-            }
-        });
-    }
-    else if (this.fatigueLevel > 0){
-        MML.processCommand({
-            type: "character",
-            who: this.name,
-            triggeredFunction: "setApiCharAttribute",
-            input: {
-                attribute: "roundsRest",
-                value: this.roundsRest + 1
-            }
-        });
-        if (this.roundsRest >= 6 && this.attributeCheckRoll("health", [0])){
-            MML.processCommand({
-                type: "character",
-                who: this.name,
-                triggeredFunction: "setApiCharAttribute",
-                input: {
-                    attribute: "roundsRest",
-                    value: 0
-                }
-            });
-            this.fatigueLevel--;
-            this.updateCharacter("fatigueLevel");
-            MML.processCommand({
-                type: "character",
-                who: this.name,
-                triggeredFunction: "setApiCharAttribute",
-                input: {
-                    attribute: "fatigueLevel",
-                    value: this.fatigueLevel - 1
-                }
-            });
-            MML.processCommand({
-                type: "character",
-                who: this.name,
-                triggeredFunction: "setApiCharAttribute",
-                input: {
-                    attribute: "roundsExertion",
-                    value: 0
-                }
-            });
-        }
-    }
-    // Reset number of defenses counter
-    MML.processCommand({
-        type: "character",
-        who: this.name,
-        triggeredFunction: "setApiCharAttribute",
-        input: {
-            attribute: "defensesThisRound",
-            value: 0
-        }
-    });
-    MML.processCommand({
-        type: "character",
-        who: this.name,
-        triggeredFunction: "setApiCharAttribute",
-        input: {
-            attribute: "dodgedThisRound",
-            value: false
-        }
-    });
-    // Reset knockdown number
-    MML.processCommand({
-        type: "character",
-        who: this.name,
-        triggeredFunction: "setApiCharAttribute",
-        input: {
-            attribute: "knockdown",
-            value: this.knockdownMax
-        }
-    });
-    MML.processCommand({
-        type: "character",
-        who: this.name,
-        triggeredFunction: "setApiCharAttribute",
-        input: {
-            attribute: "spentInitiative",
-            value: 0
-        }
-    });
-    this.action = {};
-
-    MML.processCommand({
-        type: "character",
-        who: this.name,
-        triggeredFunction: "setApiCharAttribute",
-        input: {
-            attribute: "ready",
-            value: false
-        }
-    });
-};
-
-MML.setReady = function setReady(ready){
-    if(state.MML.GM.inCombat === true && this.ready === "false"){
-        MML.getTokenFromChar(this.name).set("tint_color", "#FF0000");
-    }
-    else{
-        MML.getTokenFromChar(this.name).set("tint_color", "transparent");
-    }
-    return this.ready;
-};
-
-// Health and Wounds
-MML.alterHP = function alterHP(position, hpAmount){
-    var woundInfo = { bodyPart: MML.hitPositions[position].part, type: "none", duration: -1 };
-    
-    if(hpAmount < 0){ //if damage
-        var initialHP = this[woundInfo.bodyPart].current;
-        var currentHP = initialHP + hpAmount;
-        this[woundInfo.bodyPart].current = currentHP;
-        //Wounds
-        if(currentHP < Math.round(this[woundInfo.bodyPart].max/2) && currentHP >= 0){//Major wound
-            woundInfo.type = "major";
-            if(initialHP >= Math.round(this[woundInfo.bodyPart].max/2) && this[woundInfo.bodyPart].wound.major === {}){ //Fresh wound
-                woundInfo.duration = Math.round(this[woundInfo.bodyPart].max/2) - currentHP;
-            }
-            else{ //Add damage to duration of effect
-                woundInfo.duration = -hpAmount;
-            }
-        }
-        
-        else if(currentHP < 0 && currentHP > -this[woundInfo.bodyPart].max){//Disabling wound           
-            if(this[woundInfo.bodyPart].wound.disabling === {} ){ //Fresh wound
-                woundInfo.type = "disabling";
-                woundInfo.duration = -currentHP;
-                
-            }
-            else{ //Add damage to duration of effect
-                woundInfo.type = "disabling";
-                woundInfo.duration = -hpAmount;
-            }
-            
-        }
-        
-        else if(currentHP < -this[woundInfo.bodyPart].max){//Mortal wound
-            woundInfo.type = "mortal";
-        }
-    }
-    else{ //if healing
-        this[woundInfo.bodyPart].current += hpAmount;
-        
-        if(this[woundInfo.bodyPart].current >= -1*this[woundInfo.bodyPart].max){
-            this[woundInfo.bodyPart].wound.mortal = false;
-        }
-        if(this[woundInfo.bodyPart].current >= 0){
-            this[woundInfo.bodyPart].wound.disabling = false;
-        }
-        if(this[woundInfo.bodyPart].current >= Math.round(this[woundInfo.bodyPart].max/2)){
-            this[woundInfo.bodyPart].wound.major = {};
-        }
-        if(this[woundInfo.bodyPart].current > this[woundInfo.bodyPart].max){
-            this[woundInfo.bodyPart].current = this[woundInfo.bodyPart].max;
-        }
-    }
-    return woundInfo;
-};
-
-MML.setMultiWound = function setMultiWound(){
-    var current = this.multiWound.max;
-    var woundInfo = { bodyPart: "multiWound", type: "none", duration: -1 };
-    
-    var i;
-    for(i in MML.hitPoints){
-        if(MML.hitPoints[i].name !== "multiWound"){
-            if(this[MML.hitPoints[i].name].current >= Math.round(this[MML.hitPoints[i].name].max/2)){ //Only minor wounds apply
-                current -= this[MML.hitPoints[i].name].max - this[MML.hitPoints[i].name].current;
-            }
-            else{
-                current -= this[MML.hitPoints[i].name].max - Math.round(this[MML.hitPoints[i].name].max/2);
-            }
-        }
-    }
-    
-    if(this.multiWound.current < 0 && this.multiWound.wound === false){
-        woundInfo.type = "multiWound";
-    }
-    else if(this.multiWound.current >= 0){
-        this.multiWound.wound = false;
-    }
-    this.multiWound.current = current;
-    return woundInfo;
-};
-
-MML.woundRoll = function woundRoll(woundInfo){
-    var roll;
-
-    switch(woundInfo.type){
-        case "major":
-            roll = this.attributeCheckRoll("willpower", [0]);
-            roll.title = this.name + "'s major wound willpower save";
-            break;
-        case "disabling":
-            roll = this.attributeCheckRoll("systemStrength", [0]);
-            roll.title = this.name + "'s disabling wound system strength save";
-            break;
-        case "mortal":
-            roll = this.attributeCheckRoll("systemStrength", [0]);
-            roll.title = this.name + "'s mortal wound system strength save";
-            break;
-        case "multiWound":
-            roll = this.attributeCheckRoll("willpower", [0]);
-            roll.title = this.name + "'s wound fatigue willpower save";
-            break;
-        default:
-        break;
-    }
-    woundInfo.name = roll.name;
-    woundInfo.result = roll.result;
-    woundInfo.target = roll.target;
-    woundInfo.range = roll.range;
-    woundInfo = roll;
-    return woundInfo;
-};
-
-MML.checkKnockdown = function checkKnockdown(damage){
-    if (this.movementPosition !== "Prone"){
-        this.knockdown += damage;
-        this.updateCharacter("knockdown");
-    }
-};
-
-MML.knockdownRoll = function knockdownRoll(){
-    var roll;
-
-    if(MML.hasStatusEffect.apply(this, ["Stumbling"])){
-        //victim saved first knockdown check, harder to save 2nd time
-        roll = MML.attributeCheckRoll(this, ["systemStrength", [-5]]);
-    }   
-    else{
-        roll = MML.attributeCheckRoll(this, ["systemStrength", [0]]);
-    }
-    return roll;
-};
-
-MML.isSensitiveArea = function isSensitiveArea(position){
-    if(position === 2 || position === 6 || position === 33){
-        return true;
-    }
-    else{
-        return false;
-    }
-};
-
-MML.sensitiveAreaRoll = function sensitiveAreaCheck(){ 
-    var roll = this.attributeCheckRoll("willpower", [0]);
-    return roll;
-};
-
-MML.armorPenetration = function armorPenetration(position, damage, type) {
-    var damageApplied = false; //Accounts for partial coverage, once true the loop stops
-    var coverageRoll = randomInteger(100); 
-    var damageDeflected = 0;
-    
-    // Iterates over apv values at given position (accounting for partial coverage)
-    var apv;
-    for (apv in this.apv[position][type]){
-        if (damageApplied === false){
-            if (coverageRoll <= this.apv[position][type][apv].coverage) { //if coverage roll is less than apv coverage
-                damageDeflected = this.apv[position][type][apv];
-                
-                //If all damage is deflected, do blunt trauma. Modifies damage variable for next if statement
-                if (damage + damageDeflected >= 0){
-                    //If surface, cut, or pierce, cut in half and apply as impact
-                    if (type === "Surface" || type === "Cut" || type === "Pierce"){                        
-                        damage = Math.ceil(damage/2);
-                        damageDeflected = this.apv[position].Impact[apv];
-                        
-                        if (damage + damageDeflected >= 0){
-                            damageDeflected = -damage;
-                            damage = 0;
-                        }
-                    }
-                    //If chop, or thrust, apply 3/4 as impact
-                    else if (type === "Chop" || type === "Thrust"){
-                        damage = Math.ceil(damage*0.75);
-                        damageDeflected = this.apv[position].Impact[apv];
-                        
-                        if (damage + damageDeflected >= 0){
-                            damageDeflected = -damage;
-                            damage = 0;
-                        }
-                    }
-                    //If impact or flanged, no damage
-                    else {
-                        damageDeflected = -damage;
-                        damage = 0;
-                    }
-                }
-                
-                // if damage gets through, subtract amount deflected by armor
-                if (damage < 0){
-                    damage += damageDeflected;
-                }
-                damageApplied = true;
-            }
-        }
-    }
-    return damage;
-};
-
-MML.getWeaponFamily = function getWeaponFamily(hand){
-    var item = this.inventory[this[hand]._id];
-
-    if(!_.isUndefined(item) && item.type === "weapon"){
-        return item.grips[this[hand].grip].family;
-    }
-    else{
-        return "Not a Weapon";
-    }
-};
-
-MML.isWieldingMissileWeapon = function isWieldingMissileWeapon(){
-        var leftFamily = MML.getWeaponFamily.apply(this, ["leftHand"]);
-        var rightFamily = MML.getWeaponFamily.apply(this, ["rightHand"]);
-
-        return (leftFamily === "MWD" || 
-                rightFamily === "MWD" ||
-                leftFamily === "MWM" ||
-                rightFamily === "MWM" ||
-                leftFamily === "TWH" ||
-                rightFamily === "TWH" || 
-                leftFamily === "TWK" ||
-                rightFamily === "TWS" ||
-                leftFamily === "TWS" ||
-                rightFamily === "SLI" ||
-                leftFamily === "SLI");
-};
-
-MML.isDualWielding = function isDualWielding(){
-    var leftHand = MML.getWeaponFamily.apply(this, ["leftHand"]);
-    var rightHand = MML.getWeaponFamily.apply(this, ["rightHand"]);
-
-    if(this.leftHand._id !== this.rightHand._id &&
-        leftHand !== "Not a Weapon" &&
-        rightHand !== "Not a Weapon"){
-        return true;
-    }
-    else{
-        return false;
-    }
-};
-
-MML.initiativeRoll = function initiativeRoll(input){
-    var rollValue = MML.rollDice(1, 10);
-    
-    MML.processCommand({
-        type: "character",
-        who: this.name,
-        triggeredFunction: "updateCharacter",
-        input: {
-            attribute: "action"
-        }
-    });
-    MML.processCommand({
-        type: "character",
-        who: this.name,
-        triggeredFunction: "setApiCharAttribute",
-        input: {
-            attribute: "ready",
-            value: true
-        }
-    });
-
-    MML.processCommand({
-        type: "player",
-        who: this.player,
-        triggeredFunction: "setApiPlayerAttribute",
-        input: {
-            attribute: "currentRoll",
-            value: {
-                who: this.name,
-                name: "initiative",
-                value: rollValue,
-                getResult: "initiativeResult",
-                applyResult: "initiativeApply",
-                range: "1-10",
-                accepted: false
-            }
-        }   
-    });
-
-    MML.processCommand({
-        type: "character",
-        who: this.name,
-        triggeredFunction: "initiativeResult",
-        input: {}
-    });
-};
-
-MML.initiativeResult = function initiativeResult(input){
-    var player = state.MML.players[this.player];
-    var currentRoll = player.currentRoll;
-
-    currentRoll.rollResult = 
-        currentRoll.value + 
-        this.situationalInitBonus + 
-        this.movementRatioInitBonus +
-        this.attributeInitBonus + 
-        this.senseInitBonus +
-        this.fomInitBonus +
-        this.firstActionInitBonus +
-        this.spentInitiative;
-
-    currentRoll.message =
-        "Roll: " + currentRoll.value + 
-        "\nResult: " + currentRoll.rollResult + 
-        "\nRange: " + currentRoll.range;
-
-    if(player.name === state.MML.GM.player){
-        if(currentRoll.accepted === false){
-            MML.processCommand({
-                type: "player",
-                who: player.name,
-                triggeredFunction: "displayGmRoll",
-                input: {}
-            });
-        }
-        else{
-            MML.processCommand({
-                type: "character",
-                who: this.name,
-                triggeredFunction: "initiativeApply",
-                input: {}
-            });
-        }
-    }
-    else{
-        MML.processCommand({
-            type: "player",
-            who: player.name,
-            triggeredFunction: "displayPlayerRoll",
-            input: {}
-        });
-    }
-};
-
-MML.initiativeApply = function initiativeApply(){
-    MML.processCommand({
-        type: "character",
-        who: this.name,
-        triggeredFunction: "setApiCharAttribute",
-        input: {
-            attribute: "initiativeRoll",
-            value: state.MML.players[this.player].currentRoll.value
-        }
-    });
-
-    MML.processCommand({
-        type: "player",
-        who: this.player,
-        triggeredFunction: "prepareNextCharacter",
-        input: {}   
-    });
-
-    
-};
-
-MML.startAttackAction = function startAttackAction(){
-    var player = state.MML.players[this.player];
-    if(_.contains(this.action.modifiers, ["Called Shot"])){
-        MML.processCommand({
-            type: "player",
-            who: player.name,
-            triggeredFunction: "menuSelectBodyPart",
-            input: {
-                who: this.name,
-            }   
-        });
-    }
-    else if(_.contains(this.action.modifiers, ["Called Shot Specific"])){
-        MML.processCommand({
-            type: "player",
-            who: player.name,
-            triggeredFunction: "menuSelectHitPosition",
-            input: {
-                who: this.name,
-            }   
-        });
-    }
-    else if(_.contains(this.action.modifiers, ["Aim"])){
-        if(MML.hasStatusEffect("Taking Aim")){
-            this.statusEffects["Taking Aim"].level++;
-        }
-        else{
-            this.statusEffects["Taking Aim"] = { name: "Taking Aim", level: 1, target: this.action.targets[0] };
-        }
-    }
-    else{
-        MML.processCommand({
-            type: "character",
-            who: this.name,
-            triggeredFunction: "getAttackRoll",
-            input: {}   
-        });
-    }
-};
-
-
-MML.statusEffects = {};
-MML.statusEffects["Major Wound"] = function(effect, index){
-    if(this[effect.bodyPart] > Math.round(this[effect.bodyPart + "Max"]/2)){
-        delete this.statusEffects[index];
-    }
-    else{
-        if(this.situationalInitBonus !== "No Combat"){
-            this.situationalInitBonus += -5;
-        }
-        if(effect.duration > 0){
-            this.situationalMod += -10;
-        }
-    }
-};
-MML.statusEffects["Disabling Wound"] = function(effect, index){
-    if(this[effect.bodyPart] > 0){
-        delete this.statusEffects[index];
-    }
-    else{
-        if(this.situationalInitBonus !== "No Combat"){
-            this.situationalInitBonus += -10;
-        }
-        this.situationalMod += -25;
-    }
-};
-MML.statusEffects["Mortal Wound"] = function(effect, index){
-    if(this[effect.bodyPart] <= -this[effect.bodyPart + "Max"]){
-        delete this.statusEffects[index];
-    }
-    else{
-        this.situationalInitBonus = "No Combat";
-    }
-};
-MML.statusEffects["Wound Fatigue"] = function(effect, index){
-    if(this.situationalInitBonus !== "No Combat"){
-        this.situationalInitBonus += -5;
-    }
-    this.situationalMod  += -10;
-};
-MML.statusEffects["Number of Defenses"] = function(effect, index){
-    if(state.GM.roundStarted === false){ 
-        delete this.statusEffects[index];
-    }
-
-    this.missileDefenseMod += -20 * effect.number;
-    this.meleeDefenseMod += -20 * effect.number;
-};
-MML.statusEffects["Fatigue"] = function(effect, index){
-    if(this.situationalInitBonus !== "No Combat"){
-        this.situationalInitBonus += -5*effect.level;
-    }
-    this.situationalMod  += -10*effect.level;
-};
-MML.statusEffects["Sensitive Area"] = function(effect, index){
-    if(state.GM.roundStarted === false){ 
-        effect.duration--;
-        if(effect.duration < 1){
-            delete this.statusEffects[index];
-        }
-    }
-    else{
-        if(this.situationalInitBonus !== "No Combat"){
-            this.situationalInitBonus += -5;
-        }
-    }
-    if(effect.duration > 1){
-        this.situationalMod  += -10;
-    }
-};
-MML.statusEffects["Stumbling"] = function(effect, index){
-    if(state.GM.roundStarted === false){ 
-        effect.duration--;
-        if(effect.duration < 1){
-            delete this.statusEffects[index];
-        }
-    }
-    else{
-        if(this.situationalInitBonus !== "No Combat"){
-            this.situationalInitBonus += -5;
-        }
-    }
-};
-MML.statusEffects["Called Shot"] = function(effect, index){
-    if(!_.contains(this.action.modifiers, "Called Shot")){
-        delete this.statusEffects[index];
-    }
-
-    else{
-        this.missileDefenseMod += -10;
-        this.meleeDefenseMod += -10;
-        this.missileAttackMod += -10;
-        this.meleeAttackMod += -10;
-        if(this.situationalInitBonus !== "No Combat"){
-            this.situationalInitBonus += -5;
-        }
-    }
-};
-MML.statusEffects["Called Shot Specific"] = function(effect, index){
-    if(!_.contains(this.action.modifiers, "Called Shot Specific")){
-        delete this.statusEffects[index];
-    }
-    else{
-        this.missileDefenseMod += -30;
-        this.meleeDefenseMod += -30;
-        this.meleeAttackMod += -30;
-        this.missileAttackMod += -30;
-        if(this.situationalInitBonus !== "No Combat"){
-            this.situationalInitBonus += -5;
-        }
-    }
-};
-MML.statusEffects["Aggressive Stance"] = function(effect, index){
-    if(!_.contains(this.action.modifiers, "Aggressive Stance")){
-        // log("aggro deleted");
-        delete this.statusEffects[index];
-        // log(this.statusEffects);
-    }
-    else{
-        this.missileDefenseMod += -40;
-        this.meleeDefenseMod += -40;
-        this.meleeAttackMod += 10;
-        this.perceptionCheckMod += -4;
-        if(this.situationalInitBonus !== "No Combat"){
-            this.situationalInitBonus += 5;
-        }
-    }
-};
-MML.statusEffects["Defensive Stance"] = function(effect, index){
-    if(!_.contains(this.action.modifiers, "Defensive Stance")){
-        delete this.statusEffects[index];
-    }
-    else{
-        this.missileDefenseMod += 40;
-        this.meleeDefenseMod += 40;
-        this.meleeAttackMod += -30;
-        this.perceptionCheckMod += -4;
-        if(this.situationalInitBonus !== "No Combat"){
-            this.situationalInitBonus += -5;
-        }
-    }
-};
-MML.statusEffects["Observe"] = function(effect, index){
-    if(state.GM.roundStarted === false){ 
-        effect.duration--;
-    }
-    
-    if(effect.duration < 1 || (this.situationalInitBonus !== "No Combat" && !MML.hasStatusEffect("Number of Defenses"))){
-        delete this.statusEffects[index];
-    }
-    else if(effect.duration < 1){
-        // Observing this round
-        this.perceptionCheckMod += 4;
-        this.missileDefenseMod += -10;
-        this.meleeDefenseMod += -10;
-    }
-    else{
-        //observed previous round
-        this.situationalInitBonus += 5;
-        if(MML.isWieldingMissileWeapon.apply(this, [])){
-                this.missileAttackMod += 15;
-            }
-        } 
-};
-MML.statusEffects["Taking Aim"] = function(effect, index){
-    if(MML.hasStatusEffect.apply(this, ["Number of Defenses"]) ||
-       MML.hasStatusEffect.apply(this, ["Damaged This Round"]) ||
-       MML.hasStatusEffect.apply(this, ["Dodged This Round"]) ||
-       this.action.targets[0] !== effect.target)
-    {
-        delete this.statusEffects[index];
-    }
-    else{
-        if(effect.level === 1){
-            this.missileAttackMod += 30;
-        }
-        else if(effect.level === 2){
-            this.missileAttackMod += 40;
-        }
-    }
-};
-MML.statusEffects["Aim"] = function(effect, index){
-    // if(MML.hasStatusEffect.apply(this, ["Number of Defenses"]) ||
-    //    MML.hasStatusEffect.apply(this, ["Damaged This Round"]) ||
-    //    MML.hasStatusEffect.apply(this, ["Dodged This Round"]))
-    // {
-    //     this.statusEffects[index]
-    // }
-    // else if(state.MML.GM.roundStarted === false){
-    //     if(effect.level === 1){
-    //         this.missileAttackMod += 30;
-    //     }
-    //     else if(effect.level === 2){
-    //         this.missileAttackMod += 40;
-    //     }
-    //}
-};
-MML.statusEffects["Damaged This Round"] = function(effect, index){
-
-};
-MML.statusEffects["Dodged This Round"] = function(effect, index){
-
-};
-MML.statusEffects["Melee This Round"] = function(effect, index){
-    if(state.MML.GM.roundStarted === false){
-        this.roundsExertion++;
-        delete this.statusEffects[index];
-    }
-};
-
-// //Give weapons functions and set character's getAttackRoll equal to it
-MML.getAttackRoll = function getAttackRoll(input){
- var roll;
-    
- if (this.inventory.weapons.length === 0){
-     roll = this.unarmedAttack();
- }
- else if (this.inventory.weapons[0].family === "MWD" || this.inventory.weapons[0].family === "MWM"){
-     roll = this.missileAttack();
- }
- else if(this.inventory.weapons[0].family === "TWH" || 
- this.inventory.weapons[0].family === "TWK" ||
- this.inventory.weapons[0].family === "TWS" ||
- this.inventory.weapons[0].family === "SLI"){
-     roll = this.thrownAttack();
- }
- else if(this.inventory.weapons.length === 2){
-     roll = this.dualWieldAttack();
- }
- else {
-     roll = this.meleeAttack();
- }
- this.fatigue.inMelee = true;
-
- return roll;
-};
-
-MML.attackRollResult = function attackRollResult(){
-    this.rolls.attack = this.currentRoll.result;
-    if(this.rolls.attack === "Critical Success" || this.rolls.attack === "Success"){
-        var player = state.MML.GM.characters[this.currentTarget].player;
-        state.MML.players[player].menu = "charMenuDefense";
-        MML.displayMenu.apply(state.MML.players[player], []);
-    }
-    else{
-        MML.endAction.apply(this, []);
-    }
-};
-
-MML.getDefenseRoll = function getDefenseRoll(){
-    this.currentRoll = this.characters[this.currentTarget].defenseRoll();
-    this.displayRoll();
-};
-
-MML.defenseRollResult = function defenseRollResult(){
-    this.rolls.defense = this.currentRoll.result;
-    if(this.rolls.defense === "Critical Success" || this.rolls.defense === "Success"){
-        this.endAction();
-    }
-    else{
-        var player = state.MML.GM.characters[this.actor].player;
-        state.MML.players[player].setMenu = MML.charMenuHitPositionRoll;
-        state.MML.players[player].displayMenu();
-    }
-};
-
-// MML.weaponDamageRoll = function weaponDamageRoll(crit){
-//     var weapon = this.inventory.weapons[0];
-//     var weaponDamage;
-//  var damageType;
-//  var bonusDamage = 0; // Strength, weapon, and other bonuses
-//  var roll;
-    
-//  if (this.inventory.weapons.length === 0){
-//      log("unarmed");//unarmed damage
-//  }
-//  else if (this.inventory.weapons[0].family === "MWD" || this.inventory.weapons[0].family === "MWM"){
-//      log("missile");//missile damage
-//  }
-//  else if(this.inventory.weapons[0].family === "TWH" || 
-//  this.inventory.weapons[0].family === "TWK" ||
-//  this.inventory.weapons[0].family === "TWS" ||
-//  this.inventory.weapons[0].family === "SLI" ){
-//      log("thrown"); //thrown damage
-//  }
-//  else if(this.inventory.weapons.length === 2){
-//      log("dual"); //dual wield damage
-//  }
-//  else {//Melee Damage
-//      //Primary or secondary attack
-//      if (this.action.damageType === "primary"){
-//          weaponDamage = weapon.primaryDamage;
-//          damageType = weapon.primaryType;
-//      }
-//      else {
-//          weaponDamage = weapon.secondaryDamage;
-//          damageType = weapon.secondaryType;
-//      }
-//  }
-//  roll = MML.rollDamage(weaponDamage, [bonusDamage], crit, damageType);
-//  return roll;
-// };
-
-
-// // Todo: Add sweep attack
-// MML.meleeAttack = function meleeAttack(){ 
-//     this.currentWeapon = this.inventory.weapons[0];
-//     var weapon = this.currentWeapon;
-//     var skill = this.action.skill;
-//  var attackMod = this.modifiers.attack;
-//  var sitMod = this.modifiers.situational;
-    
-//  var roll;
-//     //Primary or secondary attack
-//  if (this.action.damageType === "primary"){
-//      roll = this.universalRoll([weapon.primaryTask, skill, sitMod, attackMod]);
-//  }
-//  else {
-//      roll = this.universalRoll([weapon.secondaryTask, skill, sitMod, attackMod]);
-//  }
-    
-//  return roll;
-// };
-// // Check if missle weapon and maybe magic
-// MML.defenseRoll = function defenseRoll(){
-//  var roll = {};
-//  var weapon = this.inventory.weapons[0];
-//     var weaponSkill = Math.round(this.skills[weapon.name]/2);
-//  var shieldMod = this.inventory.shield.defenseMod;
-//  var dodgeSkill = this.skills.dodge;
-//  var defaultMartialSkill = this.skills.defaultMartial;
-//  var defenseMod = this.modifiers.defense;
-//     var sitMod = this.modifiers.situational;
-//  var dodgeChance;
-//  var blockChance;
-    
-//  if(weaponSkill >= defaultMartialSkill){
-//      blockChance = weapon.defense + weaponSkill + sitMod + defenseMod + shieldMod;
-//  }
-//  else{
-//      blockChance = weapon.defense + defaultMartialSkill + sitMod + defenseMod + shieldMod;
-//  }
-    
-//  if(dodgeSkill >= defaultMartialSkill){
-//      dodgeChance = dodgeSkill + sitMod + defenseMod;
-//  }
-//  else{
-//      dodgeChance = defaultMartialSkill + sitMod + defenseMod;
-//  }
-
-//  switch(this.defense.style){
-//      case "Block":
-//          this.defense.number++;
-//          roll = this.universalRoll([blockChance]);
-//      break;
-//      case "Dodge":
-//          this.defense.number++;
-//          this.defense.dodge = true;
-//          roll = this.universalRoll([dodgeChance]);
-//      break;
-//      case "Take It":
-//          roll = {value: 100, player: this.player, result: "Failure", target: 1};
-//      break;
-//      default:
-//      break;
-//  }
-
-//  return roll;
-// };
-
-// MML.missileAttack = function missileAttack(){
-//  var weapon = this.inventory.weapons[0];
-//  var skill = this.action.skill;
-//  var attackMod = this.modifiers.attack;
-//  var attackerSitMod = this.modifiers.situational;
-//  // var range = MML.getDistanceBetweenChars(this.name, this.);
-//  var task;
-//  //var damageDice;
-    
-//  // Get task and damage from range
-//  if ( range <= attackerWeapon.range.pointBlank.range ){
-//      task = attackerWeapon.range.pointBlank.task;
-//      //damageDice = attackerWeapon.range.pointBlank.damage;
-//  }
-//  else if ( range <= attackerWeapon.range.effective.range ){
-//      task = attackerWeapon.range.effective.task;
-//      //damageDice = attackerWeapon.range.effective.damage;
-//  }
-//  else if ( range <= attackerWeapon.range.long.range ){
-//      task = attackerWeapon.range.long.task;
-//      //damageDice = attackerWeapon.range.long.damage;
-//  }
-//  else {
-//      task = attackerWeapon.range.extreme.task;
-//      //damageDice = attackerWeapon.range.extreme.damage;
-//  }
-    
-//  // // Determine dodge or shield
-//  // if (defenderDodgeSkill > (defaultMartialSkill + shieldDefenseMod)){
-//      // defenderSkill = defenderDodgeSkill;
-//  // }
-//  // else {
-//      // defenderSkill = defaultMartialSkill + shieldDefenseMod;
-//  // }
-
-//  //var position = MML.rollHitPosition(state.MML.GM.characters[charName].action.elevation, defender, target);
-//  state.MML.Combat.turnInfo.currentRoll = this.universalRoll([task, skill, attackerSitMod, attackMod]);
-
-// };
-
-MML.unarmedAttack = function unarmedAttack(charName){};
-
-MML.readyItemAction = function readyItemAction(charName){};
-
-MML.castSpellAction = function castSpellAction(charName){};
-
-MML.observeAction = function observeAction(charName){};MML.skills = {};
+MML.skills = {};
 MML.skills["Acrobatics"] = {attribute: "coordination"};
 MML.skills["Acting"] = {attribute: "presence"};
 MML.skills["Alchemy"] = {attribute: "intellect"};
@@ -6024,6 +5813,12 @@ MML.assignNewItem = function assignNewItem(input){
 // };
 
 MML.processCommand = function(command){
+	log("Last Command");
+	log(state.MML.GM);
+	log(state.MML.players);
+	log(state.MML.characters);
+	log(command);
+
 	switch(command.type){
 		case "character":
 			var character = state.MML.characters[command.who];
@@ -6098,7 +5893,7 @@ MML.parseCommand = function parseCommand(msg) {
 	        }
 	    }
 
-	    else if(msg.type === "api" && msg.content.indexOf("!displayItemOptions") !== -1) {
+	    else if(msg.content.indexOf("!displayItemOptions") !== -1) {
 	        var input = msg.content.replace("!displayItemOptions ", "").split("|");
 	        var who = input[0];
 	        var itemId = input[1];
@@ -6124,7 +5919,7 @@ MML.parseCommand = function parseCommand(msg) {
 	        log(command);
 	        command.input.selectedCharNames = MML.getSelectedCharNames(msg.selected);
     	}
-
+    	
     	MML.processCommand(command);
     }
 	    
@@ -7100,10 +6895,9 @@ MML.charMenuChooseTarget = function charMenuChooseTarget(input){
 	}
 };
 MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(input){
-	log(this);
 	var targetArray;
 	if(typeof input.who !== "undefined"){
-		targetArray = [input.who];
+		targetArray = [input.target];
 	}
 	else{
 		targetArray = input.targets;
@@ -7111,8 +6905,8 @@ MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(input){
 
 	MML.processCommand({
     	type: "character",
-    	who: this.characters[this.characterIndex],
-    	triggeredFunction: state.MML.characters[this.characters[this.characterIndex]].action.triggeredMethod,
+    	who: input.character,
+    	triggeredFunction: state.MML.characters[input.character].action.triggeredMethod,
 		input: {
 	    	targetArray: targetArray
 	  	}
@@ -8039,21 +7833,230 @@ MML.GmMenuUtilities = function utilities(input){
 // 	}
 	 
 // };
+MML.statusEffects = {};
+MML.statusEffects["Major Wound"] = function(effect, index){
+    if(this[effect.bodyPart] > Math.round(this[effect.bodyPart + "Max"]/2)){
+        delete this.statusEffects[index];
+    }
+    else{
+        if(this.situationalInitBonus !== "No Combat"){
+            this.situationalInitBonus += -5;
+        }
+        if(effect.duration > 0){
+            this.situationalMod += -10;
+        }
+    }
+};
+MML.statusEffects["Disabling Wound"] = function(effect, index){
+    if(this[effect.bodyPart] > 0){
+        delete this.statusEffects[index];
+    }
+    else{
+        if(this.situationalInitBonus !== "No Combat"){
+            this.situationalInitBonus += -10;
+        }
+        this.situationalMod += -25;
+    }
+};
+MML.statusEffects["Mortal Wound"] = function(effect, index){
+    if(this[effect.bodyPart] <= -this[effect.bodyPart + "Max"]){
+        delete this.statusEffects[index];
+    }
+    else{
+        this.situationalInitBonus = "No Combat";
+    }
+};
+MML.statusEffects["Wound Fatigue"] = function(effect, index){
+    if(this.situationalInitBonus !== "No Combat"){
+        this.situationalInitBonus += -5;
+    }
+    this.situationalMod  += -10;
+};
+MML.statusEffects["Number of Defenses"] = function(effect, index){
+    if(state.GM.roundStarted === false){ 
+        delete this.statusEffects[index];
+    }
+
+    this.missileDefenseMod += -20 * effect.number;
+    this.meleeDefenseMod += -20 * effect.number;
+};
+MML.statusEffects["Fatigue"] = function(effect, index){
+    if(this.situationalInitBonus !== "No Combat"){
+        this.situationalInitBonus += -5*effect.level;
+    }
+    this.situationalMod  += -10*effect.level;
+};
+MML.statusEffects["Sensitive Area"] = function(effect, index){
+    if(state.GM.roundStarted === false){ 
+        effect.duration--;
+        if(effect.duration < 1){
+            delete this.statusEffects[index];
+        }
+    }
+    else{
+        if(this.situationalInitBonus !== "No Combat"){
+            this.situationalInitBonus += -5;
+        }
+    }
+    if(effect.duration > 1){
+        this.situationalMod  += -10;
+    }
+};
+MML.statusEffects["Stumbling"] = function(effect, index){
+    if(state.GM.roundStarted === false){ 
+        effect.duration--;
+        if(effect.duration < 1){
+            delete this.statusEffects[index];
+        }
+    }
+    else{
+        if(this.situationalInitBonus !== "No Combat"){
+            this.situationalInitBonus += -5;
+        }
+    }
+};
+MML.statusEffects["Called Shot"] = function(effect, index){
+    if(!_.contains(this.action.modifiers, "Called Shot")){
+        delete this.statusEffects[index];
+    }
+
+    else{
+        this.missileDefenseMod += -10;
+        this.meleeDefenseMod += -10;
+        this.missileAttackMod += -10;
+        this.meleeAttackMod += -10;
+        if(this.situationalInitBonus !== "No Combat"){
+            this.situationalInitBonus += -5;
+        }
+    }
+};
+MML.statusEffects["Called Shot Specific"] = function(effect, index){
+    if(!_.contains(this.action.modifiers, "Called Shot Specific")){
+        delete this.statusEffects[index];
+    }
+    else{
+        this.missileDefenseMod += -30;
+        this.meleeDefenseMod += -30;
+        this.meleeAttackMod += -30;
+        this.missileAttackMod += -30;
+        if(this.situationalInitBonus !== "No Combat"){
+            this.situationalInitBonus += -5;
+        }
+    }
+};
+MML.statusEffects["Aggressive Stance"] = function(effect, index){
+    if(!_.contains(this.action.modifiers, "Aggressive Stance")){
+        // log("aggro deleted");
+        delete this.statusEffects[index];
+        // log(this.statusEffects);
+    }
+    else{
+        this.missileDefenseMod += -40;
+        this.meleeDefenseMod += -40;
+        this.meleeAttackMod += 10;
+        this.perceptionCheckMod += -4;
+        if(this.situationalInitBonus !== "No Combat"){
+            this.situationalInitBonus += 5;
+        }
+    }
+};
+MML.statusEffects["Defensive Stance"] = function(effect, index){
+    if(!_.contains(this.action.modifiers, "Defensive Stance")){
+        delete this.statusEffects[index];
+    }
+    else{
+        this.missileDefenseMod += 40;
+        this.meleeDefenseMod += 40;
+        this.meleeAttackMod += -30;
+        this.perceptionCheckMod += -4;
+        if(this.situationalInitBonus !== "No Combat"){
+            this.situationalInitBonus += -5;
+        }
+    }
+};
+MML.statusEffects["Observe"] = function(effect, index){
+    if(state.GM.roundStarted === false){ 
+        effect.duration--;
+    }
+    
+    if(effect.duration < 1 || (this.situationalInitBonus !== "No Combat" && !MML.hasStatusEffect("Number of Defenses"))){
+        delete this.statusEffects[index];
+    }
+    else if(effect.duration < 1){
+        // Observing this round
+        this.perceptionCheckMod += 4;
+        this.missileDefenseMod += -10;
+        this.meleeDefenseMod += -10;
+    }
+    else{
+        //observed previous round
+        this.situationalInitBonus += 5;
+        if(MML.isWieldingMissileWeapon.apply(this, [])){
+                this.missileAttackMod += 15;
+            }
+        } 
+};
+MML.statusEffects["Taking Aim"] = function(effect, index){
+    if(MML.hasStatusEffect.apply(this, ["Number of Defenses"]) ||
+       MML.hasStatusEffect.apply(this, ["Damaged This Round"]) ||
+       MML.hasStatusEffect.apply(this, ["Dodged This Round"]) ||
+       this.action.targets[0] !== effect.target)
+    {
+        delete this.statusEffects[index];
+    }
+    else{
+        if(effect.level === 1){
+            this.missileAttackMod += 30;
+        }
+        else if(effect.level === 2){
+            this.missileAttackMod += 40;
+        }
+    }
+};
+MML.statusEffects["Aim"] = function(effect, index){
+    // if(MML.hasStatusEffect.apply(this, ["Number of Defenses"]) ||
+    //    MML.hasStatusEffect.apply(this, ["Damaged This Round"]) ||
+    //    MML.hasStatusEffect.apply(this, ["Dodged This Round"]))
+    // {
+    //     this.statusEffects[index]
+    // }
+    // else if(state.MML.GM.roundStarted === false){
+    //     if(effect.level === 1){
+    //         this.missileAttackMod += 30;
+    //     }
+    //     else if(effect.level === 2){
+    //         this.missileAttackMod += 40;
+    //     }
+    //}
+};
+MML.statusEffects["Damaged This Round"] = function(effect, index){
+
+};
+MML.statusEffects["Dodged This Round"] = function(effect, index){
+
+};
+MML.statusEffects["Melee This Round"] = function(effect, index){
+    if(state.MML.GM.roundStarted === false){
+        this.roundsExertion++;
+        delete this.statusEffects[index];
+    }
+};
 MML.test = function test(){
     log("test");
 
-    // var exampleCommand = {
-    //     type: "player",
-    //     who: "Robot",
-    //     triggeredFunction: "menuCommand",
-    //     input: {
-    //         who: "GM",
-    //         buttonText: "GmMenuMain"
-    //     }
-    // };
+    var GM = "{\"player\":\"Robot\",\"name\":\"GM\",\"currentAction\":{},\"inCombat\":true,\"currentRound\":1,\"roundStarted\":true,\"combatants\":[\"Thaddeus Clinch\",\"Remmy Denkin\"],\"actor\":\"Thaddeus Clinch\"}";
+    var players = "{\"Robot\":{\"name\":\"Robot\",\"who\":\"Thaddeus Clinch\",\"menu\":\"menuIdle\",\"buttons\":[],\"characters\":[\"Thaddeus Clinch\",\"Remmy Denkin\"],\"characterIndex\":2,\"message\":\"Menu Closed\",\"currentRoll\":{\"who\":\"Remmy Denkin\",\"name\":\"initiative\",\"value\":2,\"getResult\":\"initiativeResult\",\"applyResult\":\"initiativeApply\",\"range\":\"1-10\",\"accepted\":true,\"rollResult\":17,\"message\":\"Roll: 2\\nResult: 17\\nRange: 1-10\"}},\"Andrew\":{\"name\":\"Andrew\",\"menu\":\"charMenuPrepareAction\",\"characters\":[],\"characterIndex\":0,\"message\":\"Prepare undefined's action\",\"buttons\":[{\"text\":\"Attack\",\"nextMenu\":\"charMenuAttack\"},{\"text\":\"Cast\",\"nextMenu\":\"charMenuCast\"},{\"text\":\"Ready Item\",\"nextMenu\":\"charMenuReadyItem\"},{\"text\":\"Observe\",\"nextMenu\":\"charMenuPrepareAction\"}]}}";
+    var characters = "{\"Thaddeus Clinch\":{\"name\":\"Thaddeus Clinch\",\"player\":\"Robot\",\"race\":\"Human\",\"bodyType\":\"humanoid\",\"gender\":\"Male\",\"height\":\"5'7\",\"weight\":150,\"handedness\":\"\",\"stature\":22,\"strength\":20,\"coordination\":15,\"health\":19,\"beauty\":18,\"intellect\":7,\"reason\":7,\"creativity\":14,\"presence\":15,\"willpower\":16,\"evocation\":63,\"perception\":9,\"systemStrength\":18,\"fitness\":20,\"fitnessMod\":4,\"load\":88,\"overhead\":176,\"deadLift\":352,\"multiWoundMax\":29,\"multiWound\":29,\"headHPMax\":13,\"headHP\":13,\"chestHPMax\":16,\"chestHP\":16,\"abdomenHPMax\":21,\"abdomenHP\":21,\"leftArmHPMax\":21,\"leftArmHP\":21,\"rightArmHPMax\":21,\"rightArmHP\":21,\"leftLegHPMax\":21,\"leftLegHP\":21,\"rightLegHPMax\":21,\"rightLegHP\":21,\"epMax\":63,\"ep\":63,\"fatigueMax\":20,\"fatigue\":20,\"hpRecovery\":4,\"epRecovery\":8,\"inventory\":{\"kc439wkco1c9in3p573\":{\"name\":\"Shovel\",\"type\":\"weapon\",\"weight\":6,\"grips\":{\"Two Hands\":{\"family\":\"Bludgeoning\",\"hands\":2,\"primaryType\":\"Impact\",\"primaryTask\":35,\"primaryDamage\":\"\",\"secondaryType\":\"1d8\",\"secondaryTask\":0,\"secondaryDamage\":\"\",\"defense\":15,\"initiative\":4,\"rank\":1}},\"quality\":\"Standard\"}},\"totalWeightCarried\":6,\"knockdownMax\":23,\"knockdown\":false,\"apv\":[{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]}],\"leftHand\":{\"_id\":\"kc439wkco1c9in3p573\",\"grip\":\"Two Hands\"},\"rightHand\":{\"_id\":\"kc439wkco1c9in3p573\",\"grip\":\"Two Hands\"},\"hitTable\":\"[null,1,1,2,3,3,4,4,5,5,6,7,8,8,8,8,9,9,9,9,10,10,11,11,11,11,12,12,13,13,13,13,14,14,14,15,15,16,16,17,17,17,18,18,19,19,19,19,20,20,21,21,21,22,22,23,23,23,24,24,25,25,26,26,27,27,27,28,28,29,29,29,30,30,31,31,32,32,33,34,34,35,35,35,36,36,36,37,37,38,38,39,39,40,40,41,42,43,44,45,46]\",\"movementRatio\":4,\"movementAvailable\":4,\"movementPosition\":\"Walk\",\"situationalMod\":0,\"attributeDefenseMod\":13,\"meleeDefenseMod\":-50,\"missileDefenseMod\":-50,\"meleeAttackMod\":0,\"missileAttackMod\":-10,\"attributeMeleeAttackMod\":13,\"meleeDamageMod\":2,\"attributeMissileAttackMod\":8,\"attributeCastingMod\":-30,\"spellLearningMod\":-5,\"statureCheckMod\":0,\"strengthCheckMod\":0,\"coordinationCheckMod\":0,\"healthCheckMod\":0,\"beautyCheckMod\":0,\"intellectCheckMod\":0,\"reasonCheckMod\":0,\"creativityCheckMod\":0,\"presenceCheckMod\":0,\"willpowerCheckMod\":0,\"evocationCheckMod\":0,\"perceptionCheckMod\":0,\"systemStrengthCheckMod\":0,\"fitnessCheckMod\":0,\"statusEffects\":{},\"initiative\":22,\"initiativeRoll\":10,\"situationalInitBonus\":0,\"movementRatioInitBonus\":5,\"attributeInitBonus\":-1,\"senseInitBonus\":4,\"fomInitBonus\":0,\"firstActionInitBonus\":4,\"spentInitiative\":0,\"actionTempo\":-12,\"ready\":true,\"action\":{\"name\":\"Attack\",\"getTargets\":\"getSingleTarget\",\"triggeredMethod\":\"startAttackAction\",\"modifiers\":[],\"initBonus\":4},\"defensesThisRound\":0,\"dodgedThisRound\":false,\"meleeThisRound\":false,\"fatigueLevel\":0,\"roundsRest\":0,\"roundsExertion\":0,\"damagedThisRound\":false,\"skills\":{},\"weaponSkills\":{}},\"Remmy Denkin\":{\"name\":\"Remmy Denkin\",\"player\":\"Robot\",\"race\":\"Human\",\"bodyType\":\"humanoid\",\"gender\":\"Male\",\"height\":\"5'10\",\"weight\":165,\"handedness\":\"\",\"stature\":24,\"strength\":12,\"coordination\":14,\"health\":9,\"beauty\":8,\"intellect\":7,\"reason\":16,\"creativity\":10,\"presence\":6,\"willpower\":7,\"evocation\":49,\"perception\":11,\"systemStrength\":8,\"fitness\":11,\"fitnessMod\":2.6,\"load\":65,\"overhead\":130,\"deadLift\":260,\"multiWoundMax\":20,\"multiWound\":20,\"headHPMax\":9,\"headHP\":9,\"chestHPMax\":12,\"chestHP\":12,\"abdomenHPMax\":17,\"abdomenHP\":17,\"leftArmHPMax\":17,\"leftArmHP\":17,\"rightArmHPMax\":17,\"rightArmHP\":17,\"leftLegHPMax\":17,\"leftLegHP\":17,\"rightLegHPMax\":17,\"rightLegHP\":17,\"epMax\":49,\"ep\":49,\"fatigueMax\":11,\"fatigue\":11,\"hpRecovery\":0.5,\"epRecovery\":2,\"inventory\":{\"pj2mh7tir4zto6gigyr\":{\"name\":\"Cudgel, Light\",\"type\":\"weapon\",\"weight\":3,\"grips\":{\"One Hand\":{\"family\":\"Bludgeoning\",\"hands\":1,\"primaryType\":\"Impact\",\"primaryTask\":45,\"primaryDamage\":\"2d10\",\"secondaryType\":\"\",\"secondaryTask\":0,\"secondaryDamage\":\"\",\"defense\":15,\"initiative\":6,\"rank\":1}},\"quality\":\"Poor\"}},\"totalWeightCarried\":3,\"knockdownMax\":24,\"knockdown\":false,\"apv\":[{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]},{\"Surface\":[{\"value\":null,\"coverage\":100}],\"Cut\":[{\"value\":null,\"coverage\":100}],\"Chop\":[{\"value\":null,\"coverage\":100}],\"Pierce\":[{\"value\":null,\"coverage\":100}],\"Thrust\":[{\"value\":null,\"coverage\":100}],\"Impact\":[{\"value\":null,\"coverage\":100}],\"Flanged\":[{\"value\":null,\"coverage\":100}]}],\"leftHand\":{\"_id\":\"pj2mh7tir4zto6gigyr\",\"grip\":\"One Hand\"},\"rightHand\":{\"_id\":\"pj2mh7tir4zto6gigyr\",\"grip\":\"One Hand\"},\"hitTable\":\"[null,1,1,2,3,3,4,4,5,5,6,7,8,8,8,8,9,9,9,9,10,10,11,11,11,11,12,12,13,13,13,13,14,14,14,15,15,16,16,17,17,17,18,18,19,19,19,19,20,20,21,21,21,22,22,23,23,23,24,24,25,25,26,26,27,27,27,28,28,29,29,29,30,30,31,31,32,32,33,34,34,35,35,35,36,36,36,37,37,38,38,39,39,40,40,41,42,43,44,45,46]\",\"movementRatio\":4,\"movementAvailable\":4,\"movementPosition\":\"Walk\",\"situationalMod\":0,\"attributeDefenseMod\":6,\"meleeDefenseMod\":0,\"missileDefenseMod\":0,\"meleeAttackMod\":0,\"missileAttackMod\":0,\"attributeMeleeAttackMod\":6,\"meleeDamageMod\":1,\"attributeMissileAttackMod\":6,\"attributeCastingMod\":-20,\"spellLearningMod\":-5,\"statureCheckMod\":0,\"strengthCheckMod\":0,\"coordinationCheckMod\":0,\"healthCheckMod\":0,\"beautyCheckMod\":0,\"intellectCheckMod\":0,\"reasonCheckMod\":0,\"creativityCheckMod\":0,\"presenceCheckMod\":0,\"willpowerCheckMod\":0,\"evocationCheckMod\":0,\"perceptionCheckMod\":0,\"systemStrengthCheckMod\":0,\"fitnessCheckMod\":0,\"statusEffects\":{},\"initiative\":17,\"initiativeRoll\":2,\"situationalInitBonus\":0,\"movementRatioInitBonus\":5,\"attributeInitBonus\":0,\"senseInitBonus\":4,\"fomInitBonus\":0,\"firstActionInitBonus\":6,\"spentInitiative\":0,\"actionTempo\":-12,\"ready\":true,\"action\":{\"name\":\"Attack\",\"getTargets\":\"getSingleTarget\",\"triggeredMethod\":\"startAttackAction\",\"modifiers\":[],\"initBonus\":6},\"defensesThisRound\":0,\"dodgedThisRound\":false,\"meleeThisRound\":false,\"fatigueLevel\":0,\"roundsRest\":0,\"roundsExertion\":0,\"damagedThisRound\":false,\"skills\":{},\"weaponSkills\":{}}}";
+    var command = '{"type":"character","who":"Thaddeus Clinch","triggeredFunction":"startAttackAction","input":{}}'; 
+
+    state.MML.GM = JSON.parse(GM);
+    state.MML.players = JSON.parse(players);
+    state.MML.characters = JSON.parse(characters);
+    MML.processCommand(JSON.parse(command));
 };
 
-// Menu Macro = !{"type":"player","who":"Robot","triggeredFunction":"menuCommand","input":{"who":"GM","buttonText":"GmMenuMain"}}// Character Functions
+// Menu Macro = !{"type":"player","who":"Robot","triggeredFunction":"menuCommand","input":{"who":"GM","buttonText":"GmMenuMain"}}
+// Character Functions
 MML.getCharFromName = function getCharFromName(charName){
     var character = findObjs({
         _type: "character",

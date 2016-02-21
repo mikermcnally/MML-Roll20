@@ -482,6 +482,12 @@ MML.assignNewItem = function assignNewItem(input){
 // };
 
 MML.processCommand = function(command){
+	log("Last Command");
+	log(state.MML.GM);
+	log(state.MML.players);
+	log(state.MML.characters);
+	log(command);
+
 	switch(command.type){
 		case "character":
 			var character = state.MML.characters[command.who];
@@ -556,7 +562,7 @@ MML.parseCommand = function parseCommand(msg) {
 	        }
 	    }
 
-	    else if(msg.type === "api" && msg.content.indexOf("!displayItemOptions") !== -1) {
+	    else if(msg.content.indexOf("!displayItemOptions") !== -1) {
 	        var input = msg.content.replace("!displayItemOptions ", "").split("|");
 	        var who = input[0];
 	        var itemId = input[1];
@@ -582,7 +588,7 @@ MML.parseCommand = function parseCommand(msg) {
 	        log(command);
 	        command.input.selectedCharNames = MML.getSelectedCharNames(msg.selected);
     	}
-
+    	
     	MML.processCommand(command);
     }
 	    
