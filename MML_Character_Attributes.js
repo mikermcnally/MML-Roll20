@@ -865,7 +865,8 @@ MML.computeAttribute.attributeInitBonus = { dependents: ["initiative"],
             return 5;
         }
             }};  
-MML.computeAttribute.senseInitBonus = { dependents: ["initiative",
+MML.computeAttribute.senseInitBonus = {
+    dependents: ["initiative",
                 "attributeCastingMod"],
     compute: function(){
         var armorList = _.where(this.inventory, {type: "armor"});    
@@ -946,23 +947,27 @@ MML.computeAttribute.senseInitBonus = { dependents: ["initiative",
             }
         }
     }};  
-MML.computeAttribute.fomInitBonus = { dependents: ["initiative",
+MML.computeAttribute.fomInitBonus = { 
+    dependents: ["initiative",
                 "attributeCastingMod"],
     compute: function(){
         return this.fomInitBonus;
     }};  
-MML.computeAttribute.firstActionInitBonus = { dependents: ["initiative"],
+MML.computeAttribute.firstActionInitBonus = { 
+    dependents: ["initiative"],
     compute: function(){
         if(state.MML.GM.roundStarted === false){
             this.firstActionInitBonus = this.action.initBonus;
         }
         return this.firstActionInitBonus;
     }};
-MML.computeAttribute.spentInitiative = { dependents: ["initiative"],
+MML.computeAttribute.spentInitiative = { 
+    dependents: ["initiative"],
     compute: function(){
         return this.spentInitiative;
     }};
-MML.computeAttribute.actionTempo = { dependents: [],
+MML.computeAttribute.actionTempo = { 
+    dependents: [],
     compute: function(){
         var tempo;
 
@@ -986,7 +991,8 @@ MML.computeAttribute.actionTempo = { dependents: [],
     }};
 
 // Combat
-MML.computeAttribute.ready = { dependents: [],
+MML.computeAttribute.ready = { 
+    dependents: [],
     compute: function(){
         if(state.MML.GM.inCombat === true && this.ready === false){
             MML.getTokenFromChar(this.name).set("tint_color", "#FF0000");
@@ -996,7 +1002,8 @@ MML.computeAttribute.ready = { dependents: [],
         }
         return this.ready;
     }};
-MML.computeAttribute.action = { dependents: ["firstActionInitBonus",
+MML.computeAttribute.action = { 
+    dependents: ["firstActionInitBonus",
                 "actionTempo",
                 "statusEffects"],
     compute: function(){
@@ -1032,7 +1039,8 @@ MML.computeAttribute.action = { dependents: ["firstActionInitBonus",
 
         return this.action;
     }};
-MML.computeAttribute.defensesThisRound = { dependents: [],
+MML.computeAttribute.defensesThisRound = { 
+    dependents: [],
     compute: function(){
         return this.defensesThisRound;
     }};

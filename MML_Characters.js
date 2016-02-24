@@ -589,15 +589,6 @@ MML.knockdownRoll = function knockdownRoll(){
     return roll;
 };
 
-MML.isSensitiveArea = function isSensitiveArea(position){
-    if(position === 2 || position === 6 || position === 33){
-        return true;
-    }
-    else{
-        return false;
-    }
-};
-
 MML.sensitiveAreaRoll = function sensitiveAreaCheck(){ 
     var roll = this.attributeCheckRoll("willpower", [0]);
     return roll;
@@ -653,48 +644,6 @@ MML.armorPenetration = function armorPenetration(position, damage, type) {
         }
     }
     return damage;
-};
-
-MML.getWeaponFamily = function getWeaponFamily(hand){
-    var item = this.inventory[this[hand]._id];
-
-    if(!_.isUndefined(item) && item.type === "weapon"){
-        return item.grips[this[hand].grip].family;
-    }
-    else{
-        return "Not a Weapon";
-    }
-};
-
-MML.isWieldingMissileWeapon = function isWieldingMissileWeapon(){
-        var leftFamily = MML.getWeaponFamily.apply(this, ["leftHand"]);
-        var rightFamily = MML.getWeaponFamily.apply(this, ["rightHand"]);
-
-        return (leftFamily === "MWD" || 
-                rightFamily === "MWD" ||
-                leftFamily === "MWM" ||
-                rightFamily === "MWM" ||
-                leftFamily === "TWH" ||
-                rightFamily === "TWH" || 
-                leftFamily === "TWK" ||
-                rightFamily === "TWS" ||
-                leftFamily === "TWS" ||
-                rightFamily === "SLI" ||
-                leftFamily === "SLI");
-};
-
-MML.isDualWielding = function isDualWielding(){
-    var leftHand = MML.getWeaponFamily.apply(this, ["leftHand"]);
-    var rightHand = MML.getWeaponFamily.apply(this, ["rightHand"]);
-
-    if(this.leftHand._id !== this.rightHand._id &&
-        leftHand !== "Not a Weapon" &&
-        rightHand !== "Not a Weapon"){
-        return true;
-    }
-    else{
-        return false;
-    }
 };
 
 MML.initiativeRoll = function initiativeRoll(input){
@@ -807,9 +756,7 @@ MML.initiativeApply = function initiativeApply(){
         who: this.player,
         triggeredFunction: "prepareNextCharacter",
         input: {}   
-    });
-
-    
+    });    
 };
 
 MML.startAttackAction = function startAttackAction(){
@@ -846,38 +793,80 @@ MML.startAttackAction = function startAttackAction(){
         MML.processCommand({
             type: "character",
             who: this.name,
-            triggeredFunction: "getAttackRoll",
+            triggeredFunction: "processAttack",
             input: {}   
         });
     }
 };
 
 
-// //Give weapons functions and set character's getAttackRoll equal to it
-MML.getAttackRoll = function getAttackRoll(input){
- var roll;
-    
- if (this.inventory.weapons.length === 0){
-     roll = this.unarmedAttack();
- }
- else if (this.inventory.weapons[0].family === "MWD" || this.inventory.weapons[0].family === "MWM"){
-     roll = this.missileAttack();
- }
- else if(this.inventory.weapons[0].family === "TWH" || 
- this.inventory.weapons[0].family === "TWK" ||
- this.inventory.weapons[0].family === "TWS" ||
- this.inventory.weapons[0].family === "SLI"){
-     roll = this.thrownAttack();
- }
- else if(this.inventory.weapons.length === 2){
-     roll = this.dualWieldAttack();
- }
- else {
-     roll = this.meleeAttack();
- }
- this.fatigue.inMelee = true;
+MML.processAttack = function processAttack(input){
+    this.statusEffects["Melee This Round"] = {};
 
- return roll;
+    if (MML.isUnarmed(this)){
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "unarmedAttack",
+            input: input   
+        });
+    }
+    else if(MML.isDualWielding(this)){
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "dualWieldAttack",
+            input: input   
+        });
+    }
+    else if (MML.getWeaponFamily(this, "leftHand") === "MWD" || MML.getWeaponFamily(this, "leftHand") === "MWM"){
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "missileAttack",
+            input: input   
+        });
+    }
+    else if(MML.getWeaponFamily(this, "leftHand") === "TWH" || 
+    MML.getWeaponFamily(this, "rightHand") === "TWH" ||
+    MML.getWeaponFamily(this, "leftHand") === "TWK" ||
+    MML.getWeaponFamily(this, "rightHand") === "TWK" ||
+    MML.getWeaponFamily(this, "leftHand") === "TWS" ||
+    MML.getWeaponFamily(this, "rightHand") === "TWS" ||
+    MML.getWeaponFamily(this, "leftHand") === "SLI" ||
+    MML.getWeaponFamily(this, "rightHand") === "SLI"){
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "throwingAttack",
+            input: input   
+        });
+    }
+    else {
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "meleeAttack",
+            input: input   
+        });
+    }
+};
+
+MML.meleeAttack = function meleeAttack(input){ 
+    this.currentWeapon = this.inventory.weapons[0];
+    var weapon = this.currentWeapon;
+    var skill = this.action.skill;
+    var attackMod = this.modifiers.attack;
+    var sitMod = this.modifiers.situational;
+
+    var roll;
+    //Primary or secondary attack
+    if (this.action.damageType === "primary"){
+        roll = this.universalRoll([weapon.primaryTask, skill, sitMod, attackMod]);
+    }
+    else {
+        roll = this.universalRoll([weapon.secondaryTask, skill, sitMod, attackMod]);
+    }
 };
 
 MML.attackRollResult = function attackRollResult(){
@@ -947,25 +936,8 @@ MML.defenseRollResult = function defenseRollResult(){
 // };
 
 
-// // Todo: Add sweep attack
-// MML.meleeAttack = function meleeAttack(){ 
-//     this.currentWeapon = this.inventory.weapons[0];
-//     var weapon = this.currentWeapon;
-//     var skill = this.action.skill;
-//  var attackMod = this.modifiers.attack;
-//  var sitMod = this.modifiers.situational;
-    
-//  var roll;
-//     //Primary or secondary attack
-//  if (this.action.damageType === "primary"){
-//      roll = this.universalRoll([weapon.primaryTask, skill, sitMod, attackMod]);
-//  }
-//  else {
-//      roll = this.universalRoll([weapon.secondaryTask, skill, sitMod, attackMod]);
-//  }
-    
-//  return roll;
-// };
+// Todo: Add sweep attack
+
 // // Check if missle weapon and maybe magic
 // MML.defenseRoll = function defenseRoll(){
 //  var roll = {};
