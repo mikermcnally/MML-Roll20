@@ -902,19 +902,39 @@ MML.processAttack = function processAttack(input){
 };
 
 MML.meleeAttack = function meleeAttack(input){ 
-    this.currentWeapon = this.inventory.weapons[0];
-    var weapon = this.currentWeapon;
-    var skill = this.action.skill;
-    var attackMod = this.modifiers.attack;
-    var sitMod = this.modifiers.situational;
+    var itemId;
+    var skill;
+    var input.attackMod = this.meleeAttackMod + this.attributeMeleeAttackMod
+    var input.sitMod = this.modifiers.situational;
 
+    if(MML.getWeaponFamily(this, "rightHand") !== "unarmed"){
+        itemId = this.rightHand.id;
+    }
+    else{
+        itemId = this.leftHand.id;
+    }
+
+    if(typeof this.weaponSkills[weapon.name] !== "undefined"){
+        skill = this.weaponSkills[weapon.name].level;
+    }
+
+    input.attackerWeapon = this.inventory[itemId];
+    input.skill = skill; 
+    
+
+    
+};
+
+MML.selectDamageTypeMenu
+
+MML.meleeAttackRoll = function meleeAttackRoll(input){
     var roll;
     //Primary or secondary attack
-    if (this.action.damageType === "primary"){
-        roll = this.universalRoll([weapon.primaryTask, skill, sitMod, attackMod]);
+    if (input.damageType === "primary"){
+        roll = this.universalRoll([weapon.grip.primaryTask, skill, sitMod, attackMod]);
     }
     else {
-        roll = this.universalRoll([weapon.secondaryTask, skill, sitMod, attackMod]);
+        roll = this.universalRoll([weapon.grip.secondaryTask, skill, sitMod, attackMod]);
     }
 };
 
@@ -2095,17 +2115,17 @@ MML.computeAttribute.action = {
             var leftHand = MML.getWeaponFamily.apply(this, ["leftHand"]);
             var rightHand = MML.getWeaponFamily.apply(this, ["rightHand"]);
             
-            if(leftHand === "Not a Weapon" && rightHand === "Not a Weapon"){
+            if(leftHand === "unarmed" && rightHand === "unarmed"){
                 this.action.skill = 0; //this.weaponSkills["Brawling"].level or this.weaponSkills["Default Martial Skill"].level;
             }
-            else if(leftHand !== "Not a Weapon" && rightHand !== "Not a Weapon"){
+            else if(leftHand !== "unarmed" && rightHand !== "unarmed"){
                 var weaponInits = [this.inventory[this.leftHand._id].grips[this.leftHand.grip].initiative,
                                    this.inventory[this.rightHand._id].grips[this.rightHand.grip].initiative];
                 initBonus = _.min(weaponInits);
                 // this.action.skill = this.weaponSkills.[this.inventory[this.leftHand._id].name].level or this.weaponSkills["Default Martial Skill"].level;
                 //Dual Wielding
             }
-            else if(rightHand !== "Not a Weapon" && leftHand === "Not a Weapon"){
+            else if(rightHand !== "unarmed" && leftHand === "unarmed"){
                 initBonus = this.inventory[this.rightHand._id].grips[this.rightHand.grip].initiative;
             }
             else{
@@ -2217,7 +2237,7 @@ MML.getWeaponFamily = function getWeaponFamily(character, hand){
         return item.grips[character[hand].grip].family;
     }
     else{
-        return "Not a Weapon";
+        return "unarmed";
     }
 };
 
@@ -2242,7 +2262,7 @@ MML.isUnarmed = function isUnarmed(character){
     var leftHand = MML.getWeaponFamily(character, "leftHand");
     var rightHand = MML.getWeaponFamily(character, "rightHand");
 
-    if(leftHand === "Not a Weapon" && rightHand === "Not a Weapon"){
+    if(leftHand === "unarmed" && rightHand === "unarmed"){
         return true;
     }
     else{
@@ -2255,8 +2275,8 @@ MML.isDualWielding = function isDualWielding(character){
     var rightHand = MML.getWeaponFamily(character, "rightHand");
 
     if(character.leftHand._id !== character.rightHand._id &&
-        leftHand !== "Not a Weapon" &&
-        rightHand !== "Not a Weapon"){
+        leftHand !== "unarmed" &&
+        rightHand !== "unarmed"){
         return true;
     }
     else{

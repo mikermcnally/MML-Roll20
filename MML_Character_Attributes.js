@@ -1013,17 +1013,17 @@ MML.computeAttribute.action = {
             var leftHand = MML.getWeaponFamily.apply(this, ["leftHand"]);
             var rightHand = MML.getWeaponFamily.apply(this, ["rightHand"]);
             
-            if(leftHand === "Not a Weapon" && rightHand === "Not a Weapon"){
+            if(leftHand === "unarmed" && rightHand === "unarmed"){
                 this.action.skill = 0; //this.weaponSkills["Brawling"].level or this.weaponSkills["Default Martial Skill"].level;
             }
-            else if(leftHand !== "Not a Weapon" && rightHand !== "Not a Weapon"){
+            else if(leftHand !== "unarmed" && rightHand !== "unarmed"){
                 var weaponInits = [this.inventory[this.leftHand._id].grips[this.leftHand.grip].initiative,
                                    this.inventory[this.rightHand._id].grips[this.rightHand.grip].initiative];
                 initBonus = _.min(weaponInits);
                 // this.action.skill = this.weaponSkills.[this.inventory[this.leftHand._id].name].level or this.weaponSkills["Default Martial Skill"].level;
                 //Dual Wielding
             }
-            else if(rightHand !== "Not a Weapon" && leftHand === "Not a Weapon"){
+            else if(rightHand !== "unarmed" && leftHand === "unarmed"){
                 initBonus = this.inventory[this.rightHand._id].grips[this.rightHand.grip].initiative;
             }
             else{

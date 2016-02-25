@@ -853,19 +853,39 @@ MML.processAttack = function processAttack(input){
 };
 
 MML.meleeAttack = function meleeAttack(input){ 
-    this.currentWeapon = this.inventory.weapons[0];
-    var weapon = this.currentWeapon;
-    var skill = this.action.skill;
-    var attackMod = this.modifiers.attack;
-    var sitMod = this.modifiers.situational;
+    var itemId;
+    var skill;
+    var input.attackMod = this.meleeAttackMod + this.attributeMeleeAttackMod
+    var input.sitMod = this.modifiers.situational;
 
+    if(MML.getWeaponFamily(this, "rightHand") !== "unarmed"){
+        itemId = this.rightHand.id;
+    }
+    else{
+        itemId = this.leftHand.id;
+    }
+
+    if(typeof this.weaponSkills[weapon.name] !== "undefined"){
+        skill = this.weaponSkills[weapon.name].level;
+    }
+
+    input.attackerWeapon = this.inventory[itemId];
+    input.skill = skill; 
+    
+
+    
+};
+
+MML.selectDamageTypeMenu
+
+MML.meleeAttackRoll = function meleeAttackRoll(input){
     var roll;
     //Primary or secondary attack
-    if (this.action.damageType === "primary"){
-        roll = this.universalRoll([weapon.primaryTask, skill, sitMod, attackMod]);
+    if (input.damageType === "primary"){
+        roll = this.universalRoll([weapon.grip.primaryTask, skill, sitMod, attackMod]);
     }
     else {
-        roll = this.universalRoll([weapon.secondaryTask, skill, sitMod, attackMod]);
+        roll = this.universalRoll([weapon.grip.secondaryTask, skill, sitMod, attackMod]);
     }
 };
 
