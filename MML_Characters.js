@@ -855,8 +855,9 @@ MML.processAttack = function processAttack(input){
 MML.meleeAttack = function meleeAttack(input){ 
     var itemId;
     var skill;
-    var input.attackMod = this.meleeAttackMod + this.attributeMeleeAttackMod
-    var input.sitMod = this.modifiers.situational;
+    var attackerWeapon;
+    input.attackMod = this.meleeAttackMod + this.attributeMeleeAttackMod
+    input.sitMod = this.modifiers.situational;
 
     if(MML.getWeaponFamily(this, "rightHand") !== "unarmed"){
         itemId = this.rightHand.id;
@@ -865,12 +866,10 @@ MML.meleeAttack = function meleeAttack(input){
         itemId = this.leftHand.id;
     }
 
-    if(typeof this.weaponSkills[weapon.name] !== "undefined"){
-        skill = this.weaponSkills[weapon.name].level;
-    }
+    attackerWeapon = this.inventory[itemId];
 
-    input.attackerWeapon = this.inventory[itemId];
-    input.skill = skill; 
+    input.attackerWeapon = attackerWeapon;
+    input.skill = MML.getWeaponSkill(this, attackerWeapon); 
     
 
     

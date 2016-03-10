@@ -1328,14 +1328,7 @@ MML.items["Military Fork"] = {
             secondaryDamage: "",
             defense: 15,
             initiative: 2,
-            rank: 1}
-       }
-    };
-MML.items["Military Fork, Two Hands"] = {
-    name: "Military Fork, Two Hands",
-    type: "weapon",
-    weight: 3.5,
-    grips: {
+            rank: 1},
         "Two Hands":{
             family: "Spears",
             hands: 2,

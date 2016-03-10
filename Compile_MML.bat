@@ -1,1 +1,1 @@
-copy /b *.js MML_Roll20.txt
+copy /b *.js MML_Roll20.js
