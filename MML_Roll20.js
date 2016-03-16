@@ -2219,7 +2219,6 @@ MML.computeAttribute.weaponSkills = { dependents: [],
         this.weaponSkills = characterSkills;
         return characterSkills;
     }};
-
 MML.isSensitiveArea = function isSensitiveArea(position){
     if(position === 2 || position === 6 || position === 33){
         return true;
@@ -2239,22 +2238,27 @@ MML.getWeaponFamily = function getWeaponFamily(character, hand){
         return "unarmed";
     }
 };
-{"kc439wkco1c9in3p573":{"name":"Shovel","type":"weapon","weight":6,"grips":{"Two Hands":{"family":"Bludgeoning","hands":2,"primaryType":"Impact","primaryTask":35,"primaryDamage":"","secondaryType":"1d8","secondaryTask":0,"secondaryDamage":"","defense":15,"initiative":4,"rank":1}},"quality":"Standard"}}
-MML.getWeaponSkill = function getWeaponSkill(character, hand){
-    var item = character.inventory[character[hand]._id];
+
+MML.getWeaponSkill = function getWeaponSkill(character, weapon){
+    var item = weapon;
+    var grip;
     var skillName;
+    var skill;
+    
     if(item.type !== "weapon"){
         log("Not a weapon");
         MML.error();
     }
 
+    if(character["rightHand"].grip !== "unarmed"){
+        grip = character["rightHand"].grip;
+    }
+    else{
+        grip = character["leftHand"].grip;
+    }
+
     if(item.name === "War Spear" || item.name === "Boar Spear" || item.name === "Military Fork" || item.name === "Bastard Sword"){
-        if(character["rightHand"].grip !== "Two Hands"){
-            skillName = item.name + ", One Hand";
-        }
-        else{
-            skillName = item.name + ", Two Hands";
-        }
+        skillName = item.name + ", " + grip;
     }
     else{
         skillName = item.name;
@@ -2263,26 +2267,38 @@ MML.getWeaponSkill = function getWeaponSkill(character, hand){
     if(typeof this.weaponSkills[skillName] !== "undefined"){
         skill = this.weaponSkills[attackerWeapon.name].level;
     }
-    else if(){
+    else{
+        var relatedSkills = [];
+        _.each(this.weaponSkills[skillName], function(skillName){
+            if(MML.items[skillName.replace(", " + grip, "")].grips[grip].family === item.grips[grip].family){
+                relatedSkills.push(this.weaponSkills[skillName].level);
+            }
+        }, this);
 
+        if(relatedSkills.length === 0){
+            skill = this.weaponSkills["Default Martial"].level;
+        }
+        else{
+            skill = _.max(relatedSkills) - 10;
+        }
     }
 };
 
 MML.isWieldingMissileWeapon = function isWieldingMissileWeapon(character){
-        var leftFamily = MML.getWeaponFamily(character, "leftHand");
-        var rightFamily = MML.getWeaponFamily(character, "rightHand");
+    var leftFamily = MML.getWeaponFamily(character, "leftHand");
+    var rightFamily = MML.getWeaponFamily(character, "rightHand");
 
-        return (leftFamily === "MWD" || 
-                rightFamily === "MWD" ||
-                leftFamily === "MWM" ||
-                rightFamily === "MWM" ||
-                leftFamily === "TWH" ||
-                rightFamily === "TWH" || 
-                leftFamily === "TWK" ||
-                rightFamily === "TWS" ||
-                leftFamily === "TWS" ||
-                rightFamily === "SLI" ||
-                leftFamily === "SLI");
+    return (leftFamily === "MWD" || 
+            rightFamily === "MWD" ||
+            leftFamily === "MWM" ||
+            rightFamily === "MWM" ||
+            leftFamily === "TWH" ||
+            rightFamily === "TWH" || 
+            leftFamily === "TWK" ||
+            rightFamily === "TWS" ||
+            leftFamily === "TWS" ||
+            rightFamily === "SLI" ||
+            leftFamily === "SLI");
 };
 
 MML.isUnarmed = function isUnarmed(character){
