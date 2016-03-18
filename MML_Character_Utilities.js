@@ -43,24 +43,26 @@ MML.getWeaponSkill = function getWeaponSkill(character, weapon){
         skillName = item.name;
     }
 
-    if(typeof this.weaponSkills[skillName] !== "undefined"){
-        skill = this.weaponSkills[attackerWeapon.name].level;
+    if(typeof character.weaponSkills[skillName] !== "undefined"){
+        skill = character.weaponSkills[skillName].level;
     }
     else{
         var relatedSkills = [];
-        _.each(this.weaponSkills[skillName], function(skillName){
-            if(MML.items[skillName.replace(", " + grip, "")].grips[grip].family === item.grips[grip].family){
-                relatedSkills.push(this.weaponSkills[skillName].level);
+        _.each(character.weaponSkills, function(relatedSkill){
+            if(MML.items[relatedSkill.replace(", " + grip, "")].grips[grip].family === item.grips[grip].family){
+                relatedSkills.push(character.weaponSkills[relatedSkill].level);
             }
-        }, this);
+        }, character);
 
         if(relatedSkills.length === 0){
-            skill = this.weaponSkills["Default Martial"].level;
+            skill = character.weaponSkills["Default Martial"].level;
         }
         else{
             skill = _.max(relatedSkills) - 10;
         }
     }
+
+    return skill;
 };
 
 MML.isWieldingMissileWeapon = function isWieldingMissileWeapon(character){

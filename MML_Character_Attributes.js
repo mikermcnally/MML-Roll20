@@ -1100,6 +1100,16 @@ MML.computeAttribute.skills = { dependents: [],
 MML.computeAttribute.weaponSkills = { dependents: [],
     compute: function(){
         var characterSkills = MML.getSkillAttributes(this.name, "weaponskills");
+        var highestSkill = _.max(characterSkills, function(skill){ return skill.level; }).level;
+        // characterSkills["Default Martial"] = {_id}
+
+        // if(highestSkill >= 20){
+        //     characterSkills["Default Martial"].level = Math.round(highestSkill/2);
+        // }
+        // else{
+        //     characterSkills["Default Martial"].level = 1;
+        // }
+
         _.each(
             characterSkills,
             function(characterSkill, _id){
@@ -1114,7 +1124,7 @@ MML.computeAttribute.weaponSkills = { dependents: [],
             },
             this
         );
-
+        log(characterSkills);
         this.weaponSkills = characterSkills;
         return characterSkills;
     }};

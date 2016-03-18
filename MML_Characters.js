@@ -856,26 +856,25 @@ MML.meleeAttack = function meleeAttack(input){
     var itemId;
     var skill;
     var attackerWeapon;
-    input.attackMod = this.meleeAttackMod + this.attributeMeleeAttackMod
-    input.sitMod = this.modifiers.situational;
+    input.attackMod = this.meleeAttackMod + this.attributeMeleeAttackMod;
+    input.sitMod = this.situationalMod;
 
     if(MML.getWeaponFamily(this, "rightHand") !== "unarmed"){
-        itemId = this.rightHand.id;
+        itemId = this.rightHand._id;
     }
     else{
-        itemId = this.leftHand.id;
+        itemId = this.leftHand._id;
     }
 
     attackerWeapon = this.inventory[itemId];
-
     input.attackerWeapon = attackerWeapon;
     input.skill = MML.getWeaponSkill(this, attackerWeapon); 
     
-
+    log(input.skill);
     
 };
 
-MML.selectDamageTypeMenu
+// MML.selectDamageTypeMenu
 
 MML.meleeAttackRoll = function meleeAttackRoll(input){
     var roll;
