@@ -2080,7 +2080,7 @@ MML.computeAttribute.actionTempo = {
         else{ tempo = 5; }
         
         // If Dual Wielding
-        if (this.action.name === "Attack" && MML.isDualWielding.apply(this,[])){
+        if (this.action.name === "Attack" && MML.isDualWielding(this)){
             var twfSkill = this.weaponskills["Two Weapon Fighting"].level;
             if (twfSkill > 19 && twfSkill){ tempo += 1; }
             else if (twfSkill >= 40 && twfSkill < 60){ tempo += 2; }
@@ -2111,8 +2111,8 @@ MML.computeAttribute.action = {
         var initBonus = 10;
 
         if(this.action.name === "Attack"){
-            var leftHand = MML.getWeaponFamily.apply(this, ["leftHand"]);
-            var rightHand = MML.getWeaponFamily.apply(this, ["rightHand"]);
+            var leftHand = MML.getWeaponFamily(this, "leftHand");
+            var rightHand = MML.getWeaponFamily(this, "rightHand");
             
             if(leftHand === "unarmed" && rightHand === "unarmed"){
                 this.action.skill = 0; //this.weaponSkills["Brawling"].level or this.weaponSkills["Default Martial Skill"].level;
@@ -5924,11 +5924,11 @@ MML.assignNewItem = function assignNewItem(input){
 // };
 
 MML.processCommand = function(command){
-	log("Last Command");
-	log(state.MML.GM);
-	log(state.MML.players);
-	log(state.MML.characters);
-	log(command);
+	// log("Last Command");
+	// log(state.MML.GM);
+	// log(state.MML.players);
+	// log(state.MML.characters);
+	// log(command);
 
 	switch(command.type){
 		case "character":
@@ -6876,7 +6876,7 @@ MML.charMenuAttack = function charMenuAttack(input){
 			MML.displayMenu.apply(this, []);
 		}}];
 
-	if (MML.isWieldingMissileWeapon.apply(state.MML.characters[this.who], [])){
+	if (MML.isWieldingMissileWeapon(state.MML.characters[this.who])){
 		buttons.push({
 			text: "Shoot From Cover",
 			nextMenu: "charMenuAttackCalledShot",
@@ -6928,7 +6928,7 @@ MML.charMenuAttackCalledShot = function charMenuCalledShot(input){
 		}}
 	];
 
-	if(MML.isWieldingMissileWeapon.apply(state.MML.characters[this.who], [])){
+	if(MML.isWieldingMissileWeapon(state.MML.characters[this.who])){
 		_.each(buttons, function(button){
 			button.nextMenu = "charMenuInitiativeRoll";
 		});
@@ -8102,7 +8102,7 @@ MML.statusEffects["Observe"] = function(effect, index){
     else{
         //observed previous round
         this.situationalInitBonus += 5;
-        if(MML.isWieldingMissileWeapon.apply(this, [])){
+        if(MML.isWieldingMissileWeapon(this)){
                 this.missileAttackMod += 15;
             }
         } 

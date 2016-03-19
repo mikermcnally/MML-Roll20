@@ -525,7 +525,7 @@ MML.charMenuAttack = function charMenuAttack(input){
 			MML.displayMenu.apply(this, []);
 		}}];
 
-	if (MML.isWieldingMissileWeapon.apply(state.MML.characters[this.who], [])){
+	if (MML.isWieldingMissileWeapon(state.MML.characters[this.who])){
 		buttons.push({
 			text: "Shoot From Cover",
 			nextMenu: "charMenuAttackCalledShot",
@@ -577,7 +577,7 @@ MML.charMenuAttackCalledShot = function charMenuCalledShot(input){
 		}}
 	];
 
-	if(MML.isWieldingMissileWeapon.apply(state.MML.characters[this.who], [])){
+	if(MML.isWieldingMissileWeapon(state.MML.characters[this.who])){
 		_.each(buttons, function(button){
 			button.nextMenu = "charMenuInitiativeRoll";
 		});

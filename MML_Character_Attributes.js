@@ -979,7 +979,7 @@ MML.computeAttribute.actionTempo = {
         else{ tempo = 5; }
         
         // If Dual Wielding
-        if (this.action.name === "Attack" && MML.isDualWielding.apply(this,[])){
+        if (this.action.name === "Attack" && MML.isDualWielding(this)){
             var twfSkill = this.weaponskills["Two Weapon Fighting"].level;
             if (twfSkill > 19 && twfSkill){ tempo += 1; }
             else if (twfSkill >= 40 && twfSkill < 60){ tempo += 2; }
@@ -1010,8 +1010,8 @@ MML.computeAttribute.action = {
         var initBonus = 10;
 
         if(this.action.name === "Attack"){
-            var leftHand = MML.getWeaponFamily.apply(this, ["leftHand"]);
-            var rightHand = MML.getWeaponFamily.apply(this, ["rightHand"]);
+            var leftHand = MML.getWeaponFamily(this, "leftHand");
+            var rightHand = MML.getWeaponFamily(this, "rightHand");
             
             if(leftHand === "unarmed" && rightHand === "unarmed"){
                 this.action.skill = 0; //this.weaponSkills["Brawling"].level or this.weaponSkills["Default Martial Skill"].level;

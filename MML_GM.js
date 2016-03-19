@@ -482,11 +482,11 @@ MML.assignNewItem = function assignNewItem(input){
 // };
 
 MML.processCommand = function(command){
-	log("Last Command");
-	log(state.MML.GM);
-	log(state.MML.players);
-	log(state.MML.characters);
-	log(command);
+	// log("Last Command");
+	// log(state.MML.GM);
+	// log(state.MML.players);
+	// log(state.MML.characters);
+	// log(command);
 
 	switch(command.type){
 		case "character":
