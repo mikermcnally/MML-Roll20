@@ -10,6 +10,14 @@ MML.test = function test(){
     // state.MML.players = JSON.parse(players);
     // state.MML.characters = JSON.parse(characters);
     //MML.processCommand(JSON.parse(command));
+    // MML.processCommand({
+	   //      type: "character",
+	   //      who: "Thaddeus Clinch",
+	   //      triggeredFunction: "updateCharacter",
+	   //      input: {
+	   //      	attribute: "weaponSkills"
+	   //      }
+	   //  });
 };
 
 // Menu Macro = !{"type":"player","who":"Robot","triggeredFunction":"menuCommand","input":{"who":"GM","buttonText":"GmMenuMain"}}

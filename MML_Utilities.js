@@ -57,16 +57,23 @@ MML.getCurrentAttribute = function getCurrentAttribute(charName, attribute){
 
 MML.getCurrentAttributeAsFloat = function getCurrentAttributeAsFloat(charName, attribute){
     var result = parseFloat(MML.getCurrentAttribute(charName, attribute));
-
+    // log(result);
     if(isNaN(result)){
         MML.setCurrentAttribute(charName, attribute, 0);
         result = 0;
     }
+
     return result;
 };
 
 MML.getMaxAttributeAsFloat = function getMaxAttributeAsFloat(charName, attribute){
     var result =  parseFloat(MML.getCharAttribute(charName, attribute).get("max"));
+
+    if(isNaN(result)){
+        MML.setMaxAttribute(charName, attribute, 0);
+        result = 0;
+    }
+
     return result;
 };
 
@@ -79,7 +86,7 @@ MML.getCurrentAttributeAsBool = function getCurrentAttributeAsBool(charName, att
 MML.getCurrentAttributeJSON = function getCurrentAttributeJSON(charName, attribute){
     var result = MML.getCurrentAttribute(charName, attribute);
 
-    if(result === ""){
+    if(result === "" || isNaN(result) || _.isUndefined(result)){
         MML.setCurrentAttribute(charName, attribute, "{}");
         result = MML.getCurrentAttribute(charName, attribute);
     }

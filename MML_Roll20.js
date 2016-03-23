@@ -1215,9 +1215,15 @@ MML.updateCharacter = function(input){
 
     for(var i = 0; i < attributeArray.length; i++){ //length of array is dynamic, for-in doesn't work here
         var localAttribute = MML.computeAttribute[attributeArray[i]];
-        attributeArray = _.union(attributeArray, localAttribute.dependents);    
+        
+        if(_.isUndefined(localAttribute)){
+            log(attributeArray[i]);
+        }
+        else{
+            attributeArray = _.union(attributeArray, localAttribute.dependents);  
+        }
     }
-    // log(attributeArray);
+
     _.each(
         attributeArray,
         function(attribute) {
@@ -1283,7 +1289,9 @@ MML.computeAttribute.race = {
                 "systemStrength",
                 "fitness",
                 "load",
-                "bodyType"],
+                "bodyType",
+                "skills",
+                "weaponSkills"],
     compute: function(){
         return MML.getCurrentAttribute(this.name, "race");
     }
@@ -1334,14 +1342,18 @@ MML.computeAttribute.strength = { dependents: ["fitness",
                 "attributeDefenseMod",
                 "attributeMeleeAttackMod",
                 "attributeMissileAttackMod",
-                "attributeInitBonus"],
+                "attributeInitBonus",
+                "skills",
+                "weaponSkills"],
     compute: function(){
         return MML.getCurrentAttributeAsFloat(this.name, "strengthRoll") + MML.racialAttributeBonuses[this.race].strength;
     } };
 MML.computeAttribute.coordination = { dependents: ["attributeMeleeAttackMod",
                 "attributeMissileAttackMod",
                 "attributeDefenseMod",
-                "attributeInitBonus"], //skill mods
+                "attributeInitBonus",
+                "skills",
+                "weaponSkills"], //skill mods
     compute: function(){
         return MML.getCurrentAttributeAsFloat(this.name, "coordinationRoll") + MML.racialAttributeBonuses[this.race].coordination;
     } };
@@ -1358,35 +1370,46 @@ MML.computeAttribute.health = { dependents: ["willpower",
                 "rightLegHPMax",
                 "multiWoundMax",
                 "hpRecovery",
-                "epRecovery"
+                "epRecovery",
+                "skills",
+                "weaponSkills"
                 ], 
     compute: function(){
         return MML.getCurrentAttributeAsFloat(this.name, "healthRoll") + MML.racialAttributeBonuses[this.race].health;
     } };
-MML.computeAttribute.beauty = { dependents: [], //skill mods
+MML.computeAttribute.beauty = { dependents: ["skills",
+                "weaponSkills"],
     compute: function(){
         return MML.getCurrentAttributeAsFloat(this.name, "beautyRoll") + MML.racialAttributeBonuses[this.race].beauty;
     } };
 MML.computeAttribute.intellect = { dependents: ["perception",
                 "evocation",
-                "spellLearningMod"], //spell learning/skill mods
+                "spellLearningMod",
+                "skills",
+                "weaponSkills"],
     compute: function(){
         return MML.getCurrentAttributeAsFloat(this.name, "intellectRoll") + MML.racialAttributeBonuses[this.race].intellect;
     } };
 MML.computeAttribute.reason = { dependents: ["perception",
                 "evocation",
                 "attributeCastingMod",
-                "attributeInitBonus"], //skill mods
+                "attributeInitBonus",
+                "skills",
+                "weaponSkills"],
     compute: function(){
         return MML.getCurrentAttributeAsFloat(this.name, "reasonRoll") + MML.racialAttributeBonuses[this.race].reason;
     } };
 MML.computeAttribute.creativity = { dependents: ["perception",
-                "evocation"], //skill mods
+                "evocation",
+                "skills",
+                "weaponSkills"],
     compute: function(){
         return MML.getCurrentAttributeAsFloat(this.name, "creativityRoll") + MML.racialAttributeBonuses[this.race].creativity;
     } };
 MML.computeAttribute.presence = { dependents: ["willpower",
-                "systemStrength"],
+                "systemStrength",
+                "skills",
+                "weaponSkills"],
     compute: function(){
         return MML.getCurrentAttributeAsFloat(this.name, "presenceRoll") + MML.racialAttributeBonuses[this.race].presence;
     } };
@@ -1397,7 +1420,9 @@ MML.computeAttribute.willpower = { dependents: ["evocation",
     compute: function(){
         return Math.round((2*this.presence + this.health)/3);
     } };
-MML.computeAttribute.evocation = { dependents: ["epMax"], //skill mods
+MML.computeAttribute.evocation = { dependents: ["epMax",
+                "skills",
+                "weaponSkills"], //skill mods
     compute: function(){
         return this.intellect + 
                 this.reason + 
@@ -1407,7 +1432,9 @@ MML.computeAttribute.evocation = { dependents: ["epMax"], //skill mods
                 MML.racialAttributeBonuses[this.race].evocation;
     } };
 MML.computeAttribute.perception = { dependents: ["missileAttackMod",
-                "attributeInitBonus"],
+                "attributeInitBonus",
+                "skills",
+                "weaponSkills"],
     compute: function(){
         return Math.round((this.intellect + this.reason + this.creativity)/3) + MML.racialAttributeBonuses[this.race].perception;
     } };
@@ -1415,18 +1442,25 @@ MML.computeAttribute.systemStrength = { dependents: [],
     compute: function(){
         return Math.round((this.presence + 2*this.health)/3);
     } };
-MML.computeAttribute.fitness = { dependents: ["fitnessMod", "fatigueMax"], //skill mods
+MML.computeAttribute.fitness = { dependents: ["fitnessMod",
+                "fatigueMax",
+                "skills",
+                "weaponSkills"],
     compute: function(){
         return Math.round((this.health + this.strength)/2) + MML.racialAttributeBonuses[this.race].fitness;
     }};
-MML.computeAttribute.fitnessMod = { dependents: ["load"], //skill mods
+MML.computeAttribute.fitnessMod = { dependents: ["load",
+                "skills",
+                "weaponSkills"], //skill mods
     compute: function(){
         return MML.fitnessModLookup[this.fitness];
     }};
 MML.computeAttribute.load = { dependents: ["overhead",
                 "deadLift",
                 "meleeDamageMod",
-                "movementRatio"],
+                "movementRatio",
+                "skills",
+                "weaponSkills"],
     compute: function(){
         return Math.round(this.stature * this.fitnessMod) + MML.racialAttributeBonuses[this.race].load;
     }};
@@ -1526,7 +1560,7 @@ MML.computeAttribute.epMax = { dependents: ["ep"],
         this.ep = epMax;
         return epMax;
     }};
-MML.computeAttribute.ep = { dependents: [],
+MML.computeAttribute.ep = { dependents: ["statusEffects"],
     compute: function(){
         return this.ep;
     }};
@@ -1536,7 +1570,7 @@ MML.computeAttribute.fatigueMax = { dependents: ["fatigue"],
         this.fatigue = fatigueMax;
         return fatigueMax;
     }};
-MML.computeAttribute.fatigue = { dependents: [],
+MML.computeAttribute.fatigue = { dependents: ["statusEffects"],
     compute: function(){
         return this.fatigue;
     }};
@@ -1699,7 +1733,15 @@ MML.computeAttribute.hitTable = { dependents: [],
 // Movement
 MML.computeAttribute.movementRatio = { dependents: ["movementRatioInitBonus"],
     compute: function(){
-        var movementRatio = Math.round(10*this.load/this.totalWeightCarried)/10;
+        var movementRatio;
+
+        if(this.totalWeightCarried === 0){
+            movementRatio = Math.round(10*this.load)/10;
+        }
+        else{
+            movementRatio = Math.round(10*this.load/this.totalWeightCarried)/10;
+        }
+
         if(movementRatio > 4.0){
             movementRatio = 4.0;
         }
@@ -2201,15 +2243,25 @@ MML.computeAttribute.skills = { dependents: [],
 MML.computeAttribute.weaponSkills = { dependents: [],
     compute: function(){
         var characterSkills = MML.getSkillAttributes(this.name, "weaponskills");
+        
         var highestSkill = _.max(characterSkills, function(skill){ return skill.level; }).level;
-        // characterSkills["Default Martial"] = {_id}
+        var defaultMartialId = _.findKey(characterSkills, function(characterSkill){ return characterSkill.name === "Default Martial"; });
+        log(highestSkill);
+        if(isNaN(highestSkill)){
+            highestSkill = 0;
+        }
 
-        // if(highestSkill >= 20){
-        //     characterSkills["Default Martial"].level = Math.round(highestSkill/2);
-        // }
-        // else{
-        //     characterSkills["Default Martial"].level = 1;
-        // }
+        if(_.isUndefined(defaultMartialId)){
+            defaultMartialId = MML.createItemId();
+            characterSkills[defaultMartialId] = { name: "Default Martial" };
+        }
+
+        if(highestSkill < 20){
+            characterSkills[defaultMartialId].input = 1;
+        }
+        else{
+            characterSkills[defaultMartialId].input = Math.round(highestSkill/2);
+        }
 
         _.each(
             characterSkills,
@@ -2221,11 +2273,11 @@ MML.computeAttribute.weaponSkills = { dependents: [],
                     level += MML.weaponSkillMods[this.race][weaponName];
                 }
                 characterSkill.level = level;
-                MML.setCurrentAttribute(charName, "repeating_weaponskills_" + _id + "_level", level);
+                MML.setCurrentAttribute(this.name, "repeating_weaponskills_" + _id + "_level", level);
             },
             this
         );
-        log(characterSkills);
+
         this.weaponSkills = characterSkills;
         return characterSkills;
     }};
@@ -6026,8 +6078,13 @@ MML.parseCommand = function parseCommand(msg) {
 		    for(i = 0; i<hexes.length; i++) {
 		        command += String.fromCharCode(parseInt(hexes[i], 16));
 		    }
-	        command = JSON.parse(command);
-	        log(command);
+	        if(command === "" || isNaN(command) || _.isUndefined(command)){
+                log(command);
+                MML.error();
+            }
+            else{
+                command = JSON.parse(command);
+            }
 	        command.input.selectedCharNames = MML.getSelectedCharNames(msg.selected);
     	}
     	
@@ -6083,6 +6140,7 @@ on("ready", function() {
 	        });
         }
         else if(attrName.indexOf("repeating_weaponSkills") != -1){
+            log("update weaponSkills");
             MML.processCommand({
 	        	type: "character",
 	        	who: charName,
@@ -8164,6 +8222,14 @@ MML.test = function test(){
     // state.MML.players = JSON.parse(players);
     // state.MML.characters = JSON.parse(characters);
     //MML.processCommand(JSON.parse(command));
+    // MML.processCommand({
+	   //      type: "character",
+	   //      who: "Thaddeus Clinch",
+	   //      triggeredFunction: "updateCharacter",
+	   //      input: {
+	   //      	attribute: "weaponSkills"
+	   //      }
+	   //  });
 };
 
 // Menu Macro = !{"type":"player","who":"Robot","triggeredFunction":"menuCommand","input":{"who":"GM","buttonText":"GmMenuMain"}}
@@ -8226,16 +8292,23 @@ MML.getCurrentAttribute = function getCurrentAttribute(charName, attribute){
 
 MML.getCurrentAttributeAsFloat = function getCurrentAttributeAsFloat(charName, attribute){
     var result = parseFloat(MML.getCurrentAttribute(charName, attribute));
-
+    // log(result);
     if(isNaN(result)){
         MML.setCurrentAttribute(charName, attribute, 0);
         result = 0;
     }
+
     return result;
 };
 
 MML.getMaxAttributeAsFloat = function getMaxAttributeAsFloat(charName, attribute){
     var result =  parseFloat(MML.getCharAttribute(charName, attribute).get("max"));
+
+    if(isNaN(result)){
+        MML.setMaxAttribute(charName, attribute, 0);
+        result = 0;
+    }
+
     return result;
 };
 
@@ -8248,7 +8321,7 @@ MML.getCurrentAttributeAsBool = function getCurrentAttributeAsBool(charName, att
 MML.getCurrentAttributeJSON = function getCurrentAttributeJSON(charName, attribute){
     var result = MML.getCurrentAttribute(charName, attribute);
 
-    if(result === ""){
+    if(result === "" || isNaN(result) || _.isUndefined(result)){
         MML.setCurrentAttribute(charName, attribute, "{}");
         result = MML.getCurrentAttribute(charName, attribute);
     }

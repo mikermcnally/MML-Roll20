@@ -584,8 +584,13 @@ MML.parseCommand = function parseCommand(msg) {
 		    for(i = 0; i<hexes.length; i++) {
 		        command += String.fromCharCode(parseInt(hexes[i], 16));
 		    }
-	        command = JSON.parse(command);
-	        log(command);
+	        if(command === "" || isNaN(command) || _.isUndefined(command)){
+                log(command);
+                MML.error();
+            }
+            else{
+                command = JSON.parse(command);
+            }
 	        command.input.selectedCharNames = MML.getSelectedCharNames(msg.selected);
     	}
     	
@@ -641,6 +646,7 @@ on("ready", function() {
 	        });
         }
         else if(attrName.indexOf("repeating_weaponSkills") != -1){
+            log("update weaponSkills");
             MML.processCommand({
 	        	type: "character",
 	        	who: charName,
