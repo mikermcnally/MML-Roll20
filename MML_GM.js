@@ -466,7 +466,7 @@ MML.assignNewItem = function assignNewItem(input){
     	triggeredFunction:"setApiCharAttributeJSON",
 		input: {
 	    	attribute: "inventory",
-	    	index: MML.createItemId(),
+	    	index: generateRowID(),
 	    	value: state.MML.GM.newItem
 	  	}
     });
@@ -634,8 +634,9 @@ on("ready", function() {
         var characterObject = getObj("character", attribute.get("_characterid"));
         var charName = characterObject.get("name"); 
         var attrName = attribute.get("name");
-        
+
         if(attrName.indexOf("repeating_skills") != -1){
+        	log("update skills")
             MML.processCommand({
 	        	type: "character",
 	        	who: charName,
@@ -645,7 +646,7 @@ on("ready", function() {
 			  	}
 	        });
         }
-        else if(attrName.indexOf("repeating_weaponSkills") != -1){
+        else if(attrName.indexOf("repeating_weaponskills") != -1){
             log("update weaponSkills");
             MML.processCommand({
 	        	type: "character",
@@ -890,6 +891,7 @@ on("ready", function() {
 			        });
                 }
                 else if(attrName.indexOf("repeating_weaponskills") != -1){
+                	log("weaponSkills");
                     MML.processCommand({
 			        	type: "character",
 			        	who: charName,
@@ -900,6 +902,7 @@ on("ready", function() {
 			        });
                 }
                 else if(attrName != "tab"){
+                	log(attrName);
                     MML.processCommand({
 			        	type: "character",
 			        	who: charName,

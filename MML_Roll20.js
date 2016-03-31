@@ -2218,8 +2218,7 @@ MML.computeAttribute.skills = { dependents: [],
         var characterSkills = MML.getSkillAttributes(this.name, "skills");
         _.each(
             characterSkills,
-            function(characterSkill, _id){
-                var skillName = characterSkill.name;
+            function(characterSkill, skillName){
                 var level = characterSkill.input;       
                 var attribute = MML.skills[skillName].attribute;
 
@@ -2232,7 +2231,9 @@ MML.computeAttribute.skills = { dependents: [],
                     level += MML.skillMods[this.gender][skillName];
                 }
                 characterSkill.level = level;
-                MML.setCurrentAttribute(charName, "repeating_skills_" + _id + "_level", level);
+                MML.setCurrentAttribute(this.name, "repeating_skills_" + characterSkill._id + "_name", skillName);
+                MML.setCurrentAttribute(this.name, "repeating_skills_" + characterSkill._id + "_input", characterSkill.input);
+                MML.setCurrentAttribute(this.name, "repeating_skills_" + characterSkill._id + "_level", level);
             },
             this
         );
@@ -2243,37 +2244,44 @@ MML.computeAttribute.skills = { dependents: [],
 MML.computeAttribute.weaponSkills = { dependents: [],
     compute: function(){
         var characterSkills = MML.getSkillAttributes(this.name, "weaponskills");
-        
-        var highestSkill = _.max(characterSkills, function(skill){ return skill.level; }).level;
-        var defaultMartialId = _.findKey(characterSkills, function(characterSkill){ return characterSkill.name === "Default Martial"; });
-        log(highestSkill);
+        var highestSkill;
+
+        _.each(
+            characterSkills,
+            function(characterSkill, skillName){
+                var level = characterSkill.input;
+
+                // This may need to include other modifiers
+                if(_.isUndefined(MML.weaponSkillMods[this.race]) === false && _.isUndefined(MML.weaponSkillMods[this.race][skillName]) === false){
+                    level += MML.weaponSkillMods[this.race][skillName];
+                }
+                characterSkill.level = level;
+            },
+            this
+        );
+
+        highestSkill = _.max(characterSkills, function(skill){ return skill.level; }).level;
         if(isNaN(highestSkill)){
             highestSkill = 0;
         }
 
-        if(_.isUndefined(defaultMartialId)){
-            defaultMartialId = MML.createItemId();
-            characterSkills[defaultMartialId] = { name: "Default Martial" };
+        if(_.isUndefined(characterSkills["Default Martial"])){
+            characterSkills["Default Martial"] = { input: 0, level: 0, _id: generateRowID() };
         }
 
         if(highestSkill < 20){
-            characterSkills[defaultMartialId].input = 1;
+            characterSkills["Default Martial"].level = 1;
         }
         else{
-            characterSkills[defaultMartialId].input = Math.round(highestSkill/2);
+            characterSkills["Default Martial"].level = Math.round(highestSkill/2);
         }
 
         _.each(
             characterSkills,
-            function(characterSkill, _id){
-                var weaponName = characterSkill.name;
-                var level = characterSkill.input;
-
-                if(_.isUndefined(MML.weaponSkillMods[this.race]) === false && _.isUndefined(MML.weaponSkillMods[this.race][weaponName]) === false){
-                    level += MML.weaponSkillMods[this.race][weaponName];
-                }
-                characterSkill.level = level;
-                MML.setCurrentAttribute(this.name, "repeating_weaponskills_" + _id + "_level", level);
+            function(characterSkill, skillName){
+                MML.setCurrentAttribute(this.name, "repeating_weaponskills_" + characterSkill._id + "_name", skillName);
+                MML.setCurrentAttribute(this.name, "repeating_weaponskills_" + characterSkill._id + "_input", characterSkill.input);
+                MML.setCurrentAttribute(this.name, "repeating_weaponskills_" + characterSkill._id + "_level", characterSkill.level);
             },
             this
         );
@@ -5960,7 +5968,7 @@ MML.assignNewItem = function assignNewItem(input){
     	triggeredFunction:"setApiCharAttributeJSON",
 		input: {
 	    	attribute: "inventory",
-	    	index: MML.createItemId(),
+	    	index: generateRowID(),
 	    	value: state.MML.GM.newItem
 	  	}
     });
@@ -6128,8 +6136,9 @@ on("ready", function() {
         var characterObject = getObj("character", attribute.get("_characterid"));
         var charName = characterObject.get("name"); 
         var attrName = attribute.get("name");
-        
+
         if(attrName.indexOf("repeating_skills") != -1){
+        	log("update skills")
             MML.processCommand({
 	        	type: "character",
 	        	who: charName,
@@ -6139,7 +6148,7 @@ on("ready", function() {
 			  	}
 	        });
         }
-        else if(attrName.indexOf("repeating_weaponSkills") != -1){
+        else if(attrName.indexOf("repeating_weaponskills") != -1){
             log("update weaponSkills");
             MML.processCommand({
 	        	type: "character",
@@ -6384,6 +6393,7 @@ on("ready", function() {
 			        });
                 }
                 else if(attrName.indexOf("repeating_weaponskills") != -1){
+                	log("weaponSkills");
                     MML.processCommand({
 			        	type: "character",
 			        	who: charName,
@@ -6394,6 +6404,7 @@ on("ready", function() {
 			        });
                 }
                 else if(attrName != "tab"){
+                	log(attrName);
                     MML.processCommand({
 			        	type: "character",
 			        	who: charName,
@@ -8335,6 +8346,7 @@ MML.getSkillAttributes = function getSkillAttributes(charName, skillType){
         _characterid: character.get("_id")
     }, {caseInsensitive: false});
     var skills = {};
+    var skill_data = {};
     
     _.each(attributes, function(attribute){
         var attributeName = attribute.get("name");
@@ -8349,17 +8361,26 @@ MML.getSkillAttributes = function getSkillAttributes(charName, skillType){
                     _id = key;
                 }
             });
-            if(_.isUndefined(skills[_id])){
-                skills[_id] = {name: "Acrobatics", input: 0, level: 0};
+            if(_.isUndefined(skill_data[_id])){
+                skill_data[_id] = {name: "", input: 0, level: 0};
             }
             if(property === "name"){
-                skills[_id][property] = value;
+                skill_data[_id][property] = value;
             }
             else if(isNaN(parseFloat(value))){
-                skills[_id][property] = 0;
+                skill_data[_id][property] = 0;
             }
             else{
-                skills[_id][property] = parseFloat(value);
+                skill_data[_id][property] = parseFloat(value);
+            }
+        }
+    });
+    _.each(skill_data, function(skill, _id){
+        if(skill.name !== ""){
+            skills[skill.name] = {
+                level: skill.level,
+                input: skill.input,
+                _id: _id
             }
         }
     });
@@ -8435,12 +8456,39 @@ MML.getDistanceBetweenChars = function getDistanceBetweenChars(charName, targetN
     return MML.getDistance(charToken.get("left"), targetToken.get("left"), charToken.get("top"), targetToken.get("top")); 
 };
 
-MML.createItemId = function createItemId() {
-    //Based on this code: http://stackoverflow.com/a/10727155
-    var result = '';
-    var chars = '0123456789abcdefghijklmnopqrstuvwxyz';
-    for (var i = 19; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
-    return result;
+// Code borrowed from The Aaron from roll20.net forums
+var generateUUID = (function() {
+    "use strict";
+
+    var a = 0, b = [];
+    return function() {
+        var c = (new Date()).getTime() + 0, d = c === a;
+        a = c;
+        for (var e = new Array(8), f = 7; 0 <= f; f--) {
+            e[f] = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz".charAt(c % 64);
+            c = Math.floor(c / 64);
+        }
+        c = e.join("");
+        if (d) {
+            for (f = 11; 0 <= f && 63 === b[f]; f--) {
+                b[f] = 0;
+            }
+            b[f]++;
+        } else {
+            for (f = 0; 12 > f; f++) {
+                b[f] = Math.floor(64 * Math.random());
+            }
+        }
+        for (f = 0; 12 > f; f++){
+            c += "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz".charAt(b[f]);
+        }
+        return c;
+    };
+}()),
+
+generateRowID = function () {
+    "use strict";
+    return generateUUID().replace(/_/g, "Z");
 };
 
 // Rolling Functions

@@ -100,6 +100,7 @@ MML.getSkillAttributes = function getSkillAttributes(charName, skillType){
         _characterid: character.get("_id")
     }, {caseInsensitive: false});
     var skills = {};
+    var skill_data = {};
     
     _.each(attributes, function(attribute){
         var attributeName = attribute.get("name");
@@ -114,17 +115,26 @@ MML.getSkillAttributes = function getSkillAttributes(charName, skillType){
                     _id = key;
                 }
             });
-            if(_.isUndefined(skills[_id])){
-                skills[_id] = {name: "Acrobatics", input: 0, level: 0};
+            if(_.isUndefined(skill_data[_id])){
+                skill_data[_id] = {name: "", input: 0, level: 0};
             }
             if(property === "name"){
-                skills[_id][property] = value;
+                skill_data[_id][property] = value;
             }
             else if(isNaN(parseFloat(value))){
-                skills[_id][property] = 0;
+                skill_data[_id][property] = 0;
             }
             else{
-                skills[_id][property] = parseFloat(value);
+                skill_data[_id][property] = parseFloat(value);
+            }
+        }
+    });
+    _.each(skill_data, function(skill, _id){
+        if(skill.name !== ""){
+            skills[skill.name] = {
+                level: skill.level,
+                input: skill.input,
+                _id: _id
             }
         }
     });
@@ -200,12 +210,39 @@ MML.getDistanceBetweenChars = function getDistanceBetweenChars(charName, targetN
     return MML.getDistance(charToken.get("left"), targetToken.get("left"), charToken.get("top"), targetToken.get("top")); 
 };
 
-MML.createItemId = function createItemId() {
-    //Based on this code: http://stackoverflow.com/a/10727155
-    var result = '';
-    var chars = '0123456789abcdefghijklmnopqrstuvwxyz';
-    for (var i = 19; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
-    return result;
+// Code borrowed from The Aaron from roll20.net forums
+var generateUUID = (function() {
+    "use strict";
+
+    var a = 0, b = [];
+    return function() {
+        var c = (new Date()).getTime() + 0, d = c === a;
+        a = c;
+        for (var e = new Array(8), f = 7; 0 <= f; f--) {
+            e[f] = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz".charAt(c % 64);
+            c = Math.floor(c / 64);
+        }
+        c = e.join("");
+        if (d) {
+            for (f = 11; 0 <= f && 63 === b[f]; f--) {
+                b[f] = 0;
+            }
+            b[f]++;
+        } else {
+            for (f = 0; 12 > f; f++) {
+                b[f] = Math.floor(64 * Math.random());
+            }
+        }
+        for (f = 0; 12 > f; f++){
+            c += "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz".charAt(b[f]);
+        }
+        return c;
+    };
+}()),
+
+generateRowID = function () {
+    "use strict";
+    return generateUUID().replace(/_/g, "Z");
 };
 
 // Rolling Functions
