@@ -126,8 +126,10 @@ MML.startCombatMovement = function startCombatMovement(){
 	}
 };
 
-MML.startAction = function startAction(){
-	MML[this.action.getTargets].apply(this, []);
+MML.startAction = function startAction(input){
+    if(!_.isUndefined(this.action.getTargets)){
+        MML[this.action.getTargets].apply(this, [input]);
+    }	
 };
 
 MML.setTargets = function selectTargets(){
@@ -149,8 +151,10 @@ MML.checkReady = function checkReady(){
 };
 
 // Rolls
-MML.getSingleTarget = function getSingleTarget(){
-	sendChat("", "&{template:selectTarget} {{charName=" + this.name + "}} {{triggeredMethod=setCurrentCharacterTargets}}");
+MML.getSingleTarget = function getSingleTarget(input){
+	input.charName = this.name;
+	input.triggeredFunction = "setCurrentCharacterTargets";
+	MML.displayTargetSelection(input);
 };
 
 
@@ -166,9 +170,9 @@ MML.performAction = function performAction(){
 		this.targetIndex++;
 
 		if(this.targetIndex < this.targets.length){
-				this.currentTarget = this.targets[this.targetIndex];
-				this.menu = MML.performAction;
-				this.menu();
+			this.currentTarget = this.targets[this.targetIndex];
+			this.menu = MML.performAction;
+			this.menu();
 		}
 		else{
 			this.menu = MML.endAction;
@@ -513,19 +517,32 @@ MML.parseCommand = function parseCommand(msg) {
     	var command;
 
     	if(msg.content.indexOf("!selectTarget") !== -1) {
-	        var input = msg.content.replace("!selectTarget ", "").split("|");
-	        var character = input[0];
-	        var target = input[1];
-	        var methodName = input[2];
-	        
+	        var stringIn = msg.content.replace("!selectTarget ", "").split("|");
+	        var character = stringIn[0];
+	        var target = stringIn[1];
+	        var hexedInput = stringIn[2];
+	     
+	        var i;
+		    var hexes = hexedInput.match(/.{1,4}/g) || [];
+		    input = "";
+		    for(i = 0; i<hexes.length; i++) {
+		        input += String.fromCharCode(parseInt(hexes[i], 16));
+		    }
+	        if(input === "" || _.isUndefined(input)){
+                log(msg.content);
+                MML.error();
+            }
+            else{
+                input = JSON.parse(input);
+            }
+
+            input.target = target;
+
 	        command = {
 	        	type: "player",
 				who: msg.who.replace(" (GM)", ""),
-				triggeredFunction: methodName,
-				input: {
-					target: target,
-					character: character
-				}
+				triggeredFunction: input.triggeredFunction,
+				input: input
 	        };
 	    }
 

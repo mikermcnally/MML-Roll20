@@ -809,7 +809,7 @@ MML.initiativeApply = function initiativeApply(){
     });    
 };
 
-MML.startAttackAction = function startAttackAction(){
+MML.startAttackAction = function startAttackAction(input){
     var player = state.MML.players[this.player];
     if(_.contains(this.action.modifiers, ["Called Shot"])){
         MML.processCommand({
@@ -844,7 +844,7 @@ MML.startAttackAction = function startAttackAction(){
             type: "character",
             who: this.name,
             triggeredFunction: "processAttack",
-            input: {}   
+            input: input   
         });
     }
 };
@@ -5635,8 +5635,10 @@ MML.startCombatMovement = function startCombatMovement(){
 	}
 };
 
-MML.startAction = function startAction(){
-	MML[this.action.getTargets].apply(this, []);
+MML.startAction = function startAction(input){
+    if(!_.isUndefined(this.action.getTargets)){
+        MML[this.action.getTargets].apply(this, [input]);
+    }	
 };
 
 MML.setTargets = function selectTargets(){
@@ -5658,8 +5660,10 @@ MML.checkReady = function checkReady(){
 };
 
 // Rolls
-MML.getSingleTarget = function getSingleTarget(){
-	sendChat("", "&{template:selectTarget} {{charName=" + this.name + "}} {{triggeredMethod=setCurrentCharacterTargets}}");
+MML.getSingleTarget = function getSingleTarget(input){
+	input.charName = this.name;
+	input.triggeredFunction = "setCurrentCharacterTargets";
+	MML.displayTargetSelection(input);
 };
 
 
@@ -5675,9 +5679,9 @@ MML.performAction = function performAction(){
 		this.targetIndex++;
 
 		if(this.targetIndex < this.targets.length){
-				this.currentTarget = this.targets[this.targetIndex];
-				this.menu = MML.performAction;
-				this.menu();
+			this.currentTarget = this.targets[this.targetIndex];
+			this.menu = MML.performAction;
+			this.menu();
 		}
 		else{
 			this.menu = MML.endAction;
@@ -6022,19 +6026,32 @@ MML.parseCommand = function parseCommand(msg) {
     	var command;
 
     	if(msg.content.indexOf("!selectTarget") !== -1) {
-	        var input = msg.content.replace("!selectTarget ", "").split("|");
-	        var character = input[0];
-	        var target = input[1];
-	        var methodName = input[2];
-	        
+	        var stringIn = msg.content.replace("!selectTarget ", "").split("|");
+	        var character = stringIn[0];
+	        var target = stringIn[1];
+	        var hexedInput = stringIn[2];
+	     
+	        var i;
+		    var hexes = hexedInput.match(/.{1,4}/g) || [];
+		    input = "";
+		    for(i = 0; i<hexes.length; i++) {
+		        input += String.fromCharCode(parseInt(hexes[i], 16));
+		    }
+	        if(input === "" || _.isUndefined(input)){
+                log(msg.content);
+                MML.error();
+            }
+            else{
+                input = JSON.parse(input);
+            }
+
+            input.target = target;
+
 	        command = {
 	        	type: "player",
 				who: msg.who.replace(" (GM)", ""),
-				triggeredFunction: methodName,
-				input: {
-					target: target,
-					character: character
-				}
+				triggeredFunction: input.triggeredFunction,
+				input: input
 	        };
 	    }
 
@@ -6427,7 +6444,7 @@ on("ready", function() {
 
 MML.playerClass = {
     message: "", //
-    buttons: {}, //{text: "Click Here", nextMenu: "mainMenu", triggeredMethod: MML.triggeredMethod}
+    buttons: {}, //{text: "Click Here", nextMenu: "mainMenu", triggeredFunction: MML.triggeredFunction}
     name: "",
     characters: [],
     characterIndex: 0,
@@ -6457,7 +6474,7 @@ MML.menuCommand = function(input){
     		text: button.text,
     		selectedCharNames: input.selectedCharNames
     	};
-        button.triggeredMethod.apply(this, [buttonInput]);
+        button.triggeredFunction.apply(this, [buttonInput]);
     }
 };
 
@@ -6565,7 +6582,7 @@ MML.GmMenuNewWeapon = function GmMenuNewWeapon(input){
 			this.buttons.push({
 				text: item.name,
 				nextMenu: "GmMenuItemQuality",
-				triggeredMethod: function(input) {
+				triggeredFunction: function(input) {
 					state.MML.GM.newItem = MML.items[input.text];
 					MML.displayMenu.apply(this, []);
 				}
@@ -6586,7 +6603,7 @@ MML.GmMenuNewShield = function GmMenuNewShield(input){
 			this.buttons.push({
 				text: item.name,
 				nextMenu: "GmMenuItemQuality",
-				triggeredMethod: function(input) {
+				triggeredFunction: function(input) {
 					state.MML.GM.newItem = MML.items[input.text];
 					MML.displayMenu.apply(this, []);
 				}
@@ -6607,7 +6624,7 @@ MML.GmMenuNewArmor = function GmMenuNewArmor(input){
 			this.buttons.push({
 				text: item.name,
 				nextMenu: "GmMenuArmorMaterial",
-				triggeredMethod: function(input) {
+				triggeredFunction: function(input) {
 					state.MML.GM.newItem = MML.items[input.text];
 					MML.displayMenu.apply(this, []);
 				}
@@ -6627,7 +6644,7 @@ MML.GmMenuArmorMaterial = function GmMenuArmorMaterial(input){
 		this.buttons.push({
 			text: material.name,
 			nextMenu: "GmMenuItemQuality",
-			triggeredMethod: function(input) {
+			triggeredFunction: function(input) {
 				var material = MML.APVList[input.text];
 				state.MML.GM.newItem.material = material.name;
 				state.MML.GM.newItem.weight = material.weightPerPosition * state.MML.GM.newItem.totalPostitions;
@@ -6655,7 +6672,7 @@ MML.GmMenuassignNewItem = function GmMenuassignNewItem(input){
 		this.buttons.push({
 			text: index,
 			nextMenu: "GmMenuMain",
-			triggeredMethod: function(input){
+			triggeredFunction: function(input){
 				MML.displayMenu.apply(this, []);
 			}
 		});
@@ -6691,7 +6708,7 @@ MML.displayItemOptions = function displayItemOptions(input){
             };
 
             if(state.MML.characters[who].leftHand._id === itemId && state.MML.characters[who].leftHand._id === itemId){
-                unequipButton.triggeredMethod = function(text){
+                unequipButton.triggeredFunction = function(text){
                     MML.processCommand({
 		            	type: "character",
 						who: who,
@@ -6714,7 +6731,7 @@ MML.displayItemOptions = function displayItemOptions(input){
                     };
             }
             else if(state.MML.characters[who].leftHand._id === itemId){
-                unequipButton.triggeredMethod = function(text){
+                unequipButton.triggeredFunction = function(text){
                     MML.processCommand({
 		            	type: "character",
 						who: who,
@@ -6728,7 +6745,7 @@ MML.displayItemOptions = function displayItemOptions(input){
                     };
             }
             else{
-                unequipButton.triggeredMethod = function(text){
+                unequipButton.triggeredFunction = function(text){
                     MML.processCommand({
 		            	type: "character",
 						who: who,
@@ -6749,7 +6766,7 @@ MML.displayItemOptions = function displayItemOptions(input){
                     buttons.push({
                         text: "Equip Left Hand",
                         nextMenu: "menuIdle",
-                        triggeredMethod: function(text){
+                        triggeredFunction: function(text){
                             if(state.MML.characters[who].rightHand.grip !== "One Hand"){
                                 MML.processCommand({
 					            	type: "character",
@@ -6783,7 +6800,7 @@ MML.displayItemOptions = function displayItemOptions(input){
                     buttons.push({
                         text: "Equip Right Hand",
                         nextMenu: "menuIdle",
-                        triggeredMethod: function(text){
+                        triggeredFunction: function(text){
                             if(state.MML.characters[who].leftHand.grip !== "One Hand"){
                                 MML.processCommand({
 					            	type: "character",
@@ -6818,7 +6835,7 @@ MML.displayItemOptions = function displayItemOptions(input){
                     buttons.push({
                         text: "Equip " + gripName,
                         nextMenu: "menuIdle",
-                        triggeredMethod: function(text){
+                        triggeredFunction: function(text){
                             MML.processCommand({
 				            	type: "character",
 								who: who,
@@ -6857,7 +6874,7 @@ MML.displayItemOptions = function displayItemOptions(input){
         buttons.push({
             text: "Equip Left Hand",
             nextMenu: "menuIdle",
-            triggeredMethod: function(text){
+            triggeredFunction: function(text){
                 MML.processCommand({
 	            	type: "character",
 					who: who,
@@ -6876,7 +6893,7 @@ MML.displayItemOptions = function displayItemOptions(input){
             buttons.push({
             text: "Equip Right Hand",
             nextMenu: "menuIdle",
-            triggeredMethod: function(text){
+            triggeredFunction: function(text){
                 MML.processCommand({
 	            	type: "character",
 					who: who,
@@ -6903,7 +6920,7 @@ MML.displayItemOptions = function displayItemOptions(input){
     buttons.push({
         text: "Exit",
         nextMenu: "menuIdle",
-        triggeredMethod: function(text){
+        triggeredFunction: function(text){
             MML.displayMenu.apply(this, []);
             }
         });
@@ -6946,7 +6963,7 @@ MML.charMenuAttack = function charMenuAttack(input){
 	var buttons = [{
 		text: "Standard",
 		nextMenu: "charMenuAttackCalledShot",
-		triggeredMethod: function(input){
+		triggeredFunction: function(input){
 			MML.displayMenu.apply(this, []);
 		}}];
 
@@ -6954,7 +6971,7 @@ MML.charMenuAttack = function charMenuAttack(input){
 		buttons.push({
 			text: "Shoot From Cover",
 			nextMenu: "charMenuAttackCalledShot",
-			triggeredMethod: function(input){
+			triggeredFunction: function(input){
 				state.MML.characters[this.who].action.modifiers.push("Shoot From Cover");
 				MML.displayMenu.apply(this, []);
 			}
@@ -6962,7 +6979,7 @@ MML.charMenuAttack = function charMenuAttack(input){
 		buttons.push({
 			text: "Aim",
 			nextMenu: "charMenuPrepareAction",
-			triggeredMethod: function(input){
+			triggeredFunction: function(input){
 				state.MML.characters[this.who].action.modifiers.push("Aim");
 				MML.displayMenu.apply(this, []);
 			}
@@ -6972,7 +6989,7 @@ MML.charMenuAttack = function charMenuAttack(input){
 		buttons.push({
 			text: "Sweep Attack",
 			nextMenu: "charMenuAttackCalledShot",
-			triggeredMethod: function(input){
+			triggeredFunction: function(input){
 				state.MML.characters[this.who].action.modifiers.push("Sweep Attack");
 				MML.displayMenu.apply(this, []);
 			}
@@ -6985,18 +7002,18 @@ MML.charMenuAttackCalledShot = function charMenuCalledShot(input){
 	this.message =  "Called Shot Menu";
 	var buttons = [{
 		text: "None",
-		triggeredMethod: function(input){
+		triggeredFunction: function(input){
 			MML.displayMenu.apply(this, []);
 		}},
 		{
 		text: "Body Part",
-		triggeredMethod: function(input){
+		triggeredFunction: function(input){
 			state.MML.characters[this.who].action.modifiers.push("Called Shot");
 			MML.displayMenu.apply(this, []);
 		}},
 		{
 		text: "Specific Hit Position",
-		triggeredMethod: function(input){
+		triggeredFunction: function(input){
 			state.MML.characters[this.who].action.modifiers.push("Called Shot Specific");
 			MML.displayMenu.apply(this, []);
 		}}
@@ -7020,20 +7037,20 @@ MML.charMenuAttackStance = function charMenuAttackStance(input){
 	this.buttons = [{
 		text: "Neutral",
 		nextMenu: "charMenuInitiativeRoll",
-		triggeredMethod: function(input){
+		triggeredFunction: function(input){
 			MML.displayMenu.apply(this, []);
 		}},
 		{
 		text: "Defensive",
 		nextMenu: "charMenuInitiativeRoll",
-		triggeredMethod: function(input){
+		triggeredFunction: function(input){
 			state.MML.characters[this.who].action.modifiers.push("Defensive Stance");
 			MML.displayMenu.apply(this, []);
 		}},
 		{
 		text: "Aggressive",
 		nextMenu: "charMenuInitiativeRoll",
-		triggeredMethod: function(input){
+		triggeredFunction: function(input){
 			state.MML.characters[this.who].action.modifiers.push("Aggressive Stance");
 			MML.displayMenu.apply(this, []);
 		}}
@@ -7073,28 +7090,31 @@ MML.charMenuChooseTarget = function charMenuChooseTarget(input){
 		this.buttons.push({
 			text: state.MML.GM.combatants[index],
 			nextMenu: state.MML.characters[this.who].action.roll,
-			triggeredMethod: function(input){
-				sendChat("", "&{template:selectTarget} {{charName=" + this.name + "}} {{triggeredMethod=setCurrentCharacterTargets}}");
+			triggeredFunction: function(input){
+				input.charName = this.name;
+				input.triggeredFunction = "setCurrentCharacterTargets";
+
+				MML.displayTargetSelection(input);
 			}
 		});
 	}
 };
 MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(input){
 	var targetArray;
-	if(typeof input.who !== "undefined"){
+	if(typeof input.target !== "undefined"){
 		targetArray = [input.target];
 	}
 	else{
 		targetArray = input.targets;
 	}
-	log(input);
+	
+	input.targetArray = targetArray;
+
 	MML.processCommand({
     	type: "character",
-    	who: input.character,
-    	triggeredFunction: state.MML.characters[input.character].action.triggeredMethod,
-		input: {
-	    	targetArray: targetArray
-	  	}
+    	who: input.charName,
+    	triggeredFunction: state.MML.characters[input.charName].action.triggeredFunction,
+		input: input
     });
 };
 MML.charMenuSelectDamageType = function charMenuSelectDamageType(input){
@@ -7105,7 +7125,7 @@ MML.charMenuSelectDamageType = function charMenuSelectDamageType(input){
 	this.buttons.push({
 		text: "Primary",
 		nextMenu: "charMenuAttackRoll",
-		triggeredMethod: function(input){
+		triggeredFunction: function(input){
 			input.damageType = "primary";
 			
 			MML.processCommand({
@@ -7120,7 +7140,7 @@ MML.charMenuSelectDamageType = function charMenuSelectDamageType(input){
 	this.buttons.push({
 		text: "Secondary",
 		nextMenu: "charMenuAttackRoll",
-		triggeredMethod: function(input){
+		triggeredFunction: function(input){
 			input.damageType = "secondary";
 			
 			MML.processCommand({
@@ -7174,21 +7194,21 @@ MML.menuButtons = {};
 MML.menuButtons.GmMenuMain = {
 	text: "GmMenuMain",
 	nextMenu: "GmMenuMain",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
 MML.menuButtons.combatMenu = {
 	text: "Combat",
 	nextMenu: "GmMenuCombat",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
 MML.menuButtons.newCharacterMenu = {
 	text: "New Character",
 	nextMenu: "GmMenuNewCharacter",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
@@ -7196,14 +7216,14 @@ MML.menuButtons.newCharacterMenu = {
 MML.menuButtons.newItemMenu = {
 	text: "New Item",
 	nextMenu: "GmMenuNewItem",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
 MML.menuButtons.newWeapon = {
 	text: "Weapon",
 	nextMenu: "GmMenuNewWeapon",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
@@ -7211,7 +7231,7 @@ MML.menuButtons.newWeapon = {
 MML.menuButtons.newShield = {
 	text: "Shield",
 	nextMenu: "GmMenuNewShield",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
@@ -7219,28 +7239,28 @@ MML.menuButtons.newShield = {
 MML.menuButtons.newArmor = {
 	text: "Armor",
 	nextMenu: "GmMenuNewArmor",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
 MML.menuButtons.newSpellComponent = {
 	text: "Spell Component",
 	nextMenu: "GmMenuNewSpellComponent",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
 MML.menuButtons.newMiscItem = {
 	text: "Misc",
 	nextMenu: "GmMenuNewMiscItem",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
 MML.menuButtons.itemQualityPoor = {
 	text: "Poor",
 	nextMenu: "GmMenuNewItemProperties",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.GM.newItem.quality = input.text;
 		MML.displayMenu.apply(this, []);
 	}
@@ -7248,7 +7268,7 @@ MML.menuButtons.itemQualityPoor = {
 MML.menuButtons.itemQualityStandard = {
 	text: "Standard",
 	nextMenu: "GmMenuNewItemProperties",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.GM.newItem.quality = input.text;
 		MML.displayMenu.apply(this, []);
 	}
@@ -7256,7 +7276,7 @@ MML.menuButtons.itemQualityStandard = {
 MML.menuButtons.itemQualityExcellent = {
 	text: "Excellent",
 	nextMenu: "GmMenuNewItemProperties",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.GM.newItem.quality = input.text;
 		MML.displayMenu.apply(this, []);
 	}
@@ -7264,7 +7284,7 @@ MML.menuButtons.itemQualityExcellent = {
 MML.menuButtons.itemQualityMasterWork = {
 	text: "Master Work",
 	nextMenu: "GmMenuNewItemProperties",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.GM.newItem.quality = input.text;
 		MML.displayMenu.apply(this, []);
 	}
@@ -7272,29 +7292,31 @@ MML.menuButtons.itemQualityMasterWork = {
 MML.menuButtons.assignNewItem =  {
 	text: "Assign Item",
 	nextMenu: "GmMenuMain",
-	triggeredMethod: function(input){
-		sendChat("", "&{template:selectTarget} {{charName=" + this.name + "}} {{triggeredMethod=assignNewItem}}");
+	triggeredFunction: function(input){
+		input.charName = this.name;
+		input.triggeredFunction = "assignNewItem";
+		MML.displayTargetSelection(input);
 	}
 };
 
 MML.menuButtons.worldMenu = {
 	text: "World",
 	nextMenu: "GmMenuWorld",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
 MML.menuButtons.utilitiesMenu = {
 	text: "Utilities",
 	nextMenu: "GmMenuUtilities",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
 MML.menuButtons.startCombat = {
 	text: "Start Combat",
 	nextMenu: "charMenuPrepareAction",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "GM",
 	        triggeredFunction: "startCombat",
@@ -7305,7 +7327,7 @@ MML.menuButtons.startCombat = {
 MML.menuButtons.toMainGmMenu = {
 	text: "Back",
 	nextMenu: "GmMenuMain",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
@@ -7313,7 +7335,7 @@ MML.menuButtons.toMainGmMenu = {
 MML.menuButtons.startRound = {
 	text: "Start Round",
 	nextMenu: "GmMenuStartRound",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "GM",
 	        triggeredFunction: "startRound",
@@ -7324,7 +7346,7 @@ MML.menuButtons.startRound = {
 MML.menuButtons.endCombat = {
 	text: "End Combat",
 	nextMenu: "GmMenuMain",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "GM",
 	        triggeredFunction: "endCombat",
@@ -7335,11 +7357,11 @@ MML.menuButtons.endCombat = {
 MML.menuButtons.setActionAttack = {
 	text: "Attack",
 	nextMenu: "charMenuAttack",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.characters[this.who].action = {
 			name: "Attack",
 			getTargets: "getSingleTarget",
-			triggeredMethod: "startAttackAction",
+			triggeredFunction: "startAttackAction",
 			modifiers: []
 		};
 		MML.displayMenu.apply(this, []);
@@ -7348,7 +7370,7 @@ MML.menuButtons.setActionAttack = {
 MML.menuButtons.setActionCast = {
 	text: "Cast",
 	nextMenu: "charMenuCast",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.characters[this.who].action.name = input.text;
 		MML.displayMenu.apply(this, []);
 	}
@@ -7356,7 +7378,7 @@ MML.menuButtons.setActionCast = {
 MML.menuButtons.setActionReadyItem = {
 	text: "Ready Item",
 	nextMenu: "charMenuReadyItem",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.characters[this.who].action.name = input.text;
 		sendChat("", "Ready Item not ready...lol");
 		MML.displayMenu.apply(this, []);
@@ -7365,7 +7387,7 @@ MML.menuButtons.setActionReadyItem = {
 MML.menuButtons.setActionObserve = {
 	text: "Observe",
 	nextMenu: "charMenuPrepareAction",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.characters[this.who].action.name = input.text;
 		sendChat("", "Observe");
 		MML.displayMenu.apply(this, []);
@@ -7374,14 +7396,14 @@ MML.menuButtons.setActionObserve = {
 MML.menuButtons.changeAction = {
 	text: "Change Action",
 	nextMenu: "charMenuPrepareAction",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
 MML.menuButtons.actionPrepared = {
 	text: "Ready",
 	nextMenu: "charMenuPrepareAction",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.characters[this.who].ready = true;
 		state.MML.characters[this.who].updateCharacter("ready");
 		state.MML.characters[this.who].updateCharacter("action");
@@ -7403,14 +7425,14 @@ MML.menuButtons.actionPrepared = {
 MML.menuButtons.startAction = {
 	text: "Start",
 	nextMenu: "menuIdle",
-	triggeredMethod: function(input){
-		MML.startAction.apply(state.MML.GM, []);
+	triggeredFunction: function(input){
+		MML.startAction.apply(state.MML.GM, [input]);
 	}
 };
 MML.menuButtons.chooseTargets = {
 	text: "Choose Targets",
 	nextMenu: "charMenuChooseTargets",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
@@ -7418,21 +7440,21 @@ MML.menuButtons.chooseTargets = {
 MML.menuButtons.endAction = {
 	text: "End Action",
 	nextMenu: "charMenuPrepareAction",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.endAction.apply(state.MML.GM, []);
 	}
 };
 MML.menuButtons.rollDice = {
 	text: "Roll",
 	nextMenu: "menuIdle",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.GM.currentRoll.getRoll();
 	}
 };
 MML.menuButtons.initiativeRoll = {
 	text: "Roll",
 	nextMenu: "menuIdle",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "character",
 	        who: this.who,
@@ -7446,7 +7468,7 @@ MML.menuButtons.initiativeRoll = {
 MML.menuButtons.acceptRoll = {
 	text: "Accept",
 	nextMenu: "menuIdle",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML[this.currentRoll.applyResult].apply(this, []);
 	}
 };
@@ -7454,7 +7476,7 @@ MML.menuButtons.acceptRoll = {
 MML.menuButtons.changeRoll = {
 	text: "Change",
 	nextMenu: "menuIdle",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayGmRoll.apply(this, []);
 	}
 };
@@ -7462,14 +7484,14 @@ MML.menuButtons.changeRoll = {
 MML.menuButtons.rollHitPosition = {
 	text: "Roll",
 	nextMenu: "charMenuRollDamage",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.getHitPositionRoll.apply(state.MML.GM, []);
 	}
 };
 MML.menuButtons.setProne = {
 	text: "Prone",
 	nextMenu: "menuCombatMovement",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "character",
 	        who: this.who,
@@ -7492,7 +7514,7 @@ MML.menuButtons.setProne = {
 MML.menuButtons.setCrawl = {
 	text: "Crawl",
 	nextMenu: "menuCombatMovement",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "character",
 	        who: this.who,
@@ -7515,7 +7537,7 @@ MML.menuButtons.setCrawl = {
 MML.menuButtons.setStalk = {
 	text: "Stalk",
 	nextMenu: "menuCombatMovement",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "character",
 	        who: this.who,
@@ -7538,7 +7560,7 @@ MML.menuButtons.setStalk = {
 MML.menuButtons.setWalk = {
 	text: "Walk",
 	nextMenu: "menuCombatMovement",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "character",
 	        who: this.who,
@@ -7561,7 +7583,7 @@ MML.menuButtons.setWalk = {
 MML.menuButtons.setJog = {
 	text: "Jog",
 	nextMenu: "menuCombatMovement",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "character",
 	        who: this.who,
@@ -7584,7 +7606,7 @@ MML.menuButtons.setJog = {
 MML.menuButtons.setRun = {
 	text: "Run",
 	nextMenu: "menuCombatMovement",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "character",
 	        who: this.who,
@@ -7607,7 +7629,7 @@ MML.menuButtons.setRun = {
 MML.menuButtons.endMovement  = {
 	text: "End Movement",
 	nextMenu: "menuIdle",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "character",
 	        who: this.who,
@@ -7627,7 +7649,7 @@ MML.menuButtons.endMovement  = {
 MML.menuButtons.defenseBlock = {
 	text: "Block",
 	nextMenu: "menuIdle",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.characters[this.who].defense.style = "Block";
 		state.MML.characters[this.who].defense.number++;
 		MML.getDefenseRoll.apply(state.MML.GM, []);
@@ -7636,7 +7658,7 @@ MML.menuButtons.defenseBlock = {
 MML.menuButtons.defenseDodge = {
 	text: "Dodge",
 	nextMenu: "menuIdle",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.characters[this.who].defense.style = "Dodge";
 		state.MML.characters[this.who].defense.number++;
 		state.MML.characters[this.who].defense.dodge = true;
@@ -7646,7 +7668,7 @@ MML.menuButtons.defenseDodge = {
 MML.menuButtons.defenseTakeIt = {
 	text: "Take It",
 	nextMenu: "menuIdle",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.characters[this.who].defense.style = "Take It";
 		MML.getDefenseRoll.apply(state.MML.GM, []);
 	}
@@ -8266,7 +8288,7 @@ MML.test = function test(){
 
     var GM = {"player":"Robot","name":"GM","currentAction":{},"inCombat":true,"currentRound":1,"roundStarted":true,"combatants":["Thaddeus Clinch","Remmy Denkin"],"actor":"Thaddeus Clinch"};
     var players = {"Robot":{"name":"Robot","who":"Thaddeus Clinch","menu":"menuIdle","buttons":[],"characters":["Remmy Denkin","Thaddeus Clinch"],"characterIndex":2,"message":"Menu Closed","currentRoll":{"who":"Thaddeus Clinch","name":"initiative","value":3,"getResult":"initiativeResult","applyResult":"initiativeApply","range":"1-10","accepted":true,"rollResult":15,"message":"Roll: 3\nResult: 15\nRange: 1-10"}},"Andrew":{"name":"Andrew","menu":"charMenuPrepareAction","characters":[],"characterIndex":0,"message":"Prepare undefined's action","buttons":[{"text":"Attack","nextMenu":"charMenuAttack"},{"text":"Cast","nextMenu":"charMenuCast"},{"text":"Ready Item","nextMenu":"charMenuReadyItem"},{"text":"Observe","nextMenu":"charMenuPrepareAction"}]}};
-    var characters = {"Remmy Denkin":{"name":"Remmy Denkin","player":"Robot","race":"Human","bodyType":"humanoid","gender":"Male","height":"5'10","weight":165,"handedness":"","stature":24,"strength":12,"coordination":14,"health":9,"beauty":8,"intellect":7,"reason":16,"creativity":10,"presence":6,"willpower":7,"evocation":49,"perception":11,"systemStrength":8,"fitness":11,"fitnessMod":2.6,"load":62,"overhead":124,"deadLift":248,"multiWoundMax":20,"multiWound":20,"headHPMax":9,"headHP":9,"chestHPMax":12,"chestHP":12,"abdomenHPMax":17,"abdomenHP":17,"leftArmHPMax":17,"leftArmHP":17,"rightArmHPMax":17,"rightArmHP":17,"leftLegHPMax":17,"leftLegHP":17,"rightLegHPMax":17,"rightLegHP":17,"epMax":49,"ep":49,"fatigueMax":11,"fatigue":11,"hpRecovery":0.5,"epRecovery":2,"inventory":{"-KERfJsqEUIMaif8MCcT":{"name":"Cudgel, Light","type":"weapon","weight":3,"grips":{"One Hand":{"family":"Bludgeoning","hands":1,"primaryType":"Impact","primaryTask":45,"primaryDamage":"2d10","secondaryType":"","secondaryTask":0,"secondaryDamage":"","defense":15,"initiative":6,"rank":1}},"quality":"Standard"}},"totalWeightCarried":3,"knockdownMax":24,"knockdown":false,"apv":[{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]}],"leftHand":{"_id":"-KERfJsqEUIMaif8MCcT","grip":"One Hand"},"rightHand":{"_id":"-KERfJsqEUIMaif8MCcT","grip":"One Hand"},"hitTable":"[null,1,1,2,3,3,4,4,5,5,6,7,8,8,8,8,9,9,9,9,10,10,11,11,11,11,12,12,13,13,13,13,14,14,14,15,15,16,16,17,17,17,18,18,19,19,19,19,20,20,21,21,21,22,22,23,23,23,24,24,25,25,26,26,27,27,27,28,28,29,29,29,30,30,31,31,32,32,33,34,34,35,35,35,36,36,36,37,37,38,38,39,39,40,40,41,42,43,44,45,46]","movementRatio":4,"movementAvailable":4,"movementPosition":"","situationalMod":0,"attributeDefenseMod":6,"meleeDefenseMod":-10,"missileDefenseMod":-10,"meleeAttackMod":-10,"missileAttackMod":-10,"attributeMeleeAttackMod":6,"meleeDamageMod":0,"attributeMissileAttackMod":6,"attributeCastingMod":-20,"spellLearningMod":-5,"statureCheckMod":0,"strengthCheckMod":0,"coordinationCheckMod":0,"healthCheckMod":0,"beautyCheckMod":0,"intellectCheckMod":0,"reasonCheckMod":0,"creativityCheckMod":0,"presenceCheckMod":0,"willpowerCheckMod":0,"evocationCheckMod":0,"perceptionCheckMod":0,"systemStrengthCheckMod":0,"fitnessCheckMod":0,"statusEffects":{},"initiative":11,"initiativeRoll":1,"situationalInitBonus":-5,"movementRatioInitBonus":5,"attributeInitBonus":0,"senseInitBonus":4,"fomInitBonus":0,"firstActionInitBonus":6,"spentInitiative":0,"actionTempo":-12,"ready":true,"action":{"name":"Attack","getTargets":"getSingleTarget","triggeredMethod":"startAttackAction","modifiers":[],"initBonus":6},"defensesThisRound":0,"dodgedThisRound":false,"meleeThisRound":false,"fatigueLevel":0,"roundsRest":0,"roundsExertion":0,"damagedThisRound":false,"skills":{"Dancing":{"level":0,"input":0,"_id":"-KE9K8MdHDvVQkRnd7N9"},"Acrobatics":{"level":49,"input":46,"_id":"-KE9KtWNxzOg7JzWYZqW"},"Acting":{"level":-10,"input":0,"_id":"-KE9LACTqa5zsEy7i9Tv"}},"weaponSkills":{"Default Martial":{"level":12,"input":0,"_id":"-KE9I4lvA4HHTPIaWJB7"},"Cudgel, Light":{"level":24,"input":24,"_id":"-KE9IFePeY9M0ymMKF1s"}}},"Thaddeus Clinch":{"name":"Thaddeus Clinch","player":"Robot","race":"Human","bodyType":"humanoid","gender":"Male","height":"5'7","weight":150,"handedness":"","stature":22,"strength":20,"coordination":15,"health":19,"beauty":18,"intellect":7,"reason":7,"creativity":13,"presence":15,"willpower":16,"evocation":62,"perception":9,"systemStrength":18,"fitness":20,"fitnessMod":4,"load":88,"overhead":176,"deadLift":352,"multiWoundMax":29,"multiWound":29,"headHPMax":13,"headHP":13,"chestHPMax":16,"chestHP":16,"abdomenHPMax":21,"abdomenHP":21,"leftArmHPMax":21,"leftArmHP":21,"rightArmHPMax":21,"rightArmHP":21,"leftLegHPMax":21,"leftLegHP":21,"rightLegHPMax":21,"rightLegHP":21,"epMax":62,"ep":62,"fatigueMax":20,"fatigue":20,"hpRecovery":4,"epRecovery":8,"inventory":{"-KEReXqw39IqL83Kf1oc":{"name":"Shovel","type":"weapon","weight":6,"grips":{"Two Hands":{"family":"Bludgeoning","hands":2,"primaryType":"Impact","primaryTask":35,"primaryDamage":"","secondaryType":"1d8","secondaryTask":0,"secondaryDamage":"","defense":15,"initiative":4,"rank":1}},"quality":"Standard"}},"totalWeightCarried":6,"knockdownMax":23,"knockdown":false,"apv":[{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]}],"leftHand":{"_id":"-KEReXqw39IqL83Kf1oc","grip":"Two Hands"},"rightHand":{"_id":"-KEReXqw39IqL83Kf1oc","grip":"Two Hands"},"hitTable":"[null,1,1,2,3,3,4,4,5,5,6,7,8,8,8,8,9,9,9,9,10,10,11,11,11,11,12,12,13,13,13,13,14,14,14,15,15,16,16,17,17,17,18,18,19,19,19,19,20,20,21,21,21,22,22,23,23,23,24,24,25,25,26,26,27,27,27,28,28,29,29,29,30,30,31,31,32,32,33,34,34,35,35,35,36,36,36,37,37,38,38,39,39,40,40,41,42,43,44,45,46]","movementRatio":4,"movementAvailable":4,"movementPosition":"","situationalMod":0,"attributeDefenseMod":13,"meleeDefenseMod":0,"missileDefenseMod":0,"meleeAttackMod":0,"missileAttackMod":0,"attributeMeleeAttackMod":13,"meleeDamageMod":2,"attributeMissileAttackMod":3,"attributeCastingMod":-30,"spellLearningMod":-5,"statureCheckMod":0,"strengthCheckMod":0,"coordinationCheckMod":0,"healthCheckMod":0,"beautyCheckMod":0,"intellectCheckMod":0,"reasonCheckMod":0,"creativityCheckMod":0,"presenceCheckMod":0,"willpowerCheckMod":0,"evocationCheckMod":0,"perceptionCheckMod":0,"systemStrengthCheckMod":0,"fitnessCheckMod":0,"statusEffects":{},"initiative":15,"initiativeRoll":3,"situationalInitBonus":0,"movementRatioInitBonus":5,"attributeInitBonus":-1,"senseInitBonus":4,"fomInitBonus":0,"firstActionInitBonus":4,"spentInitiative":0,"actionTempo":-12,"ready":true,"action":{"name":"Attack","getTargets":"getSingleTarget","triggeredMethod":"startAttackAction","modifiers":[],"initBonus":4},"defensesThisRound":0,"dodgedThisRound":false,"meleeThisRound":false,"fatigueLevel":0,"roundsRest":0,"roundsExertion":0,"damagedThisRound":false,"skills":{},"weaponSkills":{"Default Martial":{"level":18,"input":0,"_id":"-KEJQeZ75T2vH0BYsm2h"},"Mace":{"level":36,"input":36,"_id":"-KEJQvt3y5aHhJSJN-5J"}}}};
+    var characters = {"Remmy Denkin":{"name":"Remmy Denkin","player":"Robot","race":"Human","bodyType":"humanoid","gender":"Male","height":"5'10","weight":165,"handedness":"","stature":24,"strength":12,"coordination":14,"health":9,"beauty":8,"intellect":7,"reason":16,"creativity":10,"presence":6,"willpower":7,"evocation":49,"perception":11,"systemStrength":8,"fitness":11,"fitnessMod":2.6,"load":62,"overhead":124,"deadLift":248,"multiWoundMax":20,"multiWound":20,"headHPMax":9,"headHP":9,"chestHPMax":12,"chestHP":12,"abdomenHPMax":17,"abdomenHP":17,"leftArmHPMax":17,"leftArmHP":17,"rightArmHPMax":17,"rightArmHP":17,"leftLegHPMax":17,"leftLegHP":17,"rightLegHPMax":17,"rightLegHP":17,"epMax":49,"ep":49,"fatigueMax":11,"fatigue":11,"hpRecovery":0.5,"epRecovery":2,"inventory":{"-KERfJsqEUIMaif8MCcT":{"name":"Cudgel, Light","type":"weapon","weight":3,"grips":{"One Hand":{"family":"Bludgeoning","hands":1,"primaryType":"Impact","primaryTask":45,"primaryDamage":"2d10","secondaryType":"","secondaryTask":0,"secondaryDamage":"","defense":15,"initiative":6,"rank":1}},"quality":"Standard"}},"totalWeightCarried":3,"knockdownMax":24,"knockdown":false,"apv":[{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]}],"leftHand":{"_id":"-KERfJsqEUIMaif8MCcT","grip":"One Hand"},"rightHand":{"_id":"-KERfJsqEUIMaif8MCcT","grip":"One Hand"},"hitTable":"[null,1,1,2,3,3,4,4,5,5,6,7,8,8,8,8,9,9,9,9,10,10,11,11,11,11,12,12,13,13,13,13,14,14,14,15,15,16,16,17,17,17,18,18,19,19,19,19,20,20,21,21,21,22,22,23,23,23,24,24,25,25,26,26,27,27,27,28,28,29,29,29,30,30,31,31,32,32,33,34,34,35,35,35,36,36,36,37,37,38,38,39,39,40,40,41,42,43,44,45,46]","movementRatio":4,"movementAvailable":4,"movementPosition":"","situationalMod":0,"attributeDefenseMod":6,"meleeDefenseMod":-10,"missileDefenseMod":-10,"meleeAttackMod":-10,"missileAttackMod":-10,"attributeMeleeAttackMod":6,"meleeDamageMod":0,"attributeMissileAttackMod":6,"attributeCastingMod":-20,"spellLearningMod":-5,"statureCheckMod":0,"strengthCheckMod":0,"coordinationCheckMod":0,"healthCheckMod":0,"beautyCheckMod":0,"intellectCheckMod":0,"reasonCheckMod":0,"creativityCheckMod":0,"presenceCheckMod":0,"willpowerCheckMod":0,"evocationCheckMod":0,"perceptionCheckMod":0,"systemStrengthCheckMod":0,"fitnessCheckMod":0,"statusEffects":{},"initiative":11,"initiativeRoll":1,"situationalInitBonus":-5,"movementRatioInitBonus":5,"attributeInitBonus":0,"senseInitBonus":4,"fomInitBonus":0,"firstActionInitBonus":6,"spentInitiative":0,"actionTempo":-12,"ready":true,"action":{"name":"Attack","getTargets":"getSingleTarget","triggeredFunction":"startAttackAction","modifiers":[],"initBonus":6},"defensesThisRound":0,"dodgedThisRound":false,"meleeThisRound":false,"fatigueLevel":0,"roundsRest":0,"roundsExertion":0,"damagedThisRound":false,"skills":{"Dancing":{"level":0,"input":0,"_id":"-KE9K8MdHDvVQkRnd7N9"},"Acrobatics":{"level":49,"input":46,"_id":"-KE9KtWNxzOg7JzWYZqW"},"Acting":{"level":-10,"input":0,"_id":"-KE9LACTqa5zsEy7i9Tv"}},"weaponSkills":{"Default Martial":{"level":12,"input":0,"_id":"-KE9I4lvA4HHTPIaWJB7"},"Cudgel, Light":{"level":24,"input":24,"_id":"-KE9IFePeY9M0ymMKF1s"}}},"Thaddeus Clinch":{"name":"Thaddeus Clinch","player":"Robot","race":"Human","bodyType":"humanoid","gender":"Male","height":"5'7","weight":150,"handedness":"","stature":22,"strength":20,"coordination":15,"health":19,"beauty":18,"intellect":7,"reason":7,"creativity":13,"presence":15,"willpower":16,"evocation":62,"perception":9,"systemStrength":18,"fitness":20,"fitnessMod":4,"load":88,"overhead":176,"deadLift":352,"multiWoundMax":29,"multiWound":29,"headHPMax":13,"headHP":13,"chestHPMax":16,"chestHP":16,"abdomenHPMax":21,"abdomenHP":21,"leftArmHPMax":21,"leftArmHP":21,"rightArmHPMax":21,"rightArmHP":21,"leftLegHPMax":21,"leftLegHP":21,"rightLegHPMax":21,"rightLegHP":21,"epMax":62,"ep":62,"fatigueMax":20,"fatigue":20,"hpRecovery":4,"epRecovery":8,"inventory":{"-KEReXqw39IqL83Kf1oc":{"name":"Shovel","type":"weapon","weight":6,"grips":{"Two Hands":{"family":"Bludgeoning","hands":2,"primaryType":"Impact","primaryTask":35,"primaryDamage":"","secondaryType":"1d8","secondaryTask":0,"secondaryDamage":"","defense":15,"initiative":4,"rank":1}},"quality":"Standard"}},"totalWeightCarried":6,"knockdownMax":23,"knockdown":false,"apv":[{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]}],"leftHand":{"_id":"-KEReXqw39IqL83Kf1oc","grip":"Two Hands"},"rightHand":{"_id":"-KEReXqw39IqL83Kf1oc","grip":"Two Hands"},"hitTable":"[null,1,1,2,3,3,4,4,5,5,6,7,8,8,8,8,9,9,9,9,10,10,11,11,11,11,12,12,13,13,13,13,14,14,14,15,15,16,16,17,17,17,18,18,19,19,19,19,20,20,21,21,21,22,22,23,23,23,24,24,25,25,26,26,27,27,27,28,28,29,29,29,30,30,31,31,32,32,33,34,34,35,35,35,36,36,36,37,37,38,38,39,39,40,40,41,42,43,44,45,46]","movementRatio":4,"movementAvailable":4,"movementPosition":"","situationalMod":0,"attributeDefenseMod":13,"meleeDefenseMod":0,"missileDefenseMod":0,"meleeAttackMod":0,"missileAttackMod":0,"attributeMeleeAttackMod":13,"meleeDamageMod":2,"attributeMissileAttackMod":3,"attributeCastingMod":-30,"spellLearningMod":-5,"statureCheckMod":0,"strengthCheckMod":0,"coordinationCheckMod":0,"healthCheckMod":0,"beautyCheckMod":0,"intellectCheckMod":0,"reasonCheckMod":0,"creativityCheckMod":0,"presenceCheckMod":0,"willpowerCheckMod":0,"evocationCheckMod":0,"perceptionCheckMod":0,"systemStrengthCheckMod":0,"fitnessCheckMod":0,"statusEffects":{},"initiative":15,"initiativeRoll":3,"situationalInitBonus":0,"movementRatioInitBonus":5,"attributeInitBonus":-1,"senseInitBonus":4,"fomInitBonus":0,"firstActionInitBonus":4,"spentInitiative":0,"actionTempo":-12,"ready":true,"action":{"name":"Attack","getTargets":"getSingleTarget","triggeredFunction":"startAttackAction","modifiers":[],"initBonus":4},"defensesThisRound":0,"dodgedThisRound":false,"meleeThisRound":false,"fatigueLevel":0,"roundsRest":0,"roundsExertion":0,"damagedThisRound":false,"skills":{},"weaponSkills":{"Default Martial":{"level":18,"input":0,"_id":"-KEJQeZ75T2vH0BYsm2h"},"Mace":{"level":36,"input":36,"_id":"-KEJQvt3y5aHhJSJN-5J"}}}};
     var command = {"type":"character","who":"Thaddeus Clinch","triggeredFunction":"startAction","input":{}};
 
 
@@ -8667,14 +8689,18 @@ MML.displayMenu = function displayMenu(input){
     sendChat(this.name, toChat, null, {noarchive: false}); //Change to true this when they fix the bug
 };
 
-// MML.displayMenu = function displayMenu(){
-//     var toChat = '/w "' + this.name + '" &{template:charMenu} {{name=' + this.message + '}} ';
-//     _.each(this.buttons, function(button){
-//         var noSpace = button.text.replace(/\s+/g, '');
-//         toChat = toChat + '{{' + noSpace + '=[' + button.text + '](!menu ' +  button.text + ')}} ';
-//     }, this);
-//     sendChat(this.name, toChat, null, {noarchive: false}); //Change to true this when they fix the bug
-// };
+MML.displayTargetSelection = function displayTargetSelection(input){
+    var inputJSON = JSON.stringify(input);
+
+    // JSON strings screw up Command Buttons, convert to hex
+    var hex, i;
+    var result = "";
+    for (i=0; i<inputJSON.length; i++){
+        result += ("000"+inputJSON.charCodeAt(i).toString(16)).slice(-4);
+    }
+
+    sendChat("", "&{template:selectTarget} {{charName=" + input.charName + "}} {{input="+ result +"}}");
+};
 
 // NEEDS WORK. Attacks from above and below need to be added. Use arrays instead of switches on the hit positions for cleaner code
 MML.rollHitPosition = function rollHitPosition(){

@@ -759,7 +759,7 @@ MML.initiativeApply = function initiativeApply(){
     });    
 };
 
-MML.startAttackAction = function startAttackAction(){
+MML.startAttackAction = function startAttackAction(input){
     var player = state.MML.players[this.player];
     if(_.contains(this.action.modifiers, ["Called Shot"])){
         MML.processCommand({
@@ -794,7 +794,7 @@ MML.startAttackAction = function startAttackAction(){
             type: "character",
             who: this.name,
             triggeredFunction: "processAttack",
-            input: {}   
+            input: input   
         });
     }
 };

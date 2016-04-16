@@ -2,7 +2,7 @@
 
 MML.playerClass = {
     message: "", //
-    buttons: {}, //{text: "Click Here", nextMenu: "mainMenu", triggeredMethod: MML.triggeredMethod}
+    buttons: {}, //{text: "Click Here", nextMenu: "mainMenu", triggeredFunction: MML.triggeredFunction}
     name: "",
     characters: [],
     characterIndex: 0,
@@ -32,7 +32,7 @@ MML.menuCommand = function(input){
     		text: button.text,
     		selectedCharNames: input.selectedCharNames
     	};
-        button.triggeredMethod.apply(this, [buttonInput]);
+        button.triggeredFunction.apply(this, [buttonInput]);
     }
 };
 
@@ -140,7 +140,7 @@ MML.GmMenuNewWeapon = function GmMenuNewWeapon(input){
 			this.buttons.push({
 				text: item.name,
 				nextMenu: "GmMenuItemQuality",
-				triggeredMethod: function(input) {
+				triggeredFunction: function(input) {
 					state.MML.GM.newItem = MML.items[input.text];
 					MML.displayMenu.apply(this, []);
 				}
@@ -161,7 +161,7 @@ MML.GmMenuNewShield = function GmMenuNewShield(input){
 			this.buttons.push({
 				text: item.name,
 				nextMenu: "GmMenuItemQuality",
-				triggeredMethod: function(input) {
+				triggeredFunction: function(input) {
 					state.MML.GM.newItem = MML.items[input.text];
 					MML.displayMenu.apply(this, []);
 				}
@@ -182,7 +182,7 @@ MML.GmMenuNewArmor = function GmMenuNewArmor(input){
 			this.buttons.push({
 				text: item.name,
 				nextMenu: "GmMenuArmorMaterial",
-				triggeredMethod: function(input) {
+				triggeredFunction: function(input) {
 					state.MML.GM.newItem = MML.items[input.text];
 					MML.displayMenu.apply(this, []);
 				}
@@ -202,7 +202,7 @@ MML.GmMenuArmorMaterial = function GmMenuArmorMaterial(input){
 		this.buttons.push({
 			text: material.name,
 			nextMenu: "GmMenuItemQuality",
-			triggeredMethod: function(input) {
+			triggeredFunction: function(input) {
 				var material = MML.APVList[input.text];
 				state.MML.GM.newItem.material = material.name;
 				state.MML.GM.newItem.weight = material.weightPerPosition * state.MML.GM.newItem.totalPostitions;
@@ -230,7 +230,7 @@ MML.GmMenuassignNewItem = function GmMenuassignNewItem(input){
 		this.buttons.push({
 			text: index,
 			nextMenu: "GmMenuMain",
-			triggeredMethod: function(input){
+			triggeredFunction: function(input){
 				MML.displayMenu.apply(this, []);
 			}
 		});
@@ -266,7 +266,7 @@ MML.displayItemOptions = function displayItemOptions(input){
             };
 
             if(state.MML.characters[who].leftHand._id === itemId && state.MML.characters[who].leftHand._id === itemId){
-                unequipButton.triggeredMethod = function(text){
+                unequipButton.triggeredFunction = function(text){
                     MML.processCommand({
 		            	type: "character",
 						who: who,
@@ -289,7 +289,7 @@ MML.displayItemOptions = function displayItemOptions(input){
                     };
             }
             else if(state.MML.characters[who].leftHand._id === itemId){
-                unequipButton.triggeredMethod = function(text){
+                unequipButton.triggeredFunction = function(text){
                     MML.processCommand({
 		            	type: "character",
 						who: who,
@@ -303,7 +303,7 @@ MML.displayItemOptions = function displayItemOptions(input){
                     };
             }
             else{
-                unequipButton.triggeredMethod = function(text){
+                unequipButton.triggeredFunction = function(text){
                     MML.processCommand({
 		            	type: "character",
 						who: who,
@@ -324,7 +324,7 @@ MML.displayItemOptions = function displayItemOptions(input){
                     buttons.push({
                         text: "Equip Left Hand",
                         nextMenu: "menuIdle",
-                        triggeredMethod: function(text){
+                        triggeredFunction: function(text){
                             if(state.MML.characters[who].rightHand.grip !== "One Hand"){
                                 MML.processCommand({
 					            	type: "character",
@@ -358,7 +358,7 @@ MML.displayItemOptions = function displayItemOptions(input){
                     buttons.push({
                         text: "Equip Right Hand",
                         nextMenu: "menuIdle",
-                        triggeredMethod: function(text){
+                        triggeredFunction: function(text){
                             if(state.MML.characters[who].leftHand.grip !== "One Hand"){
                                 MML.processCommand({
 					            	type: "character",
@@ -393,7 +393,7 @@ MML.displayItemOptions = function displayItemOptions(input){
                     buttons.push({
                         text: "Equip " + gripName,
                         nextMenu: "menuIdle",
-                        triggeredMethod: function(text){
+                        triggeredFunction: function(text){
                             MML.processCommand({
 				            	type: "character",
 								who: who,
@@ -432,7 +432,7 @@ MML.displayItemOptions = function displayItemOptions(input){
         buttons.push({
             text: "Equip Left Hand",
             nextMenu: "menuIdle",
-            triggeredMethod: function(text){
+            triggeredFunction: function(text){
                 MML.processCommand({
 	            	type: "character",
 					who: who,
@@ -451,7 +451,7 @@ MML.displayItemOptions = function displayItemOptions(input){
             buttons.push({
             text: "Equip Right Hand",
             nextMenu: "menuIdle",
-            triggeredMethod: function(text){
+            triggeredFunction: function(text){
                 MML.processCommand({
 	            	type: "character",
 					who: who,
@@ -478,7 +478,7 @@ MML.displayItemOptions = function displayItemOptions(input){
     buttons.push({
         text: "Exit",
         nextMenu: "menuIdle",
-        triggeredMethod: function(text){
+        triggeredFunction: function(text){
             MML.displayMenu.apply(this, []);
             }
         });
@@ -521,7 +521,7 @@ MML.charMenuAttack = function charMenuAttack(input){
 	var buttons = [{
 		text: "Standard",
 		nextMenu: "charMenuAttackCalledShot",
-		triggeredMethod: function(input){
+		triggeredFunction: function(input){
 			MML.displayMenu.apply(this, []);
 		}}];
 
@@ -529,7 +529,7 @@ MML.charMenuAttack = function charMenuAttack(input){
 		buttons.push({
 			text: "Shoot From Cover",
 			nextMenu: "charMenuAttackCalledShot",
-			triggeredMethod: function(input){
+			triggeredFunction: function(input){
 				state.MML.characters[this.who].action.modifiers.push("Shoot From Cover");
 				MML.displayMenu.apply(this, []);
 			}
@@ -537,7 +537,7 @@ MML.charMenuAttack = function charMenuAttack(input){
 		buttons.push({
 			text: "Aim",
 			nextMenu: "charMenuPrepareAction",
-			triggeredMethod: function(input){
+			triggeredFunction: function(input){
 				state.MML.characters[this.who].action.modifiers.push("Aim");
 				MML.displayMenu.apply(this, []);
 			}
@@ -547,7 +547,7 @@ MML.charMenuAttack = function charMenuAttack(input){
 		buttons.push({
 			text: "Sweep Attack",
 			nextMenu: "charMenuAttackCalledShot",
-			triggeredMethod: function(input){
+			triggeredFunction: function(input){
 				state.MML.characters[this.who].action.modifiers.push("Sweep Attack");
 				MML.displayMenu.apply(this, []);
 			}
@@ -560,18 +560,18 @@ MML.charMenuAttackCalledShot = function charMenuCalledShot(input){
 	this.message =  "Called Shot Menu";
 	var buttons = [{
 		text: "None",
-		triggeredMethod: function(input){
+		triggeredFunction: function(input){
 			MML.displayMenu.apply(this, []);
 		}},
 		{
 		text: "Body Part",
-		triggeredMethod: function(input){
+		triggeredFunction: function(input){
 			state.MML.characters[this.who].action.modifiers.push("Called Shot");
 			MML.displayMenu.apply(this, []);
 		}},
 		{
 		text: "Specific Hit Position",
-		triggeredMethod: function(input){
+		triggeredFunction: function(input){
 			state.MML.characters[this.who].action.modifiers.push("Called Shot Specific");
 			MML.displayMenu.apply(this, []);
 		}}
@@ -595,20 +595,20 @@ MML.charMenuAttackStance = function charMenuAttackStance(input){
 	this.buttons = [{
 		text: "Neutral",
 		nextMenu: "charMenuInitiativeRoll",
-		triggeredMethod: function(input){
+		triggeredFunction: function(input){
 			MML.displayMenu.apply(this, []);
 		}},
 		{
 		text: "Defensive",
 		nextMenu: "charMenuInitiativeRoll",
-		triggeredMethod: function(input){
+		triggeredFunction: function(input){
 			state.MML.characters[this.who].action.modifiers.push("Defensive Stance");
 			MML.displayMenu.apply(this, []);
 		}},
 		{
 		text: "Aggressive",
 		nextMenu: "charMenuInitiativeRoll",
-		triggeredMethod: function(input){
+		triggeredFunction: function(input){
 			state.MML.characters[this.who].action.modifiers.push("Aggressive Stance");
 			MML.displayMenu.apply(this, []);
 		}}
@@ -648,28 +648,31 @@ MML.charMenuChooseTarget = function charMenuChooseTarget(input){
 		this.buttons.push({
 			text: state.MML.GM.combatants[index],
 			nextMenu: state.MML.characters[this.who].action.roll,
-			triggeredMethod: function(input){
-				sendChat("", "&{template:selectTarget} {{charName=" + this.name + "}} {{triggeredMethod=setCurrentCharacterTargets}}");
+			triggeredFunction: function(input){
+				input.charName = this.name;
+				input.triggeredFunction = "setCurrentCharacterTargets";
+
+				MML.displayTargetSelection(input);
 			}
 		});
 	}
 };
 MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(input){
 	var targetArray;
-	if(typeof input.who !== "undefined"){
+	if(typeof input.target !== "undefined"){
 		targetArray = [input.target];
 	}
 	else{
 		targetArray = input.targets;
 	}
-	log(input);
+	
+	input.targetArray = targetArray;
+
 	MML.processCommand({
     	type: "character",
-    	who: input.character,
-    	triggeredFunction: state.MML.characters[input.character].action.triggeredMethod,
-		input: {
-	    	targetArray: targetArray
-	  	}
+    	who: input.charName,
+    	triggeredFunction: state.MML.characters[input.charName].action.triggeredFunction,
+		input: input
     });
 };
 MML.charMenuSelectDamageType = function charMenuSelectDamageType(input){
@@ -680,7 +683,7 @@ MML.charMenuSelectDamageType = function charMenuSelectDamageType(input){
 	this.buttons.push({
 		text: "Primary",
 		nextMenu: "charMenuAttackRoll",
-		triggeredMethod: function(input){
+		triggeredFunction: function(input){
 			input.damageType = "primary";
 			
 			MML.processCommand({
@@ -695,7 +698,7 @@ MML.charMenuSelectDamageType = function charMenuSelectDamageType(input){
 	this.buttons.push({
 		text: "Secondary",
 		nextMenu: "charMenuAttackRoll",
-		triggeredMethod: function(input){
+		triggeredFunction: function(input){
 			input.damageType = "secondary";
 			
 			MML.processCommand({
@@ -749,21 +752,21 @@ MML.menuButtons = {};
 MML.menuButtons.GmMenuMain = {
 	text: "GmMenuMain",
 	nextMenu: "GmMenuMain",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
 MML.menuButtons.combatMenu = {
 	text: "Combat",
 	nextMenu: "GmMenuCombat",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
 MML.menuButtons.newCharacterMenu = {
 	text: "New Character",
 	nextMenu: "GmMenuNewCharacter",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
@@ -771,14 +774,14 @@ MML.menuButtons.newCharacterMenu = {
 MML.menuButtons.newItemMenu = {
 	text: "New Item",
 	nextMenu: "GmMenuNewItem",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
 MML.menuButtons.newWeapon = {
 	text: "Weapon",
 	nextMenu: "GmMenuNewWeapon",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
@@ -786,7 +789,7 @@ MML.menuButtons.newWeapon = {
 MML.menuButtons.newShield = {
 	text: "Shield",
 	nextMenu: "GmMenuNewShield",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
@@ -794,28 +797,28 @@ MML.menuButtons.newShield = {
 MML.menuButtons.newArmor = {
 	text: "Armor",
 	nextMenu: "GmMenuNewArmor",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
 MML.menuButtons.newSpellComponent = {
 	text: "Spell Component",
 	nextMenu: "GmMenuNewSpellComponent",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
 MML.menuButtons.newMiscItem = {
 	text: "Misc",
 	nextMenu: "GmMenuNewMiscItem",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
 MML.menuButtons.itemQualityPoor = {
 	text: "Poor",
 	nextMenu: "GmMenuNewItemProperties",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.GM.newItem.quality = input.text;
 		MML.displayMenu.apply(this, []);
 	}
@@ -823,7 +826,7 @@ MML.menuButtons.itemQualityPoor = {
 MML.menuButtons.itemQualityStandard = {
 	text: "Standard",
 	nextMenu: "GmMenuNewItemProperties",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.GM.newItem.quality = input.text;
 		MML.displayMenu.apply(this, []);
 	}
@@ -831,7 +834,7 @@ MML.menuButtons.itemQualityStandard = {
 MML.menuButtons.itemQualityExcellent = {
 	text: "Excellent",
 	nextMenu: "GmMenuNewItemProperties",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.GM.newItem.quality = input.text;
 		MML.displayMenu.apply(this, []);
 	}
@@ -839,7 +842,7 @@ MML.menuButtons.itemQualityExcellent = {
 MML.menuButtons.itemQualityMasterWork = {
 	text: "Master Work",
 	nextMenu: "GmMenuNewItemProperties",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.GM.newItem.quality = input.text;
 		MML.displayMenu.apply(this, []);
 	}
@@ -847,29 +850,31 @@ MML.menuButtons.itemQualityMasterWork = {
 MML.menuButtons.assignNewItem =  {
 	text: "Assign Item",
 	nextMenu: "GmMenuMain",
-	triggeredMethod: function(input){
-		sendChat("", "&{template:selectTarget} {{charName=" + this.name + "}} {{triggeredMethod=assignNewItem}}");
+	triggeredFunction: function(input){
+		input.charName = this.name;
+		input.triggeredFunction = "assignNewItem";
+		MML.displayTargetSelection(input);
 	}
 };
 
 MML.menuButtons.worldMenu = {
 	text: "World",
 	nextMenu: "GmMenuWorld",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
 MML.menuButtons.utilitiesMenu = {
 	text: "Utilities",
 	nextMenu: "GmMenuUtilities",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
 MML.menuButtons.startCombat = {
 	text: "Start Combat",
 	nextMenu: "charMenuPrepareAction",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "GM",
 	        triggeredFunction: "startCombat",
@@ -880,7 +885,7 @@ MML.menuButtons.startCombat = {
 MML.menuButtons.toMainGmMenu = {
 	text: "Back",
 	nextMenu: "GmMenuMain",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
@@ -888,7 +893,7 @@ MML.menuButtons.toMainGmMenu = {
 MML.menuButtons.startRound = {
 	text: "Start Round",
 	nextMenu: "GmMenuStartRound",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "GM",
 	        triggeredFunction: "startRound",
@@ -899,7 +904,7 @@ MML.menuButtons.startRound = {
 MML.menuButtons.endCombat = {
 	text: "End Combat",
 	nextMenu: "GmMenuMain",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "GM",
 	        triggeredFunction: "endCombat",
@@ -910,11 +915,11 @@ MML.menuButtons.endCombat = {
 MML.menuButtons.setActionAttack = {
 	text: "Attack",
 	nextMenu: "charMenuAttack",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.characters[this.who].action = {
 			name: "Attack",
 			getTargets: "getSingleTarget",
-			triggeredMethod: "startAttackAction",
+			triggeredFunction: "startAttackAction",
 			modifiers: []
 		};
 		MML.displayMenu.apply(this, []);
@@ -923,7 +928,7 @@ MML.menuButtons.setActionAttack = {
 MML.menuButtons.setActionCast = {
 	text: "Cast",
 	nextMenu: "charMenuCast",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.characters[this.who].action.name = input.text;
 		MML.displayMenu.apply(this, []);
 	}
@@ -931,7 +936,7 @@ MML.menuButtons.setActionCast = {
 MML.menuButtons.setActionReadyItem = {
 	text: "Ready Item",
 	nextMenu: "charMenuReadyItem",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.characters[this.who].action.name = input.text;
 		sendChat("", "Ready Item not ready...lol");
 		MML.displayMenu.apply(this, []);
@@ -940,7 +945,7 @@ MML.menuButtons.setActionReadyItem = {
 MML.menuButtons.setActionObserve = {
 	text: "Observe",
 	nextMenu: "charMenuPrepareAction",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.characters[this.who].action.name = input.text;
 		sendChat("", "Observe");
 		MML.displayMenu.apply(this, []);
@@ -949,14 +954,14 @@ MML.menuButtons.setActionObserve = {
 MML.menuButtons.changeAction = {
 	text: "Change Action",
 	nextMenu: "charMenuPrepareAction",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
 MML.menuButtons.actionPrepared = {
 	text: "Ready",
 	nextMenu: "charMenuPrepareAction",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.characters[this.who].ready = true;
 		state.MML.characters[this.who].updateCharacter("ready");
 		state.MML.characters[this.who].updateCharacter("action");
@@ -978,14 +983,14 @@ MML.menuButtons.actionPrepared = {
 MML.menuButtons.startAction = {
 	text: "Start",
 	nextMenu: "menuIdle",
-	triggeredMethod: function(input){
-		MML.startAction.apply(state.MML.GM, []);
+	triggeredFunction: function(input){
+		MML.startAction.apply(state.MML.GM, [input]);
 	}
 };
 MML.menuButtons.chooseTargets = {
 	text: "Choose Targets",
 	nextMenu: "charMenuChooseTargets",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayMenu.apply(this, []);
 	}
 };
@@ -993,21 +998,21 @@ MML.menuButtons.chooseTargets = {
 MML.menuButtons.endAction = {
 	text: "End Action",
 	nextMenu: "charMenuPrepareAction",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.endAction.apply(state.MML.GM, []);
 	}
 };
 MML.menuButtons.rollDice = {
 	text: "Roll",
 	nextMenu: "menuIdle",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.GM.currentRoll.getRoll();
 	}
 };
 MML.menuButtons.initiativeRoll = {
 	text: "Roll",
 	nextMenu: "menuIdle",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "character",
 	        who: this.who,
@@ -1021,7 +1026,7 @@ MML.menuButtons.initiativeRoll = {
 MML.menuButtons.acceptRoll = {
 	text: "Accept",
 	nextMenu: "menuIdle",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML[this.currentRoll.applyResult].apply(this, []);
 	}
 };
@@ -1029,7 +1034,7 @@ MML.menuButtons.acceptRoll = {
 MML.menuButtons.changeRoll = {
 	text: "Change",
 	nextMenu: "menuIdle",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.displayGmRoll.apply(this, []);
 	}
 };
@@ -1037,14 +1042,14 @@ MML.menuButtons.changeRoll = {
 MML.menuButtons.rollHitPosition = {
 	text: "Roll",
 	nextMenu: "charMenuRollDamage",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.getHitPositionRoll.apply(state.MML.GM, []);
 	}
 };
 MML.menuButtons.setProne = {
 	text: "Prone",
 	nextMenu: "menuCombatMovement",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "character",
 	        who: this.who,
@@ -1067,7 +1072,7 @@ MML.menuButtons.setProne = {
 MML.menuButtons.setCrawl = {
 	text: "Crawl",
 	nextMenu: "menuCombatMovement",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "character",
 	        who: this.who,
@@ -1090,7 +1095,7 @@ MML.menuButtons.setCrawl = {
 MML.menuButtons.setStalk = {
 	text: "Stalk",
 	nextMenu: "menuCombatMovement",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "character",
 	        who: this.who,
@@ -1113,7 +1118,7 @@ MML.menuButtons.setStalk = {
 MML.menuButtons.setWalk = {
 	text: "Walk",
 	nextMenu: "menuCombatMovement",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "character",
 	        who: this.who,
@@ -1136,7 +1141,7 @@ MML.menuButtons.setWalk = {
 MML.menuButtons.setJog = {
 	text: "Jog",
 	nextMenu: "menuCombatMovement",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "character",
 	        who: this.who,
@@ -1159,7 +1164,7 @@ MML.menuButtons.setJog = {
 MML.menuButtons.setRun = {
 	text: "Run",
 	nextMenu: "menuCombatMovement",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "character",
 	        who: this.who,
@@ -1182,7 +1187,7 @@ MML.menuButtons.setRun = {
 MML.menuButtons.endMovement  = {
 	text: "End Movement",
 	nextMenu: "menuIdle",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		MML.processCommand({
 	        type: "character",
 	        who: this.who,
@@ -1202,7 +1207,7 @@ MML.menuButtons.endMovement  = {
 MML.menuButtons.defenseBlock = {
 	text: "Block",
 	nextMenu: "menuIdle",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.characters[this.who].defense.style = "Block";
 		state.MML.characters[this.who].defense.number++;
 		MML.getDefenseRoll.apply(state.MML.GM, []);
@@ -1211,7 +1216,7 @@ MML.menuButtons.defenseBlock = {
 MML.menuButtons.defenseDodge = {
 	text: "Dodge",
 	nextMenu: "menuIdle",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.characters[this.who].defense.style = "Dodge";
 		state.MML.characters[this.who].defense.number++;
 		state.MML.characters[this.who].defense.dodge = true;
@@ -1221,7 +1226,7 @@ MML.menuButtons.defenseDodge = {
 MML.menuButtons.defenseTakeIt = {
 	text: "Take It",
 	nextMenu: "menuIdle",
-	triggeredMethod: function(input){
+	triggeredFunction: function(input){
 		state.MML.characters[this.who].defense.style = "Take It";
 		MML.getDefenseRoll.apply(state.MML.GM, []);
 	}

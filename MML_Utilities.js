@@ -380,14 +380,18 @@ MML.displayMenu = function displayMenu(input){
     sendChat(this.name, toChat, null, {noarchive: false}); //Change to true this when they fix the bug
 };
 
-// MML.displayMenu = function displayMenu(){
-//     var toChat = '/w "' + this.name + '" &{template:charMenu} {{name=' + this.message + '}} ';
-//     _.each(this.buttons, function(button){
-//         var noSpace = button.text.replace(/\s+/g, '');
-//         toChat = toChat + '{{' + noSpace + '=[' + button.text + '](!menu ' +  button.text + ')}} ';
-//     }, this);
-//     sendChat(this.name, toChat, null, {noarchive: false}); //Change to true this when they fix the bug
-// };
+MML.displayTargetSelection = function displayTargetSelection(input){
+    var inputJSON = JSON.stringify(input);
+
+    // JSON strings screw up Command Buttons, convert to hex
+    var hex, i;
+    var result = "";
+    for (i=0; i<inputJSON.length; i++){
+        result += ("000"+inputJSON.charCodeAt(i).toString(16)).slice(-4);
+    }
+
+    sendChat("", "&{template:selectTarget} {{charName=" + input.charName + "}} {{input="+ result +"}}");
+};
 
 // NEEDS WORK. Attacks from above and below need to be added. Use arrays instead of switches on the hit positions for cleaner code
 MML.rollHitPosition = function rollHitPosition(){
