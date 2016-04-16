@@ -662,7 +662,7 @@ MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(input){
 	else{
 		targetArray = input.targets;
 	}
-
+	log(input);
 	MML.processCommand({
     	type: "character",
     	who: input.character,
@@ -671,6 +671,41 @@ MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(input){
 	    	targetArray: targetArray
 	  	}
     });
+};
+MML.charMenuSelectDamageType = function charMenuSelectDamageType(input){
+    this.who = input.who;
+	this.message =  "Choose a Damage Type.";
+	this.buttons = [];
+
+	this.buttons.push({
+		text: "Primary",
+		nextMenu: "charMenuAttackRoll",
+		triggeredMethod: function(input){
+			input.damageType = "primary";
+			
+			MML.processCommand({
+		    	type: "character",
+		    	who: input.character,
+		    	triggeredFunction: "meleeAttackRoll",
+				input: input
+		    });
+		}
+	});
+
+	this.buttons.push({
+		text: "Secondary",
+		nextMenu: "charMenuAttackRoll",
+		triggeredMethod: function(input){
+			input.damageType = "secondary";
+			
+			MML.processCommand({
+		    	type: "character",
+		    	who: input.character,
+		    	triggeredFunction: "meleeAttackRoll",
+				input: input
+		    });
+		}
+	});	
 };
 MML.charMenuAttackRoll = function charMenuAttackRoll(input){
 	this.who = input.who;

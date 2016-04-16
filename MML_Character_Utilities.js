@@ -48,9 +48,13 @@ MML.getWeaponSkill = function getWeaponSkill(character, weapon){
     }
     else{
         var relatedSkills = [];
-        _.each(character.weaponSkills, function(relatedSkill){
-            if(MML.items[relatedSkill.replace(", " + grip, "")].grips[grip].family === item.grips[grip].family){
-                relatedSkills.push(character.weaponSkills[relatedSkill].level);
+        _.each(character.weaponSkills, function(relatedSkill, skillName){
+            if(skillName !== "Default Martial"){
+                _.each(MML.items[skillName.replace(", " + grip, "")].grips, function(skillFamily){
+                    if(skillFamily.family === item.grips[grip].family){
+                        relatedSkills.push(relatedSkill);
+                    }
+                });                
             }
         }, character);
 
@@ -58,10 +62,9 @@ MML.getWeaponSkill = function getWeaponSkill(character, weapon){
             skill = character.weaponSkills["Default Martial"].level;
         }
         else{
-            skill = _.max(relatedSkills) - 10;
+            skill = _.max(relatedSkills, function(skill){ return skill.level; }).level - 10;
         }
     }
-
     return skill;
 };
 

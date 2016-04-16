@@ -462,7 +462,7 @@ MML.AttackRolls = function AttackAction(){
 MML.assignNewItem = function assignNewItem(input){
 	MML.processCommand({
     	type: "character",
-    	who: input.who,
+    	who: input.target,
     	triggeredFunction:"setApiCharAttributeJSON",
 		input: {
 	    	attribute: "inventory",
@@ -517,7 +517,7 @@ MML.parseCommand = function parseCommand(msg) {
 	        var character = input[0];
 	        var target = input[1];
 	        var methodName = input[2];
-
+	        
 	        command = {
 	        	type: "player",
 				who: msg.who.replace(" (GM)", ""),
@@ -584,7 +584,7 @@ MML.parseCommand = function parseCommand(msg) {
 		    for(i = 0; i<hexes.length; i++) {
 		        command += String.fromCharCode(parseInt(hexes[i], 16));
 		    }
-	        if(command === "" || isNaN(command) || _.isUndefined(command)){
+	        if(command === "" || _.isUndefined(command)){
                 log(command);
                 MML.error();
             }
@@ -636,7 +636,6 @@ on("ready", function() {
         var attrName = attribute.get("name");
 
         if(attrName.indexOf("repeating_skills") != -1){
-        	log("update skills")
             MML.processCommand({
 	        	type: "character",
 	        	who: charName,
@@ -647,7 +646,6 @@ on("ready", function() {
 	        });
         }
         else if(attrName.indexOf("repeating_weaponskills") != -1){
-            log("update weaponSkills");
             MML.processCommand({
 	        	type: "character",
 	        	who: charName,

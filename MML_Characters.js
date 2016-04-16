@@ -868,13 +868,17 @@ MML.meleeAttack = function meleeAttack(input){
 
     attackerWeapon = this.inventory[itemId];
     input.attackerWeapon = attackerWeapon;
-    input.skill = MML.getWeaponSkill(this, attackerWeapon); 
+    input.skill = MML.getWeaponSkill(this, attackerWeapon);
+    input.who = this.name;
     
-    log(input.skill);
+    MML.processCommand({
+        type: "player",
+        who: this.player,
+        triggeredFunction: "charMenuSelectDamageType",
+        input: input
+    });
     
 };
-
-// MML.selectDamageTypeMenu
 
 MML.meleeAttackRoll = function meleeAttackRoll(input){
     var roll;

@@ -86,7 +86,7 @@ MML.getCurrentAttributeAsBool = function getCurrentAttributeAsBool(charName, att
 MML.getCurrentAttributeJSON = function getCurrentAttributeJSON(charName, attribute){
     var result = MML.getCurrentAttribute(charName, attribute);
 
-    if(result === "" || isNaN(result) || _.isUndefined(result)){
+    if(result === "" || _.isUndefined(result)){
         MML.setCurrentAttribute(charName, attribute, "{}");
         result = MML.getCurrentAttribute(charName, attribute);
     }
