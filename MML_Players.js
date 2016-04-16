@@ -667,7 +667,7 @@ MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(input){
 	}
 	
 	input.targetArray = targetArray;
-
+	log
 	MML.processCommand({
     	type: "character",
     	who: input.charName,
