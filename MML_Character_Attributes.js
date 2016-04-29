@@ -1056,7 +1056,12 @@ MML.computeAttribute.action = {
             var rightHand = MML.getWeaponFamily(this, "rightHand");
             
             if(leftHand === "unarmed" && rightHand === "unarmed"){
-                this.action.skill = 0; //this.weaponSkills["Brawling"].level or this.weaponSkills["Default Martial Skill"].level;
+                if(this.weaponSkills["Brawling"].level > this.weaponSkills["Default Martial"].level){
+                    this.action.skill = this.weaponSkills["Brawling"].level;
+                }
+                else{
+                    this.action.skill = this.weaponSkills["Default Martial"].level;
+                }
             }
             else if(leftHand !== "unarmed" && rightHand !== "unarmed"){
                 var weaponInits = [this.inventory[this.leftHand._id].grips[this.leftHand.grip].initiative,

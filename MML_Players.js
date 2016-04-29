@@ -18,7 +18,7 @@ MML.menuCommand = function(input){
     var button = _.findWhere(this.buttons, { text: buttonText });
     if(!_.isUndefined(button)){
         this.menu = button.nextMenu;
-        log(button);
+        //log(button);
         MML.processCommand({
             type: "player",
 	        who: this.name,
@@ -667,7 +667,7 @@ MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(input){
 	}
 	
 	input.targetArray = targetArray;
-	log
+
 	MML.processCommand({
     	type: "character",
     	who: input.charName,
@@ -679,7 +679,7 @@ MML.charMenuSelectDamageType = function charMenuSelectDamageType(input){
     this.who = input.who;
 	this.message =  "Choose a Damage Type.";
 	this.buttons = [];
-
+	//log(input);
 	this.buttons.push({
 		text: "Primary",
 		nextMenu: "charMenuAttackRoll",
@@ -688,7 +688,7 @@ MML.charMenuSelectDamageType = function charMenuSelectDamageType(input){
 			
 			MML.processCommand({
 		    	type: "character",
-		    	who: input.character,
+		    	who: this.who,
 		    	triggeredFunction: "meleeAttackRoll",
 				input: input
 		    });
@@ -703,7 +703,7 @@ MML.charMenuSelectDamageType = function charMenuSelectDamageType(input){
 			
 			MML.processCommand({
 		    	type: "character",
-		    	who: input.character,
+		    	who: this.who,
 		    	triggeredFunction: "meleeAttackRoll",
 				input: input
 		    });

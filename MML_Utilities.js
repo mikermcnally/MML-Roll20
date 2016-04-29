@@ -276,19 +276,41 @@ MML.rollDamage = function rollDamage(diceString, mods, crit, type){
     return roll;
 };
 
-MML.universalRoll = function universalRoll(mods){
+MML.universalRoll = function universalRoll(input){
+    log("universalRoll");
+    log(input.rollResultFunction);
     var target = 0;
 
     var mod;
-    for(mod in mods){
-        target += mods[mod];
-    }
+    _.each(input.mods, function(mod){
+        target += mod;
+    });
     
-    var roll = { name: "universal", player: this.player, value: MML.rollDice(1, 100), range: "1-100", target: target, result: "", accepted: false };
+    var roll = { name: "universal", value: MML.rollDice(1, 100), range: "1-100", target: target, result: "", accepted: false };
     
     roll = MML.universalRollResult(roll);
-    
-    return roll;
+    roll.character = input.character;
+    roll.rollResultFunction = input.rollResultFunction;
+    roll.message = "Roll: " + roll.value +
+        "\nTarget: " + roll.target + 
+        "\nResult: " + roll.result + 
+        "\nRange: " + roll.range;
+
+    MML.processCommand({
+        type: "player",
+        who: this.player,
+        triggeredFunction: "setApiPlayerAttribute",
+        input: {
+            attribute: "currentRoll",
+            value: roll
+        }   
+    });
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: input.rollResultFunction,
+        input: {}   
+    });
 };
 
 MML.universalRollResult = function universalRollResult(roll){       
@@ -366,7 +388,7 @@ MML.displayMenu = function displayMenu(input){
                 },
                 triggeredFunction: "menuCommand"
             });
-
+        
         // JSON strings screw up Command Buttons, convert to hex
         var hex, i;
         var result = "";

@@ -18,6 +18,29 @@ MML.getWeaponFamily = function getWeaponFamily(character, hand){
     }
 };
 
+MML.getShieldDefenseBonus = function getShieldBonus(character){
+    var rightHand = character.inventory[character.rightHand._id];
+    var leftHand = character.inventory[character.leftHand._id];
+    var bonus = 0;
+
+    if(!_.isUndefined(rightHand) && rightHand.type === "shield"){
+        bonus = rightHand.defenseMod;
+    }
+    if(!_.isUndefined(leftHand) && leftHand.type === "shield" && leftHand.defenseMod > rightHand.defenseMod){
+        bonus = leftHand.defenseMod;
+    }
+    return bonus;
+};
+
+MML.getWeaponGrip = function getWeaponGrip(character, weapon){ 
+    if(character["rightHand"].grip !== "unarmed"){
+        grip = character["rightHand"].grip;
+    }
+    else{
+        grip = character["leftHand"].grip;
+    }
+};
+
 MML.getWeaponSkill = function getWeaponSkill(character, weapon){
     var item = weapon;
     var grip;
@@ -110,3 +133,4 @@ MML.isDualWielding = function isDualWielding(character){
         return false;
     }
 };
+
