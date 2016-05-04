@@ -716,36 +716,49 @@ MML.charMenuAttackRoll = function charMenuAttackRoll(input){
 	this.buttons = [MML.menuButtons.rollDice];
 };
 MML.charMenuDefenseRoll = function charMenuDefenseRoll(input){
+	var blockChance = input.blockChance;
+	var dodgeChance = input.dodgeChance;
+
 	this.who = input.who;
-
-	var weapon = state.MML.characters[this.who].inventory.weapons[0];
-    var weaponSkill = Math.round(state.MML.characters[this.who].skills[weapon.name]/2);
-	var shieldMod = state.MML.characters[this.who].inventory.shield.defenseMod;
-	var dodgeSkill = state.MML.characters[this.who].skills.dodge;
-	var defaultMartialSkill = state.MML.characters[this.who].skills.defaultMartial;
-	var defenseMod = state.MML.characters[this.who].modifiers.defense;
-    var sitMod = state.MML.characters[this.who].modifiers.situational;
-	var dodgeChance;
-	var blockChance;
-	
-	if(weaponSkill >= defaultMartialSkill){
-		blockChance = weapon.defense + weaponSkill + sitMod + defenseMod + shieldMod;
-	}
-	else{
-		blockChance = weapon.defense + defaultMartialSkill + sitMod + defenseMod + shieldMod;
-	}
-	
-	if(dodgeSkill >= defaultMartialSkill){
-		dodgeChance = dodgeSkill + sitMod + defenseMod;
-	}
-	else{
-		dodgeChance = defaultMartialSkill + sitMod + defenseMod;
-	}
-
-	this.message = "How will " + this.who + " defend? Block: "  + blockChance + " Dodge: " + dodgeChance;
-	this.buttons = [MML.menuButtons.defenseBlock,
-					MML.menuButtons.defenseDodge,
-					MML.menuButtons.defenseTakeIt];
+	this.message = "How will " + this.who + " defend?";
+	this.buttons = [{
+		text: "Dodge: " + dodgeChance + "%",
+		nextMenu: "menuIdle",
+		triggeredFunction: function(input){
+			MML.processCommand({
+				type: "character",
+		    	who: this.who,
+		    	triggeredFunction: "meleeDodgeRoll",
+				input: {
+					dodgeChance: dodgeChance
+				}
+			});
+		}},
+		{
+		text: "Block: " + blockChance + "%",
+		nextMenu: "menuIdle",
+		triggeredFunction: function(input){
+			MML.processCommand({
+				type: "character",
+		    	who: this.who,
+		    	triggeredFunction: "meleeBlockRoll",
+				input: {
+					blockChance: blockChance
+				}
+			});
+		}},
+		{
+		text: "Take it",
+		nextMenu: "menuIdle",
+		triggeredFunction: function(input){
+			MML.processCommand({
+				type: "character",
+		    	who: state.MML.GM.currentAction.who,
+		    	triggeredFunction: "rollHitPosition",
+				input: {}
+			});
+		}}
+	];
 };
 
 MML.menuButtons = {};
