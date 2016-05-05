@@ -1,4 +1,9 @@
 var MML = MML || {};
+var on = function(){};
+
+module.exports = {
+  MML: MML
+};
 
 MML.init = function init(){
     state.MML = state.MML || {};
