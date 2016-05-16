@@ -659,6 +659,7 @@ MML.charMenuChooseTarget = function charMenuChooseTarget(input){
 };
 MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(input){
 	var targetArray;
+
 	if(typeof input.target !== "undefined"){
 		targetArray = [input.target];
 	}
@@ -666,31 +667,32 @@ MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(input){
 		targetArray = input.targets;
 	}
 	
-	input.targetArray = targetArray;
+	state.MML.GM.currentAction.targetArray = targetArray;
+	state.MML.GM.currentAction.targetIndex = 0;
 
 	MML.processCommand({
     	type: "character",
     	who: input.charName,
     	triggeredFunction: state.MML.characters[input.charName].action.triggeredFunction,
-		input: input
+		input: {}
     });
 };
 MML.charMenuSelectDamageType = function charMenuSelectDamageType(input){
     this.who = input.who;
 	this.message =  "Choose a Damage Type.";
 	this.buttons = [];
-	//log(input);
+
 	this.buttons.push({
 		text: "Primary",
 		nextMenu: "charMenuAttackRoll",
 		triggeredFunction: function(input){
-			input.damageType = "primary";
-			
+			state.MML.GM.currentAction.weaponType = "primary";
+
 			MML.processCommand({
 		    	type: "character",
 		    	who: this.who,
 		    	triggeredFunction: "meleeAttackRoll",
-				input: input
+				input: {}
 		    });
 		}
 	});
@@ -699,13 +701,13 @@ MML.charMenuSelectDamageType = function charMenuSelectDamageType(input){
 		text: "Secondary",
 		nextMenu: "charMenuAttackRoll",
 		triggeredFunction: function(input){
-			input.damageType = "secondary";
-			
+			state.MML.GM.currentAction.weaponType = "secondary";
+
 			MML.processCommand({
 		    	type: "character",
 		    	who: this.who,
 		    	triggeredFunction: "meleeAttackRoll",
-				input: input
+				input: {}
 		    });
 		}
 	});	
@@ -993,13 +995,13 @@ MML.menuButtons.actionPrepared = {
 		}
 	}
 };
-MML.menuButtons.startAction = {
-	text: "Start",
-	nextMenu: "menuIdle",
-	triggeredFunction: function(input){
-		MML.startAction.apply(state.MML.GM, [input]);
-	}
-};
+// MML.menuButtons.startAction = {
+// 	text: "Start",
+// 	nextMenu: "menuIdle",
+// 	triggeredFunction: function(input){
+// 		MML.startAction.apply(state.MML.GM, [input]);
+// 	}
+// };
 MML.menuButtons.chooseTargets = {
 	text: "Choose Targets",
 	nextMenu: "charMenuChooseTargets",

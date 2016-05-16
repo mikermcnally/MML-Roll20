@@ -1,9 +1,4 @@
 var MML = MML || {};
-var on = function(){};
-
-module.exports = {
-  MML: MML
-};
 
 MML.init = function init(){
     state.MML = state.MML || {};
@@ -50,17 +45,22 @@ MML.init = function init(){
 		state.MML.players[characters[charName].player].characters.push(charName);
     });
 	state.MML.characters = characters;
-var data = [
-{"player":"Robot","name":"GM","currentAction":{"charName":"Thaddeus Clinch","triggeredFunction":"setCurrentCharacterTargets","target":"Remmy Denkin","targetArray":["Remmy Denkin"],"attackMod":13,"sitMod":0,"attackerWeapon":{"name":"Shovel","type":"weapon","weight":6,"grips":{"Two Hands":{"family":"Bludgeoning","hands":2,"primaryType":"Impact","primaryTask":35,"primaryDamage":"1d8","secondaryType":"","secondaryTask":0,"secondaryDamage":"","defense":15,"initiative":4,"rank":1}},"quality":"Standard"},"attackerGrip":"Two Hands","skill":26,"who":"Thaddeus Clinch","damageType":"primary","mods":[35,26,0,13],"rollResultFunction":"attackRollResult","character":"Thaddeus Clinch"},"inCombat":true,"currentRound":1,"roundStarted":true,"combatants":["Thaddeus Clinch","Remmy Denkin"],"actor":"Thaddeus Clinch"},
-{"Robot":{"name":"Robot","who":"Thaddeus Clinch","menu":"menuIdle","buttons":[],"characters":["Remmy Denkin","Thaddeus Clinch"],"characterIndex":2,"message":"Menu Closed","currentRoll":{"name":"universal","value":98,"range":"1-100","target":74,"result":"Success","accepted":true,"character":"Thaddeus Clinch","rollResultFunction":"attackRollResult","message":"Roll: 98\nTarget: 74\nResult: Success\nRange: 1-100"}},"Andrew":{"name":"Andrew","menu":"charMenuPrepareAction","characters":[],"characterIndex":0,"message":"Prepare undefined's action","buttons":[{"text":"Attack","nextMenu":"charMenuAttack"},{"text":"Cast","nextMenu":"charMenuCast"},{"text":"Ready Item","nextMenu":"charMenuReadyItem"},{"text":"Observe","nextMenu":"charMenuPrepareAction"}]}},
-{"Remmy Denkin":{"name":"Remmy Denkin","player":"Robot","race":"Human","bodyType":"humanoid","gender":"Male","height":"5'10","weight":165,"handedness":"","stature":24,"strength":12,"coordination":14,"health":9,"beauty":8,"intellect":7,"reason":16,"creativity":10,"presence":6,"willpower":7,"evocation":49,"perception":11,"systemStrength":8,"fitness":11,"fitnessMod":2.6,"load":62,"overhead":124,"deadLift":248,"multiWoundMax":20,"multiWound":20,"headHPMax":9,"headHP":9,"chestHPMax":12,"chestHP":12,"abdomenHPMax":17,"abdomenHP":17,"leftArmHPMax":17,"leftArmHP":17,"rightArmHPMax":17,"rightArmHP":17,"leftLegHPMax":17,"leftLegHP":17,"rightLegHPMax":17,"rightLegHP":17,"epMax":49,"ep":49,"fatigueMax":11,"fatigue":11,"hpRecovery":0.5,"epRecovery":2,"inventory":{"-KERfJsqEUIMaif8MCcT":{"name":"Cudgel, Light","type":"weapon","weight":3,"grips":{"One Hand":{"family":"Bludgeoning","hands":1,"primaryType":"Impact","primaryTask":45,"primaryDamage":"2d10","secondaryType":"","secondaryTask":0,"secondaryDamage":"","defense":15,"initiative":6,"rank":1}},"quality":"Standard"}},"totalWeightCarried":3,"knockdownMax":24,"knockdown":false,"apv":[{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]}],"leftHand":{"_id":"-KERfJsqEUIMaif8MCcT","grip":"One Hand"},"rightHand":{"_id":"-KERfJsqEUIMaif8MCcT","grip":"One Hand"},"hitTable":"[null,1,1,2,3,3,4,4,5,5,6,7,8,8,8,8,9,9,9,9,10,10,11,11,11,11,12,12,13,13,13,13,14,14,14,15,15,16,16,17,17,17,18,18,19,19,19,19,20,20,21,21,21,22,22,23,23,23,24,24,25,25,26,26,27,27,27,28,28,29,29,29,30,30,31,31,32,32,33,34,34,35,35,35,36,36,36,37,37,38,38,39,39,40,40,41,42,43,44,45,46]","movementRatio":4,"movementAvailable":4,"movementPosition":"","situationalMod":0,"attributeDefenseMod":6,"meleeDefenseMod":-10,"missileDefenseMod":-10,"meleeAttackMod":-10,"missileAttackMod":-10,"attributeMeleeAttackMod":6,"meleeDamageMod":0,"attributeMissileAttackMod":6,"attributeCastingMod":-20,"spellLearningMod":-5,"statureCheckMod":0,"strengthCheckMod":0,"coordinationCheckMod":0,"healthCheckMod":0,"beautyCheckMod":0,"intellectCheckMod":0,"reasonCheckMod":0,"creativityCheckMod":0,"presenceCheckMod":0,"willpowerCheckMod":0,"evocationCheckMod":0,"perceptionCheckMod":0,"systemStrengthCheckMod":0,"fitnessCheckMod":0,"statusEffects":{},"initiative":14,"initiativeRoll":4,"situationalInitBonus":-5,"movementRatioInitBonus":5,"attributeInitBonus":0,"senseInitBonus":4,"fomInitBonus":0,"firstActionInitBonus":6,"spentInitiative":0,"actionTempo":-12,"ready":true,"action":{"name":"Attack","getTargets":"getSingleTarget","triggeredFunction":"startAttackAction","modifiers":[],"initBonus":6},"defensesThisRound":0,"dodgedThisRound":false,"meleeThisRound":false,"fatigueLevel":0,"roundsRest":0,"roundsExertion":0,"damagedThisRound":false,"skills":{"Dancing":{"level":0,"input":0,"_id":"-KE9K8MdHDvVQkRnd7N9"},"Acrobatics":{"level":49,"input":46,"_id":"-KE9KtWNxzOg7JzWYZqW"},"Acting":{"level":-10,"input":0,"_id":"-KE9LACTqa5zsEy7i9Tv"}},"weaponSkills":{"Default Martial":{"level":12,"input":0,"_id":"-KE9I4lvA4HHTPIaWJB7"},"Cudgel, Light":{"level":24,"input":24,"_id":"-KE9IFePeY9M0ymMKF1s"}}},"Thaddeus Clinch":{"name":"Thaddeus Clinch","player":"Robot","race":"Human","bodyType":"humanoid","gender":"Male","height":"5'7","weight":150,"handedness":"","stature":22,"strength":20,"coordination":15,"health":19,"beauty":18,"intellect":7,"reason":7,"creativity":13,"presence":15,"willpower":16,"evocation":62,"perception":9,"systemStrength":18,"fitness":20,"fitnessMod":4,"load":88,"overhead":176,"deadLift":352,"multiWoundMax":29,"multiWound":29,"headHPMax":13,"headHP":13,"chestHPMax":16,"chestHP":16,"abdomenHPMax":21,"abdomenHP":21,"leftArmHPMax":21,"leftArmHP":21,"rightArmHPMax":21,"rightArmHP":21,"leftLegHPMax":21,"leftLegHP":21,"rightLegHPMax":21,"rightLegHP":21,"epMax":62,"ep":62,"fatigueMax":20,"fatigue":20,"hpRecovery":4,"epRecovery":8,"inventory":{"-KEReXqw39IqL83Kf1oc":{"name":"Shovel","type":"weapon","weight":6,"grips":{"Two Hands":{"family":"Bludgeoning","hands":2,"primaryType":"Impact","primaryTask":35,"primaryDamage":"1d8","secondaryType":"","secondaryTask":0,"secondaryDamage":"","defense":15,"initiative":4,"rank":1}},"quality":"Standard"}},"totalWeightCarried":6,"knockdownMax":23,"knockdown":false,"apv":[{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]},{"Surface":[{"value":null,"coverage":100}],"Cut":[{"value":null,"coverage":100}],"Chop":[{"value":null,"coverage":100}],"Pierce":[{"value":null,"coverage":100}],"Thrust":[{"value":null,"coverage":100}],"Impact":[{"value":null,"coverage":100}],"Flanged":[{"value":null,"coverage":100}]}],"leftHand":{"_id":"-KEReXqw39IqL83Kf1oc","grip":"Two Hands"},"rightHand":{"_id":"-KEReXqw39IqL83Kf1oc","grip":"Two Hands"},"hitTable":"[null,1,1,2,3,3,4,4,5,5,6,7,8,8,8,8,9,9,9,9,10,10,11,11,11,11,12,12,13,13,13,13,14,14,14,15,15,16,16,17,17,17,18,18,19,19,19,19,20,20,21,21,21,22,22,23,23,23,24,24,25,25,26,26,27,27,27,28,28,29,29,29,30,30,31,31,32,32,33,34,34,35,35,35,36,36,36,37,37,38,38,39,39,40,40,41,42,43,44,45,46]","movementRatio":4,"movementAvailable":4,"movementPosition":"","situationalMod":0,"attributeDefenseMod":13,"meleeDefenseMod":0,"missileDefenseMod":0,"meleeAttackMod":0,"missileAttackMod":0,"attributeMeleeAttackMod":13,"meleeDamageMod":2,"attributeMissileAttackMod":3,"attributeCastingMod":-30,"spellLearningMod":-5,"statureCheckMod":0,"strengthCheckMod":0,"coordinationCheckMod":0,"healthCheckMod":0,"beautyCheckMod":0,"intellectCheckMod":0,"reasonCheckMod":0,"creativityCheckMod":0,"presenceCheckMod":0,"willpowerCheckMod":0,"evocationCheckMod":0,"perceptionCheckMod":0,"systemStrengthCheckMod":0,"fitnessCheckMod":0,"statusEffects":{"Melee This Round":{}},"initiative":22,"initiativeRoll":10,"situationalInitBonus":0,"movementRatioInitBonus":5,"attributeInitBonus":-1,"senseInitBonus":4,"fomInitBonus":0,"firstActionInitBonus":4,"spentInitiative":0,"actionTempo":-12,"ready":true,"action":{"name":"Attack","getTargets":"getSingleTarget","triggeredFunction":"startAttackAction","modifiers":[],"initBonus":4},"defensesThisRound":0,"dodgedThisRound":false,"meleeThisRound":false,"fatigueLevel":0,"roundsRest":0,"roundsExertion":0,"damagedThisRound":false,"skills":{},"weaponSkills":{"Default Martial":{"level":18,"input":0,"_id":"-KEJQeZ75T2vH0BYsm2h"},"Mace":{"level":36,"input":36,"_id":"-KEJQvt3y5aHhJSJN-5J"}}}},
-{"type":"character","who":"Thaddeus Clinch","triggeredFunction":"attackRollApply","input":{"name":"universal","value":98,"range":"1-100","target":74,"result":"Success","accepted":true,"character":"Thaddeus Clinch","rollResultFunction":"attackRollResult","message":"Roll: 98\nTarget: 74\nResult: Success\nRange: 1-100"}}];
 
-state.MML.GM = data[0];
-state.MML.players = data[1];
-state.MML.characters =data[2];
-MML.processCommand(data[3]);
+    TokenCollisions = {
+        "Layer": "gmlayer"
+    };
+
+    log(TokenCollisions);
+// var data = [
+// ,,,];
+
+
+// state.MML.GM = data[0];
+// state.MML.players = data[1];
+// state.MML.characters =data[2];
+// MML.processCommand(data[3]);
 };
+
 MML.updateInventory = function updateInventory(charName){
     //Armor
     var armor = [];
@@ -830,6 +830,29 @@ MML.initiativeApply = function initiativeApply(){
     });    
 };
 
+MML.startAction = function startAction(input){
+    state.MML.GM.currentAction = {
+        who: this.name
+    };
+
+    if(!_.isUndefined(this.action.getTargets)){
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: this.action.getTargets,
+            input: {}
+        });
+    }
+    else{
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: this.action.triggeredFunction,
+            input: {}
+        });
+    }
+};
+
 MML.startAttackAction = function startAttackAction(input){
     if(_.contains(this.action.modifiers, ["Called Shot"])){
         MML.processCommand({
@@ -856,7 +879,7 @@ MML.startAttackAction = function startAttackAction(input){
             this.statusEffects["Taking Aim"].level++;
         }
         else{
-            this.statusEffects["Taking Aim"] = { name: "Taking Aim", level: 1, target: this.action.targets[0] };
+            this.statusEffects["Taking Aim"] = { name: "Taking Aim", level: 1, target: input.target };
         }
     }
     else{
@@ -864,11 +887,10 @@ MML.startAttackAction = function startAttackAction(input){
             type: "character",
             who: this.name,
             triggeredFunction: "processAttack",
-            input: input   
+            input: {}   
         });
     }
 };
-
 
 MML.processAttack = function processAttack(input){
     this.statusEffects["Melee This Round"] = {};
@@ -878,7 +900,7 @@ MML.processAttack = function processAttack(input){
             type: "character",
             who: this.name,
             triggeredFunction: "unarmedAttack",
-            input: input   
+            input: {}   
         });
     }
     else if(MML.isDualWielding(this)){
@@ -886,7 +908,7 @@ MML.processAttack = function processAttack(input){
             type: "character",
             who: this.name,
             triggeredFunction: "dualWieldAttack",
-            input: input   
+            input: {}   
         });
     }
     else if (MML.getWeaponFamily(this, "leftHand") === "MWD" || MML.getWeaponFamily(this, "leftHand") === "MWM"){
@@ -894,7 +916,7 @@ MML.processAttack = function processAttack(input){
             type: "character",
             who: this.name,
             triggeredFunction: "missileAttack",
-            input: input   
+            input: {}   
         });
     }
     else if(MML.getWeaponFamily(this, "leftHand") === "TWH" || 
@@ -909,7 +931,7 @@ MML.processAttack = function processAttack(input){
             type: "character",
             who: this.name,
             triggeredFunction: "throwingAttack",
-            input: input   
+            input: {}   
         });
     }
     else {
@@ -917,7 +939,7 @@ MML.processAttack = function processAttack(input){
             type: "character",
             who: this.name,
             triggeredFunction: "meleeAttack",
-            input: input   
+            input: {}   
         });
     }
 };
@@ -925,11 +947,7 @@ MML.processAttack = function processAttack(input){
 MML.meleeAttack = function meleeAttack(input){
     var itemId;
     var grip;
-    var skill;
-    var attackerWeapon;
-    input.attackMod = this.meleeAttackMod + this.attributeMeleeAttackMod;
-    input.sitMod = this.situationalMod;
-
+    
     if(MML.getWeaponFamily(this, "rightHand") !== "unarmed"){
         itemId = this.rightHand._id;
         grip = this.rightHand.grip;
@@ -939,58 +957,65 @@ MML.meleeAttack = function meleeAttack(input){
         grip = this.leftHand.grip;
     }
 
-    attackerWeapon = this.inventory[itemId];
-    input.attackerWeapon = attackerWeapon;
-    input.attackerGrip = grip;
-    input.skill = MML.getWeaponSkill(this, attackerWeapon);
-    input.who = this.name;
+    var attackerWeapon = this.inventory[itemId];
 
-    state.MML.GM.currentAction = input;
+    var currentAction = {
+        attackerWeapon: attackerWeapon,
+        attackerGrip: grip,
+        skill: MML.getWeaponSkill(this, attackerWeapon),
+        attackMod: this.meleeAttackMod + this.attributeMeleeAttackMod,
+        sitMod: this.situationalMod
+    };
+
+    state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, currentAction);
 
     if(attackerWeapon.grips[grip].secondaryType !== ""){
         MML.processCommand({
             type: "player",
             who: this.player,
             triggeredFunction: "charMenuSelectDamageType",
-            input: input
+            input: {
+                who: this.name
+            }
         });
 
         MML.processCommand({
             type: "player",
             who: this.player,
             triggeredFunction: "displayMenu",
-            input: input
+            input: {}
         });
     }
     else{
-        state.MML.GM.currentAction.damageType = "primary";
+        state.MML.GM.currentAction.weaponType = "primary";
 
         MML.processCommand({
             type: "character",
             who: this.name,
             triggeredFunction: "meleeAttackRoll",
-            input: input
+            input: {}
         });
     }
 };
 
 MML.meleeAttackRoll = function meleeAttackRoll(input){
     var action = state.MML.GM.currentAction;
-    if (input.damageType === "primary"){
-        input.mods = [action.attackerWeapon.grips[action.attackerGrip].primaryTask, action.skill, action.sitMod, action.attackMod];
+    var mods;
+    if (action.weaponType === "primary"){
+        mods = [action.attackerWeapon.grips[action.attackerGrip].primaryTask, action.skill, action.sitMod, action.attackMod];
     }
     else{
-        input.mods = [action.attackerWeapon.grips[action.attackerGrip].secondaryTask, action.skill, action.sitMod, action.attackMod];
+        mods = [action.attackerWeapon.grips[action.attackerGrip].secondaryTask, action.skill, action.sitMod, action.attackMod];
     }
-
-    input.rollResultFunction = "attackRollResult";
-    input.character = this.name;
 
     MML.processCommand({
         type: "character",
         who: this.name,
         triggeredFunction: "universalRoll",
-        input: input
+        input: {
+            rollResultFunction: "attackRollResult",
+            mods: mods
+        }
     });
 };
 
@@ -1023,8 +1048,8 @@ MML.attackRollResult = function attackRollResult(input){
             who: this.player,
             triggeredFunction: "displayPlayerRoll",
             input: {
-                    currentRoll: currentRoll
-                }
+                currentRoll: currentRoll
+            }
         });
         MML.processCommand({
             type: "character",
@@ -1043,9 +1068,12 @@ MML.attackRollApply = function attackRollApply(input){
     if(result === "Critical Success" || result === "Success"){
         MML.processCommand({
             type: "character",
-            who: action.target,
+            who: action.targetArray[action.targetIndex],
             triggeredFunction: "meleeDefense",
-            input: action
+            input: {
+                attackerWeapon: action.attackerWeapon,
+                attackerGrip: action.attackerGrip
+            }
         });
     }
     else if(result === "Critical Failure"){
@@ -1064,6 +1092,106 @@ MML.attackRollApply = function attackRollApply(input){
         });
     }
 };
+
+
+
+MML.hitPositionRoll = function hitPositionRoll(input){
+    var action = state.MML.GM.currentAction;
+    var mods;
+    if (action.weaponType === "primary"){
+        mods = [action.attackerWeapon.grips[action.attackerGrip].primaryTask, action.skill, action.sitMod, action.attackMod];
+    }
+    else{
+        mods = [action.attackerWeapon.grips[action.attackerGrip].secondaryTask, action.skill, action.sitMod, action.attackMod];
+    }
+
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "universalRoll",
+        input: {
+            rollResultFunction: "attackRollResult",
+            mods: mods
+        }
+    });
+};
+
+MML.hitPositionRollResult = function hitPositionRollResult(input){
+    var currentRoll = state.MML.players[this.player].currentRoll;
+
+    if(this.player === state.MML.GM.player){
+        if(currentRoll.accepted === false){
+            MML.processCommand({
+                type: "player",
+                who: this.player,
+                triggeredFunction: "displayGmRoll",
+                input: {
+                    currentRoll: currentRoll
+                }
+            });
+        }
+        else{
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                triggeredFunction: "attackRollApply",
+                input: currentRoll
+            });
+        }
+    }
+    else{
+        MML.processCommand({
+            type: "player",
+            who: this.player,
+            triggeredFunction: "displayPlayerRoll",
+            input: {
+                currentRoll: currentRoll
+            }
+        });
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "attackRollApply",
+            input: currentRoll
+        });
+    }
+};
+
+MML.hitPositionRollApply = function hitPositionRollApply(input){
+    var result = input.result;
+    state.MML.GM.currentAction.attackRollResult = result;
+    var action = state.MML.GM.currentAction;
+    
+    if(result === "Critical Success" || result === "Success"){
+        MML.processCommand({
+            type: "character",
+            who: action.targetArray[action.targetIndex],
+            triggeredFunction: "meleeDefense",
+            input: {
+                attackerWeapon: action.attackerWeapon,
+                attackerGrip: action.attackerGrip
+            }
+        });
+    }
+    else if(result === "Critical Failure"){
+        MML.processCommand({
+            type: "GM",
+            triggeredFunction: "attackCriticalFailure",
+            input: action
+        });
+    }
+    else{
+        MML.processCommand({
+            type: "player",
+            who: this.player,
+            triggeredFunction: "endAction",
+            input: action
+        });
+    }
+};
+
+
+
 
 MML.meleeDefense = function meleeDefense(input){
     var weaponId;
@@ -1108,19 +1236,19 @@ MML.meleeDefense = function meleeDefense(input){
 
     defenderWeapon = this.inventory[itemId];
     defenderSkill = Math.round(MML.getWeaponSkill(this, defenderWeapon)/2);
-    input.defenderWeapon = defenderWeapon;
-    input.defenderGrip = grip;
-    input.defenderSkill = defenderSkill;
-    input.who = this.name;    
     
-    input.dodgeChance = dodgeChance;
-    input.blockChance = defenderWeapon.grips[grip].defense + defaultMartialSkill + sitMod + defenseMod + shieldMod;
-
     MML.processCommand({
         type: "player",
         who: this.player,
         triggeredFunction: "charMenuDefenseRoll",
-        input: input
+        input: {
+            defenderWeapon: defenderWeapon,
+            defenderGrip: grip,
+            defenderSkill: defenderSkill,
+            who: this.name,  
+            dodgeChance: dodgeChance,
+            blockChance: defenderWeapon.grips[grip].defense + defaultMartialSkill + sitMod + defenseMod + shieldMod
+        }
     });
     MML.processCommand({
         type: "player",
@@ -1131,59 +1259,192 @@ MML.meleeDefense = function meleeDefense(input){
 };
 
 MML.meleeBlockRoll = function meleeBlockRoll(input){
-    this.currentRoll = this.characters[this.currentTarget].defenseRoll();
-    this.displayRoll();
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "universalRoll",
+        input: {
+            rollResultFunction: "meleeBlockRollResult",
+            mods: [input.blockChance]
+        }
+    });
 };
 
-MML.defenseRollResult = function defenseRollResult(){
-    this.rolls.defense = this.currentRoll.result;
-    if(this.rolls.defense === "Critical Success" || this.rolls.defense === "Success"){
-        this.endAction();
+MML.meleeBlockRollResult = function meleeBlockRollResult(input){
+    var currentRoll = state.MML.players[this.player].currentRoll;
+
+    if(this.player === state.MML.GM.player){
+        if(currentRoll.accepted === false){
+            MML.processCommand({
+                type: "player",
+                who: this.player,
+                triggeredFunction: "displayGmRoll",
+                input: {
+                    currentRoll: currentRoll
+                }
+            });
+        }
+        else{
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                triggeredFunction: "meleeBlockRollApply",
+                input: currentRoll
+            });
+        }
     }
     else{
-        var player = state.MML.characters[this.actor].player;
-        state.MML.players[player].setMenu = MML.charMenuHitPositionRoll;
-        state.MML.players[player].displayMenu();
+        MML.processCommand({
+            type: "player",
+            who: this.player,
+            triggeredFunction: "displayPlayerRoll",
+            input: {
+                currentRoll: currentRoll
+            }
+        });
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "meleeBlockRollApply",
+            input: currentRoll
+        });
     }
 };
 
-// MML.weaponDamageRoll = function weaponDamageRoll(crit){
-//     var weapon = this.inventory.weapons[0];
-//     var weaponDamage;
-//  var damageType;
-//  var bonusDamage = 0; // Strength, weapon, and other bonuses
-//  var roll;
+MML.meleeBlockRollApply = function meleeBlockRollApply(input){
+    // log("meleeBlockRollApply");
+    // log(input);
+    var result = input.result;
+    state.MML.GM.currentAction.defenseRollResult = result;
+    var action = state.MML.GM.currentAction;
     
-//  if (this.inventory.weapons.length === 0){
-//      log("unarmed");//unarmed damage
-//  }
-//  else if (this.inventory.weapons[0].family === "MWD" || this.inventory.weapons[0].family === "MWM"){
-//      log("missile");//missile damage
-//  }
-//  else if(this.inventory.weapons[0].family === "TWH" || 
-//  this.inventory.weapons[0].family === "TWK" ||
-//  this.inventory.weapons[0].family === "TWS" ||
-//  this.inventory.weapons[0].family === "SLI" ){
-//      log("thrown"); //thrown damage
-//  }
-//  else if(this.inventory.weapons.length === 2){
-//      log("dual"); //dual wield damage
-//  }
-//  else {//Melee Damage
-//      //Primary or secondary attack
-//      if (this.action.damageType === "primary"){
-//          weaponDamage = weapon.primaryDamage;
-//          damageType = weapon.primaryType;
-//      }
-//      else {
-//          weaponDamage = weapon.secondaryDamage;
-//          damageType = weapon.secondaryType;
-//      }
-//  }
-//  roll = MML.rollDamage(weaponDamage, [bonusDamage], crit, damageType);
-//  return roll;
-// };
+    if(result === "Critical Success" || result === "Success"){
+        if(result === "Success"){
+           if(MML.hasStatusEffect("Number of Defenses")){
+                this.statusEffects["Number of Defenses"].number++;
+            }
+            else{
+                this.statusEffects["Number of Defenses"] = { number: 1 };
+            }
 
+            if(action.attackRollResult === "Critical Success"){
+                MML.processCommand({
+                    type: "character",
+                    who: this.name,
+                    triggeredFunction: "equipmentFailure",
+                    input: {}
+                }); 
+            } 
+        }
+        
+        MML.processCommand({
+            type: "character",
+            who: action.who,
+            triggeredFunction: "endAction",
+            input: {}
+        });
+    }
+    else{
+        MML.processCommand({
+            type: "character",
+            who: action.who,
+            triggeredFunction: "meleeDamageRoll",
+            input: {}
+        });
+    }
+};
+
+MML.meleeDodgeRoll = function meleeDodgeRoll(input){
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "universalRoll",
+        input: {
+            rollResultFunction: "meleeDodgeRollResult",
+            mods: [input.dodgeChance]
+        }
+    });
+};
+
+MML.equipmentFailure = function equipmentFailure(input){
+    log("equipmentFailure");
+};
+
+MML.meleeDamageRoll = function meleeDamageRoll(input){
+    var action = state.MML.GM.currentAction;
+    var weapon = action.attackerWeapon;
+    var weaponDamage;
+    var damageType;
+    var bonusDamage = 0;
+
+    //Primary or secondary attack
+    if (action.weaponType === "primary"){
+        weaponDamage = weapon.grips[action.attackerGrip].primaryDamage;
+        damageType = weapon.grips[action.attackerGrip].primaryType;
+    }
+    else {
+        weaponDamage = weapon.grips[action.attackerGrip].secondaryDamage;
+        damageType = weapon.grips[action.attackerGrip].secondaryType;
+    }
+    
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "rollDamage",
+        input: {
+            rollResultFunction: "meleeDamageResult",
+            attackRollResult: action.attackRollResult,
+            weaponDamage: weaponDamage,
+            damageType: damageType,
+            mods: [this.meleeDamageMod, bonusDamage]
+        }
+    });
+};
+
+MML.meleeDamageResult = function meleeDamageResult(input){
+    var currentRoll = state.MML.players[this.player].currentRoll;
+
+    if(this.player === state.MML.GM.player){
+        if(currentRoll.accepted === false){
+            MML.processCommand({
+                type: "player",
+                who: this.player,
+                triggeredFunction: "displayGmRoll",
+                input: {
+                    currentRoll: currentRoll
+                }
+            });
+        }
+        else{
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                triggeredFunction: "meleeDamageRollApply",
+                input: currentRoll
+            });
+        }
+    }
+    else{
+        MML.processCommand({
+            type: "player",
+            who: this.player,
+            triggeredFunction: "displayPlayerRoll",
+            input: {
+                currentRoll: currentRoll
+            }
+        });
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "meleeDamageRollApply",
+            input: currentRoll
+        });
+    }
+};
+
+MML.meleeDamageRollApply = function meleeDamageRollApply(input){
+
+};
 
 // Todo: Add sweep attack
 
@@ -5841,12 +6102,6 @@ MML.startCombatMovement = function startCombatMovement(){
 	}
 };
 
-MML.startAction = function startAction(input){
-    if(!_.isUndefined(this.action.getTargets)){
-        MML[this.action.getTargets].apply(this, [input]);
-    }	
-};
-
 MML.setTargets = function selectTargets(){
 	this.targets = this.characters[this.actor].action.targets;
 	this.targetIndex = 0;
@@ -6124,11 +6379,18 @@ MML.changeRoll = function changeRoll(input){
 	var high = parseInt(range[1]);
 	log(this.currentRoll.rollResultFunction);
 	if(value >= low && value <= high){
-		if(this.currentRoll.name === "damage"){
+		if(this.currentRoll.type === "damage"){
 			this.currentRoll.value = -value;
+			this.currentRoll.message = "Roll: " + value + "\nRange: " + this.currentRoll.range;
 		}
 		else{
 			this.currentRoll.value = value;
+			if(this.currentRoll.type === "universal"){
+				this.currentRoll = MML.universalRollResult(this.currentRoll);
+			}
+			else if(this.currentRoll.type === "attribute"){
+				this.currentRoll = MML.attributeRollResult(this.currentRoll);
+			}
 		}
 	}
 	else{
@@ -6232,11 +6494,12 @@ MML.processCommand = function processCommand(command){
 };
 
 MML.parseCommand = function parseCommand(msg) {
-    if(msg.type === "api"){
+    if(msg.type === "api" && msg.content.indexOf("!MML|") !== -1){
     	var command = "parse failed";
+    	var content = msg.content.replace("!MML|", "");
 
-    	if(msg.content.indexOf("!selectTarget") !== -1) {
-	        var stringIn = msg.content.replace("!selectTarget ", "").split("|");
+    	if(content.indexOf("selectTarget") !== -1) {
+	        var stringIn = content.replace("selectTarget ", "").split("|");
 	        var character = stringIn[0];
 	        var target = stringIn[1];
 	        var hexedInput = stringIn[2];
@@ -6267,8 +6530,8 @@ MML.parseCommand = function parseCommand(msg) {
 	        };
 	    }
 
-	    else if(msg.content.indexOf("!changeRoll") !== -1) {
-	        var value = parseInt(msg.content.replace("!changeRoll ", ""));
+	    else if(content.indexOf("changeRoll") !== -1) {
+	        var value = parseInt(content.replace("changeRoll ", ""));
 	        
 	        if(!isNaN(value)){
 	            command = {
@@ -6285,7 +6548,7 @@ MML.parseCommand = function parseCommand(msg) {
 	        }       
 	    }
 
-	    else if(msg.content.indexOf("!acceptRoll") !== -1) {
+	    else if(content.indexOf("acceptRoll") !== -1) {
 	        if(state.MML.players[state.MML.GM.player].currentRoll.accepted === false){
 	        	var player = state.MML.players[state.MML.GM.player];
 	            state.MML.players[player.name].currentRoll.accepted = true;
@@ -6299,8 +6562,8 @@ MML.parseCommand = function parseCommand(msg) {
 	        }
 	    }
 
-	    else if(msg.content.indexOf("!displayItemOptions") !== -1) {
-	        var input = msg.content.replace("!displayItemOptions ", "").split("|");
+	    else if(content.indexOf("displayItemOptions") !== -1) {
+	        var input = content.replace("displayItemOptions ", "").split("|");
 	        var who = input[0];
 	        var itemId = input[1];
 
@@ -6316,7 +6579,7 @@ MML.parseCommand = function parseCommand(msg) {
 	    }
     	else{
     		var i;
-		    var hexes = msg.content.slice(1).match(/.{1,4}/g) || [];
+		    var hexes = content.match(/.{1,4}/g) || [];
 		    command = "";
 		    for(i = 0; i<hexes.length; i++) {
 		        command += String.fromCharCode(parseInt(hexes[i], 16));
@@ -6326,9 +6589,8 @@ MML.parseCommand = function parseCommand(msg) {
 			}
 			catch (e) {
 			 	log(command);
-			 	command = "JSON parse failed";
-			 	log(command);
-                MML.error();
+			 	log(content);
+                sendChat("", "JSON parse failed");
 			}
 
 	        command.input.selectedCharNames = MML.getSelectedCharNames(msg.selected);
@@ -6338,323 +6600,7 @@ MML.parseCommand = function parseCommand(msg) {
     }
 	    
 };
-
-on("ready", function() {
-    MML.init();
-
-    on("add:character", function(character) {
-        var charName = character.get("name");
-        MML.createAttribute("player", state.MML.GM.player, "", character);
-        MML.createAttribute("name", charName, "", character);
-        MML.createAttribute("race", "Human", "", character);
-        MML.createAttribute("gender", "Male", "", character);
-        MML.createAttribute("statureRoll", 6, "", character);
-        MML.createAttribute("strengthRoll", 6, "", character);
-        MML.createAttribute("coordinationRoll", 6, "", character);
-        MML.createAttribute("healthRoll", 6, "", character);
-        MML.createAttribute("beautyRoll", 6, "", character);
-        MML.createAttribute("intellectRoll", 6, "", character);
-        MML.createAttribute("reasonRoll", 6, "", character);
-        MML.createAttribute("creativityRoll", 6, "", character);
-        MML.createAttribute("presenceRoll", 6, "", character);
-
-        state.MML.characters[charName] = new MML.characterConstructor(charName);
-
-        MML.processCommand({
-        	type: "character",
-        	who: charName,
-        	triggeredFunction:"updateCharacter",
-			input: {
-		    	attribute: "race"
-		  	}
-        });
-    });
-
-    on("add:attribute", function(attribute) {
-        var characterObject = getObj("character", attribute.get("_characterid"));
-        var charName = characterObject.get("name"); 
-        var attrName = attribute.get("name");
-
-        if(attrName.indexOf("repeating_skills") != -1){
-            MML.processCommand({
-	        	type: "character",
-	        	who: charName,
-	        	triggeredFunction:"updateCharacter",
-				input: {
-			    	attribute: "skills"
-			  	}
-	        });
-        }
-        else if(attrName.indexOf("repeating_weaponskills") != -1){
-            MML.processCommand({
-	        	type: "character",
-	        	who: charName,
-	        	triggeredFunction:"updateCharacter",
-				input: {
-			    	attribute: "weaponSkills"
-			  	}
-	        });
-        }
-    });
-
-    on("chat:message", function(msg) {
-        MML.parseCommand(msg);
-    });
-
-    on("change:token", function(obj, prev) {
-        if(obj.get("left") !== prev["left"] && obj.get("top") !== prev["top"] && state.MML.GM.inCombat === true){
-            var charName = MML.getCharFromToken(obj);
-            var character = state.MML.characters[charName];
-            var left1 = prev["left"];
-            var left2 = obj.get("left");
-            var top1 = prev["top"];
-            var top2 = obj.get("top");
-            var distance = MML.getDistance(left1, left2, top1, top2);
-            var distanceAvailable = MML.movementRates[character.race][character.movementPosition] * character.movementAvailable;
-
-            if(state.MML.GM.actor === charName ){
-                // If they move too far, move the maxium distance in the same direction
-                if(distance > distanceAvailable){
-                    left3 = Math.floor(((left2 - left1)/distance)*distanceAvailable + left1 + 0.5);
-                    top3 = Math.floor(((top2 - top1)/distance)*distanceAvailable + top1 + 0.5);
-                    obj.set("left", left3);
-                    obj.set("top", top3);
-
-                    distance = distanceAvailable;
-                }
-                MML.processCommand({
-		        	type: "character",
-		        	who: charName,
-		        	triggeredFunction:"moveDistance",
-					input: {
-				    	distance: "distance"
-				  	}
-		        });
-            }
-            else{
-                obj.set("left", prev["left"]);
-                obj.set("top", prev["top"]);
-            }
-        }
-    });
-
-    on("change:character:name", function(changedCharacter) {
-        var newName = changedCharacter.get("name");
-        var characters = findObjs({
-                _type: "character",
-                archived: false,
-                }, {caseInsensitive: false});
-        var apiNames = _.keys(state.MML.characters);
-        var characterNames = [];
-
-        _.each(characters, function(character){
-            characterNames.push(character.get("name"));
-        });
-        
-        var oldName = _.difference(apiNames, characterNames)[0];
-
-        state.MML.characters[newName] = state.MML.characters[oldName];
-        delete state.MML.characters[oldName];
-        state.MML.characters[newName].name = newName;
-        MML.processCommand({
-        	type: "character",
-        	who: newName,
-        	triggeredFunction:"updateCharacter",
-			input: {
-		    	attribute: "name"
-		  	}
-        });
-    });
-
-    on("change:attribute:current", function(attribute) {
-        var characterObject = getObj("character", attribute.get("_characterid"));
-        var charName = characterObject.get("name"); 
-        var attrName = attribute.get("name");
-
-        switch(attrName){
-            case "statureRoll":
-                var roll = parseFloat(attribute.get("current"));
-                if(isNaN(roll) || roll < 6){
-                    roll = 6;
-                    MML.setCurrentAttribute(charName, attrName, roll);
-                }
-                MML.processCommand({
-		        	type: "character",
-		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
-					input: {
-				    	attribute: "stature"
-				  	}
-		        });
-                break;
-            case "strengthRoll":
-                var roll = parseFloat(attribute.get("current"));
-                if(isNaN(roll) || roll < 6){
-                    roll = 6;
-                    MML.setCurrentAttribute(charName, attrName, roll);
-                }
-                MML.processCommand({
-		        	type: "character",
-		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
-					input: {
-				    	attribute: "strength"
-				  	}
-		        });
-                break;
-            case "coordinationRoll":
-                var roll = parseFloat(attribute.get("current"));
-                if(isNaN(roll) || roll < 6){
-                    roll = 6;
-                    MML.setCurrentAttribute(charName, attrName, roll);
-                }
-                MML.processCommand({
-		        	type: "character",
-		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
-					input: {
-				    	attribute: "coordination"
-				  	}
-		        });
-                break;
-            case "healthRoll":
-                var roll = parseFloat(attribute.get("current"));
-                if(isNaN(roll) || roll < 6){
-                    roll = 6;
-                    MML.setCurrentAttribute(charName, attrName, roll);
-                }
-                MML.processCommand({
-		        	type: "character",
-		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
-					input: {
-				    	attribute: "health"
-				  	}
-		        });
-                break;
-            case "beautyRoll":
-                var roll = parseFloat(attribute.get("current"));
-                if(isNaN(roll) || roll < 6){
-                    roll = 6;
-                    MML.setCurrentAttribute(charName, attrName, roll);
-                }
-                MML.processCommand({
-		        	type: "character",
-		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
-					input: {
-				    	attribute: "beauty"
-				  	}
-		        });
-                break;
-            case "intellectRoll":
-                var roll = parseFloat(attribute.get("current"));
-                if(isNaN(roll) || roll < 6){
-                    roll = 6;
-                    MML.setCurrentAttribute(charName, attrName, roll);
-                }
-                MML.processCommand({
-		        	type: "character",
-		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
-					input: {
-				    	attribute: "intellect"
-				  	}
-		        });
-                break;
-            case "reasonRoll":
-                var roll = parseFloat(attribute.get("current"));
-                if(isNaN(roll) || roll < 6){
-                    roll = 6;
-                    MML.setCurrentAttribute(charName, attrName, roll);
-                }
-                MML.processCommand({
-		        	type: "character",
-		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
-					input: {
-				    	attribute: "reason"
-				  	}
-		        });
-                break;
-            case "creativityRoll":
-                var roll = parseFloat(attribute.get("current"));
-                if(isNaN(roll) || roll < 6){
-                    roll = 6;
-                    MML.setCurrentAttribute(charName, attrName, roll);
-                }
-                MML.processCommand({
-		        	type: "character",
-		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
-					input: {
-				    	attribute: "creativity"
-				  	}
-		        });
-                break;
-            case "presenceRoll":
-                var roll = parseFloat(attribute.get("current"));
-                if(isNaN(roll) || roll < 6){
-                    roll = 6;
-                    MML.setCurrentAttribute(charName, attrName, roll);
-                }
-                MML.processCommand({
-		        	type: "character",
-		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
-					input: {
-				    	attribute: "presence"
-				  	}
-		        });
-                break;
-            default:
-                if(attrName.indexOf("repeating_items") != -1){
-                    MML.processCommand({
-			        	type: "character",
-			        	who: charName,
-			        	triggeredFunction:"updateCharacter",
-						input: {
-					    	attribute: "inventory"
-					  	}
-			        });
-                }
-                else if(attrName.indexOf("repeating_skills") != -1){
-                    MML.processCommand({
-			        	type: "character",
-			        	who: charName,
-			        	triggeredFunction:"updateCharacter",
-						input: {
-					    	attribute: "skills"
-					  	}
-			        });
-                }
-                else if(attrName.indexOf("repeating_weaponskills") != -1){
-                	log("weaponSkills");
-                    MML.processCommand({
-			        	type: "character",
-			        	who: charName,
-			        	triggeredFunction:"updateCharacter",
-						input: {
-					    	attribute: "weaponSkills"
-					  	}
-			        });
-                }
-                else if(attrName != "tab"){
-                	log(attrName);
-                    MML.processCommand({
-			        	type: "character",
-			        	who: charName,
-			        	triggeredFunction:"updateCharacter",
-						input: {
-					    	attribute: attrName
-					  	}
-			        });
-                }
-                break;
-        }
-
-    });
-});// This file contains all menus and defines the player object class
+// This file contains all menus and defines the player object class
 
 MML.playerClass = {
     message: "", //
@@ -7315,6 +7261,7 @@ MML.charMenuChooseTarget = function charMenuChooseTarget(input){
 };
 MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(input){
 	var targetArray;
+
 	if(typeof input.target !== "undefined"){
 		targetArray = [input.target];
 	}
@@ -7322,31 +7269,32 @@ MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(input){
 		targetArray = input.targets;
 	}
 	
-	input.targetArray = targetArray;
+	state.MML.GM.currentAction.targetArray = targetArray;
+	state.MML.GM.currentAction.targetIndex = 0;
 
 	MML.processCommand({
     	type: "character",
     	who: input.charName,
     	triggeredFunction: state.MML.characters[input.charName].action.triggeredFunction,
-		input: input
+		input: {}
     });
 };
 MML.charMenuSelectDamageType = function charMenuSelectDamageType(input){
     this.who = input.who;
 	this.message =  "Choose a Damage Type.";
 	this.buttons = [];
-	//log(input);
+
 	this.buttons.push({
 		text: "Primary",
 		nextMenu: "charMenuAttackRoll",
 		triggeredFunction: function(input){
-			input.damageType = "primary";
-			
+			state.MML.GM.currentAction.weaponType = "primary";
+
 			MML.processCommand({
 		    	type: "character",
 		    	who: this.who,
 		    	triggeredFunction: "meleeAttackRoll",
-				input: input
+				input: {}
 		    });
 		}
 	});
@@ -7355,13 +7303,13 @@ MML.charMenuSelectDamageType = function charMenuSelectDamageType(input){
 		text: "Secondary",
 		nextMenu: "charMenuAttackRoll",
 		triggeredFunction: function(input){
-			input.damageType = "secondary";
-			
+			state.MML.GM.currentAction.weaponType = "secondary";
+
 			MML.processCommand({
 		    	type: "character",
 		    	who: this.who,
 		    	triggeredFunction: "meleeAttackRoll",
-				input: input
+				input: {}
 		    });
 		}
 	});	
@@ -7649,13 +7597,13 @@ MML.menuButtons.actionPrepared = {
 		}
 	}
 };
-MML.menuButtons.startAction = {
-	text: "Start",
-	nextMenu: "menuIdle",
-	triggeredFunction: function(input){
-		MML.startAction.apply(state.MML.GM, [input]);
-	}
-};
+// MML.menuButtons.startAction = {
+// 	text: "Start",
+// 	nextMenu: "menuIdle",
+// 	triggeredFunction: function(input){
+// 		MML.startAction.apply(state.MML.GM, [input]);
+// 	}
+// };
 MML.menuButtons.chooseTargets = {
 	text: "Choose Targets",
 	nextMenu: "charMenuChooseTargets",
@@ -8302,7 +8250,322 @@ MML.GmMenuUtilities = function utilities(input){
 // 	}
 	 
 // };
-MML.statusEffects = {};
+on("ready", function() {
+    MML.init();
+
+    on("add:character", function(character) {
+        var charName = character.get("name");
+        MML.createAttribute("player", state.MML.GM.player, "", character);
+        MML.createAttribute("name", charName, "", character);
+        MML.createAttribute("race", "Human", "", character);
+        MML.createAttribute("gender", "Male", "", character);
+        MML.createAttribute("statureRoll", 6, "", character);
+        MML.createAttribute("strengthRoll", 6, "", character);
+        MML.createAttribute("coordinationRoll", 6, "", character);
+        MML.createAttribute("healthRoll", 6, "", character);
+        MML.createAttribute("beautyRoll", 6, "", character);
+        MML.createAttribute("intellectRoll", 6, "", character);
+        MML.createAttribute("reasonRoll", 6, "", character);
+        MML.createAttribute("creativityRoll", 6, "", character);
+        MML.createAttribute("presenceRoll", 6, "", character);
+
+        state.MML.characters[charName] = new MML.characterConstructor(charName);
+
+        MML.processCommand({
+        	type: "character",
+        	who: charName,
+        	triggeredFunction:"updateCharacter",
+			input: {
+		    	attribute: "race"
+		  	}
+        });
+    });
+
+    on("add:attribute", function(attribute) {
+        var characterObject = getObj("character", attribute.get("_characterid"));
+        var charName = characterObject.get("name"); 
+        var attrName = attribute.get("name");
+
+        if(attrName.indexOf("repeating_skills") != -1){
+            MML.processCommand({
+	        	type: "character",
+	        	who: charName,
+	        	triggeredFunction:"updateCharacter",
+				input: {
+			    	attribute: "skills"
+			  	}
+	        });
+        }
+        else if(attrName.indexOf("repeating_weaponskills") != -1){
+            MML.processCommand({
+	        	type: "character",
+	        	who: charName,
+	        	triggeredFunction:"updateCharacter",
+				input: {
+			    	attribute: "weaponSkills"
+			  	}
+	        });
+        }
+    });
+
+    on("chat:message", function(msg) {
+        MML.parseCommand(msg);
+    });
+
+    on("change:token", function(obj, prev) {
+        if(obj.get("left") !== prev["left"] && obj.get("top") !== prev["top"] && state.MML.GM.inCombat === true){
+            var charName = MML.getCharFromToken(obj);
+            var character = state.MML.characters[charName];
+            var left1 = prev["left"];
+            var left2 = obj.get("left");
+            var top1 = prev["top"];
+            var top2 = obj.get("top");
+            var distance = MML.getDistance(left1, left2, top1, top2);
+            var distanceAvailable = MML.movementRates[character.race][character.movementPosition] * character.movementAvailable;
+
+            if(state.MML.GM.actor === charName ){
+                // If they move too far, move the maxium distance in the same direction
+                if(distance > distanceAvailable){
+                    left3 = Math.floor(((left2 - left1)/distance)*distanceAvailable + left1 + 0.5);
+                    top3 = Math.floor(((top2 - top1)/distance)*distanceAvailable + top1 + 0.5);
+                    obj.set("left", left3);
+                    obj.set("top", top3);
+
+                    distance = distanceAvailable;
+                }
+                MML.processCommand({
+		        	type: "character",
+		        	who: charName,
+		        	triggeredFunction:"moveDistance",
+					input: {
+				    	distance: "distance"
+				  	}
+		        });
+            }
+            else{
+                obj.set("left", prev["left"]);
+                obj.set("top", prev["top"]);
+            }
+        }
+    });
+
+    on("change:character:name", function(changedCharacter) {
+        var newName = changedCharacter.get("name");
+        var characters = findObjs({
+                _type: "character",
+                archived: false,
+                }, {caseInsensitive: false});
+        var apiNames = _.keys(state.MML.characters);
+        var characterNames = [];
+
+        _.each(characters, function(character){
+            characterNames.push(character.get("name"));
+        });
+        
+        var oldName = _.difference(apiNames, characterNames)[0];
+
+        state.MML.characters[newName] = state.MML.characters[oldName];
+        delete state.MML.characters[oldName];
+        state.MML.characters[newName].name = newName;
+        MML.processCommand({
+        	type: "character",
+        	who: newName,
+        	triggeredFunction:"updateCharacter",
+			input: {
+		    	attribute: "name"
+		  	}
+        });
+    });
+
+    on("change:attribute:current", function(attribute) {
+        var characterObject = getObj("character", attribute.get("_characterid"));
+        var charName = characterObject.get("name"); 
+        var attrName = attribute.get("name");
+
+        switch(attrName){
+            case "statureRoll":
+                var roll = parseFloat(attribute.get("current"));
+                if(isNaN(roll) || roll < 6){
+                    roll = 6;
+                    MML.setCurrentAttribute(charName, attrName, roll);
+                }
+                MML.processCommand({
+		        	type: "character",
+		        	who: charName,
+		        	triggeredFunction:"updateCharacter",
+					input: {
+				    	attribute: "stature"
+				  	}
+		        });
+                break;
+            case "strengthRoll":
+                var roll = parseFloat(attribute.get("current"));
+                if(isNaN(roll) || roll < 6){
+                    roll = 6;
+                    MML.setCurrentAttribute(charName, attrName, roll);
+                }
+                MML.processCommand({
+		        	type: "character",
+		        	who: charName,
+		        	triggeredFunction:"updateCharacter",
+					input: {
+				    	attribute: "strength"
+				  	}
+		        });
+                break;
+            case "coordinationRoll":
+                var roll = parseFloat(attribute.get("current"));
+                if(isNaN(roll) || roll < 6){
+                    roll = 6;
+                    MML.setCurrentAttribute(charName, attrName, roll);
+                }
+                MML.processCommand({
+		        	type: "character",
+		        	who: charName,
+		        	triggeredFunction:"updateCharacter",
+					input: {
+				    	attribute: "coordination"
+				  	}
+		        });
+                break;
+            case "healthRoll":
+                var roll = parseFloat(attribute.get("current"));
+                if(isNaN(roll) || roll < 6){
+                    roll = 6;
+                    MML.setCurrentAttribute(charName, attrName, roll);
+                }
+                MML.processCommand({
+		        	type: "character",
+		        	who: charName,
+		        	triggeredFunction:"updateCharacter",
+					input: {
+				    	attribute: "health"
+				  	}
+		        });
+                break;
+            case "beautyRoll":
+                var roll = parseFloat(attribute.get("current"));
+                if(isNaN(roll) || roll < 6){
+                    roll = 6;
+                    MML.setCurrentAttribute(charName, attrName, roll);
+                }
+                MML.processCommand({
+		        	type: "character",
+		        	who: charName,
+		        	triggeredFunction:"updateCharacter",
+					input: {
+				    	attribute: "beauty"
+				  	}
+		        });
+                break;
+            case "intellectRoll":
+                var roll = parseFloat(attribute.get("current"));
+                if(isNaN(roll) || roll < 6){
+                    roll = 6;
+                    MML.setCurrentAttribute(charName, attrName, roll);
+                }
+                MML.processCommand({
+		        	type: "character",
+		        	who: charName,
+		        	triggeredFunction:"updateCharacter",
+					input: {
+				    	attribute: "intellect"
+				  	}
+		        });
+                break;
+            case "reasonRoll":
+                var roll = parseFloat(attribute.get("current"));
+                if(isNaN(roll) || roll < 6){
+                    roll = 6;
+                    MML.setCurrentAttribute(charName, attrName, roll);
+                }
+                MML.processCommand({
+		        	type: "character",
+		        	who: charName,
+		        	triggeredFunction:"updateCharacter",
+					input: {
+				    	attribute: "reason"
+				  	}
+		        });
+                break;
+            case "creativityRoll":
+                var roll = parseFloat(attribute.get("current"));
+                if(isNaN(roll) || roll < 6){
+                    roll = 6;
+                    MML.setCurrentAttribute(charName, attrName, roll);
+                }
+                MML.processCommand({
+		        	type: "character",
+		        	who: charName,
+		        	triggeredFunction:"updateCharacter",
+					input: {
+				    	attribute: "creativity"
+				  	}
+		        });
+                break;
+            case "presenceRoll":
+                var roll = parseFloat(attribute.get("current"));
+                if(isNaN(roll) || roll < 6){
+                    roll = 6;
+                    MML.setCurrentAttribute(charName, attrName, roll);
+                }
+                MML.processCommand({
+		        	type: "character",
+		        	who: charName,
+		        	triggeredFunction:"updateCharacter",
+					input: {
+				    	attribute: "presence"
+				  	}
+		        });
+                break;
+            default:
+                if(attrName.indexOf("repeating_items") != -1){
+                    MML.processCommand({
+			        	type: "character",
+			        	who: charName,
+			        	triggeredFunction:"updateCharacter",
+						input: {
+					    	attribute: "inventory"
+					  	}
+			        });
+                }
+                else if(attrName.indexOf("repeating_skills") != -1){
+                    MML.processCommand({
+			        	type: "character",
+			        	who: charName,
+			        	triggeredFunction:"updateCharacter",
+						input: {
+					    	attribute: "skills"
+					  	}
+			        });
+                }
+                else if(attrName.indexOf("repeating_weaponskills") != -1){
+                	log("weaponSkills");
+                    MML.processCommand({
+			        	type: "character",
+			        	who: charName,
+			        	triggeredFunction:"updateCharacter",
+						input: {
+					    	attribute: "weaponSkills"
+					  	}
+			        });
+                }
+                else if(attrName != "tab"){
+                	log(attrName);
+                    MML.processCommand({
+			        	type: "character",
+			        	who: charName,
+			        	triggeredFunction:"updateCharacter",
+						input: {
+					    	attribute: attrName
+					  	}
+			        });
+                }
+                break;
+        }
+
+    });
+});MML.statusEffects = {};
 MML.statusEffects["Major Wound"] = function(effect, index){
     if(this[effect.bodyPart] > Math.round(this[effect.bodyPart + "Max"]/2)){
         delete this.statusEffects[index];
@@ -8511,51 +8774,55 @@ MML.statusEffects["Melee This Round"] = function(effect, index){
     }
 };
 // Character Functions
-MML.getCharFromName = function getCharFromName(charName){
+MML.getCharFromName = function getCharFromName(charName) {
     var character = findObjs({
         _type: "character",
         archived: false,
         name: charName
-    }, {caseInsensitive: false});
-    
+    }, {
+        caseInsensitive: false
+    });
+
     return character[0];
 };
 
 // Attribute and Ability Functions
-MML.createAttribute = function createAttribute(name, current, max, character){
+MML.createAttribute = function createAttribute(name, current, max, character) {
     createObj("attribute", {
-            name: name,
-            current: current,
-            max: max,
-            characterid: character.id
-        });
+        name: name,
+        current: current,
+        max: max,
+        characterid: character.id
+    });
 };
 
-MML.createAttributesFromArray = function createAttributesFromArray(inputArray, character){
-    _.each(inputArray, function(attribute){
+MML.createAttributesFromArray = function createAttributesFromArray(inputArray, character) {
+    _.each(inputArray, function(attribute) {
         MML.createAttribute(attribute.name, attribute.current, attribute.max, character);
     });
 };
 
-MML.createAbility = function createAbility(name, action, istokenaction, character){
+MML.createAbility = function createAbility(name, action, istokenaction, character) {
     createObj("ability", {
-            name: name,
-            action: action,
-            istokenaction: istokenaction,
-            characterid: character.id
-        });
+        name: name,
+        action: action,
+        istokenaction: istokenaction,
+        characterid: character.id
+    });
 };
 
-MML.getCharAttribute = function getCharAttribute(charName, attribute){
+MML.getCharAttribute = function getCharAttribute(charName, attribute) {
     var character = MML.getCharFromName(charName);
-    
+
     var charAttribute = findObjs({
         _type: "attribute",
         _characterid: character.get("_id"),
         name: attribute
-    }, {caseInsensitive: false})[0];
-    
-    if(typeof(charAttribute) === "undefined"){
+    }, {
+        caseInsensitive: false
+    })[0];
+
+    if (typeof(charAttribute) === "undefined") {
         MML.createAttribute(attribute, "", "", MML.getCharFromName(charName));
         charAttribute = MML.getCharAttribute(charName, attribute);
     }
@@ -8563,14 +8830,14 @@ MML.getCharAttribute = function getCharAttribute(charName, attribute){
     return charAttribute;
 };
 
-MML.getCurrentAttribute = function getCurrentAttribute(charName, attribute){
+MML.getCurrentAttribute = function getCurrentAttribute(charName, attribute) {
     return MML.getCharAttribute(charName, attribute).get("current");
 };
 
-MML.getCurrentAttributeAsFloat = function getCurrentAttributeAsFloat(charName, attribute){
+MML.getCurrentAttributeAsFloat = function getCurrentAttributeAsFloat(charName, attribute) {
     var result = parseFloat(MML.getCurrentAttribute(charName, attribute));
     // log(result);
-    if(isNaN(result)){
+    if (isNaN(result)) {
         MML.setCurrentAttribute(charName, attribute, 0);
         result = 0;
     }
@@ -8578,10 +8845,10 @@ MML.getCurrentAttributeAsFloat = function getCurrentAttributeAsFloat(charName, a
     return result;
 };
 
-MML.getMaxAttributeAsFloat = function getMaxAttributeAsFloat(charName, attribute){
-    var result =  parseFloat(MML.getCharAttribute(charName, attribute).get("max"));
+MML.getMaxAttributeAsFloat = function getMaxAttributeAsFloat(charName, attribute) {
+    var result = parseFloat(MML.getCharAttribute(charName, attribute).get("max"));
 
-    if(isNaN(result)){
+    if (isNaN(result)) {
         MML.setMaxAttribute(charName, attribute, 0);
         result = 0;
     }
@@ -8589,224 +8856,224 @@ MML.getMaxAttributeAsFloat = function getMaxAttributeAsFloat(charName, attribute
     return result;
 };
 
-MML.getCurrentAttributeAsBool = function getCurrentAttributeAsBool(charName, attribute){
+MML.getCurrentAttributeAsBool = function getCurrentAttributeAsBool(charName, attribute) {
     var result = MML.getCurrentAttribute(charName, attribute);
-    if(result === "true"){ return true; }
-    else{ return false; }
+    if (result === "true") {
+        return true;
+    } else {
+        return false;
+    }
 };
 
-MML.getCurrentAttributeJSON = function getCurrentAttributeJSON(charName, attribute){
+MML.getCurrentAttributeJSON = function getCurrentAttributeJSON(charName, attribute) {
     var result = MML.getCurrentAttribute(charName, attribute);
 
-    if(result === "" || _.isUndefined(result)){
+    if (result === "" || _.isUndefined(result)) {
         MML.setCurrentAttribute(charName, attribute, "{}");
         result = MML.getCurrentAttribute(charName, attribute);
     }
     return JSON.parse(result);
 };
 
-MML.getSkillAttributes = function getSkillAttributes(charName, skillType){
+MML.getSkillAttributes = function getSkillAttributes(charName, skillType) {
     var character = MML.getCharFromName(charName);
     var attributes = findObjs({
         _type: "attribute",
         _characterid: character.get("_id")
-    }, {caseInsensitive: false});
+    }, {
+        caseInsensitive: false
+    });
     var skills = {};
     var skill_data = {};
-    
-    _.each(attributes, function(attribute){
+
+    _.each(attributes, function(attribute) {
         var attributeName = attribute.get("name");
 
-        if(attributeName.indexOf("repeating_" + skillType) !== -1){
+        if (attributeName.indexOf("repeating_" + skillType) !== -1) {
             var attributeString = attributeName.split("_");
             var _id = attributeString[2];
             var property = attributeString[3];
             var value = attribute.get("current");
-            _.each(skills, function(skill, key){
-                if(key.toLowerCase() === _id){
+            _.each(skills, function(skill, key) {
+                if (key.toLowerCase() === _id) {
                     _id = key;
                 }
             });
-            if(_.isUndefined(skill_data[_id])){
-                skill_data[_id] = {name: "", input: 0, level: 0};
+            if (_.isUndefined(skill_data[_id])) {
+                skill_data[_id] = {
+                    name: "",
+                    input: 0,
+                    level: 0
+                };
             }
-            if(property === "name"){
+            if (property === "name") {
                 skill_data[_id][property] = value;
-            }
-            else if(isNaN(parseFloat(value))){
+            } else if (isNaN(parseFloat(value))) {
                 skill_data[_id][property] = 0;
-            }
-            else{
+            } else {
                 skill_data[_id][property] = parseFloat(value);
             }
         }
     });
-    _.each(skill_data, function(skill, _id){
-        if(skill.name !== ""){
+    _.each(skill_data, function(skill, _id) {
+        if (skill.name !== "") {
             skills[skill.name] = {
                 level: skill.level,
                 input: skill.input,
                 _id: _id
-            }
+            };
         }
     });
     return skills;
 };
 
-MML.setCurrentAttribute = function setCurrentAttribute(charName, attribute, value){
+MML.setCurrentAttribute = function setCurrentAttribute(charName, attribute, value) {
     MML.getCharAttribute(charName, attribute).set("current", value);
 };
 
-MML.setMaxAttribute = function setMaxAttribute(charName, attribute, value){
+MML.setMaxAttribute = function setMaxAttribute(charName, attribute, value) {
     MML.getCharAttribute(charName, attribute).set("max", value);
 };
 
-MML.getAttributeTableValue = function getAttributeTableValue(attribute, inputValue, table){
+MML.getAttributeTableValue = function getAttributeTableValue(attribute, inputValue, table) {
     return table[inputValue][attribute];
 };
 
 // Token Functions
-MML.getCharFromToken = function getCharFromToken(token){
+MML.getCharFromToken = function getCharFromToken(token) {
     var tokenObject = getObj("graphic", token.id);
     var charName = getObj("character", tokenObject.get("represents"));
     charName = charName.get("name");
     return charName;
 };
 
-MML.getTokenFromChar = function getTokenFromChar(charName){
+MML.getTokenFromChar = function getTokenFromChar(charName) {
     var character = MML.getCharFromName(charName);
-    
-    var tokens = findObjs({                              
-        _pageid: Campaign().get("playerpageid"),                              
+
+    var tokens = findObjs({
+        _pageid: Campaign().get("playerpageid"),
         _type: "graphic",
         _subtype: "token",
         represents: character.get("_id")
-        });
-    
+    });
+
     return tokens[0];
 };
 
-MML.getSelectedTokens = function getSelectedTokens(selected){
+MML.getSelectedTokens = function getSelectedTokens(selected) {
     tokens = [];
-    
+
     var index;
-    for(index in selected){
+    for (index in selected) {
         tokens.push(getObj("graphic", selected[index]._id));
     }
     return tokens;
 };
 
-MML.getSelectedCharNames = function getSelectedCharNames(selected){
+MML.getSelectedCharNames = function getSelectedCharNames(selected) {
     characters = [];
-    
+
     var index;
-    for(index in selected){
-        characters.push(MML.getCharFromToken(getObj("graphic", selected[index]._id)));
-    }
+    _.each(selected, function(object) {
+        if (object._type === "graphic") {
+            characters.push(MML.getCharFromToken(getObj("graphic", object._id)));
+        }
+    });
     return characters;
 };
 
-MML.getDistance = function getDistance(left1, left2, top1, top2){
+MML.getDistance = function getDistance(left1, left2, top1, top2) {
     var pixelPerFoot = 14;
     var leftDistance = Math.abs(left2 - left1);
     var topDistance = Math.abs(top2 - top1);
-    var distance = Math.sqrt(leftDistance*leftDistance + topDistance*topDistance)/pixelPerFoot;
+    var distance = Math.sqrt(leftDistance * leftDistance + topDistance * topDistance) / pixelPerFoot;
     distance = Math.floor(distance + 0.5);
     return distance;
 };
 
-MML.getDistanceBetweenChars = function getDistanceBetweenChars(charName, targetName){
+MML.getDistanceBetweenChars = function getDistanceBetweenChars(charName, targetName) {
     var charToken = MML.getTokenFromChar(charName);
     var targetToken = MML.getTokenFromChar(targetName);
-    
-    return MML.getDistance(charToken.get("left"), targetToken.get("left"), charToken.get("top"), targetToken.get("top")); 
+
+    return MML.getDistance(charToken.get("left"), targetToken.get("left"), charToken.get("top"), targetToken.get("top"));
 };
 
 // Code borrowed from The Aaron from roll20.net forums
 var generateUUID = (function() {
-    "use strict";
+        "use strict";
 
-    var a = 0, b = [];
-    return function() {
-        var c = (new Date()).getTime() + 0, d = c === a;
-        a = c;
-        for (var e = new Array(8), f = 7; 0 <= f; f--) {
-            e[f] = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz".charAt(c % 64);
-            c = Math.floor(c / 64);
-        }
-        c = e.join("");
-        if (d) {
-            for (f = 11; 0 <= f && 63 === b[f]; f--) {
-                b[f] = 0;
+        var a = 0,
+            b = [];
+        return function() {
+            var c = (new Date()).getTime() + 0,
+                d = c === a;
+            a = c;
+            for (var e = new Array(8), f = 7; 0 <= f; f--) {
+                e[f] = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz".charAt(c % 64);
+                c = Math.floor(c / 64);
             }
-            b[f]++;
-        } else {
+            c = e.join("");
+            if (d) {
+                for (f = 11; 0 <= f && 63 === b[f]; f--) {
+                    b[f] = 0;
+                }
+                b[f]++;
+            } else {
+                for (f = 0; 12 > f; f++) {
+                    b[f] = Math.floor(64 * Math.random());
+                }
+            }
             for (f = 0; 12 > f; f++) {
-                b[f] = Math.floor(64 * Math.random());
+                c += "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz".charAt(b[f]);
             }
-        }
-        for (f = 0; 12 > f; f++){
-            c += "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz".charAt(b[f]);
-        }
-        return c;
-    };
-}()),
+            return c;
+        };
+    }()),
 
-generateRowID = function () {
-    "use strict";
-    return generateUUID().replace(/_/g, "Z");
-};
+    generateRowID = function() {
+        "use strict";
+        return generateUUID().replace(/_/g, "Z");
+    };
 
 // Rolling Functions
 MML.rollDice = function rollDice(amount, size) {
     var value = 0;
-    
-    for (i = 0; i < amount; i++){
+
+    for (i = 0; i < amount; i++) {
         value += randomInteger(size);
     }
     return value;
 };
 
-MML.rollDamage = function rollDamage(diceString, mods, crit, type){
-    var diceArray = diceString.split("d");
-    var amount = diceArray[0]*1;
-    var size = diceArray[1]*1;
+MML.rollDamage = function rollDamage(input) {
+    var diceArray = input.weaponDamage.split("d");
+    var amount = diceArray[0] * 1;
+    var size = diceArray[1] * 1;
     var damageMod = 0;
-    var roll = {};
-    
-    var mod;
-    for(mod in mods){
-        damageMod += mods[mod];
-    }
-    
-    if(crit === "Critical Success"){
-        roll = { name: "damage", value: -(MML.rollDice(amount, size) + amount*size + damageMod), type: type, range: "" + ((amount*size) + amount + damageMod) + "-" + (2*amount*size + damageMod) + "", accepted: false };
-    }
-    else{
-        roll = { name: "damage", value: -(MML.rollDice(amount, size) + damageMod), type: type, range: "" + amount + "-" + (amount*size + damageMod) + "", accepted: false };
-    }
-    return roll;
-};
-
-MML.universalRoll = function universalRoll(input){
-    log("universalRoll");
-    log(input.rollResultFunction);
-    var target = 0;
+    var value;
 
     var mod;
-    _.each(input.mods, function(mod){
-        target += mod;
+    _.each(input.mods, function(mod) {
+        damageMod += mod;
     });
-    
-    var roll = { name: "universal", value: MML.rollDice(1, 100), range: "1-100", target: target, result: "", accepted: false };
-    
-    roll = MML.universalRollResult(roll);
-    roll.character = input.character;
-    roll.rollResultFunction = input.rollResultFunction;
-    roll.message = "Roll: " + roll.value +
-        "\nTarget: " + roll.target + 
-        "\nResult: " + roll.result + 
-        "\nRange: " + roll.range;
+
+    if (input.attackRollResult === "Critical Success") {
+        value = -(MML.rollDice(amount, size) + amount * size + damageMod);
+        range = (amount * size + amount + damageMod) + "-" + (2 * amount * size + damageMod);
+    } else {
+        value = -(MML.rollDice(amount, size) + damageMod);
+        range = (amount + damageMod) + "-" + (amount * size + damageMod);
+    }
+
+    var roll = {
+        type: "damage",
+        character: this.name,
+        accepted: false,
+        value: value,
+        range: range,
+        message: "Roll: " + value + "\nRange: " + range,
+        rollResultFunction: input.rollResultFunction
+    };
 
     MML.processCommand({
         type: "player",
@@ -8815,125 +9082,181 @@ MML.universalRoll = function universalRoll(input){
         input: {
             attribute: "currentRoll",
             value: roll
-        }   
+        }
     });
     MML.processCommand({
         type: "character",
         who: this.name,
         triggeredFunction: input.rollResultFunction,
-        input: {}   
+        input: {}
     });
 };
 
-MML.universalRollResult = function universalRollResult(roll){       
-    if (roll.value > 94){
+MML.universalRoll = function universalRoll(input) {
+    // log("universalRoll");
+    // log(input.rollResultFunction);
+    // log(input.mods);
+    var target = 0;
+
+    var mod;
+    _.each(input.mods, function(mod) {
+        target += mod;
+    });
+
+    var roll = {
+        type: "universal",
+        character: this.name,
+        rollResultFunction: input.rollResultFunction,
+        value: MML.rollDice(1, 100),
+        range: "1-100",
+        target: target,
+        accepted: false
+    };
+
+    roll = MML.universalRollResult(roll);
+
+    MML.processCommand({
+        type: "player",
+        who: this.player,
+        triggeredFunction: "setApiPlayerAttribute",
+        input: {
+            attribute: "currentRoll",
+            value: roll
+        }
+    });
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: input.rollResultFunction,
+        input: {}
+    });
+};
+
+MML.universalRollResult = function universalRollResult(roll) {
+    if (roll.value > 94) {
         roll.result = "Critical Failure";
-    }
-    else {
-        if (roll.value <= roll.target){
-            if (roll.value <= Math.round(roll.target/10)){
+    } else {
+        if (roll.value <= roll.target) {
+            if (roll.value <= Math.round(roll.target / 10)) {
                 roll.result = "Critical Success";
-            }
-            else {
+            } else {
                 roll.result = "Success";
             }
-        }
-        else {
+        } else {
             roll.result = "Failure";
         }
     }
-    
+
+    roll.message = "Roll: " + roll.value +
+        "\nTarget: " + roll.target +
+        "\nResult: " + roll.result +
+        "\nRange: " + roll.range;
+
     return roll;
 };
 
-MML.attributeCheckRoll = function attributeCheckRoll(attribute, mods){
+MML.attributeCheckRoll = function attributeCheckRoll(attribute, mods) {
     var target = this[attribute];
-    
+
     var mod;
-    for(mod in mods){
+    for (mod in mods) {
         target += mods[mod];
     }
-    
-    var roll = { name: "attribute", player: this.player, value: MML.rollDice(1, 20), range: "1-20", target: target, result: "", accepted: false };
-    
+
+    var roll = {
+        name: "attribute",
+        player: this.player,
+        value: MML.rollDice(1, 20),
+        range: "1-20",
+        target: target,
+        accepted: false
+    };
+
     roll = MML.attributeCheckResult(roll);
-    log(attribute + ": " +roll.result);
+
     return roll;
 };
 
-MML.attributeCheckResult = function attributeCheckResult(roll){       
-    if ((roll.value <= roll.target || roll.value === 1) && (roll.value !== 20)){
-        roll.result = "Success";        
-    }
-    else {
+MML.attributeCheckResult = function attributeCheckResult(roll) {
+    if ((roll.value <= roll.target || roll.value === 1) && (roll.value !== 20)) {
+        roll.result = "Success";
+    } else {
         roll.result = "Failure";
     }
+
+    roll.message = "Roll: " + roll.value +
+        "\nTarget: " + roll.target +
+        "\nResult: " + roll.result +
+        "\nRange: " + roll.range;
+
     return roll;
 };
 
-MML.displayGmRoll = function displayGmRoll(input){
+MML.displayGmRoll = function displayGmRoll(input) {
     sendChat(this.name, '/w "' + this.name + '" &{template:rollMenu} {{title=' + this.currentRoll.message + "}}");
-    // if(this.currentRoll.name === "damage"){
+    // if(this.currentRoll.type === "damage"){
     //     sendChat(this.name, '/w "' + this.player + '" &{template:damage} {{title=' + this.currentRoll.title + "}} {{value=" + this.currentRoll.value + "}} {{type=" + this.currentRoll.type + "}} {{range=" + this.currentRoll.range + "}} ");
     // }
-    // else if(this.currentRoll.name === "universal" || this.currentRoll.name === "attribute"){
+    // else if(this.currentRoll.type === "universal" || this.currentRoll.type === "attribute"){
     //     sendChat(this.name, '/w "' + this.player + '" &{template:universal} {{title=' + this.currentRoll.title + "}} {{result=" + this.currentRoll.result + "}} {{target=" + this.currentRoll.target + "}} {{range=" + this.currentRoll.range + "}} {{value=" + this.currentRoll.value + "}} ");
     // }
-    // else if(this.currentRoll.name === "hitPosition"){
+    // else if(this.currentRoll.type === "hitPosition"){
     //     sendChat(this.name, '/w "' + this.player + '" &{template:hitPosition} {{title=' + this.currentRoll.title + "}} {{result=" + this.currentRoll.result + "}} {{range=" + this.currentRoll.range + "}} {{value=" + this.currentRoll.value + "}} ");
     // }
-    
+
 };
 
 //Menu Functions
-MML.displayMenu = function displayMenu(input){
+MML.displayMenu = function displayMenu(input) {
     var toChat = '/w "' + this.name + '" &{template:charMenu} {{name=' + this.message + '}} ';
 
-    _.each(this.buttons, function(button){
+    _.each(this.buttons, function(button) {
         var noSpace = button.text.replace(/\s+/g, '');
         var command = JSON.stringify({
-                type: "player",
-                who: this.name,
-                input: {
-                    who: this.who,
-                    buttonText: button.text
-                },
-                triggeredFunction: "menuCommand"
-            });
-        
+            type: "player",
+            who: this.name,
+            input: {
+                who: this.who,
+                buttonText: button.text
+            },
+            triggeredFunction: "menuCommand"
+        });
+
         // JSON strings screw up Command Buttons, convert to hex
         var hex, i;
         var result = "";
-        for (i=0; i<command.length; i++){
-            result += ("000"+command.charCodeAt(i).toString(16)).slice(-4);
+        for (i = 0; i < command.length; i++) {
+            result += ("000" + command.charCodeAt(i).toString(16)).slice(-4);
         }
 
-        
-        toChat = toChat + '{{' + noSpace + '=[' + button.text + '](!' + result + ')}} ';
+
+        toChat = toChat + '{{' + noSpace + '=[' + button.text + '](!MML|' + result + ')}} ';
     }, this);
-    sendChat(this.name, toChat, null, {noarchive: false}); //Change to true this when they fix the bug
+    sendChat(this.name, toChat, null, {
+        noarchive: false
+    }); //Change to true this when they fix the bug
 };
 
-MML.displayTargetSelection = function displayTargetSelection(input){
+MML.displayTargetSelection = function displayTargetSelection(input) {
     var inputJSON = JSON.stringify(input);
 
     // JSON strings screw up Command Buttons, convert to hex
     var hex, i;
     var result = "";
-    for (i=0; i<inputJSON.length; i++){
-        result += ("000"+inputJSON.charCodeAt(i).toString(16)).slice(-4);
+    for (i = 0; i < inputJSON.length; i++) {
+        result += ("000" + inputJSON.charCodeAt(i).toString(16)).slice(-4);
     }
 
-    sendChat("", "&{template:selectTarget} {{charName=" + input.charName + "}} {{input="+ result +"}}");
+    sendChat("", "&{template:selectTarget} {{charName=" + input.charName + "}} {{input=" + result + "}}");
 };
 
 // NEEDS WORK. Attacks from above and below need to be added. Use arrays instead of switches on the hit positions for cleaner code
-MML.rollHitPosition = function rollHitPosition(){
+MML.rollHitPosition = function rollHitPosition() {
     var position;
     var defender = state.MML.GM.characters[this.action.targets[0]];
-      
-    switch(this.action.calledShot){            
-        
+
+    switch (this.action.calledShot) {
+
         case "head":
             positionArray = [1, 2, 3, 4, 5, 6, 7];
             position = positionArray[MML.rollDice(1, 7) - 1];
@@ -8953,21 +9276,26 @@ MML.rollHitPosition = function rollHitPosition(){
         case "rightArm":
             positionArray = [8, 14, 20, 26, 32];
             position = positionArray[MML.rollDice(1, 5) - 1];
-            break;  
+            break;
         case "leftLeg":
             positionArray = [36, 38, 40, 42, 44, 46];
             position = positionArray[MML.rollDice(1, 6) - 1];
-            break;  
+            break;
         case "rightLeg":
             positionArray = [35, 37, 39, 41, 43, 45];
             position = positionArray[MML.rollDice(1, 6) - 1];
-            break;  
+            break;
         default: // Use this for targeting specific hit positions
             position = this.action.calledShot;
             break;
     }
-    
+
     // Deal with elevation here
-    return { name: "hitPosition", range: "1-46",  result: MML.hitPositions[position].name, value: position };
+    return {
+        name: "hitPosition",
+        range: "1-46",
+        result: MML.hitPositions[position].name,
+        value: position
+    };
 
 };

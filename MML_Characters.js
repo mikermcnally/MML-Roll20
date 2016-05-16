@@ -767,6 +767,29 @@ MML.initiativeApply = function initiativeApply(){
     });    
 };
 
+MML.startAction = function startAction(input){
+    state.MML.GM.currentAction = {
+        who: this.name
+    };
+
+    if(!_.isUndefined(this.action.getTargets)){
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: this.action.getTargets,
+            input: {}
+        });
+    }
+    else{
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: this.action.triggeredFunction,
+            input: {}
+        });
+    }
+};
+
 MML.startAttackAction = function startAttackAction(input){
     if(_.contains(this.action.modifiers, ["Called Shot"])){
         MML.processCommand({
@@ -793,7 +816,7 @@ MML.startAttackAction = function startAttackAction(input){
             this.statusEffects["Taking Aim"].level++;
         }
         else{
-            this.statusEffects["Taking Aim"] = { name: "Taking Aim", level: 1, target: this.action.targets[0] };
+            this.statusEffects["Taking Aim"] = { name: "Taking Aim", level: 1, target: input.target };
         }
     }
     else{
@@ -801,11 +824,10 @@ MML.startAttackAction = function startAttackAction(input){
             type: "character",
             who: this.name,
             triggeredFunction: "processAttack",
-            input: input   
+            input: {}   
         });
     }
 };
-
 
 MML.processAttack = function processAttack(input){
     this.statusEffects["Melee This Round"] = {};
@@ -815,7 +837,7 @@ MML.processAttack = function processAttack(input){
             type: "character",
             who: this.name,
             triggeredFunction: "unarmedAttack",
-            input: input   
+            input: {}   
         });
     }
     else if(MML.isDualWielding(this)){
@@ -823,7 +845,7 @@ MML.processAttack = function processAttack(input){
             type: "character",
             who: this.name,
             triggeredFunction: "dualWieldAttack",
-            input: input   
+            input: {}   
         });
     }
     else if (MML.getWeaponFamily(this, "leftHand") === "MWD" || MML.getWeaponFamily(this, "leftHand") === "MWM"){
@@ -831,7 +853,7 @@ MML.processAttack = function processAttack(input){
             type: "character",
             who: this.name,
             triggeredFunction: "missileAttack",
-            input: input   
+            input: {}   
         });
     }
     else if(MML.getWeaponFamily(this, "leftHand") === "TWH" || 
@@ -846,7 +868,7 @@ MML.processAttack = function processAttack(input){
             type: "character",
             who: this.name,
             triggeredFunction: "throwingAttack",
-            input: input   
+            input: {}   
         });
     }
     else {
@@ -854,7 +876,7 @@ MML.processAttack = function processAttack(input){
             type: "character",
             who: this.name,
             triggeredFunction: "meleeAttack",
-            input: input   
+            input: {}   
         });
     }
 };
@@ -862,11 +884,7 @@ MML.processAttack = function processAttack(input){
 MML.meleeAttack = function meleeAttack(input){
     var itemId;
     var grip;
-    var skill;
-    var attackerWeapon;
-    input.attackMod = this.meleeAttackMod + this.attributeMeleeAttackMod;
-    input.sitMod = this.situationalMod;
-
+    
     if(MML.getWeaponFamily(this, "rightHand") !== "unarmed"){
         itemId = this.rightHand._id;
         grip = this.rightHand.grip;
@@ -876,58 +894,65 @@ MML.meleeAttack = function meleeAttack(input){
         grip = this.leftHand.grip;
     }
 
-    attackerWeapon = this.inventory[itemId];
-    input.attackerWeapon = attackerWeapon;
-    input.attackerGrip = grip;
-    input.skill = MML.getWeaponSkill(this, attackerWeapon);
-    input.who = this.name;
+    var attackerWeapon = this.inventory[itemId];
 
-    state.MML.GM.currentAction = input;
+    var currentAction = {
+        attackerWeapon: attackerWeapon,
+        attackerGrip: grip,
+        skill: MML.getWeaponSkill(this, attackerWeapon),
+        attackMod: this.meleeAttackMod + this.attributeMeleeAttackMod,
+        sitMod: this.situationalMod
+    };
+
+    state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, currentAction);
 
     if(attackerWeapon.grips[grip].secondaryType !== ""){
         MML.processCommand({
             type: "player",
             who: this.player,
             triggeredFunction: "charMenuSelectDamageType",
-            input: input
+            input: {
+                who: this.name
+            }
         });
 
         MML.processCommand({
             type: "player",
             who: this.player,
             triggeredFunction: "displayMenu",
-            input: input
+            input: {}
         });
     }
     else{
-        state.MML.GM.currentAction.damageType = "primary";
+        state.MML.GM.currentAction.weaponType = "primary";
 
         MML.processCommand({
             type: "character",
             who: this.name,
             triggeredFunction: "meleeAttackRoll",
-            input: input
+            input: {}
         });
     }
 };
 
 MML.meleeAttackRoll = function meleeAttackRoll(input){
     var action = state.MML.GM.currentAction;
-    if (input.damageType === "primary"){
-        input.mods = [action.attackerWeapon.grips[action.attackerGrip].primaryTask, action.skill, action.sitMod, action.attackMod];
+    var mods;
+    if (action.weaponType === "primary"){
+        mods = [action.attackerWeapon.grips[action.attackerGrip].primaryTask, action.skill, action.sitMod, action.attackMod];
     }
     else{
-        input.mods = [action.attackerWeapon.grips[action.attackerGrip].secondaryTask, action.skill, action.sitMod, action.attackMod];
+        mods = [action.attackerWeapon.grips[action.attackerGrip].secondaryTask, action.skill, action.sitMod, action.attackMod];
     }
-
-    input.rollResultFunction = "attackRollResult";
-    input.character = this.name;
 
     MML.processCommand({
         type: "character",
         who: this.name,
         triggeredFunction: "universalRoll",
-        input: input
+        input: {
+            rollResultFunction: "attackRollResult",
+            mods: mods
+        }
     });
 };
 
@@ -960,8 +985,8 @@ MML.attackRollResult = function attackRollResult(input){
             who: this.player,
             triggeredFunction: "displayPlayerRoll",
             input: {
-                    currentRoll: currentRoll
-                }
+                currentRoll: currentRoll
+            }
         });
         MML.processCommand({
             type: "character",
@@ -980,9 +1005,12 @@ MML.attackRollApply = function attackRollApply(input){
     if(result === "Critical Success" || result === "Success"){
         MML.processCommand({
             type: "character",
-            who: action.target,
+            who: action.targetArray[action.targetIndex],
             triggeredFunction: "meleeDefense",
-            input: action
+            input: {
+                attackerWeapon: action.attackerWeapon,
+                attackerGrip: action.attackerGrip
+            }
         });
     }
     else if(result === "Critical Failure"){
@@ -1001,6 +1029,106 @@ MML.attackRollApply = function attackRollApply(input){
         });
     }
 };
+
+
+
+MML.hitPositionRoll = function hitPositionRoll(input){
+    var action = state.MML.GM.currentAction;
+    var mods;
+    if (action.weaponType === "primary"){
+        mods = [action.attackerWeapon.grips[action.attackerGrip].primaryTask, action.skill, action.sitMod, action.attackMod];
+    }
+    else{
+        mods = [action.attackerWeapon.grips[action.attackerGrip].secondaryTask, action.skill, action.sitMod, action.attackMod];
+    }
+
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "universalRoll",
+        input: {
+            rollResultFunction: "attackRollResult",
+            mods: mods
+        }
+    });
+};
+
+MML.hitPositionRollResult = function hitPositionRollResult(input){
+    var currentRoll = state.MML.players[this.player].currentRoll;
+
+    if(this.player === state.MML.GM.player){
+        if(currentRoll.accepted === false){
+            MML.processCommand({
+                type: "player",
+                who: this.player,
+                triggeredFunction: "displayGmRoll",
+                input: {
+                    currentRoll: currentRoll
+                }
+            });
+        }
+        else{
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                triggeredFunction: "attackRollApply",
+                input: currentRoll
+            });
+        }
+    }
+    else{
+        MML.processCommand({
+            type: "player",
+            who: this.player,
+            triggeredFunction: "displayPlayerRoll",
+            input: {
+                currentRoll: currentRoll
+            }
+        });
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "attackRollApply",
+            input: currentRoll
+        });
+    }
+};
+
+MML.hitPositionRollApply = function hitPositionRollApply(input){
+    var result = input.result;
+    state.MML.GM.currentAction.attackRollResult = result;
+    var action = state.MML.GM.currentAction;
+    
+    if(result === "Critical Success" || result === "Success"){
+        MML.processCommand({
+            type: "character",
+            who: action.targetArray[action.targetIndex],
+            triggeredFunction: "meleeDefense",
+            input: {
+                attackerWeapon: action.attackerWeapon,
+                attackerGrip: action.attackerGrip
+            }
+        });
+    }
+    else if(result === "Critical Failure"){
+        MML.processCommand({
+            type: "GM",
+            triggeredFunction: "attackCriticalFailure",
+            input: action
+        });
+    }
+    else{
+        MML.processCommand({
+            type: "player",
+            who: this.player,
+            triggeredFunction: "endAction",
+            input: action
+        });
+    }
+};
+
+
+
 
 MML.meleeDefense = function meleeDefense(input){
     var weaponId;
@@ -1045,19 +1173,19 @@ MML.meleeDefense = function meleeDefense(input){
 
     defenderWeapon = this.inventory[itemId];
     defenderSkill = Math.round(MML.getWeaponSkill(this, defenderWeapon)/2);
-    input.defenderWeapon = defenderWeapon;
-    input.defenderGrip = grip;
-    input.defenderSkill = defenderSkill;
-    input.who = this.name;    
     
-    input.dodgeChance = dodgeChance;
-    input.blockChance = defenderWeapon.grips[grip].defense + defaultMartialSkill + sitMod + defenseMod + shieldMod;
-
     MML.processCommand({
         type: "player",
         who: this.player,
         triggeredFunction: "charMenuDefenseRoll",
-        input: input
+        input: {
+            defenderWeapon: defenderWeapon,
+            defenderGrip: grip,
+            defenderSkill: defenderSkill,
+            who: this.name,  
+            dodgeChance: dodgeChance,
+            blockChance: defenderWeapon.grips[grip].defense + defaultMartialSkill + sitMod + defenseMod + shieldMod
+        }
     });
     MML.processCommand({
         type: "player",
@@ -1068,59 +1196,192 @@ MML.meleeDefense = function meleeDefense(input){
 };
 
 MML.meleeBlockRoll = function meleeBlockRoll(input){
-    this.currentRoll = this.characters[this.currentTarget].defenseRoll();
-    this.displayRoll();
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "universalRoll",
+        input: {
+            rollResultFunction: "meleeBlockRollResult",
+            mods: [input.blockChance]
+        }
+    });
 };
 
-MML.defenseRollResult = function defenseRollResult(){
-    this.rolls.defense = this.currentRoll.result;
-    if(this.rolls.defense === "Critical Success" || this.rolls.defense === "Success"){
-        this.endAction();
+MML.meleeBlockRollResult = function meleeBlockRollResult(input){
+    var currentRoll = state.MML.players[this.player].currentRoll;
+
+    if(this.player === state.MML.GM.player){
+        if(currentRoll.accepted === false){
+            MML.processCommand({
+                type: "player",
+                who: this.player,
+                triggeredFunction: "displayGmRoll",
+                input: {
+                    currentRoll: currentRoll
+                }
+            });
+        }
+        else{
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                triggeredFunction: "meleeBlockRollApply",
+                input: currentRoll
+            });
+        }
     }
     else{
-        var player = state.MML.characters[this.actor].player;
-        state.MML.players[player].setMenu = MML.charMenuHitPositionRoll;
-        state.MML.players[player].displayMenu();
+        MML.processCommand({
+            type: "player",
+            who: this.player,
+            triggeredFunction: "displayPlayerRoll",
+            input: {
+                currentRoll: currentRoll
+            }
+        });
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "meleeBlockRollApply",
+            input: currentRoll
+        });
     }
 };
 
-// MML.weaponDamageRoll = function weaponDamageRoll(crit){
-//     var weapon = this.inventory.weapons[0];
-//     var weaponDamage;
-//  var damageType;
-//  var bonusDamage = 0; // Strength, weapon, and other bonuses
-//  var roll;
+MML.meleeBlockRollApply = function meleeBlockRollApply(input){
+    // log("meleeBlockRollApply");
+    // log(input);
+    var result = input.result;
+    state.MML.GM.currentAction.defenseRollResult = result;
+    var action = state.MML.GM.currentAction;
     
-//  if (this.inventory.weapons.length === 0){
-//      log("unarmed");//unarmed damage
-//  }
-//  else if (this.inventory.weapons[0].family === "MWD" || this.inventory.weapons[0].family === "MWM"){
-//      log("missile");//missile damage
-//  }
-//  else if(this.inventory.weapons[0].family === "TWH" || 
-//  this.inventory.weapons[0].family === "TWK" ||
-//  this.inventory.weapons[0].family === "TWS" ||
-//  this.inventory.weapons[0].family === "SLI" ){
-//      log("thrown"); //thrown damage
-//  }
-//  else if(this.inventory.weapons.length === 2){
-//      log("dual"); //dual wield damage
-//  }
-//  else {//Melee Damage
-//      //Primary or secondary attack
-//      if (this.action.damageType === "primary"){
-//          weaponDamage = weapon.primaryDamage;
-//          damageType = weapon.primaryType;
-//      }
-//      else {
-//          weaponDamage = weapon.secondaryDamage;
-//          damageType = weapon.secondaryType;
-//      }
-//  }
-//  roll = MML.rollDamage(weaponDamage, [bonusDamage], crit, damageType);
-//  return roll;
-// };
+    if(result === "Critical Success" || result === "Success"){
+        if(result === "Success"){
+           if(MML.hasStatusEffect("Number of Defenses")){
+                this.statusEffects["Number of Defenses"].number++;
+            }
+            else{
+                this.statusEffects["Number of Defenses"] = { number: 1 };
+            }
 
+            if(action.attackRollResult === "Critical Success"){
+                MML.processCommand({
+                    type: "character",
+                    who: this.name,
+                    triggeredFunction: "equipmentFailure",
+                    input: {}
+                }); 
+            } 
+        }
+        
+        MML.processCommand({
+            type: "character",
+            who: action.who,
+            triggeredFunction: "endAction",
+            input: {}
+        });
+    }
+    else{
+        MML.processCommand({
+            type: "character",
+            who: action.who,
+            triggeredFunction: "meleeDamageRoll",
+            input: {}
+        });
+    }
+};
+
+MML.meleeDodgeRoll = function meleeDodgeRoll(input){
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "universalRoll",
+        input: {
+            rollResultFunction: "meleeDodgeRollResult",
+            mods: [input.dodgeChance]
+        }
+    });
+};
+
+MML.equipmentFailure = function equipmentFailure(input){
+    log("equipmentFailure");
+};
+
+MML.meleeDamageRoll = function meleeDamageRoll(input){
+    var action = state.MML.GM.currentAction;
+    var weapon = action.attackerWeapon;
+    var weaponDamage;
+    var damageType;
+    var bonusDamage = 0;
+
+    //Primary or secondary attack
+    if (action.weaponType === "primary"){
+        weaponDamage = weapon.grips[action.attackerGrip].primaryDamage;
+        damageType = weapon.grips[action.attackerGrip].primaryType;
+    }
+    else {
+        weaponDamage = weapon.grips[action.attackerGrip].secondaryDamage;
+        damageType = weapon.grips[action.attackerGrip].secondaryType;
+    }
+    
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "rollDamage",
+        input: {
+            rollResultFunction: "meleeDamageResult",
+            attackRollResult: action.attackRollResult,
+            weaponDamage: weaponDamage,
+            damageType: damageType,
+            mods: [this.meleeDamageMod, bonusDamage]
+        }
+    });
+};
+
+MML.meleeDamageResult = function meleeDamageResult(input){
+    var currentRoll = state.MML.players[this.player].currentRoll;
+
+    if(this.player === state.MML.GM.player){
+        if(currentRoll.accepted === false){
+            MML.processCommand({
+                type: "player",
+                who: this.player,
+                triggeredFunction: "displayGmRoll",
+                input: {
+                    currentRoll: currentRoll
+                }
+            });
+        }
+        else{
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                triggeredFunction: "meleeDamageRollApply",
+                input: currentRoll
+            });
+        }
+    }
+    else{
+        MML.processCommand({
+            type: "player",
+            who: this.player,
+            triggeredFunction: "displayPlayerRoll",
+            input: {
+                currentRoll: currentRoll
+            }
+        });
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "meleeDamageRollApply",
+            input: currentRoll
+        });
+    }
+};
+
+MML.meleeDamageRollApply = function meleeDamageRollApply(input){
+
+};
 
 // Todo: Add sweep attack
 

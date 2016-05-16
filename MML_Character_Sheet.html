@@ -57,7 +57,7 @@
     <table>
         <tr><th>{{title}}</th></tr>
          <tr>
-            <td><span class="tcat"></span>[Change](!changeRoll ?{value})</a></td><td><span class="tcat"> </span>[Accept](!acceptRoll)</a></td>
+            <td><span class="tcat"></span>[Change](!MML|changeRoll ?{value})</a></td><td><span class="tcat"> </span>[Accept](!MML|acceptRoll)</a></td>
         </tr>
     </table>
 </rolltemplate>
@@ -66,7 +66,7 @@
     <table>
         <tr><th>Select a Token</th></tr>
         <tr>
-            <td><span class="tcat"></span>[Select](!selectTarget {{charName}}|@{target|character_name}|{{input}})</td>        
+            <td><span class="tcat"></span>[Select](!!MML|selectTarget {{charName}}|@{target|character_name}|{{input}})</td>        
         </tr>
         <tr>
             <td><span class="tcat"></span>{{back}} </a></td><td><span class="tcat"> </span>{{accept}}</a></td>

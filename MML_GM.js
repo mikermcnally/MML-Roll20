@@ -126,12 +126,6 @@ MML.startCombatMovement = function startCombatMovement(){
 	}
 };
 
-MML.startAction = function startAction(input){
-    if(!_.isUndefined(this.action.getTargets)){
-        MML[this.action.getTargets].apply(this, [input]);
-    }	
-};
-
 MML.setTargets = function selectTargets(){
 	this.targets = this.characters[this.actor].action.targets;
 	this.targetIndex = 0;
@@ -409,11 +403,18 @@ MML.changeRoll = function changeRoll(input){
 	var high = parseInt(range[1]);
 	log(this.currentRoll.rollResultFunction);
 	if(value >= low && value <= high){
-		if(this.currentRoll.name === "damage"){
+		if(this.currentRoll.type === "damage"){
 			this.currentRoll.value = -value;
+			this.currentRoll.message = "Roll: " + value + "\nRange: " + this.currentRoll.range;
 		}
 		else{
 			this.currentRoll.value = value;
+			if(this.currentRoll.type === "universal"){
+				this.currentRoll = MML.universalRollResult(this.currentRoll);
+			}
+			else if(this.currentRoll.type === "attribute"){
+				this.currentRoll = MML.attributeRollResult(this.currentRoll);
+			}
 		}
 	}
 	else{
@@ -517,11 +518,12 @@ MML.processCommand = function processCommand(command){
 };
 
 MML.parseCommand = function parseCommand(msg) {
-    if(msg.type === "api"){
+    if(msg.type === "api" && msg.content.indexOf("!MML|") !== -1){
     	var command = "parse failed";
+    	var content = msg.content.replace("!MML|", "");
 
-    	if(msg.content.indexOf("!selectTarget") !== -1) {
-	        var stringIn = msg.content.replace("!selectTarget ", "").split("|");
+    	if(content.indexOf("selectTarget") !== -1) {
+	        var stringIn = content.replace("selectTarget ", "").split("|");
 	        var character = stringIn[0];
 	        var target = stringIn[1];
 	        var hexedInput = stringIn[2];
@@ -552,8 +554,8 @@ MML.parseCommand = function parseCommand(msg) {
 	        };
 	    }
 
-	    else if(msg.content.indexOf("!changeRoll") !== -1) {
-	        var value = parseInt(msg.content.replace("!changeRoll ", ""));
+	    else if(content.indexOf("changeRoll") !== -1) {
+	        var value = parseInt(content.replace("changeRoll ", ""));
 	        
 	        if(!isNaN(value)){
 	            command = {
@@ -570,7 +572,7 @@ MML.parseCommand = function parseCommand(msg) {
 	        }       
 	    }
 
-	    else if(msg.content.indexOf("!acceptRoll") !== -1) {
+	    else if(content.indexOf("acceptRoll") !== -1) {
 	        if(state.MML.players[state.MML.GM.player].currentRoll.accepted === false){
 	        	var player = state.MML.players[state.MML.GM.player];
 	            state.MML.players[player.name].currentRoll.accepted = true;
@@ -584,8 +586,8 @@ MML.parseCommand = function parseCommand(msg) {
 	        }
 	    }
 
-	    else if(msg.content.indexOf("!displayItemOptions") !== -1) {
-	        var input = msg.content.replace("!displayItemOptions ", "").split("|");
+	    else if(content.indexOf("displayItemOptions") !== -1) {
+	        var input = content.replace("displayItemOptions ", "").split("|");
 	        var who = input[0];
 	        var itemId = input[1];
 
@@ -601,7 +603,7 @@ MML.parseCommand = function parseCommand(msg) {
 	    }
     	else{
     		var i;
-		    var hexes = msg.content.slice(1).match(/.{1,4}/g) || [];
+		    var hexes = content.match(/.{1,4}/g) || [];
 		    command = "";
 		    for(i = 0; i<hexes.length; i++) {
 		        command += String.fromCharCode(parseInt(hexes[i], 16));
@@ -611,9 +613,8 @@ MML.parseCommand = function parseCommand(msg) {
 			}
 			catch (e) {
 			 	log(command);
-			 	command = "JSON parse failed";
-			 	log(command);
-                MML.error();
+			 	log(content);
+                sendChat("", "JSON parse failed");
 			}
 
 	        command.input.selectedCharNames = MML.getSelectedCharNames(msg.selected);
