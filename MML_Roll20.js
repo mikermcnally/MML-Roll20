@@ -9299,3 +9299,4 @@ MML.rollHitPosition = function rollHitPosition() {
     };
 
 };
+
