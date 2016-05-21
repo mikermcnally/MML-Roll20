@@ -476,11 +476,11 @@ MML.displayTargetSelection = function displayTargetSelection(input) {
 };
 
 // NEEDS WORK. Attacks from above and below need to be added. Use arrays instead of switches on the hit positions for cleaner code
-MML.rollHitPosition = function rollHitPosition() {
+MML.hitPositionRoll = function rollHitPosition(input) {
     var position;
-    var defender = state.MML.GM.characters[this.action.targets[0]];
+    var defender = state.MML.GM.characters[input.target];
 
-    switch (this.action.calledShot) {
+    switch (input.calledShot) {
 
         case "head":
             positionArray = [1, 2, 3, 4, 5, 6, 7];
@@ -524,3 +524,4 @@ MML.rollHitPosition = function rollHitPosition() {
     };
 
 };
+
