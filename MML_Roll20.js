@@ -642,7 +642,7 @@ MML.checkKnockdown = function checkKnockdown(damage){
 MML.knockdownRoll = function knockdownRoll(){
     var roll;
 
-    if(MML.hasStatusEffect.apply(this, ["Stumbling"])){
+    if(_.has(this.statusEffects, "Stumbling")){
         //victim saved first knockdown check, harder to save 2nd time
         roll = MML.attributeCheckRoll(this, ["systemStrength", [-5]]);
     }   
@@ -875,7 +875,7 @@ MML.startAttackAction = function startAttackAction(input){
         });
     }
     else if(_.contains(this.action.modifiers, ["Aim"])){
-        if(MML.hasStatusEffect("Taking Aim")){
+        if(_.has(this.statusEffects, "Taking Aim")){
             this.statusEffects["Taking Aim"].level++;
         }
         else{
@@ -1034,6 +1034,11 @@ MML.attackRollResult = function attackRollResult(input){
             });
         }
         else{
+            if(_.contains(this.action.modifiers, ["Called Shot Specific"]) && currentRoll.value - currentRoll.target < 11){
+                this.action.modifiers = _.without(this.action.modifiers, 'Called Shot Specific');
+                this.action.modifiers.push("Called Shot");
+                currentRoll.result = "Success";
+            }
             MML.processCommand({
                 type: "character",
                 who: this.name,
@@ -1051,6 +1056,11 @@ MML.attackRollResult = function attackRollResult(input){
                 currentRoll: currentRoll
             }
         });
+        if(_.contains(this.action.modifiers, ["Called Shot Specific"]) && currentRoll.value - currentRoll.target < 11){
+            this.action.modifiers = _.without(this.action.modifiers, 'Called Shot Specific');
+            this.action.modifiers.push("Called Shot");
+            currentRoll.result = "Success";
+        }
         MML.processCommand({
             type: "character",
             who: this.name,
@@ -1093,27 +1103,8 @@ MML.attackRollApply = function attackRollApply(input){
     }
 };
 
-
-
 MML.hitPositionRoll = function hitPositionRoll(input){
-    var action = state.MML.GM.currentAction;
-    var mods;
-    if (action.weaponType === "primary"){
-        mods = [action.attackerWeapon.grips[action.attackerGrip].primaryTask, action.skill, action.sitMod, action.attackMod];
-    }
-    else{
-        mods = [action.attackerWeapon.grips[action.attackerGrip].secondaryTask, action.skill, action.sitMod, action.attackMod];
-    }
-
-    MML.processCommand({
-        type: "character",
-        who: this.name,
-        triggeredFunction: "universalRoll",
-        input: {
-            rollResultFunction: "attackRollResult",
-            mods: mods
-        }
-    });
+    action.targetArray[action.targetIndex] = 
 };
 
 MML.hitPositionRollResult = function hitPositionRollResult(input){
@@ -1320,7 +1311,7 @@ MML.meleeBlockRollApply = function meleeBlockRollApply(input){
     
     if(result === "Critical Success" || result === "Success"){
         if(result === "Success"){
-           if(MML.hasStatusEffect("Number of Defenses")){
+           if(_.has("Number of Defenses")){
                 this.statusEffects["Number of Defenses"].number++;
             }
             else{
@@ -8572,7 +8563,7 @@ MML.statusEffects["Major Wound"] = function(effect, index){
     }
     else{
         if(this.situationalInitBonus !== "No Combat"){
-            this.situationalInitBonus += -5;
+            this.situationalInitBonus += -5;`
         }
         if(effect.duration > 0){
             this.situationalMod += -10;
@@ -8711,7 +8702,7 @@ MML.statusEffects["Observe"] = function(effect, index){
         effect.duration--;
     }
     
-    if(effect.duration < 1 || (this.situationalInitBonus !== "No Combat" && !MML.hasStatusEffect("Number of Defenses"))){
+    if(effect.duration < 1 || (this.situationalInitBonus !== "No Combat" && !_.has(this.statusEffects, "Number of Defenses"))){
         delete this.statusEffects[index];
     }
     else if(effect.duration < 1){
@@ -8729,9 +8720,9 @@ MML.statusEffects["Observe"] = function(effect, index){
         } 
 };
 MML.statusEffects["Taking Aim"] = function(effect, index){
-    if(MML.hasStatusEffect.apply(this, ["Number of Defenses"]) ||
-       MML.hasStatusEffect.apply(this, ["Damaged This Round"]) ||
-       MML.hasStatusEffect.apply(this, ["Dodged This Round"]) ||
+    if(_.has(this.statusEffects, "Number of Defenses") ||
+       _.has(this.statusEffects, "Damaged This Round") ||
+       _.has(this.statusEffects, "Dodged This Round") ||
        this.action.targets[0] !== effect.target)
     {
         delete this.statusEffects[index];
@@ -8744,22 +8735,6 @@ MML.statusEffects["Taking Aim"] = function(effect, index){
             this.missileAttackMod += 40;
         }
     }
-};
-MML.statusEffects["Aim"] = function(effect, index){
-    // if(MML.hasStatusEffect.apply(this, ["Number of Defenses"]) ||
-    //    MML.hasStatusEffect.apply(this, ["Damaged This Round"]) ||
-    //    MML.hasStatusEffect.apply(this, ["Dodged This Round"]))
-    // {
-    //     this.statusEffects[index]
-    // }
-    // else if(state.MML.GM.roundStarted === false){
-    //     if(effect.level === 1){
-    //         this.missileAttackMod += 30;
-    //     }
-    //     else if(effect.level === 2){
-    //         this.missileAttackMod += 40;
-    //     }
-    //}
 };
 MML.statusEffects["Damaged This Round"] = function(effect, index){
 

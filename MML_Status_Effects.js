@@ -5,7 +5,7 @@ MML.statusEffects["Major Wound"] = function(effect, index){
     }
     else{
         if(this.situationalInitBonus !== "No Combat"){
-            this.situationalInitBonus += -5;
+            this.situationalInitBonus += -5;`
         }
         if(effect.duration > 0){
             this.situationalMod += -10;
@@ -144,7 +144,7 @@ MML.statusEffects["Observe"] = function(effect, index){
         effect.duration--;
     }
     
-    if(effect.duration < 1 || (this.situationalInitBonus !== "No Combat" && !MML.hasStatusEffect("Number of Defenses"))){
+    if(effect.duration < 1 || (this.situationalInitBonus !== "No Combat" && !_.has(this.statusEffects, "Number of Defenses"))){
         delete this.statusEffects[index];
     }
     else if(effect.duration < 1){
@@ -162,9 +162,9 @@ MML.statusEffects["Observe"] = function(effect, index){
         } 
 };
 MML.statusEffects["Taking Aim"] = function(effect, index){
-    if(MML.hasStatusEffect.apply(this, ["Number of Defenses"]) ||
-       MML.hasStatusEffect.apply(this, ["Damaged This Round"]) ||
-       MML.hasStatusEffect.apply(this, ["Dodged This Round"]) ||
+    if(_.has(this.statusEffects, "Number of Defenses") ||
+       _.has(this.statusEffects, "Damaged This Round") ||
+       _.has(this.statusEffects, "Dodged This Round") ||
        this.action.targets[0] !== effect.target)
     {
         delete this.statusEffects[index];
@@ -177,22 +177,6 @@ MML.statusEffects["Taking Aim"] = function(effect, index){
             this.missileAttackMod += 40;
         }
     }
-};
-MML.statusEffects["Aim"] = function(effect, index){
-    // if(MML.hasStatusEffect.apply(this, ["Number of Defenses"]) ||
-    //    MML.hasStatusEffect.apply(this, ["Damaged This Round"]) ||
-    //    MML.hasStatusEffect.apply(this, ["Dodged This Round"]))
-    // {
-    //     this.statusEffects[index]
-    // }
-    // else if(state.MML.GM.roundStarted === false){
-    //     if(effect.level === 1){
-    //         this.missileAttackMod += 30;
-    //     }
-    //     else if(effect.level === 2){
-    //         this.missileAttackMod += 40;
-    //     }
-    //}
 };
 MML.statusEffects["Damaged This Round"] = function(effect, index){
 
