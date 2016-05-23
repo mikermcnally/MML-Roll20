@@ -642,7 +642,7 @@ MML.checkKnockdown = function checkKnockdown(damage){
 MML.knockdownRoll = function knockdownRoll(){
     var roll;
 
-    if(MML.hasStatusEffect.apply(this, ["Stumbling"])){
+    if(_.has(this.statusEffects, "Stumbling")){
         //victim saved first knockdown check, harder to save 2nd time
         roll = MML.attributeCheckRoll(this, ["systemStrength", [-5]]);
     }   
@@ -875,7 +875,7 @@ MML.startAttackAction = function startAttackAction(input){
         });
     }
     else if(_.contains(this.action.modifiers, ["Aim"])){
-        if(MML.hasStatusEffect("Taking Aim")){
+        if(_.has(this.statusEffects, "Taking Aim")){
             this.statusEffects["Taking Aim"].level++;
         }
         else{
@@ -1034,6 +1034,11 @@ MML.attackRollResult = function attackRollResult(input){
             });
         }
         else{
+            if(_.contains(this.action.modifiers, ["Called Shot Specific"]) && currentRoll.value - currentRoll.target < 11){
+                this.action.modifiers = _.without(this.action.modifiers, 'Called Shot Specific');
+                this.action.modifiers.push("Called Shot");
+                currentRoll.result = "Success";
+            }
             MML.processCommand({
                 type: "character",
                 who: this.name,
@@ -1051,6 +1056,11 @@ MML.attackRollResult = function attackRollResult(input){
                 currentRoll: currentRoll
             }
         });
+        if(_.contains(this.action.modifiers, ["Called Shot Specific"]) && currentRoll.value - currentRoll.target < 11){
+            this.action.modifiers = _.without(this.action.modifiers, 'Called Shot Specific');
+            this.action.modifiers.push("Called Shot");
+            currentRoll.result = "Success";
+        }
         MML.processCommand({
             type: "character",
             who: this.name,
@@ -1093,27 +1103,8 @@ MML.attackRollApply = function attackRollApply(input){
     }
 };
 
-
-
 MML.hitPositionRoll = function hitPositionRoll(input){
-    var action = state.MML.GM.currentAction;
-    var mods;
-    if (action.weaponType === "primary"){
-        mods = [action.attackerWeapon.grips[action.attackerGrip].primaryTask, action.skill, action.sitMod, action.attackMod];
-    }
-    else{
-        mods = [action.attackerWeapon.grips[action.attackerGrip].secondaryTask, action.skill, action.sitMod, action.attackMod];
-    }
-
-    MML.processCommand({
-        type: "character",
-        who: this.name,
-        triggeredFunction: "universalRoll",
-        input: {
-            rollResultFunction: "attackRollResult",
-            mods: mods
-        }
-    });
+    action.targetArray[action.targetIndex] = {};
 };
 
 MML.hitPositionRollResult = function hitPositionRollResult(input){
@@ -1320,7 +1311,7 @@ MML.meleeBlockRollApply = function meleeBlockRollApply(input){
     
     if(result === "Critical Success" || result === "Success"){
         if(result === "Success"){
-           if(MML.hasStatusEffect("Number of Defenses")){
+           if(_.has("Number of Defenses")){
                 this.statusEffects["Number of Defenses"].number++;
             }
             else{
@@ -3456,6 +3447,312 @@ MML.hitPositions.humanoid[43] = { name: "Right Lower Shin", part: "hpRL" };
 MML.hitPositions.humanoid[44] = { name: "Left Lower Shin", part: "hpLL" };
 MML.hitPositions.humanoid[45] = { name: "Right Foot/Ankle", part: "hpRL" };
 MML.hitPositions.humanoid[46] = { name: "Left Foot/Ankle", part: "hpLL" };
+
+MML.hitTables = {};
+MML.hitTables.humanoid = {};
+MML.hitTables.humanoid.A = [];
+MML.hitTables.humanoid.A[1] = 1;
+MML.hitTables.humanoid.A[2] = 1;
+MML.hitTables.humanoid.A[3] = 2;
+MML.hitTables.humanoid.A[4] = 3;
+MML.hitTables.humanoid.A[5] = 3;
+MML.hitTables.humanoid.A[6] = 4;
+MML.hitTables.humanoid.A[7] = 4;
+MML.hitTables.humanoid.A[8] = 5;
+MML.hitTables.humanoid.A[9] = 5;
+MML.hitTables.humanoid.A[10] = 6;
+MML.hitTables.humanoid.A[11] = 7;
+MML.hitTables.humanoid.A[12] = 8;
+MML.hitTables.humanoid.A[13] = 8;
+MML.hitTables.humanoid.A[14] = 8;
+MML.hitTables.humanoid.A[15] = 8;
+MML.hitTables.humanoid.A[16] = 9;
+MML.hitTables.humanoid.A[17] = 9;
+MML.hitTables.humanoid.A[18] = 9;
+MML.hitTables.humanoid.A[19] = 9;
+MML.hitTables.humanoid.A[20] = 10;
+MML.hitTables.humanoid.A[21] = 10;
+MML.hitTables.humanoid.A[22] = 11;
+MML.hitTables.humanoid.A[23] = 11;
+MML.hitTables.humanoid.A[24] = 11;
+MML.hitTables.humanoid.A[25] = 11;
+MML.hitTables.humanoid.A[26] = 12;
+MML.hitTables.humanoid.A[27] = 12;
+MML.hitTables.humanoid.A[28] = 13;
+MML.hitTables.humanoid.A[29] = 13;
+MML.hitTables.humanoid.A[30] = 13;
+MML.hitTables.humanoid.A[31] = 13;
+MML.hitTables.humanoid.A[32] = 14;
+MML.hitTables.humanoid.A[33] = 14;
+MML.hitTables.humanoid.A[34] = 14;
+MML.hitTables.humanoid.A[35] = 15;
+MML.hitTables.humanoid.A[36] = 15;
+MML.hitTables.humanoid.A[37] = 16;
+MML.hitTables.humanoid.A[38] = 16;
+MML.hitTables.humanoid.A[39] = 17;
+MML.hitTables.humanoid.A[40] = 17;
+MML.hitTables.humanoid.A[41] = 17;
+MML.hitTables.humanoid.A[42] = 18;
+MML.hitTables.humanoid.A[43] = 18;
+MML.hitTables.humanoid.A[44] = 19;
+MML.hitTables.humanoid.A[45] = 19;
+MML.hitTables.humanoid.A[46] = 19;
+MML.hitTables.humanoid.A[47] = 19;
+MML.hitTables.humanoid.A[48] = 20;
+MML.hitTables.humanoid.A[49] = 20;
+MML.hitTables.humanoid.A[50] = 21;
+MML.hitTables.humanoid.A[51] = 21;
+MML.hitTables.humanoid.A[52] = 21;
+MML.hitTables.humanoid.A[53] = 22;
+MML.hitTables.humanoid.A[54] = 22;
+MML.hitTables.humanoid.A[55] = 23;
+MML.hitTables.humanoid.A[56] = 23;
+MML.hitTables.humanoid.A[57] = 23;
+MML.hitTables.humanoid.A[58] = 24;
+MML.hitTables.humanoid.A[59] = 24;
+MML.hitTables.humanoid.A[60] = 25;
+MML.hitTables.humanoid.A[61] = 25;
+MML.hitTables.humanoid.A[62] = 26;
+MML.hitTables.humanoid.A[63] = 26;
+MML.hitTables.humanoid.A[64] = 27;
+MML.hitTables.humanoid.A[65] = 27;
+MML.hitTables.humanoid.A[66] = 27;
+MML.hitTables.humanoid.A[67] = 28;
+MML.hitTables.humanoid.A[68] = 28;
+MML.hitTables.humanoid.A[69] = 29;
+MML.hitTables.humanoid.A[70] = 29;
+MML.hitTables.humanoid.A[71] = 29;
+MML.hitTables.humanoid.A[72] = 30;
+MML.hitTables.humanoid.A[73] = 30;
+MML.hitTables.humanoid.A[74] = 31;
+MML.hitTables.humanoid.A[75] = 31;
+MML.hitTables.humanoid.A[76] = 32;
+MML.hitTables.humanoid.A[77] = 32;
+MML.hitTables.humanoid.A[78] = 33;
+MML.hitTables.humanoid.A[79] = 34;
+MML.hitTables.humanoid.A[80] = 34;
+MML.hitTables.humanoid.A[81] = 35;
+MML.hitTables.humanoid.A[82] = 35;
+MML.hitTables.humanoid.A[83] = 35;
+MML.hitTables.humanoid.A[84] = 36;
+MML.hitTables.humanoid.A[85] = 36;
+MML.hitTables.humanoid.A[86] = 36;
+MML.hitTables.humanoid.A[87] = 37;
+MML.hitTables.humanoid.A[88] = 37;
+MML.hitTables.humanoid.A[89] = 38;
+MML.hitTables.humanoid.A[90] = 38;
+MML.hitTables.humanoid.A[91] = 39;
+MML.hitTables.humanoid.A[92] = 39;
+MML.hitTables.humanoid.A[93] = 40;
+MML.hitTables.humanoid.A[94] = 40;
+MML.hitTables.humanoid.A[95] = 41;
+MML.hitTables.humanoid.A[96] = 42;
+MML.hitTables.humanoid.A[97] = 43;
+MML.hitTables.humanoid.A[98] = 44;
+MML.hitTables.humanoid.A[99] = 45;
+MML.hitTables.humanoid.A[100] = 46;
+MML.hitTables.humanoid.B = [];
+MML.hitTables.humanoid.B[1] = 1;
+MML.hitTables.humanoid.B[2] = 1;
+MML.hitTables.humanoid.B[3] = 2;
+MML.hitTables.humanoid.B[4] = 3;
+MML.hitTables.humanoid.B[5] = 3;
+MML.hitTables.humanoid.B[6] = 4;
+MML.hitTables.humanoid.B[7] = 4;
+MML.hitTables.humanoid.B[8] = 5;
+MML.hitTables.humanoid.B[9] = 5;
+MML.hitTables.humanoid.B[10] = 6;
+MML.hitTables.humanoid.B[11] = 7;
+MML.hitTables.humanoid.B[12] = 8;
+MML.hitTables.humanoid.B[13] = 8;
+MML.hitTables.humanoid.B[14] = 8;
+MML.hitTables.humanoid.B[15] = 8;
+MML.hitTables.humanoid.B[16] = 9;
+MML.hitTables.humanoid.B[17] = 9;
+MML.hitTables.humanoid.B[18] = 10;
+MML.hitTables.humanoid.B[19] = 10;
+MML.hitTables.humanoid.B[20] = 11;
+MML.hitTables.humanoid.B[21] = 11;
+MML.hitTables.humanoid.B[22] = 12;
+MML.hitTables.humanoid.B[23] = 12;
+MML.hitTables.humanoid.B[24] = 13;
+MML.hitTables.humanoid.B[25] = 13;
+MML.hitTables.humanoid.B[26] = 13;
+MML.hitTables.humanoid.B[27] = 13;
+MML.hitTables.humanoid.B[28] = 14;
+MML.hitTables.humanoid.B[29] = 14;
+MML.hitTables.humanoid.B[30] = 14;
+MML.hitTables.humanoid.B[31] = 14;
+MML.hitTables.humanoid.B[32] = 15;
+MML.hitTables.humanoid.B[33] = 15;
+MML.hitTables.humanoid.B[34] = 16;
+MML.hitTables.humanoid.B[35] = 16;
+MML.hitTables.humanoid.B[36] = 17;
+MML.hitTables.humanoid.B[37] = 17;
+MML.hitTables.humanoid.B[38] = 18;
+MML.hitTables.humanoid.B[39] = 18;
+MML.hitTables.humanoid.B[40] = 19;
+MML.hitTables.humanoid.B[41] = 19;
+MML.hitTables.humanoid.B[42] = 19;
+MML.hitTables.humanoid.B[43] = 19;
+MML.hitTables.humanoid.B[44] = 20;
+MML.hitTables.humanoid.B[45] = 21;
+MML.hitTables.humanoid.B[46] = 21;
+MML.hitTables.humanoid.B[47] = 22;
+MML.hitTables.humanoid.B[48] = 22;
+MML.hitTables.humanoid.B[49] = 23;
+MML.hitTables.humanoid.B[50] = 23;
+MML.hitTables.humanoid.B[51] = 24;
+MML.hitTables.humanoid.B[52] = 24;
+MML.hitTables.humanoid.B[53] = 25;
+MML.hitTables.humanoid.B[54] = 26;
+MML.hitTables.humanoid.B[55] = 26;
+MML.hitTables.humanoid.B[56] = 26;
+MML.hitTables.humanoid.B[57] = 26;
+MML.hitTables.humanoid.B[58] = 27;
+MML.hitTables.humanoid.B[59] = 27;
+MML.hitTables.humanoid.B[60] = 28;
+MML.hitTables.humanoid.B[61] = 28;
+MML.hitTables.humanoid.B[62] = 29;
+MML.hitTables.humanoid.B[63] = 29;
+MML.hitTables.humanoid.B[64] = 30;
+MML.hitTables.humanoid.B[65] = 30;
+MML.hitTables.humanoid.B[66] = 31;
+MML.hitTables.humanoid.B[67] = 31;
+MML.hitTables.humanoid.B[68] = 31;
+MML.hitTables.humanoid.B[69] = 31;
+MML.hitTables.humanoid.B[70] = 32;
+MML.hitTables.humanoid.B[71] = 32;
+MML.hitTables.humanoid.B[72] = 32;
+MML.hitTables.humanoid.B[73] = 33;
+MML.hitTables.humanoid.B[74] = 34;
+MML.hitTables.humanoid.B[75] = 34;
+MML.hitTables.humanoid.B[76] = 34;
+MML.hitTables.humanoid.B[77] = 35;
+MML.hitTables.humanoid.B[78] = 35;
+MML.hitTables.humanoid.B[79] = 35;
+MML.hitTables.humanoid.B[80] = 35;
+MML.hitTables.humanoid.B[81] = 36;
+MML.hitTables.humanoid.B[82] = 36;
+MML.hitTables.humanoid.B[83] = 36;
+MML.hitTables.humanoid.B[84] = 36;
+MML.hitTables.humanoid.B[85] = 37;
+MML.hitTables.humanoid.B[86] = 37;
+MML.hitTables.humanoid.B[87] = 37;
+MML.hitTables.humanoid.B[88] = 38;
+MML.hitTables.humanoid.B[89] = 38;
+MML.hitTables.humanoid.B[90] = 38;
+MML.hitTables.humanoid.B[91] = 39;
+MML.hitTables.humanoid.B[92] = 39;
+MML.hitTables.humanoid.B[93] = 40;
+MML.hitTables.humanoid.B[94] = 40;
+MML.hitTables.humanoid.B[95] = 41;
+MML.hitTables.humanoid.B[96] = 42;
+MML.hitTables.humanoid.B[97] = 43;
+MML.hitTables.humanoid.B[98] = 44;
+MML.hitTables.humanoid.B[99] = 45;
+MML.hitTables.humanoid.B[100] = 46;
+MML.hitTables.humanoid.C = [];
+MML.hitTables.humanoid.C[1] = 1;
+MML.hitTables.humanoid.C[2] = 1;
+MML.hitTables.humanoid.C[3] = 2;
+MML.hitTables.humanoid.C[4] = 3;
+MML.hitTables.humanoid.C[5] = 3;
+MML.hitTables.humanoid.C[6] = 4;
+MML.hitTables.humanoid.C[7] = 4;
+MML.hitTables.humanoid.C[8] = 5;
+MML.hitTables.humanoid.C[9] = 5;
+MML.hitTables.humanoid.C[10] = 6;
+MML.hitTables.humanoid.C[11] = 7;
+MML.hitTables.humanoid.C[12] = 8;
+MML.hitTables.humanoid.C[13] = 8;
+MML.hitTables.humanoid.C[14] = 8;
+MML.hitTables.humanoid.C[15] = 8;
+MML.hitTables.humanoid.C[16] = 8;
+MML.hitTables.humanoid.C[17] = 9;
+MML.hitTables.humanoid.C[18] = 9;
+MML.hitTables.humanoid.C[19] = 9;
+MML.hitTables.humanoid.C[20] = 9;
+MML.hitTables.humanoid.C[21] = 10;
+MML.hitTables.humanoid.C[22] = 10;
+MML.hitTables.humanoid.C[23] = 10;
+MML.hitTables.humanoid.C[24] = 11;
+MML.hitTables.humanoid.C[25] = 11;
+MML.hitTables.humanoid.C[26] = 12;
+MML.hitTables.humanoid.C[27] = 12;
+MML.hitTables.humanoid.C[28] = 12;
+MML.hitTables.humanoid.C[29] = 12;
+MML.hitTables.humanoid.C[30] = 13;
+MML.hitTables.humanoid.C[31] = 13;
+MML.hitTables.humanoid.C[32] = 13;
+MML.hitTables.humanoid.C[33] = 14;
+MML.hitTables.humanoid.C[34] = 14;
+MML.hitTables.humanoid.C[35] = 14;
+MML.hitTables.humanoid.C[36] = 14;
+MML.hitTables.humanoid.C[37] = 14;
+MML.hitTables.humanoid.C[38] = 15;
+MML.hitTables.humanoid.C[39] = 15;
+MML.hitTables.humanoid.C[40] = 16;
+MML.hitTables.humanoid.C[41] = 17;
+MML.hitTables.humanoid.C[42] = 18;
+MML.hitTables.humanoid.C[43] = 18;
+MML.hitTables.humanoid.C[44] = 19;
+MML.hitTables.humanoid.C[45] = 20;
+MML.hitTables.humanoid.C[46] = 20;
+MML.hitTables.humanoid.C[47] = 21;
+MML.hitTables.humanoid.C[48] = 21;
+MML.hitTables.humanoid.C[49] = 21;
+MML.hitTables.humanoid.C[50] = 21;
+MML.hitTables.humanoid.C[51] = 21;
+MML.hitTables.humanoid.C[52] = 22;
+MML.hitTables.humanoid.C[53] = 23;
+MML.hitTables.humanoid.C[54] = 23;
+MML.hitTables.humanoid.C[55] = 24;
+MML.hitTables.humanoid.C[56] = 24;
+MML.hitTables.humanoid.C[57] = 24;
+MML.hitTables.humanoid.C[58] = 25;
+MML.hitTables.humanoid.C[59] = 26;
+MML.hitTables.humanoid.C[60] = 26;
+MML.hitTables.humanoid.C[61] = 26;
+MML.hitTables.humanoid.C[62] = 26;
+MML.hitTables.humanoid.C[63] = 26;
+MML.hitTables.humanoid.C[64] = 27;
+MML.hitTables.humanoid.C[65] = 27;
+MML.hitTables.humanoid.C[66] = 27;
+MML.hitTables.humanoid.C[67] = 27;
+MML.hitTables.humanoid.C[68] = 27;
+MML.hitTables.humanoid.C[69] = 28;
+MML.hitTables.humanoid.C[70] = 29;
+MML.hitTables.humanoid.C[71] = 30;
+MML.hitTables.humanoid.C[72] = 30;
+MML.hitTables.humanoid.C[73] = 30;
+MML.hitTables.humanoid.C[74] = 30;
+MML.hitTables.humanoid.C[75] = 31;
+MML.hitTables.humanoid.C[76] = 32;
+MML.hitTables.humanoid.C[77] = 32;
+MML.hitTables.humanoid.C[78] = 32;
+MML.hitTables.humanoid.C[79] = 32;
+MML.hitTables.humanoid.C[80] = 33;
+MML.hitTables.humanoid.C[81] = 34;
+MML.hitTables.humanoid.C[82] = 35;
+MML.hitTables.humanoid.C[83] = 35;
+MML.hitTables.humanoid.C[84] = 35;
+MML.hitTables.humanoid.C[85] = 35;
+MML.hitTables.humanoid.C[86] = 36;
+MML.hitTables.humanoid.C[87] = 37;
+MML.hitTables.humanoid.C[88] = 37;
+MML.hitTables.humanoid.C[89] = 37;
+MML.hitTables.humanoid.C[90] = 37;
+MML.hitTables.humanoid.C[91] = 38;
+MML.hitTables.humanoid.C[92] = 39;
+MML.hitTables.humanoid.C[93] = 39;
+MML.hitTables.humanoid.C[94] = 40;
+MML.hitTables.humanoid.C[95] = 41;
+MML.hitTables.humanoid.C[96] = 42;
+MML.hitTables.humanoid.C[97] = 43;
+MML.hitTables.humanoid.C[98] = 44;
+MML.hitTables.humanoid.C[99] = 45;
+MML.hitTables.humanoid.C[100] = 46;
 
 // Armor Styles
 MML.items = {};
@@ -5669,312 +5966,7 @@ MML.meleeDamageMods = [
 	{low: 106, high: 120, value: 4},
 	{low: 121, high: 999, value: 5},
 ];
-
-MML.hitTables = {};
-MML.hitTables.humanoid = {};
-MML.hitTables.humanoid.A = [];
-MML.hitTables.humanoid.A[1] = 1;
-MML.hitTables.humanoid.A[2] = 1;
-MML.hitTables.humanoid.A[3] = 2;
-MML.hitTables.humanoid.A[4] = 3;
-MML.hitTables.humanoid.A[5] = 3;
-MML.hitTables.humanoid.A[6] = 4;
-MML.hitTables.humanoid.A[7] = 4;
-MML.hitTables.humanoid.A[8] = 5;
-MML.hitTables.humanoid.A[9] = 5;
-MML.hitTables.humanoid.A[10] = 6;
-MML.hitTables.humanoid.A[11] = 7;
-MML.hitTables.humanoid.A[12] = 8;
-MML.hitTables.humanoid.A[13] = 8;
-MML.hitTables.humanoid.A[14] = 8;
-MML.hitTables.humanoid.A[15] = 8;
-MML.hitTables.humanoid.A[16] = 9;
-MML.hitTables.humanoid.A[17] = 9;
-MML.hitTables.humanoid.A[18] = 9;
-MML.hitTables.humanoid.A[19] = 9;
-MML.hitTables.humanoid.A[20] = 10;
-MML.hitTables.humanoid.A[21] = 10;
-MML.hitTables.humanoid.A[22] = 11;
-MML.hitTables.humanoid.A[23] = 11;
-MML.hitTables.humanoid.A[24] = 11;
-MML.hitTables.humanoid.A[25] = 11;
-MML.hitTables.humanoid.A[26] = 12;
-MML.hitTables.humanoid.A[27] = 12;
-MML.hitTables.humanoid.A[28] = 13;
-MML.hitTables.humanoid.A[29] = 13;
-MML.hitTables.humanoid.A[30] = 13;
-MML.hitTables.humanoid.A[31] = 13;
-MML.hitTables.humanoid.A[32] = 14;
-MML.hitTables.humanoid.A[33] = 14;
-MML.hitTables.humanoid.A[34] = 14;
-MML.hitTables.humanoid.A[35] = 15;
-MML.hitTables.humanoid.A[36] = 15;
-MML.hitTables.humanoid.A[37] = 16;
-MML.hitTables.humanoid.A[38] = 16;
-MML.hitTables.humanoid.A[39] = 17;
-MML.hitTables.humanoid.A[40] = 17;
-MML.hitTables.humanoid.A[41] = 17;
-MML.hitTables.humanoid.A[42] = 18;
-MML.hitTables.humanoid.A[43] = 18;
-MML.hitTables.humanoid.A[44] = 19;
-MML.hitTables.humanoid.A[45] = 19;
-MML.hitTables.humanoid.A[46] = 19;
-MML.hitTables.humanoid.A[47] = 19;
-MML.hitTables.humanoid.A[48] = 20;
-MML.hitTables.humanoid.A[49] = 20;
-MML.hitTables.humanoid.A[50] = 21;
-MML.hitTables.humanoid.A[51] = 21;
-MML.hitTables.humanoid.A[52] = 21;
-MML.hitTables.humanoid.A[53] = 22;
-MML.hitTables.humanoid.A[54] = 22;
-MML.hitTables.humanoid.A[55] = 23;
-MML.hitTables.humanoid.A[56] = 23;
-MML.hitTables.humanoid.A[57] = 23;
-MML.hitTables.humanoid.A[58] = 24;
-MML.hitTables.humanoid.A[59] = 24;
-MML.hitTables.humanoid.A[60] = 25;
-MML.hitTables.humanoid.A[61] = 25;
-MML.hitTables.humanoid.A[62] = 26;
-MML.hitTables.humanoid.A[63] = 26;
-MML.hitTables.humanoid.A[64] = 27;
-MML.hitTables.humanoid.A[65] = 27;
-MML.hitTables.humanoid.A[66] = 27;
-MML.hitTables.humanoid.A[67] = 28;
-MML.hitTables.humanoid.A[68] = 28;
-MML.hitTables.humanoid.A[69] = 29;
-MML.hitTables.humanoid.A[70] = 29;
-MML.hitTables.humanoid.A[71] = 29;
-MML.hitTables.humanoid.A[72] = 30;
-MML.hitTables.humanoid.A[73] = 30;
-MML.hitTables.humanoid.A[74] = 31;
-MML.hitTables.humanoid.A[75] = 31;
-MML.hitTables.humanoid.A[76] = 32;
-MML.hitTables.humanoid.A[77] = 32;
-MML.hitTables.humanoid.A[78] = 33;
-MML.hitTables.humanoid.A[79] = 34;
-MML.hitTables.humanoid.A[80] = 34;
-MML.hitTables.humanoid.A[81] = 35;
-MML.hitTables.humanoid.A[82] = 35;
-MML.hitTables.humanoid.A[83] = 35;
-MML.hitTables.humanoid.A[84] = 36;
-MML.hitTables.humanoid.A[85] = 36;
-MML.hitTables.humanoid.A[86] = 36;
-MML.hitTables.humanoid.A[87] = 37;
-MML.hitTables.humanoid.A[88] = 37;
-MML.hitTables.humanoid.A[89] = 38;
-MML.hitTables.humanoid.A[90] = 38;
-MML.hitTables.humanoid.A[91] = 39;
-MML.hitTables.humanoid.A[92] = 39;
-MML.hitTables.humanoid.A[93] = 40;
-MML.hitTables.humanoid.A[94] = 40;
-MML.hitTables.humanoid.A[95] = 41;
-MML.hitTables.humanoid.A[96] = 42;
-MML.hitTables.humanoid.A[97] = 43;
-MML.hitTables.humanoid.A[98] = 44;
-MML.hitTables.humanoid.A[99] = 45;
-MML.hitTables.humanoid.A[100] = 46;
-MML.hitTables.humanoid.B = [];
-MML.hitTables.humanoid.B[1] = 1;
-MML.hitTables.humanoid.B[2] = 1;
-MML.hitTables.humanoid.B[3] = 2;
-MML.hitTables.humanoid.B[4] = 3;
-MML.hitTables.humanoid.B[5] = 3;
-MML.hitTables.humanoid.B[6] = 4;
-MML.hitTables.humanoid.B[7] = 4;
-MML.hitTables.humanoid.B[8] = 5;
-MML.hitTables.humanoid.B[9] = 5;
-MML.hitTables.humanoid.B[10] = 6;
-MML.hitTables.humanoid.B[11] = 7;
-MML.hitTables.humanoid.B[12] = 8;
-MML.hitTables.humanoid.B[13] = 8;
-MML.hitTables.humanoid.B[14] = 8;
-MML.hitTables.humanoid.B[15] = 8;
-MML.hitTables.humanoid.B[16] = 9;
-MML.hitTables.humanoid.B[17] = 9;
-MML.hitTables.humanoid.B[18] = 10;
-MML.hitTables.humanoid.B[19] = 10;
-MML.hitTables.humanoid.B[20] = 11;
-MML.hitTables.humanoid.B[21] = 11;
-MML.hitTables.humanoid.B[22] = 12;
-MML.hitTables.humanoid.B[23] = 12;
-MML.hitTables.humanoid.B[24] = 13;
-MML.hitTables.humanoid.B[25] = 13;
-MML.hitTables.humanoid.B[26] = 13;
-MML.hitTables.humanoid.B[27] = 13;
-MML.hitTables.humanoid.B[28] = 14;
-MML.hitTables.humanoid.B[29] = 14;
-MML.hitTables.humanoid.B[30] = 14;
-MML.hitTables.humanoid.B[31] = 14;
-MML.hitTables.humanoid.B[32] = 15;
-MML.hitTables.humanoid.B[33] = 15;
-MML.hitTables.humanoid.B[34] = 16;
-MML.hitTables.humanoid.B[35] = 16;
-MML.hitTables.humanoid.B[36] = 17;
-MML.hitTables.humanoid.B[37] = 17;
-MML.hitTables.humanoid.B[38] = 18;
-MML.hitTables.humanoid.B[39] = 18;
-MML.hitTables.humanoid.B[40] = 19;
-MML.hitTables.humanoid.B[41] = 19;
-MML.hitTables.humanoid.B[42] = 19;
-MML.hitTables.humanoid.B[43] = 19;
-MML.hitTables.humanoid.B[44] = 20;
-MML.hitTables.humanoid.B[45] = 21;
-MML.hitTables.humanoid.B[46] = 21;
-MML.hitTables.humanoid.B[47] = 22;
-MML.hitTables.humanoid.B[48] = 22;
-MML.hitTables.humanoid.B[49] = 23;
-MML.hitTables.humanoid.B[50] = 23;
-MML.hitTables.humanoid.B[51] = 24;
-MML.hitTables.humanoid.B[52] = 24;
-MML.hitTables.humanoid.B[53] = 25;
-MML.hitTables.humanoid.B[54] = 26;
-MML.hitTables.humanoid.B[55] = 26;
-MML.hitTables.humanoid.B[56] = 26;
-MML.hitTables.humanoid.B[57] = 26;
-MML.hitTables.humanoid.B[58] = 27;
-MML.hitTables.humanoid.B[59] = 27;
-MML.hitTables.humanoid.B[60] = 28;
-MML.hitTables.humanoid.B[61] = 28;
-MML.hitTables.humanoid.B[62] = 29;
-MML.hitTables.humanoid.B[63] = 29;
-MML.hitTables.humanoid.B[64] = 30;
-MML.hitTables.humanoid.B[65] = 30;
-MML.hitTables.humanoid.B[66] = 31;
-MML.hitTables.humanoid.B[67] = 31;
-MML.hitTables.humanoid.B[68] = 31;
-MML.hitTables.humanoid.B[69] = 31;
-MML.hitTables.humanoid.B[70] = 32;
-MML.hitTables.humanoid.B[71] = 32;
-MML.hitTables.humanoid.B[72] = 32;
-MML.hitTables.humanoid.B[73] = 33;
-MML.hitTables.humanoid.B[74] = 34;
-MML.hitTables.humanoid.B[75] = 34;
-MML.hitTables.humanoid.B[76] = 34;
-MML.hitTables.humanoid.B[77] = 35;
-MML.hitTables.humanoid.B[78] = 35;
-MML.hitTables.humanoid.B[79] = 35;
-MML.hitTables.humanoid.B[80] = 35;
-MML.hitTables.humanoid.B[81] = 36;
-MML.hitTables.humanoid.B[82] = 36;
-MML.hitTables.humanoid.B[83] = 36;
-MML.hitTables.humanoid.B[84] = 36;
-MML.hitTables.humanoid.B[85] = 37;
-MML.hitTables.humanoid.B[86] = 37;
-MML.hitTables.humanoid.B[87] = 37;
-MML.hitTables.humanoid.B[88] = 38;
-MML.hitTables.humanoid.B[89] = 38;
-MML.hitTables.humanoid.B[90] = 38;
-MML.hitTables.humanoid.B[91] = 39;
-MML.hitTables.humanoid.B[92] = 39;
-MML.hitTables.humanoid.B[93] = 40;
-MML.hitTables.humanoid.B[94] = 40;
-MML.hitTables.humanoid.B[95] = 41;
-MML.hitTables.humanoid.B[96] = 42;
-MML.hitTables.humanoid.B[97] = 43;
-MML.hitTables.humanoid.B[98] = 44;
-MML.hitTables.humanoid.B[99] = 45;
-MML.hitTables.humanoid.B[100] = 46;
-MML.hitTables.humanoid.C = [];
-MML.hitTables.humanoid.C[1] = 1;
-MML.hitTables.humanoid.C[2] = 1;
-MML.hitTables.humanoid.C[3] = 2;
-MML.hitTables.humanoid.C[4] = 3;
-MML.hitTables.humanoid.C[5] = 3;
-MML.hitTables.humanoid.C[6] = 4;
-MML.hitTables.humanoid.C[7] = 4;
-MML.hitTables.humanoid.C[8] = 5;
-MML.hitTables.humanoid.C[9] = 5;
-MML.hitTables.humanoid.C[10] = 6;
-MML.hitTables.humanoid.C[11] = 7;
-MML.hitTables.humanoid.C[12] = 8;
-MML.hitTables.humanoid.C[13] = 8;
-MML.hitTables.humanoid.C[14] = 8;
-MML.hitTables.humanoid.C[15] = 8;
-MML.hitTables.humanoid.C[16] = 8;
-MML.hitTables.humanoid.C[17] = 9;
-MML.hitTables.humanoid.C[18] = 9;
-MML.hitTables.humanoid.C[19] = 9;
-MML.hitTables.humanoid.C[20] = 9;
-MML.hitTables.humanoid.C[21] = 10;
-MML.hitTables.humanoid.C[22] = 10;
-MML.hitTables.humanoid.C[23] = 10;
-MML.hitTables.humanoid.C[24] = 11;
-MML.hitTables.humanoid.C[25] = 11;
-MML.hitTables.humanoid.C[26] = 12;
-MML.hitTables.humanoid.C[27] = 12;
-MML.hitTables.humanoid.C[28] = 12;
-MML.hitTables.humanoid.C[29] = 12;
-MML.hitTables.humanoid.C[30] = 13;
-MML.hitTables.humanoid.C[31] = 13;
-MML.hitTables.humanoid.C[32] = 13;
-MML.hitTables.humanoid.C[33] = 14;
-MML.hitTables.humanoid.C[34] = 14;
-MML.hitTables.humanoid.C[35] = 14;
-MML.hitTables.humanoid.C[36] = 14;
-MML.hitTables.humanoid.C[37] = 14;
-MML.hitTables.humanoid.C[38] = 15;
-MML.hitTables.humanoid.C[39] = 15;
-MML.hitTables.humanoid.C[40] = 16;
-MML.hitTables.humanoid.C[41] = 17;
-MML.hitTables.humanoid.C[42] = 18;
-MML.hitTables.humanoid.C[43] = 18;
-MML.hitTables.humanoid.C[44] = 19;
-MML.hitTables.humanoid.C[45] = 20;
-MML.hitTables.humanoid.C[46] = 20;
-MML.hitTables.humanoid.C[47] = 21;
-MML.hitTables.humanoid.C[48] = 21;
-MML.hitTables.humanoid.C[49] = 21;
-MML.hitTables.humanoid.C[50] = 21;
-MML.hitTables.humanoid.C[51] = 21;
-MML.hitTables.humanoid.C[52] = 22;
-MML.hitTables.humanoid.C[53] = 23;
-MML.hitTables.humanoid.C[54] = 23;
-MML.hitTables.humanoid.C[55] = 24;
-MML.hitTables.humanoid.C[56] = 24;
-MML.hitTables.humanoid.C[57] = 24;
-MML.hitTables.humanoid.C[58] = 25;
-MML.hitTables.humanoid.C[59] = 26;
-MML.hitTables.humanoid.C[60] = 26;
-MML.hitTables.humanoid.C[61] = 26;
-MML.hitTables.humanoid.C[62] = 26;
-MML.hitTables.humanoid.C[63] = 26;
-MML.hitTables.humanoid.C[64] = 27;
-MML.hitTables.humanoid.C[65] = 27;
-MML.hitTables.humanoid.C[66] = 27;
-MML.hitTables.humanoid.C[67] = 27;
-MML.hitTables.humanoid.C[68] = 27;
-MML.hitTables.humanoid.C[69] = 28;
-MML.hitTables.humanoid.C[70] = 29;
-MML.hitTables.humanoid.C[71] = 30;
-MML.hitTables.humanoid.C[72] = 30;
-MML.hitTables.humanoid.C[73] = 30;
-MML.hitTables.humanoid.C[74] = 30;
-MML.hitTables.humanoid.C[75] = 31;
-MML.hitTables.humanoid.C[76] = 32;
-MML.hitTables.humanoid.C[77] = 32;
-MML.hitTables.humanoid.C[78] = 32;
-MML.hitTables.humanoid.C[79] = 32;
-MML.hitTables.humanoid.C[80] = 33;
-MML.hitTables.humanoid.C[81] = 34;
-MML.hitTables.humanoid.C[82] = 35;
-MML.hitTables.humanoid.C[83] = 35;
-MML.hitTables.humanoid.C[84] = 35;
-MML.hitTables.humanoid.C[85] = 35;
-MML.hitTables.humanoid.C[86] = 36;
-MML.hitTables.humanoid.C[87] = 37;
-MML.hitTables.humanoid.C[88] = 37;
-MML.hitTables.humanoid.C[89] = 37;
-MML.hitTables.humanoid.C[90] = 37;
-MML.hitTables.humanoid.C[91] = 38;
-MML.hitTables.humanoid.C[92] = 39;
-MML.hitTables.humanoid.C[93] = 39;
-MML.hitTables.humanoid.C[94] = 40;
-MML.hitTables.humanoid.C[95] = 41;
-MML.hitTables.humanoid.C[96] = 42;
-MML.hitTables.humanoid.C[97] = 43;
-MML.hitTables.humanoid.C[98] = 44;
-MML.hitTables.humanoid.C[99] = 45;
-MML.hitTables.humanoid.C[100] = 46;MML.startCombat = function startCombat(input) {
+MML.startCombat = function startCombat(input) {
     this.currentRound = 0;
     this.roundStarted = false;
     this.combatants = input.selectedCharNames; 
@@ -8711,7 +8703,7 @@ MML.statusEffects["Observe"] = function(effect, index){
         effect.duration--;
     }
     
-    if(effect.duration < 1 || (this.situationalInitBonus !== "No Combat" && !MML.hasStatusEffect("Number of Defenses"))){
+    if(effect.duration < 1 || (this.situationalInitBonus !== "No Combat" && !_.has(this.statusEffects, "Number of Defenses"))){
         delete this.statusEffects[index];
     }
     else if(effect.duration < 1){
@@ -8729,9 +8721,9 @@ MML.statusEffects["Observe"] = function(effect, index){
         } 
 };
 MML.statusEffects["Taking Aim"] = function(effect, index){
-    if(MML.hasStatusEffect.apply(this, ["Number of Defenses"]) ||
-       MML.hasStatusEffect.apply(this, ["Damaged This Round"]) ||
-       MML.hasStatusEffect.apply(this, ["Dodged This Round"]) ||
+    if(_.has(this.statusEffects, "Number of Defenses") ||
+       _.has(this.statusEffects, "Damaged This Round") ||
+       _.has(this.statusEffects, "Dodged This Round") ||
        this.action.targets[0] !== effect.target)
     {
         delete this.statusEffects[index];
@@ -8744,22 +8736,6 @@ MML.statusEffects["Taking Aim"] = function(effect, index){
             this.missileAttackMod += 40;
         }
     }
-};
-MML.statusEffects["Aim"] = function(effect, index){
-    // if(MML.hasStatusEffect.apply(this, ["Number of Defenses"]) ||
-    //    MML.hasStatusEffect.apply(this, ["Damaged This Round"]) ||
-    //    MML.hasStatusEffect.apply(this, ["Dodged This Round"]))
-    // {
-    //     this.statusEffects[index]
-    // }
-    // else if(state.MML.GM.roundStarted === false){
-    //     if(effect.level === 1){
-    //         this.missileAttackMod += 30;
-    //     }
-    //     else if(effect.level === 2){
-    //         this.missileAttackMod += 40;
-    //     }
-    //}
 };
 MML.statusEffects["Damaged This Round"] = function(effect, index){
 
@@ -9000,40 +8976,40 @@ MML.getDistanceBetweenChars = function getDistanceBetweenChars(charName, targetN
 
 // Code borrowed from The Aaron from roll20.net forums
 var generateUUID = (function() {
-        "use strict";
+    "use strict";
 
-        var a = 0,
-            b = [];
-        return function() {
-            var c = (new Date()).getTime() + 0,
-                d = c === a;
-            a = c;
-            for (var e = new Array(8), f = 7; 0 <= f; f--) {
-                e[f] = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz".charAt(c % 64);
-                c = Math.floor(c / 64);
+    var a = 0,
+        b = [];
+    return function() {
+        var c = (new Date()).getTime() + 0,
+            d = c === a;
+        a = c;
+        for (var e = new Array(8), f = 7; 0 <= f; f--) {
+            e[f] = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz".charAt(c % 64);
+            c = Math.floor(c / 64);
+        }
+        c = e.join("");
+        if (d) {
+            for (f = 11; 0 <= f && 63 === b[f]; f--) {
+                b[f] = 0;
             }
-            c = e.join("");
-            if (d) {
-                for (f = 11; 0 <= f && 63 === b[f]; f--) {
-                    b[f] = 0;
-                }
-                b[f]++;
-            } else {
-                for (f = 0; 12 > f; f++) {
-                    b[f] = Math.floor(64 * Math.random());
-                }
-            }
+            b[f]++;
+        } else {
             for (f = 0; 12 > f; f++) {
-                c += "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz".charAt(b[f]);
+                b[f] = Math.floor(64 * Math.random());
             }
-            return c;
-        };
-    }()),
-
-    generateRowID = function() {
-        "use strict";
-        return generateUUID().replace(/_/g, "Z");
+        }
+        for (f = 0; 12 > f; f++) {
+            c += "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz".charAt(b[f]);
+        }
+        return c;
     };
+}()),
+
+generateRowID = function() {
+    "use strict";
+    return generateUUID().replace(/_/g, "Z");
+};
 
 // Rolling Functions
 MML.rollDice = function rollDice(amount, size) {
@@ -9251,11 +9227,11 @@ MML.displayTargetSelection = function displayTargetSelection(input) {
 };
 
 // NEEDS WORK. Attacks from above and below need to be added. Use arrays instead of switches on the hit positions for cleaner code
-MML.rollHitPosition = function rollHitPosition() {
+MML.hitPositionRoll = function rollHitPosition(input) {
     var position;
-    var defender = state.MML.GM.characters[this.action.targets[0]];
+    var defender = state.MML.GM.characters[input.target];
 
-    switch (this.action.calledShot) {
+    switch (input.calledShot) {
 
         case "head":
             positionArray = [1, 2, 3, 4, 5, 6, 7];

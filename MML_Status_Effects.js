@@ -5,7 +5,7 @@ MML.statusEffects["Major Wound"] = function(effect, index){
     }
     else{
         if(this.situationalInitBonus !== "No Combat"){
-            this.situationalInitBonus += -5;`
+            this.situationalInitBonus += -5;
         }
         if(effect.duration > 0){
             this.situationalMod += -10;

@@ -1041,7 +1041,7 @@ MML.attackRollApply = function attackRollApply(input){
 };
 
 MML.hitPositionRoll = function hitPositionRoll(input){
-    action.targetArray[action.targetIndex] = 
+    action.targetArray[action.targetIndex] = {};
 };
 
 MML.hitPositionRollResult = function hitPositionRollResult(input){
