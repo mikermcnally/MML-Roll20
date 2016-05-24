@@ -13,7 +13,7 @@ MML.getCharFromName = function getCharFromName(charName) {
 
 // Attribute and Ability Functions
 MML.createAttribute = function createAttribute(name, current, max, character) {
-    createObj("attribute", {
+    return createObj("attribute", {
         name: name,
         current: current,
         max: max,
@@ -48,8 +48,7 @@ MML.getCharAttribute = function getCharAttribute(charName, attribute) {
     })[0];
 
     if (typeof(charAttribute) === "undefined") {
-        MML.createAttribute(attribute, "", "", MML.getCharFromName(charName));
-        charAttribute = MML.getCharAttribute(charName, attribute);
+        charAttribute = MML.createAttribute(attribute, "", "", MML.getCharFromName(charName));
     }
 
     return charAttribute;
@@ -61,7 +60,7 @@ MML.getCurrentAttribute = function getCurrentAttribute(charName, attribute) {
 
 MML.getCurrentAttributeAsFloat = function getCurrentAttributeAsFloat(charName, attribute) {
     var result = parseFloat(MML.getCurrentAttribute(charName, attribute));
-    // log(result);
+    log(result);
     if (isNaN(result)) {
         MML.setCurrentAttribute(charName, attribute, 0);
         result = 0;
@@ -72,7 +71,7 @@ MML.getCurrentAttributeAsFloat = function getCurrentAttributeAsFloat(charName, a
 
 MML.getMaxAttributeAsFloat = function getMaxAttributeAsFloat(charName, attribute) {
     var result = parseFloat(MML.getCharAttribute(charName, attribute).get("max"));
-
+    console.log(result);
     if (isNaN(result)) {
         MML.setMaxAttribute(charName, attribute, 0);
         result = 0;
@@ -93,11 +92,15 @@ MML.getCurrentAttributeAsBool = function getCurrentAttributeAsBool(charName, att
 MML.getCurrentAttributeJSON = function getCurrentAttributeJSON(charName, attribute) {
     var result = MML.getCurrentAttribute(charName, attribute);
 
-    if (result === "" || _.isUndefined(result)) {
-        MML.setCurrentAttribute(charName, attribute, "{}");
-        result = MML.getCurrentAttribute(charName, attribute);
+    try {
+        result = JSON.parse(result);
     }
-    return JSON.parse(result);
+    catch (e) {
+        sendChat("", "Get JSON Attribute Failed: " + result);
+        MML.setCurrentAttribute(charName, attribute, "{}");
+        result = {};
+    }
+    return result;
 };
 
 MML.getSkillAttributes = function getSkillAttributes(charName, skillType) {

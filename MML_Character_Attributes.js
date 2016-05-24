@@ -234,6 +234,7 @@ MML.computeAttribute.stature = { dependents: ["load",
                 "height",
                 "weight"], 
     compute: function(){
+        
         return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, "statureRoll")].stature;
     } };
 MML.computeAttribute.strength = { dependents: ["fitness",

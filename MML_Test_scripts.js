@@ -38,7 +38,7 @@ function test_setup(){
         player.characters = [];
     });
 
-    var characterObjects = [];
+    state.MML.characters = {};
 
     _.each(["actor", "target"], function(charName){
         var character = createObj("character", { name: charName, archived: false });
@@ -58,23 +58,20 @@ function test_setup(){
 
         state.MML.characters[charName] = new MML.characterConstructor(charName);
 
-        // MML.processCommand({
-        //     type: "character",
-        //     who: charName,
-        //     triggeredFunction:"updateCharacter",
-        //     input: {
-        //         attribute: "race"
-        //     }
-        // });
+        MML.processCommand({
+            type: "character",
+            who: charName,
+            triggeredFunction:"updateCharacter",
+            input: {
+                attribute: "race"
+            }
+        });
     });
-
-    // _.each(characterObjects, function(character){
-    //     var charName = character.get("name");
-    //     characters[charName] = new MML.characterConstructor(charName);
-    //     //Add to player's list of characters
-    //     state.MML.players[characters[charName].player].characters.push(charName);
-    //     state.MML.characters[charName] = character;
-    // });
+    console.log(state.MML.players);
+    _.each(state.MML.characters, function(character){
+        console.log(character);
+        state.MML.players[character.player].characters.push(charName);
+    });
 }
 
 test_setup();
