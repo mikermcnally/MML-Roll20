@@ -1707,25 +1707,26 @@ MML.computeAttribute.player = {
 };
 
 MML.computeAttribute.race = {
-    dependents: ["stature",
-                "strength",
-                "coordination",
-                "health",
-                "beauty",
-                "intellect",
-                "reason",
-                "creativity",
-                "presence",
-                "willpower",
-                "evocation",
-                "perception",
-                "systemStrength",
-                "fitness",
-                "load",
-                "bodyType",
-                "skills",
-                "weaponSkills"],
+    dependents: [],//"stature"],//,
+                // "strength",
+                // "coordination",
+                // "health",
+                // "beauty",
+                // "intellect",
+                // "reason",
+                // "creativity",
+                // "presence",
+                // "willpower",
+                // "evocation",
+                // "perception",
+                // "systemStrength",
+                // "fitness",
+                // "load",
+                // "bodyType",
+                // "skills",
+                // "weaponSkills"],
     compute: function(){
+        console.log(this.race);
         return MML.getCurrentAttribute(this.name, "race");
     }
 };
@@ -1768,7 +1769,7 @@ MML.computeAttribute.stature = { dependents: ["load",
                 "height",
                 "weight"], 
     compute: function(){
-        
+        console.log(this.race);
         return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, "statureRoll")].stature;
     } };
 MML.computeAttribute.strength = { dependents: ["fitness",
@@ -8812,7 +8813,7 @@ MML.getCurrentAttribute = function getCurrentAttribute(charName, attribute) {
 
 MML.getCurrentAttributeAsFloat = function getCurrentAttributeAsFloat(charName, attribute) {
     var result = parseFloat(MML.getCurrentAttribute(charName, attribute));
-    log(result);
+
     if (isNaN(result)) {
         MML.setCurrentAttribute(charName, attribute, 0);
         result = 0;
@@ -8823,7 +8824,7 @@ MML.getCurrentAttributeAsFloat = function getCurrentAttributeAsFloat(charName, a
 
 MML.getMaxAttributeAsFloat = function getMaxAttributeAsFloat(charName, attribute) {
     var result = parseFloat(MML.getCharAttribute(charName, attribute).get("max"));
-    console.log(result);
+
     if (isNaN(result)) {
         MML.setMaxAttribute(charName, attribute, 0);
         result = 0;
@@ -8848,7 +8849,6 @@ MML.getCurrentAttributeJSON = function getCurrentAttributeJSON(charName, attribu
         result = JSON.parse(result);
     }
     catch (e) {
-        sendChat("", "Get JSON Attribute Failed: " + result);
         MML.setCurrentAttribute(charName, attribute, "{}");
         result = {};
     }
