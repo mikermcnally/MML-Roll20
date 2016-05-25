@@ -46,7 +46,7 @@ MML.getCharAttribute = function getCharAttribute(charName, attribute) {
     }, {
         caseInsensitive: false
     })[0];
-
+    
     if (typeof(charAttribute) === "undefined") {
         charAttribute = MML.createAttribute(attribute, "", "", MML.getCharFromName(charName));
     }

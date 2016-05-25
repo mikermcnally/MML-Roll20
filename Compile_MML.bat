@@ -15,3 +15,5 @@ del tmp1.txt
 del tmp2.txt
 
 CLIP < MML_Roll20.js
+
+node MML_Test_scripts

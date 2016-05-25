@@ -122,7 +122,7 @@ MML.updateCharacter = function(input){
             attributeArray = _.union(attributeArray, localAttribute.dependents);  
         }
     }
-
+    console.log(attributeArray);
     _.each(
         attributeArray,
         function(attribute) {
@@ -173,26 +173,27 @@ MML.computeAttribute.player = {
 };
 
 MML.computeAttribute.race = {
-    dependents: [],//"stature"],//,
-                // "strength",
-                // "coordination",
-                // "health",
-                // "beauty",
-                // "intellect",
-                // "reason",
-                // "creativity",
-                // "presence",
-                // "willpower",
-                // "evocation",
-                // "perception",
-                // "systemStrength",
-                // "fitness",
-                // "load",
-                // "bodyType",
-                // "skills",
-                // "weaponSkills"],
+    dependents: ["stature",
+                "strength",
+                "coordination",
+                "health",
+                "beauty",
+                "intellect",
+                "reason",
+                "creativity",
+                "presence",
+                "willpower",
+                "evocation",
+                "perception",
+                "systemStrength",
+                "fitness",
+                "fitnessMod",
+                "load",
+                "bodyType",
+                "skills",
+                "weaponSkills"],
     compute: function(){
-        console.log(this.race);
+        //console.log(this.race);
         return MML.getCurrentAttribute(this.name, "race");
     }
 };
@@ -235,7 +236,7 @@ MML.computeAttribute.stature = { dependents: ["load",
                 "height",
                 "weight"], 
     compute: function(){
-        console.log(this.race);
+        // console.log(this.race);
         return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, "statureRoll")].stature;
     } };
 MML.computeAttribute.strength = { dependents: ["fitness",
@@ -354,6 +355,7 @@ MML.computeAttribute.fitnessMod = { dependents: ["load",
                 "skills",
                 "weaponSkills"], //skill mods
     compute: function(){
+        console.log(MML.fitnessModLookup[this.fitness]);
         return MML.fitnessModLookup[this.fitness];
     }};
 MML.computeAttribute.load = { dependents: ["overhead",
@@ -363,6 +365,7 @@ MML.computeAttribute.load = { dependents: ["overhead",
                 "skills",
                 "weaponSkills"],
     compute: function(){
+        console.log(this.fitnessMod);
         return Math.round(this.stature * this.fitnessMod) + MML.racialAttributeBonuses[this.race].load;
     }};
 MML.computeAttribute.overhead = { dependents: [], 

@@ -508,12 +508,12 @@ MML.processCommand = function processCommand(command){
 	}
 	catch(error){
 		sendChat("", "processCommand failed");
-		log(state.MML.GM);
-		log(state.MML.players);
-		log(state.MML.characters);
-		log(command);
-		log(error.message);
-		log(error.stack);
+		// log(state.MML.GM);
+		// log(state.MML.players);
+		// log(state.MML.characters);
+		// log(command);
+		// log(error.message);
+		// log(error.stack);
 	}		
 };
 

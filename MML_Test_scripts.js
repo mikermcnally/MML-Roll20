@@ -60,10 +60,13 @@ function test_setup() {
         MML.createAttribute("coordinationRoll", 10, "", character);
         MML.createAttribute("healthRoll", 10, "", character);
         MML.createAttribute("beautyRoll", 10, "", character);
-        MML.createAttribute("intellectRoll", 10, "", character);
-        MML.createAttribute("reasonRoll", 10, "", character);
+        MML.createAttribute("intellectRoll", 20, "", character);
+        MML.createAttribute("reasonRoll", 20, "", character);
         MML.createAttribute("creativityRoll", 10, "", character);
         MML.createAttribute("presenceRoll", 10, "", character);
+
+        // console.log(character.id);
+        // console.log(MML.getCharAttribute(charName, "race"));
 
         state.MML.characters[charName] = new MML.characterConstructor(charName);
 
@@ -85,7 +88,7 @@ function test_setup() {
 
 test_setup();
 
-//console.log(state.MML.characters);
+console.log(state.MML.characters);
 
 // {
 //     "name": "test char",
