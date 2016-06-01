@@ -111,31 +111,42 @@ MML.characterConstructor = function characterConstructor(charName){
 
 MML.updateCharacter = function(input){
     var attributeArray = [input.attribute];
+    var dependents = MML.computeAttribute[input.attribute].dependents;
+    attributeArray.push.apply(attributeArray, dependents);
 
-    for(var i = 0; i < attributeArray.length; i++){ //length of array is dynamic, for-in doesn't work here
-        var localAttribute = MML.computeAttribute[attributeArray[i]];
+    // for(var i = 0; i < attributeArray.length; i++){ //length of array is dynamic, for-in doesn't work here
+    //     var localAttribute = MML.computeAttribute[attributeArray[i]];
         
-        if(_.isUndefined(localAttribute)){
-            log(attributeArray[i]);
-        }
-        else{
-            attributeArray = _.union(attributeArray, localAttribute.dependents);  
-        }
-    }
-    console.log(attributeArray);
-    _.each(
-        attributeArray,
-        function(attribute) {
-            var value = MML.computeAttribute[attribute].compute.apply(this, []); // Run compute function from character scope
-            // log(attribute + " " + value);
-            this[attribute] = value;
-            if(typeof(value) === "object"){
-                value = JSON.stringify(value);
-            }     
-            MML.setCurrentAttribute(this.name, attribute, value);
-        },
-        this
-    );};
+    //     if(_.isUndefined(localAttribute)){
+    //         log(attributeArray[i]);
+    //     }
+    //     else{
+    //         attributeArray = _.difference(attributeArray, localAttribute.dependents);
+    //         attributeArray.push.apply(attributeArray, localAttribute.dependents);
+    //     }
+    // }
+
+    _.each(attributeArray, function(attribute) {
+        var value = MML.computeAttribute[attribute].compute.apply(this, []); // Run compute function from character scope
+        // log(attribute + " " + value);
+        this[attribute] = value;
+        if(typeof(value) === "object"){
+            value = JSON.stringify(value);
+        }     
+        MML.setCurrentAttribute(this.name, attribute, value);
+    }, this);
+
+    _.each(dependents, function(attribute){
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "updateCharacter",
+            input: {
+                attribute: attribute
+            }
+        });
+    }, this);
+};
 
 MML.setApiCharAttribute = function(input){
     this[input.attribute] = input.value;
@@ -173,7 +184,8 @@ MML.computeAttribute.player = {
 };
 
 MML.computeAttribute.race = {
-    dependents: ["stature",
+    dependents: ["inventory",
+                "stature",
                 "strength",
                 "coordination",
                 "health",
@@ -193,7 +205,6 @@ MML.computeAttribute.race = {
                 "skills",
                 "weaponSkills"],
     compute: function(){
-        //console.log(this.race);
         return MML.getCurrentAttribute(this.name, "race");
     }
 };
@@ -236,7 +247,6 @@ MML.computeAttribute.stature = { dependents: ["load",
                 "height",
                 "weight"], 
     compute: function(){
-        // console.log(this.race);
         return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, "statureRoll")].stature;
     } };
 MML.computeAttribute.strength = { dependents: ["fitness",
@@ -355,7 +365,6 @@ MML.computeAttribute.fitnessMod = { dependents: ["load",
                 "skills",
                 "weaponSkills"], //skill mods
     compute: function(){
-        console.log(MML.fitnessModLookup[this.fitness]);
         return MML.fitnessModLookup[this.fitness];
     }};
 MML.computeAttribute.load = { dependents: ["overhead",
@@ -365,7 +374,6 @@ MML.computeAttribute.load = { dependents: ["overhead",
                 "skills",
                 "weaponSkills"],
     compute: function(){
-        console.log(this.fitnessMod);
         return Math.round(this.stature * this.fitnessMod) + MML.racialAttributeBonuses[this.race].load;
     }};
 MML.computeAttribute.overhead = { dependents: [], 
@@ -712,11 +720,14 @@ MML.computeAttribute.attributeMissileAttackMod = { dependents: [],
 MML.computeAttribute.attributeCastingMod = { dependents: [],
     compute: function() {
         var attributeCastingMod = MML.attributeMods.reason[this.reason];
-
-        if(this.senseInitBonus < 3 || this.senseInitBonus > 0){
+        
+        if(this.senseInitBonus > 2){
+            attributeCastingMod += 0;
+        }
+        else if (this.senseInitBonus > 0){
             attributeCastingMod -= 10;
         }
-        else if(this.senseInitBonus < 0 || this.senseInitBonus > -2){
+        else if(this.senseInitBonus > -2){
             attributeCastingMod -= 20;
         }
         else{
@@ -738,7 +749,7 @@ MML.computeAttribute.attributeCastingMod = { dependents: [],
         else if(this.fomInitBonus === -2){
             attributeCastingMod -= 30;
         }
-
+        
         return attributeCastingMod;
     }};
 MML.computeAttribute.spellLearningMod = { dependents: [],
@@ -927,7 +938,7 @@ MML.computeAttribute.senseInitBonus = {
                 }
             });
         });
-
+        
         //nothing on head
         if (senseArray.length === 0){
             return 4;

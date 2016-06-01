@@ -511,9 +511,9 @@ MML.processCommand = function processCommand(command){
 		// log(state.MML.GM);
 		// log(state.MML.players);
 		// log(state.MML.characters);
-		// log(command);
-		// log(error.message);
-		// log(error.stack);
+		log(command);
+		log(error.message);
+		log(error.stack);
 	}		
 };
 

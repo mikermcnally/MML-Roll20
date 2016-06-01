@@ -55,15 +55,16 @@ function test_setup() {
         MML.createAttribute("name", charName, "", character);
         MML.createAttribute("race", "Human", "", character);
         MML.createAttribute("gender", "Male", "", character);
-        MML.createAttribute("statureRoll", 10, "", character);
-        MML.createAttribute("strengthRoll", 10, "", character);
-        MML.createAttribute("coordinationRoll", 10, "", character);
-        MML.createAttribute("healthRoll", 10, "", character);
-        MML.createAttribute("beautyRoll", 10, "", character);
+        MML.createAttribute("statureRoll", 20, "", character);
+        MML.createAttribute("strengthRoll", 20, "", character);
+        MML.createAttribute("coordinationRoll", 20, "", character);
+        MML.createAttribute("healthRoll", 20, "", character);
+        MML.createAttribute("beautyRoll", 20, "", character);
         MML.createAttribute("intellectRoll", 20, "", character);
         MML.createAttribute("reasonRoll", 20, "", character);
-        MML.createAttribute("creativityRoll", 10, "", character);
-        MML.createAttribute("presenceRoll", 10, "", character);
+        MML.createAttribute("creativityRoll", 20, "", character);
+        MML.createAttribute("presenceRoll", 20, "", character);
+        MML.createAttribute("fomInitBonus", 6, "", character);
 
         // console.log(character.id);
         // console.log(MML.getCharAttribute(charName, "race"));
@@ -88,7 +89,7 @@ function test_setup() {
 
 test_setup();
 
-console.log(state.MML.characters);
+// console.log(state.MML.characters);
 
 // {
 //     "name": "test char",

@@ -16,6 +16,7 @@ on("ready", function() {
         MML.createAttribute("reasonRoll", 6, "", character);
         MML.createAttribute("creativityRoll", 6, "", character);
         MML.createAttribute("presenceRoll", 6, "", character);
+        MML.createAttribute("fomInitBonus", 6, "", character);
 
         state.MML.characters[charName] = new MML.characterConstructor(charName);
 
