@@ -17,6 +17,8 @@ on("ready", function() {
         MML.createAttribute("creativityRoll", 6, "", character);
         MML.createAttribute("presenceRoll", 6, "", character);
         MML.createAttribute("fomInitBonus", 6, "", character);
+        MML.createAttribute("rightHand", JSON.stringify({ _id: "emptyHand" }), "", character);
+        MML.createAttribute("leftHand", JSON.stringify({ _id: "emptyHand" }), "", character);
 
         state.MML.characters[charName] = new MML.characterConstructor(charName);
 

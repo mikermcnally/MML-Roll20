@@ -156,7 +156,7 @@ MML.statusEffects["Observe"] = function(effect, index){
     else{
         //observed previous round
         this.situationalInitBonus += 5;
-        if(MML.isWieldingMissileWeapon(this)){
+        if(MML.isWieldingRangedWeapon(this)){
                 this.missileAttackMod += 15;
             }
         } 

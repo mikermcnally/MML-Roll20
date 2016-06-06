@@ -170,8 +170,15 @@ MML.getAttributeTableValue = function getAttributeTableValue(attribute, inputVal
 MML.getCharFromToken = function getCharFromToken(token) {
     var tokenObject = getObj("graphic", token.id);
     var charName = getObj("character", tokenObject.get("represents"));
-    charName = charName.get("name");
-    return charName;
+
+    if(_.isUndefined(charName)){
+        tokenObject.set("tint_color", "#FFFF00");
+        sendChat("Error", "Selected Token(s) not associated to a character.");
+    }
+    else{
+        charName = charName.get("name");
+        return charName;
+    }
 };
 
 MML.getTokenFromChar = function getTokenFromChar(charName) {
@@ -476,54 +483,3 @@ MML.displayTargetSelection = function displayTargetSelection(input) {
 
     sendChat("", "&{template:selectTarget} {{charName=" + input.charName + "}} {{input=" + result + "}}");
 };
-
-// NEEDS WORK. Attacks from above and below need to be added. Use arrays instead of switches on the hit positions for cleaner code
-MML.hitPositionRoll = function rollHitPosition(input) {
-    var position;
-    var defender = state.MML.GM.characters[input.target];
-
-    switch (input.calledShot) {
-
-        case "head":
-            positionArray = [1, 2, 3, 4, 5, 6, 7];
-            position = positionArray[MML.rollDice(1, 7) - 1];
-            break;
-        case "chest":
-            positionArray = [9, 10, 11, 12, 15, 16, 17, 18];
-            position = positionArray[MML.rollDice(1, 8) - 1];
-            break;
-        case "abdomen":
-            positionArray = [21, 22, 23, 24, 27, 28, 29, 30, 33];
-            position = positionArray[MML.rollDice(1, 9) - 1];
-            break;
-        case "leftArm":
-            positionArray = [13, 19, 25, 31, 34];
-            position = positionArray[MML.rollDice(1, 5) - 1];
-            break;
-        case "rightArm":
-            positionArray = [8, 14, 20, 26, 32];
-            position = positionArray[MML.rollDice(1, 5) - 1];
-            break;
-        case "leftLeg":
-            positionArray = [36, 38, 40, 42, 44, 46];
-            position = positionArray[MML.rollDice(1, 6) - 1];
-            break;
-        case "rightLeg":
-            positionArray = [35, 37, 39, 41, 43, 45];
-            position = positionArray[MML.rollDice(1, 6) - 1];
-            break;
-        default: // Use this for targeting specific hit positions
-            position = this.action.calledShot;
-            break;
-    }
-
-    // Deal with elevation here
-    return {
-        name: "hitPosition",
-        range: "1-46",
-        result: MML.hitPositions[position].name,
-        value: position
-    };
-
-};
-

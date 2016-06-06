@@ -446,9 +446,6 @@ MML.actionHandler = function actionHandler(charName){
 	}
 };
 
-MML.AttackActionSteps = {
-};
-
 MML.AttackRolls = function AttackAction(){
 	this.actionRolls = {
 		getAttackRoll: MML.getAttackRoll,

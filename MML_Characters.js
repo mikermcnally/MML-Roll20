@@ -791,24 +791,36 @@ MML.startAction = function startAction(input){
 };
 
 MML.startAttackAction = function startAttackAction(input){
-    if(_.contains(this.action.modifiers, ["Called Shot"])){
+    if(_.has(this.statusEffects, "Called Shot")){
         MML.processCommand({
             type: "player",
             who: this.player,
-            triggeredFunction: "menuSelectBodyPart",
+            triggeredFunction: "charMenuSelectBodyPart",
             input: {
                 who: this.name,
             }   
         });
-    }
-    else if(_.contains(this.action.modifiers, ["Called Shot Specific"])){
         MML.processCommand({
             type: "player",
             who: this.player,
-            triggeredFunction: "menuSelectHitPosition",
+            triggeredFunction: "displayMenu",
+            input: {}
+        });
+    }
+    else if(_.has(this.statusEffects, "Called Shot Specific")){
+        MML.processCommand({
+            type: "player",
+            who: this.player,
+            triggeredFunction: "charMenuSelectHitPosition",
             input: {
                 who: this.name,
             }   
+        });
+        MML.processCommand({
+            type: "player",
+            who: this.player,
+            triggeredFunction: "displayMenu",
+            input: {}
         });
     }
     else if(_.contains(this.action.modifiers, ["Aim"])){
@@ -1041,11 +1053,61 @@ MML.attackRollApply = function attackRollApply(input){
 };
 
 MML.hitPositionRoll = function hitPositionRoll(input){
-    action.targetArray[action.targetIndex] = {};
+    var rollValue;
+    var range;
+    var result;
+    var action = state.MML.GM.currentAction;
+    var target = state.MML.characters[action.targetArray[action.targetIndex]];
+
+    if (_.has(this.statusEffects, "Called Shot Specific")){
+        rollValue = +_.findKey(MML.hitPositions[target.bodyType], function(hitPosition){ return hitPosition.name === action.calledShot; });
+        range = rollValue + "-" + rollValue;
+        result = MML.hitPositions[target.bodyType][rollValue];
+    }
+    else if (_.has(this.statusEffects, "Called Shot")){
+        var rangeUpper = MML.getAvailableHitPositions(target, action.calledShot).length;
+        rollValue = MML.rollDice(1, rangeUpper);
+        range = "1-" + rangeUpper;
+        result = MML.getCalledShotHitPosition(target, rollValue, action.calledShot);
+    }
+    else {
+        rollValue = MML.rollDice(1, 100);
+        range = "1-46"
+        result = MML.getHitPosition(target, rollValue);
+    }
+
+    MML.processCommand({
+        type: "player",
+        who: this.player,
+        triggeredFunction: "setApiPlayerAttribute",
+        input: {
+            attribute: "currentRoll",
+            value: {
+                type: "hitPosition",
+                character: this.name,
+                player: this.player,
+                rollResultFunction: "hitPositionRollResult",
+                range: range,
+                result: result,
+                value: rollValue,
+                accepted: false
+            }
+        }   
+    });
+
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "hitPositionRollResult",
+        input: {}
+    });
 };
 
 MML.hitPositionRollResult = function hitPositionRollResult(input){
     var currentRoll = state.MML.players[this.player].currentRoll;
+    currentRoll.message = "Roll: " + currentRoll.value +
+                        "\nResult: " + currentRoll.result.name +
+                        "\nRange: " + currentRoll.range;
 
     if(this.player === state.MML.GM.player){
         if(currentRoll.accepted === false){
@@ -1062,7 +1124,7 @@ MML.hitPositionRollResult = function hitPositionRollResult(input){
             MML.processCommand({
                 type: "character",
                 who: this.name,
-                triggeredFunction: "attackRollApply",
+                triggeredFunction: "hitPositionRollApply",
                 input: currentRoll
             });
         }
@@ -1079,47 +1141,15 @@ MML.hitPositionRollResult = function hitPositionRollResult(input){
         MML.processCommand({
             type: "character",
             who: this.name,
-            triggeredFunction: "attackRollApply",
+            triggeredFunction: "hitPositionRollApply",
             input: currentRoll
         });
     }
 };
 
 MML.hitPositionRollApply = function hitPositionRollApply(input){
-    var result = input.result;
-    state.MML.GM.currentAction.attackRollResult = result;
-    var action = state.MML.GM.currentAction;
     
-    if(result === "Critical Success" || result === "Success"){
-        MML.processCommand({
-            type: "character",
-            who: action.targetArray[action.targetIndex],
-            triggeredFunction: "meleeDefense",
-            input: {
-                attackerWeapon: action.attackerWeapon,
-                attackerGrip: action.attackerGrip
-            }
-        });
-    }
-    else if(result === "Critical Failure"){
-        MML.processCommand({
-            type: "GM",
-            triggeredFunction: "attackCriticalFailure",
-            input: action
-        });
-    }
-    else{
-        MML.processCommand({
-            type: "player",
-            who: this.player,
-            triggeredFunction: "endAction",
-            input: action
-        });
-    }
 };
-
-
-
 
 MML.meleeDefense = function meleeDefense(input){
     var weaponId;
@@ -1150,7 +1180,7 @@ MML.meleeDefense = function meleeDefense(input){
     if(MML.isDualWielding(this)){
         log("Dual Wield defense");
     }
-    else if(MML.isUnarmed(this) || MML.isWieldingMissileWeapon(this)){
+    else if(MML.isUnarmed(this) || MML.isWieldingRangedWeapon(this)){
         blockChance = 0;
     }
     else if(MML.getWeaponFamily(this, "rightHand") !== "unarmed"){
@@ -1276,7 +1306,7 @@ MML.meleeBlockRollApply = function meleeBlockRollApply(input){
         MML.processCommand({
             type: "character",
             who: action.who,
-            triggeredFunction: "meleeDamageRoll",
+            triggeredFunction: "hitPositionRoll",
             input: {}
         });
     }

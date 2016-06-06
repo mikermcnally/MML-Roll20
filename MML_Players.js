@@ -525,7 +525,7 @@ MML.charMenuAttack = function charMenuAttack(input){
 			MML.displayMenu.apply(this, []);
 		}}];
 
-	if (MML.isWieldingMissileWeapon(state.MML.characters[this.who])){
+	if (MML.isWieldingRangedWeapon(state.MML.characters[this.who])){
 		buttons.push({
 			text: "Shoot From Cover",
 			nextMenu: "charMenuAttackCalledShot",
@@ -577,7 +577,7 @@ MML.charMenuAttackCalledShot = function charMenuCalledShot(input){
 		}}
 	];
 
-	if(MML.isWieldingMissileWeapon(state.MML.characters[this.who])){
+	if(MML.isWieldingRangedWeapon(state.MML.characters[this.who])){
 		_.each(buttons, function(button){
 			button.nextMenu = "charMenuInitiativeRoll";
 		});
@@ -677,6 +677,54 @@ MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(input){
 		input: {}
     });
 };
+MML.charMenuSelectBodyPart = function charMenuSelectBodyPart(input){
+	this.who = input.who;
+	this.message =  "Choose a Body Part.";
+	this.buttons = [];
+
+	var bodyParts = MML.getBodyParts(state.MML.characters[state.MML.GM.currentAction.targetArray[state.MML.GM.currentAction.targetIndex]]);
+
+	_.each(bodyParts, function(part){
+		this.buttons.push({
+			text: part,
+			nextMenu: "menuIdle",
+			triggeredFunction: function(input){
+				state.MML.GM.currentAction.calledShot = input.text;
+
+				MML.processCommand({
+			    	type: "character",
+			    	who: this.who,
+			    	triggeredFunction: "processAttack",
+					input: {}
+			    });
+			}
+		});
+	}, this);
+};
+MML.charMenuSelectHitPosition = function charMenuSelectHitPosition(input){
+	this.who = input.who;
+	this.message =  "Choose a Hit Position.";
+	this.buttons = [];
+
+	var hitPositions = MML.getHitPositionNames(state.MML.characters[state.MML.GM.currentAction.targetArray[state.MML.GM.currentAction.targetIndex]]);
+
+	_.each(hitPositions, function(position){
+		this.buttons.push({
+			text: position,
+			nextMenu: "menuIdle",
+			triggeredFunction: function(input){
+				state.MML.GM.currentAction.calledShot = input.text;
+
+				MML.processCommand({
+			    	type: "character",
+			    	who: this.who,
+			    	triggeredFunction: "processAttack",
+					input: {}
+			    });
+			}
+		});
+	}, this);
+};
 MML.charMenuSelectDamageType = function charMenuSelectDamageType(input){
     this.who = input.who;
 	this.message =  "Choose a Damage Type.";
@@ -710,7 +758,7 @@ MML.charMenuSelectDamageType = function charMenuSelectDamageType(input){
 				input: {}
 		    });
 		}
-	});	
+	});
 };
 MML.charMenuAttackRoll = function charMenuAttackRoll(input){
 	this.who = input.who;
