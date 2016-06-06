@@ -12,6 +12,11 @@ Campaign = roll20.Campaign;
 on = function(event) {};
 
 var MML = require('./MML_test').MML;
+hitPositionRoll_0_hitTable_A();
+
+function hitPositionRoll_0_hitTable_A(){
+    state.MML.players
+}
 
 function test_setup() {
     state.MML = {};
