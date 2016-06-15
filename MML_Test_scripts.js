@@ -12,10 +12,97 @@ Campaign = roll20.Campaign;
 on = function(event) {};
 
 var MML = require('./MML_test').MML;
-hitPositionRoll_0_hitTable_A();
 
-function hitPositionRoll_0_hitTable_A(){
-    state.MML.players
+test_setup();
+
+applyDamage();
+hitPositionRollApply();
+getHitTableHumanoid_unarmed();
+getHitTableHumanoid_meleeLeft();
+getHitTableHumanoid_meleeRight();
+getHitTableHumanoid_thrown();
+getHitTableHumanoid_missile();
+getHitTableHumanoid_dualWield();
+getHitTableHumanoid_twohander();
+getHitTableHumanoid_shieldWeapon();
+getHitTableHumanoid_shieldOnly();
+getHitPostionHumanoid_A_1();
+getHitPostionHumanoid_A_50();
+getHitPostionHumanoid_A_100();
+getHitPostionHumanoid_A_101();
+getHitPostionHumanoid_A_0();
+getHitPostionHumanoid_B_1();
+getHitPostionHumanoid_B_50();
+getHitPostionHumanoid_B_100();
+getHitPostionHumanoid_C_1();
+getHitPostionHumanoid_C_50();
+getHitPostionHumanoid_C_100();
+getBodyParts_humanoid();
+getBodyParts_NonexistantBodyType();
+getCalledShotHitPositionHumanoid_head_1();
+getCalledShotHitPositionHumanoid_head_7();
+getCalledShotHitPositionHumanoid_head_8();
+getCalledShotHitPositionHumanoid_head_0();
+getCalledShotHitPositionHumanoid_plumbus();
+getHitPositionNames_humanoid();
+getHitPositionNames_NonexistantBodyType();
+rollHitPosition_humanoid_default();
+rollHitPosition_humanoid_calledshot();
+rollHitPosition_humanoid_calledshotSpecific();
+
+function applyDamage(){
+    state.MML.GM.currentAction = {
+        hitPosition: {
+            name: "Top of Head",
+            hp: "hpHead",
+            bodyPart: "Head"
+        }
+    };
+    
+}
+
+function hitPositionRollApply(){
+    var input = {
+        hitPosition: {
+            name: "Top of Head",
+            hp: "hpHead",
+            bodyPart: "Head"
+        }
+    };
+
+    var actor = {
+        name: "actor",
+        player: "Robot",
+        statusEffects: {}
+    };
+
+    try {
+        MML.hitPositionRollApply.apply(actor, [input]);
+        var result = MML.testResult;
+        var expected = {
+            character: "actor",
+            type: "hitPosition",
+            rollResultFunction: "hitPositionRollResult",
+            player: "Robot",
+            range: "1-46",
+            accepted: false
+        };
+
+        if (_.isMatch(result, expected) &&
+            _.has(result.result, "name") &&
+            _.has(result.result, "hp") &&
+            _.has(result.result, "bodyPart") &&
+            _.isNumber(result.value)) {
+            console.log("rollHitPosition_humanoid_default passed!");
+        } else {
+            console.log("rollHitPosition_humanoid_default failed!");
+            console.log(result);
+            console.log(expected);
+        }
+    } catch (error) {
+        console.log("rollHitPosition_humanoid_default");
+        console.log(error);
+    }
 }
 
 function test_setup() {
@@ -98,42 +185,9 @@ function test_setup() {
     // });
 }
 
-test_setup();
-
-getHitTableHumanoid_unarmed();
-getHitTableHumanoid_meleeLeft();
-getHitTableHumanoid_meleeRight();
-getHitTableHumanoid_thrown();
-getHitTableHumanoid_missile();
-getHitTableHumanoid_dualWield();
-getHitTableHumanoid_twohander();
-getHitTableHumanoid_shieldWeapon();
-getHitTableHumanoid_shieldOnly();
-getHitPostionHumanoid_A_1();
-getHitPostionHumanoid_A_50();
-getHitPostionHumanoid_A_100();
-getHitPostionHumanoid_A_101();
-getHitPostionHumanoid_A_0();
-getHitPostionHumanoid_B_1();
-getHitPostionHumanoid_B_50();
-getHitPostionHumanoid_B_100();
-getHitPostionHumanoid_C_1();
-getHitPostionHumanoid_C_50();
-getHitPostionHumanoid_C_100();
-getBodyParts_humanoid();
-getBodyParts_NonexistantBodyType();
-getCalledShotHitPositionHumanoid_head_1();
-getCalledShotHitPositionHumanoid_head_7();
-getCalledShotHitPositionHumanoid_head_8();
-getCalledShotHitPositionHumanoid_head_0();
-getCalledShotHitPositionHumanoid_plumbus();
-getHitPositionNames_humanoid();
-getHitPositionNames_NonexistantBodyType();
-rollHitPosition_humanoid_default();
-rollHitPosition_humanoid_calledshot();
-rollHitPosition_humanoid_calledshotSpecific();
 
 function rollHitPosition_humanoid_default() {
+    MML.testedFunction = "hitPositionRoll";
     state.MML.characters.target = {
         inventory: {
             emptyHand: {
@@ -1170,4 +1224,17 @@ function getHitPositionNames_NonexistantBodyType() {
         console.log("getHitPositionNames_NonexistantBodyType");
         console.log(error);
     }
+}
+
+
+function meleeAttackAction(){
+    state.MML.GM.currentAction = {
+        parameters: {},
+        rolls: {},
+        process: function(){
+            if(_.isUndefined(this.rolls.attackRoll)){
+                MML.meleeAttackRoll()
+            }
+        }
+    };
 }

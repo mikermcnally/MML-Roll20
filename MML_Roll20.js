@@ -1010,23 +1010,23 @@ MML.meleeAttack = function meleeAttack(input){
     }
 };
 
-MML.meleeAttackRoll = function meleeAttackRoll(input){
-    var action = state.MML.GM.currentAction;
-    var mods;
-    if (action.weaponType === "primary"){
-        mods = [action.attackerWeapon.grips[action.attackerGrip].primaryTask, action.skill, action.sitMod, action.attackMod];
-    }
-    else{
-        mods = [action.attackerWeapon.grips[action.attackerGrip].secondaryTask, action.skill, action.sitMod, action.attackMod];
-    }
+MML.meleeAttackRoll = function meleeAttackRoll(character,task, skill, sitMod, attackMod){
+    // var action = state.MML.GM.currentAction;
+    // var mods;
+    // if (action.weaponType === "primary"){
+    //     mods = [action.attackerWeapon.grips[action.attackerGrip].primaryTask, action.skill, action.sitMod, action.attackMod];
+    // }
+    // else{
+    //     mods = [action.attackerWeapon.grips[action.attackerGrip].secondaryTask, action.skill, action.sitMod, action.attackMod];
+    // }
 
     MML.processCommand({
         type: "character",
-        who: this.name,
+        who: character.name,
         triggeredFunction: "universalRoll",
         input: {
             rollResultFunction: "attackRollResult",
-            mods: mods
+            mods: [task, skill, sitMod, attackMod]
         }
     });
 };
@@ -1134,9 +1134,9 @@ MML.hitPositionRoll = function hitPositionRoll(input){
         result = MML.getCalledShotHitPosition(target, rollValue, action.calledShot);
     }
     else {
-        rollValue = MML.rollDice(1, 100);
-        range = "1-46"
-        result = MML.getHitPosition(target, rollValue);
+        range = "1-" + _.keys(MML.hitPositions[target.bodyType]).length;
+        result = MML.getHitPosition(target, MML.rollDice(1, 100));
+        rollValue = +_.findKey(MML.hitPositions[target.bodyType], function(hitPosition){ return hitPosition.name === result.name; });
     }
 
     MML.processCommand({
@@ -1168,6 +1168,16 @@ MML.hitPositionRoll = function hitPositionRoll(input){
 
 MML.hitPositionRollResult = function hitPositionRollResult(input){
     var currentRoll = state.MML.players[this.player].currentRoll;
+    var action = state.MML.GM.currentAction;
+    var target = state.MML.characters[action.targetArray[action.targetIndex]];
+
+    if (_.has(this.statusEffects, "Called Shot")){
+        currentRoll.result = MML.getCalledShotHitPosition(target, currentRoll.value, action.calledShot);
+    }
+    else {
+        currentRoll.result = MML.hitPositions[target.bodyType][currentRoll.value];
+    }
+
     currentRoll.message = "Roll: " + currentRoll.value +
                         "\nResult: " + currentRoll.result.name +
                         "\nRange: " + currentRoll.range;
@@ -1205,13 +1215,22 @@ MML.hitPositionRollResult = function hitPositionRollResult(input){
             type: "character",
             who: this.name,
             triggeredFunction: "hitPositionRollApply",
-            input: currentRoll
+            input: {
+                result: currentRoll.result,
+                triggeredFunction
         });
     }
 };
 
 MML.hitPositionRollApply = function hitPositionRollApply(input){
-    
+    state.MML.GM.currentAction.hitPosition = input.result;
+
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: input.triggeredFunction,
+        input: {}
+    });
 };
 
 MML.meleeDefense = function meleeDefense(input){
