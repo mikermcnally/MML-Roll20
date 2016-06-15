@@ -15,7 +15,7 @@ var MML = require('./MML_test').MML;
 hitPositionRoll_0_hitTable_A();
 
 function hitPositionRoll_0_hitTable_A(){
-    state.MML.players
+    // state.MML.players
 }
 
 function test_setup() {
@@ -1249,6 +1249,9 @@ MML.meleeAttack = function meleeAttack(){
         MML.sensitiveAreaRoll();
     }
     else if(!_.isUndefined(parameters.knockDown)){
-        MML.sensitiveAreaRoll();
+        MML.knockdownRoll();
+    }
+    else {
+      MML.endAction();
     }
 };
