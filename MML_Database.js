@@ -1,3 +1,4 @@
+/* jshint -W069 */
 MML.skills = {};
 MML.skills["Acrobatics"] = {attribute: "coordination"};
 MML.skills["Acting"] = {attribute: "presence"};
@@ -379,7 +380,7 @@ MML.skillMods["Wood Elf"]["Navigation"] = 10;
 MML.skillMods["Wood Elf"]["Stealth"] = 10;
 MML.skillMods["Wood Elf"]["Survival"] = 10;
 MML.skillMods["Wood Elf"]["Tracking"] = 3;
-MML.skillMods["Female"] = []
+MML.skillMods["Female"] = {};
 MML.skillMods["Female"]["Life Elementalism"] = 5;
 MML.skillMods["Female"]["Symbol Magic"] = 5;
 
@@ -446,15 +447,15 @@ MML.weaponSkillMods["Wood Elf"]["Medium Composite Bow"] = 10;
 //MML.weaponSkillMods["Wood Elf"]["thrownWeaponSpears"] = 3;
 
 MML.movementRates = {};
-MML.movementRates["Dwarf"] = { 
+MML.movementRates["Dwarf"] = {
     Prone: 0,
     Crawl: 1.75,
 	Stalk: 1.75,
 	Walk: 6,
 	Jog: 14,
-	Run: 34	
+	Run: 34
 };
-MML.movementRates["Gnome"] = { 
+MML.movementRates["Gnome"] = {
 	Prone: 0,
 	Crawl: 1.75,
 	Stalk: 1.75,
@@ -462,7 +463,7 @@ MML.movementRates["Gnome"] = {
 	Jog: 14,
 	Run: 32
 };
-MML.movementRates["Gray Elf"] = { 
+MML.movementRates["Gray Elf"] = {
 	Prone: 0,
 	Crawl: 2,
 	Stalk: 2,
@@ -470,7 +471,7 @@ MML.movementRates["Gray Elf"] = {
 	Jog: 20,
 	Run: 36
 };
-MML.movementRates["Hobbit"] = { 
+MML.movementRates["Hobbit"] = {
 	Prone: 0,
 	Crawl: 2,
 	Stalk: 2,
@@ -478,7 +479,7 @@ MML.movementRates["Hobbit"] = {
 	Jog: 8,
 	Run: 18
 };
-MML.movementRates["Human"] = { 
+MML.movementRates["Human"] = {
 	Prone: 0,
 	Crawl: 1.75,
 	Stalk: 1.75,
@@ -486,13 +487,13 @@ MML.movementRates["Human"] = {
 	Jog: 16,
 	Run: 28
 };
-MML.movementRates["Wood Elf"] = { 
+MML.movementRates["Wood Elf"] = {
 	Prone: 0,
 	Crawl: 2,
 	Stalk: 2,
 	Walk: 8,
 	Jog: 20,
-	Run: 34	
+	Run: 34
 };
 
 
@@ -585,7 +586,7 @@ MML.hitPositions.humanoid[46] = { name: "Left Foot/Ankle", hp: "hpLL", bodyPart:
 
 MML.hitTables = {};
 MML.hitTables.humanoid = {};
-MML.hitTables.humanoid.A = [];
+MML.hitTables.humanoid.A = {};
 MML.hitTables.humanoid.A[1] = 1;
 MML.hitTables.humanoid.A[2] = 1;
 MML.hitTables.humanoid.A[3] = 2;
@@ -686,7 +687,7 @@ MML.hitTables.humanoid.A[97] = 43;
 MML.hitTables.humanoid.A[98] = 44;
 MML.hitTables.humanoid.A[99] = 45;
 MML.hitTables.humanoid.A[100] = 46;
-MML.hitTables.humanoid.B = [];
+MML.hitTables.humanoid.B = {};
 MML.hitTables.humanoid.B[1] = 1;
 MML.hitTables.humanoid.B[2] = 1;
 MML.hitTables.humanoid.B[3] = 2;
@@ -787,7 +788,7 @@ MML.hitTables.humanoid.B[97] = 43;
 MML.hitTables.humanoid.B[98] = 44;
 MML.hitTables.humanoid.B[99] = 45;
 MML.hitTables.humanoid.B[100] = 46;
-MML.hitTables.humanoid.C = [];
+MML.hitTables.humanoid.C = {};
 MML.hitTables.humanoid.C[1] = 1;
 MML.hitTables.humanoid.C[2] = 1;
 MML.hitTables.humanoid.C[3] = 2;
@@ -2042,98 +2043,98 @@ MML.items["Pitch Fork"] = {
        }
     };
 MML.items["Short Bow"] = {
-    name: "Short Bow", 
+    name: "Short Bow",
     type: "weapon",
     weight: 0,
     grips: {
         "Two Hands": {
-            family: "MWD", 
-            hands: 2, 
-            pull: 45, 
-            initiative: 8, 
-            reload: 1, 
-            primaryType: "Pierce", 
-            range: { 
-                pointBlank: { task: 15, range: 74, damage: "3d6"}, 
-                effective: { task: 45, range: 149, damage: "2d8"}, 
-                long: { task: 25, range: 299, damage: "2d6"}, 
+            family: "MWD",
+            hands: 2,
+            pull: 45,
+            initiative: 8,
+            reload: 1,
+            primaryType: "Pierce",
+            range: {
+                pointBlank: { task: 15, range: 74, damage: "3d6"},
+                effective: { task: 45, range: 149, damage: "2d8"},
+                long: { task: 25, range: 299, damage: "2d6"},
                 extreme: { task: 0, range: 300, damage: "1d6"}
             }
         }
     }};
 MML.items["Medium Bow"] = {
-    name: "Medium Bow", 
+    name: "Medium Bow",
     type: "weapon",
     weight: 0,
     grips: {
-        "Two Hands": { 
-            family: "MWD", 
-            hands: 2, 
-            pull: 60, 
-            initiative: 7, 
-            reload: 1, 
-            primaryType: "Pierce", 
-            range: { 
-                pointBlank: { task: 15, range: 89, damage: "3d8"}, 
-                effective: { task: 45, range: 179, damage: "2d10"}, 
-                long: { task: 25, range: 449, damage: "2d8"}, 
-                extreme: { task: 0, range: 450, damage: "1d8"} 
+        "Two Hands": {
+            family: "MWD",
+            hands: 2,
+            pull: 60,
+            initiative: 7,
+            reload: 1,
+            primaryType: "Pierce",
+            range: {
+                pointBlank: { task: 15, range: 89, damage: "3d8"},
+                effective: { task: 45, range: 179, damage: "2d10"},
+                long: { task: 25, range: 449, damage: "2d8"},
+                extreme: { task: 0, range: 450, damage: "1d8"}
             }
         }
     }};
-MML.items["Long Bow"] = { 
-    name: "Long Bow", 
-    type: "weapon", 
-    weight: 0, 
+MML.items["Long Bow"] = {
+    name: "Long Bow",
+    type: "weapon",
+    weight: 0,
     grips: {
         "Two Hands": {
             family: "MWD",
-            hands: 2, 
-            pull: 80, 
-            initiative: 6, 
-            reload: 1, 
-            primaryType: "Pierce", 
-            range: { 
-                pointBlank: { task: 15, range: 149, damage: "3d10"}, 
-                effective: { task: 45, range: 269, damage: "3d8"}, 
-                long: { task: 25, range: 599, damage: "3d6"}, 
-                extreme: { task: 0, range: 600, damage: "1d10"} 
+            hands: 2,
+            pull: 80,
+            initiative: 6,
+            reload: 1,
+            primaryType: "Pierce",
+            range: {
+                pointBlank: { task: 15, range: 149, damage: "3d10"},
+                effective: { task: 45, range: 269, damage: "3d8"},
+                long: { task: 25, range: 599, damage: "3d6"},
+                extreme: { task: 0, range: 600, damage: "1d10"}
             }
         }
     }};
-MML.items["Heavy Long Bow"] = { 
-    name: "Heavy Long Bow", 
-    type: "weapon", 
-    weight: 0, 
+MML.items["Heavy Long Bow"] = {
+    name: "Heavy Long Bow",
+    type: "weapon",
+    weight: 0,
     grips: {
         "Two Hands": {
-            family: "MWD", 
-            hands: 2, 
-            pull: 100, 
+            family: "MWD",
+            hands: 2,
+            pull: 100,
             initiative: 4,
-            reload: 1, 
-            primaryType: "Pierce", 
-            range: { 
-                pointBlank: { task: 15, range: 179, damage: "3d12"}, 
-                effective: { task: 45, range: 299, damage: "3d10"}, 
-                long: { task: 25, range: 674, damage: "3d8"}, 
-                extreme: { task: 0, range: 675, damage: "1d10"} 
+            reload: 1,
+            primaryType: "Pierce",
+            range: {
+                pointBlank: { task: 15, range: 179, damage: "3d12"},
+                effective: { task: 45, range: 299, damage: "3d10"},
+                long: { task: 25, range: 674, damage: "3d8"},
+                extreme: { task: 0, range: 675, damage: "1d10"}
             }
         }
     }};
 MML.items["Short Composite Bow"] = {
-    name: "Short Composite Bow", 
+    name: "Short Composite Bow",
     type: "weapon",
-    weight: 0, 
+    weight: 0,
     grips: {
         "Two Hands": {
-            family: "MWD", 
-            hands: 2, 
-            pull: 60, 
-            initiative: 7, 
-            reload: 1, 
-            primaryType: "Pierce", 
-            range: { 
+            family: "MWD",
+            hands: 2,
+            pull: 60,
+            initiative: 7,
+            reload: 1,
+            primaryType: "Pierce",
+            range: {
                 pointBlank: { task: 15, range: 89, damage: "3d8"},
                 effective: { task: 45, range: 179, damage: "2d10"},
                 long: { task: 25, range: 449, damage: "2d8"},
@@ -2144,7 +2145,7 @@ MML.items["Short Composite Bow"] = {
 MML.items["Medium Composite Bow"] = {
     name: "Medium Composite Bow",
     type: "weapon",
-    weight: 0, 
+    weight: 0,
     grips: {
         "Two Hands": {
             family: "MWD",
@@ -2164,7 +2165,7 @@ MML.items["Medium Composite Bow"] = {
 MML.items["Light Cross Bow"] = {
     name: "Light Cross Bow",
     type: "weapon",
-    weight: 0, 
+    weight: 0,
     grips: {
         "Two Hands": {
             family: "MWM",
@@ -2174,25 +2175,25 @@ MML.items["Light Cross Bow"] = {
             reload: 4,
             primaryType: "Pierce",
             range: {
-                pointBlank: { task: 15, range: 179, damage: "3d10"}, 
-                effective: { task: 45, range: 299, damage: "3d8"}, 
-                long: { task: 25, range: 674, damage: "3d6"}, 
-                extreme: { task: 0, range: 675, damage: "1d10"} 
+                pointBlank: { task: 15, range: 179, damage: "3d10"},
+                effective: { task: 45, range: 299, damage: "3d8"},
+                long: { task: 25, range: 674, damage: "3d6"},
+                extreme: { task: 0, range: 675, damage: "1d10"}
             }
         }
     } };
 MML.items["Medium Cross Bow"] = {
-    name: "Medium Cross Bow", 
+    name: "Medium Cross Bow",
     type: "weapon",
-    weight: 0, 
+    weight: 0,
     grips: {
-        "Two Hands": { 
-            family: "MWM", 
-            hands: 2, 
-            pull: 100, 
-            initiative: 10, 
-            reload: 6, 
-            primaryType: "Pierce", 
+        "Two Hands": {
+            family: "MWM",
+            hands: 2,
+            pull: 100,
+            initiative: 10,
+            reload: 6,
+            primaryType: "Pierce",
             range: {
                 pointBlank: { task: 15, range: 224, damage: "3d12"},
                 effective: { task: 45, range: 374, damage: "3d10"},
@@ -2204,7 +2205,7 @@ MML.items["Medium Cross Bow"] = {
 MML.items["Heavy Cross Bow"] = {
     name: "Heavy Cross Bow",
     type: "weapon",
-    weight: 0, 
+    weight: 0,
     grips: {
         "Two Hands": {
             family: "MWM",
@@ -2221,21 +2222,21 @@ MML.items["Heavy Cross Bow"] = {
             }
         }
     }};
-MML.items["Battle Axe, Thrown"] = { 
-    name: "Battle Axe, Thrown", 
+MML.items["Battle Axe, Thrown"] = {
+    name: "Battle Axe, Thrown",
     type: "weapon",
-    weight: 0, 
+    weight: 0,
     grips: {
-        "One Hand": { 
-            family: "TWH", 
-            hands: 1, 
-            initiative: 3, 
-            accuracyMod: -8, 
-            primaryType: "Chop", 
-            range: { 
-                pointBlank: { task: 35, loadDivider: 8, damage: "2d12"}, 
-                effective: { task: 45, loadDivider: 4, damage: "2d10"}, 
-                long: { task: 25, loadDivider: 3, damage: "2d6"}, 
+        "One Hand": {
+            family: "TWH",
+            hands: 1,
+            initiative: 3,
+            accuracyMod: -8,
+            primaryType: "Chop",
+            range: {
+                pointBlank: { task: 35, loadDivider: 8, damage: "2d12"},
+                effective: { task: 45, loadDivider: 4, damage: "2d10"},
+                long: { task: 25, loadDivider: 3, damage: "2d6"},
                 extreme: { task: 0, loadDivider: 2, damage: "1d6"}
             }
         }

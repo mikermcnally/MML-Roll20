@@ -1,3 +1,4 @@
+/* jshint -W069 */
 MML.processCommand = function processCommand(command){
 	if(command.triggeredFunction === MML.testedFunction){
 		MML.testResult = command;
@@ -26,8 +27,8 @@ MML.processCommand = function processCommand(command){
 			console.log(command);
 			console.log(error.message);
 			console.log(error.stack);
-		}	
-	}	
+		}
+	}
 };
 
  module.exports = {

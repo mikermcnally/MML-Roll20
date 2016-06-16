@@ -1,3 +1,4 @@
+/* jshint -W069 */
 // This file contains all menus and defines the player object class
 
 MML.playerClass = {
@@ -65,7 +66,7 @@ MML.prepareNextCharacter = function(input){
             triggeredFunction: "charMenuPrepareAction",
             input: {
                 who: this.characters[this.characterIndex],
-            }   
+            }
         });
     }
     else if(this.name === state.MML.GM.player){
@@ -75,14 +76,14 @@ MML.prepareNextCharacter = function(input){
             triggeredFunction: "GmMenuStartRound",
             input: {
                 who: "GM",
-            }   
+            }
         });
     }
     MML.processCommand({
         type: "player",
         who: this.name,
         triggeredFunction: "displayMenu",
-        input: {}   
+        input: {}
     });
 };
 
@@ -95,7 +96,7 @@ MML.menuIdle = function menuIdle(input){
 MML.GmMenuMain = function GmMenuMain(input){
     this.who = input.who;
     this.message = "Main Menu: ";
-    this.buttons = [MML.menuButtons.combatMenu, 
+    this.buttons = [MML.menuButtons.combatMenu,
     				MML.menuButtons.newCharacterMenu,
 					MML.menuButtons.newItemMenu,
 					MML.menuButtons.worldMenu,
@@ -112,7 +113,7 @@ MML.displayPlayerRoll = function rollMenu(input){
 MML.GmMenuCombat = function GmMenuCombat(input){
 	this.who = input.who;
 	this.message = "Select tokens and begin.";
-	this.buttons = [MML.menuButtons.startCombat, 
+	this.buttons = [MML.menuButtons.startCombat,
 					MML.menuButtons.toMainGmMenu,
 					];
 };
@@ -121,7 +122,7 @@ MML.GmMenuNewItem = function GmMenuNewItem(input){
 	this.who = input.who;
 	this.message = "Select item type:";
 	this.buttons = [MML.menuButtons.newWeapon,
-					MML.menuButtons.newShield, 
+					MML.menuButtons.newShield,
 					MML.menuButtons.newArmor,
 					MML.menuButtons.newSpellComponent,
 					MML.menuButtons.newMiscItem
@@ -240,7 +241,7 @@ MML.GmMenuassignNewItem = function GmMenuassignNewItem(input){
 MML.GmMenuItemQuality = function GmMenuItemQuality(input){
 	this.who = input.who;
 	this.message = "Select a quality level:";
-	this.buttons = [MML.menuButtons.itemQualityPoor, 
+	this.buttons = [MML.menuButtons.itemQualityPoor,
 					MML.menuButtons.itemQualityStandard,
 					MML.menuButtons.itemQualityExcellent,
 					MML.menuButtons.itemQualityMasterWork];
@@ -255,8 +256,8 @@ MML.displayItemOptions = function displayItemOptions(input){
     var hands;
     this.menu = "menuIdle";
     this.message =  "Item Menu";
-    this.who = who;   
-    
+    this.who = who;
+
     if(item.type === "weapon"){
         //Weapon already equipped
         if(state.MML.characters[who].leftHand._id === itemId || state.MML.characters[who].rightHand._id === itemId){
@@ -426,7 +427,7 @@ MML.displayItemOptions = function displayItemOptions(input){
             }
         }
     else if(item.type === "armor"){
-        log(item.type); 
+        log(item.type);
         }
     else if(item.type === "shield"){
         buttons.push({
@@ -490,27 +491,27 @@ MML.displayItemOptions = function displayItemOptions(input){
 // MML.GmMenupromptInitiativeRolls = function GmMenupromptInitiativeRolls(input){
 // 	this.who = input.who;
 // 	this.message = "Start round when all characters are ready.";
-// 	this.buttons = [MML.menuButtons.startRound, 
+// 	this.buttons = [MML.menuButtons.startRound,
 // 					MML.menuButtons.endCombat];
 // };
 MML.GmMenuStartRound = function GmMenuStartRound(input){
 	this.who = input.who;
 	this.message = "Start round when all characters are ready.";
-	this.buttons = [MML.menuButtons.startRound, 
+	this.buttons = [MML.menuButtons.startRound,
 					MML.menuButtons.endCombat];
 };
 
 // MML.GmMenuStartRound = function GmMenuStartRound(input){
 // 	this.who = input.who;
 // 	this.message = "Prepare actions and start the round";
-// 	this.buttons = [MML.menuButtons.startRound, 
+// 	this.buttons = [MML.menuButtons.startRound,
 // 					MML.menuButtons.endCombat];
 // };
 
 MML.charMenuPrepareAction = function charMenuPrepareAction(input){
 	this.who = input.who;
 	this.message =  "Prepare " + this.who + "'s action";
-	this.buttons = [MML.menuButtons.setActionAttack, 
+	this.buttons = [MML.menuButtons.setActionAttack,
 					MML.menuButtons.setActionCast,
 					MML.menuButtons.setActionReadyItem,
 					MML.menuButtons.setActionObserve];
@@ -543,7 +544,7 @@ MML.charMenuAttack = function charMenuAttack(input){
 			}
 		});
 	}
-	else {//Melee	
+	else {//Melee
 		buttons.push({
 			text: "Sweep Attack",
 			nextMenu: "charMenuAttackCalledShot",
@@ -666,7 +667,7 @@ MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(input){
 	else{
 		targetArray = input.targets;
 	}
-	
+
 	state.MML.GM.currentAction.targetArray = targetArray;
 	state.MML.GM.currentAction.targetIndex = 0;
 
@@ -1314,7 +1315,7 @@ MML.movementPhase = function movementPhase(input){
 			this.actor = this.combatants[0];
 
 			var buttonArray = ["Perform Action"];
-			
+
 			this.displayMenu("Wait for characters to be ready", buttonArray);
 		break;
 		case "Perform Action":
@@ -1350,7 +1351,7 @@ MML.endAction = function endAction(){
 	this.setTurnOrder();
 
 	if(this.characters[this.combatants[0]].initiative < 1){
-		
+
 	}
 	else{
 		this.who = MML.GmMenuCombat;
@@ -1370,7 +1371,7 @@ MML.nextAction = function nextAction(){
 			this.characters[this.targets[index]].setInitiative();
 		}
 		this.setTurnOrder();
-		
+
 		if(this.actor.initiative < 1){
 			var index = 0;
 			for (index in this.combatants){
@@ -1405,7 +1406,7 @@ MML.nextAction = function nextAction(){
 MML.GmMenuNewCharacter = function newCharacter(input){
 	var character = {};
 	var buttonArray = ["Name"];
-	
+
 	switch(input){
 		case "entry":
 			this.who = "newCharacter";
@@ -1417,16 +1418,16 @@ MML.GmMenuNewCharacter = function newCharacter(input){
 			MML.GmMenu.chooseRace("entry");
 		break;
 		default:
-		break;			
+		break;
 	}
-	
-	
+
+
 };
 
 MML.GmMenuChooseRace = function chooseRace(input){
 	var character = {};
 	var buttonArray = ["Dwarf", "Gnome", "Human", "Hobbit", "Gray Elf", "Wood Elf"];
-	
+
 	switch(input){
 		case "entry":
 			this.who = "chooseRace";
@@ -1457,16 +1458,16 @@ MML.GmMenuChooseRace = function chooseRace(input){
 			MML.GmMenu.chooseGender("entry");
 		break;
 		default:
-		break;			
+		break;
 	}
-	
+
 	this.whoInfo.character = character;
 };
 
 MML.GmMenuChooseGender = function chooseGender(input){
 	var character = this.whoInfo.character;
 	var buttonArray = ["Female", "Male"];
-	
+
 	switch(input){
 		case "entry":
 			this.who = "chooseGender";
@@ -1481,13 +1482,13 @@ MML.GmMenuChooseGender = function chooseGender(input){
 			MML.GmMenu.rollAttributes("entry");
 		break;
 		default:
-		break;			
+		break;
 	}
 	this.whoInfo.character = character;
 };
- 
+
 MML.GmMenuRollAttributes = function rollAttributes(input){
-	var character = this.whoInfo.character; 
+	var character = this.whoInfo.character;
 	var rollArray = this.whoInfo.rollArray;
 	var buttonArray = ["Stature", "Strength", "Coordination", "Health", "Beauty", "Intellect", "Reason", "Creativity", "Presence"];
 	var message;
@@ -1501,9 +1502,9 @@ MML.GmMenuRollAttributes = function rollAttributes(input){
 				roll = MML.rollDice(4, 6) - 4;
 			}
 			rollArray[index] = roll;
-		}	
+		}
 	}
-	
+
 	if(rollArray.length > 0){
 		var index;
 		for(index in rollArray){
@@ -1647,14 +1648,14 @@ MML.GmMenuRollAttributes = function rollAttributes(input){
 				MML.GmMenu.rollAttributes("entry");
 			break;
 			default:
-			break;			
+			break;
 		}
 	}
 
 	else{
 		MML.GmMenu.chooseSkills("entry");
 	}
-	
+
 	this.whoInfo.character = character;
 };
 
@@ -1666,7 +1667,7 @@ MML.GmMenuChooseSkills = function chooseSkills(input){
 	var index;
 	for(index in MML.skills){
 		buttonArray.push(MML.skills[index].name); //{ name: "Acrobatics", current: 0, attribute: "coordination", mods: [{ name: , value: }]};
-	} 
+	}
 
 	if(input === "entry"){
 		this.who = "chooseSkills";
@@ -1694,5 +1695,5 @@ MML.GmMenuUtilities = function utilities(input){
 // 	effect: function(){
 // 		this.result;
 // 	}
-	 
+
 // };

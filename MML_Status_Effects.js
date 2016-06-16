@@ -1,3 +1,5 @@
+/* jshint -W069 */
+
 MML.statusEffects = {};
 MML.statusEffects["Major Wound"] = function(effect, index){
     if(this[effect.bodyPart] > Math.round(this[effect.bodyPart + "Max"]/2)){
@@ -38,7 +40,7 @@ MML.statusEffects["Wound Fatigue"] = function(effect, index){
     this.situationalMod  += -10;
 };
 MML.statusEffects["Number of Defenses"] = function(effect, index){
-    if(state.GM.roundStarted === false){ 
+    if(state.GM.roundStarted === false){
         delete this.statusEffects[index];
     }
 
@@ -52,7 +54,7 @@ MML.statusEffects["Fatigue"] = function(effect, index){
     this.situationalMod  += -10*effect.level;
 };
 MML.statusEffects["Sensitive Area"] = function(effect, index){
-    if(state.GM.roundStarted === false){ 
+    if(state.GM.roundStarted === false){
         effect.duration--;
         if(effect.duration < 1){
             delete this.statusEffects[index];
@@ -68,7 +70,7 @@ MML.statusEffects["Sensitive Area"] = function(effect, index){
     }
 };
 MML.statusEffects["Stumbling"] = function(effect, index){
-    if(state.GM.roundStarted === false){ 
+    if(state.GM.roundStarted === false){
         effect.duration--;
         if(effect.duration < 1){
             delete this.statusEffects[index];
@@ -140,10 +142,10 @@ MML.statusEffects["Defensive Stance"] = function(effect, index){
     }
 };
 MML.statusEffects["Observe"] = function(effect, index){
-    if(state.GM.roundStarted === false){ 
+    if(state.GM.roundStarted === false){
         effect.duration--;
     }
-    
+
     if(effect.duration < 1 || (this.situationalInitBonus !== "No Combat" && !_.has(this.statusEffects, "Number of Defenses"))){
         delete this.statusEffects[index];
     }
@@ -159,7 +161,7 @@ MML.statusEffects["Observe"] = function(effect, index){
         if(MML.isWieldingRangedWeapon(this)){
                 this.missileAttackMod += 15;
             }
-        } 
+        }
 };
 MML.statusEffects["Taking Aim"] = function(effect, index){
     if(_.has(this.statusEffects, "Number of Defenses") ||
