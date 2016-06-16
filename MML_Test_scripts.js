@@ -1226,15 +1226,86 @@ function getHitPositionNames_NonexistantBodyType() {
     }
 }
 
-
-function meleeAttackAction(){
+function attackAction_Melee_Standard_NoCalledshot(){
     state.MML.GM.currentAction = {
+        character: {},
         parameters: {},
         rolls: {},
-        process: function(){
-            if(_.isUndefined(this.rolls.attackRoll)){
-                MML.meleeAttackRoll()
-            }
-        }
+        triggeredFunction: "meleeAttack"
     };
+
+    try {
+        var result = MML.getHitPositionNames(character);
+        var expected = "Error: Body type not found";
+
+        if (result === expected) {
+            console.log("getHitPositionNames_NonexistantBodyType passed!");
+        } else {
+            console.log("getHitPositionNames_NonexistantBodyType failed!");
+            console.log(result);
+            console.log(expected);
+        }
+    } catch (error) {
+        console.log("getHitPositionNames_NonexistantBodyType");
+        console.log(error);
+    }
 }
+
+MML.meleeAttack = function meleeAttack(){
+    var currentAction = state.MML.GM.currentAction;
+    var character = currentAction.character;
+    var parameters = currentAction.parameters;
+    var target = parameters.target;
+    var attackerWeapon = parameters.attackerWeapon;
+    var targetWeapon = parameters.targetWeapon;
+    var rolls = currentAction.rolls;
+
+    if(_.isUndefined(rolls.attackRoll)){
+        MML.meleeAttackRoll(character, attackerWeapon, sitMods, attackMods);
+    }
+    else if(_.isUndefined(rolls.defenseRoll)){
+        if (rolls.attackRoll === "Critical Success" || rolls.attackRoll === "Success") {
+            MML.meleeDefenseRoll(target, targetWeapon);
+        }
+        else if (rolls.attackRoll === "Critical Failure"){
+            MML.endAction();
+        }
+        else {
+            MML.endAction();
+        }
+    }
+    else if(_.isUndefined(rolls.hitPositionRoll)){
+        if (rolls.defenseRoll === "Critical Success" || rolls.defenseRoll === "Success") {
+            MML.endAction(target, targetWeapon);
+        }
+        else if (rolls.defenseRoll === "Critical Failure"){
+            MML.hitPositionRoll();
+        }
+        else {
+            MML.hitPositionRoll();
+        }
+    }
+    else if(_.isUndefined(rolls.damageRoll)){
+        if (rolls.attackRoll === "Critical Success") {
+            MML.meleeDamageRoll(character, attackerWeapon, true);
+        }
+        else {
+            MML.meleeDamageRoll(character, attackerWeapon, false);
+        }
+    }
+    else if(!_.isUndefined(parameters.wound)){
+        MML.woundRoll();
+    }
+    else if(!_.isUndefined(parameters.multiWound)){
+        MML.multiWoundRoll();
+    }
+    else if(!_.isUndefined(parameters.sensitiveArea)){
+        MML.sensitiveAreaRoll();
+    }
+    else if(!_.isUndefined(parameters.knockDown)){
+        MML.knockdownRoll();
+    }
+    else {
+      MML.endAction();
+    }
+};
