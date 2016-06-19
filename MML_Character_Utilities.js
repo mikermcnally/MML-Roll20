@@ -1,3 +1,4 @@
+/* jshint -W069 */
 MML.isSensitiveArea = function isSensitiveArea(position) {
     if (position === 2 || position === 6 || position === 33) {
         return true;

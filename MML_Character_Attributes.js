@@ -1,6 +1,7 @@
+/* jshint -W069 */
 // Character Creation
 MML.characterConstructor = function characterConstructor(charName) {
-    // Basic Info 
+    // Basic Info
     this.name = charName;
     this.player = MML.getCurrentAttribute(this.name, "player");
     this.race = MML.getCurrentAttribute(this.name, "race");
@@ -598,7 +599,7 @@ MML.computeAttribute.epRecovery = {
     }
 };
 
-// Inventory stuff    
+// Inventory stuff
 MML.computeAttribute.inventory = {
     dependents: ["totalWeightCarried",
         "apv",
@@ -1321,7 +1322,7 @@ MML.computeAttribute.action = {
                 initBonus = this.inventory[this.rightHand._id].grips[this.rightHand.grip].initiative;
             } else {
                 initBonus = this.inventory[this.leftHand._id].grips[this.leftHand.grip].initiative;
-                //this.action.skill = this.weaponSkills.[this.inventory[this.leftHand._id].name].level or this.weaponSkills["Default Martial Skill"].level;                    
+                //this.action.skill = this.weaponSkills.[this.inventory[this.leftHand._id].name].level or this.weaponSkills["Default Martial Skill"].level;
             }
         }
         this.action.initBonus = initBonus;

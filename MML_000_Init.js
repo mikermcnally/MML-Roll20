@@ -1,3 +1,4 @@
+/* jshint -W069 */
 var MML = MML || {};
 
 MML.init = function init(){
@@ -60,4 +61,3 @@ MML.init = function init(){
 // state.MML.characters =data[2];
 // MML.processCommand(data[3]);
 };
-

@@ -1,11 +1,12 @@
+/* jshint -W069 */
 MML.startCombat = function startCombat(input) {
     this.currentRound = 0;
     this.roundStarted = false;
-    this.combatants = input.selectedCharNames; 
+    this.combatants = input.selectedCharNames;
 
 	if(this.combatants.length > 0){
 		this.inCombat = true;
-		
+
 		_.each(this.combatants, function(charName){
 			MML.processCommand({
 		        type: "character",
@@ -25,7 +26,7 @@ MML.startCombat = function startCombat(input) {
 		        }
 		    });
 		}, this);
-		
+
 		MML.processCommand({
 	        type: "GM",
 	        triggeredFunction: "setTurnOrder",
@@ -106,9 +107,9 @@ MML.startRound = function startRound(){
 
 MML.startCombatMovement = function startCombatMovement(){
 	if (MML.checkReady.apply(this, [])){
-		this.actor = this.combatants[0];		
+		this.actor = this.combatants[0];
 		var playerName = state.MML.characters[this.actor].player;
-		
+
     	MML.processCommand({
 	        type: "player",
 	        who: playerName,
@@ -140,7 +141,7 @@ MML.checkReady = function checkReady(){
 			everyoneReady = false;
 		}
 	});
-		
+
 	return everyoneReady;
 };
 
@@ -204,7 +205,7 @@ MML.getWeaponDamageRoll = function getWeaponDamageRoll(input){
 			this.currentRoll = this.characters[this.actor].weaponDamageRoll();
 			this.displayRoll();
 		break;
-		case "result": 
+		case "result":
 			this.rolls.damage = this.currentRoll;
 			this.rollIndex = "getKnockdownRoll";
 			this.menu = MML.performAction;
@@ -235,7 +236,7 @@ MML.getKnockdownRoll = function getKnockdownRoll(input){
 			this.rolls.knockdown = this.currentRoll.result;
 			if(this.rolls.knockdown === "Critical Success" || this.rolls.knockdown === "Success"){
 				this.stumble = 1;
-			}			
+			}
 			else{
 				sendChat("Game", this.characters[this.currentTarget].name + " is knocked to the ground");
 				this.characters[this.currentTarget].currentMotion = "prone";
@@ -271,7 +272,7 @@ MML.getSensitiveAreaRoll = function getSensitiveAreaRoll(input){
 			if(this.rolls.sensitiveArea !== "Critical Success" || this.rolls.sensitiveArea !== "Success"){
 				sendChat("", this.characters[this.currentTarget].name + " is in pain!");
 				this.characters[this.currentTarget].sensitive = 1;
-			}	
+			}
 			this.rollIndex = "getWoundRoll";
 			this.menu = MML.performAction;
 			this.menu();
@@ -301,7 +302,7 @@ MML.getMultiWoundRoll = function getMultiWoundRoll(input){
 		break;
 		case "result":
 			this.rolls.multiWound.result = this.currentRoll.result;
-			
+
 			if(this.rolls.multiWound.result === "Success" || this.rolls.multiWound.result === "Critical Success"){
 				//this.characters[this.currentTarget].statusEffects.push(MML.woundFatigue);
 				this.characters[this.currentTarget].multiWound.wound = true;
@@ -343,7 +344,7 @@ MML.getWoundRoll = function getWoundRoll(input){
 				break;
 				case "disabling":
 					this.characters[this.currentTarget][this.rolls.wound.bodyPart].wound.disabling = true;
-					
+
 					if(this.rolls.wound.result === "Failure" ){
 						this.characters[this.currentTarget].stun.duration += this.rolls.wound.duration;
 					}
@@ -372,7 +373,7 @@ MML.setTurnOrder = function setTurnOrder(){
 			custom: ""
 		});
     }
-    
+
 	turnorder.sort(function (a, b) {
 		if (parseFloat(b.pr) === parseFloat(a.pr)) {
 	    		if (a.custom !== "" && b.custom !== ""){
@@ -380,19 +381,19 @@ MML.setTurnOrder = function setTurnOrder(){
 			}
 			else{
 	        	return 0;
-			}            
-		} 
+			}
+		}
 		else {
 			return parseFloat(b.pr) - parseFloat(a.pr);
 		}
 	});
-	
+
 	index = 0;
 	for (index in this.combatants){
 		//Orders the tokens based on initiative
 		this.combatants[index] = MML.getCharFromToken(getObj("graphic", turnorder[index].id));
     }
-    
+
     Campaign().set("turnorder", JSON.stringify(turnorder));
 };
 
@@ -511,7 +512,7 @@ MML.processCommand = function processCommand(command){
 		log(command);
 		log(error.message);
 		log(error.stack);
-	}		
+	}
 };
 
 MML.parseCommand = function parseCommand(msg) {
@@ -524,7 +525,7 @@ MML.parseCommand = function parseCommand(msg) {
 	        var character = stringIn[0];
 	        var target = stringIn[1];
 	        var hexedInput = stringIn[2];
-	     
+
 	        var i;
 		    var hexes = hexedInput.match(/.{1,4}/g) || [];
 		    input = "";
@@ -553,7 +554,7 @@ MML.parseCommand = function parseCommand(msg) {
 
 	    else if(content.indexOf("changeRoll") !== -1) {
 	        var value = parseInt(content.replace("changeRoll ", ""));
-	        
+
 	        if(!isNaN(value)){
 	            command = {
 	            	type: "player",
@@ -566,14 +567,14 @@ MML.parseCommand = function parseCommand(msg) {
 	        }
 	        else{
 	            sendChat("Error", "Please enter a numerical value.");
-	        }       
+	        }
 	    }
 
 	    else if(content.indexOf("acceptRoll") !== -1) {
 	        if(state.MML.players[state.MML.GM.player].currentRoll.accepted === false){
 	        	var player = state.MML.players[state.MML.GM.player];
 	            state.MML.players[player.name].currentRoll.accepted = true;
-	            
+
 	            command = {
 	            	type: "character",
 					who: player.who,
@@ -616,8 +617,8 @@ MML.parseCommand = function parseCommand(msg) {
 
 	        command.input.selectedCharNames = MML.getSelectedCharNames(msg.selected);
     	}
-    	
+
     	MML.processCommand(command);
     }
-	    
+
 };

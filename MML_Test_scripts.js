@@ -1,3 +1,4 @@
+/* jshint -W069 */
 _ = require('underscore');
 roll20 = require('../Roll20 Emulation/Roll20');
 

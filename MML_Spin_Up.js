@@ -1,3 +1,4 @@
+/* jshint -W069 */
 on("ready", function() {
     MML.init();
 
@@ -34,7 +35,7 @@ on("ready", function() {
 
     on("add:attribute", function(attribute) {
         var characterObject = getObj("character", attribute.get("_characterid"));
-        var charName = characterObject.get("name"); 
+        var charName = characterObject.get("name");
         var attrName = attribute.get("name");
 
         if(attrName.indexOf("repeating_skills") != -1){
@@ -112,7 +113,7 @@ on("ready", function() {
         _.each(characters, function(character){
             characterNames.push(character.get("name"));
         });
-        
+
         var oldName = _.difference(apiNames, characterNames)[0];
 
         state.MML.characters[newName] = state.MML.characters[oldName];
@@ -130,12 +131,13 @@ on("ready", function() {
 
     on("change:attribute:current", function(attribute) {
         var characterObject = getObj("character", attribute.get("_characterid"));
-        var charName = characterObject.get("name"); 
+        var charName = characterObject.get("name");
         var attrName = attribute.get("name");
+        var roll;
 
         switch(attrName){
             case "statureRoll":
-                var roll = parseFloat(attribute.get("current"));
+                roll = parseFloat(attribute.get("current"));
                 if(isNaN(roll) || roll < 6){
                     roll = 6;
                     MML.setCurrentAttribute(charName, attrName, roll);
@@ -150,7 +152,7 @@ on("ready", function() {
 		        });
                 break;
             case "strengthRoll":
-                var roll = parseFloat(attribute.get("current"));
+                roll = parseFloat(attribute.get("current"));
                 if(isNaN(roll) || roll < 6){
                     roll = 6;
                     MML.setCurrentAttribute(charName, attrName, roll);
@@ -165,7 +167,7 @@ on("ready", function() {
 		        });
                 break;
             case "coordinationRoll":
-                var roll = parseFloat(attribute.get("current"));
+                roll = parseFloat(attribute.get("current"));
                 if(isNaN(roll) || roll < 6){
                     roll = 6;
                     MML.setCurrentAttribute(charName, attrName, roll);
@@ -180,7 +182,7 @@ on("ready", function() {
 		        });
                 break;
             case "healthRoll":
-                var roll = parseFloat(attribute.get("current"));
+                roll = parseFloat(attribute.get("current"));
                 if(isNaN(roll) || roll < 6){
                     roll = 6;
                     MML.setCurrentAttribute(charName, attrName, roll);
@@ -195,7 +197,7 @@ on("ready", function() {
 		        });
                 break;
             case "beautyRoll":
-                var roll = parseFloat(attribute.get("current"));
+                roll = parseFloat(attribute.get("current"));
                 if(isNaN(roll) || roll < 6){
                     roll = 6;
                     MML.setCurrentAttribute(charName, attrName, roll);
@@ -210,7 +212,7 @@ on("ready", function() {
 		        });
                 break;
             case "intellectRoll":
-                var roll = parseFloat(attribute.get("current"));
+                roll = parseFloat(attribute.get("current"));
                 if(isNaN(roll) || roll < 6){
                     roll = 6;
                     MML.setCurrentAttribute(charName, attrName, roll);
@@ -225,7 +227,7 @@ on("ready", function() {
 		        });
                 break;
             case "reasonRoll":
-                var roll = parseFloat(attribute.get("current"));
+                roll = parseFloat(attribute.get("current"));
                 if(isNaN(roll) || roll < 6){
                     roll = 6;
                     MML.setCurrentAttribute(charName, attrName, roll);
@@ -240,7 +242,7 @@ on("ready", function() {
 		        });
                 break;
             case "creativityRoll":
-                var roll = parseFloat(attribute.get("current"));
+                roll = parseFloat(attribute.get("current"));
                 if(isNaN(roll) || roll < 6){
                     roll = 6;
                     MML.setCurrentAttribute(charName, attrName, roll);
@@ -255,7 +257,7 @@ on("ready", function() {
 		        });
                 break;
             case "presenceRoll":
-                var roll = parseFloat(attribute.get("current"));
+                roll = parseFloat(attribute.get("current"));
                 if(isNaN(roll) || roll < 6){
                     roll = 6;
                     MML.setCurrentAttribute(charName, attrName, roll);
