@@ -1,8 +1,10 @@
 'use babel';
+/* jshint -W119 */
+/* jshint -W104 */
 
 import AtomBuildMmlView from './atom-build-mml-view';
 import { CompositeDisposable } from 'atom';
-var exec = require('child_process').exec;
+import _ from 'underscore';
 
 export default {
 
@@ -22,7 +24,7 @@ export default {
 
     // Register command that toggles this view
     this.subscriptions.add(atom.commands.add('atom-workspace', {
-      'atom-build-mml:toggle': () => this.toggle()
+      'atom-build-mml:build': () => this.build()
     }));
   },
 
@@ -39,14 +41,16 @@ export default {
   },
 
   build() {
-    console.log('AtomBuildMml was built!');
     if (this.modalPanel.isVisible()) {
       this.modalPanel.hide();
     } else {
-      this.apply(exec, ["Compile_MML.bat", function(error, stdout, stderr) {
-        this.atomBuildMmlView.setOutput(stdout);
-        this.modalPanel.show();
-      }]);
+      var editor = atom.workspace.getActiveTextEditor();
+      var files = editor.buffer.file.getParent().getEntriesSync();
+      var roll20Files = _.sortBy(_.filter(files, function(item) {
+          return item.getBaseName().search(/MML_(?!Test|Roll20).*\.js/) != -1;
+      }), "path");
+
+        console.log(roll20Files);
     }
   }
 
