@@ -1,5 +1,4 @@
 /* jshint -W069 */
-
 MML.statusEffects = {};
 MML.statusEffects["Major Wound"] = function(effect, index){
     if(this[effect.bodyPart] > Math.round(this[effect.bodyPart + "Max"]/2)){

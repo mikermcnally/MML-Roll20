@@ -340,6 +340,7 @@ MML.universalRoll = function universalRoll(input) {
 
     var roll = {
         type: "universal",
+        name: input.name,
         character: this.name,
         rollResultFunction: input.rollResultFunction,
         value: MML.rollDice(1, 100),

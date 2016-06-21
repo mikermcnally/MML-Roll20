@@ -31,12 +31,46 @@ MML.getShieldDefenseBonus = function getShieldBonus(character) {
     return bonus;
 };
 
-MML.getWeaponGrip = function getWeaponGrip(character, weapon) {
+MML.getWeaponGrip = function getWeaponGrip(character) {
     if (character["rightHand"].grip !== "unarmed") {
         grip = character["rightHand"].grip;
     } else {
         grip = character["leftHand"].grip;
     }
+    return grip;
+};
+
+MML.getMeleeWeapon = function getMeleeWeapon(character){
+    var grip = MML.getWeaponGrip(character);
+    var weapon;
+    var item;
+    var itemId;
+
+    if (character["rightHand"].grip !== "unarmed") {
+        itemId = character.rightHand._id;
+        item = character.inventory[itemId];
+    } else {
+        itemId = character.leftHand._id;
+        item = character.inventory[itemId];
+    }
+    weapon = {
+        _id: itemId,
+        name: item.name,
+        type: "weapon",
+        weight: item.weight,
+        family: item.grips[grip].family,
+        hands: item.grips[grip].hands,
+        defense: item.grips[grip].defense,
+        initiative: item.grips[grip].initiative,
+        rank: item.grips[grip].rank,
+        primaryType: item.grips[grip].primaryType,
+        primaryTask: item.grips[grip].primaryTask,
+        primaryDamage: item.grips[grip].primaryDamage,
+        secondaryType: item.grips[grip].secondaryType,
+        secondaryTask: item.grips[grip].secondaryTask,
+        secondaryDamage: item.grips[grip].secondaryDamage
+    };
+    return weapon;
 };
 
 MML.getWeaponSkill = function getWeaponSkill(character, weapon) {
@@ -50,11 +84,7 @@ MML.getWeaponSkill = function getWeaponSkill(character, weapon) {
         MML.error();
     }
 
-    if (character["rightHand"].grip !== "unarmed") {
-        grip = character["rightHand"].grip;
-    } else {
-        grip = character["leftHand"].grip;
-    }
+    grip = MML.getWeaponGrip(character);
 
     if (item.name === "War Spear" || item.name === "Boar Spear" || item.name === "Military Fork" || item.name === "Bastard Sword") {
         skillName = item.name + ", " + grip;
@@ -165,7 +195,7 @@ MML.getHitPositionNames = function getHitPositionNames(character) {
     else {
         return _.pluck(MML.hitPositions[character.bodyType], "name");
     }
-}
+};
 
 MML.getBodyParts = function getBodyParts(character) {
     if(_.isUndefined(MML.hitPositions[character.bodyType])){

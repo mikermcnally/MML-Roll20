@@ -1,3 +1,4 @@
+/* jshint -W069 */
 var MML = MML || {};
 
 MML.init = function init(){
@@ -60,7 +61,69 @@ MML.init = function init(){
 // state.MML.characters =data[2];
 // MML.processCommand(data[3]);
 };
+/* jshint -W069 */
+MML.meleeAttackAction = function meleeAttackAction(){
+    var currentAction = state.MML.GM.currentAction;
+    var character = currentAction.character;
+    var parameters = currentAction.parameters;
+    var attackerSkill = parameters.attackerSkill;
+    var attackerWeapon = parameters.attackerWeapon;
+    var target = parameters.target;
+    var targetWeapon = parameters.targetWeapon;
+    var defenseSkill = parameters.defenseSkill;
+    var dodgeSkill = parameters.dodgeSkill;
+    var rolls = currentAction.rolls;
 
+    if(_.isUndefined(rolls.attackRoll)){
+        MML.meleeAttackRoll("attackRoll", character, attackerWeapon.task, attackerSkill);
+    }
+    else if(_.isUndefined(rolls.defenseRoll)){
+        if (rolls.attackRoll === "Critical Success" || rolls.attackRoll === "Success") {
+            MML.meleeDefenseRoll(target, targetWeapon);
+        }
+        else if (rolls.attackRoll === "Critical Failure"){
+            MML.endAction();
+        }
+        else {
+            MML.endAction();
+        }
+    }
+    else if(_.isUndefined(rolls.hitPositionRoll)){
+        if (rolls.defenseRoll === "Critical Success" || rolls.defenseRoll === "Success") {
+            MML.endAction(target, targetWeapon);
+        }
+        else if (rolls.defenseRoll === "Critical Failure"){
+            MML.hitPositionRoll();
+        }
+        else {
+            MML.hitPositionRoll();
+        }
+    }
+    else if(_.isUndefined(rolls.damageRoll)){
+        if (rolls.attackRoll === "Critical Success") {
+            MML.meleeDamageRoll(character, attackerWeapon, true);
+        }
+        else {
+            MML.meleeDamageRoll(character, attackerWeapon, false);
+        }
+    }
+    else if(!_.isUndefined(parameters.wound)){
+        MML.woundRoll();
+    }
+    else if(!_.isUndefined(parameters.multiWound)){
+        MML.multiWoundRoll();
+    }
+    else if(!_.isUndefined(parameters.sensitiveArea)){
+        MML.sensitiveAreaRoll();
+    }
+    else if(!_.isUndefined(parameters.knockDown)){
+        MML.knockdownRoll();
+    }
+    else {
+      MML.endAction();
+    }
+};
+/* jshint -W069 */
 MML.updateInventory = function updateInventory(charName){
     //Armor
     var armor = [];
@@ -968,65 +1031,47 @@ MML.meleeAttack = function meleeAttack(input){
         itemId = this.leftHand._id;
         grip = this.leftHand.grip;
     }
+    var item = this.inventory[itemId];
+    var attackerWeapon = {
+        _id: itemId,
+        name: item.name,
+        type: "weapon",
+        weight: item.weight,
+        family: item.grips[grip].family,
+        hands: item.grips[grip].hands,
+        defense: item.grips[grip].defense,
+        initiative: item.grips[grip].initiative,
+        rank: item.grips[grip].rank
+    };
 
-    var attackerWeapon = this.inventory[itemId];
+    if (this.action.weaponType === "primary"){
+        attackerWeapon.damageType = item.grips[grip].primaryType;
+        attackerWeapon.task = item.grips[grip].primaryTask;
+        attackerWeapon.damage = item.grips[grip].primaryDamage;
+    }
+    else{
+        attackerWeapon.damageType = item.grips[grip].secondaryType;
+        attackerWeapon.task = item.grips[grip].secondaryTask;
+        attackerWeapon.damage = item.grips[grip].secondaryDamage;
+    }
 
     var currentAction = {
         attackerWeapon: attackerWeapon,
-        attackerGrip: grip,
-        skill: MML.getWeaponSkill(this, attackerWeapon),
-        attackMod: this.meleeAttackMod + this.attributeMeleeAttackMod,
-        sitMod: this.situationalMod
+        attackerSkill: MML.getWeaponSkill(this, this.inventory[itemId])
     };
 
     state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, currentAction);
-
-    if(attackerWeapon.grips[grip].secondaryType !== ""){
-        MML.processCommand({
-            type: "player",
-            who: this.player,
-            triggeredFunction: "charMenuSelectDamageType",
-            input: {
-                who: this.name
-            }
-        });
-
-        MML.processCommand({
-            type: "player",
-            who: this.player,
-            triggeredFunction: "displayMenu",
-            input: {}
-        });
-    }
-    else{
-        state.MML.GM.currentAction.weaponType = "primary";
-
-        MML.processCommand({
-            type: "character",
-            who: this.name,
-            triggeredFunction: "meleeAttackRoll",
-            input: {}
-        });
-    }
 };
 
-MML.meleeAttackRoll = function meleeAttackRoll(character,task, skill, sitMod, attackMod){
-    // var action = state.MML.GM.currentAction;
-    // var mods;
-    // if (action.weaponType === "primary"){
-    //     mods = [action.attackerWeapon.grips[action.attackerGrip].primaryTask, action.skill, action.sitMod, action.attackMod];
-    // }
-    // else{
-    //     mods = [action.attackerWeapon.grips[action.attackerGrip].secondaryTask, action.skill, action.sitMod, action.attackMod];
-    // }
-
+MML.meleeAttackRoll = function meleeAttackRoll(rollName, character, task, skill){
     MML.processCommand({
         type: "character",
         who: character.name,
         triggeredFunction: "universalRoll",
         input: {
+            name: rollName,
             rollResultFunction: "attackRollResult",
-            mods: [task, skill, sitMod, attackMod]
+            mods: [task, skill, character.situationalMod, character.meleeAttackMod, character.attributeMeleeAttackMod]
         }
     });
 };
@@ -1052,10 +1097,10 @@ MML.attackRollResult = function attackRollResult(input){
                 currentRoll.result = "Success";
             }
             MML.processCommand({
-                type: "character",
+                type: "GM",
                 who: this.name,
-                triggeredFunction: "attackRollApply",
-                input: currentRoll
+                triggeredFunction: state.MML.GM.currentAction.name,
+                input: {}
             });
         }
     }
@@ -1074,10 +1119,10 @@ MML.attackRollResult = function attackRollResult(input){
             currentRoll.result = "Success";
         }
         MML.processCommand({
-            type: "character",
+            type: "GM",
             who: this.name,
-            triggeredFunction: "attackRollApply",
-            input: currentRoll
+            triggeredFunction: state.MML.GM.currentAction.name,
+            input: {}
         });
     }
 };
@@ -1093,8 +1138,7 @@ MML.attackRollApply = function attackRollApply(input){
             who: action.targetArray[action.targetIndex],
             triggeredFunction: "meleeDefense",
             input: {
-                attackerWeapon: action.attackerWeapon,
-                attackerGrip: action.attackerGrip
+                attackerWeapon: action.attackerWeapon
             }
         });
     }
@@ -1217,6 +1261,7 @@ MML.hitPositionRollResult = function hitPositionRollResult(input){
             triggeredFunction: "hitPositionRollApply",
             input: {
                 result: currentRoll.result
+            }
         });
     }
 };
@@ -1254,7 +1299,7 @@ MML.meleeDefense = function meleeDefense(input){
         dodgeChance = defaultMartialSkill + defenseMod + sitMod;
     }
 
-    if(input.attackerWeapon.grips[input.attackerGrip].initiative < 6){
+    if(input.attackerWeapon.initiative < 6){
         dodgeChance += 15;
     }
 
@@ -1580,7 +1625,9 @@ MML.readyItemAction = function readyItemAction(charName){};
 
 MML.castSpellAction = function castSpellAction(charName){};
 
-MML.observeAction = function observeAction(charName){};// Character Creation
+MML.observeAction = function observeAction(charName){};
+/* jshint -W069 */
+// Character Creation
 MML.characterConstructor = function characterConstructor(charName) {
     // Basic Info
     this.name = charName;
@@ -3045,7 +3092,9 @@ MML.computeAttribute.weaponSkills = {
         this.weaponSkills = characterSkills;
         return characterSkills;
     }
-};MML.isSensitiveArea = function isSensitiveArea(position) {
+};
+/* jshint -W069 */
+MML.isSensitiveArea = function isSensitiveArea(position) {
     if (position === 2 || position === 6 || position === 33) {
         return true;
     } else {
@@ -3077,12 +3126,46 @@ MML.getShieldDefenseBonus = function getShieldBonus(character) {
     return bonus;
 };
 
-MML.getWeaponGrip = function getWeaponGrip(character, weapon) {
+MML.getWeaponGrip = function getWeaponGrip(character) {
     if (character["rightHand"].grip !== "unarmed") {
         grip = character["rightHand"].grip;
     } else {
         grip = character["leftHand"].grip;
     }
+    return grip;
+};
+
+MML.getMeleeWeapon = function getMeleeWeapon(character){
+    var grip = MML.getWeaponGrip(character);
+    var weapon;
+    var item;
+    var itemId;
+
+    if (character["rightHand"].grip !== "unarmed") {
+        itemId = character.rightHand._id;
+        item = character.inventory[itemId];
+    } else {
+        itemId = character.leftHand._id;
+        item = character.inventory[itemId];
+    }
+    weapon = {
+        _id: itemId,
+        name: item.name,
+        type: "weapon",
+        weight: item.weight,
+        family: item.grips[grip].family,
+        hands: item.grips[grip].hands,
+        defense: item.grips[grip].defense,
+        initiative: item.grips[grip].initiative,
+        rank: item.grips[grip].rank,
+        primaryType: item.grips[grip].primaryType,
+        primaryTask: item.grips[grip].primaryTask,
+        primaryDamage: item.grips[grip].primaryDamage,
+        secondaryType: item.grips[grip].secondaryType,
+        secondaryTask: item.grips[grip].secondaryTask,
+        secondaryDamage: item.grips[grip].secondaryDamage
+    };
+    return weapon;
 };
 
 MML.getWeaponSkill = function getWeaponSkill(character, weapon) {
@@ -3096,11 +3179,7 @@ MML.getWeaponSkill = function getWeaponSkill(character, weapon) {
         MML.error();
     }
 
-    if (character["rightHand"].grip !== "unarmed") {
-        grip = character["rightHand"].grip;
-    } else {
-        grip = character["leftHand"].grip;
-    }
+    grip = MML.getWeaponGrip(character);
 
     if (item.name === "War Spear" || item.name === "Boar Spear" || item.name === "Military Fork" || item.name === "Bastard Sword") {
         skillName = item.name + ", " + grip;
@@ -3211,7 +3290,7 @@ MML.getHitPositionNames = function getHitPositionNames(character) {
     else {
         return _.pluck(MML.hitPositions[character.bodyType], "name");
     }
-}
+};
 
 MML.getBodyParts = function getBodyParts(character) {
     if(_.isUndefined(MML.hitPositions[character.bodyType])){
@@ -3247,7 +3326,9 @@ MML.getCalledShotHitPosition = function getCalledShotHitPosition(character, roll
     } else {
         return availableHitPositions[rollValue-1];
     }
-};MML.skills = {};
+};
+/* jshint -W069 */
+MML.skills = {};
 MML.skills["Acrobatics"] = {attribute: "coordination"};
 MML.skills["Acting"] = {attribute: "presence"};
 MML.skills["Alchemy"] = {attribute: "intellect"};
@@ -3628,7 +3709,7 @@ MML.skillMods["Wood Elf"]["Navigation"] = 10;
 MML.skillMods["Wood Elf"]["Stealth"] = 10;
 MML.skillMods["Wood Elf"]["Survival"] = 10;
 MML.skillMods["Wood Elf"]["Tracking"] = 3;
-MML.skillMods["Female"] = []
+MML.skillMods["Female"] = {};
 MML.skillMods["Female"]["Life Elementalism"] = 5;
 MML.skillMods["Female"]["Symbol Magic"] = 5;
 
@@ -3834,7 +3915,7 @@ MML.hitPositions.humanoid[46] = { name: "Left Foot/Ankle", hp: "hpLL", bodyPart:
 
 MML.hitTables = {};
 MML.hitTables.humanoid = {};
-MML.hitTables.humanoid.A = [];
+MML.hitTables.humanoid.A = {};
 MML.hitTables.humanoid.A[1] = 1;
 MML.hitTables.humanoid.A[2] = 1;
 MML.hitTables.humanoid.A[3] = 2;
@@ -3935,7 +4016,7 @@ MML.hitTables.humanoid.A[97] = 43;
 MML.hitTables.humanoid.A[98] = 44;
 MML.hitTables.humanoid.A[99] = 45;
 MML.hitTables.humanoid.A[100] = 46;
-MML.hitTables.humanoid.B = [];
+MML.hitTables.humanoid.B = {};
 MML.hitTables.humanoid.B[1] = 1;
 MML.hitTables.humanoid.B[2] = 1;
 MML.hitTables.humanoid.B[3] = 2;
@@ -4036,7 +4117,7 @@ MML.hitTables.humanoid.B[97] = 43;
 MML.hitTables.humanoid.B[98] = 44;
 MML.hitTables.humanoid.B[99] = 45;
 MML.hitTables.humanoid.B[100] = 46;
-MML.hitTables.humanoid.C = [];
+MML.hitTables.humanoid.C = {};
 MML.hitTables.humanoid.C[1] = 1;
 MML.hitTables.humanoid.C[2] = 1;
 MML.hitTables.humanoid.C[3] = 2;
@@ -6350,6 +6431,7 @@ MML.meleeDamageMods = [
 	{low: 106, high: 120, value: 4},
 	{low: 121, high: 999, value: 5},
 ];
+/* jshint -W069 */
 MML.startCombat = function startCombat(input) {
     this.currentRound = 0;
     this.roundStarted = false;
@@ -6973,6 +7055,7 @@ MML.parseCommand = function parseCommand(msg) {
     }
 
 };
+/* jshint -W069 */
 // This file contains all menus and defines the player object class
 
 MML.playerClass = {
@@ -7248,7 +7331,7 @@ MML.displayItemOptions = function displayItemOptions(input){
 						triggeredFunction: "setApiCharAttribute",
 						input: {
 							attribute: "leftHand",
-							value: {}
+							value: { _id: "emptyHand" }
 						}
 					});
 					MML.processCommand({
@@ -7257,7 +7340,7 @@ MML.displayItemOptions = function displayItemOptions(input){
 						triggeredFunction: "setApiCharAttribute",
 						input: {
 							attribute: "rightHand",
-							value: {}
+							value: { _id: "emptyHand" }
 						}
 					});
                     MML.displayMenu.apply(this, []);
@@ -7271,7 +7354,7 @@ MML.displayItemOptions = function displayItemOptions(input){
 						triggeredFunction: "setApiCharAttribute",
 						input: {
 							attribute: "leftHand",
-							value: {}
+							value: { _id: "emptyHand" }
 						}
 					});
                     MML.displayMenu.apply(this, []);
@@ -7285,7 +7368,7 @@ MML.displayItemOptions = function displayItemOptions(input){
 						triggeredFunction: "setApiCharAttribute",
 						input: {
 							attribute: "rightHand",
-							value: {}
+							value: { _id: "emptyHand" }
 						}
 					});
                     MML.displayMenu.apply(this, []);
@@ -7300,20 +7383,20 @@ MML.displayItemOptions = function displayItemOptions(input){
                         text: "Equip Left Hand",
                         nextMenu: "menuIdle",
                         triggeredFunction: function(text){
-                            if(state.MML.characters[who].rightHand.grip !== "One Hand"){
-                                MML.processCommand({
-					            	type: "character",
-									who: who,
-									triggeredFunction: "setApiCharAttribute",
-									input: {
-										attribute: "rightHand",
-										value: {
-	                                        _id: itemId,
-	                                        grip: gripName
-	                                    }
-									}
-								});
-                            }
+                            // if(state.MML.characters[who].rightHand.grip !== "One Hand"){
+                            //     MML.processCommand({
+					        //     	type: "character",
+							// 		who: who,
+							// 		triggeredFunction: "setApiCharAttribute",
+							// 		input: {
+							// 			attribute: "rightHand",
+							// 			value: {
+	                        //                 _id: itemId,
+	                        //                 grip: gripName
+	                        //             }
+							// 		}
+							// 	});
+                            // }
                             MML.processCommand({
 				            	type: "character",
 								who: who,
@@ -7334,20 +7417,20 @@ MML.displayItemOptions = function displayItemOptions(input){
                         text: "Equip Right Hand",
                         nextMenu: "menuIdle",
                         triggeredFunction: function(text){
-                            if(state.MML.characters[who].leftHand.grip !== "One Hand"){
-                                MML.processCommand({
-					            	type: "character",
-									who: who,
-									triggeredFunction: "setApiCharAttribute",
-									input: {
-										attribute: "leftHand",
-										value: {
-	                                        _id: itemId,
-	                                        grip: gripName
-	                                    }
-									}
-								});
-                            }
+                            // if(state.MML.characters[who].leftHand.grip !== "One Hand"){
+                            //     MML.processCommand({
+					        //     	type: "character",
+							// 		who: who,
+							// 		triggeredFunction: "setApiCharAttribute",
+							// 		input: {
+							// 			attribute: "leftHand",
+							// 			value: {
+	                        //                 _id: itemId,
+	                        //                 grip: gripName
+	                        //             }
+							// 		}
+							// 	});
+                            // }
                             MML.processCommand({
 				            	type: "character",
 								who: who,
@@ -7567,27 +7650,37 @@ MML.charMenuAttackCalledShot = function charMenuCalledShot(input){
 MML.charMenuAttackStance = function charMenuAttackStance(input){
 	this.who = input.who;
 	this.message =  "Attack Stance Menu";
-	this.buttons = [{
+	var buttons = [{
 		text: "Neutral",
-		nextMenu: "charMenuInitiativeRoll",
 		triggeredFunction: function(input){
 			MML.displayMenu.apply(this, []);
 		}},
 		{
 		text: "Defensive",
-		nextMenu: "charMenuInitiativeRoll",
 		triggeredFunction: function(input){
 			state.MML.characters[this.who].action.modifiers.push("Defensive Stance");
 			MML.displayMenu.apply(this, []);
 		}},
 		{
 		text: "Aggressive",
-		nextMenu: "charMenuInitiativeRoll",
 		triggeredFunction: function(input){
 			state.MML.characters[this.who].action.modifiers.push("Aggressive Stance");
 			MML.displayMenu.apply(this, []);
 		}}
 	];
+
+    if(MML.getMeleeWeapon(state.MML.characters[this.who]).secondaryType !== ""){
+		_.each(buttons, function(button){
+			button.nextMenu = "charMenuSelectDamageType";
+		});
+	}
+	else{
+        state.MML.characters[this.who].action.weaponType = "primary";
+		_.each(buttons, function(button){
+			button.nextMenu = "charMenuInitiativeRoll";
+		});
+	}
+	this.buttons = buttons;
 };
 
 MML.charMenuInitiativeRoll = function charMenuInitiativeRoll(input){
@@ -7707,31 +7800,19 @@ MML.charMenuSelectDamageType = function charMenuSelectDamageType(input){
 
 	this.buttons.push({
 		text: "Primary",
-		nextMenu: "charMenuAttackRoll",
+		nextMenu: "charMenuInitiativeRoll",
 		triggeredFunction: function(input){
-			state.MML.GM.currentAction.weaponType = "primary";
-
-			MML.processCommand({
-		    	type: "character",
-		    	who: this.who,
-		    	triggeredFunction: "meleeAttackRoll",
-				input: {}
-		    });
+            state.MML.characters[this.who].action.weaponType = "primary";
+            MML.displayMenu.apply(this, []);
 		}
 	});
 
 	this.buttons.push({
 		text: "Secondary",
-		nextMenu: "charMenuAttackRoll",
+		nextMenu: "charMenuInitiativeRoll",
 		triggeredFunction: function(input){
-			state.MML.GM.currentAction.weaponType = "secondary";
-
-			MML.processCommand({
-		    	type: "character",
-		    	who: this.who,
-		    	triggeredFunction: "meleeAttackRoll",
-				input: {}
-		    });
+            state.MML.characters[this.who].action.weaponType = "secondary";
+            MML.displayMenu.apply(this, []);
 		}
 	});
 };
@@ -8671,6 +8752,7 @@ MML.GmMenuUtilities = function utilities(input){
 // 	}
 
 // };
+/* jshint -W069 */
 on("ready", function() {
     MML.init();
 
@@ -8805,10 +8887,11 @@ on("ready", function() {
         var characterObject = getObj("character", attribute.get("_characterid"));
         var charName = characterObject.get("name");
         var attrName = attribute.get("name");
+        var roll;
 
         switch(attrName){
             case "statureRoll":
-                var roll = parseFloat(attribute.get("current"));
+                roll = parseFloat(attribute.get("current"));
                 if(isNaN(roll) || roll < 6){
                     roll = 6;
                     MML.setCurrentAttribute(charName, attrName, roll);
@@ -8823,7 +8906,7 @@ on("ready", function() {
 		        });
                 break;
             case "strengthRoll":
-                var roll = parseFloat(attribute.get("current"));
+                roll = parseFloat(attribute.get("current"));
                 if(isNaN(roll) || roll < 6){
                     roll = 6;
                     MML.setCurrentAttribute(charName, attrName, roll);
@@ -8838,7 +8921,7 @@ on("ready", function() {
 		        });
                 break;
             case "coordinationRoll":
-                var roll = parseFloat(attribute.get("current"));
+                roll = parseFloat(attribute.get("current"));
                 if(isNaN(roll) || roll < 6){
                     roll = 6;
                     MML.setCurrentAttribute(charName, attrName, roll);
@@ -8853,7 +8936,7 @@ on("ready", function() {
 		        });
                 break;
             case "healthRoll":
-                var roll = parseFloat(attribute.get("current"));
+                roll = parseFloat(attribute.get("current"));
                 if(isNaN(roll) || roll < 6){
                     roll = 6;
                     MML.setCurrentAttribute(charName, attrName, roll);
@@ -8868,7 +8951,7 @@ on("ready", function() {
 		        });
                 break;
             case "beautyRoll":
-                var roll = parseFloat(attribute.get("current"));
+                roll = parseFloat(attribute.get("current"));
                 if(isNaN(roll) || roll < 6){
                     roll = 6;
                     MML.setCurrentAttribute(charName, attrName, roll);
@@ -8883,7 +8966,7 @@ on("ready", function() {
 		        });
                 break;
             case "intellectRoll":
-                var roll = parseFloat(attribute.get("current"));
+                roll = parseFloat(attribute.get("current"));
                 if(isNaN(roll) || roll < 6){
                     roll = 6;
                     MML.setCurrentAttribute(charName, attrName, roll);
@@ -8898,7 +8981,7 @@ on("ready", function() {
 		        });
                 break;
             case "reasonRoll":
-                var roll = parseFloat(attribute.get("current"));
+                roll = parseFloat(attribute.get("current"));
                 if(isNaN(roll) || roll < 6){
                     roll = 6;
                     MML.setCurrentAttribute(charName, attrName, roll);
@@ -8913,7 +8996,7 @@ on("ready", function() {
 		        });
                 break;
             case "creativityRoll":
-                var roll = parseFloat(attribute.get("current"));
+                roll = parseFloat(attribute.get("current"));
                 if(isNaN(roll) || roll < 6){
                     roll = 6;
                     MML.setCurrentAttribute(charName, attrName, roll);
@@ -8928,7 +9011,7 @@ on("ready", function() {
 		        });
                 break;
             case "presenceRoll":
-                var roll = parseFloat(attribute.get("current"));
+                roll = parseFloat(attribute.get("current"));
                 if(isNaN(roll) || roll < 6){
                     roll = 6;
                     MML.setCurrentAttribute(charName, attrName, roll);
@@ -8989,7 +9072,9 @@ on("ready", function() {
         }
 
     });
-});MML.statusEffects = {};
+});
+/* jshint -W069 */
+MML.statusEffects = {};
 MML.statusEffects["Major Wound"] = function(effect, index){
     if(this[effect.bodyPart] > Math.round(this[effect.bodyPart + "Max"]/2)){
         delete this.statusEffects[index];
@@ -9181,6 +9266,7 @@ MML.statusEffects["Melee This Round"] = function(effect, index){
         delete this.statusEffects[index];
     }
 };
+/* jshint -W069 */
 // Character Functions
 MML.getCharFromName = function getCharFromName(charName) {
     var character = findObjs({
@@ -9522,6 +9608,7 @@ MML.universalRoll = function universalRoll(input) {
 
     var roll = {
         type: "universal",
+        name: input.name,
         character: this.name,
         rollResultFunction: input.rollResultFunction,
         value: MML.rollDice(1, 100),
@@ -9666,6 +9753,7 @@ MML.displayTargetSelection = function displayTargetSelection(input) {
 
     sendChat("", "&{template:selectTarget} {{charName=" + input.charName + "}} {{input=" + result + "}}");
 };
+/* jshint -W069 */
 MML.processCommand = function processCommand(command){
 	if(command.triggeredFunction === MML.testedFunction){
 		MML.testResult = command;
