@@ -1,114 +1,4 @@
 /* jshint -W069 */
-MML.updateInventory = function updateInventory(charName){
-    //Armor
-    var armor = [];
-    var item = MML.getCharAttribute(this.name, "repeating_item_0_armorStyleName");
-    var index = 0;
-    while(typeof item !== "undefined"){
-        armor[index] = { style: "", material: "", quality: "" };
-        index++;
-        item = MML.getCharAttribute(charName, "repeating_armor_" + index + "_armorStyleName");
-    }
-
-    //Weapons
-    item = MML.getCharAttribute(charName, "repeating_weapons_0_weaponName");
-    index = 0;
-    var weapons = [];
-    var left = false;
-    var right = false;
-    while(typeof item !== "undefined"){
-        weapons[index] = MML.weaponStats[MML.getCharAttribute(charName, "repeating_weapons_" + index + "_weaponName").get("current")];
-        weapons[index].equipped = MML.getCharAttribute(charName, "repeating_weapons_" + index + "_weaponEquipped").get("current");
-        weapons[index].quality = MML.getCharAttribute(charName, "repeating_weapons_" + index + "_weaponQuality").get("current");
-
-        if (weapons[index].equipped === "Both"){
-            if(right === false && left === false){
-                left = true;
-                right = true;
-                state.MML.characters[charName].inventory.weapons.push(weapons[index]);
-            }
-            else {
-                state.MML.characters[charName].error = "Equipment Conflict: Hands Full";
-            }
-
-        }
-        else if(weapons[index].equipped === "Right"){
-            if(right === false){
-                right = true;
-                state.MML.characters[charName].inventory.weapons.push(weapons[index]);
-            }
-            else {
-                state.MML.characters[charName].error = "Equipment Conflict: Hands Full";
-            }
-        }
-        else if(weapons[index].equipped === "Left"){
-            if(left === false){
-                left = true;
-                state.MML.characters[charName].inventory.weapons.push(weapons[index]);
-            }
-            else {
-                state.MML.characters[charName].error = "Equipment Conflict: Hands Full";
-            }
-        }
-        else{
-            state.MML.characters[charName].inventory.inPack.push(weapons[index]);
-        }
-        index++;
-        item = MML.getCharAttribute(charName, "repeating_weapons_" + index + "_weaponName");
-    }
-
-    //Shields
-    if(MML.getCharAttribute(charName, "shieldEquipped") === "Right"){
-        if(right === false){
-            right = true;
-            state.MML.characters[charName].inventory.shield = MML.shieldStats[MML.getCharAttribute(charName, "shieldName")];
-        }
-        else {
-            state.MML.characters[charName].error = "Equipment Conflict: Hands Full";
-        }
-    }
-    else if(MML.getCharAttribute(charName, "shieldEquipped") === "Left"){
-        if(left === false){
-            left = true;
-            state.MML.characters[charName].inventory.shield = MML.shieldStats[MML.getCharAttribute(charName, "shieldName")];
-        }
-        else {
-            state.MML.characters[charName].error = "Equipment Conflict: Hands Full";
-        }
-    }
-    else{
-        state.MML.characters[charName].inventory.inPack.push(MML.shieldStats[MML.getCharAttribute(charName, "shieldName")]);
-    }
-
-    //Other items
-
-
-    //This looks at the character's stuff and decides which column on hit table to use (A, B, or C)
-    if(state.MML.characters[charName].inventory.weapons.length === 0){
-        state.MML.characters[charName].defense.hitTable = "A";
-    }
-    else if (state.MML.characters[charName].inventory.weapons.length === 2){
-        state.MML.characters[charName].defense.hitTable = "B";
-    }
-    else if(state.MML.characters[charName].inventory.shield !== "None"){
-        state.MML.characters[charName].defense.hitTable = "C";
-    }
-    else if(MML.weaponStats[state.MML.characters[charName].inventory.weapons[0]].family === "MWD" ||
-    MML.weaponStats[state.MML.characters[charName].inventory.weapons[0]].family === "MWM" ||
-    MML.weaponStats[state.MML.characters[charName].inventory.weapons[0]].family === "TWH" ||
-    MML.weaponStats[state.MML.characters[charName].inventory.weapons[0]].family === "TWK" ||
-    MML.weaponStats[state.MML.characters[charName].inventory.weapons[0]].family === "TWS" ||
-    MML.weaponStats[state.MML.characters[charName].inventory.weapons[0]].family === "SLI"){
-        state.MML.characters[charName].defense.hitTable = "A";
-    }
-    else if(MML.weaponStats[state.MML.characters[charName].inventory.weapons[0]].hands === 2){
-        state.MML.characters[charName].defense.hitTable = "B";
-    }
-    else{
-        state.MML.characters[charName].defense.hitTable = "A";
-    }
-};
-
 //Combat Functions
 MML.displayMovement = function displayMovement(input){
     if(input.display){
@@ -125,158 +15,8 @@ MML.moveDistance = function moveDistance(distance){
     MML.displayMovement.apply(this, [true]);
 };
 
-MML.computeSitMods = function computeSitMods(){
-    var initiative = 0;
-    var situational  = 0;
-    var defense  = 0;
-    var attack  = 0;
-    var casting  = 0;
-
-    //Apply wound effects
-    var i;
-    for(i in MML.hitPoints){
-        if(MML.hitPoints[i].name !== "multiWound"){
-            if(this[MML.hitPoints[i].name].wound.major === true){
-                initiative += -5;
-                if(this[MML.hitPoints[i].name].wound.major.duration > 0){
-                    situational  += -10;
-                }
-            }
-            if(this[MML.hitPoints[i].name].wound.disabling === true){
-                initiative += -10;
-                situational  += -25;
-            }
-        }
-        else{
-            if(this[MML.hitPoints[i].name].wound === true){
-                initiative += -5;
-                situational  += -10;
-            }
-        }
-    }
-
-    //Compute action-based initiative bonus
-    switch(this.action.name){
-        case "attack":
-            //Weapon
-            if(this.inventory.weapons.length === 0){
-                //Unarmed
-                initiative  += 10;
-                this.action.skill = this.skills["brawling"];
-            }
-            else if(this.inventory.weapons.length === 2){
-                //Dual Wielding
-                var weaponInits = [MML.weaponStats[this.inventory.equipped.leftHand.name].initiative, MML.weaponStats[this.inventory.equipped.rightHand.name].initiative];
-                initiative  += weaponInits.sort(function(a,b){return b-a;})[0];
-                //Set action skill here
-            }
-            else{
-                initiative  += MML.weaponStats[this.inventory.weapons[0].name].initiative;
-                this.action.skill = this.skills[this.inventory.weapons[0].name];
-            }
-            if (this.action.calledShot === "head" ||
-            this.action.calledShot === "chest" ||
-            this.action.calledShot === "abdomen" ||
-            this.action.calledShot === "leftArm" ||
-            this.action.calledShot === "rightArm" ||
-            this.action.calledShot === "leftLeg" ||
-            this.action.calledShot === "rightLeg"){
-                defense  += -10;
-                attack  += -10;
-                initiative  += -5;
-            }
-
-            else if (this.action.calledShot !== "standard"){ //Specific hit position
-                defense  += -10;
-                attack  += -30;
-                initiative  += -5;
-            }
-
-            // Attack style
-            if (this.action.style === "sweep"){
-                defense  += -20;
-            }
-            else if (this.action.style === "cover"){
-                attack  += -10;
-            }
-            break;
-
-        case "ready":
-            initiative  += 10;
-            break;
-        case "cast":
-            initiative  += 10;
-            break;
-        case "observe":
-            initiative  += 10;
-            break;
-    }
-
-    //Action skill bonus
-    if (this.action.skill <= 9){
-        initiative  += 0;
-    }
-    else if (this.action.skill > 9 && this.action.skill <= 19){
-        initiative  +=  1;
-    }
-    else if (this.action.skill > 19 && this.action.skill <= 29){
-        initiative  += 2;
-    }
-    else if (this.action.skill > 29 && this.action.skill <= 39){
-        initiative  += 3;
-    }
-    else if (this.action.skill > 39 && this.action.skill <= 49){
-        initiative  += 4;
-    }
-    else if (this.action.skill > 49 && this.action.skill <= 59){
-        initiative  += 5;
-    }
-    else if (this.action.skill > 59){
-        initiative  += 6;
-    }
-
-    MML.setAttackTempo(this.name);
-
-    // Compute defense mod
-    defense  = -20 * this.defense.number;
-
-    // Apply fatigue
-    initiative  += -5*this.fatigue.level;
-    situational  += -10*this.fatigue.level;
-
-    // Apply sensitive area effect
-    if (this.sensitive > -1){
-        initiative  += -5;
-        situational  += -10;
-    }
-    // Apply stumble effects from knockdown
-    if (this.stumble > -1){
-        initiative  += -5;
-    }
-
-    this.initiative.situational = initiative;
-    this.modifiers.situational = situational;
-    this.modifiers.defense = defense;
-    this.modifiers.attack = attack;
-    this.modifiers.casting = casting;
-};
-
 MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input){
-    //Update wound counters, only major wounds have temporary effects. Disabling wound stun is handled with the .stun.duration property
-    // var i;
-    // for(i in MML.hitPoints){
-    //  if(MML.hitPoints[i].name !== "multiWound"){
-    //      if(this[MML.hitPoints[i].name].wound.major.duration > 0){
-    //          this[MML.hitPoints[i].name].wound.major.duration--;
-    //      }
-    //  }
-    // }
-    // if(this.stun.duration > 0){ //if stun === -1, then stun is over
-    //  this.stun.duration--;
-    // }
-
-    // Handle fatigue don't use the fitness score to track fatigue, just use the combat state
-    if (this.meleeThisRound === true){ // Character acted in melee
+    if (_.has(this.statusEffects, "Melee This Round")){
         MML.processCommand({
             type: "character",
             who: this.name,
@@ -298,62 +38,28 @@ MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input){
 
         if (this.fatigueLevel < 1){
             if (this.roundsExertion > this.fitness){
-                if (MML.attributeCheckRoll(charName, "fitness", [0])){
-                    MML.processCommand({
-                        type: "character",
-                        who: this.name,
-                        triggeredFunction: "setApiCharAttribute",
-                        input: {
-                            attribute: "fatigueLevel",
-                            value: this.fatigueLevel + 1
-                        }
-                    });
-                    MML.processCommand({
-                        type: "character",
-                        who: this.name,
-                        triggeredFunction: "setApiCharAttribute",
-                        input: {
-                            attribute: "roundsExertion",
-                            value: 0
-                        }
-                    });
-                }
+                MML.processCommand({
+                    type: "character",
+                    who: this.name,
+                    triggeredFunction: "fatigueCheckRoll",
+                    input: {
+                        modifier: 0
+                    }
+                });
             }
         }
         else {
             if (this.roundsExertion > Math.round(this.fitness/2)){
-                if (MML.attributeCheckRoll(charName, "fitness", [-4])){
-                    MML.processCommand({
-                        type: "character",
-                        who: this.name,
-                        triggeredFunction: "setApiCharAttribute",
-                        input: {
-                            attribute: "fatigueLevel",
-                            value: this.fatigueLevel + 1
-                        }
-                    });
-                    MML.processCommand({
-                        type: "character",
-                        who: this.name,
-                        triggeredFunction: "setApiCharAttribute",
-                        input: {
-                            attribute: "roundsExertion",
-                            value: 0
-                        }
-                    });
-                }
+                MML.processCommand({
+                    type: "character",
+                    who: this.name,
+                    triggeredFunction: "fatigueCheckRoll",
+                    input: {
+                        modifier: -4
+                    }
+                });
             }
         }
-
-        MML.processCommand({
-            type: "character",
-            who: this.name,
-            triggeredFunction: "setApiCharAttribute",
-            input: {
-                attribute: "meleeThisRound",
-                value: false
-            }
-        });
     }
     else if (this.fatigueLevel > 0){
         MML.processCommand({
@@ -365,57 +71,19 @@ MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input){
                 value: this.roundsRest + 1
             }
         });
-        if (this.roundsRest >= 6 && this.attributeCheckRoll("health", [0])){
+
+        if (this.roundsRest >= 6){
             MML.processCommand({
                 type: "character",
                 who: this.name,
-                triggeredFunction: "setApiCharAttribute",
+                triggeredFunction: "fatigueRecoveryRoll",
                 input: {
-                    attribute: "roundsRest",
-                    value: 0
-                }
-            });
-            this.fatigueLevel--;
-            this.updateCharacter("fatigueLevel");
-            MML.processCommand({
-                type: "character",
-                who: this.name,
-                triggeredFunction: "setApiCharAttribute",
-                input: {
-                    attribute: "fatigueLevel",
-                    value: this.fatigueLevel - 1
-                }
-            });
-            MML.processCommand({
-                type: "character",
-                who: this.name,
-                triggeredFunction: "setApiCharAttribute",
-                input: {
-                    attribute: "roundsExertion",
-                    value: 0
+                    modifier: 0
                 }
             });
         }
     }
-    // Reset number of defenses counter
-    MML.processCommand({
-        type: "character",
-        who: this.name,
-        triggeredFunction: "setApiCharAttribute",
-        input: {
-            attribute: "defensesThisRound",
-            value: 0
-        }
-    });
-    MML.processCommand({
-        type: "character",
-        who: this.name,
-        triggeredFunction: "setApiCharAttribute",
-        input: {
-            attribute: "dodgedThisRound",
-            value: false
-        }
-    });
+
     // Reset knockdown number
     MML.processCommand({
         type: "character",
@@ -447,6 +115,8 @@ MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input){
         }
     });
 };
+
+
 
 MML.setReady = function setReady(ready){
     if(state.MML.GM.inCombat === true && this.ready === "false"){
@@ -513,6 +183,40 @@ MML.alterHP = function alterHP(position, hpAmount){
     return woundInfo;
 };
 
+//
+MML.getMultiWoundRoll = function getMultiWoundRoll(input){
+	switch(input){
+		case "entry":
+			this.rolls.multiWound = this.characters[this.currentTarget].setMultiWound();
+			if(this.rolls.multiWound.type === "none"){
+				this.rollIndex = "end";
+				this.menu = MML.performAction;
+				this.menu();
+			}
+			else{
+				this.displayMenu(this.characters[this.currentTarget].name + " suffers wound fatigue.", ["Multiple Wounds Roll"]);
+			}
+		break;
+		case "Multiple Wounds Roll":
+			this.currentRoll = this.currentTarget.attributeCheckRoll("systemStrength", [0]);
+			this.displayRoll();
+		break;
+		case "result":
+			this.rolls.multiWound.result = this.currentRoll.result;
+
+			if(this.rolls.multiWound.result === "Success" || this.rolls.multiWound.result === "Critical Success"){
+				//this.characters[this.currentTarget].statusEffects.push(MML.woundFatigue);
+				this.characters[this.currentTarget].multiWound.wound = true;
+			}
+
+			this.rollIndex = "end";
+			this.menu = MML.performAction;
+			this.menu();
+		break;
+		default:
+		break;
+	}
+};
 MML.setMultiWound = function setMultiWound(){
     var current = this.multiWound.max;
     var woundInfo = { bodyPart: "multiWound", type: "none", duration: -1 };
@@ -537,6 +241,51 @@ MML.setMultiWound = function setMultiWound(){
     }
     this.multiWound.current = current;
     return woundInfo;
+};
+
+MML.getWoundRoll = function getWoundRoll(input){
+	switch(input){
+		case "entry":
+			this.rolls.wound = this.characters[this.currentTarget].alterHP(this.rolls.hitPosition, this.rolls.damage, this.rolls.damage.type);
+			if(this.rolls.wound.type === "none"){
+				this.rollIndex = "getMultiWoundRoll";
+				this.menu = MML.performAction;
+				this.menu();
+			}
+			else{
+				this.displayMenu(this.characters[this.currentTarget].name + " suffered a " + this.rolls.wound.type + " wound.", ["Wound Roll"]);
+			}
+		break;
+		case "Wound Roll":
+			this.currentRoll = this.characters[this.currentTarget].woundRoll(this.rolls.wound);
+			this.displayRoll();
+		break;
+		case "result":
+			this.rolls.wound = this.currentRoll;
+			switch(this.rolls.wound.type){
+				case "major":
+					if(this.rolls.wound.result === "Failure"){
+						this.characters[this.currentTarget][this.rolls.wound.bodyPart].wound.major.duration += this.rolls.wound.duration;
+					}
+				break;
+				case "disabling":
+					this.characters[this.currentTarget][this.rolls.wound.bodyPart].wound.disabling = true;
+
+					if(this.rolls.wound.result === "Failure" ){
+						this.characters[this.currentTarget].stun.duration += this.rolls.wound.duration;
+					}
+				break;
+				case "mortal":
+					this.characters[this.currentTarget][this.rolls.wound.bodyPart].wound.mortal = true;
+				break;
+			}
+			this.rollIndex = "getMultiWoundRoll";
+			this.menu = MML.performAction;
+			this.menu();
+		break;
+		default:
+		break;
+	}
 };
 
 MML.woundRoll = function woundRoll(woundInfo){
@@ -589,13 +338,133 @@ MML.knockdownRoll = function knockdownRoll(){
     }
     return roll;
 };
+MML.getKnockdownRoll = function getKnockdownRoll(input){
+	switch(input){
+		case "entry":
+			if(this.characters[this.currentTarget].checkKnockdown()){
+				this.displayMenu(this.characters[this.currentTarget].name, ["Roll Knockdown"]);
+			}
+			else{
+				this.rollIndex = "getSensitiveAreaRoll";
+				this.menu = MML.performAction;
+				this.menu();
+			}
+		break;
+		case "Roll Knockdown":
+			this.currentRoll = this.characters[this.currentTarget].knockdownRoll();
+			this.displayRoll();
+		break;
+		case "result":
+			this.rolls.knockdown = this.currentRoll.result;
+			if(this.rolls.knockdown === "Critical Success" || this.rolls.knockdown === "Success"){
+				this.stumble = 1;
+			}
+			else{
+				sendChat("Game", this.characters[this.currentTarget].name + " is knocked to the ground");
+				this.characters[this.currentTarget].currentMotion = "prone";
+				this.characters[this.currentTarget].knockdown.current = this.characters[this.currentTarget].knockdown.max;
+			}
+			this.rollIndex = "getSensitiveAreaRoll";
+			this.menu = MML.performAction;
+			this.menu();
+		break;
+		default:
+		break;
+	}
+};
 
 MML.sensitiveAreaRoll = function sensitiveAreaCheck(){
     var roll = this.attributeCheckRoll("willpower", [0]);
     return roll;
 };
+MML.getSensitiveAreaRoll = function getSensitiveAreaRoll(input){
+	switch(input){
+		case "entry":
+			if(this.characters[this.currentTarget].isSensitiveArea(this.rolls.hitPosition)){
+				this.displayMenu(this.characters[this.currentTarget].name + " was hit in a sensitive area.", ["Sensitive Area Roll"]);
+			}
+			else{
+				this.rollIndex = "getWoundRoll";
+				this.menu = MML.performAction;
+				this.menu();
+			}
+		break;
+		case "Sensitive Area Roll":
+			this.currentRoll = this.characters[this.currentTarget].sensitiveAreaRoll();
+			this.displayRoll();
+		break;
+		case "result":
+			this.rolls.sensitiveArea = this.currentRoll.result;
+			if(this.rolls.sensitiveArea !== "Critical Success" || this.rolls.sensitiveArea !== "Success"){
+				sendChat("", this.characters[this.currentTarget].name + " is in pain!");
+				this.characters[this.currentTarget].sensitive = 1;
+			}
+			this.rollIndex = "getWoundRoll";
+			this.menu = MML.performAction;
+			this.menu();
+		break;
+		default:
+		break;
+	}
+};
 
-MML.armorPenetration = function armorPenetration(position, damage, type) {
+MML.fatigueCheckRoll = function fatigueCheckRoll (modifier){
+    if (MML.attributeCheckRoll(charName, "fitness", [modifier])){
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "setApiCharAttribute",
+            input: {
+                attribute: "fatigueLevel",
+                value: this.fatigueLevel + 1
+            }
+        });
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            triggeredFunction: "setApiCharAttribute",
+            input: {
+                attribute: "roundsExertion",
+                value: 0
+            }
+        });
+    }
+};
+
+MML.fatigueRecoveryRoll = function fatigueRecoveryRoll (modifier){
+    this.attributeCheckRoll("health", [modifier]);
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "setApiCharAttribute",
+        input: {
+            attribute: "roundsRest",
+            value: 0
+        }
+    });
+    this.fatigueLevel--;
+    this.updateCharacter("fatigueLevel");
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "setApiCharAttribute",
+        input: {
+            attribute: "fatigueLevel",
+            value: this.fatigueLevel - 1
+        }
+    });
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "setApiCharAttribute",
+        input: {
+            attribute: "roundsExertion",
+            value: 0
+        }
+    });
+};
+
+MML.armorDamageReduction = function armorDamageReduction(position, damage, type) {
     var damageApplied = false; //Accounts for partial coverage, once true the loop stops
     var coverageRoll = randomInteger(100);
     var damageDeflected = 0;

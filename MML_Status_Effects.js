@@ -1,5 +1,26 @@
 /* jshint -W069 */
 MML.statusEffects = {};
+// MML.statusEffects["Major Wound"] = function(character){
+//     this.bodyPart = "";
+//     this.duration = 1;
+//
+//     this.compute = function(effect, index){
+//         if(this[effect.bodyPart] > Math.round(this[effect.bodyPart + "Max"]/2)){
+//             delete this.statusEffects[index];
+//         }
+//         else{
+//             if(this.situationalInitBonus !== "No Combat"){
+//                 this.situationalInitBonus += -5;
+//             }
+//             if(effect.duration > 0){
+//                 this.situationalMod += -10;
+//             }
+//         }
+//     };
+// };
+
+
+
 MML.statusEffects["Major Wound"] = function(effect, index){
     if(this[effect.bodyPart] > Math.round(this[effect.bodyPart + "Max"]/2)){
         delete this.statusEffects[index];
@@ -12,6 +33,9 @@ MML.statusEffects["Major Wound"] = function(effect, index){
             this.situationalMod += -10;
         }
     }
+    // if(this[MML.hitPoints[i].name].wound.major.duration > 0){
+    //          this[MML.hitPoints[i].name].wound.major.duration--;
+    //      }
 };
 MML.statusEffects["Disabling Wound"] = function(effect, index){
     if(this[effect.bodyPart] > 0){
@@ -190,4 +214,7 @@ MML.statusEffects["Melee This Round"] = function(effect, index){
         this.roundsExertion++;
         delete this.statusEffects[index];
     }
+};
+MML.statusEffects["Stunned"] = function(effect, index){
+
 };
