@@ -3,13 +3,13 @@
     <table>
         <tr><th>{{title}}</th></tr>
         <tr>
-            <td><span class="tcat">Result: </span>{{result}}</td>        
+            <td><span class="tcat">Result: </span>{{result}}</td>
         </tr>
         <tr>
-            <td><span class="tcat">Range: </span>{{range}}</td>        
+            <td><span class="tcat">Range: </span>{{range}}</td>
         </tr>
         <tr>
-            <td><span class="tcat">Target: </span>{{target}}</td>        
+            <td><span class="tcat">Target: </span>{{target}}</td>
         </tr>
         <tr>
             <td><span class="tcat">Roll: </span>{{value}}</td>
@@ -24,7 +24,7 @@
     <table>
         <tr><th>{{title}}</th></tr>
         <tr>
-            <td><span class="tcat">Range: </span>{{range}}</td>        
+            <td><span class="tcat">Range: </span>{{range}}</td>
         </tr>
         <tr>
             <td><span class="tcat">Damage: </span>{{value}} {{type}}</td>
@@ -39,10 +39,10 @@
     <table>
         <tr><th>{{title}}</th></tr>
         <tr>
-            <td><span class="tcat">Position: </span>{{result}}</td>        
+            <td><span class="tcat">Position: </span>{{result}}</td>
         </tr>
         <tr>
-            <td><span class="tcat">Range: </span>{{range}}</td>        
+            <td><span class="tcat">Range: </span>{{range}}</td>
         </tr>
         <tr>
             <td><span class="tcat">Roll: </span>{{value}}</td>
@@ -66,7 +66,7 @@
     <table>
         <tr><th>Select a Token</th></tr>
         <tr>
-            <td><span class="tcat"></span>[Select](!!MML|selectTarget {{charName}}|@{target|character_name}|{{input}})</td>        
+            <td><span class="tcat"></span>[Select](!!MML|selectTarget {{charName}}|@{target|character_name}|{{input}})</td>
         </tr>
         <tr>
             <td><span class="tcat"></span>{{back}} </a></td><td><span class="tcat"> </span>{{accept}}</a></td>
@@ -89,7 +89,7 @@
 
 <!--input type="hidden" class="sheet-module-roll" /><span>Roll Comparisons Support</span-->
 <div class="sheet-wrapper">
-    
+
     <!-- ===== ===== ===== ===== TABS ===== ===== ===== ===== -->
     <input type="radio" name="attr_tab" class="sheet-tab sheet-tab1" value="1" title="General" checked="checked" />
     <input type="radio" name="attr_tab" class="sheet-tab sheet-tab2" value="2" title="Combat" />
@@ -97,9 +97,9 @@
     <input type="radio" name="attr_tab" class="sheet-tab sheet-tab4" value="4" title="Skills" />
     <input type="radio" name="attr_tab" class="sheet-tab sheet-tab5" value="5" title="Inventory" />
     <div class="sheet-tab-br"></div>
-    
+
     <div class="sheet-tab1"><!-- ===== ===== ===== ===== GENERAL TAB ===== ===== ===== ===== -->
-    
+
         <div class="sheet-box sheet-attribute"><!-- _____ _____ Basic Info BOX _____ _____ -->
             <div class="sheet-table">
                 <div class="sheet-header">
@@ -286,7 +286,7 @@
 	            </div> <!-- .sheet-row end Presence -->
 			</div> <!-- .sheet-table -->
 		</div> <!-- .sheet-box .sheet-attributes -->
-		
+
 		<div class="sheet-box sheet-attribute"> <!-- _____ _____ Secondary ATTRIBUTE BOX _____ _____ -->
 	        <div class="sheet-table">
 	            <div class="sheet-header">
@@ -364,10 +364,10 @@
 					<div class="sheet-cell sheet-col1">
 	                    <input type="text" name="attr_deadLift" value="0" />
 	                </div>
-	            </div> <!-- .sheet-row -->				
+	            </div> <!-- .sheet-row -->
 			</div> <!-- .sheet-table -->
 		</div> <!-- .sheet-box .sheet-attributes -->
-	    
+
 		<div class="sheet-box sheet-attribute"> <!-- _____ _____ Hit Points ATTRIBUTE BOX _____ _____ -->
 	        <div class="sheet-table">
 	            <div class="sheet-header">
@@ -480,7 +480,7 @@
 	                </div>
 	            </div> <!-- .sheet-row end Right Leg HP-->
 			</div> <!-- .sheet-table -->
-		</div> <!-- .sheet-box .sheet-attributes -->	
+		</div> <!-- .sheet-box .sheet-attributes -->
 
 		<div class="sheet-box sheet-attribute"> <!-- _____ _____ misc ATTRIBUTE BOX _____ _____ -->
 	        <div class="sheet-table">
@@ -526,7 +526,7 @@
 					<div class="sheet-cell sheet-col1">
 	                    <input type="text" name="attr_meleeDamageMod" value="0" />
 	                </div>
-	            </div> <!-- .sheet-row -->		
+	            </div> <!-- .sheet-row -->
 	            <div class="sheet-row"> <!--  -->
     				<div class="sheet-cell sheet-col0 sheet-label">
 						<div class="sheet-popup">Defense Mod</div>
@@ -534,20 +534,20 @@
 					<div class="sheet-cell sheet-col1">
 	                    <input type="text" name="attr_attributeDefenseMod" value="0" />
 	                </div>
-	            </div> <!-- .sheet-row -->	
+	            </div> <!-- .sheet-row -->
 			</div> <!-- .sheet-table -->
 		</div> <!-- .sheet-box .sheet-attributes -->
 
 
 	</div> <!-- .sheet-tab1 -->
-    
+
     <!-- ===== ===== ===== ===== Combat TAB ===== ===== ===== ===== -->
     <div class="sheet-tab2">
-        
+
 	    <!-- _____ _____ Action Select Menu _____ _____ -->
         <table>
             <input type="radio" name="attr_action" class="sheet-menu sheet-attackButton" title="Attack" value="1" checked="checked" />
-            
+
             <div class="sheet-menuBody sheet-attackBody">
                     <div>
                         <button type='roll' value='!setTarget @{Name}' name='roll_setTarget'>Set Target</button>
@@ -600,23 +600,23 @@
                         </select>
                     </div>
                 </div>
-            
+
             <input type="radio" name="attr_action" class="sheet-menu sheet-castButton" title="Cast Spell" value="2" />
             <div class="sheet-menuBody sheet-castBody">The Cast Spell Option is selected</div>
             <input type="radio" name="attr_action" class="sheet-menu sheet-itemButton" title="Ready Item" value="3" />
             <div class="sheet-menuBody sheet-itemBody">The Ready Item Option is selected</div>
-            <input type="radio" name="attr_action" class="sheet-menu sheet-observeButton" title="Observe" value="4" /> 
+            <input type="radio" name="attr_action" class="sheet-menu sheet-observeButton" title="Observe" value="4" />
             <div class="sheet-menuBody sheet-observeBody">The Observe Option is selected</div>
-                       
+
         </table>
 	</div> <!-- .sheet-tab2 -->
-    
+
 
     <!-- ===== ===== ===== ===== Spells TAB ===== ===== ===== ===== -->
     <div class="sheet-tab3">
-		
+
 	</div> <!-- .sheet-tab3 -->
-    
+
 
     <!-- ===== ===== ===== ===== Skills TAB ===== ===== ===== ===== -->
     <div class="sheet-tab4">
@@ -630,7 +630,7 @@
 				<fieldset class="repeating_weaponSkills">
 					<!-- <div class="sheet-cell sheet-col0"> -->
 						<select name="attr_name" class="weaponSkillName">
-							<option value="Default Martial">Default Martial</option>             
+							<option value="Default Martial">Default Martial</option>
 							<option value="Hand Axe">Hand Axe</option>
 							<option value="Battle Axe">Battle Axe</option>
 							<option value="Pick">Pick</option>
@@ -697,10 +697,10 @@
 						</select>
 					<!-- </div>
 					<!-- <div class="sheet-cell sheet-col1"> -->
-						<input type="text" name="attr_input" class="skillInput" value="0" />    
+						<input type="text" name="attr_input" class="skillInput" value="0" />
 					<!-- </div> -->
 					<!-- <div class="sheet-cell sheet-col2"> -->
-						<input type="text" name="attr_level" class="skillLevel" value="0" />    
+						<input type="text" name="attr_level" class="skillLevel" value="0" />
 					<!-- </div>  -->
 				</fieldset>
 			</div>
@@ -714,7 +714,7 @@
 				</div> <!-- .sheet-header -->
 				<fieldset class="repeating_skills">
 					<div class="sheet-cell sheet-col0">
-						<select name="attr_name" class="skillName" value="Acrobatics">                
+						<select name="attr_name" class="skillName" value="Acrobatics">
 							<option value="Acrobatics">Acrobatics</option>
 							<option value="Acting">Acting</option>
 							<option value="Alchemy">Alchemy</option>
@@ -800,15 +800,15 @@
 						</select>
 					</div>
 					<div class="sheet-cell sheet-col1">
-						<input type="text" name="attr_input" class="skillInput" value="0" />    
+						<input type="text" name="attr_input" class="skillInput" value="0" />
 					</div>
 					<div class="sheet-cell sheet-col2">
-						<input type="text" name="attr_level" class="skillLevel" value="0" />    
-					</div> 
+						<input type="text" name="attr_level" class="skillLevel" value="0" />
+					</div>
 				</fieldset>
 			</div>
 		</div>
-	</div> <!-- .sheet-tab4 -->    
+	</div> <!-- .sheet-tab4 -->
 
 
     <!-- ===== ===== ===== ===== ITEMS TAB ===== ===== ===== ===== -->
@@ -818,7 +818,7 @@
 	            <div class="sheet-header">
 					<div class="sheet-cell sheet-col1">Name</div>
 				</div> <!-- .sheet-header -->
-				
+
 				<fieldset class="repeating_items">
 					<div class="sheet-cell sheet-col1">
 	                    <input type="text" name="attr_itemName" class="itemName"></input>
@@ -827,15 +827,15 @@
 	                    <input type="text" name="attr_itemId" class="itemId"></input>
 	                </div>
 	                <div class="sheet-cell sheet-col3">
-	                	<button type='roll' value='!displayItemOptions @{name}|@{itemId}' name='roll_displayItemOptions'>Options</button>
+	                	<button type='roll' value='!MML|displayItemOptions @{name}|@{itemId}' name='roll_displayItemOptions'>Options</button>
 	                </div>
-				</fieldset>			
+				</fieldset>
 			</div> <!-- .sheet-table -->
 		</div> <!-- .sheet-box .sheet-weapon -->
-	</div> <!-- .sheet-tab5 -->       
-    
+	</div> <!-- .sheet-tab5 -->
+
 </div>
 
 <script type="text/worker">
-	
+
 </script>

@@ -274,7 +274,7 @@ MML.displayItemOptions = function displayItemOptions(input){
 						triggeredFunction: "setApiCharAttribute",
 						input: {
 							attribute: "leftHand",
-							value: {}
+							value: { _id: "emptyHand" }
 						}
 					});
 					MML.processCommand({
@@ -283,7 +283,7 @@ MML.displayItemOptions = function displayItemOptions(input){
 						triggeredFunction: "setApiCharAttribute",
 						input: {
 							attribute: "rightHand",
-							value: {}
+							value: { _id: "emptyHand" }
 						}
 					});
                     MML.displayMenu.apply(this, []);
@@ -297,7 +297,7 @@ MML.displayItemOptions = function displayItemOptions(input){
 						triggeredFunction: "setApiCharAttribute",
 						input: {
 							attribute: "leftHand",
-							value: {}
+							value: { _id: "emptyHand" }
 						}
 					});
                     MML.displayMenu.apply(this, []);
@@ -311,7 +311,7 @@ MML.displayItemOptions = function displayItemOptions(input){
 						triggeredFunction: "setApiCharAttribute",
 						input: {
 							attribute: "rightHand",
-							value: {}
+							value: { _id: "emptyHand" }
 						}
 					});
                     MML.displayMenu.apply(this, []);
@@ -326,20 +326,20 @@ MML.displayItemOptions = function displayItemOptions(input){
                         text: "Equip Left Hand",
                         nextMenu: "menuIdle",
                         triggeredFunction: function(text){
-                            if(state.MML.characters[who].rightHand.grip !== "One Hand"){
-                                MML.processCommand({
-					            	type: "character",
-									who: who,
-									triggeredFunction: "setApiCharAttribute",
-									input: {
-										attribute: "rightHand",
-										value: {
-	                                        _id: itemId,
-	                                        grip: gripName
-	                                    }
-									}
-								});
-                            }
+                            // if(state.MML.characters[who].rightHand.grip !== "One Hand"){
+                            //     MML.processCommand({
+					        //     	type: "character",
+							// 		who: who,
+							// 		triggeredFunction: "setApiCharAttribute",
+							// 		input: {
+							// 			attribute: "rightHand",
+							// 			value: {
+	                        //                 _id: itemId,
+	                        //                 grip: gripName
+	                        //             }
+							// 		}
+							// 	});
+                            // }
                             MML.processCommand({
 				            	type: "character",
 								who: who,
@@ -360,20 +360,20 @@ MML.displayItemOptions = function displayItemOptions(input){
                         text: "Equip Right Hand",
                         nextMenu: "menuIdle",
                         triggeredFunction: function(text){
-                            if(state.MML.characters[who].leftHand.grip !== "One Hand"){
-                                MML.processCommand({
-					            	type: "character",
-									who: who,
-									triggeredFunction: "setApiCharAttribute",
-									input: {
-										attribute: "leftHand",
-										value: {
-	                                        _id: itemId,
-	                                        grip: gripName
-	                                    }
-									}
-								});
-                            }
+                            // if(state.MML.characters[who].leftHand.grip !== "One Hand"){
+                            //     MML.processCommand({
+					        //     	type: "character",
+							// 		who: who,
+							// 		triggeredFunction: "setApiCharAttribute",
+							// 		input: {
+							// 			attribute: "leftHand",
+							// 			value: {
+	                        //                 _id: itemId,
+	                        //                 grip: gripName
+	                        //             }
+							// 		}
+							// 	});
+                            // }
                             MML.processCommand({
 				            	type: "character",
 								who: who,
@@ -593,27 +593,37 @@ MML.charMenuAttackCalledShot = function charMenuCalledShot(input){
 MML.charMenuAttackStance = function charMenuAttackStance(input){
 	this.who = input.who;
 	this.message =  "Attack Stance Menu";
-	this.buttons = [{
+	var buttons = [{
 		text: "Neutral",
-		nextMenu: "charMenuInitiativeRoll",
 		triggeredFunction: function(input){
 			MML.displayMenu.apply(this, []);
 		}},
 		{
 		text: "Defensive",
-		nextMenu: "charMenuInitiativeRoll",
 		triggeredFunction: function(input){
 			state.MML.characters[this.who].action.modifiers.push("Defensive Stance");
 			MML.displayMenu.apply(this, []);
 		}},
 		{
 		text: "Aggressive",
-		nextMenu: "charMenuInitiativeRoll",
 		triggeredFunction: function(input){
 			state.MML.characters[this.who].action.modifiers.push("Aggressive Stance");
 			MML.displayMenu.apply(this, []);
 		}}
 	];
+
+    if(MML.getMeleeWeapon(state.MML.characters[this.who]).secondaryType !== ""){
+		_.each(buttons, function(button){
+			button.nextMenu = "charMenuSelectDamageType";
+		});
+	}
+	else{
+        state.MML.characters[this.who].action.weaponType = "primary";
+		_.each(buttons, function(button){
+			button.nextMenu = "charMenuInitiativeRoll";
+		});
+	}
+	this.buttons = buttons;
 };
 
 MML.charMenuInitiativeRoll = function charMenuInitiativeRoll(input){
@@ -733,31 +743,19 @@ MML.charMenuSelectDamageType = function charMenuSelectDamageType(input){
 
 	this.buttons.push({
 		text: "Primary",
-		nextMenu: "charMenuAttackRoll",
+		nextMenu: "charMenuInitiativeRoll",
 		triggeredFunction: function(input){
-			state.MML.GM.currentAction.weaponType = "primary";
-
-			MML.processCommand({
-		    	type: "character",
-		    	who: this.who,
-		    	triggeredFunction: "meleeAttackRoll",
-				input: {}
-		    });
+            state.MML.characters[this.who].action.weaponType = "primary";
+            MML.displayMenu.apply(this, []);
 		}
 	});
 
 	this.buttons.push({
 		text: "Secondary",
-		nextMenu: "charMenuAttackRoll",
+		nextMenu: "charMenuInitiativeRoll",
 		triggeredFunction: function(input){
-			state.MML.GM.currentAction.weaponType = "secondary";
-
-			MML.processCommand({
-		    	type: "character",
-		    	who: this.who,
-		    	triggeredFunction: "meleeAttackRoll",
-				input: {}
-		    });
+            state.MML.characters[this.who].action.weaponType = "secondary";
+            MML.displayMenu.apply(this, []);
 		}
 	});
 };
@@ -1686,14 +1684,3 @@ MML.GmMenuWorld = function world(input){
 MML.GmMenuUtilities = function utilities(input){
 	//edit states and other api stuff
 };
-
-// MML.initiativeRoll = {
-// 	prompt: function(){
-
-// 	},
-// 	result: {},
-// 	effect: function(){
-// 		this.result;
-// 	}
-
-// };
