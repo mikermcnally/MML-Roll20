@@ -1,3 +1,4 @@
+/* jshint -W069 */
 MML.meleeAttackAction = function meleeAttackAction(){
     var currentAction = state.MML.GM.currentAction;
     var character = currentAction.character;

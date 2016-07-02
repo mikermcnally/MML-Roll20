@@ -61,6 +61,10 @@ MML.init = function init(){
 // state.MML.characters =data[2];
 // MML.processCommand(data[3]);
 };
+<<<<<<< .merge_file_a06508
+=======
+/* jshint -W069 */
+>>>>>>> .merge_file_a05720
 MML.meleeAttackAction = function meleeAttackAction(){
     var currentAction = state.MML.GM.currentAction;
     var character = currentAction.character;
@@ -9073,7 +9077,10 @@ on("ready", function() {
     });
 });
 /* jshint -W069 */
+<<<<<<< .merge_file_a06508
 
+=======
+>>>>>>> .merge_file_a05720
 MML.statusEffects = {};
 MML.statusEffects["Major Wound"] = function(effect, index){
     if(this[effect.bodyPart] > Math.round(this[effect.bodyPart + "Max"]/2)){

@@ -270,6 +270,18 @@ generateRowID = function() {
     return generateUUID().replace(/_/g, "Z");
 };
 
+MML.dehexify = function dehexify(hexIn) {
+    var i;
+    var hexes = hexIn.match(/.{1,4}/g) || [];
+    var dehexed = "";
+    for (i = 0; i < hexes.length; i++) {
+            dehexed += String.fromCharCode(parseInt(hexes[i], 16));
+    }
+
+    return dehexed;
+};
+
+
 // Rolling Functions
 MML.rollDice = function rollDice(amount, size) {
     var value = 0;
