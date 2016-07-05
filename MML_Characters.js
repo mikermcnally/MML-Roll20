@@ -183,140 +183,89 @@ MML.alterHP = function alterHP(position, hpAmount){
     return woundInfo;
 };
 
-//
-MML.getMultiWoundRoll = function getMultiWoundRoll(input){
-	switch(input){
-		case "entry":
-			this.rolls.multiWound = this.characters[this.currentTarget].setMultiWound();
-			if(this.rolls.multiWound.type === "none"){
-				this.rollIndex = "end";
-				this.menu = MML.performAction;
-				this.menu();
-			}
-			else{
-				this.displayMenu(this.characters[this.currentTarget].name + " suffers wound fatigue.", ["Multiple Wounds Roll"]);
-			}
-		break;
-		case "Multiple Wounds Roll":
-			this.currentRoll = this.currentTarget.attributeCheckRoll("systemStrength", [0]);
-			this.displayRoll();
-		break;
-		case "result":
-			this.rolls.multiWound.result = this.currentRoll.result;
-
-			if(this.rolls.multiWound.result === "Success" || this.rolls.multiWound.result === "Critical Success"){
-				//this.characters[this.currentTarget].statusEffects.push(MML.woundFatigue);
-				this.characters[this.currentTarget].multiWound.wound = true;
-			}
-
-			this.rollIndex = "end";
-			this.menu = MML.performAction;
-			this.menu();
-		break;
-		default:
-		break;
-	}
-};
 MML.setMultiWound = function setMultiWound(){
-    var current = this.multiWound.max;
-    var woundInfo = { bodyPart: "multiWound", type: "none", duration: -1 };
+    var currentHP = this.hp;
+    currentHP.multiWound = this.hpMax.multiwound;
 
-    var i;
-    for(i in MML.hitPoints){
-        if(MML.hitPoints[i].name !== "multiWound"){
-            if(this[MML.hitPoints[i].name].current >= Math.round(this[MML.hitPoints[i].name].max/2)){ //Only minor wounds apply
-                current -= this[MML.hitPoints[i].name].max - this[MML.hitPoints[i].name].current;
-            }
-            else{
-                current -= this[MML.hitPoints[i].name].max - Math.round(this[MML.hitPoints[i].name].max/2);
-            }
+    _.each(MML.getBodyParts(this), function(bodyPart){
+        if(currentHP[bodyPart] >= Math.round(this.hpMax[bodyPart]/2)){ //Only minor wounds apply
+            currentHP.multiWound -= this.hpMax[bodyPart] - currentHP[bodyPart];
         }
-    }
+        else{
+            currentHP.multiWound -= this.hpMax[bodyPart] - Math.round(this.hpMax[bodyPart]/2);
+        }
+    });
 
-    if(this.multiWound.current < 0 && this.multiWound.wound === false){
-        woundInfo.type = "multiWound";
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "setApiCharAttribute",
+        input: {
+            attribute: "hp",
+            value: currentHP
+        }
+    });
+
+    if(!_.has(this.statusEffects, "Wound Fatigue")){
+        MML.multiWoundRoll();
     }
-    else if(this.multiWound.current >= 0){
-        this.multiWound.wound = false;
-    }
-    this.multiWound.current = current;
-    return woundInfo;
 };
 
-MML.getWoundRoll = function getWoundRoll(input){
-	switch(input){
-		case "entry":
-			this.rolls.wound = this.characters[this.currentTarget].alterHP(this.rolls.hitPosition, this.rolls.damage, this.rolls.damage.type);
-			if(this.rolls.wound.type === "none"){
-				this.rollIndex = "getMultiWoundRoll";
-				this.menu = MML.performAction;
-				this.menu();
-			}
-			else{
-				this.displayMenu(this.characters[this.currentTarget].name + " suffered a " + this.rolls.wound.type + " wound.", ["Wound Roll"]);
-			}
-		break;
-		case "Wound Roll":
-			this.currentRoll = this.characters[this.currentTarget].woundRoll(this.rolls.wound);
-			this.displayRoll();
-		break;
-		case "result":
-			this.rolls.wound = this.currentRoll;
-			switch(this.rolls.wound.type){
-				case "major":
-					if(this.rolls.wound.result === "Failure"){
-						this.characters[this.currentTarget][this.rolls.wound.bodyPart].wound.major.duration += this.rolls.wound.duration;
-					}
-				break;
-				case "disabling":
-					this.characters[this.currentTarget][this.rolls.wound.bodyPart].wound.disabling = true;
-
-					if(this.rolls.wound.result === "Failure" ){
-						this.characters[this.currentTarget].stun.duration += this.rolls.wound.duration;
-					}
-				break;
-				case "mortal":
-					this.characters[this.currentTarget][this.rolls.wound.bodyPart].wound.mortal = true;
-				break;
-			}
-			this.rollIndex = "getMultiWoundRoll";
-			this.menu = MML.performAction;
-			this.menu();
-		break;
-		default:
-		break;
-	}
+MML.multiWoundRoll = function getMultiWoundRoll(input){
+	var roll = attributeCheckRoll("systemStrength", [0]);
 };
 
-MML.woundRoll = function woundRoll(woundInfo){
+MML.multiWoundRollResult = function multiWoundRollResult(input){
+
+};
+
+MML.multiWoundRollApply = function multiWoundRollApply(input){
+
+};
+
+MML.majorWoundRoll = function majorWoundRoll(input){
+    roll = this.attributeCheckRoll("willpower", [0]);
+};
+
+MML.majorWoundRollResult = function majorWoundRollResult(input){
     var roll;
 
-    switch(woundInfo.type){
-        case "major":
-            roll = this.attributeCheckRoll("willpower", [0]);
-            roll.title = this.name + "'s major wound willpower save";
-            break;
-        case "disabling":
-            roll = this.attributeCheckRoll("systemStrength", [0]);
-            roll.title = this.name + "'s disabling wound system strength save";
-            break;
-        case "mortal":
-            roll = this.attributeCheckRoll("systemStrength", [0]);
-            roll.title = this.name + "'s mortal wound system strength save";
-            break;
-        case "multiWound":
-            roll = this.attributeCheckRoll("willpower", [0]);
-            roll.title = this.name + "'s wound fatigue willpower save";
-            break;
-        default:
-        break;
+};
+
+MML.majorWoundRollApply = function majorWoundRollApply() {
+    if(this.rolls.result === "Failure"){
+        var message = this.name + " suffered a major wound to their " + bodyPart;
+		this.characters[this.currentTarget][this.rolls.wound.bodyPart].wound.major.duration += this.rolls.wound.duration;
+	}
+};
+
+
+MML.disablingWoundRoll = function disablingWoundRoll(input){
+	roll = this.attributeCheckRoll("systemStrength", [0]);
+};
+
+MML.disablingWoundRollResult = function disablingWoundRollResult(woundInfo){
+
+};
+
+MML.disablingWoundRollApply = function disablingWoundRollApply() {
+    this.characters[this.currentTarget][this.rolls.wound.bodyPart].wound.disabling = true;
+
+    if(this.rolls.wound.result === "Failure" ){
+        this.characters[this.currentTarget].stun.duration += this.rolls.wound.duration;
     }
-    woundInfo.name = roll.name;
-    woundInfo.result = roll.result;
-    woundInfo.target = roll.target;
-    woundInfo.range = roll.range;
-    woundInfo = roll;
-    return woundInfo;
+};
+
+MML.mortalWoundRoll = function mortalWoundRoll(input){
+	var roll = this.attributeCheckRoll("systemStrength", [0]);
+};
+
+MML.mortalWoundRollResult = function mortalWoundRollResult(woundInfo){
+    var roll;
+};
+
+MML.mortalWoundRollApply = function mortalWoundRollApply() {
+
 };
 
 MML.checkKnockdown = function checkKnockdown(damage){
