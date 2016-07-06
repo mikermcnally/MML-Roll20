@@ -28,22 +28,8 @@ MML.characterConstructor = function characterConstructor(charName) {
     this.load = MML.getCurrentAttributeAsFloat(this.name, "load");
     this.overhead = MML.getCurrentAttributeAsFloat(this.name, "overhead");
     this.deadLift = MML.getCurrentAttributeAsFloat(this.name, "deadLift");
-    this.multiWoundMax = MML.getCurrentAttributeAsFloat(this.name, "multiWoundMax");
-    this.multiWound = MML.getCurrentAttributeAsFloat(this.name, "multiWound");
-    this.headHPMax = MML.getCurrentAttributeAsFloat(this.name, "headHPMax");
-    this.headHP = MML.getCurrentAttributeAsFloat(this.name, "headHP");
-    this.chestHPMax = MML.getCurrentAttributeAsFloat(this.name, "chestHPMax");
-    this.chestHP = MML.getCurrentAttributeAsFloat(this.name, "chestHP");
-    this.abdomenHPMax = MML.getCurrentAttributeAsFloat(this.name, "abdomenHPMax");
-    this.abdomenHP = MML.getCurrentAttributeAsFloat(this.name, "abdomenHP");
-    this.leftArmHPMax = MML.getCurrentAttributeAsFloat(this.name, "leftArmHPMax");
-    this.leftArmHP = MML.getCurrentAttributeAsFloat(this.name, "leftArmHP");
-    this.rightArmHPMax = MML.getCurrentAttributeAsFloat(this.name, "rightArmHPMax");
-    this.rightArmHP = MML.getCurrentAttributeAsFloat(this.name, "rightArmHP");
-    this.leftLegHPMax = MML.getCurrentAttributeAsFloat(this.name, "leftLegHPMax");
-    this.leftLegHP = MML.getCurrentAttributeAsFloat(this.name, "leftLegHP");
-    this.rightLegHPMax = MML.getCurrentAttributeAsFloat(this.name, "rightLegHPMax");
-    this.rightLegHP = MML.getCurrentAttributeAsFloat(this.name, "rightLegHP");
+    this.hpMax = MML.getCurrentAttributeJSON(this.name, "hpMax");
+    this.hp = MML.getCurrentAttributeJSON(this.name, "hp");
     this.epMax = MML.getCurrentAttributeAsFloat(this.name, "epMax");
     this.ep = MML.getCurrentAttributeAsFloat(this.name, "ep");
     this.fatigueMax = MML.getCurrentAttributeAsFloat(this.name, "fatigueMax");
@@ -246,14 +232,7 @@ MML.computeAttribute.handedness = {
 //Primary Attributes
 MML.computeAttribute.stature = {
     dependents: ["load",
-        "headHPMax",
-        "chestHPMax",
-        "abdomenHPMax",
-        "leftArmHPMax",
-        "rightArmHPMax",
-        "leftLegHPMax",
-        "rightLegHPMax",
-        "multiWoundMax",
+        "hpMax",
         "knockdownMax",
         "height",
         "weight"
@@ -264,7 +243,7 @@ MML.computeAttribute.stature = {
 };
 MML.computeAttribute.strength = {
     dependents: ["fitness",
-        "chestHPMax",
+    "hpMax",
         "attributeDefenseMod",
         "attributeMeleeAttackMod",
         "attributeMissileAttackMod",
@@ -290,17 +269,10 @@ MML.computeAttribute.coordination = {
 };
 MML.computeAttribute.health = {
     dependents: ["willpower",
+        "hpMax",
         "evocation",
         "systemStrength",
         "fitness",
-        "headHPMax",
-        "chestHPMax",
-        "abdomenHPMax",
-        "leftArmHPMax",
-        "rightArmHPMax",
-        "leftLegHPMax",
-        "rightLegHPMax",
-        "multiWoundMax",
         "hpRecovery",
         "epRecovery",
         "skills",
@@ -365,7 +337,7 @@ MML.computeAttribute.presence = {
 // Secondary Attributes
 MML.computeAttribute.willpower = {
     dependents: ["evocation",
-        "multiWound"
+        "hpMax"
     ],
     compute: function() {
         return Math.round((2 * this.presence + this.health) / 3);
@@ -446,116 +418,18 @@ MML.computeAttribute.deadLift = {
 };
 
 // HP stuff
-MML.computeAttribute.multiWoundMax = {
-    dependents: ["multiWound"],
+MML.computeAttribute.hpMax = {
+    dependents: ["hp"],
     compute: function() {
-        var multiWoundMax = Math.round((this.health + this.stature + this.willpower) / 2);
-        this.multiWound = multiWoundMax;
-        return multiWoundMax;
+        var hpMax = MML.buildHpAttribute(this);
+        this.hp = hpMax;
+        return hpMax;
     }
 };
-MML.computeAttribute.multiWound = {
-    dependents: [],
+MML.computeAttribute.hp = {
+    dependents: ["statusEffects"],
     compute: function() {
-        return this.multiWound;
-    }
-};
-MML.computeAttribute.headHPMax = {
-    dependents: ["headHP"],
-    compute: function() {
-        var headHPMax = MML.HPTables[this.race][Math.round(this.health + this.stature / 3)];
-        this.headHP = headHPMax;
-        return headHPMax;
-    }
-};
-MML.computeAttribute.headHP = {
-    dependents: [],
-    compute: function() {
-        return this.headHP;
-    }
-};
-MML.computeAttribute.chestHPMax = {
-    dependents: ["chestHP"],
-    compute: function() {
-        var chestHPMax = MML.HPTables[this.race][Math.round((this.health + this.stature + this.strength) / 2)];
-        this.chestHP = chestHPMax;
-        return chestHPMax;
-    }
-};
-MML.computeAttribute.chestHP = {
-    dependents: [],
-    compute: function() {
-        return this.chestHP;
-    }
-};
-MML.computeAttribute.abdomenHPMax = {
-    dependents: ["abdomenHP"],
-    compute: function() {
-        var abdomenHPMax = MML.HPTables[this.race][Math.round(this.health + this.stature)];
-        this.abdomenHP = abdomenHPMax;
-        return abdomenHPMax;
-    }
-};
-MML.computeAttribute.abdomenHP = {
-    dependents: [],
-    compute: function() {
-        return this.abdomenHP;
-    }
-};
-MML.computeAttribute.leftArmHPMax = {
-    dependents: ["leftArmHP"],
-    compute: function() {
-        var leftArmHPMax = MML.HPTables[this.race][Math.round(this.health + this.stature)];
-        this.leftArmHP = leftArmHPMax;
-        return leftArmHPMax;
-    }
-};
-MML.computeAttribute.leftArmHP = {
-    dependents: [],
-    compute: function() {
-        return this.leftArmHP;
-    }
-};
-MML.computeAttribute.rightArmHPMax = {
-    dependents: ["rightArmHP"],
-    compute: function() {
-        var rightArmHPMax = MML.HPTables[this.race][Math.round(this.health + this.stature)];
-        this.rightArmHP = rightArmHPMax;
-        return rightArmHPMax;
-    }
-};
-MML.computeAttribute.rightArmHP = {
-    dependents: [],
-    compute: function() {
-        return this.rightArmHP;
-    }
-};
-MML.computeAttribute.leftLegHPMax = {
-    dependents: ["leftLegHP"],
-    compute: function() {
-        var leftLegHPMax = MML.HPTables[this.race][Math.round(this.health + this.stature)];
-        this.leftLegHP = leftLegHPMax;
-        return leftLegHPMax;
-    }
-};
-MML.computeAttribute.leftLegHP = {
-    dependents: [],
-    compute: function() {
-        return this.leftLegHP;
-    }
-};
-MML.computeAttribute.rightLegHPMax = {
-    dependents: ["rightLegHP"],
-    compute: function() {
-        var rightLegHPMax = MML.HPTables[this.race][Math.round(this.health + this.stature)];
-        this.rightLegHP = rightLegHPMax;
-        return rightLegHPMax;
-    }
-};
-MML.computeAttribute.rightLegHP = {
-    dependents: [],
-    compute: function() {
-        return this.rightLegHP;
+        return hp;
     }
 };
 MML.computeAttribute.epMax = {
@@ -618,7 +492,10 @@ MML.computeAttribute.inventory = {
             },
             this
         );
-        items.emptyHand = { type: "empty", weight: 0 };
+        items.emptyHand = {
+            type: "empty",
+            weight: 0
+        };
         return items;
     }
 };
@@ -1045,7 +922,15 @@ MML.computeAttribute.statusEffects = {
             this[dependent] = 0;
         }, this);
         _.each(this.statusEffects, function(effect, index) {
-            MML.statusEffects[effect.name].apply(this, [effect, index]);
+            if (effect.name.indexOf("Major Wound") !== -1) {
+                MML.statusEffects["Major Wound"].apply(this, [effect, index]);
+            } else if (effect.name.indexOf("Disabling Wound") !== -1) {
+                MML.statusEffects["Disabling Wound"].apply(this, [effect, index]);
+            } else if (effect.name.indexOf("Mortal Wound") !== -1) {
+                MML.statusEffects["Mortal Wound"].apply(this, [effect, index]);
+            } else {
+                MML.statusEffects[effect.name].apply(this, [effect, index]);
+            }
         }, this);
         return this.statusEffects;
     }

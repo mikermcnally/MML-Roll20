@@ -103,8 +103,15 @@ MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input){
             value: 0
         }
     });
-    this.action = {};
-
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "setApiCharAttribute",
+        input: {
+            attribute: "action",
+            value: {}
+        }
+    });
     MML.processCommand({
         type: "character",
         who: this.name,
@@ -115,8 +122,6 @@ MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input){
         }
     });
 };
-
-
 
 MML.setReady = function setReady(ready){
     if(state.MML.GM.inCombat === true && this.ready === "false"){
@@ -130,57 +135,61 @@ MML.setReady = function setReady(ready){
 
 // Health and Wounds
 MML.alterHP = function alterHP(position, hpAmount){
-    var woundInfo = { bodyPart: MML.hitPositions[position].part, type: "none", duration: -1 };
+    var hpAttribute = this.hp;
+    var bodyPart = MML.hitPositions[this.bodyType][position].bodyPart;
+    var maxHP = this.hpMax[bodyPart];
+    var initialHP = hpAttribute[bodyPart];
+    var currentHP = initialHP + hpAmount;
 
-    if(hpAmount < 0){ //if damage
-        var initialHP = this[woundInfo.bodyPart].current;
-        var currentHP = initialHP + hpAmount;
-        this[woundInfo.bodyPart].current = currentHP;
-        //Wounds
-        if(currentHP < Math.round(this[woundInfo.bodyPart].max/2) && currentHP >= 0){//Major wound
-            woundInfo.type = "major";
-            if(initialHP >= Math.round(this[woundInfo.bodyPart].max/2) && this[woundInfo.bodyPart].wound.major === {}){ //Fresh wound
-                woundInfo.duration = Math.round(this[woundInfo.bodyPart].max/2) - currentHP;
+    if(currentHP > maxHP){
+        currentHP = maxHP;
+    }
+
+    hpAttribute[bodyPart] = currentHP;
+
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        triggeredFunction: "setApiCharAttribute",
+        input: {
+            attribute: "hp",
+            value: hpAttribute
+        }
+    });
+
+    if(currentHP < initialHP){
+        var duration;
+        if(currentHP < Math.round(maxHP/2) && currentHP >= 0){
+            if(!_.has(this.statusEffects, "Major Wound, " + bodyPart)){
+                duration = Math.round(maxHP/2) - currentHP;
             }
-            else{ //Add damage to duration of effect
-                woundInfo.duration = -hpAmount;
+            else{
+                duration = -hpAmount;
+            }
+            MML.majorWoundRoll();
+        }
+
+        else if(currentHP < 0 && currentHP > -maxHP){
+            if(!_.has(this.statusEffects, "Disabling Wound, " + bodyPart)){
+                duration = -currentHP;
+            }
+            else{
+                duration = -hpAmount;
             }
         }
 
-        else if(currentHP < 0 && currentHP > -this[woundInfo.bodyPart].max){//Disabling wound
-            if(this[woundInfo.bodyPart].wound.disabling === {} ){ //Fresh wound
-                woundInfo.type = "disabling";
-                woundInfo.duration = -currentHP;
-
-            }
-            else{ //Add damage to duration of effect
-                woundInfo.type = "disabling";
-                woundInfo.duration = -hpAmount;
-            }
-
-        }
-
-        else if(currentHP < -this[woundInfo.bodyPart].max){//Mortal wound
-            woundInfo.type = "mortal";
+        else if(currentHP < -maxHP){
+            this.statusEffects["Mortal Wound, "  + bodyPart] = { effect: bodyPart };
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                triggeredFunction: "updateCharacter",
+                input: {
+                    attribute: "statusEffects"
+                }
+            });
         }
     }
-    else{ //if healing
-        this[woundInfo.bodyPart].current += hpAmount;
-
-        if(this[woundInfo.bodyPart].current >= -1*this[woundInfo.bodyPart].max){
-            this[woundInfo.bodyPart].wound.mortal = false;
-        }
-        if(this[woundInfo.bodyPart].current >= 0){
-            this[woundInfo.bodyPart].wound.disabling = false;
-        }
-        if(this[woundInfo.bodyPart].current >= Math.round(this[woundInfo.bodyPart].max/2)){
-            this[woundInfo.bodyPart].wound.major = {};
-        }
-        if(this[woundInfo.bodyPart].current > this[woundInfo.bodyPart].max){
-            this[woundInfo.bodyPart].current = this[woundInfo.bodyPart].max;
-        }
-    }
-    return woundInfo;
 };
 
 //
@@ -219,7 +228,6 @@ MML.getMultiWoundRoll = function getMultiWoundRoll(input){
 };
 MML.setMultiWound = function setMultiWound(){
     var current = this.multiWound.max;
-    var woundInfo = { bodyPart: "multiWound", type: "none", duration: -1 };
 
     var i;
     for(i in MML.hitPoints){

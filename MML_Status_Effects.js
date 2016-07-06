@@ -22,7 +22,7 @@ MML.statusEffects = {};
 
 
 MML.statusEffects["Major Wound"] = function(effect, index){
-    if(this[effect.bodyPart] > Math.round(this[effect.bodyPart + "Max"]/2)){
+    if(this.hp[effect.bodyPart] > Math.round(this.hpMax[effect.bodyPart]/2)){
         delete this.statusEffects[index];
     }
     else{
@@ -38,7 +38,7 @@ MML.statusEffects["Major Wound"] = function(effect, index){
     //      }
 };
 MML.statusEffects["Disabling Wound"] = function(effect, index){
-    if(this[effect.bodyPart] > 0){
+    if(this.hp[effect.bodyPart] > 0){
         delete this.statusEffects[index];
     }
     else{
@@ -49,7 +49,7 @@ MML.statusEffects["Disabling Wound"] = function(effect, index){
     }
 };
 MML.statusEffects["Mortal Wound"] = function(effect, index){
-    if(this[effect.bodyPart] <= -this[effect.bodyPart + "Max"]){
+    if(this.hp[effect.bodyPart] <= -this.hpMax[effect.bodyPart]){
         delete this.statusEffects[index];
     }
     else{

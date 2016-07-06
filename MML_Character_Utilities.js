@@ -232,3 +232,25 @@ MML.getCalledShotHitPosition = function getCalledShotHitPosition(character, roll
         return availableHitPositions[rollValue-1];
     }
 };
+
+
+MML.buildHpAttribute = function buildHpAttribute(character) {
+    var hpAttribute;
+    switch (character.bodyType) {
+        case "humanoid":
+            hpAttribute = {
+                "Multiple Wounds": Math.round((character.health + character.stature + character.willpower) / 2),
+                "Head": MML.HPTables[character.race][Math.round(character.health + character.stature / 3)],
+                "Chest": MML.HPTables[character.race][Math.round((character.health + character.stature + character.strength) / 2)],
+                "Abdomen": MML.HPTables[character.race][Math.round(character.health + character.stature)],
+                "Left Arm": MML.HPTables[character.race][Math.round(character.health + character.stature)],
+                "Right Arm": MML.HPTables[character.race][Math.round(character.health + character.stature)],
+                "Left Leg": MML.HPTables[character.race][Math.round(character.health + character.stature)],
+                "Right Leg": MML.HPTables[character.race][Math.round(character.health + character.stature)],
+            };
+            break;
+        default:
+            console.log("Fuck!");
+    }
+    return hpAttribute;
+};

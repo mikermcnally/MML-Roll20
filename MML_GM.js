@@ -42,11 +42,23 @@ MML.startCombat = function startCombat(input) {
         });
     } else {
         sendChat("", "&{template:charMenu} {{name=Error}} {{message=No tokens selected}}");
+
         MML.processCommand({
             type: "player",
             who: this.player,
-            triggeredFunction: "displayMenu",
-            input: {}
+            triggeredFunction: "setApiPlayerAttribute",
+            input: {
+                buttons: [MML.menuButtons.combatMenu]
+            }
+        });
+        MML.processCommand({
+            type: "player",
+            who: this.player,
+            triggeredFunction: "menuCommand",
+            input: {
+                who: this.player,
+                buttonText: "Combat"
+            }
         });
     }
 };

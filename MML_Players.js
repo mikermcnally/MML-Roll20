@@ -98,7 +98,6 @@ MML.GmMenuMain = function GmMenuMain(input) {
     this.who = input.who;
     this.message = "Main Menu: ";
     this.buttons = [MML.menuButtons.combatMenu,
-        MML.menuButtons.newCharacterMenu,
         MML.menuButtons.newItemMenu,
         MML.menuButtons.worldMenu,
         MML.menuButtons.utilitiesMenu
@@ -122,7 +121,7 @@ MML.GmMenuAssignStatusEffect = function GmMenuAssignStatusEffect(input) {
     });
 };
 
-MML.displayPlayerRoll = function rollMenu(input) {
+MML.displayPlayerRoll = function displayPlayerRoll(input) {
     this.who = input.who;
     this.message = this.currentRoll.message;
     this.buttons = [MML.menuButtons.acceptRoll];
@@ -628,6 +627,23 @@ MML.charMenuAttackStance = function charMenuAttackStance(input){
 	this.who = input.who;
 	this.message =  "Attack Stance Menu";
 	var buttons = [{
+		text: "Neutral",
+		triggeredFunction: function(input){
+			MML.displayMenu.apply(this, []);
+		}},
+		{
+		text: "Defensive",
+		triggeredFunction: function(input){
+			state.MML.characters[this.who].action.modifiers.push("Defensive Stance");
+			MML.displayMenu.apply(this, []);
+		}},
+		{
+		text: "Aggressive",
+		triggeredFunction: function(input){
+			state.MML.characters[this.who].action.modifiers.push("Aggressive Stance");
+			MML.displayMenu.apply(this, []);
+		}}
+	];
 
     if(MML.getMeleeWeapon(state.MML.characters[this.who]).secondaryType !== ""){
 		_.each(buttons, function(button){
@@ -641,12 +657,6 @@ MML.charMenuAttackStance = function charMenuAttackStance(input){
 		});
 	}
 	this.buttons = buttons;
-        state.MML.characters[this.who].action.weaponType = "primary";
-        _.each(buttons, function(button) {
-            button.nextMenu = "charMenuInitiativeRoll";
-        });
-    }
-    this.buttons = buttons;
 };
 
 MML.charMenuInitiativeRoll = function charMenuInitiativeRoll(input) {
@@ -741,22 +751,28 @@ MML.charMenuSelectHitPosition = function charMenuSelectHitPosition(input) {
         });
     }, this);
 };
-MML.charMenuSelectDamageType = function charMenuSelectDamageType(input) {
+MML.charMenuSelectDamageType = function charMenuSelectDamageType(input){
     this.who = input.who;
-    this.message = "Choose a Damage Type.";
-    this.buttons = [];
+	this.message =  "Choose a Damage Type.";
+	this.buttons = [];
 
-    this.buttons.push({
-        text: "Primary",
-        nextMenu: "charMenuInitiativeRoll",
-        triggeredFunction: function(input) {
+	this.buttons.push({
+		text: "Primary",
+		nextMenu: "charMenuInitiativeRoll",
+		triggeredFunction: function(input){
             state.MML.characters[this.who].action.weaponType = "primary";
             MML.displayMenu.apply(this, []);
+		}
+	});
+
+	this.buttons.push({
+		text: "Secondary",
 		nextMenu: "charMenuInitiativeRoll",
+		triggeredFunction: function(input){
             state.MML.characters[this.who].action.weaponType = "secondary";
             MML.displayMenu.apply(this, []);
-        }
-    });
+		}
+	});
 };
 MML.charMenuAttackRoll = function charMenuAttackRoll(input) {
     this.who = input.who;

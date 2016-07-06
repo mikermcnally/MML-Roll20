@@ -17,7 +17,7 @@ runTests();
 
 function runTests(){
     test_setup();
-
+    buildHpAttributeHumanoid();
     meleeAttackRoll();
     applyDamage();
     hitPositionRollApply();
@@ -55,6 +55,42 @@ function runTests(){
     // rollHitPosition_humanoid_calledshotSpecific();
 }
 
+function buildHpAttributeHumanoid() {
+    var character = {
+        bodyType: "humanoid",
+        race: "Human",
+        health: 10,
+        stature: 10,
+        willpower: 10,
+        strength: 10
+    };
+
+    try {
+        var result = MML.buildHpAttribute(character);
+        var expected = {
+            "Multiple Wounds": 15,
+            "Head": 7,
+            "Chest": 8,
+            "Abdomen": 10,
+            "Left Arm": 10,
+            "Right Arm": 10,
+            "Left Leg": 10,
+            "Right Leg": 10
+        };
+
+        if (_.isEqual(result, expected)) {
+            console.log("buildHpAttributeHumanoid passed!");
+        } else {
+            console.log("buildHpAttributeHumanoid failed!");
+            console.log(result);
+            console.log(expected);
+        }
+    } catch (error) {
+        console.log("buildHpAttributeHumanoid");
+        console.log(error);
+    }
+}
+
 function meleeAttackRoll() {
     MML.testedFunction = "attackRollResult";
     var target = {
@@ -76,7 +112,7 @@ function meleeAttackRoll() {
     var actor = {
         name: "actor",
         player: "Robot",
-        
+
         statusEffects: {}
     };
 
