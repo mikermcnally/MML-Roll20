@@ -129,7 +129,7 @@ function meleeAttackRoll() {
         var expected = {
             type: "character",
             who: "actor",
-            triggeredFunction: "attackRollResult",
+            callback: "attackRollResult",
             input: {}
         };
 
@@ -268,7 +268,7 @@ function test_setup() {
         MML.processCommand({
             type: "character",
             who: charName,
-            triggeredFunction: "updateCharacter",
+            callback: "updateCharacter",
             input: {
                 attribute: "race"
             }
@@ -1327,7 +1327,7 @@ function attackAction_Melee_Standard_NoCalledshot(){
         character: {},
         parameters: {},
         rolls: {},
-        triggeredFunction: "meleeAttack"
+        callback: "meleeAttack"
     };
 
     try {

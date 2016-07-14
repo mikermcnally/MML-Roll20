@@ -26,7 +26,7 @@ on("ready", function() {
         MML.processCommand({
         	type: "character",
         	who: charName,
-        	triggeredFunction:"updateCharacter",
+        	callback:"updateCharacter",
 			input: {
 		    	attribute: "race"
 		  	}
@@ -42,7 +42,7 @@ on("ready", function() {
             MML.processCommand({
 	        	type: "character",
 	        	who: charName,
-	        	triggeredFunction:"updateCharacter",
+	        	callback:"updateCharacter",
 				input: {
 			    	attribute: "skills"
 			  	}
@@ -52,7 +52,7 @@ on("ready", function() {
             MML.processCommand({
 	        	type: "character",
 	        	who: charName,
-	        	triggeredFunction:"updateCharacter",
+	        	callback:"updateCharacter",
 				input: {
 			    	attribute: "weaponSkills"
 			  	}
@@ -88,7 +88,7 @@ on("ready", function() {
                 MML.processCommand({
 		        	type: "character",
 		        	who: charName,
-		        	triggeredFunction:"moveDistance",
+		        	callback:"moveDistance",
 					input: {
 				    	distance: "distance"
 				  	}
@@ -122,7 +122,7 @@ on("ready", function() {
         MML.processCommand({
         	type: "character",
         	who: newName,
-        	triggeredFunction:"updateCharacter",
+        	callback:"updateCharacter",
 			input: {
 		    	attribute: "name"
 		  	}
@@ -145,7 +145,7 @@ on("ready", function() {
                 MML.processCommand({
 		        	type: "character",
 		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
+		        	callback:"updateCharacter",
 					input: {
 				    	attribute: "stature"
 				  	}
@@ -160,7 +160,7 @@ on("ready", function() {
                 MML.processCommand({
 		        	type: "character",
 		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
+		        	callback:"updateCharacter",
 					input: {
 				    	attribute: "strength"
 				  	}
@@ -175,7 +175,7 @@ on("ready", function() {
                 MML.processCommand({
 		        	type: "character",
 		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
+		        	callback:"updateCharacter",
 					input: {
 				    	attribute: "coordination"
 				  	}
@@ -190,7 +190,7 @@ on("ready", function() {
                 MML.processCommand({
 		        	type: "character",
 		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
+		        	callback:"updateCharacter",
 					input: {
 				    	attribute: "health"
 				  	}
@@ -205,7 +205,7 @@ on("ready", function() {
                 MML.processCommand({
 		        	type: "character",
 		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
+		        	callback:"updateCharacter",
 					input: {
 				    	attribute: "beauty"
 				  	}
@@ -220,7 +220,7 @@ on("ready", function() {
                 MML.processCommand({
 		        	type: "character",
 		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
+		        	callback:"updateCharacter",
 					input: {
 				    	attribute: "intellect"
 				  	}
@@ -235,7 +235,7 @@ on("ready", function() {
                 MML.processCommand({
 		        	type: "character",
 		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
+		        	callback:"updateCharacter",
 					input: {
 				    	attribute: "reason"
 				  	}
@@ -250,7 +250,7 @@ on("ready", function() {
                 MML.processCommand({
 		        	type: "character",
 		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
+		        	callback:"updateCharacter",
 					input: {
 				    	attribute: "creativity"
 				  	}
@@ -265,7 +265,7 @@ on("ready", function() {
                 MML.processCommand({
 		        	type: "character",
 		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
+		        	callback:"updateCharacter",
 					input: {
 				    	attribute: "presence"
 				  	}
@@ -276,7 +276,7 @@ on("ready", function() {
                     MML.processCommand({
 			        	type: "character",
 			        	who: charName,
-			        	triggeredFunction:"updateCharacter",
+			        	callback:"updateCharacter",
 						input: {
 					    	attribute: "inventory"
 					  	}
@@ -286,7 +286,7 @@ on("ready", function() {
                     MML.processCommand({
 			        	type: "character",
 			        	who: charName,
-			        	triggeredFunction:"updateCharacter",
+			        	callback:"updateCharacter",
 						input: {
 					    	attribute: "skills"
 					  	}
@@ -297,7 +297,7 @@ on("ready", function() {
                     MML.processCommand({
 			        	type: "character",
 			        	who: charName,
-			        	triggeredFunction:"updateCharacter",
+			        	callback:"updateCharacter",
 						input: {
 					    	attribute: "weaponSkills"
 					  	}
@@ -308,7 +308,7 @@ on("ready", function() {
                     MML.processCommand({
 			        	type: "character",
 			        	who: charName,
-			        	triggeredFunction:"updateCharacter",
+			        	callback:"updateCharacter",
 						input: {
 					    	attribute: attrName
 					  	}

@@ -127,7 +127,7 @@ MML.updateCharacter = function(input) {
         MML.processCommand({
             type: "character",
             who: this.name,
-            triggeredFunction: "updateCharacter",
+            callback: "updateCharacter",
             input: {
                 attribute: attribute
             }
@@ -140,7 +140,7 @@ MML.setApiCharAttribute = function(input) {
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: "updateCharacter",
+        callback: "updateCharacter",
         input: input
     });
 };
@@ -150,7 +150,7 @@ MML.setApiCharAttributeJSON = function(input) {
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: "updateCharacter",
+        callback: "updateCharacter",
         input: input
     });
 };
@@ -171,7 +171,8 @@ MML.computeAttribute.player = {
 };
 
 MML.computeAttribute.race = {
-    dependents: ["inventory",
+    dependents: [
+        "inventory",
         "stature",
         "strength",
         "coordination",
@@ -231,7 +232,8 @@ MML.computeAttribute.handedness = {
 
 //Primary Attributes
 MML.computeAttribute.stature = {
-    dependents: ["load",
+    dependents: [
+        "load",
         "hpMax",
         "knockdownMax",
         "height",
@@ -242,8 +244,9 @@ MML.computeAttribute.stature = {
     }
 };
 MML.computeAttribute.strength = {
-    dependents: ["fitness",
-    "hpMax",
+    dependents: [
+        "fitness",
+        "hpMax",
         "attributeDefenseMod",
         "attributeMeleeAttackMod",
         "attributeMissileAttackMod",
@@ -256,7 +259,8 @@ MML.computeAttribute.strength = {
     }
 };
 MML.computeAttribute.coordination = {
-    dependents: ["attributeMeleeAttackMod",
+    dependents: [
+        "attributeMeleeAttackMod",
         "attributeMissileAttackMod",
         "attributeDefenseMod",
         "attributeInitBonus",
@@ -268,7 +272,8 @@ MML.computeAttribute.coordination = {
     }
 };
 MML.computeAttribute.health = {
-    dependents: ["willpower",
+    dependents: [
+        "willpower",
         "hpMax",
         "evocation",
         "systemStrength",
@@ -283,7 +288,8 @@ MML.computeAttribute.health = {
     }
 };
 MML.computeAttribute.beauty = {
-    dependents: ["skills",
+    dependents: [
+        "skills",
         "weaponSkills"
     ],
     compute: function() {
@@ -291,7 +297,8 @@ MML.computeAttribute.beauty = {
     }
 };
 MML.computeAttribute.intellect = {
-    dependents: ["perception",
+    dependents: [
+        "perception",
         "evocation",
         "spellLearningMod",
         "skills",
@@ -302,7 +309,8 @@ MML.computeAttribute.intellect = {
     }
 };
 MML.computeAttribute.reason = {
-    dependents: ["perception",
+    dependents: [
+        "perception",
         "evocation",
         "attributeCastingMod",
         "attributeInitBonus",
@@ -314,7 +322,8 @@ MML.computeAttribute.reason = {
     }
 };
 MML.computeAttribute.creativity = {
-    dependents: ["perception",
+    dependents: [
+        "perception",
         "evocation",
         "skills",
         "weaponSkills"
@@ -324,7 +333,8 @@ MML.computeAttribute.creativity = {
     }
 };
 MML.computeAttribute.presence = {
-    dependents: ["willpower",
+    dependents: [
+        "willpower",
         "systemStrength",
         "skills",
         "weaponSkills"
@@ -336,7 +346,8 @@ MML.computeAttribute.presence = {
 
 // Secondary Attributes
 MML.computeAttribute.willpower = {
-    dependents: ["evocation",
+    dependents: [
+        "evocation",
         "hpMax"
     ],
     compute: function() {
@@ -344,7 +355,8 @@ MML.computeAttribute.willpower = {
     }
 };
 MML.computeAttribute.evocation = {
-    dependents: ["epMax",
+    dependents: [
+        "epMax",
         "skills",
         "weaponSkills"
     ], //skill mods
@@ -358,7 +370,8 @@ MML.computeAttribute.evocation = {
     }
 };
 MML.computeAttribute.perception = {
-    dependents: ["missileAttackMod",
+    dependents: [
+        "missileAttackMod",
         "attributeInitBonus",
         "skills",
         "weaponSkills"
@@ -374,7 +387,8 @@ MML.computeAttribute.systemStrength = {
     }
 };
 MML.computeAttribute.fitness = {
-    dependents: ["fitnessMod",
+    dependents: [
+        "fitnessMod",
         "fatigueMax",
         "skills",
         "weaponSkills"
@@ -384,7 +398,8 @@ MML.computeAttribute.fitness = {
     }
 };
 MML.computeAttribute.fitnessMod = {
-    dependents: ["load",
+    dependents: [
+        "load",
         "skills",
         "weaponSkills"
     ], //skill mods
@@ -393,7 +408,8 @@ MML.computeAttribute.fitnessMod = {
     }
 };
 MML.computeAttribute.load = {
-    dependents: ["overhead",
+    dependents: [
+        "overhead",
         "deadLift",
         "meleeDamageMod",
         "movementRatio",
@@ -429,7 +445,7 @@ MML.computeAttribute.hpMax = {
 MML.computeAttribute.hp = {
     dependents: ["statusEffects"],
     compute: function() {
-        return hp;
+        return this.hp;
     }
 };
 MML.computeAttribute.epMax = {
@@ -475,7 +491,8 @@ MML.computeAttribute.epRecovery = {
 
 // Inventory stuff
 MML.computeAttribute.inventory = {
-    dependents: ["totalWeightCarried",
+    dependents: [
+        "totalWeightCarried",
         "apv",
         "leftHand",
         "rightHand",
@@ -500,7 +517,10 @@ MML.computeAttribute.inventory = {
     }
 };
 MML.computeAttribute.totalWeightCarried = {
-    dependents: ["knockdownMax", "movementRatio"],
+    dependents: [
+        "knockdownMax",
+        "movementRatio"
+    ],
     compute: function() {
         var totalWeightCarried = 0;
 
@@ -908,7 +928,8 @@ MML.computeAttribute.fitnessCheckMod = {
     }
 };
 MML.computeAttribute.statusEffects = {
-    dependents: ["situationalInitBonus",
+    dependents: [
+        "situationalInitBonus",
         "situationalMod",
         "missileDefenseMod",
         "meleeDefenseMod",
@@ -1024,7 +1045,8 @@ MML.computeAttribute.attributeInitBonus = {
     }
 };
 MML.computeAttribute.senseInitBonus = {
-    dependents: ["initiative",
+    dependents: [
+        "initiative",
         "attributeCastingMod"
     ],
     compute: function() {
@@ -1106,7 +1128,8 @@ MML.computeAttribute.senseInitBonus = {
     }
 };
 MML.computeAttribute.fomInitBonus = {
-    dependents: ["initiative",
+    dependents: [
+        "initiative",
         "attributeCastingMod"
     ],
     compute: function() {
@@ -1179,7 +1202,8 @@ MML.computeAttribute.ready = {
     }
 };
 MML.computeAttribute.action = {
-    dependents: ["firstActionInitBonus",
+    dependents: [
+        "firstActionInitBonus",
         "actionTempo",
         "statusEffects"
     ],

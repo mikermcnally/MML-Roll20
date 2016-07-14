@@ -270,6 +270,15 @@ generateRowID = function() {
     return generateUUID().replace(/_/g, "Z");
 };
 
+MML.hexify = function hexify(stringIn){
+    var stringOut = "";
+    var i;
+    for (i = 0; i < stringIn.length; i++) {
+        stringOut += ("000" + stringIn.charCodeAt(i).toString(16)).slice(-4);
+    }
+    return stringOut;
+};
+
 MML.dehexify = function dehexify(hexIn) {
     var i;
     var hexes = hexIn.match(/.{1,4}/g) || [];
@@ -325,7 +334,7 @@ MML.rollDamage = function rollDamage(input) {
     MML.processCommand({
         type: "player",
         who: this.player,
-        triggeredFunction: "setApiPlayerAttribute",
+        callback: "setApiPlayerAttribute",
         input: {
             attribute: "currentRoll",
             value: roll
@@ -334,7 +343,7 @@ MML.rollDamage = function rollDamage(input) {
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: input.rollResultFunction,
+        callback: input.rollResultFunction,
         input: {}
     });
 };
@@ -366,7 +375,7 @@ MML.universalRoll = function universalRoll(input) {
     MML.processCommand({
         type: "player",
         who: this.player,
-        triggeredFunction: "setApiPlayerAttribute",
+        callback: "setApiPlayerAttribute",
         input: {
             attribute: "currentRoll",
             value: roll
@@ -375,7 +384,7 @@ MML.universalRoll = function universalRoll(input) {
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: input.rollResultFunction,
+        callback: input.rollResultFunction,
         input: {}
     });
 };
@@ -467,18 +476,10 @@ MML.displayMenu = function displayMenu(input) {
                 who: this.who,
                 buttonText: button.text
             },
-            triggeredFunction: "menuCommand"
+            callback: "menuCommand"
         });
 
-        // JSON strings screw up Command Buttons, convert to hex
-        var hex, i;
-        var result = "";
-        for (i = 0; i < command.length; i++) {
-            result += ("000" + command.charCodeAt(i).toString(16)).slice(-4);
-        }
-
-
-        toChat = toChat + '{{' + noSpace + '=[' + button.text + '](!MML|' + result + ')}} ';
+        toChat = toChat + '{{' + noSpace + '=[' + button.text + '](!MML|' + MML.hexify(command) + ')}} ';
     }, this);
     sendChat(this.name, toChat, null, {
         noarchive: false
@@ -486,14 +487,5 @@ MML.displayMenu = function displayMenu(input) {
 };
 
 MML.displayTargetSelection = function displayTargetSelection(input) {
-    var inputJSON = JSON.stringify(input);
-
-    // JSON strings screw up Command Buttons, convert to hex
-    var hex, i;
-    var result = "";
-    for (i = 0; i < inputJSON.length; i++) {
-        result += ("000" + inputJSON.charCodeAt(i).toString(16)).slice(-4);
-    }
-
-    sendChat("", "&{template:selectTarget} {{charName=" + input.charName + "}} {{input=" + result + "}}");
+    sendChat("", "&{template:selectTarget} {{charName=" + input.charName + "}} {{input=" + MML.hexify(JSON.stringify(input)) + "}}");
 };

@@ -11,7 +11,7 @@ MML.startCombat = function startCombat(input) {
             MML.processCommand({
                 type: "character",
                 who: charName,
-                triggeredFunction: "setApiCharAttribute",
+                callback: "setApiCharAttribute",
                 input: {
                     attribute: "ready",
                     value: false
@@ -20,7 +20,7 @@ MML.startCombat = function startCombat(input) {
             MML.processCommand({
                 type: "character",
                 who: charName,
-                triggeredFunction: "updateCharacter",
+                callback: "updateCharacter",
                 input: {
                     attribute: "initiative"
                 }
@@ -29,7 +29,7 @@ MML.startCombat = function startCombat(input) {
 
         MML.processCommand({
             type: "GM",
-            triggeredFunction: "setTurnOrder",
+            callback: "setTurnOrder",
             input: {}
         });
 
@@ -37,7 +37,7 @@ MML.startCombat = function startCombat(input) {
 
         MML.processCommand({
             type: "GM",
-            triggeredFunction: "newRound",
+            callback: "newRound",
             input: {}
         });
     } else {
@@ -46,7 +46,7 @@ MML.startCombat = function startCombat(input) {
         MML.processCommand({
             type: "player",
             who: this.player,
-            triggeredFunction: "setApiPlayerAttribute",
+            callback: "setApiPlayerAttribute",
             input: {
                 buttons: [MML.menuButtons.combatMenu]
             }
@@ -54,7 +54,7 @@ MML.startCombat = function startCombat(input) {
         MML.processCommand({
             type: "player",
             who: this.player,
-            triggeredFunction: "menuCommand",
+            callback: "menuCommand",
             input: {
                 who: this.player,
                 buttonText: "Combat"
@@ -68,7 +68,7 @@ MML.newRound = function newRound() {
         MML.processCommand({
             type: "character",
             who: charName,
-            triggeredFunction: "newRoundUpdateCharacter",
+            callback: "newRoundUpdateCharacter",
             input: {}
         });
     });
@@ -76,7 +76,7 @@ MML.newRound = function newRound() {
         MML.processCommand({
             type: "player",
             who: player.name,
-            triggeredFunction: "newRoundUpdatePlayer",
+            callback: "newRoundUpdatePlayer",
             input: {
                 who: player.who
             }
@@ -93,7 +93,7 @@ MML.startRound = function startRound() {
             MML.processCommand({
                 type: "character",
                 who: charName,
-                triggeredFunction: "updateCharacter",
+                callback: "updateCharacter",
                 input: {
                     attribute: "initiativeRoll"
                 }
@@ -101,7 +101,7 @@ MML.startRound = function startRound() {
             MML.processCommand({
                 type: "character",
                 who: charName,
-                triggeredFunction: "setApiCharAttribute",
+                callback: "setApiCharAttribute",
                 input: {
                     attribute: "movementAvailable",
                     value: state.MML.characters[charName].movementRatio
@@ -111,7 +111,7 @@ MML.startRound = function startRound() {
 
         MML.processCommand({
             type: "GM",
-            triggeredFunction: "setTurnOrder",
+            callback: "setTurnOrder",
             input: {}
         });
 
@@ -122,7 +122,7 @@ MML.startRound = function startRound() {
             MML.processCommand({
                 type: "player",
                 who: playerName,
-                triggeredFunction: "menuCombatMovement",
+                callback: "menuCombatMovement",
                 input: {
                     who: this.actor
                 }
@@ -130,7 +130,7 @@ MML.startRound = function startRound() {
             MML.processCommand({
                 type: "player",
                 who: playerName,
-                triggeredFunction: "displayMenu",
+                callback: "displayMenu",
                 input: {}
             });
         }
@@ -212,7 +212,7 @@ MML.nextAction = function nextAction() {
 
 MML.getSingleTarget = function getSingleTarget(input) {
     input.charName = this.name;
-    input.triggeredFunction = "setCurrentCharacterTargets";
+    input.callback = "setCurrentCharacterTargets";
     MML.displayTargetSelection(input);
 };
 
@@ -296,7 +296,7 @@ MML.changeRoll = function changeRoll(input) {
     MML.processCommand({
         type: "character",
         who: this.currentRoll.character,
-        triggeredFunction: this.currentRoll.rollResultFunction,
+        callback: this.currentRoll.rollResultFunction,
         input: {}
     });
 };
@@ -306,7 +306,7 @@ MML.assignNewItem = function assignNewItem(input) {
     MML.processCommand({
         type: "character",
         who: input.target,
-        triggeredFunction: "setApiCharAttributeJSON",
+        callback: "setApiCharAttributeJSON",
         input: {
             attribute: "inventory",
             index: generateRowID(),
@@ -318,7 +318,7 @@ MML.assignNewItem = function assignNewItem(input) {
 // var exampleCommand = {
 //   type: "player",
 //   who: state.MML.players[playerName],
-//   triggeredFunction:"menuCommand",
+//   callback:"menuCommand",
 //   input: {
 //     rollResult: "Success"
 //   }
@@ -329,16 +329,16 @@ MML.processCommand = function processCommand(command) {
         switch (command.type) {
             case "character":
                 var character = state.MML.characters[command.who];
-                MML[command.triggeredFunction].apply(character, [command.input]);
+                MML[command.callback].apply(character, [command.input]);
                 state.MML.characters[command.who] = character;
                 break;
             case "player":
                 var player = state.MML.players[command.who];
-                MML[command.triggeredFunction].apply(player, [command.input]);
+                MML[command.callback].apply(player, [command.input]);
                 state.MML.players[command.who] = player;
                 break;
             case "GM":
-                MML[command.triggeredFunction].apply(state.MML.GM, [command.input]);
+                MML[command.callback].apply(state.MML.GM, [command.input]);
                 break;
             default:
                 break;
@@ -382,7 +382,7 @@ MML.parseCommand = function parseCommand(msg) {
             command = {
                 type: "player",
                 who: msg.who.replace(" (GM)", ""),
-                triggeredFunction: input.triggeredFunction,
+                callback: input.callback,
                 input: input
             };
         } else if (content.indexOf("changeRoll") !== -1) {
@@ -392,7 +392,7 @@ MML.parseCommand = function parseCommand(msg) {
                 command = {
                     type: "player",
                     who: state.MML.GM.player,
-                    triggeredFunction: "changeRoll",
+                    callback: "changeRoll",
                     input: {
                         value: value
                     }
@@ -408,7 +408,7 @@ MML.parseCommand = function parseCommand(msg) {
                 command = {
                     type: "character",
                     who: player.who,
-                    triggeredFunction: player.currentRoll.rollResultFunction,
+                    callback: player.currentRoll.rollResultFunction,
                     input: {}
                 };
             }
@@ -420,7 +420,7 @@ MML.parseCommand = function parseCommand(msg) {
             command = {
                 type: "player",
                 who: msg.who.replace(" (GM)", ""),
-                triggeredFunction: "displayItemOptions",
+                callback: "displayItemOptions",
                 input: {
                     who: who,
                     itemId: itemId

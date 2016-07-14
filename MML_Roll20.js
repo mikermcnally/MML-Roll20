@@ -62,7 +62,7 @@ MML.init = function init(){
 // MML.processCommand(data[3]);
 };
 /* jshint -W069 */
-MML.meleeAttackAction = function meleeAttackAction(){
+MML.meleeAttackAction = function meleeAttackAction() {
     var currentAction = state.MML.GM.currentAction;
     var character = currentAction.character;
     var parameters = currentAction.parameters;
@@ -74,78 +74,62 @@ MML.meleeAttackAction = function meleeAttackAction(){
     var dodgeSkill = parameters.dodgeSkill;
     var rolls = currentAction.rolls;
 
-    if(_.isUndefined(rolls.attackRoll)){
+    if (_.isUndefined(rolls.attackRoll)) {
         MML.meleeAttackRoll("attackRoll", character, attackerWeapon.task, attackerSkill);
-    }
-    else if(_.isUndefined(rolls.defenseRoll)){
+    } else if (_.isUndefined(rolls.defenseRoll)) {
         if (rolls.attackRoll === "Critical Success" || rolls.attackRoll === "Success") {
             MML.meleeDefenseRoll(target, targetWeapon);
-        }
-        else if (rolls.attackRoll === "Critical Failure"){
+        } else if (rolls.attackRoll === "Critical Failure") {
+            MML.endAction();
+        } else {
             MML.endAction();
         }
-        else {
-            MML.endAction();
-        }
-    }
-    else if(_.isUndefined(rolls.hitPositionRoll)){
+    } else if (_.isUndefined(rolls.hitPositionRoll)) {
         if (rolls.defenseRoll === "Critical Success" || rolls.defenseRoll === "Success") {
-            MML.endAction(target, targetWeapon);
-        }
-        else if (rolls.defenseRoll === "Critical Failure"){
+            MML.endAction();
+        } else {
             MML.hitPositionRoll();
         }
-        else {
-            MML.hitPositionRoll();
-        }
-    }
-    else if(_.isUndefined(rolls.damageRoll)){
+    } else if (_.isUndefined(rolls.damageRoll)) {
         if (rolls.attackRoll === "Critical Success") {
             MML.meleeDamageRoll(character, attackerWeapon, true);
-        }
-        else {
+        } else {
             MML.meleeDamageRoll(character, attackerWeapon, false);
         }
-    }
-    else if(!_.isUndefined(parameters.wound)){
+    } else if (!_.isUndefined(parameters.wound)) {
         MML.woundRoll();
-    }
-    else if(!_.isUndefined(parameters.multiWound)){
+    } else if (!_.isUndefined(parameters.multiWound)) {
         MML.multiWoundRoll();
-    }
-    else if(!_.isUndefined(parameters.sensitiveArea)){
+    } else if (!_.isUndefined(parameters.sensitiveArea)) {
         MML.sensitiveAreaRoll();
-    }
-    else if(!_.isUndefined(parameters.knockDown)){
+    } else if (!_.isUndefined(parameters.knockDown)) {
         MML.knockdownRoll();
-    }
-    else {
-      MML.endAction();
+    } else {
+        MML.endAction();
     }
 };
 /* jshint -W069 */
 //Combat Functions
-MML.displayMovement = function displayMovement(input){
-    if(input.display){
-        MML.getTokenFromChar(this.name).set("aura1_radius", MML.movementRates[this.race][this.movementPosition]*this.movementAvailable);
+MML.displayMovement = function displayMovement(input) {
+    if (input.display) {
+        MML.getTokenFromChar(this.name).set("aura1_radius", MML.movementRates[this.race][this.movementPosition] * this.movementAvailable);
         MML.getTokenFromChar(this.name).set("aura1_color", "#00FF00");
-    }
-    else{
+    } else {
         MML.getTokenFromChar(this.name).set("aura1_color", "transparent");
     }
 };
 
-MML.moveDistance = function moveDistance(distance){
-    this.movementAvailable -= (distance)/(MML.movementRates[this.race][this.movementPosition]);
+MML.moveDistance = function moveDistance(distance) {
+    this.movementAvailable -= (distance) / (MML.movementRates[this.race][this.movementPosition]);
     MML.displayMovement.apply(this, [true]);
 };
 
-MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input){
-    if (_.has(this.statusEffects, "Melee This Round")){
+MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input) {
+    if (_.has(this.statusEffects, "Melee This Round")) {
         MML.processCommand({
             type: "character",
             who: this.name,
-            triggeredFunction: "setApiCharAttribute",
+            callback: "setApiCharAttribute",
             input: {
                 attribute: "roundsExertion",
                 value: this.roundsExertion + 1
@@ -154,54 +138,52 @@ MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input){
         MML.processCommand({
             type: "character",
             who: this.name,
-            triggeredFunction: "setApiCharAttribute",
+            callback: "setApiCharAttribute",
             input: {
                 attribute: "roundsRest",
                 value: 0
             }
         });
 
-        if (this.fatigueLevel < 1){
-            if (this.roundsExertion > this.fitness){
+        if (this.fatigueLevel < 1) {
+            if (this.roundsExertion > this.fitness) {
                 MML.processCommand({
                     type: "character",
                     who: this.name,
-                    triggeredFunction: "fatigueCheckRoll",
+                    callback: "fatigueCheckRoll",
                     input: {
                         modifier: 0
                     }
                 });
             }
-        }
-        else {
-            if (this.roundsExertion > Math.round(this.fitness/2)){
+        } else {
+            if (this.roundsExertion > Math.round(this.fitness / 2)) {
                 MML.processCommand({
                     type: "character",
                     who: this.name,
-                    triggeredFunction: "fatigueCheckRoll",
+                    callback: "fatigueCheckRoll",
                     input: {
                         modifier: -4
                     }
                 });
             }
         }
-    }
-    else if (this.fatigueLevel > 0){
+    } else if (this.fatigueLevel > 0) {
         MML.processCommand({
             type: "character",
             who: this.name,
-            triggeredFunction: "setApiCharAttribute",
+            callback: "setApiCharAttribute",
             input: {
                 attribute: "roundsRest",
                 value: this.roundsRest + 1
             }
         });
 
-        if (this.roundsRest >= 6){
+        if (this.roundsRest >= 6) {
             MML.processCommand({
                 type: "character",
                 who: this.name,
-                triggeredFunction: "fatigueRecoveryRoll",
+                callback: "fatigueRecoveryRoll",
                 input: {
                     modifier: 0
                 }
@@ -213,7 +195,7 @@ MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input){
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: "setApiCharAttribute",
+        callback: "setApiCharAttribute",
         input: {
             attribute: "knockdown",
             value: this.knockdownMax
@@ -222,25 +204,18 @@ MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input){
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: "setApiCharAttribute",
+        callback: "setApiCharAttribute",
         input: {
             attribute: "spentInitiative",
             value: 0
         }
     });
+    this.action = {};
+
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: "setApiCharAttribute",
-        input: {
-            attribute: "action",
-            value: {}
-        }
-    });
-    MML.processCommand({
-        type: "character",
-        who: this.name,
-        triggeredFunction: "setApiCharAttribute",
+        callback: "setApiCharAttribute",
         input: {
             attribute: "ready",
             value: false
@@ -248,301 +223,244 @@ MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input){
     });
 };
 
-MML.setReady = function setReady(ready){
-    if(state.MML.GM.inCombat === true && this.ready === "false"){
+
+
+MML.setReady = function setReady(ready) {
+    if (state.MML.GM.inCombat === true && this.ready === "false") {
         MML.getTokenFromChar(this.name).set("tint_color", "#FF0000");
-    }
-    else{
+    } else {
         MML.getTokenFromChar(this.name).set("tint_color", "transparent");
     }
     return this.ready;
 };
 
 // Health and Wounds
-MML.alterHP = function alterHP(position, hpAmount){
-    var hpAttribute = MML.hitPositions[this.bodyType][position].hp;
+MML.alterHP = function alterHP(position, hpAmount) {
+    var woundInfo = {
+        bodyPart: MML.hitPositions[position].part,
+        type: "none",
+        duration: -1
+    };
 
-    if(hpAmount < 0){ //if damage
-        var initialHP = this[hpAttribute].current;
+    if (hpAmount < 0) { //if damage
+        var initialHP = this[woundInfo.bodyPart].current;
         var currentHP = initialHP + hpAmount;
-        this[hpAttribute].current = currentHP;
+        this[woundInfo.bodyPart].current = currentHP;
         //Wounds
-        if(currentHP < Math.round(this[hpAttribute].max/2) && currentHP >= 0){//Major wound
+        if (currentHP < Math.round(this[woundInfo.bodyPart].max / 2) && currentHP >= 0) { //Major wound
             woundInfo.type = "major";
-            if(initialHP >= Math.round(this[hpAttribute].max/2) && this[hpAttribute].wound.major === {}){ //Fresh wound
-                woundInfo.duration = Math.round(this[hpAttribute].max/2) - currentHP;
-            }
-            else{ //Add damage to duration of effect
+            if (initialHP >= Math.round(this[woundInfo.bodyPart].max / 2) && this[woundInfo.bodyPart].wound.major === {}) { //Fresh wound
+                woundInfo.duration = Math.round(this[woundInfo.bodyPart].max / 2) - currentHP;
+            } else { //Add damage to duration of effect
                 woundInfo.duration = -hpAmount;
             }
-        }
-
-        else if(currentHP < 0 && currentHP > -this[hpAttribute].max){//Disabling wound
-            if(this[hpAttribute].wound.disabling === {} ){ //Fresh wound
+        } else if (currentHP < 0 && currentHP > -this[woundInfo.bodyPart].max) { //Disabling wound
+            if (this[woundInfo.bodyPart].wound.disabling === {}) { //Fresh wound
                 woundInfo.type = "disabling";
                 woundInfo.duration = -currentHP;
 
-            }
-            else{ //Add damage to duration of effect
+            } else { //Add damage to duration of effect
                 woundInfo.type = "disabling";
                 woundInfo.duration = -hpAmount;
             }
 
-        }
-
-        else if(currentHP < -this[hpAttribute].max){//Mortal wound
+        } else if (currentHP < -this[woundInfo.bodyPart].max) { //Mortal wound
             woundInfo.type = "mortal";
         }
-    }
-    else{ //if healing
-        this[hpAttribute].current += hpAmount;
+    } else { //if healing
+        this[woundInfo.bodyPart].current += hpAmount;
 
-        if(this[hpAttribute].current >= -1*this[hpAttribute].max){
-            this[hpAttribute].wound.mortal = false;
+        if (this[woundInfo.bodyPart].current >= -1 * this[woundInfo.bodyPart].max) {
+            this[woundInfo.bodyPart].wound.mortal = false;
         }
-        if(this[hpAttribute].current >= 0){
-            this[hpAttribute].wound.disabling = false;
+        if (this[woundInfo.bodyPart].current >= 0) {
+            this[woundInfo.bodyPart].wound.disabling = false;
         }
-        if(this[hpAttribute].current >= Math.round(this[hpAttribute].max/2)){
-            this[hpAttribute].wound.major = {};
+        if (this[woundInfo.bodyPart].current >= Math.round(this[woundInfo.bodyPart].max / 2)) {
+            this[woundInfo.bodyPart].wound.major = {};
         }
-        if(this[hpAttribute].current > this[hpAttribute].max){
-            this[hpAttribute].current = this[hpAttribute].max;
+        if (this[woundInfo.bodyPart].current > this[woundInfo.bodyPart].max) {
+            this[woundInfo.bodyPart].current = this[woundInfo.bodyPart].max;
         }
     }
     return woundInfo;
 };
 
-//
-MML.getMultiWoundRoll = function getMultiWoundRoll(input){
-	switch(input){
-		case "entry":
-			this.rolls.multiWound = this.characters[this.currentTarget].setMultiWound();
-			if(this.rolls.multiWound.type === "none"){
-				this.rollIndex = "end";
-				this.menu = MML.performAction;
-				this.menu();
-			}
-			else{
-				this.displayMenu(this.characters[this.currentTarget].name + " suffers wound fatigue.", ["Multiple Wounds Roll"]);
-			}
-		break;
-		case "Multiple Wounds Roll":
-			this.currentRoll = this.currentTarget.attributeCheckRoll("systemStrength", [0]);
-			this.displayRoll();
-		break;
-		case "result":
-			this.rolls.multiWound.result = this.currentRoll.result;
+MML.setMultiWound = function setMultiWound() {
+    var currentHP = this.hp;
+    currentHP.multiWound = this.hpMax.multiwound;
 
-			if(this.rolls.multiWound.result === "Success" || this.rolls.multiWound.result === "Critical Success"){
-				//this.characters[this.currentTarget].statusEffects.push(MML.woundFatigue);
-				this.characters[this.currentTarget].multiWound.wound = true;
-			}
-
-			this.rollIndex = "end";
-			this.menu = MML.performAction;
-			this.menu();
-		break;
-		default:
-		break;
-	}
-};
-MML.setMultiWound = function setMultiWound(){
-    var current = this.multiWound.max;
-
-    var i;
-    for(i in MML.hitPoints){
-        if(MML.hitPoints[i].name !== "multiWound"){
-            if(this[MML.hitPoints[i].name].current >= Math.round(this[MML.hitPoints[i].name].max/2)){ //Only minor wounds apply
-                current -= this[MML.hitPoints[i].name].max - this[MML.hitPoints[i].name].current;
-            }
-            else{
-                current -= this[MML.hitPoints[i].name].max - Math.round(this[MML.hitPoints[i].name].max/2);
-            }
+    _.each(MML.getBodyParts(this), function(bodyPart) {
+        if (currentHP[bodyPart] >= Math.round(this.hpMax[bodyPart] / 2)) { //Only minor wounds apply
+            currentHP.multiWound -= this.hpMax[bodyPart] - currentHP[bodyPart];
+        } else {
+            currentHP.multiWound -= this.hpMax[bodyPart] - Math.round(this.hpMax[bodyPart] / 2);
         }
-    }
+    });
 
-    if(this.multiWound.current < 0 && this.multiWound.wound === false){
-        woundInfo.type = "multiWound";
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        callback: "setApiCharAttribute",
+        input: {
+            attribute: "hp",
+            value: currentHP
+        }
+    });
+
+    if (!_.has(this.statusEffects, "Wound Fatigue")) {
+        MML.multiWoundRoll();
     }
-    else if(this.multiWound.current >= 0){
-        this.multiWound.wound = false;
-    }
-    this.multiWound.current = current;
-    return woundInfo;
 };
 
-MML.getWoundRoll = function getWoundRoll(input){
-	switch(input){
-		case "entry":
-			this.rolls.wound = this.characters[this.currentTarget].alterHP(this.rolls.hitPosition, this.rolls.damage, this.rolls.damage.type);
-			if(this.rolls.wound.type === "none"){
-				this.rollIndex = "getMultiWoundRoll";
-				this.menu = MML.performAction;
-				this.menu();
-			}
-			else{
-				this.displayMenu(this.characters[this.currentTarget].name + " suffered a " + this.rolls.wound.type + " wound.", ["Wound Roll"]);
-			}
-		break;
-		case "Wound Roll":
-			this.currentRoll = this.characters[this.currentTarget].woundRoll(this.rolls.wound);
-			this.displayRoll();
-		break;
-		case "result":
-			this.rolls.wound = this.currentRoll;
-			switch(this.rolls.wound.type){
-				case "major":
-					if(this.rolls.wound.result === "Failure"){
-						this.characters[this.currentTarget][this.rolls.wound.bodyPart].wound.major.duration += this.rolls.wound.duration;
-					}
-				break;
-				case "disabling":
-					this.characters[this.currentTarget][this.rolls.wound.bodyPart].wound.disabling = true;
-
-					if(this.rolls.wound.result === "Failure" ){
-						this.characters[this.currentTarget].stun.duration += this.rolls.wound.duration;
-					}
-				break;
-				case "mortal":
-					this.characters[this.currentTarget][this.rolls.wound.bodyPart].wound.mortal = true;
-				break;
-			}
-			this.rollIndex = "getMultiWoundRoll";
-			this.menu = MML.performAction;
-			this.menu();
-		break;
-		default:
-		break;
-	}
+MML.multiWoundRoll = function getMultiWoundRoll(input) {
+    var roll = attributeCheckRoll("systemStrength", [0]);
 };
 
-MML.woundRoll = function woundRoll(woundInfo){
+MML.multiWoundRollResult = function getMultiWoundRoll(input) {
+    var roll = attributeCheckRoll("systemStrength", [0]);
+};
+
+MML.multiWoundRoll = function getMultiWoundRoll(input) {
+    var roll = attributeCheckRoll("systemStrength", [0]);
+};
+
+MML.majorWoundRoll = function majorWoundRoll(input) {
+    roll = this.attributeCheckRoll("willpower", [0]);
+};
+
+MML.majorWoundRollResult = function majorWoundRollResult(input) {
     var roll;
 
-    switch(woundInfo.type){
-        case "major":
-            roll = this.attributeCheckRoll("willpower", [0]);
-            roll.title = this.name + "'s major wound willpower save";
-            break;
-        case "disabling":
-            roll = this.attributeCheckRoll("systemStrength", [0]);
-            roll.title = this.name + "'s disabling wound system strength save";
-            break;
-        case "mortal":
-            roll = this.attributeCheckRoll("systemStrength", [0]);
-            roll.title = this.name + "'s mortal wound system strength save";
-            break;
-        case "multiWound":
-            roll = this.attributeCheckRoll("willpower", [0]);
-            roll.title = this.name + "'s wound fatigue willpower save";
-            break;
-        default:
-        break;
-    }
-    woundInfo.name = roll.name;
-    woundInfo.result = roll.result;
-    woundInfo.target = roll.target;
-    woundInfo.range = roll.range;
-    woundInfo = roll;
-    return woundInfo;
 };
 
-MML.checkKnockdown = function checkKnockdown(damage){
-    if (this.movementPosition !== "Prone"){
+MML.majorWoundRollApply = function majorWoundRollApply() {
+    if (this.rolls.result === "Failure") {
+        var message = this.name + " suffered a major wound to their " + bodyPart;
+        this.characters[this.currentTarget][this.rolls.wound.bodyPart].wound.major.duration += this.rolls.wound.duration;
+    }
+};
+
+
+MML.disablingWoundRoll = function disablingWoundRoll(input) {
+    roll = this.attributeCheckRoll("systemStrength", [0]);
+};
+
+MML.disablingWoundRollResult = function disablingWoundRollResult(woundInfo) {
+
+};
+
+MML.disablingWoundRollApply = function disablingWoundRollApply() {
+    this.characters[this.currentTarget][this.rolls.wound.bodyPart].wound.disabling = true;
+
+    if (this.rolls.wound.result === "Failure") {
+        this.characters[this.currentTarget].stun.duration += this.rolls.wound.duration;
+    }
+};
+
+MML.mortalWoundRoll = function mortalWoundRoll(input) {
+    var roll = this.attributeCheckRoll("systemStrength", [0]);
+};
+
+MML.mortalWoundRollResult = function mortalWoundRollResult(woundInfo) {
+    var roll;
+};
+
+MML.mortalWoundRollApply = function mortalWoundRollApply() {
+
+};
+
+MML.checkKnockdown = function checkKnockdown(damage) {
+    if (this.movementPosition !== "Prone") {
         this.knockdown += damage;
         this.updateCharacter("knockdown");
     }
 };
 
-MML.knockdownRoll = function knockdownRoll(){
+MML.knockdownRoll = function knockdownRoll() {
     var roll;
 
-    if(_.has(this.statusEffects, "Stumbling")){
+    if (_.has(this.statusEffects, "Stumbling")) {
         //victim saved first knockdown check, harder to save 2nd time
         roll = MML.attributeCheckRoll(this, ["systemStrength", [-5]]);
-    }
-    else{
+    } else {
         roll = MML.attributeCheckRoll(this, ["systemStrength", [0]]);
     }
     return roll;
 };
-MML.getKnockdownRoll = function getKnockdownRoll(input){
-	switch(input){
-		case "entry":
-			if(this.characters[this.currentTarget].checkKnockdown()){
-				this.displayMenu(this.characters[this.currentTarget].name, ["Roll Knockdown"]);
-			}
-			else{
-				this.rollIndex = "getSensitiveAreaRoll";
-				this.menu = MML.performAction;
-				this.menu();
-			}
-		break;
-		case "Roll Knockdown":
-			this.currentRoll = this.characters[this.currentTarget].knockdownRoll();
-			this.displayRoll();
-		break;
-		case "result":
-			this.rolls.knockdown = this.currentRoll.result;
-			if(this.rolls.knockdown === "Critical Success" || this.rolls.knockdown === "Success"){
-				this.stumble = 1;
-			}
-			else{
-				sendChat("Game", this.characters[this.currentTarget].name + " is knocked to the ground");
-				this.characters[this.currentTarget].currentMotion = "prone";
-				this.characters[this.currentTarget].knockdown.current = this.characters[this.currentTarget].knockdown.max;
-			}
-			this.rollIndex = "getSensitiveAreaRoll";
-			this.menu = MML.performAction;
-			this.menu();
-		break;
-		default:
-		break;
-	}
+MML.getKnockdownRoll = function getKnockdownRoll(input) {
+    switch (input) {
+        case "entry":
+            if (this.characters[this.currentTarget].checkKnockdown()) {
+                this.displayMenu(this.characters[this.currentTarget].name, ["Roll Knockdown"]);
+            } else {
+                this.rollIndex = "getSensitiveAreaRoll";
+                this.menu = MML.performAction;
+                this.menu();
+            }
+            break;
+        case "Roll Knockdown":
+            this.currentRoll = this.characters[this.currentTarget].knockdownRoll();
+            this.displayRoll();
+            break;
+        case "result":
+            this.rolls.knockdown = this.currentRoll.result;
+            if (this.rolls.knockdown === "Critical Success" || this.rolls.knockdown === "Success") {
+                this.stumble = 1;
+            } else {
+                sendChat("Game", this.characters[this.currentTarget].name + " is knocked to the ground");
+                this.characters[this.currentTarget].currentMotion = "prone";
+                this.characters[this.currentTarget].knockdown.current = this.characters[this.currentTarget].knockdown.max;
+            }
+            this.rollIndex = "getSensitiveAreaRoll";
+            this.menu = MML.performAction;
+            this.menu();
+            break;
+        default:
+            break;
+    }
 };
 
-MML.sensitiveAreaRoll = function sensitiveAreaCheck(){
+MML.sensitiveAreaRoll = function sensitiveAreaCheck() {
     var roll = this.attributeCheckRoll("willpower", [0]);
     return roll;
 };
-MML.getSensitiveAreaRoll = function getSensitiveAreaRoll(input){
-	switch(input){
-		case "entry":
-			if(this.characters[this.currentTarget].isSensitiveArea(this.rolls.hitPosition)){
-				this.displayMenu(this.characters[this.currentTarget].name + " was hit in a sensitive area.", ["Sensitive Area Roll"]);
-			}
-			else{
-				this.rollIndex = "getWoundRoll";
-				this.menu = MML.performAction;
-				this.menu();
-			}
-		break;
-		case "Sensitive Area Roll":
-			this.currentRoll = this.characters[this.currentTarget].sensitiveAreaRoll();
-			this.displayRoll();
-		break;
-		case "result":
-			this.rolls.sensitiveArea = this.currentRoll.result;
-			if(this.rolls.sensitiveArea !== "Critical Success" || this.rolls.sensitiveArea !== "Success"){
-				sendChat("", this.characters[this.currentTarget].name + " is in pain!");
-				this.characters[this.currentTarget].sensitive = 1;
-			}
-			this.rollIndex = "getWoundRoll";
-			this.menu = MML.performAction;
-			this.menu();
-		break;
-		default:
-		break;
-	}
+MML.getSensitiveAreaRoll = function getSensitiveAreaRoll(input) {
+    switch (input) {
+        case "entry":
+            if (this.characters[this.currentTarget].isSensitiveArea(this.rolls.hitPosition)) {
+                this.displayMenu(this.characters[this.currentTarget].name + " was hit in a sensitive area.", ["Sensitive Area Roll"]);
+            } else {
+                this.rollIndex = "getWoundRoll";
+                this.menu = MML.performAction;
+                this.menu();
+            }
+            break;
+        case "Sensitive Area Roll":
+            this.currentRoll = this.characters[this.currentTarget].sensitiveAreaRoll();
+            this.displayRoll();
+            break;
+        case "result":
+            this.rolls.sensitiveArea = this.currentRoll.result;
+            if (this.rolls.sensitiveArea !== "Critical Success" || this.rolls.sensitiveArea !== "Success") {
+                sendChat("", this.characters[this.currentTarget].name + " is in pain!");
+                this.characters[this.currentTarget].sensitive = 1;
+            }
+            this.rollIndex = "getWoundRoll";
+            this.menu = MML.performAction;
+            this.menu();
+            break;
+        default:
+            break;
+    }
 };
 
-MML.fatigueCheckRoll = function fatigueCheckRoll (modifier){
-    if (MML.attributeCheckRoll(charName, "fitness", [modifier])){
+MML.fatigueCheckRoll = function fatigueCheckRoll(modifier) {
+    if (MML.attributeCheckRoll(charName, "fitness", [modifier])) {
         MML.processCommand({
             type: "character",
             who: this.name,
-            triggeredFunction: "setApiCharAttribute",
+            callback: "setApiCharAttribute",
             input: {
                 attribute: "fatigueLevel",
                 value: this.fatigueLevel + 1
@@ -551,7 +469,7 @@ MML.fatigueCheckRoll = function fatigueCheckRoll (modifier){
         MML.processCommand({
             type: "character",
             who: this.name,
-            triggeredFunction: "setApiCharAttribute",
+            callback: "setApiCharAttribute",
             input: {
                 attribute: "roundsExertion",
                 value: 0
@@ -560,12 +478,12 @@ MML.fatigueCheckRoll = function fatigueCheckRoll (modifier){
     }
 };
 
-MML.fatigueRecoveryRoll = function fatigueRecoveryRoll (modifier){
+MML.fatigueRecoveryRoll = function fatigueRecoveryRoll(modifier) {
     this.attributeCheckRoll("health", [modifier]);
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: "setApiCharAttribute",
+        callback: "setApiCharAttribute",
         input: {
             attribute: "roundsRest",
             value: 0
@@ -576,7 +494,7 @@ MML.fatigueRecoveryRoll = function fatigueRecoveryRoll (modifier){
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: "setApiCharAttribute",
+        callback: "setApiCharAttribute",
         input: {
             attribute: "fatigueLevel",
             value: this.fatigueLevel - 1
@@ -585,7 +503,7 @@ MML.fatigueRecoveryRoll = function fatigueRecoveryRoll (modifier){
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: "setApiCharAttribute",
+        callback: "setApiCharAttribute",
         input: {
             attribute: "roundsExertion",
             value: 0
@@ -600,29 +518,29 @@ MML.armorDamageReduction = function armorDamageReduction(position, damage, type)
 
     // Iterates over apv values at given position (accounting for partial coverage)
     var apv;
-    for (apv in this.apv[position][type]){
-        if (damageApplied === false){
+    for (apv in this.apv[position][type]) {
+        if (damageApplied === false) {
             if (coverageRoll <= this.apv[position][type][apv].coverage) { //if coverage roll is less than apv coverage
                 damageDeflected = this.apv[position][type][apv];
 
                 //If all damage is deflected, do blunt trauma. Modifies damage variable for next if statement
-                if (damage + damageDeflected >= 0){
+                if (damage + damageDeflected >= 0) {
                     //If surface, cut, or pierce, cut in half and apply as impact
-                    if (type === "Surface" || type === "Cut" || type === "Pierce"){
-                        damage = Math.ceil(damage/2);
+                    if (type === "Surface" || type === "Cut" || type === "Pierce") {
+                        damage = Math.ceil(damage / 2);
                         damageDeflected = this.apv[position].Impact[apv];
 
-                        if (damage + damageDeflected >= 0){
+                        if (damage + damageDeflected >= 0) {
                             damageDeflected = -damage;
                             damage = 0;
                         }
                     }
                     //If chop, or thrust, apply 3/4 as impact
-                    else if (type === "Chop" || type === "Thrust"){
-                        damage = Math.ceil(damage*0.75);
+                    else if (type === "Chop" || type === "Thrust") {
+                        damage = Math.ceil(damage * 0.75);
                         damageDeflected = this.apv[position].Impact[apv];
 
-                        if (damage + damageDeflected >= 0){
+                        if (damage + damageDeflected >= 0) {
                             damageDeflected = -damage;
                             damage = 0;
                         }
@@ -635,7 +553,7 @@ MML.armorDamageReduction = function armorDamageReduction(position, damage, type)
                 }
 
                 // if damage gets through, subtract amount deflected by armor
-                if (damage < 0){
+                if (damage < 0) {
                     damage += damageDeflected;
                 }
                 damageApplied = true;
@@ -645,13 +563,13 @@ MML.armorDamageReduction = function armorDamageReduction(position, damage, type)
     return damage;
 };
 
-MML.initiativeRoll = function initiativeRoll(input){
+MML.initiativeRoll = function initiativeRoll(input) {
     var rollValue = MML.rollDice(1, 10);
 
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: "updateCharacter",
+        callback: "updateCharacter",
         input: {
             attribute: "action"
         }
@@ -659,7 +577,7 @@ MML.initiativeRoll = function initiativeRoll(input){
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: "setApiCharAttribute",
+        callback: "setApiCharAttribute",
         input: {
             attribute: "ready",
             value: true
@@ -669,7 +587,7 @@ MML.initiativeRoll = function initiativeRoll(input){
     MML.processCommand({
         type: "player",
         who: this.player,
-        triggeredFunction: "setApiPlayerAttribute",
+        callback: "setApiPlayerAttribute",
         input: {
             attribute: "currentRoll",
             value: {
@@ -686,12 +604,12 @@ MML.initiativeRoll = function initiativeRoll(input){
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: "initiativeResult",
+        callback: "initiativeResult",
         input: {}
     });
 };
 
-MML.initiativeResult = function initiativeResult(input){
+MML.initiativeResult = function initiativeResult(input) {
     var currentRoll = state.MML.players[this.player].currentRoll;
 
     currentRoll.rollResult =
@@ -709,49 +627,47 @@ MML.initiativeResult = function initiativeResult(input){
         "\nResult: " + currentRoll.rollResult +
         "\nRange: " + currentRoll.range;
 
-    if(this.player === state.MML.GM.player){
-        if(currentRoll.accepted === false){
+    if (this.player === state.MML.GM.player) {
+        if (currentRoll.accepted === false) {
             MML.processCommand({
                 type: "player",
                 who: this.player,
-                triggeredFunction: "displayGmRoll",
+                callback: "displayGmRoll",
                 input: {
                     currentRoll: currentRoll
                 }
             });
-        }
-        else{
+        } else {
             MML.processCommand({
                 type: "character",
                 who: this.name,
-                triggeredFunction: "initiativeApply",
+                callback: "initiativeApply",
                 input: {}
             });
         }
-    }
-    else{
+    } else {
         MML.processCommand({
             type: "player",
             who: this.player,
-            triggeredFunction: "displayPlayerRoll",
+            callback: "displayPlayerRoll",
             input: {
-                    currentRoll: currentRoll
-                }
+                currentRoll: currentRoll
+            }
         });
         MML.processCommand({
             type: "character",
             who: this.name,
-            triggeredFunction: "initiativeApply",
+            callback: "initiativeApply",
             input: {}
         });
     }
 };
 
-MML.initiativeApply = function initiativeApply(){
+MML.initiativeApply = function initiativeApply() {
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: "setApiCharAttribute",
+        callback: "setApiCharAttribute",
         input: {
             attribute: "initiativeRoll",
             value: state.MML.players[this.player].currentRoll.value
@@ -761,40 +677,39 @@ MML.initiativeApply = function initiativeApply(){
     MML.processCommand({
         type: "player",
         who: this.player,
-        triggeredFunction: "prepareNextCharacter",
+        callback: "prepareNextCharacter",
         input: {}
     });
 };
 
-MML.startAction = function startAction(input){
+MML.startAction = function startAction(input) {
     state.MML.GM.currentAction = {
         who: this.name
     };
 
-    if(!_.isUndefined(this.action.getTargets)){
+    if (!_.isUndefined(this.action.getTargets)) {
         MML.processCommand({
             type: "character",
             who: this.name,
-            triggeredFunction: this.action.getTargets,
+            callback: this.action.getTargets,
             input: {}
         });
-    }
-    else{
+    } else {
         MML.processCommand({
             type: "character",
             who: this.name,
-            triggeredFunction: this.action.triggeredFunction,
+            callback: this.action.callback,
             input: {}
         });
     }
 };
 
-MML.startAttackAction = function startAttackAction(input){
-    if(_.has(this.statusEffects, "Called Shot")){
+MML.startAttackAction = function startAttackAction(input) {
+    if (_.has(this.statusEffects, "Called Shot")) {
         MML.processCommand({
             type: "player",
             who: this.player,
-            triggeredFunction: "charMenuSelectBodyPart",
+            callback: "charMenuSelectBodyPart",
             input: {
                 who: this.name,
             }
@@ -802,15 +717,14 @@ MML.startAttackAction = function startAttackAction(input){
         MML.processCommand({
             type: "player",
             who: this.player,
-            triggeredFunction: "displayMenu",
+            callback: "displayMenu",
             input: {}
         });
-    }
-    else if(_.has(this.statusEffects, "Called Shot Specific")){
+    } else if (_.has(this.statusEffects, "Called Shot Specific")) {
         MML.processCommand({
             type: "player",
             who: this.player,
-            triggeredFunction: "charMenuSelectHitPosition",
+            callback: "charMenuSelectHitPosition",
             input: {
                 who: this.name,
             }
@@ -818,89 +732,85 @@ MML.startAttackAction = function startAttackAction(input){
         MML.processCommand({
             type: "player",
             who: this.player,
-            triggeredFunction: "displayMenu",
+            callback: "displayMenu",
             input: {}
         });
-    }
-    else if(_.contains(this.action.modifiers, ["Aim"])){
-        if(_.has(this.statusEffects, "Taking Aim")){
+    } else if (_.contains(this.action.modifiers, ["Aim"])) {
+        if (_.has(this.statusEffects, "Taking Aim")) {
             this.statusEffects["Taking Aim"].level++;
+        } else {
+            this.statusEffects["Taking Aim"] = {
+                name: "Taking Aim",
+                level: 1,
+                target: input.target
+            };
         }
-        else{
-            this.statusEffects["Taking Aim"] = { name: "Taking Aim", level: 1, target: input.target };
-        }
-    }
-    else{
+    } else {
         MML.processCommand({
             type: "character",
             who: this.name,
-            triggeredFunction: "processAttack",
+            callback: "processAttack",
             input: {}
         });
     }
 };
 
-MML.processAttack = function processAttack(input){
+MML.processAttack = function processAttack(input) {
     this.statusEffects["Melee This Round"] = {};
 
-    if(MML.isUnarmed(this)){
+    if (MML.isUnarmed(this)) {
         MML.processCommand({
             type: "character",
             who: this.name,
-            triggeredFunction: "unarmedAttack",
+            callback: "unarmedAttack",
             input: {}
         });
-    }
-    else if(MML.isDualWielding(this)){
+    } else if (MML.isDualWielding(this)) {
         MML.processCommand({
             type: "character",
             who: this.name,
-            triggeredFunction: "dualWieldAttack",
+            callback: "dualWieldAttack",
             input: {}
         });
-    }
-    else if (MML.getWeaponFamily(this, "leftHand") === "MWD" || MML.getWeaponFamily(this, "leftHand") === "MWM"){
+    } else if (MML.getWeaponFamily(this, "leftHand") === "MWD" || MML.getWeaponFamily(this, "leftHand") === "MWM") {
         MML.processCommand({
             type: "character",
             who: this.name,
-            triggeredFunction: "missileAttack",
+            callback: "missileAttack",
             input: {}
         });
-    }
-    else if(MML.getWeaponFamily(this, "leftHand") === "TWH" ||
-    MML.getWeaponFamily(this, "rightHand") === "TWH" ||
-    MML.getWeaponFamily(this, "leftHand") === "TWK" ||
-    MML.getWeaponFamily(this, "rightHand") === "TWK" ||
-    MML.getWeaponFamily(this, "leftHand") === "TWS" ||
-    MML.getWeaponFamily(this, "rightHand") === "TWS" ||
-    MML.getWeaponFamily(this, "leftHand") === "SLI" ||
-    MML.getWeaponFamily(this, "rightHand") === "SLI"){
+    } else if (MML.getWeaponFamily(this, "leftHand") === "TWH" ||
+        MML.getWeaponFamily(this, "rightHand") === "TWH" ||
+        MML.getWeaponFamily(this, "leftHand") === "TWK" ||
+        MML.getWeaponFamily(this, "rightHand") === "TWK" ||
+        MML.getWeaponFamily(this, "leftHand") === "TWS" ||
+        MML.getWeaponFamily(this, "rightHand") === "TWS" ||
+        MML.getWeaponFamily(this, "leftHand") === "SLI" ||
+        MML.getWeaponFamily(this, "rightHand") === "SLI") {
         MML.processCommand({
             type: "character",
             who: this.name,
-            triggeredFunction: "throwingAttack",
+            callback: "throwingAttack",
             input: {}
         });
-    }
-    else {
+    } else {
         MML.processCommand({
             type: "character",
             who: this.name,
-            triggeredFunction: "meleeAttack",
+            callback: "meleeAttack",
             input: {}
         });
     }
 };
 
-MML.meleeAttack = function meleeAttack(input){
+MML.meleeAttack = function meleeAttack(input) {
     var itemId;
     var grip;
 
-    if(MML.getWeaponFamily(this, "rightHand") !== "unarmed"){
+    if (MML.getWeaponFamily(this, "rightHand") !== "unarmed") {
         itemId = this.rightHand._id;
         grip = this.rightHand.grip;
-    }
-    else{
+    } else {
         itemId = this.leftHand._id;
         grip = this.leftHand.grip;
     }
@@ -917,30 +827,35 @@ MML.meleeAttack = function meleeAttack(input){
         rank: item.grips[grip].rank
     };
 
-    if (this.action.weaponType === "primary"){
+    if (this.action.weaponType === "primary") {
         attackerWeapon.damageType = item.grips[grip].primaryType;
         attackerWeapon.task = item.grips[grip].primaryTask;
         attackerWeapon.damage = item.grips[grip].primaryDamage;
-    }
-    else{
+    } else {
         attackerWeapon.damageType = item.grips[grip].secondaryType;
         attackerWeapon.task = item.grips[grip].secondaryTask;
         attackerWeapon.damage = item.grips[grip].secondaryDamage;
     }
 
     var currentAction = {
-        attackerWeapon: attackerWeapon,
-        attackerSkill: MML.getWeaponSkill(this, this.inventory[itemId])
+        character: this,
+        callback: "meleeAttackAction",
+        parameters: {
+            attackerWeapon: attackerWeapon,
+            attackerSkill: MML.getWeaponSkill(this, this.inventory[itemId])
+        },
+        rolls: {}
     };
 
     state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, currentAction);
+    MML[currentAction.callback]();
 };
 
-MML.meleeAttackRoll = function meleeAttackRoll(rollName, character, task, skill){
+MML.meleeAttackRoll = function meleeAttackRoll(rollName, character, task, skill) {
     MML.processCommand({
         type: "character",
         who: character.name,
-        triggeredFunction: "universalRoll",
+        callback: "universalRoll",
         input: {
             name: rollName,
             rollResultFunction: "attackRollResult",
@@ -949,117 +864,90 @@ MML.meleeAttackRoll = function meleeAttackRoll(rollName, character, task, skill)
     });
 };
 
-MML.attackRollResult = function attackRollResult(input){
+MML.attackRollResult = function attackRollResult(input) {
     var currentRoll = state.MML.players[this.player].currentRoll;
 
-    if(this.player === state.MML.GM.player){
-        if(currentRoll.accepted === false){
+    if (this.player === state.MML.GM.player) {
+        if (currentRoll.accepted === false) {
             MML.processCommand({
                 type: "player",
                 who: this.player,
-                triggeredFunction: "displayGmRoll",
+                callback: "displayGmRoll",
                 input: {
                     currentRoll: currentRoll
                 }
             });
-        }
-        else{
-            if(_.contains(this.action.modifiers, ["Called Shot Specific"]) && currentRoll.value - currentRoll.target < 11){
+        } else {
+            if (_.contains(this.action.modifiers, ["Called Shot Specific"]) && currentRoll.value - currentRoll.target < 11) {
                 this.action.modifiers = _.without(this.action.modifiers, 'Called Shot Specific');
                 this.action.modifiers.push("Called Shot");
                 currentRoll.result = "Success";
             }
             MML.processCommand({
-                type: "GM",
+                type: "character",
                 who: this.name,
-                triggeredFunction: state.MML.GM.currentAction.name,
+                callback: "attackRollApply",
                 input: {}
             });
         }
-    }
-    else{
+    } else {
         MML.processCommand({
             type: "player",
             who: this.player,
-            triggeredFunction: "displayPlayerRoll",
+            callback: "displayPlayerRoll",
             input: {
                 currentRoll: currentRoll
             }
         });
-        if(_.contains(this.action.modifiers, ["Called Shot Specific"]) && currentRoll.value - currentRoll.target < 11){
+        if (_.contains(this.action.modifiers, ["Called Shot Specific"]) && currentRoll.value - currentRoll.target < 11) {
             this.action.modifiers = _.without(this.action.modifiers, 'Called Shot Specific');
             this.action.modifiers.push("Called Shot");
             currentRoll.result = "Success";
         }
         MML.processCommand({
-            type: "GM",
+            type: "character",
             who: this.name,
-            triggeredFunction: state.MML.GM.currentAction.name,
+            callback: "attackRollApply",
             input: {}
         });
     }
 };
 
-MML.attackRollApply = function attackRollApply(input){
-    var result = input.result;
-    state.MML.GM.currentAction.attackRollResult = result;
-    var action = state.MML.GM.currentAction;
-
-    if(result === "Critical Success" || result === "Success"){
-        MML.processCommand({
-            type: "character",
-            who: action.targetArray[action.targetIndex],
-            triggeredFunction: "meleeDefense",
-            input: {
-                attackerWeapon: action.attackerWeapon
-            }
-        });
-    }
-    else if(result === "Critical Failure"){
-        MML.processCommand({
-            type: "GM",
-            triggeredFunction: "attackCriticalFailure",
-            input: action
-        });
-    }
-    else{
-        MML.processCommand({
-            type: "player",
-            who: this.player,
-            triggeredFunction: "endAction",
-            input: action
-        });
-    }
+MML.attackRollApply = function attackRollApply(input) {
+    state.MML.GM.currentAction.attackRollResult = state.MML.players[this.player].currentRoll.result;
+    MML[state.MML.GM.currentAction.callback]();
 };
 
-MML.hitPositionRoll = function hitPositionRoll(input){
+MML.hitPositionRoll = function hitPositionRoll(input) {
     var rollValue;
     var range;
     var result;
     var action = state.MML.GM.currentAction;
     var target = state.MML.characters[action.targetArray[action.targetIndex]];
 
-    if (_.has(this.statusEffects, "Called Shot Specific")){
-        rollValue = +_.findKey(MML.hitPositions[target.bodyType], function(hitPosition){ return hitPosition.name === action.calledShot; });
+    if (_.has(this.statusEffects, "Called Shot Specific")) {
+        rollValue = +_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
+            return hitPosition.name === action.calledShot;
+        });
         range = rollValue + "-" + rollValue;
         result = MML.hitPositions[target.bodyType][rollValue];
-    }
-    else if (_.has(this.statusEffects, "Called Shot")){
+    } else if (_.has(this.statusEffects, "Called Shot")) {
         var rangeUpper = MML.getAvailableHitPositions(target, action.calledShot).length;
         rollValue = MML.rollDice(1, rangeUpper);
         range = "1-" + rangeUpper;
         result = MML.getCalledShotHitPosition(target, rollValue, action.calledShot);
-    }
-    else {
+    } else {
         range = "1-" + _.keys(MML.hitPositions[target.bodyType]).length;
         result = MML.getHitPosition(target, MML.rollDice(1, 100));
-        rollValue = +_.findKey(MML.hitPositions[target.bodyType], function(hitPosition){ return hitPosition.name === result.name; });
+        rollValue = +_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
+            return hitPosition.name === result.name;
+        });
     }
 
     MML.processCommand({
         type: "player",
         who: this.player,
-        triggeredFunction: "setApiPlayerAttribute",
+        callback: "setApiPlayerAttribute",
         input: {
             attribute: "currentRoll",
             value: {
@@ -1078,52 +966,49 @@ MML.hitPositionRoll = function hitPositionRoll(input){
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: "hitPositionRollResult",
+        callback: "hitPositionRollResult",
         input: {}
     });
 };
 
-MML.hitPositionRollResult = function hitPositionRollResult(input){
+MML.hitPositionRollResult = function hitPositionRollResult(input) {
     var currentRoll = state.MML.players[this.player].currentRoll;
     var action = state.MML.GM.currentAction;
     var target = state.MML.characters[action.targetArray[action.targetIndex]];
 
-    if (_.has(this.statusEffects, "Called Shot")){
+    if (_.has(this.statusEffects, "Called Shot")) {
         currentRoll.result = MML.getCalledShotHitPosition(target, currentRoll.value, action.calledShot);
-    }
-    else {
+    } else {
         currentRoll.result = MML.hitPositions[target.bodyType][currentRoll.value];
     }
 
     currentRoll.message = "Roll: " + currentRoll.value +
-                        "\nResult: " + currentRoll.result.name +
-                        "\nRange: " + currentRoll.range;
+        "\nResult: " + currentRoll.result.name +
+        "\nRange: " + currentRoll.range;
 
-    if(this.player === state.MML.GM.player){
-        if(currentRoll.accepted === false){
+    if (this.player === state.MML.GM.player) {
+        if (currentRoll.accepted === false) {
             MML.processCommand({
                 type: "player",
                 who: this.player,
-                triggeredFunction: "displayGmRoll",
+                callback: "displayGmRoll",
                 input: {
                     currentRoll: currentRoll
                 }
             });
-        }
-        else{
+        } else {
             MML.processCommand({
                 type: "character",
                 who: this.name,
-                triggeredFunction: "hitPositionRollApply",
+                callback: "hitPositionRollApply",
                 input: currentRoll
             });
         }
-    }
-    else{
+    } else {
         MML.processCommand({
             type: "player",
             who: this.player,
-            triggeredFunction: "displayPlayerRoll",
+            callback: "displayPlayerRoll",
             input: {
                 currentRoll: currentRoll
             }
@@ -1131,7 +1016,7 @@ MML.hitPositionRollResult = function hitPositionRollResult(input){
         MML.processCommand({
             type: "character",
             who: this.name,
-            triggeredFunction: "hitPositionRollApply",
+            callback: "hitPositionRollApply",
             input: {
                 result: currentRoll.result
             }
@@ -1139,18 +1024,18 @@ MML.hitPositionRollResult = function hitPositionRollResult(input){
     }
 };
 
-MML.hitPositionRollApply = function hitPositionRollApply(input){
+MML.hitPositionRollApply = function hitPositionRollApply(input) {
     state.MML.GM.currentAction.hitPosition = input.result;
 
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: input.triggeredFunction,
+        callback: input.callback,
         input: {}
     });
 };
 
-MML.meleeDefense = function meleeDefense(input){
+MML.meleeDefense = function meleeDefense(input) {
     var weaponId;
     var shieldId;
     var grip;
@@ -1165,39 +1050,35 @@ MML.meleeDefense = function meleeDefense(input){
 
     this.statusEffects["Melee This Round"] = {};
 
-    if(!_.isUndefined(this.skills["Dodge"]) && this.skills["Dodge"].level >= defaultMartialSkill){
+    if (!_.isUndefined(this.skills["Dodge"]) && this.skills["Dodge"].level >= defaultMartialSkill) {
         dodgeChance = this.weaponSkills["Dodge"].level + defenseMod + sitMod;
-    }
-    else{
+    } else {
         dodgeChance = defaultMartialSkill + defenseMod + sitMod;
     }
 
-    if(input.attackerWeapon.initiative < 6){
+    if (input.attackerWeapon.initiative < 6) {
         dodgeChance += 15;
     }
 
-    if(MML.isDualWielding(this)){
+    if (MML.isDualWielding(this)) {
         log("Dual Wield defense");
-    }
-    else if(MML.isUnarmed(this) || MML.isWieldingRangedWeapon(this)){
+    } else if (MML.isUnarmed(this) || MML.isWieldingRangedWeapon(this)) {
         blockChance = 0;
-    }
-    else if(MML.getWeaponFamily(this, "rightHand") !== "unarmed"){
+    } else if (MML.getWeaponFamily(this, "rightHand") !== "unarmed") {
         itemId = this.rightHand._id;
         grip = this.rightHand.grip;
-    }
-    else{
+    } else {
         itemId = this.leftHand._id;
         grip = this.leftHand.grip;
     }
 
     defenderWeapon = this.inventory[itemId];
-    defenderSkill = Math.round(MML.getWeaponSkill(this, defenderWeapon)/2);
+    defenderSkill = Math.round(MML.getWeaponSkill(this, defenderWeapon) / 2);
 
     MML.processCommand({
         type: "player",
         who: this.player,
-        triggeredFunction: "charMenuDefenseRoll",
+        callback: "charMenuDefenseRoll",
         input: {
             defenderWeapon: defenderWeapon,
             defenderGrip: grip,
@@ -1210,16 +1091,16 @@ MML.meleeDefense = function meleeDefense(input){
     MML.processCommand({
         type: "player",
         who: this.player,
-        triggeredFunction: "displayMenu",
+        callback: "displayMenu",
         input: {}
     });
 };
 
-MML.meleeBlockRoll = function meleeBlockRoll(input){
+MML.meleeBlockRoll = function meleeBlockRoll(input) {
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: "universalRoll",
+        callback: "universalRoll",
         input: {
             rollResultFunction: "meleeBlockRollResult",
             mods: [input.blockChance]
@@ -1227,34 +1108,32 @@ MML.meleeBlockRoll = function meleeBlockRoll(input){
     });
 };
 
-MML.meleeBlockRollResult = function meleeBlockRollResult(input){
+MML.meleeBlockRollResult = function meleeBlockRollResult(input) {
     var currentRoll = state.MML.players[this.player].currentRoll;
 
-    if(this.player === state.MML.GM.player){
-        if(currentRoll.accepted === false){
+    if (this.player === state.MML.GM.player) {
+        if (currentRoll.accepted === false) {
             MML.processCommand({
                 type: "player",
                 who: this.player,
-                triggeredFunction: "displayGmRoll",
+                callback: "displayGmRoll",
                 input: {
                     currentRoll: currentRoll
                 }
             });
-        }
-        else{
+        } else {
             MML.processCommand({
                 type: "character",
                 who: this.name,
-                triggeredFunction: "meleeBlockRollApply",
+                callback: "meleeBlockRollApply",
                 input: currentRoll
             });
         }
-    }
-    else{
+    } else {
         MML.processCommand({
             type: "player",
             who: this.player,
-            triggeredFunction: "displayPlayerRoll",
+            callback: "displayPlayerRoll",
             input: {
                 currentRoll: currentRoll
             }
@@ -1262,33 +1141,34 @@ MML.meleeBlockRollResult = function meleeBlockRollResult(input){
         MML.processCommand({
             type: "character",
             who: this.name,
-            triggeredFunction: "meleeBlockRollApply",
+            callback: "meleeBlockRollApply",
             input: currentRoll
         });
     }
 };
 
-MML.meleeBlockRollApply = function meleeBlockRollApply(input){
+MML.meleeBlockRollApply = function meleeBlockRollApply(input) {
     // log("meleeBlockRollApply");
     // log(input);
     var result = input.result;
     state.MML.GM.currentAction.defenseRollResult = result;
     var action = state.MML.GM.currentAction;
 
-    if(result === "Critical Success" || result === "Success"){
-        if(result === "Success"){
-           if(_.has("Number of Defenses")){
+    if (result === "Critical Success" || result === "Success") {
+        if (result === "Success") {
+            if (_.has("Number of Defenses")) {
                 this.statusEffects["Number of Defenses"].number++;
-            }
-            else{
-                this.statusEffects["Number of Defenses"] = { number: 1 };
+            } else {
+                this.statusEffects["Number of Defenses"] = {
+                    number: 1
+                };
             }
 
-            if(action.attackRollResult === "Critical Success"){
+            if (action.attackRollResult === "Critical Success") {
                 MML.processCommand({
                     type: "character",
                     who: this.name,
-                    triggeredFunction: "equipmentFailure",
+                    callback: "equipmentFailure",
                     input: {}
                 });
             }
@@ -1297,25 +1177,24 @@ MML.meleeBlockRollApply = function meleeBlockRollApply(input){
         MML.processCommand({
             type: "character",
             who: action.who,
-            triggeredFunction: "endAction",
+            callback: "endAction",
             input: {}
         });
-    }
-    else{
+    } else {
         MML.processCommand({
             type: "character",
             who: action.who,
-            triggeredFunction: "hitPositionRoll",
+            callback: "hitPositionRoll",
             input: {}
         });
     }
 };
 
-MML.meleeDodgeRoll = function meleeDodgeRoll(input){
+MML.meleeDodgeRoll = function meleeDodgeRoll(input) {
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: "universalRoll",
+        callback: "universalRoll",
         input: {
             rollResultFunction: "meleeDodgeRollResult",
             mods: [input.dodgeChance]
@@ -1323,11 +1202,11 @@ MML.meleeDodgeRoll = function meleeDodgeRoll(input){
     });
 };
 
-MML.equipmentFailure = function equipmentFailure(input){
+MML.equipmentFailure = function equipmentFailure(input) {
     log("equipmentFailure");
 };
 
-MML.meleeDamageRoll = function meleeDamageRoll(input){
+MML.meleeDamageRoll = function meleeDamageRoll(input) {
     var action = state.MML.GM.currentAction;
     var weapon = action.attackerWeapon;
     var weaponDamage;
@@ -1335,11 +1214,10 @@ MML.meleeDamageRoll = function meleeDamageRoll(input){
     var bonusDamage = 0;
 
     //Primary or secondary attack
-    if (action.weaponType === "primary"){
+    if (action.weaponType === "primary") {
         weaponDamage = weapon.grips[action.attackerGrip].primaryDamage;
         damageType = weapon.grips[action.attackerGrip].primaryType;
-    }
-    else {
+    } else {
         weaponDamage = weapon.grips[action.attackerGrip].secondaryDamage;
         damageType = weapon.grips[action.attackerGrip].secondaryType;
     }
@@ -1347,7 +1225,7 @@ MML.meleeDamageRoll = function meleeDamageRoll(input){
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: "rollDamage",
+        callback: "rollDamage",
         input: {
             rollResultFunction: "meleeDamageResult",
             attackRollResult: action.attackRollResult,
@@ -1358,34 +1236,32 @@ MML.meleeDamageRoll = function meleeDamageRoll(input){
     });
 };
 
-MML.meleeDamageResult = function meleeDamageResult(input){
+MML.meleeDamageResult = function meleeDamageResult(input) {
     var currentRoll = state.MML.players[this.player].currentRoll;
 
-    if(this.player === state.MML.GM.player){
-        if(currentRoll.accepted === false){
+    if (this.player === state.MML.GM.player) {
+        if (currentRoll.accepted === false) {
             MML.processCommand({
                 type: "player",
                 who: this.player,
-                triggeredFunction: "displayGmRoll",
+                callback: "displayGmRoll",
                 input: {
                     currentRoll: currentRoll
                 }
             });
-        }
-        else{
+        } else {
             MML.processCommand({
                 type: "character",
                 who: this.name,
-                triggeredFunction: "meleeDamageRollApply",
+                callback: "meleeDamageRollApply",
                 input: currentRoll
             });
         }
-    }
-    else{
+    } else {
         MML.processCommand({
             type: "player",
             who: this.player,
-            triggeredFunction: "displayPlayerRoll",
+            callback: "displayPlayerRoll",
             input: {
                 currentRoll: currentRoll
             }
@@ -1393,13 +1269,13 @@ MML.meleeDamageResult = function meleeDamageResult(input){
         MML.processCommand({
             type: "character",
             who: this.name,
-            triggeredFunction: "meleeDamageRollApply",
+            callback: "meleeDamageRollApply",
             input: currentRoll
         });
     }
 };
 
-MML.meleeDamageRollApply = function meleeDamageRollApply(input){
+MML.meleeDamageRollApply = function meleeDamageRollApply(input) {
 
 };
 
@@ -1492,13 +1368,13 @@ MML.meleeDamageRollApply = function meleeDamageRollApply(input){
 
 // };
 
-MML.unarmedAttack = function unarmedAttack(charName){};
+MML.unarmedAttack = function unarmedAttack(charName) {};
 
-MML.readyItemAction = function readyItemAction(charName){};
+MML.readyItemAction = function readyItemAction(charName) {};
 
-MML.castSpellAction = function castSpellAction(charName){};
+MML.castSpellAction = function castSpellAction(charName) {};
 
-MML.observeAction = function observeAction(charName){};
+MML.observeAction = function observeAction(charName) {};
 /* jshint -W069 */
 // Character Creation
 MML.characterConstructor = function characterConstructor(charName) {
@@ -1529,6 +1405,7 @@ MML.characterConstructor = function characterConstructor(charName) {
     this.load = MML.getCurrentAttributeAsFloat(this.name, "load");
     this.overhead = MML.getCurrentAttributeAsFloat(this.name, "overhead");
     this.deadLift = MML.getCurrentAttributeAsFloat(this.name, "deadLift");
+    this.hpMax = MML.getCurrentAttributeJSON(this.name, "hpMax");
     this.hp = MML.getCurrentAttributeJSON(this.name, "hp");
     this.epMax = MML.getCurrentAttributeAsFloat(this.name, "epMax");
     this.ep = MML.getCurrentAttributeAsFloat(this.name, "ep");
@@ -1627,7 +1504,7 @@ MML.updateCharacter = function(input) {
         MML.processCommand({
             type: "character",
             who: this.name,
-            triggeredFunction: "updateCharacter",
+            callback: "updateCharacter",
             input: {
                 attribute: attribute
             }
@@ -1640,7 +1517,7 @@ MML.setApiCharAttribute = function(input) {
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: "updateCharacter",
+        callback: "updateCharacter",
         input: input
     });
 };
@@ -1650,7 +1527,7 @@ MML.setApiCharAttributeJSON = function(input) {
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: "updateCharacter",
+        callback: "updateCharacter",
         input: input
     });
 };
@@ -1671,7 +1548,8 @@ MML.computeAttribute.player = {
 };
 
 MML.computeAttribute.race = {
-    dependents: ["inventory",
+    dependents: [
+        "inventory",
         "stature",
         "strength",
         "coordination",
@@ -1731,8 +1609,9 @@ MML.computeAttribute.handedness = {
 
 //Primary Attributes
 MML.computeAttribute.stature = {
-    dependents: ["load",
-        "hp",
+    dependents: [
+        "load",
+        "hpMax",
         "knockdownMax",
         "height",
         "weight"
@@ -1742,8 +1621,9 @@ MML.computeAttribute.stature = {
     }
 };
 MML.computeAttribute.strength = {
-    dependents: ["fitness",
-    "hp",
+    dependents: [
+        "fitness",
+        "hpMax",
         "attributeDefenseMod",
         "attributeMeleeAttackMod",
         "attributeMissileAttackMod",
@@ -1756,7 +1636,8 @@ MML.computeAttribute.strength = {
     }
 };
 MML.computeAttribute.coordination = {
-    dependents: ["attributeMeleeAttackMod",
+    dependents: [
+        "attributeMeleeAttackMod",
         "attributeMissileAttackMod",
         "attributeDefenseMod",
         "attributeInitBonus",
@@ -1768,8 +1649,9 @@ MML.computeAttribute.coordination = {
     }
 };
 MML.computeAttribute.health = {
-    dependents: ["willpower",
-        "hp",
+    dependents: [
+        "willpower",
+        "hpMax",
         "evocation",
         "systemStrength",
         "fitness",
@@ -1783,7 +1665,8 @@ MML.computeAttribute.health = {
     }
 };
 MML.computeAttribute.beauty = {
-    dependents: ["skills",
+    dependents: [
+        "skills",
         "weaponSkills"
     ],
     compute: function() {
@@ -1791,7 +1674,8 @@ MML.computeAttribute.beauty = {
     }
 };
 MML.computeAttribute.intellect = {
-    dependents: ["perception",
+    dependents: [
+        "perception",
         "evocation",
         "spellLearningMod",
         "skills",
@@ -1802,7 +1686,8 @@ MML.computeAttribute.intellect = {
     }
 };
 MML.computeAttribute.reason = {
-    dependents: ["perception",
+    dependents: [
+        "perception",
         "evocation",
         "attributeCastingMod",
         "attributeInitBonus",
@@ -1814,7 +1699,8 @@ MML.computeAttribute.reason = {
     }
 };
 MML.computeAttribute.creativity = {
-    dependents: ["perception",
+    dependents: [
+        "perception",
         "evocation",
         "skills",
         "weaponSkills"
@@ -1824,7 +1710,8 @@ MML.computeAttribute.creativity = {
     }
 };
 MML.computeAttribute.presence = {
-    dependents: ["willpower",
+    dependents: [
+        "willpower",
         "systemStrength",
         "skills",
         "weaponSkills"
@@ -1836,15 +1723,17 @@ MML.computeAttribute.presence = {
 
 // Secondary Attributes
 MML.computeAttribute.willpower = {
-    dependents: ["evocation",
-        "hp"
+    dependents: [
+        "evocation",
+        "hpMax"
     ],
     compute: function() {
         return Math.round((2 * this.presence + this.health) / 3);
     }
 };
 MML.computeAttribute.evocation = {
-    dependents: ["epMax",
+    dependents: [
+        "epMax",
         "skills",
         "weaponSkills"
     ], //skill mods
@@ -1858,7 +1747,8 @@ MML.computeAttribute.evocation = {
     }
 };
 MML.computeAttribute.perception = {
-    dependents: ["missileAttackMod",
+    dependents: [
+        "missileAttackMod",
         "attributeInitBonus",
         "skills",
         "weaponSkills"
@@ -1874,7 +1764,8 @@ MML.computeAttribute.systemStrength = {
     }
 };
 MML.computeAttribute.fitness = {
-    dependents: ["fitnessMod",
+    dependents: [
+        "fitnessMod",
         "fatigueMax",
         "skills",
         "weaponSkills"
@@ -1884,7 +1775,8 @@ MML.computeAttribute.fitness = {
     }
 };
 MML.computeAttribute.fitnessMod = {
-    dependents: ["load",
+    dependents: [
+        "load",
         "skills",
         "weaponSkills"
     ], //skill mods
@@ -1893,7 +1785,8 @@ MML.computeAttribute.fitnessMod = {
     }
 };
 MML.computeAttribute.load = {
-    dependents: ["overhead",
+    dependents: [
+        "overhead",
         "deadLift",
         "meleeDamageMod",
         "movementRatio",
@@ -1921,13 +1814,15 @@ MML.computeAttribute.deadLift = {
 MML.computeAttribute.hpMax = {
     dependents: ["hp"],
     compute: function() {
+        var hpMax = MML.buildHpAttribute(this);
+        this.hp = hpMax;
         return hpMax;
     }
 };
 MML.computeAttribute.hp = {
     dependents: ["statusEffects"],
     compute: function() {
-        return hp;
+        return this.hp;
     }
 };
 MML.computeAttribute.epMax = {
@@ -1973,7 +1868,8 @@ MML.computeAttribute.epRecovery = {
 
 // Inventory stuff
 MML.computeAttribute.inventory = {
-    dependents: ["totalWeightCarried",
+    dependents: [
+        "totalWeightCarried",
         "apv",
         "leftHand",
         "rightHand",
@@ -1998,7 +1894,10 @@ MML.computeAttribute.inventory = {
     }
 };
 MML.computeAttribute.totalWeightCarried = {
-    dependents: ["knockdownMax", "movementRatio"],
+    dependents: [
+        "knockdownMax",
+        "movementRatio"
+    ],
     compute: function() {
         var totalWeightCarried = 0;
 
@@ -2406,7 +2305,8 @@ MML.computeAttribute.fitnessCheckMod = {
     }
 };
 MML.computeAttribute.statusEffects = {
-    dependents: ["situationalInitBonus",
+    dependents: [
+        "situationalInitBonus",
         "situationalMod",
         "missileDefenseMod",
         "meleeDefenseMod",
@@ -2420,7 +2320,15 @@ MML.computeAttribute.statusEffects = {
             this[dependent] = 0;
         }, this);
         _.each(this.statusEffects, function(effect, index) {
-            MML.statusEffects[effect.name].apply(this, [effect, index]);
+            if (effect.name.indexOf("Major Wound") !== -1) {
+                MML.statusEffects["Major Wound"].apply(this, [effect, index]);
+            } else if (effect.name.indexOf("Disabling Wound") !== -1) {
+                MML.statusEffects["Disabling Wound"].apply(this, [effect, index]);
+            } else if (effect.name.indexOf("Mortal Wound") !== -1) {
+                MML.statusEffects["Mortal Wound"].apply(this, [effect, index]);
+            } else {
+                MML.statusEffects[effect.name].apply(this, [effect, index]);
+            }
         }, this);
         return this.statusEffects;
     }
@@ -2514,7 +2422,8 @@ MML.computeAttribute.attributeInitBonus = {
     }
 };
 MML.computeAttribute.senseInitBonus = {
-    dependents: ["initiative",
+    dependents: [
+        "initiative",
         "attributeCastingMod"
     ],
     compute: function() {
@@ -2596,7 +2505,8 @@ MML.computeAttribute.senseInitBonus = {
     }
 };
 MML.computeAttribute.fomInitBonus = {
-    dependents: ["initiative",
+    dependents: [
+        "initiative",
         "attributeCastingMod"
     ],
     compute: function() {
@@ -2669,7 +2579,8 @@ MML.computeAttribute.ready = {
     }
 };
 MML.computeAttribute.action = {
-    dependents: ["firstActionInitBonus",
+    dependents: [
+        "firstActionInitBonus",
         "actionTempo",
         "statusEffects"
     ],
@@ -3081,14 +2992,14 @@ MML.buildHpAttribute = function buildHpAttribute(character) {
     switch (character.bodyType) {
         case "humanoid":
             hpAttribute = {
-                multiWound: Math.round((character.health + character.stature + character.willpower) / 2),
-                head: MML.HPTables[character.race][Math.round(character.health + character.stature / 3)],
-                chest: MML.HPTables[character.race][Math.round((character.health + character.stature + character.strength) / 2)],
-                abdomen: MML.HPTables[character.race][Math.round(character.health + character.stature)],
-                leftArm: MML.HPTables[character.race][Math.round(character.health + character.stature)],
-                rightArm: MML.HPTables[character.race][Math.round(character.health + character.stature)],
-                leftLeg: MML.HPTables[character.race][Math.round(character.health + character.stature)],
-                rightLeg: MML.HPTables[character.race][Math.round(character.health + character.stature)],
+                "Multiple Wounds": Math.round((character.health + character.stature + character.willpower) / 2),
+                "Head": MML.HPTables[character.race][Math.round(character.health + character.stature / 3)],
+                "Chest": MML.HPTables[character.race][Math.round((character.health + character.stature + character.strength) / 2)],
+                "Abdomen": MML.HPTables[character.race][Math.round(character.health + character.stature)],
+                "Left Arm": MML.HPTables[character.race][Math.round(character.health + character.stature)],
+                "Right Arm": MML.HPTables[character.race][Math.round(character.health + character.stature)],
+                "Left Leg": MML.HPTables[character.race][Math.round(character.health + character.stature)],
+                "Right Leg": MML.HPTables[character.race][Math.round(character.health + character.stature)],
             };
             break;
         default:
@@ -3635,52 +3546,52 @@ MML.bodyTypes["Wood Elf"] = "humanoid";
 
 MML.hitPositions = {};
 MML.hitPositions.humanoid = {};
-MML.hitPositions.humanoid[1] = { name: "Top of Head", hp: "hpHead", bodyPart: "Head" };
-MML.hitPositions.humanoid[2] = { name: "Face", hp: "hpHead", bodyPart: "Head" };
-MML.hitPositions.humanoid[3] = { name: "Rear of Head", hp: "hpHead", bodyPart: "Head" };
-MML.hitPositions.humanoid[4] = { name: "Right Side of Head", hp: "hpHead", bodyPart: "Head" };
-MML.hitPositions.humanoid[5] = { name: "Left Side of Head", hp: "hpHead", bodyPart: "Head" };
-MML.hitPositions.humanoid[6] = { name: "Neck, Throat", hp: "hpHead", bodyPart: "Head" };
-MML.hitPositions.humanoid[7] = { name: "Rear of Neck", hp: "hpHead", bodyPart: "Head" };
-MML.hitPositions.humanoid[8] = { name: "Right Shoulder", hp: "hpRA", bodyPart: "Right Arm" };
-MML.hitPositions.humanoid[9] = { name: "Right Upper Chest", hp: "hpChest", bodyPart: "Chest" };
-MML.hitPositions.humanoid[10] = { name: "Right Upper Back", hp: "hpChest", bodyPart: "Chest" };
-MML.hitPositions.humanoid[11] = { name: "Left Upper Chest", hp: "hpChest", bodyPart: "Chest" };
-MML.hitPositions.humanoid[12] = { name: "Left Upper Back", hp: "hpChest", bodyPart: "Chest" };
-MML.hitPositions.humanoid[13] = { name: "Left Shoulder", hp: "hpLA", bodyPart: "Left Arm" };
-MML.hitPositions.humanoid[14] = { name: "Right Upper Arm", hp: "hpRA", bodyPart: "Right Arm" };
-MML.hitPositions.humanoid[15] = { name: "Right Lower Chest", hp: "hpChest", bodyPart: "Chest" };
-MML.hitPositions.humanoid[16] = { name: "Right Mid Back", hp: "hpChest", bodyPart: "Chest" };
-MML.hitPositions.humanoid[17] = { name: "Left Lower Chest", hp: "hpChest", bodyPart: "Chest" };
-MML.hitPositions.humanoid[18] = { name: "Left Mid Back", hp: "hpChest", bodyPart: "Chest" };
-MML.hitPositions.humanoid[19] = { name: "Left Upper Arm", hp: "hpLA", bodyPart: "Left Arm" };
-MML.hitPositions.humanoid[20] = { name: "Right Elbow", hp: "hpRA", bodyPart: "Right Arm" };
-MML.hitPositions.humanoid[21] = { name: "Right Abdomen", hp: "hpAb", bodyPart: "Abdomin" };
-MML.hitPositions.humanoid[22] = { name: "Right Lower Back", hp: "hpAb", bodyPart: "Abdomin" };
-MML.hitPositions.humanoid[23] = { name: "Left Abdomen", hp: "hpAb", bodyPart: "Abdomin" };
-MML.hitPositions.humanoid[24] = { name: "Left Lower Back", hp: "hpAb", bodyPart: "Abdomin" };
-MML.hitPositions.humanoid[25] = { name: "Left Elbow", hp: "hpLA", bodyPart: "Left Arm" };
-MML.hitPositions.humanoid[26] = { name: "Right Forearm", hp: "hpRA", bodyPart: "Right Arm" };
-MML.hitPositions.humanoid[27] = { name: "Right Hip", hp: "hpAb", bodyPart: "Abdomin" };
-MML.hitPositions.humanoid[28] = { name: "Right Buttock", hp: "hpAb", bodyPart: "Abdomin" };
-MML.hitPositions.humanoid[29] = { name: "Left Hip", hp: "hpAb", bodyPart: "Abdomin" };
-MML.hitPositions.humanoid[30] = { name: "Left Buttock", hp: "hpAb", bodyPart: "Abdomin" };
-MML.hitPositions.humanoid[31] = { name: "Left Forearm", hp: "hpLA", bodyPart: "Left Arm" };
-MML.hitPositions.humanoid[32] = { name: "Right Hand/Wrist", hp: "hpRA", bodyPart: "Right Arm" };
-MML.hitPositions.humanoid[33] = { name: "Groin", hp: "hpAb", bodyPart: "Abdomin" };
-MML.hitPositions.humanoid[34] = { name: "Left Hand/Wrist", hp: "hpLA", bodyPart: "Left Arm" };
-MML.hitPositions.humanoid[35] = { name: "Right Upper Thigh", hp: "hpRL", bodyPart: "Right Leg" };
-MML.hitPositions.humanoid[36] = { name: "Left Upper Thigh", hp: "hpLL", bodyPart: "Left Leg" };
-MML.hitPositions.humanoid[37] = { name: "Right Lower Thigh", hp: "hpRL", bodyPart: "Right Leg" };
-MML.hitPositions.humanoid[38] = { name: "Left Lower Thigh", hp: "hpLL", bodyPart: "Left Leg" };
-MML.hitPositions.humanoid[39] = { name: "Right Knee", hp: "hpRL", bodyPart: "Right Leg" };
-MML.hitPositions.humanoid[40] = { name: "Left Knee", hp: "hpLL", bodyPart: "Left Leg" };
-MML.hitPositions.humanoid[41] = { name: "Right Upper Shin", hp: "hpRL", bodyPart: "Right Leg" };
-MML.hitPositions.humanoid[42] = { name: "Left Upper Shin", hp: "hpLL", bodyPart: "Left Leg" };
-MML.hitPositions.humanoid[43] = { name: "Right Lower Shin", hp: "hpRL", bodyPart: "Right Leg" };
-MML.hitPositions.humanoid[44] = { name: "Left Lower Shin", hp: "hpLL", bodyPart: "Left Leg" };
-MML.hitPositions.humanoid[45] = { name: "Right Foot/Ankle", hp: "hpRL", bodyPart: "Right Leg" };
-MML.hitPositions.humanoid[46] = { name: "Left Foot/Ankle", hp: "hpLL", bodyPart: "Left Leg" };
+MML.hitPositions.humanoid[1] = { name: "Top of Head", bodyPart: "Head" };
+MML.hitPositions.humanoid[2] = { name: "Face", bodyPart: "Head" };
+MML.hitPositions.humanoid[3] = { name: "Rear of Head", bodyPart: "Head" };
+MML.hitPositions.humanoid[4] = { name: "Right Side of Head", bodyPart: "Head" };
+MML.hitPositions.humanoid[5] = { name: "Left Side of Head", bodyPart: "Head" };
+MML.hitPositions.humanoid[6] = { name: "Neck, Throat", bodyPart: "Head" };
+MML.hitPositions.humanoid[7] = { name: "Rear of Neck", bodyPart: "Head" };
+MML.hitPositions.humanoid[8] = { name: "Right Shoulder", bodyPart: "Right Arm" };
+MML.hitPositions.humanoid[9] = { name: "Right Upper Chest", bodyPart: "Chest" };
+MML.hitPositions.humanoid[10] = { name: "Right Upper Back", bodyPart: "Chest" };
+MML.hitPositions.humanoid[11] = { name: "Left Upper Chest", bodyPart: "Chest" };
+MML.hitPositions.humanoid[12] = { name: "Left Upper Back", bodyPart: "Chest" };
+MML.hitPositions.humanoid[13] = { name: "Left Shoulder", bodyPart: "Left Arm" };
+MML.hitPositions.humanoid[14] = { name: "Right Upper Arm", bodyPart: "Right Arm" };
+MML.hitPositions.humanoid[15] = { name: "Right Lower Chest", bodyPart: "Chest" };
+MML.hitPositions.humanoid[16] = { name: "Right Mid Back", bodyPart: "Chest" };
+MML.hitPositions.humanoid[17] = { name: "Left Lower Chest", bodyPart: "Chest" };
+MML.hitPositions.humanoid[18] = { name: "Left Mid Back", bodyPart: "Chest" };
+MML.hitPositions.humanoid[19] = { name: "Left Upper Arm", bodyPart: "Left Arm" };
+MML.hitPositions.humanoid[20] = { name: "Right Elbow", bodyPart: "Right Arm" };
+MML.hitPositions.humanoid[21] = { name: "Right Abdomen", bodyPart: "Abdomin" };
+MML.hitPositions.humanoid[22] = { name: "Right Lower Back", bodyPart: "Abdomin" };
+MML.hitPositions.humanoid[23] = { name: "Left Abdomen", bodyPart: "Abdomin" };
+MML.hitPositions.humanoid[24] = { name: "Left Lower Back", bodyPart: "Abdomin" };
+MML.hitPositions.humanoid[25] = { name: "Left Elbow", bodyPart: "Left Arm" };
+MML.hitPositions.humanoid[26] = { name: "Right Forearm", bodyPart: "Right Arm" };
+MML.hitPositions.humanoid[27] = { name: "Right Hip", bodyPart: "Abdomin" };
+MML.hitPositions.humanoid[28] = { name: "Right Buttock", bodyPart: "Abdomin" };
+MML.hitPositions.humanoid[29] = { name: "Left Hip", bodyPart: "Abdomin" };
+MML.hitPositions.humanoid[30] = { name: "Left Buttock", bodyPart: "Abdomin" };
+MML.hitPositions.humanoid[31] = { name: "Left Forearm", bodyPart: "Left Arm" };
+MML.hitPositions.humanoid[32] = { name: "Right Hand/Wrist", bodyPart: "Right Arm" };
+MML.hitPositions.humanoid[33] = { name: "Groin", bodyPart: "Abdomin" };
+MML.hitPositions.humanoid[34] = { name: "Left Hand/Wrist", bodyPart: "Left Arm" };
+MML.hitPositions.humanoid[35] = { name: "Right Upper Thigh", bodyPart: "Right Leg" };
+MML.hitPositions.humanoid[36] = { name: "Left Upper Thigh", bodyPart: "Left Leg" };
+MML.hitPositions.humanoid[37] = { name: "Right Lower Thigh", bodyPart: "Right Leg" };
+MML.hitPositions.humanoid[38] = { name: "Left Lower Thigh", bodyPart: "Left Leg" };
+MML.hitPositions.humanoid[39] = { name: "Right Knee", bodyPart: "Right Leg" };
+MML.hitPositions.humanoid[40] = { name: "Left Knee", bodyPart: "Left Leg" };
+MML.hitPositions.humanoid[41] = { name: "Right Upper Shin", bodyPart: "Right Leg" };
+MML.hitPositions.humanoid[42] = { name: "Left Upper Shin", bodyPart: "Left Leg" };
+MML.hitPositions.humanoid[43] = { name: "Right Lower Shin", bodyPart: "Right Leg" };
+MML.hitPositions.humanoid[44] = { name: "Left Lower Shin", bodyPart: "Left Leg" };
+MML.hitPositions.humanoid[45] = { name: "Right Foot/Ankle", bodyPart: "Right Leg" };
+MML.hitPositions.humanoid[46] = { name: "Left Foot/Ankle", bodyPart: "Left Leg" };
 
 MML.hitTables = {};
 MML.hitTables.humanoid = {};
@@ -6213,7 +6124,7 @@ MML.startCombat = function startCombat(input) {
             MML.processCommand({
                 type: "character",
                 who: charName,
-                triggeredFunction: "setApiCharAttribute",
+                callback: "setApiCharAttribute",
                 input: {
                     attribute: "ready",
                     value: false
@@ -6222,7 +6133,7 @@ MML.startCombat = function startCombat(input) {
             MML.processCommand({
                 type: "character",
                 who: charName,
-                triggeredFunction: "updateCharacter",
+                callback: "updateCharacter",
                 input: {
                     attribute: "initiative"
                 }
@@ -6231,7 +6142,7 @@ MML.startCombat = function startCombat(input) {
 
         MML.processCommand({
             type: "GM",
-            triggeredFunction: "setTurnOrder",
+            callback: "setTurnOrder",
             input: {}
         });
 
@@ -6239,7 +6150,7 @@ MML.startCombat = function startCombat(input) {
 
         MML.processCommand({
             type: "GM",
-            triggeredFunction: "newRound",
+            callback: "newRound",
             input: {}
         });
     } else {
@@ -6248,7 +6159,7 @@ MML.startCombat = function startCombat(input) {
         MML.processCommand({
             type: "player",
             who: this.player,
-            triggeredFunction: "setApiPlayerAttribute",
+            callback: "setApiPlayerAttribute",
             input: {
                 buttons: [MML.menuButtons.combatMenu]
             }
@@ -6256,7 +6167,7 @@ MML.startCombat = function startCombat(input) {
         MML.processCommand({
             type: "player",
             who: this.player,
-            triggeredFunction: "menuCommand",
+            callback: "menuCommand",
             input: {
                 who: this.player,
                 buttonText: "Combat"
@@ -6270,7 +6181,7 @@ MML.newRound = function newRound() {
         MML.processCommand({
             type: "character",
             who: charName,
-            triggeredFunction: "newRoundUpdateCharacter",
+            callback: "newRoundUpdateCharacter",
             input: {}
         });
     });
@@ -6278,7 +6189,7 @@ MML.newRound = function newRound() {
         MML.processCommand({
             type: "player",
             who: player.name,
-            triggeredFunction: "newRoundUpdatePlayer",
+            callback: "newRoundUpdatePlayer",
             input: {
                 who: player.who
             }
@@ -6295,7 +6206,7 @@ MML.startRound = function startRound() {
             MML.processCommand({
                 type: "character",
                 who: charName,
-                triggeredFunction: "updateCharacter",
+                callback: "updateCharacter",
                 input: {
                     attribute: "initiativeRoll"
                 }
@@ -6303,7 +6214,7 @@ MML.startRound = function startRound() {
             MML.processCommand({
                 type: "character",
                 who: charName,
-                triggeredFunction: "setApiCharAttribute",
+                callback: "setApiCharAttribute",
                 input: {
                     attribute: "movementAvailable",
                     value: state.MML.characters[charName].movementRatio
@@ -6313,7 +6224,7 @@ MML.startRound = function startRound() {
 
         MML.processCommand({
             type: "GM",
-            triggeredFunction: "setTurnOrder",
+            callback: "setTurnOrder",
             input: {}
         });
 
@@ -6324,7 +6235,7 @@ MML.startRound = function startRound() {
             MML.processCommand({
                 type: "player",
                 who: playerName,
-                triggeredFunction: "menuCombatMovement",
+                callback: "menuCombatMovement",
                 input: {
                     who: this.actor
                 }
@@ -6332,7 +6243,7 @@ MML.startRound = function startRound() {
             MML.processCommand({
                 type: "player",
                 who: playerName,
-                triggeredFunction: "displayMenu",
+                callback: "displayMenu",
                 input: {}
             });
         }
@@ -6414,7 +6325,7 @@ MML.nextAction = function nextAction() {
 
 MML.getSingleTarget = function getSingleTarget(input) {
     input.charName = this.name;
-    input.triggeredFunction = "setCurrentCharacterTargets";
+    input.callback = "setCurrentCharacterTargets";
     MML.displayTargetSelection(input);
 };
 
@@ -6498,7 +6409,7 @@ MML.changeRoll = function changeRoll(input) {
     MML.processCommand({
         type: "character",
         who: this.currentRoll.character,
-        triggeredFunction: this.currentRoll.rollResultFunction,
+        callback: this.currentRoll.rollResultFunction,
         input: {}
     });
 };
@@ -6508,7 +6419,7 @@ MML.assignNewItem = function assignNewItem(input) {
     MML.processCommand({
         type: "character",
         who: input.target,
-        triggeredFunction: "setApiCharAttributeJSON",
+        callback: "setApiCharAttributeJSON",
         input: {
             attribute: "inventory",
             index: generateRowID(),
@@ -6520,7 +6431,7 @@ MML.assignNewItem = function assignNewItem(input) {
 // var exampleCommand = {
 //   type: "player",
 //   who: state.MML.players[playerName],
-//   triggeredFunction:"menuCommand",
+//   callback:"menuCommand",
 //   input: {
 //     rollResult: "Success"
 //   }
@@ -6531,16 +6442,16 @@ MML.processCommand = function processCommand(command) {
         switch (command.type) {
             case "character":
                 var character = state.MML.characters[command.who];
-                MML[command.triggeredFunction].apply(character, [command.input]);
+                MML[command.callback].apply(character, [command.input]);
                 state.MML.characters[command.who] = character;
                 break;
             case "player":
                 var player = state.MML.players[command.who];
-                MML[command.triggeredFunction].apply(player, [command.input]);
+                MML[command.callback].apply(player, [command.input]);
                 state.MML.players[command.who] = player;
                 break;
             case "GM":
-                MML[command.triggeredFunction].apply(state.MML.GM, [command.input]);
+                MML[command.callback].apply(state.MML.GM, [command.input]);
                 break;
             default:
                 break;
@@ -6584,7 +6495,7 @@ MML.parseCommand = function parseCommand(msg) {
             command = {
                 type: "player",
                 who: msg.who.replace(" (GM)", ""),
-                triggeredFunction: input.triggeredFunction,
+                callback: input.callback,
                 input: input
             };
         } else if (content.indexOf("changeRoll") !== -1) {
@@ -6594,7 +6505,7 @@ MML.parseCommand = function parseCommand(msg) {
                 command = {
                     type: "player",
                     who: state.MML.GM.player,
-                    triggeredFunction: "changeRoll",
+                    callback: "changeRoll",
                     input: {
                         value: value
                     }
@@ -6610,7 +6521,7 @@ MML.parseCommand = function parseCommand(msg) {
                 command = {
                     type: "character",
                     who: player.who,
-                    triggeredFunction: player.currentRoll.rollResultFunction,
+                    callback: player.currentRoll.rollResultFunction,
                     input: {}
                 };
             }
@@ -6622,7 +6533,7 @@ MML.parseCommand = function parseCommand(msg) {
             command = {
                 type: "player",
                 who: msg.who.replace(" (GM)", ""),
-                triggeredFunction: "displayItemOptions",
+                callback: "displayItemOptions",
                 input: {
                     who: who,
                     itemId: itemId
@@ -6650,7 +6561,7 @@ MML.parseCommand = function parseCommand(msg) {
 
 MML.playerClass = {
     message: "", //
-    buttons: {}, //{text: "Click Here", nextMenu: "mainMenu", triggeredFunction: MML.triggeredFunction}
+    buttons: {}, //{text: "Click Here", nextMenu: "mainMenu", callback: MML.callback}
     name: "",
     characters: [],
     characterIndex: 0,
@@ -6672,7 +6583,7 @@ MML.menuCommand = function(input) {
         MML.processCommand({
             type: "player",
             who: this.name,
-            triggeredFunction: button.nextMenu,
+            callback: button.nextMenu,
             input: {
                 who: who
             }
@@ -6682,7 +6593,7 @@ MML.menuCommand = function(input) {
             text: button.text,
             selectedCharNames: input.selectedCharNames
         };
-        button.triggeredFunction.apply(this, [buttonInput]);
+        button.callback.apply(this, [buttonInput]);
     }
 };
 
@@ -6697,12 +6608,17 @@ MML.newRoundUpdatePlayer = function(input) {
     MML.processCommand({
         type: "player",
         who: this.name,
-        triggeredFunction: "charMenuPrepareAction",
+        callback: "charMenuPrepareAction",
         input: {
             who: this.who
         }
     });
-    MML.displayMenu.apply(this, []);
+    MML.processCommand({
+        type: "player",
+        who: this.name,
+        callback: "displayMenu",
+        input: {}
+    });
 };
 
 MML.prepareNextCharacter = function(input) {
@@ -6712,7 +6628,7 @@ MML.prepareNextCharacter = function(input) {
         MML.processCommand({
             type: "player",
             who: this.name,
-            triggeredFunction: "charMenuPrepareAction",
+            callback: "charMenuPrepareAction",
             input: {
                 who: this.characters[this.characterIndex],
             }
@@ -6721,7 +6637,7 @@ MML.prepareNextCharacter = function(input) {
         MML.processCommand({
             type: "player",
             who: this.name,
-            triggeredFunction: "GmMenuStartRound",
+            callback: "GmMenuStartRound",
             input: {
                 who: "GM",
             }
@@ -6730,7 +6646,7 @@ MML.prepareNextCharacter = function(input) {
     MML.processCommand({
         type: "player",
         who: this.name,
-        triggeredFunction: "displayMenu",
+        callback: "displayMenu",
         input: {}
     });
 };
@@ -6760,9 +6676,14 @@ MML.GmMenuAssignStatusEffect = function GmMenuAssignStatusEffect(input) {
         this.buttons.push({
             text: effectName,
             nextMenu: "GmMenuItemQuality",
-            triggeredFunction: function(input) {
+            callback: function(input) {
                 state.MML.GM.newItem = MML.items[input.text];
-                MML.displayMenu.apply(this, []);
+                MML.processCommand({
+                    type: "player",
+                    who: this.name,
+                    callback: "displayMenu",
+                    input: {}
+                });
             }
         });
     });
@@ -6803,9 +6724,14 @@ MML.GmMenuNewWeapon = function GmMenuNewWeapon(input) {
             this.buttons.push({
                 text: item.name,
                 nextMenu: "GmMenuItemQuality",
-                triggeredFunction: function(input) {
+                callback: function(input) {
                     state.MML.GM.newItem = MML.items[input.text];
-                    MML.displayMenu.apply(this, []);
+                    MML.processCommand({
+                        type: "player",
+                        who: this.name,
+                        callback: "displayMenu",
+                        input: {}
+                    });
                 }
             });
         }
@@ -6822,9 +6748,14 @@ MML.GmMenuNewShield = function GmMenuNewShield(input) {
             this.buttons.push({
                 text: item.name,
                 nextMenu: "GmMenuItemQuality",
-                triggeredFunction: function(input) {
+                callback: function(input) {
                     state.MML.GM.newItem = MML.items[input.text];
-                    MML.displayMenu.apply(this, []);
+                    MML.processCommand({
+                        type: "player",
+                        who: this.name,
+                        callback: "displayMenu",
+                        input: {}
+                    });
                 }
             });
         }
@@ -6841,9 +6772,14 @@ MML.GmMenuNewArmor = function GmMenuNewArmor(input) {
             this.buttons.push({
                 text: item.name,
                 nextMenu: "GmMenuArmorMaterial",
-                triggeredFunction: function(input) {
+                callback: function(input) {
                     state.MML.GM.newItem = MML.items[input.text];
-                    MML.displayMenu.apply(this, []);
+                    MML.processCommand({
+                        type: "player",
+                        who: this.name,
+                        callback: "displayMenu",
+                        input: {}
+                    });
                 }
             });
         }
@@ -6859,12 +6795,17 @@ MML.GmMenuArmorMaterial = function GmMenuArmorMaterial(input) {
         this.buttons.push({
             text: material.name,
             nextMenu: "GmMenuItemQuality",
-            triggeredFunction: function(input) {
+            callback: function(input) {
                 var material = MML.APVList[input.text];
                 state.MML.GM.newItem.material = material.name;
                 state.MML.GM.newItem.weight = material.weightPerPosition * state.MML.GM.newItem.totalPostitions;
                 state.MML.GM.newItem.name = material.name + " " + state.MML.GM.newItem.name;
-                MML.displayMenu.apply(this, []);
+                MML.processCommand({
+                    type: "player",
+                    who: this.name,
+                    callback: "displayMenu",
+                    input: {}
+                });
             }
         });
     }, this);
@@ -6885,8 +6826,13 @@ MML.GmMenuassignNewItem = function GmMenuassignNewItem(input) {
         this.buttons.push({
             text: index,
             nextMenu: "GmMenuMain",
-            triggeredFunction: function(input) {
-                MML.displayMenu.apply(this, []);
+            callback: function(input) {
+                MML.processCommand({
+                    type: "player",
+                    who: this.name,
+                    callback: "displayMenu",
+                    input: {}
+                });
             }
         });
     }, this);
@@ -6922,11 +6868,11 @@ MML.displayItemOptions = function displayItemOptions(input) {
             };
 
             if (state.MML.characters[who].leftHand._id === itemId && state.MML.characters[who].leftHand._id === itemId) {
-                unequipButton.triggeredFunction = function(text) {
+                unequipButton.callback = function(text) {
                     MML.processCommand({
                         type: "character",
                         who: who,
-                        triggeredFunction: "setApiCharAttribute",
+                        callback: "setApiCharAttribute",
                         input: {
                             attribute: "leftHand",
                             value: {
@@ -6935,50 +6881,73 @@ MML.displayItemOptions = function displayItemOptions(input) {
                         }
                     });
                     MML.processCommand({
-		            	type: "character",
-						who: who,
-						triggeredFunction: "setApiCharAttribute",
-						input: {
-							attribute: "leftHand",
-							value: { _id: "emptyHand" }
-						}
-					});
-					MML.processCommand({
-		            	type: "character",
-						who: who,
-						triggeredFunction: "setApiCharAttribute",
-						input: {
-							attribute: "rightHand",
-							value: { _id: "emptyHand" }
-						}
-					});
-                    MML.displayMenu.apply(this, []);
+                        type: "character",
+                        who: who,
+                        callback: "setApiCharAttribute",
+                        input: {
+                            attribute: "leftHand",
+                            value: {
+                                _id: "emptyHand"
+                            }
+                        }
+                    });
+                    MML.processCommand({
+                        type: "character",
+                        who: who,
+                        callback: "setApiCharAttribute",
+                        input: {
+                            attribute: "rightHand",
+                            value: {
+                                _id: "emptyHand"
+                            }
+                        }
+                    });
+                    MML.processCommand({
+                        type: "player",
+                        who: this.name,
+                        callback: "displayMenu",
+                        input: {}
+                    });
                 };
             } else if (state.MML.characters[who].leftHand._id === itemId) {
-                unequipButton.triggeredFunction = function(text) {
+                unequipButton.callback = function(text) {
                     MML.processCommand({
-		            	type: "character",
-						who: who,
-						triggeredFunction: "setApiCharAttribute",
-						input: {
-							attribute: "leftHand",
-							value: { _id: "emptyHand" }
-						}
-					});
-                    MML.displayMenu.apply(this, []);
+                        type: "character",
+                        who: who,
+                        callback: "setApiCharAttribute",
+                        input: {
+                            attribute: "leftHand",
+                            value: {
+                                _id: "emptyHand"
+                            }
+                        }
+                    });
+                    MML.processCommand({
+                        type: "player",
+                        who: this.name,
+                        callback: "displayMenu",
+                        input: {}
+                    });
                 };
             } else {
-                unequipButton.triggeredFunction = function(text) {
+                unequipButton.callback = function(text) {
                     MML.processCommand({
-		            	type: "character",
-						who: who,
-						triggeredFunction: "setApiCharAttribute",
-						input: {
-							attribute: "rightHand",
-							value: { _id: "emptyHand" }
-						}
-					});
-                    MML.displayMenu.apply(this, []);
+                        type: "character",
+                        who: who,
+                        callback: "setApiCharAttribute",
+                        input: {
+                            attribute: "rightHand",
+                            value: {
+                                _id: "emptyHand"
+                            }
+                        }
+                    });
+                    MML.processCommand({
+                        type: "player",
+                        who: this.name,
+                        callback: "displayMenu",
+                        input: {}
+                    });
                 };
             }
             buttons.push(unequipButton);
@@ -6988,25 +6957,25 @@ MML.displayItemOptions = function displayItemOptions(input) {
                     buttons.push({
                         text: "Equip Left Hand",
                         nextMenu: "menuIdle",
-                        triggeredFunction: function(text) {
+                        callback: function(text) {
                             // if(state.MML.characters[who].rightHand.grip !== "One Hand"){
                             //     MML.processCommand({
-					        //     	type: "character",
-							// 		who: who,
-							// 		triggeredFunction: "setApiCharAttribute",
-							// 		input: {
-							// 			attribute: "rightHand",
-							// 			value: {
-	                        //                 _id: itemId,
-	                        //                 grip: gripName
-	                        //             }
-							// 		}
-							// 	});
+                            //     	type: "character",
+                            // 		who: who,
+                            // 		callback: "setApiCharAttribute",
+                            // 		input: {
+                            // 			attribute: "rightHand",
+                            // 			value: {
+                            //                 _id: itemId,
+                            //                 grip: gripName
+                            //             }
+                            // 		}
+                            // 	});
                             // }
                             MML.processCommand({
                                 type: "character",
                                 who: who,
-                                triggeredFunction: "setApiCharAttribute",
+                                callback: "setApiCharAttribute",
                                 input: {
                                     attribute: "leftHand",
                                     value: {
@@ -7016,18 +6985,23 @@ MML.displayItemOptions = function displayItemOptions(input) {
                                 }
                             });
 
-                            MML.displayMenu.apply(this, []);
+                            MML.processCommand({
+                                type: "player",
+                                who: this.name,
+                                callback: "displayMenu",
+                                input: {}
+                            });
                         }
                     });
                     buttons.push({
                         text: "Equip Right Hand",
                         nextMenu: "menuIdle",
-                        triggeredFunction: function(text) {
+                        callback: function(text) {
                             // if(state.MML.characters[who].leftHand.grip !== "One Hand"){
                             //     MML.processCommand({
                             //     	type: "character",
                             // 		who: who,
-                            // 		triggeredFunction: "setApiCharAttribute",
+                            // 		callback: "setApiCharAttribute",
                             // 		input: {
                             // 			attribute: "leftHand",
                             // 			value: {
@@ -7040,7 +7014,7 @@ MML.displayItemOptions = function displayItemOptions(input) {
                             MML.processCommand({
                                 type: "character",
                                 who: who,
-                                triggeredFunction: "setApiCharAttribute",
+                                callback: "setApiCharAttribute",
                                 input: {
                                     attribute: "rightHand",
                                     value: {
@@ -7049,18 +7023,23 @@ MML.displayItemOptions = function displayItemOptions(input) {
                                     }
                                 }
                             });
-                            MML.displayMenu.apply(this, []);
+                            MML.processCommand({
+                                type: "player",
+                                who: this.name,
+                                callback: "displayMenu",
+                                input: {}
+                            });
                         }
                     });
                 } else {
                     buttons.push({
                         text: "Equip " + gripName,
                         nextMenu: "menuIdle",
-                        triggeredFunction: function(text) {
+                        callback: function(text) {
                             MML.processCommand({
                                 type: "character",
                                 who: who,
-                                triggeredFunction: "setApiCharAttribute",
+                                callback: "setApiCharAttribute",
                                 input: {
                                     attribute: "rightHand",
                                     value: {
@@ -7072,7 +7051,7 @@ MML.displayItemOptions = function displayItemOptions(input) {
                             MML.processCommand({
                                 type: "character",
                                 who: who,
-                                triggeredFunction: "setApiCharAttribute",
+                                callback: "setApiCharAttribute",
                                 input: {
                                     attribute: "leftHand",
                                     value: {
@@ -7081,7 +7060,12 @@ MML.displayItemOptions = function displayItemOptions(input) {
                                     }
                                 }
                             });
-                            MML.displayMenu.apply(this, []);
+                            MML.processCommand({
+                                type: "player",
+                                who: this.name,
+                                callback: "displayMenu",
+                                input: {}
+                            });
                         }
                     });
                 }
@@ -7093,11 +7077,11 @@ MML.displayItemOptions = function displayItemOptions(input) {
         buttons.push({
             text: "Equip Left Hand",
             nextMenu: "menuIdle",
-            triggeredFunction: function(text) {
+            callback: function(text) {
                 MML.processCommand({
                     type: "character",
                     who: who,
-                    triggeredFunction: "setApiCharAttribute",
+                    callback: "setApiCharAttribute",
                     input: {
                         attribute: "leftHand",
                         value: {
@@ -7106,17 +7090,22 @@ MML.displayItemOptions = function displayItemOptions(input) {
                         }
                     }
                 });
-                MML.displayMenu.apply(this, []);
+                MML.processCommand({
+                    type: "player",
+                    who: this.name,
+                    callback: "displayMenu",
+                    input: {}
+                });
             }
         });
         buttons.push({
             text: "Equip Right Hand",
             nextMenu: "menuIdle",
-            triggeredFunction: function(text) {
+            callback: function(text) {
                 MML.processCommand({
                     type: "character",
                     who: who,
-                    triggeredFunction: "setApiCharAttribute",
+                    callback: "setApiCharAttribute",
                     input: {
                         attribute: "rightHand",
                         value: {
@@ -7125,7 +7114,12 @@ MML.displayItemOptions = function displayItemOptions(input) {
                         }
                     }
                 });
-                MML.displayMenu.apply(this, []);
+                MML.processCommand({
+                    type: "player",
+                    who: this.name,
+                    callback: "displayMenu",
+                    input: {}
+                });
             }
         });
     } else if (item.type === "spellComponent") {
@@ -7137,13 +7131,23 @@ MML.displayItemOptions = function displayItemOptions(input) {
     buttons.push({
         text: "Exit",
         nextMenu: "menuIdle",
-        triggeredFunction: function(text) {
-            MML.displayMenu.apply(this, []);
+        callback: function(text) {
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "displayMenu",
+                input: {}
+            });
         }
     });
 
     this.buttons = buttons;
-    MML.displayMenu.apply(this, []);
+    MML.processCommand({
+        type: "player",
+        who: this.name,
+        callback: "displayMenu",
+        input: {}
+    });
 };
 
 MML.GmMenuStartRound = function GmMenuStartRound(input) {
@@ -7169,8 +7173,13 @@ MML.charMenuAttack = function charMenuAttack(input) {
     var buttons = [{
         text: "Standard",
         nextMenu: "charMenuAttackCalledShot",
-        triggeredFunction: function(input) {
-            MML.displayMenu.apply(this, []);
+        callback: function(input) {
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "displayMenu",
+                input: {}
+            });
         }
     }];
 
@@ -7178,26 +7187,41 @@ MML.charMenuAttack = function charMenuAttack(input) {
         buttons.push({
             text: "Shoot From Cover",
             nextMenu: "charMenuAttackCalledShot",
-            triggeredFunction: function(input) {
+            callback: function(input) {
                 state.MML.characters[this.who].action.modifiers.push("Shoot From Cover");
-                MML.displayMenu.apply(this, []);
+                MML.processCommand({
+                    type: "player",
+                    who: this.name,
+                    callback: "displayMenu",
+                    input: {}
+                });
             }
         });
         buttons.push({
             text: "Aim",
             nextMenu: "charMenuPrepareAction",
-            triggeredFunction: function(input) {
+            callback: function(input) {
                 state.MML.characters[this.who].action.modifiers.push("Aim");
-                MML.displayMenu.apply(this, []);
+                MML.processCommand({
+                    type: "player",
+                    who: this.name,
+                    callback: "displayMenu",
+                    input: {}
+                });
             }
         });
     } else { //Melee
         buttons.push({
             text: "Sweep Attack",
             nextMenu: "charMenuAttackCalledShot",
-            triggeredFunction: function(input) {
+            callback: function(input) {
                 state.MML.characters[this.who].action.modifiers.push("Sweep Attack");
-                MML.displayMenu.apply(this, []);
+                MML.processCommand({
+                    type: "player",
+                    who: this.name,
+                    callback: "displayMenu",
+                    input: {}
+                });
             }
         });
     }
@@ -7208,20 +7232,35 @@ MML.charMenuAttackCalledShot = function charMenuCalledShot(input) {
     this.message = "Called Shot Menu";
     var buttons = [{
         text: "None",
-        triggeredFunction: function(input) {
-            MML.displayMenu.apply(this, []);
+        callback: function(input) {
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "displayMenu",
+                input: {}
+            });
         }
     }, {
         text: "Body Part",
-        triggeredFunction: function(input) {
+        callback: function(input) {
             state.MML.characters[this.who].action.modifiers.push("Called Shot");
-            MML.displayMenu.apply(this, []);
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "displayMenu",
+                input: {}
+            });
         }
     }, {
         text: "Specific Hit Position",
-        triggeredFunction: function(input) {
+        callback: function(input) {
             state.MML.characters[this.who].action.modifiers.push("Called Shot Specific");
-            MML.displayMenu.apply(this, []);
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "displayMenu",
+                input: {}
+            });
         }
     }];
 
@@ -7241,69 +7280,97 @@ MML.charMenuAttackStance = function charMenuAttackStance(input) {
     this.message = "Attack Stance Menu";
     var buttons = [{
         text: "Neutral",
-        triggeredFunction: function(input) {
-            MML.displayMenu.apply(this, []);
+        callback: function(input) {
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "displayMenu",
+                input: {}
+            });
         }
     }, {
         text: "Defensive",
-        triggeredFunction: function(input) {
+        callback: function(input) {
             state.MML.characters[this.who].action.modifiers.push("Defensive Stance");
-            MML.displayMenu.apply(this, []);
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "displayMenu",
+                input: {}
+            });
         }
     }, {
         text: "Aggressive",
-        triggeredFunction: function(input) {
+        callback: function(input) {
             state.MML.characters[this.who].action.modifiers.push("Aggressive Stance");
-            MML.displayMenu.apply(this, []);
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "displayMenu",
+                input: {}
+            });
         }
     }];
 
-	if(MML.isWieldingRangedWeapon(state.MML.characters[this.who])){
-		_.each(buttons, function(button){
-			button.nextMenu = "charMenuInitiativeRoll";
-		});
-	}
-	else{
-		_.each(buttons, function(button){
-			button.nextMenu = "charMenuAttackStance";
-		});
-	}
-	this.buttons = buttons;
+    if (MML.isWieldingRangedWeapon(state.MML.characters[this.who])) {
+        _.each(buttons, function(button) {
+            button.nextMenu = "charMenuInitiativeRoll";
+        });
+    } else {
+        _.each(buttons, function(button) {
+            button.nextMenu = "charMenuAttackStance";
+        });
+    }
+    this.buttons = buttons;
 };
-MML.charMenuAttackStance = function charMenuAttackStance(input){
-	this.who = input.who;
-	this.message =  "Attack Stance Menu";
-	var buttons = [{
-		text: "Neutral",
-		triggeredFunction: function(input){
-			MML.displayMenu.apply(this, []);
-		}},
-		{
-		text: "Defensive",
-		triggeredFunction: function(input){
-			state.MML.characters[this.who].action.modifiers.push("Defensive Stance");
-			MML.displayMenu.apply(this, []);
-		}},
-		{
-		text: "Aggressive",
-		triggeredFunction: function(input){
-			state.MML.characters[this.who].action.modifiers.push("Aggressive Stance");
-			MML.displayMenu.apply(this, []);
-		}}
-	];
+MML.charMenuAttackStance = function charMenuAttackStance(input) {
+    this.who = input.who;
+    this.message = "Attack Stance Menu";
+    var buttons = [{
+        text: "Neutral",
+        callback: function(input) {
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "displayMenu",
+                input: {}
+            });
+        }
+    }, {
+        text: "Defensive",
+        callback: function(input) {
+            state.MML.characters[this.who].action.modifiers.push("Defensive Stance");
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "displayMenu",
+                input: {}
+            });
+        }
+    }, {
+        text: "Aggressive",
+        callback: function(input) {
+            state.MML.characters[this.who].action.modifiers.push("Aggressive Stance");
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "displayMenu",
+                input: {}
+            });
+        }
+    }];
 
-    if(MML.getMeleeWeapon(state.MML.characters[this.who]).secondaryType !== ""){
-		_.each(buttons, function(button){
-			button.nextMenu = "charMenuSelectDamageType";
-		});
-	}
-	else{
+    if (MML.getMeleeWeapon(state.MML.characters[this.who]).secondaryType !== "") {
+        _.each(buttons, function(button) {
+            button.nextMenu = "charMenuSelectDamageType";
+        });
+    } else {
         state.MML.characters[this.who].action.weaponType = "primary";
-		_.each(buttons, function(button){
-			button.nextMenu = "charMenuInitiativeRoll";
-		});
-	}
-	this.buttons = buttons;
+        _.each(buttons, function(button) {
+            button.nextMenu = "charMenuInitiativeRoll";
+        });
+    }
+    this.buttons = buttons;
 };
 
 MML.charMenuInitiativeRoll = function charMenuInitiativeRoll(input) {
@@ -7346,7 +7413,7 @@ MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(input) {
     MML.processCommand({
         type: "character",
         who: input.charName,
-        triggeredFunction: state.MML.characters[input.charName].action.triggeredFunction,
+        callback: state.MML.characters[input.charName].action.callback,
         input: {}
     });
 };
@@ -7361,13 +7428,13 @@ MML.charMenuSelectBodyPart = function charMenuSelectBodyPart(input) {
         this.buttons.push({
             text: part,
             nextMenu: "menuIdle",
-            triggeredFunction: function(input) {
+            callback: function(input) {
                 state.MML.GM.currentAction.calledShot = input.text;
 
                 MML.processCommand({
                     type: "character",
                     who: this.who,
-                    triggeredFunction: "processAttack",
+                    callback: "processAttack",
                     input: {}
                 });
             }
@@ -7385,41 +7452,51 @@ MML.charMenuSelectHitPosition = function charMenuSelectHitPosition(input) {
         this.buttons.push({
             text: position,
             nextMenu: "menuIdle",
-            triggeredFunction: function(input) {
+            callback: function(input) {
                 state.MML.GM.currentAction.calledShot = input.text;
 
                 MML.processCommand({
                     type: "character",
                     who: this.who,
-                    triggeredFunction: "processAttack",
+                    callback: "processAttack",
                     input: {}
                 });
             }
         });
     }, this);
 };
-MML.charMenuSelectDamageType = function charMenuSelectDamageType(input){
+MML.charMenuSelectDamageType = function charMenuSelectDamageType(input) {
     this.who = input.who;
-	this.message =  "Choose a Damage Type.";
-	this.buttons = [];
+    this.message = "Choose a Damage Type.";
+    this.buttons = [];
 
-	this.buttons.push({
-		text: "Primary",
-		nextMenu: "charMenuInitiativeRoll",
-		triggeredFunction: function(input){
+    this.buttons.push({
+        text: "Primary",
+        nextMenu: "charMenuInitiativeRoll",
+        callback: function(input) {
             state.MML.characters[this.who].action.weaponType = "primary";
-            MML.displayMenu.apply(this, []);
-		}
-	});
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "displayMenu",
+                input: {}
+            });
+        }
+    });
 
-	this.buttons.push({
-		text: "Secondary",
-		nextMenu: "charMenuInitiativeRoll",
-		triggeredFunction: function(input){
+    this.buttons.push({
+        text: "Secondary",
+        nextMenu: "charMenuInitiativeRoll",
+        callback: function(input) {
             state.MML.characters[this.who].action.weaponType = "secondary";
-            MML.displayMenu.apply(this, []);
-		}
-	});
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "displayMenu",
+                input: {}
+            });
+        }
+    });
 };
 MML.charMenuAttackRoll = function charMenuAttackRoll(input) {
     this.who = input.who;
@@ -7435,11 +7512,11 @@ MML.charMenuDefenseRoll = function charMenuDefenseRoll(input) {
     this.buttons = [{
         text: "Dodge: " + dodgeChance + "%",
         nextMenu: "menuIdle",
-        triggeredFunction: function(input) {
+        callback: function(input) {
             MML.processCommand({
                 type: "character",
                 who: this.who,
-                triggeredFunction: "meleeDodgeRoll",
+                callback: "meleeDodgeRoll",
                 input: {
                     dodgeChance: dodgeChance
                 }
@@ -7448,11 +7525,11 @@ MML.charMenuDefenseRoll = function charMenuDefenseRoll(input) {
     }, {
         text: "Block: " + blockChance + "%",
         nextMenu: "menuIdle",
-        triggeredFunction: function(input) {
+        callback: function(input) {
             MML.processCommand({
                 type: "character",
                 who: this.who,
-                triggeredFunction: "meleeBlockRoll",
+                callback: "meleeBlockRoll",
                 input: {
                     blockChance: blockChance
                 }
@@ -7461,11 +7538,11 @@ MML.charMenuDefenseRoll = function charMenuDefenseRoll(input) {
     }, {
         text: "Take it",
         nextMenu: "menuIdle",
-        triggeredFunction: function(input) {
+        callback: function(input) {
             MML.processCommand({
                 type: "character",
                 who: state.MML.GM.currentAction.who,
-                triggeredFunction: "rollHitPosition",
+                callback: "rollHitPosition",
                 input: {}
             });
         }
@@ -7476,107 +7553,172 @@ MML.menuButtons = {};
 MML.menuButtons.GmMenuMain = {
     text: "GmMenuMain",
     nextMenu: "GmMenuMain",
-    triggeredFunction: function(input) {
-        MML.displayMenu.apply(this, []);
+    callback: function(input) {
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 MML.menuButtons.combatMenu = {
     text: "Combat",
     nextMenu: "GmMenuCombat",
-    triggeredFunction: function(input) {
-        MML.displayMenu.apply(this, []);
+    callback: function(input) {
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 MML.menuButtons.newCharacterMenu = {
     text: "New Character",
     nextMenu: "GmMenuNewCharacter",
-    triggeredFunction: function(input) {
-        MML.displayMenu.apply(this, []);
+    callback: function(input) {
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 
 MML.menuButtons.newItemMenu = {
     text: "New Item",
     nextMenu: "GmMenuNewItem",
-    triggeredFunction: function(input) {
-        MML.displayMenu.apply(this, []);
+    callback: function(input) {
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 MML.menuButtons.newWeapon = {
     text: "Weapon",
     nextMenu: "GmMenuNewWeapon",
-    triggeredFunction: function(input) {
-        MML.displayMenu.apply(this, []);
+    callback: function(input) {
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 
 MML.menuButtons.newShield = {
     text: "Shield",
     nextMenu: "GmMenuNewShield",
-    triggeredFunction: function(input) {
-        MML.displayMenu.apply(this, []);
+    callback: function(input) {
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 
 MML.menuButtons.newArmor = {
     text: "Armor",
     nextMenu: "GmMenuNewArmor",
-    triggeredFunction: function(input) {
-        MML.displayMenu.apply(this, []);
+    callback: function(input) {
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 MML.menuButtons.newSpellComponent = {
     text: "Spell Component",
     nextMenu: "GmMenuNewSpellComponent",
-    triggeredFunction: function(input) {
-        MML.displayMenu.apply(this, []);
+    callback: function(input) {
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 MML.menuButtons.newMiscItem = {
     text: "Misc",
     nextMenu: "GmMenuNewMiscItem",
-    triggeredFunction: function(input) {
-        MML.displayMenu.apply(this, []);
+    callback: function(input) {
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 MML.menuButtons.itemQualityPoor = {
     text: "Poor",
     nextMenu: "GmMenuNewItemProperties",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         state.MML.GM.newItem.quality = input.text;
-        MML.displayMenu.apply(this, []);
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 MML.menuButtons.itemQualityStandard = {
     text: "Standard",
     nextMenu: "GmMenuNewItemProperties",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         state.MML.GM.newItem.quality = input.text;
-        MML.displayMenu.apply(this, []);
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 MML.menuButtons.itemQualityExcellent = {
     text: "Excellent",
     nextMenu: "GmMenuNewItemProperties",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         state.MML.GM.newItem.quality = input.text;
-        MML.displayMenu.apply(this, []);
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 MML.menuButtons.itemQualityMasterWork = {
     text: "Master Work",
     nextMenu: "GmMenuNewItemProperties",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         state.MML.GM.newItem.quality = input.text;
-        MML.displayMenu.apply(this, []);
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 MML.menuButtons.assignNewItem = {
     text: "Assign Item",
     nextMenu: "GmMenuMain",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         input.charName = this.name;
-        input.triggeredFunction = "assignNewItem";
+        input.callback = "assignNewItem";
         MML.displayTargetSelection(input);
     }
 };
@@ -7584,24 +7726,34 @@ MML.menuButtons.assignNewItem = {
 MML.menuButtons.worldMenu = {
     text: "World",
     nextMenu: "GmMenuWorld",
-    triggeredFunction: function(input) {
-        MML.displayMenu.apply(this, []);
+    callback: function(input) {
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 MML.menuButtons.utilitiesMenu = {
     text: "Utilities",
     nextMenu: "GmMenuUtilities",
-    triggeredFunction: function(input) {
-        MML.displayMenu.apply(this, []);
+    callback: function(input) {
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 MML.menuButtons.startCombat = {
     text: "Start Combat",
     nextMenu: "charMenuPrepareAction",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         MML.processCommand({
             type: "GM",
-            triggeredFunction: "startCombat",
+            callback: "startCombat",
             input: input
         });
     }
@@ -7609,18 +7761,23 @@ MML.menuButtons.startCombat = {
 MML.menuButtons.toMainGmMenu = {
     text: "Back",
     nextMenu: "GmMenuMain",
-    triggeredFunction: function(input) {
-        MML.displayMenu.apply(this, []);
+    callback: function(input) {
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 
 MML.menuButtons.startRound = {
     text: "Start Round",
     nextMenu: "GmMenuStartRound",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         MML.processCommand({
             type: "GM",
-            triggeredFunction: "startRound",
+            callback: "startRound",
             input: {}
         });
     }
@@ -7628,10 +7785,10 @@ MML.menuButtons.startRound = {
 MML.menuButtons.endCombat = {
     text: "End Combat",
     nextMenu: "GmMenuMain",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         MML.processCommand({
             type: "GM",
-            triggeredFunction: "endCombat",
+            callback: "endCombat",
             input: {}
         });
     }
@@ -7639,66 +7796,114 @@ MML.menuButtons.endCombat = {
 MML.menuButtons.setActionAttack = {
     text: "Attack",
     nextMenu: "charMenuAttack",
-    triggeredFunction: function(input) {
-        state.MML.characters[this.who].action = {
-            name: "Attack",
-            getTargets: "getSingleTarget",
-            triggeredFunction: "startAttackAction",
-            modifiers: []
-        };
-        MML.displayMenu.apply(this, []);
+    callback: function(input) {
+        MML.processCommand({
+            type: "character",
+            who: this.who,
+            callback: "setApiCharAttribute",
+            input: {
+                attribute: "action",
+                value: {
+                    name: "Attack",
+                    getTargets: "getSingleTarget",
+                    callback: "startAttackAction",
+                    modifiers: []
+                }
+            }
+        });
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 MML.menuButtons.setActionCast = {
     text: "Cast",
     nextMenu: "charMenuCast",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         state.MML.characters[this.who].action.name = input.text;
-        MML.displayMenu.apply(this, []);
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 MML.menuButtons.setActionReadyItem = {
     text: "Ready Item",
     nextMenu: "charMenuReadyItem",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         state.MML.characters[this.who].action.name = input.text;
         sendChat("", "Ready Item not ready...lol");
-        MML.displayMenu.apply(this, []);
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 MML.menuButtons.setActionObserve = {
     text: "Observe",
     nextMenu: "charMenuPrepareAction",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         state.MML.characters[this.who].action.name = input.text;
         sendChat("", "Observe");
-        MML.displayMenu.apply(this, []);
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 MML.menuButtons.changeAction = {
     text: "Change Action",
     nextMenu: "charMenuPrepareAction",
-    triggeredFunction: function(input) {
-        MML.displayMenu.apply(this, []);
+    callback: function(input) {
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 MML.menuButtons.actionPrepared = {
     text: "Ready",
     nextMenu: "charMenuPrepareAction",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         state.MML.characters[this.who].ready = true;
         state.MML.characters[this.who].updateCharacter("ready");
         state.MML.characters[this.who].updateCharacter("action");
         this.characterIndex++;
         if (this.characterIndex < this.characters.length) {
             MML.charMenuPrepareAction.apply(this, [this.characters[this.characterIndex]]);
-            MML.displayMenu.apply(this, []);
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "displayMenu",
+                input: {}
+            });
         } else if (this.name === state.MML.GM.player) {
             MML.GmMenuStartRound.apply(this, ["GM"]);
-            MML.displayMenu.apply(this, []);
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "displayMenu",
+                input: {}
+            });
         } else {
             this.menu = "menuIdle";
-            MML.displayMenu.apply(this, []);
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "displayMenu",
+                input: {}
+            });
         }
     }
 };
@@ -7706,33 +7911,38 @@ MML.menuButtons.actionPrepared = {
 MML.menuButtons.chooseTargets = {
     text: "Choose Targets",
     nextMenu: "charMenuChooseTargets",
-    triggeredFunction: function(input) {
-        MML.displayMenu.apply(this, []);
+    callback: function(input) {
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
 };
 
 MML.menuButtons.endAction = {
     text: "End Action",
     nextMenu: "charMenuPrepareAction",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         MML.endAction.apply(state.MML.GM, []);
     }
 };
 MML.menuButtons.rollDice = {
     text: "Roll",
     nextMenu: "menuIdle",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         state.MML.GM.currentRoll.getRoll();
     }
 };
 MML.menuButtons.initiativeRoll = {
     text: "Roll",
     nextMenu: "menuIdle",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         MML.processCommand({
             type: "character",
             who: this.who,
-            triggeredFunction: "initiativeRoll",
+            callback: "initiativeRoll",
             input: {}
         });
     }
@@ -7742,7 +7952,7 @@ MML.menuButtons.initiativeRoll = {
 MML.menuButtons.acceptRoll = {
     text: "Accept",
     nextMenu: "menuIdle",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         MML[this.currentRoll.applyResult].apply(this, []);
     }
 };
@@ -7750,7 +7960,7 @@ MML.menuButtons.acceptRoll = {
 MML.menuButtons.changeRoll = {
     text: "Change",
     nextMenu: "menuIdle",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         MML.displayGmRoll.apply(this, []);
     }
 };
@@ -7758,18 +7968,18 @@ MML.menuButtons.changeRoll = {
 MML.menuButtons.rollHitPosition = {
     text: "Roll",
     nextMenu: "charMenuRollDamage",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         MML.getHitPositionRoll.apply(state.MML.GM, []);
     }
 };
 MML.menuButtons.setProne = {
     text: "Prone",
     nextMenu: "menuCombatMovement",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         MML.processCommand({
             type: "character",
             who: this.who,
-            triggeredFunction: "setApiCharAttribute",
+            callback: "setApiCharAttribute",
             input: {
                 attribute: "movementPosition",
                 value: "Prone"
@@ -7778,7 +7988,7 @@ MML.menuButtons.setProne = {
         MML.processCommand({
             type: "character",
             who: this.who,
-            triggeredFunction: "displayMovement",
+            callback: "displayMovement",
             input: {
                 display: true
             }
@@ -7788,11 +7998,11 @@ MML.menuButtons.setProne = {
 MML.menuButtons.setCrawl = {
     text: "Crawl",
     nextMenu: "menuCombatMovement",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         MML.processCommand({
             type: "character",
             who: this.who,
-            triggeredFunction: "setApiCharAttribute",
+            callback: "setApiCharAttribute",
             input: {
                 attribute: "movementPosition",
                 value: "Crawl"
@@ -7801,7 +8011,7 @@ MML.menuButtons.setCrawl = {
         MML.processCommand({
             type: "character",
             who: this.who,
-            triggeredFunction: "displayMovement",
+            callback: "displayMovement",
             input: {
                 display: true
             }
@@ -7811,11 +8021,11 @@ MML.menuButtons.setCrawl = {
 MML.menuButtons.setStalk = {
     text: "Stalk",
     nextMenu: "menuCombatMovement",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         MML.processCommand({
             type: "character",
             who: this.who,
-            triggeredFunction: "setApiCharAttribute",
+            callback: "setApiCharAttribute",
             input: {
                 attribute: "movementPosition",
                 value: "Stalk"
@@ -7824,7 +8034,7 @@ MML.menuButtons.setStalk = {
         MML.processCommand({
             type: "character",
             who: this.who,
-            triggeredFunction: "displayMovement",
+            callback: "displayMovement",
             input: {
                 display: true
             }
@@ -7834,11 +8044,11 @@ MML.menuButtons.setStalk = {
 MML.menuButtons.setWalk = {
     text: "Walk",
     nextMenu: "menuCombatMovement",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         MML.processCommand({
             type: "character",
             who: this.who,
-            triggeredFunction: "setApiCharAttribute",
+            callback: "setApiCharAttribute",
             input: {
                 attribute: "movementPosition",
                 value: "Walk"
@@ -7847,7 +8057,7 @@ MML.menuButtons.setWalk = {
         MML.processCommand({
             type: "character",
             who: this.who,
-            triggeredFunction: "displayMovement",
+            callback: "displayMovement",
             input: {
                 display: true
             }
@@ -7857,11 +8067,11 @@ MML.menuButtons.setWalk = {
 MML.menuButtons.setJog = {
     text: "Jog",
     nextMenu: "menuCombatMovement",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         MML.processCommand({
             type: "character",
             who: this.who,
-            triggeredFunction: "setApiCharAttribute",
+            callback: "setApiCharAttribute",
             input: {
                 attribute: "movementPosition",
                 value: "Jog"
@@ -7870,7 +8080,7 @@ MML.menuButtons.setJog = {
         MML.processCommand({
             type: "character",
             who: this.who,
-            triggeredFunction: "displayMovement",
+            callback: "displayMovement",
             input: {
                 display: true
             }
@@ -7880,11 +8090,11 @@ MML.menuButtons.setJog = {
 MML.menuButtons.setRun = {
     text: "Run",
     nextMenu: "menuCombatMovement",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         MML.processCommand({
             type: "character",
             who: this.who,
-            triggeredFunction: "setApiCharAttribute",
+            callback: "setApiCharAttribute",
             input: {
                 attribute: "movementPosition",
                 value: "Run"
@@ -7893,7 +8103,7 @@ MML.menuButtons.setRun = {
         MML.processCommand({
             type: "character",
             who: this.who,
-            triggeredFunction: "displayMovement",
+            callback: "displayMovement",
             input: {
                 display: true
             }
@@ -7903,11 +8113,11 @@ MML.menuButtons.setRun = {
 MML.menuButtons.endMovement = {
     text: "End Movement",
     nextMenu: "menuIdle",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         MML.processCommand({
             type: "character",
             who: this.who,
-            triggeredFunction: "displayMovement",
+            callback: "displayMovement",
             input: {
                 display: false
             }
@@ -7915,7 +8125,7 @@ MML.menuButtons.endMovement = {
         MML.processCommand({
             type: "character",
             who: this.who,
-            triggeredFunction: "startAction",
+            callback: "startAction",
             input: {}
         });
     }
@@ -7923,7 +8133,7 @@ MML.menuButtons.endMovement = {
 MML.menuButtons.defenseBlock = {
     text: "Block",
     nextMenu: "menuIdle",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         state.MML.characters[this.who].defense.style = "Block";
         state.MML.characters[this.who].defense.number++;
         MML.getDefenseRoll.apply(state.MML.GM, []);
@@ -7932,7 +8142,7 @@ MML.menuButtons.defenseBlock = {
 MML.menuButtons.defenseDodge = {
     text: "Dodge",
     nextMenu: "menuIdle",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         state.MML.characters[this.who].defense.style = "Dodge";
         state.MML.characters[this.who].defense.number++;
         state.MML.characters[this.who].defense.dodge = true;
@@ -7942,7 +8152,7 @@ MML.menuButtons.defenseDodge = {
 MML.menuButtons.defenseTakeIt = {
     text: "Take It",
     nextMenu: "menuIdle",
-    triggeredFunction: function(input) {
+    callback: function(input) {
         state.MML.characters[this.who].defense.style = "Take It";
         MML.getDefenseRoll.apply(state.MML.GM, []);
     }
@@ -7983,7 +8193,7 @@ on("ready", function() {
         MML.processCommand({
         	type: "character",
         	who: charName,
-        	triggeredFunction:"updateCharacter",
+        	callback:"updateCharacter",
 			input: {
 		    	attribute: "race"
 		  	}
@@ -7999,7 +8209,7 @@ on("ready", function() {
             MML.processCommand({
 	        	type: "character",
 	        	who: charName,
-	        	triggeredFunction:"updateCharacter",
+	        	callback:"updateCharacter",
 				input: {
 			    	attribute: "skills"
 			  	}
@@ -8009,7 +8219,7 @@ on("ready", function() {
             MML.processCommand({
 	        	type: "character",
 	        	who: charName,
-	        	triggeredFunction:"updateCharacter",
+	        	callback:"updateCharacter",
 				input: {
 			    	attribute: "weaponSkills"
 			  	}
@@ -8045,7 +8255,7 @@ on("ready", function() {
                 MML.processCommand({
 		        	type: "character",
 		        	who: charName,
-		        	triggeredFunction:"moveDistance",
+		        	callback:"moveDistance",
 					input: {
 				    	distance: "distance"
 				  	}
@@ -8079,7 +8289,7 @@ on("ready", function() {
         MML.processCommand({
         	type: "character",
         	who: newName,
-        	triggeredFunction:"updateCharacter",
+        	callback:"updateCharacter",
 			input: {
 		    	attribute: "name"
 		  	}
@@ -8102,7 +8312,7 @@ on("ready", function() {
                 MML.processCommand({
 		        	type: "character",
 		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
+		        	callback:"updateCharacter",
 					input: {
 				    	attribute: "stature"
 				  	}
@@ -8117,7 +8327,7 @@ on("ready", function() {
                 MML.processCommand({
 		        	type: "character",
 		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
+		        	callback:"updateCharacter",
 					input: {
 				    	attribute: "strength"
 				  	}
@@ -8132,7 +8342,7 @@ on("ready", function() {
                 MML.processCommand({
 		        	type: "character",
 		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
+		        	callback:"updateCharacter",
 					input: {
 				    	attribute: "coordination"
 				  	}
@@ -8147,7 +8357,7 @@ on("ready", function() {
                 MML.processCommand({
 		        	type: "character",
 		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
+		        	callback:"updateCharacter",
 					input: {
 				    	attribute: "health"
 				  	}
@@ -8162,7 +8372,7 @@ on("ready", function() {
                 MML.processCommand({
 		        	type: "character",
 		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
+		        	callback:"updateCharacter",
 					input: {
 				    	attribute: "beauty"
 				  	}
@@ -8177,7 +8387,7 @@ on("ready", function() {
                 MML.processCommand({
 		        	type: "character",
 		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
+		        	callback:"updateCharacter",
 					input: {
 				    	attribute: "intellect"
 				  	}
@@ -8192,7 +8402,7 @@ on("ready", function() {
                 MML.processCommand({
 		        	type: "character",
 		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
+		        	callback:"updateCharacter",
 					input: {
 				    	attribute: "reason"
 				  	}
@@ -8207,7 +8417,7 @@ on("ready", function() {
                 MML.processCommand({
 		        	type: "character",
 		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
+		        	callback:"updateCharacter",
 					input: {
 				    	attribute: "creativity"
 				  	}
@@ -8222,7 +8432,7 @@ on("ready", function() {
                 MML.processCommand({
 		        	type: "character",
 		        	who: charName,
-		        	triggeredFunction:"updateCharacter",
+		        	callback:"updateCharacter",
 					input: {
 				    	attribute: "presence"
 				  	}
@@ -8233,7 +8443,7 @@ on("ready", function() {
                     MML.processCommand({
 			        	type: "character",
 			        	who: charName,
-			        	triggeredFunction:"updateCharacter",
+			        	callback:"updateCharacter",
 						input: {
 					    	attribute: "inventory"
 					  	}
@@ -8243,7 +8453,7 @@ on("ready", function() {
                     MML.processCommand({
 			        	type: "character",
 			        	who: charName,
-			        	triggeredFunction:"updateCharacter",
+			        	callback:"updateCharacter",
 						input: {
 					    	attribute: "skills"
 					  	}
@@ -8254,7 +8464,7 @@ on("ready", function() {
                     MML.processCommand({
 			        	type: "character",
 			        	who: charName,
-			        	triggeredFunction:"updateCharacter",
+			        	callback:"updateCharacter",
 						input: {
 					    	attribute: "weaponSkills"
 					  	}
@@ -8265,7 +8475,7 @@ on("ready", function() {
                     MML.processCommand({
 			        	type: "character",
 			        	who: charName,
-			        	triggeredFunction:"updateCharacter",
+			        	callback:"updateCharacter",
 						input: {
 					    	attribute: attrName
 					  	}
@@ -8300,7 +8510,7 @@ MML.statusEffects = {};
 
 
 MML.statusEffects["Major Wound"] = function(effect, index){
-    if(this[effect.bodyPart] > Math.round(this[effect.bodyPart + "Max"]/2)){
+    if(this.hp[effect.bodyPart] > Math.round(this.hpMax[effect.bodyPart]/2)){
         delete this.statusEffects[index];
     }
     else{
@@ -8316,7 +8526,7 @@ MML.statusEffects["Major Wound"] = function(effect, index){
     //      }
 };
 MML.statusEffects["Disabling Wound"] = function(effect, index){
-    if(this[effect.bodyPart] > 0){
+    if(this.hp[effect.bodyPart] > 0){
         delete this.statusEffects[index];
     }
     else{
@@ -8327,7 +8537,7 @@ MML.statusEffects["Disabling Wound"] = function(effect, index){
     }
 };
 MML.statusEffects["Mortal Wound"] = function(effect, index){
-    if(this[effect.bodyPart] <= -this[effect.bodyPart + "Max"]){
+    if(this.hp[effect.bodyPart] <= -this.hpMax[effect.bodyPart]){
         delete this.statusEffects[index];
     }
     else{
@@ -8768,6 +8978,15 @@ generateRowID = function() {
     return generateUUID().replace(/_/g, "Z");
 };
 
+MML.hexify = function hexify(stringIn){
+    var stringOut = "";
+    var i;
+    for (i = 0; i < stringIn.length; i++) {
+        stringOut += ("000" + stringIn.charCodeAt(i).toString(16)).slice(-4);
+    }
+    return stringOut;
+};
+
 MML.dehexify = function dehexify(hexIn) {
     var i;
     var hexes = hexIn.match(/.{1,4}/g) || [];
@@ -8823,7 +9042,7 @@ MML.rollDamage = function rollDamage(input) {
     MML.processCommand({
         type: "player",
         who: this.player,
-        triggeredFunction: "setApiPlayerAttribute",
+        callback: "setApiPlayerAttribute",
         input: {
             attribute: "currentRoll",
             value: roll
@@ -8832,7 +9051,7 @@ MML.rollDamage = function rollDamage(input) {
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: input.rollResultFunction,
+        callback: input.rollResultFunction,
         input: {}
     });
 };
@@ -8864,7 +9083,7 @@ MML.universalRoll = function universalRoll(input) {
     MML.processCommand({
         type: "player",
         who: this.player,
-        triggeredFunction: "setApiPlayerAttribute",
+        callback: "setApiPlayerAttribute",
         input: {
             attribute: "currentRoll",
             value: roll
@@ -8873,7 +9092,7 @@ MML.universalRoll = function universalRoll(input) {
     MML.processCommand({
         type: "character",
         who: this.name,
-        triggeredFunction: input.rollResultFunction,
+        callback: input.rollResultFunction,
         input: {}
     });
 };
@@ -8965,18 +9184,10 @@ MML.displayMenu = function displayMenu(input) {
                 who: this.who,
                 buttonText: button.text
             },
-            triggeredFunction: "menuCommand"
+            callback: "menuCommand"
         });
 
-        // JSON strings screw up Command Buttons, convert to hex
-        var hex, i;
-        var result = "";
-        for (i = 0; i < command.length; i++) {
-            result += ("000" + command.charCodeAt(i).toString(16)).slice(-4);
-        }
-
-
-        toChat = toChat + '{{' + noSpace + '=[' + button.text + '](!MML|' + result + ')}} ';
+        toChat = toChat + '{{' + noSpace + '=[' + button.text + '](!MML|' + MML.hexify(command) + ')}} ';
     }, this);
     sendChat(this.name, toChat, null, {
         noarchive: false
@@ -8984,14 +9195,5 @@ MML.displayMenu = function displayMenu(input) {
 };
 
 MML.displayTargetSelection = function displayTargetSelection(input) {
-    var inputJSON = JSON.stringify(input);
-
-    // JSON strings screw up Command Buttons, convert to hex
-    var hex, i;
-    var result = "";
-    for (i = 0; i < inputJSON.length; i++) {
-        result += ("000" + inputJSON.charCodeAt(i).toString(16)).slice(-4);
-    }
-
-    sendChat("", "&{template:selectTarget} {{charName=" + input.charName + "}} {{input=" + result + "}}");
+    sendChat("", "&{template:selectTarget} {{charName=" + input.charName + "}} {{input=" + MML.hexify(JSON.stringify(input)) + "}}");
 };
