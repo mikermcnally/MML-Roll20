@@ -328,7 +328,7 @@ MML.rollDamage = function rollDamage(input) {
         value: value,
         range: range,
         message: "Roll: " + value + "\nRange: " + range,
-        rollResultFunction: input.rollResultFunction
+        callback: input.callback
     };
 
     MML.processCommand({
@@ -343,14 +343,14 @@ MML.rollDamage = function rollDamage(input) {
     MML.processCommand({
         type: "character",
         who: this.name,
-        callback: input.rollResultFunction,
+        callback: input.callback,
         input: {}
     });
 };
 
 MML.universalRoll = function universalRoll(input) {
     // log("universalRoll");
-    // log(input.rollResultFunction);
+    // log(input.callback);
     // log(input.mods);
     var target = 0;
 
@@ -363,7 +363,7 @@ MML.universalRoll = function universalRoll(input) {
         type: "universal",
         name: input.name,
         character: this.name,
-        rollResultFunction: input.rollResultFunction,
+        callback: input.callback,
         value: MML.rollDice(1, 100),
         range: "1-100",
         target: target,
@@ -384,7 +384,7 @@ MML.universalRoll = function universalRoll(input) {
     MML.processCommand({
         type: "character",
         who: this.name,
-        callback: input.rollResultFunction,
+        callback: input.callback,
         input: {}
     });
 };

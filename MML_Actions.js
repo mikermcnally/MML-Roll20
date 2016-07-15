@@ -15,7 +15,7 @@ MML.meleeAttackAction = function meleeAttackAction() {
         MML.meleeAttackRoll("attackRoll", character, attackerWeapon.task, attackerSkill);
     } else if (_.isUndefined(rolls.defenseRoll)) {
         if (rolls.attackRoll === "Critical Success" || rolls.attackRoll === "Success") {
-            MML.meleeDefenseRoll(target, targetWeapon);
+            MML.meleeDefense(target, attackerWeapon);
         } else if (rolls.attackRoll === "Critical Failure") {
             MML.endAction();
         } else {

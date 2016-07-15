@@ -277,7 +277,7 @@ MML.changeRoll = function changeRoll(input) {
     var range = this.currentRoll.range.split("-");
     var low = parseInt(range[0]);
     var high = parseInt(range[1]);
-    log(this.currentRoll.rollResultFunction);
+    log(this.currentRoll.callback);
     if (value >= low && value <= high) {
         if (this.currentRoll.type === "damage") {
             this.currentRoll.value = -value;
@@ -296,7 +296,7 @@ MML.changeRoll = function changeRoll(input) {
     MML.processCommand({
         type: "character",
         who: this.currentRoll.character,
-        callback: this.currentRoll.rollResultFunction,
+        callback: this.currentRoll.callback,
         input: {}
     });
 };
@@ -323,6 +323,16 @@ MML.assignNewItem = function assignNewItem(input) {
 //     rollResult: "Success"
 //   }
 // };
+
+function commandLock(){
+    switch (state.MML.GM.gameState) {
+        case "non-combat":
+
+            break;
+        default:
+
+    }
+}
 
 MML.processCommand = function processCommand(command) {
     try {
@@ -408,7 +418,7 @@ MML.parseCommand = function parseCommand(msg) {
                 command = {
                     type: "character",
                     who: player.who,
-                    callback: player.currentRoll.rollResultFunction,
+                    callback: player.currentRoll.callback,
                     input: {}
                 };
             }
