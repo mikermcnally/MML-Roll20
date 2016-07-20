@@ -1080,21 +1080,8 @@ MML.equipmentFailure = function equipmentFailure(input) {
     log("equipmentFailure");
 };
 
-MML.meleeDamageRoll = function meleeDamageRoll(character, attackerWeapon, crit) {
-    var action = state.MML.GM.currentAction;
-    var weapon = action.attackerWeapon;
-    var weaponDamage;
-    var damageType;
-    var bonusDamage = 0;
-
-    //Primary or secondary attack
-    if (action.weaponType === "primary") {
-        weaponDamage = weapon.grips[action.attackerGrip].primaryDamage;
-        damageType = weapon.grips[action.attackerGrip].primaryType;
-    } else {
-        weaponDamage = weapon.grips[action.attackerGrip].secondaryDamage;
-        damageType = weapon.grips[action.attackerGrip].secondaryType;
-    }
+MML.meleeDamageRoll = function meleeDamageRoll(character, attackerWeapon, crit, bonusDamage) {
+    bonusDamage = 0;
 
     MML.processCommand({
         type: "character",
@@ -1102,9 +1089,9 @@ MML.meleeDamageRoll = function meleeDamageRoll(character, attackerWeapon, crit) 
         callback: "rollDamage",
         input: {
             callback: "meleeDamageResult",
-            attackRollResult: action.attackRollResult,
-            weaponDamage: weaponDamage,
-            damageType: damageType,
+            crit: crit,
+            damageDice: attackerWeapon.damage,
+            damageType: attackerWeapon.damageType,
             mods: [this.meleeDamageMod, bonusDamage]
         }
     });

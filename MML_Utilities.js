@@ -302,7 +302,7 @@ MML.rollDice = function rollDice(amount, size) {
 };
 
 MML.rollDamage = function rollDamage(input) {
-    var diceArray = input.weaponDamage.split("d");
+    var diceArray = input.damageDice.split("d");
     var amount = diceArray[0] * 1;
     var size = diceArray[1] * 1;
     var damageMod = 0;
@@ -313,7 +313,7 @@ MML.rollDamage = function rollDamage(input) {
         damageMod += mod;
     });
 
-    if (input.attackRollResult === "Critical Success") {
+    if (input.crit) {
         value = -(MML.rollDice(amount, size) + amount * size + damageMod);
         range = (amount * size + amount + damageMod) + "-" + (2 * amount * size + damageMod);
     } else {

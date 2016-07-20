@@ -29,9 +29,9 @@ MML.meleeAttackAction = function meleeAttackAction() {
         }
     } else if (_.isUndefined(rolls.damageRoll)) {
         if (rolls.attackRoll === "Critical Success") {
-            MML.meleeDamageRoll(character, attackerWeapon, true);
+            MML.meleeDamageRoll(target, attackerWeapon, true);
         } else {
-            MML.meleeDamageRoll(character, attackerWeapon, false);
+            MML.meleeDamageRoll(target, attackerWeapon, false);
         }
     } else if (!_.isUndefined(parameters.wound)) {
         MML.woundRoll();
