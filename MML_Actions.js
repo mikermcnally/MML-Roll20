@@ -33,15 +33,31 @@ MML.meleeAttackAction = function meleeAttackAction() {
         } else {
             MML.meleeDamageRoll(target, attackerWeapon, false);
         }
-    } else if (!_.isUndefined(parameters.wound)) {
-        MML.woundRoll();
-    } else if (!_.isUndefined(parameters.multiWound)) {
-        MML.multiWoundRoll();
-    } else if (!_.isUndefined(parameters.sensitiveArea)) {
-        MML.sensitiveAreaRoll();
-    } else if (!_.isUndefined(parameters.knockDown)) {
-        MML.knockdownRoll();
     } else {
-        MML.endAction();
+        MML.damageTargetAction("endAction");
+    }
+};
+
+MML.damageTargetAction = function damageTargetAction(callback) {
+    var currentAction = state.MML.GM.currentAction;
+    var parameters = currentAction.parameters;
+    var target = parameters.target;
+    var rolls = currentAction.rolls;
+
+    if (!_.isUndefined(parameters.wound)) {
+        state.MML.GM.currentAction.parameters.wound = "complete";
+        var damageAfterArmor = armorDamageReduction(rolls.hitPositionRoll.name, rolls.damageRoll.value, parameters.damageType, randomInteger(100));
+        MML.alterHP(rolls.hitPositionRoll.bodyPart, damageAfterArmor, state.MML.GM.currentAction.callback);
+    } else if (!_.isUndefined(parameters.multiWound)) {
+        state.MML.GM.currentAction.parameters.multiWound = "complete";
+        MML.setMultiWound(state.MML.GM.currentAction.callback);
+    } else if (!_.isUndefined(parameters.sensitiveArea)) {
+        state.MML.GM.currentAction.parameters.sensitiveArea = "complete";
+        MML.sensitiveAreaCheck(state.MML.GM.currentAction.callback);
+    } else if (!_.isUndefined(parameters.knockDown)) {
+        state.MML.GM.currentAction.parameters.knockDown = "complete";
+        MML.knockdownCheck(state.MML.GM.currentAction.callback);
+    } else {
+        MML[callback]();
     }
 };
