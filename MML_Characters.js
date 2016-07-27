@@ -123,7 +123,7 @@ MML.setReady = function setReady(ready) {
 };
 
 // Health and Wounds
-MML.alterHP = function alterHP(bodyPart, hpAmount, callback) {
+MML.alterHP = function alterHP(bodyPart, hpAmount) {
     var initialHP = this.hp[bodyPart];
     var currentHP = initialHP + hpAmount;
     var maxHP = this.hpMax[bodyPart];
@@ -138,14 +138,12 @@ MML.alterHP = function alterHP(bodyPart, hpAmount, callback) {
             } else { //Add damage to duration of effect
                 duration = -hpAmount;
             }
+            state.MML.GM.currentAction.woundDuration = duration;
             MML.processCommand({
                 type: "character",
                 who: this.name,
                 callback: "majorWoundRoll",
-                input: {
-                    duration: duration,
-                    callback: callback
-                }
+                input: {}
             });
         } else if (currentHP < 0 && currentHP > -maxHP) { //Disabling wound
             if (!_.has(this.statusEffects, "Disabling Wound, " + bodyPart)) { //Fresh wound
@@ -153,43 +151,33 @@ MML.alterHP = function alterHP(bodyPart, hpAmount, callback) {
             } else { //Add damage to duration of effect
                 duration = -hpAmount;
             }
+            state.MML.GM.currentAction.woundDuration = duration;
             MML.processCommand({
                 type: "character",
                 who: this.name,
                 callback: "disablingWoundRoll",
-                input: {
-                    duration: duration,
-                    callback: callback
-                }
+                input: {}
             });
         } else if (currentHP < -maxHP) { //Mortal wound
             MML.processCommand({
                 type: "character",
                 who: this.name,
                 callback: "mortalWoundRoll",
-                input: {
-                    callback: callback
-                }
+                input: {}
             });
         } else {
-            MML.processCommand({
-                type: "character",
-                who: this.name,
-                callback: "checkKnockdown",
-                input: {
-                    callback: callback
-                }
-            });
+            MML[state.MML.GM.currentAction.callback]();
         }
     } else { //if healing
         this.hp[bodyPart] += hpAmount;
         if (this.hp[bodyPart] > maxHP) {
             this.hp[bodyPart] = maxHP;
         }
+        MML[state.MML.GM.currentAction.callback]();
     }
 };
 
-MML.setMultiWound = function setMultiWound(callback) {
+MML.setMultiWound = function setMultiWound() {
     var currentHP = this.hp;
     currentHP["Multiple Wounds"] = this.hpMax["Multiple Wounds"];
 
@@ -211,37 +199,119 @@ MML.setMultiWound = function setMultiWound(callback) {
         }
     });
 
-    if (!_.has(this.statusEffects, "Wound Fatigue")) {
+    if (currentHP["Multiple Wounds"] < 0 && !_.has(this.statusEffects, "Wound Fatigue")) {
         MML.multiWoundRoll();
+    } else {
+        MML[state.MML.GM.currentAction.callback]();
     }
 };
 
-MML.multiWoundRoll = function getMultiWoundRoll(input) {
-    var roll = attributeCheckRoll("systemStrength", [0]);
+MML.multiWoundRoll = function multiWoundRoll() {
+    MML.attributeCheckRoll("systemStrength", [0], multiWoundRollResult);
 };
 
-MML.multiWoundRollResult = function getMultiWoundRoll(input) {
-    var roll = attributeCheckRoll("systemStrength", [0]);
+MML.multiWoundRollResult = function multiWoundRollResult() {
+    var currentRoll = state.MML.players[this.player].currentRoll;
+
+    if (this.player === state.MML.GM.player) {
+        if (currentRoll.accepted === false) {
+            MML.processCommand({
+                type: "player",
+                who: this.player,
+                callback: "displayGmRoll",
+                input: {
+                    currentRoll: currentRoll
+                }
+            });
+        } else {
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                callback: "multiWoundRollApply",
+                input: currentRoll
+            });
+        }
+    } else {
+        MML.processCommand({
+            type: "player",
+            who: this.player,
+            callback: "displayPlayerRoll",
+            input: {
+                currentRoll: currentRoll
+            }
+        });
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            callback: "multiWoundRollApply",
+            input: currentRoll
+        });
+    }
 };
 
-MML.multiWoundRoll = function getMultiWoundRoll(input) {
-    var roll = attributeCheckRoll("systemStrength", [0]);
+MML.multiWoundRollApply = function multiWoundRollApply(input) {
+    var result = state.MML.players[this.player].currentRoll.result;
+    state.MML.GM.currentAction.multiWoundRoll = result;
+    if (result === "Failure") {
+        this.statusEffects["Wound Fatiuge"] = {};
+    }
+    MML[state.MML.GM.currentAction.callback]();
 };
 
 MML.majorWoundRoll = function majorWoundRoll(input) {
-    roll = this.attributeCheckRoll("willpower", [0]);
+    roll = this.attributeCheckRoll("willpower", [0], majorWoundRollResult);
 };
 
 MML.majorWoundRollResult = function majorWoundRollResult(input) {
-    var roll;
+    var currentRoll = state.MML.players[this.player].currentRoll;
 
+    if (this.player === state.MML.GM.player) {
+        if (currentRoll.accepted === false) {
+            MML.processCommand({
+                type: "player",
+                who: this.player,
+                callback: "displayGmRoll",
+                input: {
+                    currentRoll: currentRoll
+                }
+            });
+        } else {
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                callback: "majorWoundRollApply",
+                input: currentRoll
+            });
+        }
+    } else {
+        MML.processCommand({
+            type: "player",
+            who: this.player,
+            callback: "displayPlayerRoll",
+            input: {
+                currentRoll: currentRoll
+            }
+        });
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            callback: "majorWoundRollApply",
+            input: currentRoll
+        });
+    }
 };
 
 MML.majorWoundRollApply = function majorWoundRollApply() {
-    if (this.rolls.result === "Failure") {
-        var message = this.name + " suffered a major wound to their " + bodyPart;
-        this.characters[this.currentTarget][this.rolls.wound.bodyPart].wound.major.duration += this.rolls.wound.duration;
+    var result = state.MML.players[this.player].currentRoll.result;
+    state.MML.GM.currentAction.multiWoundRoll = result;
+    var bodyPart = state.MML.GM.currentAction.hitPositionRoll.bodyPart;
+    if (result === "Failure") {
+        this.statusEffects["Major Wound, " + bodyPart] = {
+            duration: state.MML.GM.currentAction.woundDuration,
+            bodyPart: bodyPart
+        };
     }
+    MML[state.MML.GM.currentAction.callback]();
 };
 
 MML.disablingWoundRoll = function disablingWoundRoll(input) {
@@ -926,13 +996,7 @@ MML.hitPositionRollResult = function hitPositionRollResult(input) {
 
 MML.hitPositionRollApply = function hitPositionRollApply(input) {
     state.MML.GM.currentAction.hitPosition = input.result;
-
-    MML.processCommand({
-        type: "character",
-        who: this.name,
-        callback: input.callback,
-        input: {}
-    });
+    MML[state.MML.GM.currentAction.callback]();
 };
 
 MML.meleeDefense = function meleeDefense(defender, attackerWeapon) {

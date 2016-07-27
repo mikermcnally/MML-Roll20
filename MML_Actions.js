@@ -47,16 +47,16 @@ MML.damageTargetAction = function damageTargetAction(callback) {
     if (!_.isUndefined(parameters.wound)) {
         state.MML.GM.currentAction.parameters.wound = "complete";
         var damageAfterArmor = armorDamageReduction(rolls.hitPositionRoll.name, rolls.damageRoll.value, parameters.damageType, randomInteger(100));
-        MML.alterHP(rolls.hitPositionRoll.bodyPart, damageAfterArmor, state.MML.GM.currentAction.callback);
+        MML.alterHP(rolls.hitPositionRoll.bodyPart, damageAfterArmor);
     } else if (!_.isUndefined(parameters.multiWound)) {
         state.MML.GM.currentAction.parameters.multiWound = "complete";
-        MML.setMultiWound(state.MML.GM.currentAction.callback);
+        MML.setMultiWound();
     } else if (!_.isUndefined(parameters.sensitiveArea)) {
         state.MML.GM.currentAction.parameters.sensitiveArea = "complete";
-        MML.sensitiveAreaCheck(state.MML.GM.currentAction.callback);
+        MML.sensitiveAreaCheck();
     } else if (!_.isUndefined(parameters.knockDown)) {
         state.MML.GM.currentAction.parameters.knockDown = "complete";
-        MML.knockdownCheck(state.MML.GM.currentAction.callback);
+        MML.knockdownCheck();
     } else {
         MML[callback]();
     }
