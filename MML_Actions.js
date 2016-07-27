@@ -33,7 +33,7 @@ MML.meleeAttackAction = function meleeAttackAction() {
         } else {
             MML.meleeDamageRoll(target, attackerWeapon, false);
         }
-    } else if (!_.isUndefined(parameters.wound)) {
+    } else if (!_.isUndefined(parameters.wound) && _.isUndefined(rolls.woundRoll)) {
         MML.woundRoll();
     } else if (!_.isUndefined(parameters.multiWound)) {
         MML.multiWoundRoll();

@@ -113,8 +113,6 @@ MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input) {
     });
 };
 
-
-
 MML.setReady = function setReady(ready) {
     if (state.MML.GM.inCombat === true && this.ready === "false") {
         MML.getTokenFromChar(this.name).set("tint_color", "#FF0000");
@@ -231,14 +229,11 @@ MML.majorWoundRollApply = function majorWoundRollApply() {
     }
 };
 
-
 MML.disablingWoundRoll = function disablingWoundRoll(input) {
     roll = this.attributeCheckRoll("systemStrength", [0]);
 };
 
-MML.disablingWoundRollResult = function disablingWoundRollResult(woundInfo) {
-
-};
+MML.disablingWoundRollResult = function disablingWoundRollResult(woundInfo) {};
 
 MML.disablingWoundRollApply = function disablingWoundRollApply() {
     this.characters[this.currentTarget][this.rolls.wound.bodyPart].wound.disabling = true;
@@ -256,9 +251,7 @@ MML.mortalWoundRollResult = function mortalWoundRollResult(woundInfo) {
     var roll;
 };
 
-MML.mortalWoundRollApply = function mortalWoundRollApply() {
-
-};
+MML.mortalWoundRollApply = function mortalWoundRollApply() {};
 
 MML.checkKnockdown = function checkKnockdown(damage) {
     if (this.movementPosition !== "Prone") {
@@ -278,6 +271,7 @@ MML.knockdownRoll = function knockdownRoll() {
     }
     return roll;
 };
+
 MML.getKnockdownRoll = function getKnockdownRoll(input) {
     switch (input) {
         case "entry":
@@ -315,6 +309,7 @@ MML.sensitiveAreaRoll = function sensitiveAreaCheck() {
     var roll = this.attributeCheckRoll("willpower", [0]);
     return roll;
 };
+
 MML.getSensitiveAreaRoll = function getSensitiveAreaRoll(input) {
     switch (input) {
         case "entry":
@@ -401,9 +396,8 @@ MML.fatigueRecoveryRoll = function fatigueRecoveryRoll(modifier) {
     });
 };
 
-MML.armorDamageReduction = function armorDamageReduction(position, damage, type) {
+MML.armorDamageReduction = function armorDamageReduction(position, damage, type, coverageRoll) {
     var damageApplied = false; //Accounts for partial coverage, once true the loop stops
-    var coverageRoll = randomInteger(100);
     var damageDeflected = 0;
 
     // Iterates over apv values at given position (accounting for partial coverage)
@@ -1062,8 +1056,6 @@ MML.meleeBlockRollApply = function meleeBlockRollApply(input) {
     MML[state.MML.GM.currentAction.callback]();
 };
 
-
-
 MML.meleeDodgeRoll = function meleeDodgeRoll(input) {
     MML.processCommand({
         type: "character",
@@ -1137,7 +1129,11 @@ MML.meleeDamageResult = function meleeDamageResult(input) {
 };
 
 MML.meleeDamageRollApply = function meleeDamageRollApply(input) {
+    var result = state.MML.players[this.player].currentRoll.result;
+    state.MML.GM.currentAction.damageRoll = result;
 
+    MML.alterHP(MML.armorDamageReduction(state.MML.GM.currentAction.hitPositionRoll.bodyPart, result.value, type, rollDice(1, 100)))
+    state.MML.GM.currentAction.callback
 };
 
 // Todo: Add sweep attack
