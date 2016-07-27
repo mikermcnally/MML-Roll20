@@ -562,11 +562,11 @@ MML.computeAttribute.apv = {
             },
             this);
 
-        var mat = [];
+        var apvMatrix = {};
 
         // Initialize APV Matrix
         _.each(MML.hitPositions[this.bodyType], function(position) {
-            mat.push({
+            apvMatrix[position.name] = {
                 Surface: [{
                     value: 0,
                     coverage: 100
@@ -595,7 +595,7 @@ MML.computeAttribute.apv = {
                     value: 0,
                     coverage: 100
                 }]
-            });
+            };
         });
 
         //Creates raw matrix of individual pieces of armor (no layering or partial coverage)
@@ -604,90 +604,85 @@ MML.computeAttribute.apv = {
             var material = MML.APVList[piece.material];
 
             _.each(piece.protection, function(protection) {
-                mat[protection.position].Surface.push({
+                var position = MML.hitPositions[this.bodyType][protection.position].name;
+                var coverage = protection.coverage;
+                apvMatrix[position].Surface.push({
                     value: material.surface,
-                    coverage: protection.coverage
+                    coverage: coverage
                 });
-                mat[protection.position].Cut.push({
+                apvMatrix[position].Cut.push({
                     value: material.cut,
-                    coverage: protection.coverage
+                    coverage: coverage
                 });
-                mat[protection.position].Chop.push({
+                apvMatrix[position].Chop.push({
                     value: material.chop,
-                    coverage: protection.coverage
+                    coverage: coverage
                 });
-                mat[protection.position].Pierce.push({
+                apvMatrix[position].Pierce.push({
                     value: material.pierce,
-                    coverage: protection.coverage
+                    coverage: coverage
                 });
-                mat[protection.position].Thrust.push({
+                apvMatrix[position].Thrust.push({
                     value: material.thrust,
-                    coverage: protection.coverage
+                    coverage: coverage
                 });
-                mat[protection.position].Impact.push({
+                apvMatrix[position].Impact.push({
                     value: material.impact,
-                    coverage: protection.coverage
+                    coverage: coverage
                 });
-                mat[protection.position].Flanged.push({
+                apvMatrix[position].Flanged.push({
                     value: material.flanged,
-                    coverage: protection.coverage
+                    coverage: coverage
                 });
             });
         });
 
         //This loop accounts for layered armor and partial coverage and outputs final APVs
-        var position = 0;
-        for (position in mat) {
-            for (var type in mat[position]) {
-                var rawAPVArray = mat[position][type];
+        _.each(apvMatrix, function(position, positionName) {
+            _.each(position, function(rawAPVArray, type) {
                 var apvFinalArray = [];
                 var coverageArray = [];
 
                 //Creates an array of armor coverage in ascending order.
-                var apv;
-                for (apv in rawAPVArray) {
-                    if (coverageArray.indexOf(rawAPVArray[apv].coverage) === -1) {
-                        coverageArray.push(rawAPVArray[apv].coverage);
+                _.each(rawAPVArray, function(apv){
+                    if (coverageArray.indexOf(apv.coverage) === -1) {
+                        coverageArray.push(apv.coverage);
                     }
-                }
+                });
                 coverageArray = coverageArray.sort(function(a, b) {
                     return a - b;
                 });
 
                 //Creates APV array per damage type per position
-                var value;
-                for (value in coverageArray) {
+                _.each(coverageArray, function(apvCoverage){
                     var apvToLayerArray = [];
                     var apvValue = 0;
-                    var apvCoverage = coverageArray[value];
 
                     //Builds an array of APVs that meet or exceed the coverage value
-                    apv = 0;
-                    for (apv in rawAPVArray) {
-                        if (rawAPVArray[apv].coverage >= apvCoverage) {
-                            apvToLayerArray.push(rawAPVArray[apv]);
+                    _.each(rawAPVArray, function(apv){
+                        if (apv.coverage >= apvCoverage) {
+                            apvToLayerArray.push(apv);
                         }
-                    }
+                    });
                     apvToLayerArray = apvToLayerArray.sort(function(a, b) {
                         return b - a;
                     });
 
                     //Adds the values at coverage value with diminishing returns on layered armor
-                    value = 0;
-                    for (value in apvToLayerArray) {
-                        apvValue += apvToLayerArray[value] * Math.pow(2, -value);
+                    _.each(apvToLayerArray, function(value, index){
+                        apvValue += value * Math.pow(2, -index);
                         apvValue = Math.round(apvValue);
-                    }
+                    });
                     //Puts final APV and associated Coverage into final APV array for that damage type.
                     apvFinalArray.push({
                         value: apvValue,
                         coverage: apvCoverage
                     });
-                }
-                mat[position][type] = apvFinalArray;
-            }
-        }
-        return mat;
+                });
+                apvMatrix[positionName][type] = apvFinalArray;
+            });
+        });
+        return apvMatrix;
     }
 };
 MML.computeAttribute.leftHand = {

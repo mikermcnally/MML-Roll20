@@ -123,66 +123,81 @@ MML.setReady = function setReady(ready) {
 };
 
 // Health and Wounds
-MML.alterHP = function alterHP(position, hpAmount) {
-    var woundInfo = {
-        bodyPart: MML.hitPositions[position].part,
-        type: "none",
-        duration: -1
-    };
+MML.alterHP = function alterHP(bodyPart, hpAmount, callback) {
+    var initialHP = this.hp[bodyPart];
+    var currentHP = initialHP + hpAmount;
+    var maxHP = this.hpMax[bodyPart];
 
     if (hpAmount < 0) { //if damage
-        var initialHP = this[woundInfo.bodyPart].current;
-        var currentHP = initialHP + hpAmount;
-        this[woundInfo.bodyPart].current = currentHP;
+        var duration;
+        this.hp[bodyPart] = currentHP;
         //Wounds
-        if (currentHP < Math.round(this[woundInfo.bodyPart].max / 2) && currentHP >= 0) { //Major wound
-            woundInfo.type = "major";
-            if (initialHP >= Math.round(this[woundInfo.bodyPart].max / 2) && this[woundInfo.bodyPart].wound.major === {}) { //Fresh wound
-                woundInfo.duration = Math.round(this[woundInfo.bodyPart].max / 2) - currentHP;
+        if (currentHP < Math.round(maxHP / 2) && currentHP >= 0) { //Major wound
+            if (initialHP >= Math.round(maxHP / 2) && !_.has(this.statusEffects, "Major Wound, " + bodyPart)) { //Fresh wound
+                duration = Math.round(maxHP / 2) - currentHP;
             } else { //Add damage to duration of effect
-                woundInfo.duration = -hpAmount;
+                duration = -hpAmount;
             }
-        } else if (currentHP < 0 && currentHP > -this[woundInfo.bodyPart].max) { //Disabling wound
-            if (this[woundInfo.bodyPart].wound.disabling === {}) { //Fresh wound
-                woundInfo.type = "disabling";
-                woundInfo.duration = -currentHP;
-
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                callback: "majorWoundRoll",
+                input: {
+                    duration: duration,
+                    callback: callback
+                }
+            });
+        } else if (currentHP < 0 && currentHP > -maxHP) { //Disabling wound
+            if (!_.has(this.statusEffects, "Disabling Wound, " + bodyPart)) { //Fresh wound
+                duration = -currentHP;
             } else { //Add damage to duration of effect
-                woundInfo.type = "disabling";
-                woundInfo.duration = -hpAmount;
+                duration = -hpAmount;
             }
-
-        } else if (currentHP < -this[woundInfo.bodyPart].max) { //Mortal wound
-            woundInfo.type = "mortal";
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                callback: "disablingWoundRoll",
+                input: {
+                    duration: duration,
+                    callback: callback
+                }
+            });
+        } else if (currentHP < -maxHP) { //Mortal wound
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                callback: "mortalWoundRoll",
+                input: {
+                    callback: callback
+                }
+            });
+        } else {
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                callback: "checkKnockdown",
+                input: {
+                    callback: callback
+                }
+            });
         }
     } else { //if healing
-        this[woundInfo.bodyPart].current += hpAmount;
-
-        if (this[woundInfo.bodyPart].current >= -1 * this[woundInfo.bodyPart].max) {
-            this[woundInfo.bodyPart].wound.mortal = false;
-        }
-        if (this[woundInfo.bodyPart].current >= 0) {
-            this[woundInfo.bodyPart].wound.disabling = false;
-        }
-        if (this[woundInfo.bodyPart].current >= Math.round(this[woundInfo.bodyPart].max / 2)) {
-            this[woundInfo.bodyPart].wound.major = {};
-        }
-        if (this[woundInfo.bodyPart].current > this[woundInfo.bodyPart].max) {
-            this[woundInfo.bodyPart].current = this[woundInfo.bodyPart].max;
+        this.hp[bodyPart] += hpAmount;
+        if (this.hp[bodyPart] > maxHP) {
+            this.hp[bodyPart] = maxHP;
         }
     }
-    return woundInfo;
 };
 
-MML.setMultiWound = function setMultiWound() {
+MML.setMultiWound = function setMultiWound(callback) {
     var currentHP = this.hp;
-    currentHP.multiWound = this.hpMax.multiwound;
+    currentHP["Multiple Wounds"] = this.hpMax["Multiple Wounds"];
 
     _.each(MML.getBodyParts(this), function(bodyPart) {
         if (currentHP[bodyPart] >= Math.round(this.hpMax[bodyPart] / 2)) { //Only minor wounds apply
-            currentHP.multiWound -= this.hpMax[bodyPart] - currentHP[bodyPart];
+            currentHP["Multiple Wounds"] -= this.hpMax[bodyPart] - currentHP[bodyPart];
         } else {
-            currentHP.multiWound -= this.hpMax[bodyPart] - Math.round(this.hpMax[bodyPart] / 2);
+            currentHP["Multiple Wounds"] -= this.hpMax[bodyPart] - Math.round(this.hpMax[bodyPart] / 2);
         }
     });
 
@@ -1074,7 +1089,7 @@ MML.equipmentFailure = function equipmentFailure(input) {
 
 MML.meleeDamageRoll = function meleeDamageRoll(character, attackerWeapon, crit, bonusDamage) {
     bonusDamage = 0;
-
+    state.MML.GM.currentAction.parameters.damageType = attackerWeapon.damageType;
     MML.processCommand({
         type: "character",
         who: this.name,
@@ -1083,7 +1098,6 @@ MML.meleeDamageRoll = function meleeDamageRoll(character, attackerWeapon, crit, 
             callback: "meleeDamageResult",
             crit: crit,
             damageDice: attackerWeapon.damage,
-            damageType: attackerWeapon.damageType,
             mods: [this.meleeDamageMod, bonusDamage]
         }
     });
@@ -1129,11 +1143,8 @@ MML.meleeDamageResult = function meleeDamageResult(input) {
 };
 
 MML.meleeDamageRollApply = function meleeDamageRollApply(input) {
-    var result = state.MML.players[this.player].currentRoll.result;
-    state.MML.GM.currentAction.damageRoll = result;
-
-    MML.alterHP(MML.armorDamageReduction(state.MML.GM.currentAction.hitPositionRoll.bodyPart, result.value, type, rollDice(1, 100)))
-    state.MML.GM.currentAction.callback
+    state.MML.GM.currentAction.damageRoll = state.MML.players[this.player].currentRoll.result;
+    MML[state.MML.GM.currentAction.callback]();
 };
 
 // Todo: Add sweep attack
