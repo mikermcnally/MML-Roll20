@@ -159,12 +159,9 @@ MML.alterHP = function alterHP(bodyPart, hpAmount) {
                 input: {}
             });
         } else if (currentHP < -maxHP) { //Mortal wound
-            MML.processCommand({
-                type: "character",
-                who: this.name,
-                callback: "mortalWoundRoll",
-                input: {}
-            });
+            this.statusEffects["Mortal Wound, " + bodyPart] = {
+                bodyPart: bodyPart
+            };
         } else {
             MML[state.MML.GM.currentAction.callback]();
         }
@@ -303,7 +300,7 @@ MML.majorWoundRollResult = function majorWoundRollResult(input) {
 
 MML.majorWoundRollApply = function majorWoundRollApply() {
     var result = state.MML.players[this.player].currentRoll.result;
-    state.MML.GM.currentAction.multiWoundRoll = result;
+    state.MML.GM.currentAction.woundRoll = result;
     var bodyPart = state.MML.GM.currentAction.hitPositionRoll.bodyPart;
     if (result === "Failure") {
         this.statusEffects["Major Wound, " + bodyPart] = {
@@ -315,78 +312,99 @@ MML.majorWoundRollApply = function majorWoundRollApply() {
 };
 
 MML.disablingWoundRoll = function disablingWoundRoll(input) {
-    roll = this.attributeCheckRoll("systemStrength", [0]);
+    roll = this.attributeCheckRoll("systemStrength", [0], disablingWoundRollResult);
 };
 
-MML.disablingWoundRollResult = function disablingWoundRollResult(woundInfo) {};
+MML.disablingWoundRollResult = function disablingWoundRollResult(input) {
+    var currentRoll = state.MML.players[this.player].currentRoll;
 
-MML.disablingWoundRollApply = function disablingWoundRollApply() {
-    this.characters[this.currentTarget][this.rolls.wound.bodyPart].wound.disabling = true;
-
-    if (this.rolls.wound.result === "Failure") {
-        this.characters[this.currentTarget].stun.duration += this.rolls.wound.duration;
+    if (this.player === state.MML.GM.player) {
+        if (currentRoll.accepted === false) {
+            MML.processCommand({
+                type: "player",
+                who: this.player,
+                callback: "displayGmRoll",
+                input: {
+                    currentRoll: currentRoll
+                }
+            });
+        } else {
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                callback: "MML.disablingWoundRollApply",
+                input: currentRoll
+            });
+        }
+    } else {
+        MML.processCommand({
+            type: "player",
+            who: this.player,
+            callback: "displayPlayerRoll",
+            input: {
+                currentRoll: currentRoll
+            }
+        });
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            callback: "MML.disablingWoundRollApply",
+            input: currentRoll
+        });
     }
 };
 
-MML.mortalWoundRoll = function mortalWoundRoll(input) {
-    var roll = this.attributeCheckRoll("systemStrength", [0]);
-};
+MML.disablingWoundRollApply = function disablingWoundRollApply() {
+    var result = state.MML.players[this.player].currentRoll.result;
+    state.MML.GM.currentAction.woundRoll = result;
+    var bodyPart = state.MML.GM.currentAction.hitPositionRoll.bodyPart;
 
-MML.mortalWoundRollResult = function mortalWoundRollResult(woundInfo) {
-    var roll;
+    this.statusEffects["Disabling Wound, " + bodyPart] = {
+        bodyPart: bodyPart
+    };
+    if (result === "Failure") {
+        this.statusEffects["Stunned"] = {
+            duration: state.MML.GM.currentAction.woundDuration
+        };
+    }
+    MML[state.MML.GM.currentAction.callback]();
 };
-
-MML.mortalWoundRollApply = function mortalWoundRollApply() {};
 
 MML.checkKnockdown = function checkKnockdown(damage) {
-    if (this.movementPosition !== "Prone") {
-        this.knockdown += damage;
-        this.updateCharacter("knockdown");
+    this.knockdown += damage;
+    if (this.movementPosition !== "Prone" && this.knockdown < 1) {
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            callback: "knockdownRoll",
+            input: {}
+        });
     }
 };
 
 MML.knockdownRoll = function knockdownRoll() {
-    var roll;
-
     if (_.has(this.statusEffects, "Stumbling")) {
         //victim saved first knockdown check, harder to save 2nd time
-        roll = MML.attributeCheckRoll(this, ["systemStrength", [-5]]);
+        MML.attributeCheckRoll("systemStrength", [-5], "getKnockdownRoll");
     } else {
-        roll = MML.attributeCheckRoll(this, ["systemStrength", [0]]);
+        MML.attributeCheckRoll("systemStrength", [0], "getKnockdownRoll");
     }
-    return roll;
 };
 
-MML.getKnockdownRoll = function getKnockdownRoll(input) {
-    switch (input) {
-        case "entry":
-            if (this.characters[this.currentTarget].checkKnockdown()) {
-                this.displayMenu(this.characters[this.currentTarget].name, ["Roll Knockdown"]);
-            } else {
-                this.rollIndex = "getSensitiveAreaRoll";
-                this.menu = MML.performAction;
-                this.menu();
-            }
-            break;
-        case "Roll Knockdown":
-            this.currentRoll = this.characters[this.currentTarget].knockdownRoll();
-            this.displayRoll();
-            break;
-        case "result":
-            this.rolls.knockdown = this.currentRoll.result;
-            if (this.rolls.knockdown === "Critical Success" || this.rolls.knockdown === "Success") {
-                this.stumble = 1;
-            } else {
-                sendChat("Game", this.characters[this.currentTarget].name + " is knocked to the ground");
-                this.characters[this.currentTarget].currentMotion = "prone";
-                this.characters[this.currentTarget].knockdown.current = this.characters[this.currentTarget].knockdown.max;
-            }
-            this.rollIndex = "getSensitiveAreaRoll";
-            this.menu = MML.performAction;
-            this.menu();
-            break;
-        default:
-            break;
+MML.knockdownRollResult = function knockdownRollResult() {
+    if (_.has(this.statusEffects, "Stumbling")) {
+        //victim saved first knockdown check, harder to save 2nd time
+        MML.attributeCheckRoll("systemStrength", [-5], "getKnockdownRoll");
+    } else {
+        MML.attributeCheckRoll("systemStrength", [0], "getKnockdownRoll");
+    }
+};
+
+MML.knockdownRollApply = function knockdownRollApply(input) {
+    if (this.movementPosition === "Prone") {
+        this.statusEffects["Stunned"] = {
+            duration: state.MML.GM.currentAction.woundDuration
+        };
     }
 };
 

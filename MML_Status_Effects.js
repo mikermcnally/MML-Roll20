@@ -202,5 +202,10 @@ MML.statusEffects["Melee This Round"] = function(effect, index) {
     }
 };
 MML.statusEffects["Stunned"] = function(effect, index) {
-
+    if (state.GM.roundStarted === false) {
+        effect.duration--;
+        if (effect.duration < 1) {
+            delete this.statusEffects[index];
+        }
+    }
 };

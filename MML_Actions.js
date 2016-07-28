@@ -53,10 +53,10 @@ MML.damageTargetAction = function damageTargetAction(callback) {
         MML.setMultiWound();
     } else if (!_.isUndefined(parameters.sensitiveArea)) {
         state.MML.GM.currentAction.parameters.sensitiveArea = "complete";
-        MML.sensitiveAreaCheck();
-    } else if (!_.isUndefined(parameters.knockDown)) {
-        state.MML.GM.currentAction.parameters.knockDown = "complete";
-        MML.knockdownCheck();
+        MML.sensitiveAreaCheck(rolls.hitPositionRoll.name);
+    } else if (!_.isUndefined(parameters.knockdown)) {
+        state.MML.GM.currentAction.parameters.knockdown = "complete";
+        MML.knockdownCheck(rolls.damageRoll.value);
     } else {
         MML[callback]();
     }

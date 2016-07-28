@@ -541,12 +541,11 @@ MML.computeAttribute.knockdownMax = {
 MML.computeAttribute.knockdown = {
     dependents: [],
     compute: function() {
-        if (this.knockdown < 0) {
-            MML.knockdownRoll.apply(this, []);
+        if (state.MML.GM.roundStarted === false) {
+            return this.knockdownMax;
         } else {
-            return false;
+            return this.knockdown;
         }
-        return this.knockdown;
     }
 };
 MML.computeAttribute.apv = {
