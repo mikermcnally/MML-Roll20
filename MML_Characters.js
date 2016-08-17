@@ -370,7 +370,7 @@ MML.disablingWoundRollApply = function disablingWoundRollApply() {
     MML[state.MML.GM.currentAction.callback]();
 };
 
-MML.checkKnockdown = function checkKnockdown(damage) {
+MML.knockdownCheck = function knockdownCheck(damage) {
     this.knockdown += damage;
     if (this.movementPosition !== "Prone" && this.knockdown < 1) {
         MML.processCommand({
