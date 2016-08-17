@@ -708,7 +708,7 @@ MML.charMenuAttackCalledShot = function charMenuCalledShot(input) {
 
     if (MML.isWieldingRangedWeapon(state.MML.characters[this.who])) {
         _.each(buttons, function(button) {
-            button.nextMenu = "charMenuInitiativeRoll";
+            button.nextMenu = "charMenuFinializeAction";
         });
     } else {
         _.each(buttons, function(button) {
@@ -756,7 +756,7 @@ MML.charMenuAttackStance = function charMenuAttackStance(input) {
 
     if (MML.isWieldingRangedWeapon(state.MML.characters[this.who])) {
         _.each(buttons, function(button) {
-            button.nextMenu = "charMenuInitiativeRoll";
+            button.nextMenu = "charMenuFinializeAction";
         });
     } else {
         _.each(buttons, function(button) {
@@ -809,18 +809,28 @@ MML.charMenuAttackStance = function charMenuAttackStance(input) {
     } else {
         state.MML.characters[this.who].action.weaponType = "primary";
         _.each(buttons, function(button) {
-            button.nextMenu = "charMenuInitiativeRoll";
+            button.nextMenu = "charMenuFinializeAction";
         });
     }
     this.buttons = buttons;
 };
 
-MML.charMenuInitiativeRoll = function charMenuInitiativeRoll(input) {
+MML.charMenuFinializeAction = function charMenuFinializeAction(input) {
     this.who = input.who;
-    this.message = "Roll initiative or change action for " + this.who;
-    this.buttons = [MML.menuButtons.initiativeRoll,
-        MML.menuButtons.changeAction
-    ];
+
+    if (state.MML.GM.roundStarted === true) {
+        this.message = "Accept or change action for " + this.who;
+        this.buttons = [
+            MML.menuButtons.acceptAction,
+            MML.menuButtons.changeAction
+        ];
+    } else {
+        this.message = "Roll initiative or change action for " + this.who;
+        this.buttons = [
+            MML.menuButtons.initiativeRoll,
+            MML.menuButtons.changeAction
+        ];
+    }
 };
 
 MML.GmMenuStartAction = function GmMenuStartAction(input) {
@@ -914,7 +924,7 @@ MML.charMenuSelectDamageType = function charMenuSelectDamageType(input) {
 
     this.buttons.push({
         text: "Primary",
-        nextMenu: "charMenuInitiativeRoll",
+        nextMenu: "charMenuFinializeAction",
         callback: function(input) {
             state.MML.characters[this.who].action.weaponType = "primary";
             MML.processCommand({
@@ -928,7 +938,7 @@ MML.charMenuSelectDamageType = function charMenuSelectDamageType(input) {
 
     this.buttons.push({
         text: "Secondary",
-        nextMenu: "charMenuInitiativeRoll",
+        nextMenu: "charMenuFinializeAction",
         callback: function(input) {
             state.MML.characters[this.who].action.weaponType = "secondary";
             MML.processCommand({
@@ -1362,12 +1372,31 @@ MML.menuButtons.chooseTargets = {
         });
     }
 };
-
+MML.menuButtons.acceptAction = {
+    text: "Accept",
+    nextMenu: "menuIdle",
+    callback: function(input) {
+        MML.processCommand({
+            type: "character",
+            who: this.who,
+            callback: "setApiCharAttribute",
+            input: {
+                attribute: "ready",
+                value: true
+            }
+        });
+        MML.processCommand({
+            type: "GM",
+            callback: "nextAction",
+            input: {}
+        });
+    }
+};
 MML.menuButtons.endAction = {
     text: "End Action",
     nextMenu: "charMenuPrepareAction",
     callback: function(input) {
-        MML.endAction.apply(state.MML.GM, []);
+        MML.endAction();
     }
 };
 MML.menuButtons.rollDice = {

@@ -61,7 +61,7 @@ MML.statusEffects["Wound Fatigue"] = function(effect, index) {
     }
 };
 MML.statusEffects["Number of Defenses"] = function(effect, index) {
-    if (state.GM.roundStarted === false) {
+    if (state.MML.GM.roundStarted === false) {
         delete this.statusEffects[index];
     }
 
@@ -75,7 +75,7 @@ MML.statusEffects["Fatigue"] = function(effect, index) {
     this.situationalMod += -10 * effect.level;
 };
 MML.statusEffects["Sensitive Area"] = function(effect, index) {
-    if (state.GM.roundStarted === false) {
+    if (state.MML.GM.roundStarted === false) {
         effect.duration--;
         if (effect.duration < 1) {
             delete this.statusEffects[index];
@@ -90,7 +90,7 @@ MML.statusEffects["Sensitive Area"] = function(effect, index) {
     }
 };
 MML.statusEffects["Stumbling"] = function(effect, index) {
-    if (state.GM.roundStarted === false) {
+    if (state.MML.GM.roundStarted === false) {
         effect.duration--;
         if (effect.duration < 1) {
             delete this.statusEffects[index];
@@ -156,7 +156,7 @@ MML.statusEffects["Defensive Stance"] = function(effect, index) {
     }
 };
 MML.statusEffects["Observe"] = function(effect, index) {
-    if (state.GM.roundStarted === false) {
+    if (state.MML.GM.roundStarted === false) {
         effect.duration--;
     }
 
@@ -202,7 +202,7 @@ MML.statusEffects["Melee This Round"] = function(effect, index) {
     }
 };
 MML.statusEffects["Stunned"] = function(effect, index) {
-    if (state.GM.roundStarted === false) {
+    if (state.MML.GM.roundStarted === false) {
         effect.duration--;
         if (effect.duration < 1) {
             delete this.statusEffects[index];

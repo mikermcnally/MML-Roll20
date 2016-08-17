@@ -596,7 +596,6 @@ MML.computeAttribute.apv = {
                 }]
             };
         });
-
         //Creates raw matrix of individual pieces of armor (no layering or partial coverage)
 
         _.each(armor, function(piece) {
@@ -660,7 +659,7 @@ MML.computeAttribute.apv = {
                     //Builds an array of APVs that meet or exceed the coverage value
                     _.each(rawAPVArray, function(apv){
                         if (apv.coverage >= apvCoverage) {
-                            apvToLayerArray.push(apv);
+                            apvToLayerArray.push(apv.value);
                         }
                     });
                     apvToLayerArray = apvToLayerArray.sort(function(a, b) {
@@ -937,14 +936,16 @@ MML.computeAttribute.statusEffects = {
             this[dependent] = 0;
         }, this);
         _.each(this.statusEffects, function(effect, index) {
-            if (effect.name.indexOf("Major Wound") !== -1) {
+            log(effect);
+            log(index);
+            if (index.indexOf("Major Wound") !== -1) {
                 MML.statusEffects["Major Wound"].apply(this, [effect, index]);
-            } else if (effect.name.indexOf("Disabling Wound") !== -1) {
+            } else if (index.indexOf("Disabling Wound") !== -1) {
                 MML.statusEffects["Disabling Wound"].apply(this, [effect, index]);
-            } else if (effect.name.indexOf("Mortal Wound") !== -1) {
+            } else if (index.indexOf("Mortal Wound") !== -1) {
                 MML.statusEffects["Mortal Wound"].apply(this, [effect, index]);
             } else {
-                MML.statusEffects[effect.name].apply(this, [effect, index]);
+                MML.statusEffects[index].apply(this, [effect, index]);
             }
         }, this);
         return this.statusEffects;
@@ -1063,30 +1064,30 @@ MML.computeAttribute.senseInitBonus = {
             return 4;
         } else {
             //Head fully encased in metal
-            if (senseArray.indexOf("Great Helm") !== -1 || (senseArray.indexOf("Sallet Helm") !== -1 && senseArray.indexOf("Throat Guard") !== -1)) {
+            if (_.intersection(senseArray, ["Great Helm", "Sallet Helm", "Throat Guard"]).length > 0) {
                 return -2;
             }
             //wearing a helm
-            else if (senseArray.indexOf("Barbute Helm") !== -1 || senseArray.indexOf("Sallet Helm") !== -1 || senseArray.indexOf("Bascinet Helm") !== -1 || senseArray.indexOf("Duerne Helm") !== -1 || senseArray.indexOf("Cap") !== -1 || senseArray.indexOf("Pot Helm") !== -1 || senseArray.indexOf("Conical Helm") !== -1 || senseArray.indexOf("War Hat") !== -1) {
+            else if (_.intersection(senseArray, ["Barbute Helm", "Sallet Helm", "Bascinet Helm", "Duerne Helm", "Cap", "Pot Helm", "Conical Helm", "War Hat"]).length > 0) {
                 //Has faceplate
                 if (senseArray.indexOf("Face Plate") !== -1) {
                     //Enclosed Sides
-                    if (senseArray.indexOf("Barbute Helm") !== -1 || senseArray.indexOf("Bascinet Helm") !== -1 || senseArray.indexOf("Duerne Helm") !== -1) {
+                    if (_.intersection(senseArray, ["Barbute Helm", "Bascinet Helm", "Duerne Helm"]).length > 0) {
                         return -2;
                     } else {
                         return -1;
                     }
                 }
                 //These types of helms or half face plate
-                else if (senseArray.indexOf("Barbute Helm") !== -1 || senseArray.indexOf("Sallet Helm") !== -1 || senseArray.indexOf("Bascinet Helm") !== -1 || senseArray.indexOf("Duerne Helm") !== -1 || senseArray.indexOf("Half-Face Plate") !== -1) {
+                else if (_.intersection(senseArray, ["Barbute Helm", "Sallet Helm", "Bascinet Helm", "Duerne Helm", "Half-Face Plate"]).length > 0) {
                     return 0;
                 }
                 //has camail or cheeks
-                else if (senseArray.indexOf("Camail") !== -1 || senseArray.indexOf("Camail-Conical") !== -1 || senseArray.indexOf("Cheeks") !== -1) {
+                else if (_.intersection(senseArray, ["Camail", "Camail-Conical", "Cheeks"]).length > 0) {
                     return 1;
                 }
                 //Wearing a hood
-                else if (senseArray.indexOf("Dwarven War Hood") !== -1 || senseArray.indexOf("Hood") !== -1) {
+                else if (_.intersection(senseArray, ["Dwarven War Hood", "Hood"]).length > 0) {
                     _.each(armorList, function(piece) {
                         if (piece.name === "Dwarven War Hood" || piece.name === "Hood") {
                             if (piece.family === "Cloth") {
@@ -1107,7 +1108,7 @@ MML.computeAttribute.senseInitBonus = {
                 }
             }
             //Wearing a hood
-            else if (senseArray.indexOf("Dwarven War Hood") !== -1 || senseArray.indexOf("Hood") !== -1) {
+            else if (_.intersection(senseArray, ["Dwarven War Hood", "Hood"]).length > 0) {
                 _.each(armorList, function(piece) {
                     if (piece.name === "Dwarven War Hood" || piece.name === "Hood") {
                         if (piece.family === "Cloth") {

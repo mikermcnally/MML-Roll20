@@ -85,10 +85,17 @@ MML.meleeAttackAction = function meleeAttackAction() {
             MML.endAction();
         }
     } else if (_.isUndefined(rolls.hitPositionRoll)) {
-        if (rolls.defenseRoll === "Critical Success" || rolls.defenseRoll === "Success") {
+        if (rolls.defenseRoll === "Critical Success"){
+            MML.processCommand({
+                type: "character",
+                who: target.name,
+                callback: "criticalDefense",
+                input: {}
+            });
+        } else if (rolls.defenseRoll === "Success") {
             MML.endAction();
         } else {
-            MML.hitPositionRoll();
+            MML.hitPositionRoll(character);
         }
     } else if (_.isUndefined(rolls.damageRoll)) {
         if (rolls.attackRoll === "Critical Success") {
@@ -96,16 +103,84 @@ MML.meleeAttackAction = function meleeAttackAction() {
         } else {
             MML.meleeDamageRoll(character, attackerWeapon, false);
         }
-    } else if (!_.isUndefined(parameters.wound)) {
-        MML.woundRoll();
-    } else if (!_.isUndefined(parameters.multiWound)) {
-        MML.multiWoundRoll();
-    } else if (!_.isUndefined(parameters.sensitiveArea)) {
-        MML.sensitiveAreaRoll();
-    } else if (!_.isUndefined(parameters.knockDown)) {
-        MML.knockdownRoll();
     } else {
-        MML.endAction();
+        MML.damageTargetAction("endAction");
+    }
+};
+
+MML.damageTargetAction = function damageTargetAction(callback) {
+    var currentAction = state.MML.GM.currentAction;
+    var parameters = currentAction.parameters;
+    var target = parameters.target;
+    var rolls = currentAction.rolls;
+
+    if (_.isUndefined(parameters.damageApplied)) {
+        state.MML.GM.currentAction.parameters.damageApplied = "complete";
+        var damageAfterArmor = MML.armorDamageReduction(target, rolls.hitPositionRoll.name, rolls.damageRoll, parameters.damageType, randomInteger(100));
+        MML.processCommand({
+            type: "character",
+            who: target.name,
+            callback: "alterHP",
+            input: {
+                bodyPart: rolls.hitPositionRoll.bodyPart,
+                hpAmount: damageAfterArmor
+            }
+        });
+    } else if (_.isUndefined(parameters.multiWound)) {
+        state.MML.GM.currentAction.parameters.multiWound = "complete";
+        MML.processCommand({
+            type: "character",
+            who: target.name,
+            callback: "setMultiWound",
+            input: {}
+        });
+    } else if (_.isUndefined(parameters.sensitiveArea)) {
+        state.MML.GM.currentAction.parameters.sensitiveArea = "complete";
+        MML.sensitiveAreaCheck(target, rolls.hitPositionRoll.name);
+    } else if (_.isUndefined(parameters.knockdown)) {
+        state.MML.GM.currentAction.parameters.knockdown = "complete";
+        MML.knockdownCheck(target, rolls.damageRoll.value);
+    } else {
+        MML[callback]();
+    }
+};
+
+MML.endAction = function endAction() {
+    var currentAction = state.MML.GM.currentAction;
+    var character = currentAction.character;
+    var spentInitiative = character.spentInitiative + character.actionTempo;
+    var currentInitiative = character.initiative + spentInitiative;
+
+    MML.processCommand({
+        type: "character",
+        who: character.name,
+        callback: "setApiCharAttribute",
+        input: {
+            attribute: "spentInitiative",
+            value: spentInitiative
+        }
+    });
+    if(currentInitiative > 0) {
+        MML.processCommand({
+            type: "player",
+            who: character.player,
+            callback: "charMenuPrepareAction",
+            input: {
+                who: character.name
+            }
+        });
+        MML.processCommand({
+            type: "player",
+            who: character.player,
+            callback: "displayMenu",
+            input: {}
+        });
+    } else {
+        MML.processCommand({
+            type: "GM",
+            callback: "nextAction",
+            input: {}
+        });
     }
 };
 /* jshint -W069 */
@@ -223,8 +298,6 @@ MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input) {
     });
 };
 
-
-
 MML.setReady = function setReady(ready) {
     if (state.MML.GM.inCombat === true && this.ready === "false") {
         MML.getTokenFromChar(this.name).set("tint_color", "#FF0000");
@@ -235,69 +308,79 @@ MML.setReady = function setReady(ready) {
 };
 
 // Health and Wounds
-MML.alterHP = function alterHP(position, hpAmount) {
-    var woundInfo = {
-        bodyPart: MML.hitPositions[position].part,
-        type: "none",
-        duration: -1
-    };
+MML.alterHP = function alterHP(input) {
+    log(input.hpAmount);
+    var bodyPart = input.bodyPart;
+    var hpAmount = parseInt(input.hpAmount);
+    var initialHP = this.hp[bodyPart];
+    var currentHP = initialHP + hpAmount;
+    var maxHP = this.hpMax[bodyPart];
 
     if (hpAmount < 0) { //if damage
-        var initialHP = this[woundInfo.bodyPart].current;
-        var currentHP = initialHP + hpAmount;
-        this[woundInfo.bodyPart].current = currentHP;
+        var duration;
+        this.hp[bodyPart] = currentHP;
+        log();
         //Wounds
-        if (currentHP < Math.round(this[woundInfo.bodyPart].max / 2) && currentHP >= 0) { //Major wound
-            woundInfo.type = "major";
-            if (initialHP >= Math.round(this[woundInfo.bodyPart].max / 2) && this[woundInfo.bodyPart].wound.major === {}) { //Fresh wound
-                woundInfo.duration = Math.round(this[woundInfo.bodyPart].max / 2) - currentHP;
+        if (currentHP < Math.round(maxHP / 2) && currentHP >= 0) { //Major wound
+            log("Major");
+            if (initialHP >= Math.round(maxHP / 2) && !_.has(this.statusEffects, "Major Wound, " + bodyPart)) { //Fresh wound
+                duration = Math.round(maxHP / 2) - currentHP;
             } else { //Add damage to duration of effect
-                woundInfo.duration = -hpAmount;
+                duration = -hpAmount;
             }
-        } else if (currentHP < 0 && currentHP > -this[woundInfo.bodyPart].max) { //Disabling wound
-            if (this[woundInfo.bodyPart].wound.disabling === {}) { //Fresh wound
-                woundInfo.type = "disabling";
-                woundInfo.duration = -currentHP;
-
+            state.MML.GM.currentAction.woundDuration = duration;
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                callback: "majorWoundRoll",
+                input: {}
+            });
+        } else if (currentHP < 0 && currentHP > -maxHP) { //Disabling wound
+            log("Disabling");
+            if (!_.has(this.statusEffects, "Disabling Wound, " + bodyPart)) { //Fresh wound
+                duration = -currentHP;
             } else { //Add damage to duration of effect
-                woundInfo.type = "disabling";
-                woundInfo.duration = -hpAmount;
+                duration = -hpAmount;
             }
-
-        } else if (currentHP < -this[woundInfo.bodyPart].max) { //Mortal wound
-            woundInfo.type = "mortal";
+            state.MML.GM.currentAction.woundDuration = duration;
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                callback: "disablingWoundRoll",
+                input: {}
+            });
+        } else if (currentHP < -maxHP) { //Mortal wound
+            log("Mortal");
+            this.statusEffects["Mortal Wound, " + bodyPart] = {
+                bodyPart: bodyPart
+            };
+            MML[state.MML.GM.currentAction.callback]();
+        } else {
+            log("Minor");
+            MML[state.MML.GM.currentAction.callback]();
         }
     } else { //if healing
-        this[woundInfo.bodyPart].current += hpAmount;
-
-        if (this[woundInfo.bodyPart].current >= -1 * this[woundInfo.bodyPart].max) {
-            this[woundInfo.bodyPart].wound.mortal = false;
+        this.hp[bodyPart] += hpAmount;
+        if (this.hp[bodyPart] > maxHP) {
+            this.hp[bodyPart] = maxHP;
         }
-        if (this[woundInfo.bodyPart].current >= 0) {
-            this[woundInfo.bodyPart].wound.disabling = false;
-        }
-        if (this[woundInfo.bodyPart].current >= Math.round(this[woundInfo.bodyPart].max / 2)) {
-            this[woundInfo.bodyPart].wound.major = {};
-        }
-        if (this[woundInfo.bodyPart].current > this[woundInfo.bodyPart].max) {
-            this[woundInfo.bodyPart].current = this[woundInfo.bodyPart].max;
-        }
+        MML[state.MML.GM.currentAction.callback]();
     }
-    return woundInfo;
 };
 
-MML.setMultiWound = function setMultiWound() {
+MML.setMultiWound = function setMultiWound(input) {
     var currentHP = this.hp;
-    currentHP.multiWound = this.hpMax.multiwound;
+    currentHP["Multiple Wounds"] = this.hpMax["Multiple Wounds"];
 
     _.each(MML.getBodyParts(this), function(bodyPart) {
         if (currentHP[bodyPart] >= Math.round(this.hpMax[bodyPart] / 2)) { //Only minor wounds apply
-            currentHP.multiWound -= this.hpMax[bodyPart] - currentHP[bodyPart];
+            currentHP["Multiple Wounds"] -= this.hpMax[bodyPart] - currentHP[bodyPart];
         } else {
-            currentHP.multiWound -= this.hpMax[bodyPart] - Math.round(this.hpMax[bodyPart] / 2);
+            currentHP["Multiple Wounds"] -= this.hpMax[bodyPart] - Math.round(this.hpMax[bodyPart] / 2);
         }
-    });
+    }, this);
 
+    log(currentHP);
     MML.processCommand({
         type: "character",
         who: this.name,
@@ -308,151 +391,379 @@ MML.setMultiWound = function setMultiWound() {
         }
     });
 
-    if (!_.has(this.statusEffects, "Wound Fatigue")) {
-        MML.multiWoundRoll();
+    if (currentHP["Multiple Wounds"] < 0 && !_.has(this.statusEffects, "Wound Fatigue")) {
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            callback: "multiWoundRoll",
+            input: {}
+        });
+    } else {
+        MML[state.MML.GM.currentAction.callback]();
     }
 };
 
-MML.multiWoundRoll = function getMultiWoundRoll(input) {
-    var roll = attributeCheckRoll("systemStrength", [0]);
+MML.multiWoundRoll = function multiWoundRoll(input) {
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        callback: "attributeCheckRoll",
+        input: {
+            attribute: "systemStrength",
+            mods: [0],
+            callback: "multiWoundRollResult"
+        }
+    });
 };
 
-MML.multiWoundRollResult = function getMultiWoundRoll(input) {
-    var roll = attributeCheckRoll("systemStrength", [0]);
+MML.multiWoundRollResult = function multiWoundRollResult() {
+    var currentRoll = state.MML.players[this.player].currentRoll;
+
+    if (this.player === state.MML.GM.player) {
+        if (currentRoll.accepted === false) {
+            MML.processCommand({
+                type: "player",
+                who: this.player,
+                callback: "displayGmRoll",
+                input: {
+                    currentRoll: currentRoll
+                }
+            });
+        } else {
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                callback: "multiWoundRollApply",
+                input: currentRoll
+            });
+        }
+    } else {
+        MML.processCommand({
+            type: "player",
+            who: this.player,
+            callback: "displayPlayerRoll",
+            input: {
+                currentRoll: currentRoll
+            }
+        });
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            callback: "multiWoundRollApply",
+            input: currentRoll
+        });
+    }
 };
 
-MML.multiWoundRoll = function getMultiWoundRoll(input) {
-    var roll = attributeCheckRoll("systemStrength", [0]);
+MML.multiWoundRollApply = function multiWoundRollApply(input) {
+    var result = state.MML.players[this.player].currentRoll.result;
+    state.MML.GM.currentAction.multiWoundRoll = result;
+    if (result === "Failure") {
+        this.statusEffects["Wound Fatiuge"] = {};
+    }
+    MML[state.MML.GM.currentAction.callback]();
 };
 
 MML.majorWoundRoll = function majorWoundRoll(input) {
-    roll = this.attributeCheckRoll("willpower", [0]);
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        callback: "attributeCheckRoll",
+        input: {
+            attribute: "willpower",
+            mods: [0],
+            callback: "majorWoundRollResult"
+        }
+    });
 };
 
 MML.majorWoundRollResult = function majorWoundRollResult(input) {
-    var roll;
+    var currentRoll = state.MML.players[this.player].currentRoll;
 
+    if (this.player === state.MML.GM.player) {
+        if (currentRoll.accepted === false) {
+            MML.processCommand({
+                type: "player",
+                who: this.player,
+                callback: "displayGmRoll",
+                input: {
+                    currentRoll: currentRoll
+                }
+            });
+        } else {
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                callback: "majorWoundRollApply",
+                input: currentRoll
+            });
+        }
+    } else {
+        MML.processCommand({
+            type: "player",
+            who: this.player,
+            callback: "displayPlayerRoll",
+            input: {
+                currentRoll: currentRoll
+            }
+        });
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            callback: "majorWoundRollApply",
+            input: currentRoll
+        });
+    }
 };
 
 MML.majorWoundRollApply = function majorWoundRollApply() {
-    if (this.rolls.result === "Failure") {
-        var message = this.name + " suffered a major wound to their " + bodyPart;
-        this.characters[this.currentTarget][this.rolls.wound.bodyPart].wound.major.duration += this.rolls.wound.duration;
+    var result = state.MML.players[this.player].currentRoll.result;
+    state.MML.GM.currentAction.woundRoll = result;
+    var bodyPart = state.MML.GM.currentAction.rolls.hitPositionRoll.bodyPart;
+    if (result === "Failure") {
+        this.statusEffects["Major Wound, " + bodyPart] = {
+            duration: state.MML.GM.currentAction.woundDuration,
+            bodyPart: bodyPart
+        };
     }
+    MML[state.MML.GM.currentAction.callback]();
 };
-
 
 MML.disablingWoundRoll = function disablingWoundRoll(input) {
-    roll = this.attributeCheckRoll("systemStrength", [0]);
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        callback: "attributeCheckRoll",
+        input: {
+            attribute: "willpower",
+            mods: [0],
+            callback: "disablingWoundRollResult"
+        }
+    });
 };
 
-MML.disablingWoundRollResult = function disablingWoundRollResult(woundInfo) {
+MML.disablingWoundRollResult = function disablingWoundRollResult(input) {
+    var currentRoll = state.MML.players[this.player].currentRoll;
 
+    if (this.player === state.MML.GM.player) {
+        if (currentRoll.accepted === false) {
+            MML.processCommand({
+                type: "player",
+                who: this.player,
+                callback: "displayGmRoll",
+                input: {
+                    currentRoll: currentRoll
+                }
+            });
+        } else {
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                callback: "disablingWoundRollApply",
+                input: currentRoll
+            });
+        }
+    } else {
+        MML.processCommand({
+            type: "player",
+            who: this.player,
+            callback: "displayPlayerRoll",
+            input: {
+                currentRoll: currentRoll
+            }
+        });
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            callback: "disablingWoundRollApply",
+            input: currentRoll
+        });
+    }
 };
 
 MML.disablingWoundRollApply = function disablingWoundRollApply() {
-    this.characters[this.currentTarget][this.rolls.wound.bodyPart].wound.disabling = true;
+    var result = state.MML.players[this.player].currentRoll.result;
+    state.MML.GM.currentAction.woundRoll = result;
+    var bodyPart = state.MML.GM.currentAction.rolls.hitPositionRoll.bodyPart;
 
-    if (this.rolls.wound.result === "Failure") {
-        this.characters[this.currentTarget].stun.duration += this.rolls.wound.duration;
+    this.statusEffects["Disabling Wound, " + bodyPart] = {
+        bodyPart: bodyPart
+    };
+    if (result === "Failure") {
+        this.statusEffects["Stunned"] = {
+            duration: state.MML.GM.currentAction.woundDuration
+        };
     }
+    MML[state.MML.GM.currentAction.callback]();
 };
 
-MML.mortalWoundRoll = function mortalWoundRoll(input) {
-    var roll = this.attributeCheckRoll("systemStrength", [0]);
-};
-
-MML.mortalWoundRollResult = function mortalWoundRollResult(woundInfo) {
-    var roll;
-};
-
-MML.mortalWoundRollApply = function mortalWoundRollApply() {
-
-};
-
-MML.checkKnockdown = function checkKnockdown(damage) {
-    if (this.movementPosition !== "Prone") {
-        this.knockdown += damage;
-        this.updateCharacter("knockdown");
+MML.knockdownCheck = function checkKnockdown(character, damage) {
+    character.knockdown += damage;
+    if (character.movementPosition !== "Prone" && character.knockdown < 1) {
+        MML.processCommand({
+            type: "character",
+            who: character.name,
+            callback: "knockdownRoll",
+            input: {}
+        });
+    } else {
+        MML[state.MML.GM.currentAction.callback]();
     }
 };
 
 MML.knockdownRoll = function knockdownRoll() {
-    var roll;
-
     if (_.has(this.statusEffects, "Stumbling")) {
         //victim saved first knockdown check, harder to save 2nd time
-        roll = MML.attributeCheckRoll(this, ["systemStrength", [-5]]);
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            callback: "attributeCheckRoll",
+            input: {
+                attribute: "systemStrength",
+                mods: [-5],
+                callback: "getKnockdownRoll"
+            }
+        });
     } else {
-        roll = MML.attributeCheckRoll(this, ["systemStrength", [0]]);
-    }
-    return roll;
-};
-MML.getKnockdownRoll = function getKnockdownRoll(input) {
-    switch (input) {
-        case "entry":
-            if (this.characters[this.currentTarget].checkKnockdown()) {
-                this.displayMenu(this.characters[this.currentTarget].name, ["Roll Knockdown"]);
-            } else {
-                this.rollIndex = "getSensitiveAreaRoll";
-                this.menu = MML.performAction;
-                this.menu();
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            callback: "attributeCheckRoll",
+            input: {
+                attribute: "systemStrength",
+                mods: [0],
+                callback: "getKnockdownRoll"
             }
-            break;
-        case "Roll Knockdown":
-            this.currentRoll = this.characters[this.currentTarget].knockdownRoll();
-            this.displayRoll();
-            break;
-        case "result":
-            this.rolls.knockdown = this.currentRoll.result;
-            if (this.rolls.knockdown === "Critical Success" || this.rolls.knockdown === "Success") {
-                this.stumble = 1;
-            } else {
-                sendChat("Game", this.characters[this.currentTarget].name + " is knocked to the ground");
-                this.characters[this.currentTarget].currentMotion = "prone";
-                this.characters[this.currentTarget].knockdown.current = this.characters[this.currentTarget].knockdown.max;
-            }
-            this.rollIndex = "getSensitiveAreaRoll";
-            this.menu = MML.performAction;
-            this.menu();
-            break;
-        default:
-            break;
+        });
     }
 };
 
-MML.sensitiveAreaRoll = function sensitiveAreaCheck() {
-    var roll = this.attributeCheckRoll("willpower", [0]);
-    return roll;
-};
-MML.getSensitiveAreaRoll = function getSensitiveAreaRoll(input) {
-    switch (input) {
-        case "entry":
-            if (this.characters[this.currentTarget].isSensitiveArea(this.rolls.hitPosition)) {
-                this.displayMenu(this.characters[this.currentTarget].name + " was hit in a sensitive area.", ["Sensitive Area Roll"]);
-            } else {
-                this.rollIndex = "getWoundRoll";
-                this.menu = MML.performAction;
-                this.menu();
+MML.knockdownRollResult = function knockdownRollResult() {
+    var currentRoll = state.MML.players[this.player].currentRoll;
+
+    if (this.player === state.MML.GM.player) {
+        if (currentRoll.accepted === false) {
+            MML.processCommand({
+                type: "player",
+                who: this.player,
+                callback: "displayGmRoll",
+                input: {
+                    currentRoll: currentRoll
+                }
+            });
+        } else {
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                callback: "knockdownRollApply",
+                input: currentRoll
+            });
+        }
+    } else {
+        MML.processCommand({
+            type: "player",
+            who: this.player,
+            callback: "displayPlayerRoll",
+            input: {
+                currentRoll: currentRoll
             }
-            break;
-        case "Sensitive Area Roll":
-            this.currentRoll = this.characters[this.currentTarget].sensitiveAreaRoll();
-            this.displayRoll();
-            break;
-        case "result":
-            this.rolls.sensitiveArea = this.currentRoll.result;
-            if (this.rolls.sensitiveArea !== "Critical Success" || this.rolls.sensitiveArea !== "Success") {
-                sendChat("", this.characters[this.currentTarget].name + " is in pain!");
-                this.characters[this.currentTarget].sensitive = 1;
-            }
-            this.rollIndex = "getWoundRoll";
-            this.menu = MML.performAction;
-            this.menu();
-            break;
-        default:
-            break;
+        });
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            callback: "knockdownRollApply",
+            input: currentRoll
+        });
     }
+};
+
+MML.knockdownRollApply = function knockdownRollApply(input) {
+    var result = state.MML.players[this.player].currentRoll.result;
+
+    if (result === "Critical Failure" || result === "Failure") {
+        this.movementPosition = "Prone";
+    } else {
+        this.statusEffects["Stumbling"] = {
+            duration: 1
+        };
+    }
+
+    MML[state.MML.GM.currentAction.callback]();
+};
+
+MML.sensitiveAreaCheck = function sensitiveAreaCheck(character, hitPosition) {
+    if (MML.sensitiveAreas[character.bodyType].indexOf(hitPosition) > -1) {
+        MML.processCommand({
+            type: "character",
+            who: character.name,
+            callback: "sensitiveAreaRoll",
+            input: {}
+        });
+    } else {
+        MML[state.MML.GM.currentAction.callback]();
+    }
+};
+
+MML.sensitiveAreaRoll = function sensitiveAreaRoll(input) {
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        callback: "attributeCheckRoll",
+        input: {
+            attribute: "willpower",
+            mods: [0],
+            callback: "sensitiveAreaRollResult"
+        }
+    });
+};
+
+MML.sensitiveAreaRollResult = function sensitiveAreaRollResult(input) {
+    var currentRoll = state.MML.players[this.player].currentRoll;
+
+    if (this.player === state.MML.GM.player) {
+        if (currentRoll.accepted === false) {
+            MML.processCommand({
+                type: "player",
+                who: this.player,
+                callback: "displayGmRoll",
+                input: {
+                    currentRoll: currentRoll
+                }
+            });
+        } else {
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                callback: "sensitiveAreaRollApply",
+                input: currentRoll
+            });
+        }
+    } else {
+        MML.processCommand({
+            type: "player",
+            who: this.player,
+            callback: "displayPlayerRoll",
+            input: {
+                currentRoll: currentRoll
+            }
+        });
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            callback: "sensitiveAreaRollApply",
+            input: currentRoll
+        });
+    }
+};
+
+MML.sensitiveAreaRollApply = function sensitiveAreaRollApply(input) {
+    var result = state.MML.players[this.player].currentRoll.result;
+    if (result === "Critical Failure" || result === "Failure") {
+        this.statusEffects["Sensitive Area"] = {
+            duration: 1
+        };
+    }
+    MML[state.MML.GM.currentAction.callback]();
 };
 
 MML.fatigueCheckRoll = function fatigueCheckRoll(modifier) {
@@ -511,24 +822,23 @@ MML.fatigueRecoveryRoll = function fatigueRecoveryRoll(modifier) {
     });
 };
 
-MML.armorDamageReduction = function armorDamageReduction(position, damage, type) {
+MML.armorDamageReduction = function armorDamageReduction(character, position, damage, type, coverageRoll) {
     var damageApplied = false; //Accounts for partial coverage, once true the loop stops
-    var coverageRoll = randomInteger(100);
     var damageDeflected = 0;
 
     // Iterates over apv values at given position (accounting for partial coverage)
     var apv;
-    for (apv in this.apv[position][type]) {
+    for (apv in character.apv[position][type]) {
         if (damageApplied === false) {
-            if (coverageRoll <= this.apv[position][type][apv].coverage) { //if coverage roll is less than apv coverage
-                damageDeflected = this.apv[position][type][apv];
+            if (coverageRoll <= character.apv[position][type][apv].coverage) { //if coverage roll is less than apv coverage
+                damageDeflected = character.apv[position][type][apv].value;
 
                 //If all damage is deflected, do blunt trauma. Modifies damage variable for next if statement
                 if (damage + damageDeflected >= 0) {
                     //If surface, cut, or pierce, cut in half and apply as impact
                     if (type === "Surface" || type === "Cut" || type === "Pierce") {
                         damage = Math.ceil(damage / 2);
-                        damageDeflected = this.apv[position].Impact[apv];
+                        damageDeflected = character.apv[position].Impact[apv].value;
 
                         if (damage + damageDeflected >= 0) {
                             damageDeflected = -damage;
@@ -538,7 +848,7 @@ MML.armorDamageReduction = function armorDamageReduction(position, damage, type)
                     //If chop, or thrust, apply 3/4 as impact
                     else if (type === "Chop" || type === "Thrust") {
                         damage = Math.ceil(damage * 0.75);
-                        damageDeflected = this.apv[position].Impact[apv];
+                        damageDeflected = character.apv[position].Impact[apv].value;
 
                         if (damage + damageDeflected >= 0) {
                             damageDeflected = -damage;
@@ -572,15 +882,6 @@ MML.initiativeRoll = function initiativeRoll(input) {
         callback: "updateCharacter",
         input: {
             attribute: "action"
-        }
-    });
-    MML.processCommand({
-        type: "character",
-        who: this.name,
-        callback: "setApiCharAttribute",
-        input: {
-            attribute: "ready",
-            value: true
         }
     });
 
@@ -673,7 +974,15 @@ MML.initiativeApply = function initiativeApply() {
             value: state.MML.players[this.player].currentRoll.value
         }
     });
-
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        callback: "setApiCharAttribute",
+        input: {
+            attribute: "ready",
+            value: true
+        }
+    });
     MML.processCommand({
         type: "player",
         who: this.player,
@@ -915,24 +1224,24 @@ MML.attackRollResult = function attackRollResult(input) {
 };
 
 MML.attackRollApply = function attackRollApply(input) {
-    state.MML.GM.currentAction.attackRoll = state.MML.players[this.player].currentRoll.result;
+    state.MML.GM.currentAction.rolls.attackRoll = state.MML.players[this.player].currentRoll.result;
     MML[state.MML.GM.currentAction.callback]();
 };
 
-MML.hitPositionRoll = function hitPositionRoll(input) {
+MML.hitPositionRoll = function hitPositionRoll(character) {
     var rollValue;
     var range;
     var result;
     var action = state.MML.GM.currentAction;
     var target = state.MML.characters[action.targetArray[action.targetIndex]];
 
-    if (_.has(this.statusEffects, "Called Shot Specific")) {
+    if (_.has(character.statusEffects, "Called Shot Specific")) {
         rollValue = +_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
             return hitPosition.name === action.calledShot;
         });
         range = rollValue + "-" + rollValue;
         result = MML.hitPositions[target.bodyType][rollValue];
-    } else if (_.has(this.statusEffects, "Called Shot")) {
+    } else if (_.has(character.statusEffects, "Called Shot")) {
         var rangeUpper = MML.getAvailableHitPositions(target, action.calledShot).length;
         rollValue = MML.rollDice(1, rangeUpper);
         range = "1-" + rangeUpper;
@@ -947,14 +1256,14 @@ MML.hitPositionRoll = function hitPositionRoll(input) {
 
     MML.processCommand({
         type: "player",
-        who: this.player,
+        who: character.player,
         callback: "setApiPlayerAttribute",
         input: {
             attribute: "currentRoll",
             value: {
                 type: "hitPosition",
-                character: this.name,
-                player: this.player,
+                character: character.name,
+                player: character.player,
                 callback: "hitPositionRollResult",
                 range: range,
                 result: result,
@@ -966,7 +1275,7 @@ MML.hitPositionRoll = function hitPositionRoll(input) {
 
     MML.processCommand({
         type: "character",
-        who: this.name,
+        who: character.name,
         callback: "hitPositionRollResult",
         input: {}
     });
@@ -1026,14 +1335,8 @@ MML.hitPositionRollResult = function hitPositionRollResult(input) {
 };
 
 MML.hitPositionRollApply = function hitPositionRollApply(input) {
-    state.MML.GM.currentAction.hitPosition = input.result;
-
-    MML.processCommand({
-        type: "character",
-        who: this.name,
-        callback: input.callback,
-        input: {}
-    });
+    state.MML.GM.currentAction.rolls.hitPositionRoll = input.result;
+    MML[state.MML.GM.currentAction.callback]();
 };
 
 MML.meleeDefense = function meleeDefense(defender, attackerWeapon) {
@@ -1049,7 +1352,16 @@ MML.meleeDefense = function meleeDefense(defender, attackerWeapon) {
     var defenseMod = defender.meleeDefenseMod + defender.attributeDefenseMod;
     var sitMod = defender.situationalMod;
 
-    defender.statusEffects["Melee This Round"] = {};
+    MML.processCommand({
+        type: "character",
+        who: defender.name,
+        callback: "setApiCharAttributeJSON",
+        input: {
+            attribute: "statusEffects",
+            index: "Melee This Round",
+            value: {}
+        }
+    });
 
     if (!_.isUndefined(defender.skills["Dodge"]) && defender.skills["Dodge"].level >= defaultMartialSkill) {
         dodgeChance = defender.weaponSkills["Dodge"].level + defenseMod + sitMod;
@@ -1159,20 +1471,11 @@ MML.meleeBlockRollApply = function meleeBlockRollApply(input) {
                 number: 1
             };
         }
-    } else if (result === "Critical Success") {
-        MML.processCommand({
-            type: "character",
-            who: this.name,
-            callback: "criticalDefense",
-            input: {}
-        });
     }
 
-    state.MML.GM.currentAction.defenseRoll = result;
+    state.MML.GM.currentAction.rolls.defenseRoll = result;
     MML[state.MML.GM.currentAction.callback]();
 };
-
-
 
 MML.meleeDodgeRoll = function meleeDodgeRoll(input) {
     MML.processCommand({
@@ -1186,36 +1489,26 @@ MML.meleeDodgeRoll = function meleeDodgeRoll(input) {
     });
 };
 
+MML.criticalDefense = function criticalDefense() {
+    MML.endAction();
+};
+
 MML.equipmentFailure = function equipmentFailure(input) {
     log("equipmentFailure");
 };
 
-MML.meleeDamageRoll = function meleeDamageRoll(character, attackerWeapon, crit) {
-    var action = state.MML.GM.currentAction;
-    var weapon = action.attackerWeapon;
-    var weaponDamage;
-    var damageType;
-    var bonusDamage = 0;
-
-    //Primary or secondary attack
-    if (action.weaponType === "primary") {
-        weaponDamage = weapon.grips[action.attackerGrip].primaryDamage;
-        damageType = weapon.grips[action.attackerGrip].primaryType;
-    } else {
-        weaponDamage = weapon.grips[action.attackerGrip].secondaryDamage;
-        damageType = weapon.grips[action.attackerGrip].secondaryType;
-    }
-
+MML.meleeDamageRoll = function meleeDamageRoll(character, attackerWeapon, crit, bonusDamage) {
+    bonusDamage = 0;
+    state.MML.GM.currentAction.parameters.damageType = attackerWeapon.damageType;
     MML.processCommand({
         type: "character",
-        who: this.name,
+        who: character.name,
         callback: "rollDamage",
         input: {
             callback: "meleeDamageResult",
-            attackRollResult: action.attackRollResult,
-            weaponDamage: weaponDamage,
-            damageType: damageType,
-            mods: [this.meleeDamageMod, bonusDamage]
+            crit: crit,
+            damageDice: attackerWeapon.damage,
+            mods: [character.meleeDamageMod, bonusDamage]
         }
     });
 };
@@ -1260,7 +1553,8 @@ MML.meleeDamageResult = function meleeDamageResult(input) {
 };
 
 MML.meleeDamageRollApply = function meleeDamageRollApply(input) {
-
+    state.MML.GM.currentAction.rolls.damageRoll = state.MML.players[this.player].currentRoll.result;
+    MML[state.MML.GM.currentAction.callback]();
 };
 
 // Todo: Add sweep attack
@@ -1902,12 +2196,11 @@ MML.computeAttribute.knockdownMax = {
 MML.computeAttribute.knockdown = {
     dependents: [],
     compute: function() {
-        if (this.knockdown < 0) {
-            MML.knockdownRoll.apply(this, []);
+        if (state.MML.GM.roundStarted === false) {
+            return this.knockdownMax;
         } else {
-            return false;
+            return this.knockdown;
         }
-        return this.knockdown;
     }
 };
 MML.computeAttribute.apv = {
@@ -1923,11 +2216,11 @@ MML.computeAttribute.apv = {
             },
             this);
 
-        var mat = [];
+        var apvMatrix = {};
 
         // Initialize APV Matrix
         _.each(MML.hitPositions[this.bodyType], function(position) {
-            mat.push({
+            apvMatrix[position.name] = {
                 Surface: [{
                     value: 0,
                     coverage: 100
@@ -1956,99 +2249,93 @@ MML.computeAttribute.apv = {
                     value: 0,
                     coverage: 100
                 }]
-            });
+            };
         });
-
         //Creates raw matrix of individual pieces of armor (no layering or partial coverage)
 
         _.each(armor, function(piece) {
             var material = MML.APVList[piece.material];
 
             _.each(piece.protection, function(protection) {
-                mat[protection.position].Surface.push({
+                var position = MML.hitPositions[this.bodyType][protection.position].name;
+                var coverage = protection.coverage;
+                apvMatrix[position].Surface.push({
                     value: material.surface,
-                    coverage: protection.coverage
+                    coverage: coverage
                 });
-                mat[protection.position].Cut.push({
+                apvMatrix[position].Cut.push({
                     value: material.cut,
-                    coverage: protection.coverage
+                    coverage: coverage
                 });
-                mat[protection.position].Chop.push({
+                apvMatrix[position].Chop.push({
                     value: material.chop,
-                    coverage: protection.coverage
+                    coverage: coverage
                 });
-                mat[protection.position].Pierce.push({
+                apvMatrix[position].Pierce.push({
                     value: material.pierce,
-                    coverage: protection.coverage
+                    coverage: coverage
                 });
-                mat[protection.position].Thrust.push({
+                apvMatrix[position].Thrust.push({
                     value: material.thrust,
-                    coverage: protection.coverage
+                    coverage: coverage
                 });
-                mat[protection.position].Impact.push({
+                apvMatrix[position].Impact.push({
                     value: material.impact,
-                    coverage: protection.coverage
+                    coverage: coverage
                 });
-                mat[protection.position].Flanged.push({
+                apvMatrix[position].Flanged.push({
                     value: material.flanged,
-                    coverage: protection.coverage
+                    coverage: coverage
                 });
             });
         });
 
         //This loop accounts for layered armor and partial coverage and outputs final APVs
-        var position = 0;
-        for (position in mat) {
-            for (var type in mat[position]) {
-                var rawAPVArray = mat[position][type];
+        _.each(apvMatrix, function(position, positionName) {
+            _.each(position, function(rawAPVArray, type) {
                 var apvFinalArray = [];
                 var coverageArray = [];
 
                 //Creates an array of armor coverage in ascending order.
-                var apv;
-                for (apv in rawAPVArray) {
-                    if (coverageArray.indexOf(rawAPVArray[apv].coverage) === -1) {
-                        coverageArray.push(rawAPVArray[apv].coverage);
+                _.each(rawAPVArray, function(apv){
+                    if (coverageArray.indexOf(apv.coverage) === -1) {
+                        coverageArray.push(apv.coverage);
                     }
-                }
+                });
                 coverageArray = coverageArray.sort(function(a, b) {
                     return a - b;
                 });
 
                 //Creates APV array per damage type per position
-                var value;
-                for (value in coverageArray) {
+                _.each(coverageArray, function(apvCoverage){
                     var apvToLayerArray = [];
                     var apvValue = 0;
-                    var apvCoverage = coverageArray[value];
 
                     //Builds an array of APVs that meet or exceed the coverage value
-                    apv = 0;
-                    for (apv in rawAPVArray) {
-                        if (rawAPVArray[apv].coverage >= apvCoverage) {
-                            apvToLayerArray.push(rawAPVArray[apv]);
+                    _.each(rawAPVArray, function(apv){
+                        if (apv.coverage >= apvCoverage) {
+                            apvToLayerArray.push(apv.value);
                         }
-                    }
+                    });
                     apvToLayerArray = apvToLayerArray.sort(function(a, b) {
                         return b - a;
                     });
 
                     //Adds the values at coverage value with diminishing returns on layered armor
-                    value = 0;
-                    for (value in apvToLayerArray) {
-                        apvValue += apvToLayerArray[value] * Math.pow(2, -value);
+                    _.each(apvToLayerArray, function(value, index){
+                        apvValue += value * Math.pow(2, -index);
                         apvValue = Math.round(apvValue);
-                    }
+                    });
                     //Puts final APV and associated Coverage into final APV array for that damage type.
                     apvFinalArray.push({
                         value: apvValue,
                         coverage: apvCoverage
                     });
-                }
-                mat[position][type] = apvFinalArray;
-            }
-        }
-        return mat;
+                });
+                apvMatrix[positionName][type] = apvFinalArray;
+            });
+        });
+        return apvMatrix;
     }
 };
 MML.computeAttribute.leftHand = {
@@ -2304,14 +2591,16 @@ MML.computeAttribute.statusEffects = {
             this[dependent] = 0;
         }, this);
         _.each(this.statusEffects, function(effect, index) {
-            if (effect.name.indexOf("Major Wound") !== -1) {
+            log(effect);
+            log(index);
+            if (index.indexOf("Major Wound") !== -1) {
                 MML.statusEffects["Major Wound"].apply(this, [effect, index]);
-            } else if (effect.name.indexOf("Disabling Wound") !== -1) {
+            } else if (index.indexOf("Disabling Wound") !== -1) {
                 MML.statusEffects["Disabling Wound"].apply(this, [effect, index]);
-            } else if (effect.name.indexOf("Mortal Wound") !== -1) {
+            } else if (index.indexOf("Mortal Wound") !== -1) {
                 MML.statusEffects["Mortal Wound"].apply(this, [effect, index]);
             } else {
-                MML.statusEffects[effect.name].apply(this, [effect, index]);
+                MML.statusEffects[index].apply(this, [effect, index]);
             }
         }, this);
         return this.statusEffects;
@@ -2430,30 +2719,30 @@ MML.computeAttribute.senseInitBonus = {
             return 4;
         } else {
             //Head fully encased in metal
-            if (senseArray.indexOf("Great Helm") !== -1 || (senseArray.indexOf("Sallet Helm") !== -1 && senseArray.indexOf("Throat Guard") !== -1)) {
+            if (_.intersection(senseArray, ["Great Helm", "Sallet Helm", "Throat Guard"]).length > 0) {
                 return -2;
             }
             //wearing a helm
-            else if (senseArray.indexOf("Barbute Helm") !== -1 || senseArray.indexOf("Sallet Helm") !== -1 || senseArray.indexOf("Bascinet Helm") !== -1 || senseArray.indexOf("Duerne Helm") !== -1 || senseArray.indexOf("Cap") !== -1 || senseArray.indexOf("Pot Helm") !== -1 || senseArray.indexOf("Conical Helm") !== -1 || senseArray.indexOf("War Hat") !== -1) {
+            else if (_.intersection(senseArray, ["Barbute Helm", "Sallet Helm", "Bascinet Helm", "Duerne Helm", "Cap", "Pot Helm", "Conical Helm", "War Hat"]).length > 0) {
                 //Has faceplate
                 if (senseArray.indexOf("Face Plate") !== -1) {
                     //Enclosed Sides
-                    if (senseArray.indexOf("Barbute Helm") !== -1 || senseArray.indexOf("Bascinet Helm") !== -1 || senseArray.indexOf("Duerne Helm") !== -1) {
+                    if (_.intersection(senseArray, ["Barbute Helm", "Bascinet Helm", "Duerne Helm"]).length > 0) {
                         return -2;
                     } else {
                         return -1;
                     }
                 }
                 //These types of helms or half face plate
-                else if (senseArray.indexOf("Barbute Helm") !== -1 || senseArray.indexOf("Sallet Helm") !== -1 || senseArray.indexOf("Bascinet Helm") !== -1 || senseArray.indexOf("Duerne Helm") !== -1 || senseArray.indexOf("Half-Face Plate") !== -1) {
+                else if (_.intersection(senseArray, ["Barbute Helm", "Sallet Helm", "Bascinet Helm", "Duerne Helm", "Half-Face Plate"]).length > 0) {
                     return 0;
                 }
                 //has camail or cheeks
-                else if (senseArray.indexOf("Camail") !== -1 || senseArray.indexOf("Camail-Conical") !== -1 || senseArray.indexOf("Cheeks") !== -1) {
+                else if (_.intersection(senseArray, ["Camail", "Camail-Conical", "Cheeks"]).length > 0) {
                     return 1;
                 }
                 //Wearing a hood
-                else if (senseArray.indexOf("Dwarven War Hood") !== -1 || senseArray.indexOf("Hood") !== -1) {
+                else if (_.intersection(senseArray, ["Dwarven War Hood", "Hood"]).length > 0) {
                     _.each(armorList, function(piece) {
                         if (piece.name === "Dwarven War Hood" || piece.name === "Hood") {
                             if (piece.family === "Cloth") {
@@ -2474,7 +2763,7 @@ MML.computeAttribute.senseInitBonus = {
                 }
             }
             //Wearing a hood
-            else if (senseArray.indexOf("Dwarven War Hood") !== -1 || senseArray.indexOf("Hood") !== -1) {
+            else if (_.intersection(senseArray, ["Dwarven War Hood", "Hood"]).length > 0) {
                 _.each(armorList, function(piece) {
                     if (piece.name === "Dwarven War Hood" || piece.name === "Hood") {
                         if (piece.family === "Cloth") {
@@ -3576,6 +3865,9 @@ MML.hitPositions.humanoid[43] = { name: "Right Lower Shin", bodyPart: "Right Leg
 MML.hitPositions.humanoid[44] = { name: "Left Lower Shin", bodyPart: "Left Leg" };
 MML.hitPositions.humanoid[45] = { name: "Right Foot/Ankle", bodyPart: "Right Leg" };
 MML.hitPositions.humanoid[46] = { name: "Left Foot/Ankle", bodyPart: "Left Leg" };
+
+MML.sensitiveAreas = {};
+MML.sensitiveAreas.humanoid = ["Face", "Neck, Throat", "Groin"];
 
 MML.hitTables = {};
 MML.hitTables.humanoid = {};
@@ -6208,11 +6500,34 @@ MML.startRound = function startRound() {
 
         MML.processCommand({
             type: "GM",
-            callback: "setTurnOrder",
+            callback: "nextAction",
             input: {}
         });
+    }
+};
 
-        if (MML.checkReady()) {
+MML.endCombat = function endCombat() {
+    if (this.combatants.length > 0) {
+        var index = 0;
+        for (index in this.combatants) {
+            //remove token tints
+            this.characters[this.combatants[index]].setReady(false);
+        }
+        this.inCombat = false;
+        this.combatants = [];
+        Campaign().set("initiativepage", "false");
+    }
+};
+
+MML.nextAction = function nextAction() {
+    MML.processCommand({
+        type: "GM",
+        callback: "setTurnOrder",
+        input: {}
+    });
+
+    if (MML.checkReady()){
+        if (state.MML.characters[this.combatants[0]].initiative > 0) {
             this.actor = this.combatants[0];
             var playerName = state.MML.characters[this.actor].player;
 
@@ -6230,80 +6545,13 @@ MML.startRound = function startRound() {
                 callback: "displayMenu",
                 input: {}
             });
-        }
-    }
-};
-
-MML.endCombat = function endCombat() {
-    if (this.combatants.length > 0) {
-        var index = 0;
-        for (index in this.combatants) {
-            //remove token tints
-            this.characters[this.combatants[index]].setReady(false);
-        }
-        this.inCombat = false;
-        this.combatants = [];
-        Campaign().set("initiativepage", "false");
-    }
-};
-
-MML.endAction = function endAction() {
-    this.characters[this.actor].initiative.action++;
-    this.characters[this.actor].setInitiative();
-    this.characters[this.actor].computeSitMods();
-
-    var index;
-    for (index in this.targets) {
-        this.characters[this.targets[index]].computeSitMods();
-        this.characters[this.targets[index]].setInitiative();
-    }
-    this.setTurnOrder();
-
-    if (this.characters[this.combatants[0]].initiative < 1) {
-
-    } else {
-        this.who = MML.GmMenuCombat;
-        this.who("Start Action");
-    }
-};
-
-MML.nextAction = function nextAction() {
-    if (MML.checkReady()) {
-        this.actor = this.combatants[0];
-        this.characters[this.actor].initiative.action++;
-        this.characters[this.actor].computeSitMods();
-        this.characters[this.actor].setInitiative();
-        _.each(this.targets, function(target) {
-            this.characters[target].computeSitMods();
-            this.characters[target].setInitiative();
-        }, this);
-
-        this.setTurnOrder();
-
-        if (this.actor.initiative < 1) {
-            _.each(this.combatants, function(character) {
-                this.characters[character].setReady(false);
-                this.characters[character].newRoundUpdate();
-                this.characters[character].computeSitMods();
-            }, this);
-            // this.roundStarted = false;
-            this.actor = "";
-            // this.turnInfo.step = "newRound";
-            // this.turnInfo.data = {};
-            // sendChat("", "&{template:charMenu} {{button=[End Round](!main)}}");
-            this.who = MML.GmMenuCombat;
-            this.who("Next Round");
         } else {
-            // this.turnInfo.charName = charName;
-            // this.turnInfo.step = "action";
-            // this.turnInfo.data = {};
-            // this.turnInfo.data.targets = character.action.target;
-            // sendChat("", "&{template:charMenu} {{button=[" + charName + "'s Turn](!main)}}");
-            this.combatants[index].menu("entry");
-            //MML.GmMenu.combat("Next Action");
+            MML.processCommand({
+                type: "GM",
+                callback: "newRound",
+                input: {}
+            });
         }
-    } else {
-        sendChat("", "&{template:charMenu} {{name=Ready characters}} {{button=[Next Turn](!main)}}");
     }
 };
 
@@ -6330,10 +6578,6 @@ MML.checkReady = function checkReady() {
 
     return everyoneReady;
 };
-
-// Rolls
-
-
 
 // Turn Order Functions
 MML.setTurnOrder = function setTurnOrder() {
@@ -6384,7 +6628,7 @@ MML.changeRoll = function changeRoll(input) {
             if (this.currentRoll.type === "universal") {
                 this.currentRoll = MML.universalRollResult(this.currentRoll);
             } else if (this.currentRoll.type === "attribute") {
-                this.currentRoll = MML.attributeRollResult(this.currentRoll);
+                this.currentRoll = MML.attributeCheckResult(this.currentRoll);
             }
         }
     } else {
@@ -6397,7 +6641,6 @@ MML.changeRoll = function changeRoll(input) {
         input: {}
     });
 };
-
 
 MML.assignNewItem = function assignNewItem(input) {
     MML.processCommand({
@@ -7260,7 +7503,7 @@ MML.charMenuAttackCalledShot = function charMenuCalledShot(input) {
 
     if (MML.isWieldingRangedWeapon(state.MML.characters[this.who])) {
         _.each(buttons, function(button) {
-            button.nextMenu = "charMenuInitiativeRoll";
+            button.nextMenu = "charMenuFinializeAction";
         });
     } else {
         _.each(buttons, function(button) {
@@ -7308,7 +7551,7 @@ MML.charMenuAttackStance = function charMenuAttackStance(input) {
 
     if (MML.isWieldingRangedWeapon(state.MML.characters[this.who])) {
         _.each(buttons, function(button) {
-            button.nextMenu = "charMenuInitiativeRoll";
+            button.nextMenu = "charMenuFinializeAction";
         });
     } else {
         _.each(buttons, function(button) {
@@ -7361,18 +7604,28 @@ MML.charMenuAttackStance = function charMenuAttackStance(input) {
     } else {
         state.MML.characters[this.who].action.weaponType = "primary";
         _.each(buttons, function(button) {
-            button.nextMenu = "charMenuInitiativeRoll";
+            button.nextMenu = "charMenuFinializeAction";
         });
     }
     this.buttons = buttons;
 };
 
-MML.charMenuInitiativeRoll = function charMenuInitiativeRoll(input) {
+MML.charMenuFinializeAction = function charMenuFinializeAction(input) {
     this.who = input.who;
-    this.message = "Roll initiative or change action for " + this.who;
-    this.buttons = [MML.menuButtons.initiativeRoll,
-        MML.menuButtons.changeAction
-    ];
+
+    if (state.MML.GM.roundStarted === true) {
+        this.message = "Accept or change action for " + this.who;
+        this.buttons = [
+            MML.menuButtons.acceptAction,
+            MML.menuButtons.changeAction
+        ];
+    } else {
+        this.message = "Roll initiative or change action for " + this.who;
+        this.buttons = [
+            MML.menuButtons.initiativeRoll,
+            MML.menuButtons.changeAction
+        ];
+    }
 };
 
 MML.GmMenuStartAction = function GmMenuStartAction(input) {
@@ -7466,7 +7719,7 @@ MML.charMenuSelectDamageType = function charMenuSelectDamageType(input) {
 
     this.buttons.push({
         text: "Primary",
-        nextMenu: "charMenuInitiativeRoll",
+        nextMenu: "charMenuFinializeAction",
         callback: function(input) {
             state.MML.characters[this.who].action.weaponType = "primary";
             MML.processCommand({
@@ -7480,7 +7733,7 @@ MML.charMenuSelectDamageType = function charMenuSelectDamageType(input) {
 
     this.buttons.push({
         text: "Secondary",
-        nextMenu: "charMenuInitiativeRoll",
+        nextMenu: "charMenuFinializeAction",
         callback: function(input) {
             state.MML.characters[this.who].action.weaponType = "secondary";
             MML.processCommand({
@@ -7914,12 +8167,31 @@ MML.menuButtons.chooseTargets = {
         });
     }
 };
-
+MML.menuButtons.acceptAction = {
+    text: "Accept",
+    nextMenu: "menuIdle",
+    callback: function(input) {
+        MML.processCommand({
+            type: "character",
+            who: this.who,
+            callback: "setApiCharAttribute",
+            input: {
+                attribute: "ready",
+                value: true
+            }
+        });
+        MML.processCommand({
+            type: "GM",
+            callback: "nextAction",
+            input: {}
+        });
+    }
+};
 MML.menuButtons.endAction = {
     text: "End Action",
     nextMenu: "charMenuPrepareAction",
     callback: function(input) {
-        MML.endAction.apply(state.MML.GM, []);
+        MML.endAction();
     }
 };
 MML.menuButtons.rollDice = {
@@ -8503,202 +8775,193 @@ MML.statusEffects = {};
 
 
 
-MML.statusEffects["Major Wound"] = function(effect, index){
-    if(this.hp[effect.bodyPart] > Math.round(this.hpMax[effect.bodyPart]/2)){
+MML.statusEffects["Major Wound"] = function(effect, index) {
+    if (this.hp[effect.bodyPart] > Math.round(this.hpMax[effect.bodyPart] / 2)) {
         delete this.statusEffects[index];
-    }
-    else{
-        if(this.situationalInitBonus !== "No Combat"){
+    } else {
+        if (this.situationalInitBonus !== "No Combat") {
             this.situationalInitBonus += -5;
         }
-        if(effect.duration > 0){
+        if (effect.duration > 0) {
             this.situationalMod += -10;
         }
     }
-    // if(this[MML.hitPoints[i].name].wound.major.duration > 0){
-    //          this[MML.hitPoints[i].name].wound.major.duration--;
-    //      }
 };
-MML.statusEffects["Disabling Wound"] = function(effect, index){
-    if(this.hp[effect.bodyPart] > 0){
+MML.statusEffects["Disabling Wound"] = function(effect, index) {
+    if (this.hp[effect.bodyPart] > 0) {
         delete this.statusEffects[index];
-    }
-    else{
-        if(this.situationalInitBonus !== "No Combat"){
+    } else {
+        if (this.situationalInitBonus !== "No Combat") {
             this.situationalInitBonus += -10;
         }
         this.situationalMod += -25;
     }
 };
-MML.statusEffects["Mortal Wound"] = function(effect, index){
-    if(this.hp[effect.bodyPart] <= -this.hpMax[effect.bodyPart]){
+MML.statusEffects["Mortal Wound"] = function(effect, index) {
+    if (this.hp[effect.bodyPart] <= -this.hpMax[effect.bodyPart]) {
         delete this.statusEffects[index];
-    }
-    else{
+    } else {
         this.situationalInitBonus = "No Combat";
     }
 };
-MML.statusEffects["Wound Fatigue"] = function(effect, index){
-    if(this.situationalInitBonus !== "No Combat"){
-        this.situationalInitBonus += -5;
+MML.statusEffects["Wound Fatigue"] = function(effect, index) {
+    if (currentHP["Multiple Wounds"] > -1) {
+        delete this.statusEffects[index];
+    } else {
+        if (this.situationalInitBonus !== "No Combat") {
+            this.situationalInitBonus += -5;
+        }
+        this.situationalMod += -10;
     }
-    this.situationalMod  += -10;
 };
-MML.statusEffects["Number of Defenses"] = function(effect, index){
-    if(state.GM.roundStarted === false){
+MML.statusEffects["Number of Defenses"] = function(effect, index) {
+    if (state.MML.GM.roundStarted === false) {
         delete this.statusEffects[index];
     }
 
     this.missileDefenseMod += -20 * effect.number;
     this.meleeDefenseMod += -20 * effect.number;
 };
-MML.statusEffects["Fatigue"] = function(effect, index){
-    if(this.situationalInitBonus !== "No Combat"){
-        this.situationalInitBonus += -5*effect.level;
+MML.statusEffects["Fatigue"] = function(effect, index) {
+    if (this.situationalInitBonus !== "No Combat") {
+        this.situationalInitBonus += -5 * effect.level;
     }
-    this.situationalMod  += -10*effect.level;
+    this.situationalMod += -10 * effect.level;
 };
-MML.statusEffects["Sensitive Area"] = function(effect, index){
-    if(state.GM.roundStarted === false){
+MML.statusEffects["Sensitive Area"] = function(effect, index) {
+    if (state.MML.GM.roundStarted === false) {
         effect.duration--;
-        if(effect.duration < 1){
+        if (effect.duration < 1) {
             delete this.statusEffects[index];
         }
-    }
-    else{
-        if(this.situationalInitBonus !== "No Combat"){
+    } else {
+        if (this.situationalInitBonus !== "No Combat") {
             this.situationalInitBonus += -5;
         }
     }
-    if(effect.duration > 1){
-        this.situationalMod  += -10;
+    if (effect.duration > 1) {
+        this.situationalMod += -10;
     }
 };
-MML.statusEffects["Stumbling"] = function(effect, index){
-    if(state.GM.roundStarted === false){
+MML.statusEffects["Stumbling"] = function(effect, index) {
+    if (state.MML.GM.roundStarted === false) {
         effect.duration--;
-        if(effect.duration < 1){
+        if (effect.duration < 1) {
             delete this.statusEffects[index];
         }
-    }
-    else{
-        if(this.situationalInitBonus !== "No Combat"){
+    } else {
+        if (this.situationalInitBonus !== "No Combat") {
             this.situationalInitBonus += -5;
         }
     }
 };
-MML.statusEffects["Called Shot"] = function(effect, index){
-    if(!_.contains(this.action.modifiers, "Called Shot")){
+MML.statusEffects["Called Shot"] = function(effect, index) {
+    if (!_.contains(this.action.modifiers, "Called Shot")) {
         delete this.statusEffects[index];
-    }
-
-    else{
+    } else {
         this.missileDefenseMod += -10;
         this.meleeDefenseMod += -10;
         this.missileAttackMod += -10;
         this.meleeAttackMod += -10;
-        if(this.situationalInitBonus !== "No Combat"){
+        if (this.situationalInitBonus !== "No Combat") {
             this.situationalInitBonus += -5;
         }
     }
 };
-MML.statusEffects["Called Shot Specific"] = function(effect, index){
-    if(!_.contains(this.action.modifiers, "Called Shot Specific")){
+MML.statusEffects["Called Shot Specific"] = function(effect, index) {
+    if (!_.contains(this.action.modifiers, "Called Shot Specific")) {
         delete this.statusEffects[index];
-    }
-    else{
+    } else {
         this.missileDefenseMod += -30;
         this.meleeDefenseMod += -30;
         this.meleeAttackMod += -30;
         this.missileAttackMod += -30;
-        if(this.situationalInitBonus !== "No Combat"){
+        if (this.situationalInitBonus !== "No Combat") {
             this.situationalInitBonus += -5;
         }
     }
 };
-MML.statusEffects["Aggressive Stance"] = function(effect, index){
-    if(!_.contains(this.action.modifiers, "Aggressive Stance")){
+MML.statusEffects["Aggressive Stance"] = function(effect, index) {
+    if (!_.contains(this.action.modifiers, "Aggressive Stance")) {
         // log("aggro deleted");
         delete this.statusEffects[index];
         // log(this.statusEffects);
-    }
-    else{
+    } else {
         this.missileDefenseMod += -40;
         this.meleeDefenseMod += -40;
         this.meleeAttackMod += 10;
         this.perceptionCheckMod += -4;
-        if(this.situationalInitBonus !== "No Combat"){
+        if (this.situationalInitBonus !== "No Combat") {
             this.situationalInitBonus += 5;
         }
     }
 };
-MML.statusEffects["Defensive Stance"] = function(effect, index){
-    if(!_.contains(this.action.modifiers, "Defensive Stance")){
+MML.statusEffects["Defensive Stance"] = function(effect, index) {
+    if (!_.contains(this.action.modifiers, "Defensive Stance")) {
         delete this.statusEffects[index];
-    }
-    else{
+    } else {
         this.missileDefenseMod += 40;
         this.meleeDefenseMod += 40;
         this.meleeAttackMod += -30;
         this.perceptionCheckMod += -4;
-        if(this.situationalInitBonus !== "No Combat"){
+        if (this.situationalInitBonus !== "No Combat") {
             this.situationalInitBonus += -5;
         }
     }
 };
-MML.statusEffects["Observe"] = function(effect, index){
-    if(state.GM.roundStarted === false){
+MML.statusEffects["Observe"] = function(effect, index) {
+    if (state.MML.GM.roundStarted === false) {
         effect.duration--;
     }
 
-    if(effect.duration < 1 || (this.situationalInitBonus !== "No Combat" && !_.has(this.statusEffects, "Number of Defenses"))){
+    if (effect.duration < 1 || (this.situationalInitBonus !== "No Combat" && !_.has(this.statusEffects, "Number of Defenses"))) {
         delete this.statusEffects[index];
-    }
-    else if(effect.duration < 1){
+    } else if (effect.duration < 1) {
         // Observing this round
         this.perceptionCheckMod += 4;
         this.missileDefenseMod += -10;
         this.meleeDefenseMod += -10;
-    }
-    else{
+    } else {
         //observed previous round
         this.situationalInitBonus += 5;
-        if(MML.isWieldingRangedWeapon(this)){
-                this.missileAttackMod += 15;
-            }
+        if (MML.isWieldingRangedWeapon(this)) {
+            this.missileAttackMod += 15;
         }
-};
-MML.statusEffects["Taking Aim"] = function(effect, index){
-    if(_.has(this.statusEffects, "Number of Defenses") ||
-       _.has(this.statusEffects, "Damaged This Round") ||
-       _.has(this.statusEffects, "Dodged This Round") ||
-       this.action.targets[0] !== effect.target)
-    {
-        delete this.statusEffects[index];
     }
-    else{
-        if(effect.level === 1){
+};
+MML.statusEffects["Taking Aim"] = function(effect, index) {
+    if (_.has(this.statusEffects, "Number of Defenses") ||
+        _.has(this.statusEffects, "Damaged This Round") ||
+        _.has(this.statusEffects, "Dodged This Round") ||
+        this.action.targets[0] !== effect.target) {
+        delete this.statusEffects[index];
+    } else {
+        if (effect.level === 1) {
             this.missileAttackMod += 30;
-        }
-        else if(effect.level === 2){
+        } else if (effect.level === 2) {
             this.missileAttackMod += 40;
         }
     }
 };
-MML.statusEffects["Damaged This Round"] = function(effect, index){
+MML.statusEffects["Damaged This Round"] = function(effect, index) {
 
 };
-MML.statusEffects["Dodged This Round"] = function(effect, index){
+MML.statusEffects["Dodged This Round"] = function(effect, index) {
 
 };
-MML.statusEffects["Melee This Round"] = function(effect, index){
-    if(state.MML.GM.roundStarted === false){
+MML.statusEffects["Melee This Round"] = function(effect, index) {
+    if (state.MML.GM.roundStarted === false) {
         this.roundsExertion++;
         delete this.statusEffects[index];
     }
 };
-MML.statusEffects["Stunned"] = function(effect, index){
-
+MML.statusEffects["Stunned"] = function(effect, index) {
+    if (state.MML.GM.roundStarted === false) {
+        effect.duration--;
+        if (effect.duration < 1) {
+            delete this.statusEffects[index];
+        }
+    }
 };
 /* jshint -W069 */
 // Character Functions
@@ -9004,7 +9267,7 @@ MML.rollDice = function rollDice(amount, size) {
 };
 
 MML.rollDamage = function rollDamage(input) {
-    var diceArray = input.weaponDamage.split("d");
+    var diceArray = input.damageDice.split("d");
     var amount = diceArray[0] * 1;
     var size = diceArray[1] * 1;
     var damageMod = 0;
@@ -9015,11 +9278,11 @@ MML.rollDamage = function rollDamage(input) {
         damageMod += mod;
     });
 
-    if (input.attackRollResult === "Critical Success") {
-        value = -(MML.rollDice(amount, size) + amount * size + damageMod);
+    if (input.crit) {
+        value = MML.rollDice(amount, size) + amount * size + damageMod;
         range = (amount * size + amount + damageMod) + "-" + (2 * amount * size + damageMod);
     } else {
-        value = -(MML.rollDice(amount, size) + damageMod);
+        value = MML.rollDice(amount, size) + damageMod;
         range = (amount + damageMod) + "-" + (amount * size + damageMod);
     }
 
@@ -9028,6 +9291,7 @@ MML.rollDamage = function rollDamage(input) {
         character: this.name,
         accepted: false,
         value: value,
+        result: -value,
         range: range,
         message: "Roll: " + value + "\nRange: " + range,
         callback: input.callback
@@ -9114,7 +9378,10 @@ MML.universalRollResult = function universalRollResult(roll) {
     return roll;
 };
 
-MML.attributeCheckRoll = function attributeCheckRoll(attribute, mods) {
+MML.attributeCheckRoll = function attributeCheckRoll(input) {
+    var attribute = input.attribute;
+    var mods = input.mods;
+    var callback = input.callback;
     var target = this[attribute];
 
     var mod;
@@ -9123,8 +9390,10 @@ MML.attributeCheckRoll = function attributeCheckRoll(attribute, mods) {
     }
 
     var roll = {
-        name: "attribute",
-        player: this.player,
+        type: "attribute",
+        name: input.name,
+        character: this.name,
+        callback: callback,
         value: MML.rollDice(1, 20),
         range: "1-20",
         target: target,
@@ -9133,7 +9402,21 @@ MML.attributeCheckRoll = function attributeCheckRoll(attribute, mods) {
 
     roll = MML.attributeCheckResult(roll);
 
-    return roll;
+    MML.processCommand({
+        type: "player",
+        who: this.player,
+        callback: "setApiPlayerAttribute",
+        input: {
+            attribute: "currentRoll",
+            value: roll
+        }
+    });
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        callback: callback,
+        input: {}
+    });
 };
 
 MML.attributeCheckResult = function attributeCheckResult(roll) {

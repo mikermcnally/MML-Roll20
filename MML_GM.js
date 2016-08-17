@@ -111,11 +111,34 @@ MML.startRound = function startRound() {
 
         MML.processCommand({
             type: "GM",
-            callback: "setTurnOrder",
+            callback: "nextAction",
             input: {}
         });
+    }
+};
 
-        if (MML.checkReady()) {
+MML.endCombat = function endCombat() {
+    if (this.combatants.length > 0) {
+        var index = 0;
+        for (index in this.combatants) {
+            //remove token tints
+            this.characters[this.combatants[index]].setReady(false);
+        }
+        this.inCombat = false;
+        this.combatants = [];
+        Campaign().set("initiativepage", "false");
+    }
+};
+
+MML.nextAction = function nextAction() {
+    MML.processCommand({
+        type: "GM",
+        callback: "setTurnOrder",
+        input: {}
+    });
+
+    if (MML.checkReady()){
+        if (state.MML.characters[this.combatants[0]].initiative > 0) {
             this.actor = this.combatants[0];
             var playerName = state.MML.characters[this.actor].player;
 
@@ -133,80 +156,13 @@ MML.startRound = function startRound() {
                 callback: "displayMenu",
                 input: {}
             });
-        }
-    }
-};
-
-MML.endCombat = function endCombat() {
-    if (this.combatants.length > 0) {
-        var index = 0;
-        for (index in this.combatants) {
-            //remove token tints
-            this.characters[this.combatants[index]].setReady(false);
-        }
-        this.inCombat = false;
-        this.combatants = [];
-        Campaign().set("initiativepage", "false");
-    }
-};
-
-MML.endAction = function endAction() {
-    this.characters[this.actor].initiative.action++;
-    this.characters[this.actor].setInitiative();
-    this.characters[this.actor].computeSitMods();
-
-    var index;
-    for (index in this.targets) {
-        this.characters[this.targets[index]].computeSitMods();
-        this.characters[this.targets[index]].setInitiative();
-    }
-    this.setTurnOrder();
-
-    if (this.characters[this.combatants[0]].initiative < 1) {
-
-    } else {
-        this.who = MML.GmMenuCombat;
-        this.who("Start Action");
-    }
-};
-
-MML.nextAction = function nextAction() {
-    if (MML.checkReady()) {
-        this.actor = this.combatants[0];
-        this.characters[this.actor].initiative.action++;
-        this.characters[this.actor].computeSitMods();
-        this.characters[this.actor].setInitiative();
-        _.each(this.targets, function(target) {
-            this.characters[target].computeSitMods();
-            this.characters[target].setInitiative();
-        }, this);
-
-        this.setTurnOrder();
-
-        if (this.actor.initiative < 1) {
-            _.each(this.combatants, function(character) {
-                this.characters[character].setReady(false);
-                this.characters[character].newRoundUpdate();
-                this.characters[character].computeSitMods();
-            }, this);
-            // this.roundStarted = false;
-            this.actor = "";
-            // this.turnInfo.step = "newRound";
-            // this.turnInfo.data = {};
-            // sendChat("", "&{template:charMenu} {{button=[End Round](!main)}}");
-            this.who = MML.GmMenuCombat;
-            this.who("Next Round");
         } else {
-            // this.turnInfo.charName = charName;
-            // this.turnInfo.step = "action";
-            // this.turnInfo.data = {};
-            // this.turnInfo.data.targets = character.action.target;
-            // sendChat("", "&{template:charMenu} {{button=[" + charName + "'s Turn](!main)}}");
-            this.combatants[index].menu("entry");
-            //MML.GmMenu.combat("Next Action");
+            MML.processCommand({
+                type: "GM",
+                callback: "newRound",
+                input: {}
+            });
         }
-    } else {
-        sendChat("", "&{template:charMenu} {{name=Ready characters}} {{button=[Next Turn](!main)}}");
     }
 };
 
@@ -233,10 +189,6 @@ MML.checkReady = function checkReady() {
 
     return everyoneReady;
 };
-
-// Rolls
-
-
 
 // Turn Order Functions
 MML.setTurnOrder = function setTurnOrder() {
@@ -287,7 +239,7 @@ MML.changeRoll = function changeRoll(input) {
             if (this.currentRoll.type === "universal") {
                 this.currentRoll = MML.universalRollResult(this.currentRoll);
             } else if (this.currentRoll.type === "attribute") {
-                this.currentRoll = MML.attributeRollResult(this.currentRoll);
+                this.currentRoll = MML.attributeCheckResult(this.currentRoll);
             }
         }
     } else {
@@ -300,7 +252,6 @@ MML.changeRoll = function changeRoll(input) {
         input: {}
     });
 };
-
 
 MML.assignNewItem = function assignNewItem(input) {
     MML.processCommand({
