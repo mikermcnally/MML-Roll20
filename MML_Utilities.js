@@ -314,10 +314,10 @@ MML.rollDamage = function rollDamage(input) {
     });
 
     if (input.crit) {
-        value = -(MML.rollDice(amount, size) + amount * size + damageMod);
+        value = MML.rollDice(amount, size) + amount * size + damageMod;
         range = (amount * size + amount + damageMod) + "-" + (2 * amount * size + damageMod);
     } else {
-        value = -(MML.rollDice(amount, size) + damageMod);
+        value = MML.rollDice(amount, size) + damageMod;
         range = (amount + damageMod) + "-" + (amount * size + damageMod);
     }
 
@@ -326,6 +326,7 @@ MML.rollDamage = function rollDamage(input) {
         character: this.name,
         accepted: false,
         value: value,
+        result: -value,
         range: range,
         message: "Roll: " + value + "\nRange: " + range,
         callback: input.callback
@@ -412,7 +413,10 @@ MML.universalRollResult = function universalRollResult(roll) {
     return roll;
 };
 
-MML.attributeCheckRoll = function attributeCheckRoll(attribute, mods, callback) {
+MML.attributeCheckRoll = function attributeCheckRoll(input) {
+    var attribute = input.attribute;
+    var mods = input.mods;
+    var callback = input.callback;
     var target = this[attribute];
 
     var mod;

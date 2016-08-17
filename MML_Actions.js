@@ -22,16 +22,23 @@ MML.meleeAttackAction = function meleeAttackAction() {
             MML.endAction();
         }
     } else if (_.isUndefined(rolls.hitPositionRoll)) {
-        if (rolls.defenseRoll === "Critical Success" || rolls.defenseRoll === "Success") {
+        if (rolls.defenseRoll === "Critical Success"){
+            MML.processCommand({
+                type: "character",
+                who: target.name,
+                callback: "criticalDefense",
+                input: {}
+            });
+        } else if (rolls.defenseRoll === "Success") {
             MML.endAction();
         } else {
-            MML.hitPositionRoll();
+            MML.hitPositionRoll(character);
         }
     } else if (_.isUndefined(rolls.damageRoll)) {
         if (rolls.attackRoll === "Critical Success") {
-            MML.meleeDamageRoll(target, attackerWeapon, true);
+            MML.meleeDamageRoll(character, attackerWeapon, true);
         } else {
-            MML.meleeDamageRoll(target, attackerWeapon, false);
+            MML.meleeDamageRoll(character, attackerWeapon, false);
         }
     } else {
         MML.damageTargetAction("endAction");
@@ -44,20 +51,72 @@ MML.damageTargetAction = function damageTargetAction(callback) {
     var target = parameters.target;
     var rolls = currentAction.rolls;
 
-    if (!_.isUndefined(parameters.wound)) {
-        state.MML.GM.currentAction.parameters.wound = "complete";
-        var damageAfterArmor = armorDamageReduction(rolls.hitPositionRoll.name, rolls.damageRoll.value, parameters.damageType, randomInteger(100));
-        MML.alterHP(rolls.hitPositionRoll.bodyPart, damageAfterArmor);
-    } else if (!_.isUndefined(parameters.multiWound)) {
+    if (_.isUndefined(parameters.damageApplied)) {
+        state.MML.GM.currentAction.parameters.damageApplied = "complete";
+        var damageAfterArmor = MML.armorDamageReduction(target, rolls.hitPositionRoll.name, rolls.damageRoll, parameters.damageType, randomInteger(100));
+        MML.processCommand({
+            type: "character",
+            who: target.name,
+            callback: "alterHP",
+            input: {
+                bodyPart: rolls.hitPositionRoll.bodyPart,
+                hpAmount: damageAfterArmor
+            }
+        });
+    } else if (_.isUndefined(parameters.multiWound)) {
         state.MML.GM.currentAction.parameters.multiWound = "complete";
-        MML.setMultiWound();
-    } else if (!_.isUndefined(parameters.sensitiveArea)) {
+        MML.processCommand({
+            type: "character",
+            who: target.name,
+            callback: "setMultiWound",
+            input: {}
+        });
+    } else if (_.isUndefined(parameters.sensitiveArea)) {
         state.MML.GM.currentAction.parameters.sensitiveArea = "complete";
-        MML.sensitiveAreaCheck(rolls.hitPositionRoll.name);
-    } else if (!_.isUndefined(parameters.knockdown)) {
+        MML.sensitiveAreaCheck(target, rolls.hitPositionRoll.name);
+    } else if (_.isUndefined(parameters.knockdown)) {
         state.MML.GM.currentAction.parameters.knockdown = "complete";
-        MML.knockdownCheck(rolls.damageRoll.value);
+        MML.knockdownCheck(target, rolls.damageRoll.value);
     } else {
         MML[callback]();
+    }
+};
+
+MML.endAction = function endAction() {
+    var currentAction = state.MML.GM.currentAction;
+    var character = currentAction.character;
+    var spentInitiative = character.spentInitiative + character.actionTempo;
+    var currentInitiative = character.initiative + spentInitiative;
+
+    MML.processCommand({
+        type: "character",
+        who: character.name,
+        callback: "setApiCharAttribute",
+        input: {
+            attribute: "spentInitiative",
+            value: spentInitiative
+        }
+    });
+    if(currentInitiative > 0) {
+        MML.processCommand({
+            type: "player",
+            who: character.player,
+            callback: "charMenuPrepareAction",
+            input: {
+                who: character.name
+            }
+        });
+        MML.processCommand({
+            type: "player",
+            who: character.player,
+            callback: "displayMenu",
+            input: {}
+        });
+    } else {
+        MML.processCommand({
+            type: "GM",
+            callback: "nextAction",
+            input: {}
+        });
     }
 };

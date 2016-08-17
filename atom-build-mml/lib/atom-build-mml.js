@@ -44,13 +44,18 @@ export default {
     if (this.modalPanel.isVisible()) {
       this.modalPanel.hide();
     } else {
+      // this.modalPanel.show();
       var editor = atom.workspace.getActiveTextEditor();
       var files = editor.buffer.file.getParent().getEntriesSync();
       var roll20Files = _.sortBy(_.filter(files, function(item) {
           return item.getBaseName().search(/MML_(?!Test|Roll20).*\.js/) != -1;
       }), "path");
+      var roll20String = "";
 
-        console.log(roll20Files);
+      _.each(roll20Files, function(file) {
+          roll20String += file.readSync(true);
+      });
+        atom.clipboard.write(roll20String);
     }
   }
 

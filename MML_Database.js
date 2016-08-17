@@ -584,6 +584,9 @@ MML.hitPositions.humanoid[44] = { name: "Left Lower Shin", bodyPart: "Left Leg" 
 MML.hitPositions.humanoid[45] = { name: "Right Foot/Ankle", bodyPart: "Right Leg" };
 MML.hitPositions.humanoid[46] = { name: "Left Foot/Ankle", bodyPart: "Left Leg" };
 
+MML.sensitiveAreas = {};
+MML.sensitiveAreas.humanoid = ["Face", "Neck, Throat", "Groin"];
+
 MML.hitTables = {};
 MML.hitTables.humanoid = {};
 MML.hitTables.humanoid.A = {};
