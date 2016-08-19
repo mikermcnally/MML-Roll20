@@ -1076,7 +1076,6 @@ MML.menuButtons.newShield = {
         });
     }
 };
-
 MML.menuButtons.newArmor = {
     text: "Armor",
     nextMenu: "GmMenuNewArmor",
