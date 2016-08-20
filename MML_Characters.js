@@ -35,7 +35,7 @@ MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input) {
             }
         });
 
-        if (this.fatigueLevel < 1) {
+        if (!_.has(this.statusEffects, "Fatigue")) {
             if (this.roundsExertion > this.fitness) {
                 MML.processCommand({
                     type: "character",
@@ -58,7 +58,7 @@ MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input) {
                 });
             }
         }
-    } else if (this.fatigueLevel > 0) {
+    } else if (_.has(this.statusEffects, "Fatigue")) {
         MML.processCommand({
             type: "character",
             who: this.name,

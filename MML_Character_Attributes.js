@@ -642,7 +642,7 @@ MML.computeAttribute.apv = {
                 var coverageArray = [];
 
                 //Creates an array of armor coverage in ascending order.
-                _.each(rawAPVArray, function(apv){
+                _.each(rawAPVArray, function(apv) {
                     if (coverageArray.indexOf(apv.coverage) === -1) {
                         coverageArray.push(apv.coverage);
                     }
@@ -652,12 +652,12 @@ MML.computeAttribute.apv = {
                 });
 
                 //Creates APV array per damage type per position
-                _.each(coverageArray, function(apvCoverage){
+                _.each(coverageArray, function(apvCoverage) {
                     var apvToLayerArray = [];
                     var apvValue = 0;
 
                     //Builds an array of APVs that meet or exceed the coverage value
-                    _.each(rawAPVArray, function(apv){
+                    _.each(rawAPVArray, function(apv) {
                         if (apv.coverage >= apvCoverage) {
                             apvToLayerArray.push(apv.value);
                         }
@@ -667,7 +667,7 @@ MML.computeAttribute.apv = {
                     });
 
                     //Adds the values at coverage value with diminishing returns on layered armor
-                    _.each(apvToLayerArray, function(value, index){
+                    _.each(apvToLayerArray, function(value, index) {
                         apvValue += value * Math.pow(2, -index);
                         apvValue = Math.round(apvValue);
                     });
@@ -1151,7 +1151,7 @@ MML.computeAttribute.actionTempo = {
     compute: function() {
         var tempo;
 
-        if (this.action.skill < 30) {
+        if (_.isUndefined(this.action.skill) || this.action.skill < 30) {
             tempo = 0;
         } else if (this.action.skill < 40) {
             tempo = 1;
@@ -1224,9 +1224,10 @@ MML.computeAttribute.action = {
                 //Dual Wielding
             } else if (rightHand !== "unarmed" && leftHand === "unarmed") {
                 initBonus = this.inventory[this.rightHand._id].grips[this.rightHand.grip].initiative;
+                this.action.skill = MML.getWeaponSkill(this, this.inventory[this.rightHand._id]);
             } else {
                 initBonus = this.inventory[this.leftHand._id].grips[this.leftHand.grip].initiative;
-                //this.action.skill = this.weaponSkills.[this.inventory[this.leftHand._id].name].level or this.weaponSkills["Default Martial Skill"].level;
+                this.action.skill = MML.getWeaponSkill(this, this.inventory[this.leftHand._id]);
             }
         }
         this.action.initBonus = initBonus;
@@ -1240,30 +1241,7 @@ MML.computeAttribute.action = {
         return this.action;
     }
 };
-MML.computeAttribute.defensesThisRound = {
-    dependents: [],
-    compute: function() {
-        return this.defensesThisRound;
-    }
-};
-MML.computeAttribute.dodgedThisRound = {
-    dependents: ["situationalInitBonus"],
-    compute: function() {
-        return this.dodgedThisRound;
-    }
-};
-MML.computeAttribute.meleeThisRound = {
-    dependents: [],
-    compute: function() {
-        return this.meleeThisRound;
-    }
-};
-MML.computeAttribute.fatigueLevel = {
-    dependents: ["statusEffects"],
-    compute: function() {
-        return this.fatigueLevel;
-    }
-};
+
 MML.computeAttribute.roundsRest = {
     dependents: [],
     compute: function() {
@@ -1276,16 +1254,11 @@ MML.computeAttribute.roundsExertion = {
         return this.roundsExertion;
     }
 };
-MML.computeAttribute.damagedThisRound = {
-    dependents: [],
-    compute: function() {
-        return this.damagedThisRound;
-    }
-};
+
 
 // Skills
 MML.computeAttribute.skills = {
-    dependents: [],
+    dependents: ["actionTempo"],
     compute: function() {
         var characterSkills = MML.getSkillAttributes(this.name, "skills");
         _.each(
@@ -1315,7 +1288,7 @@ MML.computeAttribute.skills = {
     }
 };
 MML.computeAttribute.weaponSkills = {
-    dependents: [],
+    dependents: ["actionTempo"],
     compute: function() {
         var characterSkills = MML.getSkillAttributes(this.name, "weaponskills");
         var highestSkill;
