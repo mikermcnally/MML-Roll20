@@ -6453,6 +6453,8 @@ MML.startCombat = function startCombat(input) {
 };
 
 MML.newRound = function newRound() {
+    this.currentRound++;
+    this.roundStarted = false;
     _.each(this.combatants, function(charName) {
         MML.processCommand({
             type: "character",
