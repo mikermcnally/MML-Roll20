@@ -1000,13 +1000,13 @@ MML.charMenuMeleeDefenseRoll = function charMenuMeleeDefenseRoll(input) {
         }
     }];
 };
-MML.charMenuMeleeDefenseRoll = function charMenuMeleeDefenseRoll(input) {
+MML.charMenuRangedDefenseRoll = function charMenuRangedDefenseRoll(input) {
     var defenseChance = input.defenseChance;
 
     this.who = input.who;
     this.message = "How will " + this.who + " defend?";
     this.buttons = [{
-        text: "Dodge: " + dodgeChance + "%",
+        text: "Defend: " + defenseChance + "%",
         nextMenu: "menuIdle",
         callback: function(input) {
             MML.processCommand({

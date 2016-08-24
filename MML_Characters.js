@@ -1053,7 +1053,7 @@ MML.missileAttack = function missileAttack() {
     MML[currentAction.callback]();
 };
 
-MML.missleAttackRoll = function missleAttackRoll(rollName, character, task, skill) {
+MML.missileAttackRoll = function missleAttackRoll(rollName, character, task, skill) {
     MML.processCommand({
         type: "character",
         who: character.name,
@@ -1127,13 +1127,13 @@ MML.hitPositionRoll = function hitPositionRoll(character) {
     var action = state.MML.GM.currentAction;
     var target = state.MML.characters[action.targetArray[action.targetIndex]];
 
-    if (_.contains(this.action.modifiers, ["Called Shot Specific"])) {
+    if (_.contains(character.action.modifiers, ["Called Shot Specific"])) {
         rollValue = +_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
             return hitPosition.name === action.calledShot;
         });
         range = rollValue + "-" + rollValue;
         result = MML.hitPositions[target.bodyType][rollValue];
-    } else if (_.contains(this.action.modifiers, "Called Shot")) {
+    } else if (_.contains(character.action.modifiers, "Called Shot")) {
         var rangeUpper = MML.getAvailableHitPositions(target, action.calledShot).length;
         rollValue = MML.rollDice(1, rangeUpper);
         range = "1-" + rangeUpper;
@@ -1522,7 +1522,7 @@ MML.rangedDefense = function rangedDefense(defender, attackerWeapon, range) {
     MML.processCommand({
         type: "player",
         who: defender.player,
-        callback: "charMenurangedDefenseRoll",
+        callback: "charMenuRangedDefenseRoll",
         input: {
             who: defender.name,
             defenseChance: defenseChance
