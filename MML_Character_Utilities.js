@@ -120,18 +120,8 @@ MML.getWeaponSkill = function getWeaponSkill(character, weapon) {
 MML.isWieldingRangedWeapon = function isWieldingRangedWeapon(character) {
     var leftFamily = MML.getWeaponFamily(character, "leftHand");
     var rightFamily = MML.getWeaponFamily(character, "rightHand");
-
-    return (leftFamily === "MWD" ||
-        rightFamily === "MWD" ||
-        leftFamily === "MWM" ||
-        rightFamily === "MWM" ||
-        leftFamily === "TWH" ||
-        rightFamily === "TWH" ||
-        leftFamily === "TWK" ||
-        rightFamily === "TWS" ||
-        leftFamily === "TWS" ||
-        rightFamily === "SLI" ||
-        leftFamily === "SLI");
+    var rangedFamilies = ["MWD", "MWM", "TWH", "TWK", "TWS", "SLI"];
+    return (rangedFamilies.indexOf(leftFamily) > -1 || rangedFamilies.indexOf(rightFamily) > -1);
 };
 
 MML.isUnarmed = function isUnarmed(character) {
@@ -233,7 +223,6 @@ MML.getCalledShotHitPosition = function getCalledShotHitPosition(character, roll
     }
 };
 
-
 MML.buildHpAttribute = function buildHpAttribute(character) {
     var hpAttribute;
     switch (character.bodyType) {
@@ -253,4 +242,11 @@ MML.buildHpAttribute = function buildHpAttribute(character) {
             console.log("Fuck!");
     }
     return hpAttribute;
+};
+
+MML.getDistanceBetweenChars = function getDistanceBetweenChars(charName, targetName) {
+    var charToken = MML.getTokenFromChar(charName);
+    var targetToken = MML.getTokenFromChar(targetName);
+
+    return MML.getDistance(charToken.get("left"), targetToken.get("left"), charToken.get("top"), targetToken.get("top"));
 };

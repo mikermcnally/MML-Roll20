@@ -708,7 +708,7 @@ MML.charMenuAttackCalledShot = function charMenuCalledShot(input) {
 
     if (MML.isWieldingRangedWeapon(state.MML.characters[this.who])) {
         _.each(buttons, function(button) {
-            button.nextMenu = "charMenuFinializeAction";
+            button.nextMenu = "charMenuFinalizeAction";
         });
     } else {
         _.each(buttons, function(button) {
@@ -756,7 +756,7 @@ MML.charMenuAttackStance = function charMenuAttackStance(input) {
 
     if (MML.isWieldingRangedWeapon(state.MML.characters[this.who])) {
         _.each(buttons, function(button) {
-            button.nextMenu = "charMenuFinializeAction";
+            button.nextMenu = "charMenuFinalizeAction";
         });
     } else {
         _.each(buttons, function(button) {
@@ -809,15 +809,15 @@ MML.charMenuAttackStance = function charMenuAttackStance(input) {
     } else {
         state.MML.characters[this.who].action.weaponType = "primary";
         _.each(buttons, function(button) {
-            button.nextMenu = "charMenuFinializeAction";
+            button.nextMenu = "charMenuFinalizeAction";
         });
     }
     this.buttons = buttons;
 };
 
-MML.charMenuFinializeAction = function charMenuFinializeAction(input) {
+MML.charMenuFinalizeAction = function charMenuFinalizeAction(input) {
     this.who = input.who;
-
+    log(state.MML.characters[this.who].action.modifiers);
     if (state.MML.GM.roundStarted === true) {
         this.message = "Accept or change action for " + this.who;
         this.buttons = [
@@ -924,7 +924,7 @@ MML.charMenuSelectDamageType = function charMenuSelectDamageType(input) {
 
     this.buttons.push({
         text: "Primary",
-        nextMenu: "charMenuFinializeAction",
+        nextMenu: "charMenuFinalizeAction",
         callback: function(input) {
             state.MML.characters[this.who].action.weaponType = "primary";
             MML.processCommand({
@@ -938,7 +938,7 @@ MML.charMenuSelectDamageType = function charMenuSelectDamageType(input) {
 
     this.buttons.push({
         text: "Secondary",
-        nextMenu: "charMenuFinializeAction",
+        nextMenu: "charMenuFinalizeAction",
         callback: function(input) {
             state.MML.characters[this.who].action.weaponType = "secondary";
             MML.processCommand({
@@ -955,7 +955,7 @@ MML.charMenuAttackRoll = function charMenuAttackRoll(input) {
     this.message = "Roll Attack.";
     this.buttons = [MML.menuButtons.rollDice];
 };
-MML.charMenuDefenseRoll = function charMenuDefenseRoll(input) {
+MML.charMenuMeleeDefenseRoll = function charMenuMeleeDefenseRoll(input) {
     var blockChance = input.blockChance;
     var dodgeChance = input.dodgeChance;
 
@@ -993,8 +993,39 @@ MML.charMenuDefenseRoll = function charMenuDefenseRoll(input) {
         callback: function(input) {
             MML.processCommand({
                 type: "character",
-                who: state.MML.GM.currentAction.who,
-                callback: "rollHitPosition",
+                who: this.who,
+                callback: "forgoDefense",
+                input: {}
+            });
+        }
+    }];
+};
+MML.charMenuMeleeDefenseRoll = function charMenuMeleeDefenseRoll(input) {
+    var defenseChance = input.defenseChance;
+
+    this.who = input.who;
+    this.message = "How will " + this.who + " defend?";
+    this.buttons = [{
+        text: "Dodge: " + dodgeChance + "%",
+        nextMenu: "menuIdle",
+        callback: function(input) {
+            MML.processCommand({
+                type: "character",
+                who: this.who,
+                callback: "rangedDefenseRoll",
+                input: {
+                    defenseChance: defenseChance
+                }
+            });
+        }
+    }, {
+        text: "Take it",
+        nextMenu: "menuIdle",
+        callback: function(input) {
+            MML.processCommand({
+                type: "character",
+                who: this.who,
+                callback: "forgoDefense",
                 input: {}
             });
         }
@@ -1382,6 +1413,14 @@ MML.menuButtons.acceptAction = {
             input: {
                 attribute: "ready",
                 value: true
+            }
+        });
+        MML.processCommand({
+            type: "character",
+            who: this.who,
+            callback: "updateCharacter",
+            input: {
+                attribute: "action"
             }
         });
         MML.processCommand({

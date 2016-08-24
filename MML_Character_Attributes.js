@@ -50,7 +50,7 @@ MML.characterConstructor = function characterConstructor(charName) {
     this.situationalMod = MML.getCurrentAttributeAsFloat(this.name, "situationalMod");
     this.attributeDefenseMod = MML.getCurrentAttributeAsFloat(this.name, "attributeDefenseMod");
     this.meleeDefenseMod = MML.getCurrentAttributeAsFloat(this.name, "meleeDefenseMod");
-    this.missileDefenseMod = MML.getCurrentAttributeAsFloat(this.name, "missileDefenseMod");
+    this.rangedDefenseMod = MML.getCurrentAttributeAsFloat(this.name, "rangedDefenseMod");
     this.meleeAttackMod = MML.getCurrentAttributeAsFloat(this.name, "meleeAttackMod");
     this.missileAttackMod = MML.getCurrentAttributeAsFloat(this.name, "missileAttackMod");
     this.attributeMeleeAttackMod = MML.getCurrentAttributeAsFloat(this.name, "attributeMeleeAttackMod");
@@ -752,10 +752,10 @@ MML.computeAttribute.meleeDefenseMod = {
         return this.meleeDefenseMod;
     }
 };
-MML.computeAttribute.missileDefenseMod = {
+MML.computeAttribute.rangedDefenseMod = {
     dependents: [],
     compute: function() {
-        return this.missileDefenseMod;
+        return this.rangedDefenseMod;
     }
 };
 MML.computeAttribute.meleeAttackMod = {
@@ -924,7 +924,7 @@ MML.computeAttribute.statusEffects = {
     dependents: [
         "situationalInitBonus",
         "situationalMod",
-        "missileDefenseMod",
+        "rangedDefenseMod",
         "meleeDefenseMod",
         "missileAttackMod",
         "meleeAttackMod",

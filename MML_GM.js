@@ -1,8 +1,37 @@
 /* jshint -W069 */
 MML.startCombat = function startCombat(input) {
+    this.currentRound = 0;
     this.combatants = input.selectedCharNames;
 
     if (this.combatants.length > 0) {
+        this.inCombat = true;
+
+        _.each(this.combatants, function(charName) {
+            MML.processCommand({
+                type: "character",
+                who: charName,
+                callback: "setApiCharAttribute",
+                input: {
+                    attribute: "ready",
+                    value: false
+                }
+            });
+            MML.processCommand({
+                type: "character",
+                who: charName,
+                callback: "updateCharacter",
+                input: {
+                    attribute: "initiative"
+                }
+            });
+        });
+
+        MML.processCommand({
+            type: "GM",
+            callback: "setTurnOrder",
+            input: {}
+        });
+
         Campaign().set("initiativepage", "true");
 
         MML.processCommand({
@@ -35,58 +64,24 @@ MML.startCombat = function startCombat(input) {
 
 MML.newRound = function newRound() {
     this.roundStarted = false;
-
-    if (this.inCombat === false) {
-        this.inCombat = true;
-        this.currentRound = 0;
-
-        _.each(this.combatants, function(charName) {
-            MML.processCommand({
-                type: "character",
-                who: charName,
-                callback: "setApiCharAttribute",
-                input: {
-                    attribute: "ready",
-                    value: false
-                }
-            });
-            MML.processCommand({
-                type: "character",
-                who: charName,
-                callback: "updateCharacter",
-                input: {
-                    attribute: "initiative"
-                }
-            });
-        });
-
+    _.each(this.combatants, function(charName) {
         MML.processCommand({
-            type: "GM",
-            callback: "setTurnOrder",
+            type: "character",
+            who: charName,
+            callback: "newRoundUpdateCharacter",
             input: {}
         });
-    } else {
-        this.currentRound++;
-
-        _.each(this.combatants, function(charName) {
-            MML.processCommand({
-                type: "character",
-                who: charName,
-                callback: "newRoundUpdateCharacter",
-                input: {}
-            });
+    });
+    _.each(state.MML.players, function(player) {
+        MML.processCommand({
+            type: "player",
+            who: player.name,
+            callback: "newRoundUpdatePlayer",
+            input: {
+                who: player.who
+            }
         });
-        _.each(state.MML.players, function(player) {
-            MML.processCommand({
-                type: "player",
-                who: player.name,
-                callback: "newRoundUpdatePlayer",
-                input: {
-                    who: player.name
-                }
-            });
-        });
-    }
+    });
 };
 
 MML.startRound = function startRound() {
@@ -407,5 +402,4 @@ MML.parseCommand = function parseCommand(msg) {
 
         MML.processCommand(command);
     }
-
 };

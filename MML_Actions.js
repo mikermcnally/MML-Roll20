@@ -6,9 +6,6 @@ MML.meleeAttackAction = function meleeAttackAction() {
     var attackerSkill = parameters.attackerSkill;
     var attackerWeapon = parameters.attackerWeapon;
     var target = parameters.target;
-    var targetWeapon = parameters.targetWeapon;
-    var defenseSkill = parameters.defenseSkill;
-    var dodgeSkill = parameters.dodgeSkill;
     var rolls = currentAction.rolls;
 
     if (_.isUndefined(rolls.attackRoll)) {
@@ -16,6 +13,50 @@ MML.meleeAttackAction = function meleeAttackAction() {
     } else if (_.isUndefined(rolls.defenseRoll)) {
         if (rolls.attackRoll === "Critical Success" || rolls.attackRoll === "Success") {
             MML.meleeDefense(target, attackerWeapon);
+        } else if (rolls.attackRoll === "Critical Failure") {
+            MML.endAction();
+        } else {
+            MML.endAction();
+        }
+    } else if (_.isUndefined(rolls.hitPositionRoll)) {
+        if (rolls.defenseRoll === "Critical Success") {
+            MML.processCommand({
+                type: "character",
+                who: target.name,
+                callback: "criticalDefense",
+                input: {}
+            });
+        } else if (rolls.defenseRoll === "Success") {
+            MML.endAction();
+        } else {
+            MML.hitPositionRoll(character);
+        }
+    } else if (_.isUndefined(rolls.damageRoll)) {
+        if (rolls.attackRoll === "Critical Success") {
+            MML.meleeDamageRoll(character, attackerWeapon, true);
+        } else {
+            MML.meleeDamageRoll(character, attackerWeapon, false);
+        }
+    } else {
+        MML.damageTargetAction("endAction");
+    }
+};
+
+MML.missileAttackAction = function missileAttackAction() {
+    var currentAction = state.MML.GM.currentAction;
+    var character = currentAction.character;
+    var parameters = currentAction.parameters;
+    var attackerSkill = parameters.attackerSkill;
+    var attackerWeapon = parameters.attackerWeapon;
+    var target = parameters.target;
+    var range = parameters.range;
+    var rolls = currentAction.rolls;
+
+    if (_.isUndefined(rolls.attackRoll)) {
+        MML.missileAttackRoll("attackRoll", character, attackerWeapon.task, attackerSkill);
+    } else if (_.isUndefined(rolls.defenseRoll)) {
+        if (rolls.attackRoll === "Critical Success" || rolls.attackRoll === "Success") {
+            MML.rangedDefense(target, attackerWeapon, range);
         } else if (rolls.attackRoll === "Critical Failure") {
             MML.endAction();
         } else {
@@ -36,9 +77,9 @@ MML.meleeAttackAction = function meleeAttackAction() {
         }
     } else if (_.isUndefined(rolls.damageRoll)) {
         if (rolls.attackRoll === "Critical Success") {
-            MML.meleeDamageRoll(character, attackerWeapon, true);
+            MML.missileDamageRoll(character, attackerWeapon, true);
         } else {
-            MML.meleeDamageRoll(character, attackerWeapon, false);
+            MML.missileDamageRoll(character, attackerWeapon, false);
         }
     } else {
         MML.damageTargetAction("endAction");
@@ -87,6 +128,11 @@ MML.endAction = function endAction() {
     var character = currentAction.character;
     var spentInitiative = character.spentInitiative + character.actionTempo;
     var currentInitiative = character.initiative + spentInitiative;
+
+    // Prevents character from gaining initiative when these status effects are removed
+    if (_.has(this.statusEffects, "Called Shot") || _.has(this.statusEffects, "Called Shot Specific")) {
+        spentInitiative += -5;
+    }
 
     MML.processCommand({
         type: "character",

@@ -226,13 +226,6 @@ MML.getDistance = function getDistance(left1, left2, top1, top2) {
     return distance;
 };
 
-MML.getDistanceBetweenChars = function getDistanceBetweenChars(charName, targetName) {
-    var charToken = MML.getTokenFromChar(charName);
-    var targetToken = MML.getTokenFromChar(targetName);
-
-    return MML.getDistance(charToken.get("left"), targetToken.get("left"), charToken.get("top"), targetToken.get("top"));
-};
-
 // Code borrowed from The Aaron from roll20.net forums
 var generateUUID = (function() {
     "use strict";
