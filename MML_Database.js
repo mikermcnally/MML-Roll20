@@ -1,3 +1,4 @@
+/* jshint -W069 */
 MML.skills = {};
 MML.skills["Acrobatics"] = {attribute: "coordination"};
 MML.skills["Acting"] = {attribute: "presence"};
@@ -379,7 +380,7 @@ MML.skillMods["Wood Elf"]["Navigation"] = 10;
 MML.skillMods["Wood Elf"]["Stealth"] = 10;
 MML.skillMods["Wood Elf"]["Survival"] = 10;
 MML.skillMods["Wood Elf"]["Tracking"] = 3;
-MML.skillMods["Female"] = []
+MML.skillMods["Female"] = {};
 MML.skillMods["Female"]["Life Elementalism"] = 5;
 MML.skillMods["Female"]["Symbol Magic"] = 5;
 
@@ -446,15 +447,15 @@ MML.weaponSkillMods["Wood Elf"]["Medium Composite Bow"] = 10;
 //MML.weaponSkillMods["Wood Elf"]["thrownWeaponSpears"] = 3;
 
 MML.movementRates = {};
-MML.movementRates["Dwarf"] = { 
+MML.movementRates["Dwarf"] = {
     Prone: 0,
     Crawl: 1.75,
 	Stalk: 1.75,
 	Walk: 6,
 	Jog: 14,
-	Run: 34	
+	Run: 34
 };
-MML.movementRates["Gnome"] = { 
+MML.movementRates["Gnome"] = {
 	Prone: 0,
 	Crawl: 1.75,
 	Stalk: 1.75,
@@ -462,7 +463,7 @@ MML.movementRates["Gnome"] = {
 	Jog: 14,
 	Run: 32
 };
-MML.movementRates["Gray Elf"] = { 
+MML.movementRates["Gray Elf"] = {
 	Prone: 0,
 	Crawl: 2,
 	Stalk: 2,
@@ -470,7 +471,7 @@ MML.movementRates["Gray Elf"] = {
 	Jog: 20,
 	Run: 36
 };
-MML.movementRates["Hobbit"] = { 
+MML.movementRates["Hobbit"] = {
 	Prone: 0,
 	Crawl: 2,
 	Stalk: 2,
@@ -478,7 +479,7 @@ MML.movementRates["Hobbit"] = {
 	Jog: 8,
 	Run: 18
 };
-MML.movementRates["Human"] = { 
+MML.movementRates["Human"] = {
 	Prone: 0,
 	Crawl: 1.75,
 	Stalk: 1.75,
@@ -486,13 +487,13 @@ MML.movementRates["Human"] = {
 	Jog: 16,
 	Run: 28
 };
-MML.movementRates["Wood Elf"] = { 
+MML.movementRates["Wood Elf"] = {
 	Prone: 0,
 	Crawl: 2,
 	Stalk: 2,
 	Walk: 8,
 	Jog: 20,
-	Run: 34	
+	Run: 34
 };
 
 
@@ -535,53 +536,362 @@ MML.bodyTypes["Hobbit"] = "humanoid";
 MML.bodyTypes["Wood Elf"] = "humanoid";
 
 MML.hitPositions = {};
-MML.hitPositions.humanoid = [];
-MML.hitPositions.humanoid[1] = { name: "Top of Head", part: "hpHead" };
-MML.hitPositions.humanoid[2] = { name: "Face", part: "hpHead" };
-MML.hitPositions.humanoid[3] = { name: "Rear of Head", part: "hpHead" };
-MML.hitPositions.humanoid[4] = { name: "Right Side of Head", part: "hpHead" };
-MML.hitPositions.humanoid[5] = { name: "Left Side of Head", part: "hpHead" };
-MML.hitPositions.humanoid[6] = { name: "Neck, Throat", part: "hpHead" };
-MML.hitPositions.humanoid[7] = { name: "Rear of Neck", part: "hpHead" };
-MML.hitPositions.humanoid[8] = { name: "Right Shoulder", part: "hpRA" };
-MML.hitPositions.humanoid[9] = { name: "Right Upper Chest", part: "hpChest" };
-MML.hitPositions.humanoid[10] = { name: "Right Upper Back", part: "hpChest" };
-MML.hitPositions.humanoid[11] = { name: "Left Upper Chest", part: "hpChest" };
-MML.hitPositions.humanoid[12] = { name: "Left Upper Back", part: "hpChest" };
-MML.hitPositions.humanoid[13] = { name: "Left Shoulder", part: "hpLA" };
-MML.hitPositions.humanoid[14] = { name: "Right Upper Arm", part: "hpRA" };
-MML.hitPositions.humanoid[15] = { name: "Right Lower Chest", part: "hpChest" };
-MML.hitPositions.humanoid[16] = { name: "Right Mid Back", part: "hpChest" };
-MML.hitPositions.humanoid[17] = { name: "Left Lower Chest", part: "hpChest" };
-MML.hitPositions.humanoid[18] = { name: "Left Mid Back", part: "hpChest" };
-MML.hitPositions.humanoid[19] = { name: "Left Upper Arm", part: "hpLA" };
-MML.hitPositions.humanoid[20] = { name: "Right Elbow", part: "hpRA" };
-MML.hitPositions.humanoid[21] = { name: "Right Abdomen", part: "hpAb" };
-MML.hitPositions.humanoid[22] = { name: "Right Lower Back", part: "hpAb" };
-MML.hitPositions.humanoid[23] = { name: "Left Abdomen", part: "hpAb" };
-MML.hitPositions.humanoid[24] = { name: "Left Lower Back", part: "hpAb" };
-MML.hitPositions.humanoid[25] = { name: "Left Elbow", part: "hpLA" };
-MML.hitPositions.humanoid[26] = { name: "Right Forearm", part: "hpRA" };
-MML.hitPositions.humanoid[27] = { name: "Right Hip", part: "hpAb" };
-MML.hitPositions.humanoid[28] = { name: "Right Buttock", part: "hpAb" };
-MML.hitPositions.humanoid[29] = { name: "Left Hip", part: "hpAb" };
-MML.hitPositions.humanoid[30] = { name: "Left Buttock", part: "hpAb" };
-MML.hitPositions.humanoid[31] = { name: "Left Forearm", part: "hpLA" };
-MML.hitPositions.humanoid[32] = { name: "Right Hand/Wrist", part: "hpRA" };
-MML.hitPositions.humanoid[33] = { name: "Groin", part: "hpAb" };
-MML.hitPositions.humanoid[34] = { name: "Left Hand/Wrist", part: "hpLA" };
-MML.hitPositions.humanoid[35] = { name: "Right Upper Thigh", part: "hpRL" };
-MML.hitPositions.humanoid[36] = { name: "Left Upper Thigh", part: "hpLL" };
-MML.hitPositions.humanoid[37] = { name: "Right Lower Thigh", part: "hpRL" };
-MML.hitPositions.humanoid[38] = { name: "Left Lower Thigh", part: "hpLL" };
-MML.hitPositions.humanoid[39] = { name: "Right Knee", part: "hpRL" };
-MML.hitPositions.humanoid[40] = { name: "Left Knee", part: "hpLL" };
-MML.hitPositions.humanoid[41] = { name: "Right Upper Shin", part: "hpRL" };
-MML.hitPositions.humanoid[42] = { name: "Left Upper Shin", part: "hpLL" };
-MML.hitPositions.humanoid[43] = { name: "Right Lower Shin", part: "hpRL" };
-MML.hitPositions.humanoid[44] = { name: "Left Lower Shin", part: "hpLL" };
-MML.hitPositions.humanoid[45] = { name: "Right Foot/Ankle", part: "hpRL" };
-MML.hitPositions.humanoid[46] = { name: "Left Foot/Ankle", part: "hpLL" };
+MML.hitPositions.humanoid = {};
+MML.hitPositions.humanoid[1] = { name: "Top of Head", bodyPart: "Head" };
+MML.hitPositions.humanoid[2] = { name: "Face", bodyPart: "Head" };
+MML.hitPositions.humanoid[3] = { name: "Rear of Head", bodyPart: "Head" };
+MML.hitPositions.humanoid[4] = { name: "Right Side of Head", bodyPart: "Head" };
+MML.hitPositions.humanoid[5] = { name: "Left Side of Head", bodyPart: "Head" };
+MML.hitPositions.humanoid[6] = { name: "Neck, Throat", bodyPart: "Head" };
+MML.hitPositions.humanoid[7] = { name: "Rear of Neck", bodyPart: "Head" };
+MML.hitPositions.humanoid[8] = { name: "Right Shoulder", bodyPart: "Right Arm" };
+MML.hitPositions.humanoid[9] = { name: "Right Upper Chest", bodyPart: "Chest" };
+MML.hitPositions.humanoid[10] = { name: "Right Upper Back", bodyPart: "Chest" };
+MML.hitPositions.humanoid[11] = { name: "Left Upper Chest", bodyPart: "Chest" };
+MML.hitPositions.humanoid[12] = { name: "Left Upper Back", bodyPart: "Chest" };
+MML.hitPositions.humanoid[13] = { name: "Left Shoulder", bodyPart: "Left Arm" };
+MML.hitPositions.humanoid[14] = { name: "Right Upper Arm", bodyPart: "Right Arm" };
+MML.hitPositions.humanoid[15] = { name: "Right Lower Chest", bodyPart: "Chest" };
+MML.hitPositions.humanoid[16] = { name: "Right Mid Back", bodyPart: "Chest" };
+MML.hitPositions.humanoid[17] = { name: "Left Lower Chest", bodyPart: "Chest" };
+MML.hitPositions.humanoid[18] = { name: "Left Mid Back", bodyPart: "Chest" };
+MML.hitPositions.humanoid[19] = { name: "Left Upper Arm", bodyPart: "Left Arm" };
+MML.hitPositions.humanoid[20] = { name: "Right Elbow", bodyPart: "Right Arm" };
+MML.hitPositions.humanoid[21] = { name: "Right Abdomen", bodyPart: "Abdomin" };
+MML.hitPositions.humanoid[22] = { name: "Right Lower Back", bodyPart: "Abdomin" };
+MML.hitPositions.humanoid[23] = { name: "Left Abdomen", bodyPart: "Abdomin" };
+MML.hitPositions.humanoid[24] = { name: "Left Lower Back", bodyPart: "Abdomin" };
+MML.hitPositions.humanoid[25] = { name: "Left Elbow", bodyPart: "Left Arm" };
+MML.hitPositions.humanoid[26] = { name: "Right Forearm", bodyPart: "Right Arm" };
+MML.hitPositions.humanoid[27] = { name: "Right Hip", bodyPart: "Abdomin" };
+MML.hitPositions.humanoid[28] = { name: "Right Buttock", bodyPart: "Abdomin" };
+MML.hitPositions.humanoid[29] = { name: "Left Hip", bodyPart: "Abdomin" };
+MML.hitPositions.humanoid[30] = { name: "Left Buttock", bodyPart: "Abdomin" };
+MML.hitPositions.humanoid[31] = { name: "Left Forearm", bodyPart: "Left Arm" };
+MML.hitPositions.humanoid[32] = { name: "Right Hand/Wrist", bodyPart: "Right Arm" };
+MML.hitPositions.humanoid[33] = { name: "Groin", bodyPart: "Abdomin" };
+MML.hitPositions.humanoid[34] = { name: "Left Hand/Wrist", bodyPart: "Left Arm" };
+MML.hitPositions.humanoid[35] = { name: "Right Upper Thigh", bodyPart: "Right Leg" };
+MML.hitPositions.humanoid[36] = { name: "Left Upper Thigh", bodyPart: "Left Leg" };
+MML.hitPositions.humanoid[37] = { name: "Right Lower Thigh", bodyPart: "Right Leg" };
+MML.hitPositions.humanoid[38] = { name: "Left Lower Thigh", bodyPart: "Left Leg" };
+MML.hitPositions.humanoid[39] = { name: "Right Knee", bodyPart: "Right Leg" };
+MML.hitPositions.humanoid[40] = { name: "Left Knee", bodyPart: "Left Leg" };
+MML.hitPositions.humanoid[41] = { name: "Right Upper Shin", bodyPart: "Right Leg" };
+MML.hitPositions.humanoid[42] = { name: "Left Upper Shin", bodyPart: "Left Leg" };
+MML.hitPositions.humanoid[43] = { name: "Right Lower Shin", bodyPart: "Right Leg" };
+MML.hitPositions.humanoid[44] = { name: "Left Lower Shin", bodyPart: "Left Leg" };
+MML.hitPositions.humanoid[45] = { name: "Right Foot/Ankle", bodyPart: "Right Leg" };
+MML.hitPositions.humanoid[46] = { name: "Left Foot/Ankle", bodyPart: "Left Leg" };
+
+MML.sensitiveAreas = {};
+MML.sensitiveAreas.humanoid = ["Face", "Neck, Throat", "Groin"];
+
+MML.hitTables = {};
+MML.hitTables.humanoid = {};
+MML.hitTables.humanoid.A = {};
+MML.hitTables.humanoid.A[1] = 1;
+MML.hitTables.humanoid.A[2] = 1;
+MML.hitTables.humanoid.A[3] = 2;
+MML.hitTables.humanoid.A[4] = 3;
+MML.hitTables.humanoid.A[5] = 3;
+MML.hitTables.humanoid.A[6] = 4;
+MML.hitTables.humanoid.A[7] = 4;
+MML.hitTables.humanoid.A[8] = 5;
+MML.hitTables.humanoid.A[9] = 5;
+MML.hitTables.humanoid.A[10] = 6;
+MML.hitTables.humanoid.A[11] = 7;
+MML.hitTables.humanoid.A[12] = 8;
+MML.hitTables.humanoid.A[13] = 8;
+MML.hitTables.humanoid.A[14] = 8;
+MML.hitTables.humanoid.A[15] = 8;
+MML.hitTables.humanoid.A[16] = 9;
+MML.hitTables.humanoid.A[17] = 9;
+MML.hitTables.humanoid.A[18] = 9;
+MML.hitTables.humanoid.A[19] = 9;
+MML.hitTables.humanoid.A[20] = 10;
+MML.hitTables.humanoid.A[21] = 10;
+MML.hitTables.humanoid.A[22] = 11;
+MML.hitTables.humanoid.A[23] = 11;
+MML.hitTables.humanoid.A[24] = 11;
+MML.hitTables.humanoid.A[25] = 11;
+MML.hitTables.humanoid.A[26] = 12;
+MML.hitTables.humanoid.A[27] = 12;
+MML.hitTables.humanoid.A[28] = 13;
+MML.hitTables.humanoid.A[29] = 13;
+MML.hitTables.humanoid.A[30] = 13;
+MML.hitTables.humanoid.A[31] = 13;
+MML.hitTables.humanoid.A[32] = 14;
+MML.hitTables.humanoid.A[33] = 14;
+MML.hitTables.humanoid.A[34] = 14;
+MML.hitTables.humanoid.A[35] = 15;
+MML.hitTables.humanoid.A[36] = 15;
+MML.hitTables.humanoid.A[37] = 16;
+MML.hitTables.humanoid.A[38] = 16;
+MML.hitTables.humanoid.A[39] = 17;
+MML.hitTables.humanoid.A[40] = 17;
+MML.hitTables.humanoid.A[41] = 17;
+MML.hitTables.humanoid.A[42] = 18;
+MML.hitTables.humanoid.A[43] = 18;
+MML.hitTables.humanoid.A[44] = 19;
+MML.hitTables.humanoid.A[45] = 19;
+MML.hitTables.humanoid.A[46] = 19;
+MML.hitTables.humanoid.A[47] = 19;
+MML.hitTables.humanoid.A[48] = 20;
+MML.hitTables.humanoid.A[49] = 20;
+MML.hitTables.humanoid.A[50] = 21;
+MML.hitTables.humanoid.A[51] = 21;
+MML.hitTables.humanoid.A[52] = 21;
+MML.hitTables.humanoid.A[53] = 22;
+MML.hitTables.humanoid.A[54] = 22;
+MML.hitTables.humanoid.A[55] = 23;
+MML.hitTables.humanoid.A[56] = 23;
+MML.hitTables.humanoid.A[57] = 23;
+MML.hitTables.humanoid.A[58] = 24;
+MML.hitTables.humanoid.A[59] = 24;
+MML.hitTables.humanoid.A[60] = 25;
+MML.hitTables.humanoid.A[61] = 25;
+MML.hitTables.humanoid.A[62] = 26;
+MML.hitTables.humanoid.A[63] = 26;
+MML.hitTables.humanoid.A[64] = 27;
+MML.hitTables.humanoid.A[65] = 27;
+MML.hitTables.humanoid.A[66] = 27;
+MML.hitTables.humanoid.A[67] = 28;
+MML.hitTables.humanoid.A[68] = 28;
+MML.hitTables.humanoid.A[69] = 29;
+MML.hitTables.humanoid.A[70] = 29;
+MML.hitTables.humanoid.A[71] = 29;
+MML.hitTables.humanoid.A[72] = 30;
+MML.hitTables.humanoid.A[73] = 30;
+MML.hitTables.humanoid.A[74] = 31;
+MML.hitTables.humanoid.A[75] = 31;
+MML.hitTables.humanoid.A[76] = 32;
+MML.hitTables.humanoid.A[77] = 32;
+MML.hitTables.humanoid.A[78] = 33;
+MML.hitTables.humanoid.A[79] = 34;
+MML.hitTables.humanoid.A[80] = 34;
+MML.hitTables.humanoid.A[81] = 35;
+MML.hitTables.humanoid.A[82] = 35;
+MML.hitTables.humanoid.A[83] = 35;
+MML.hitTables.humanoid.A[84] = 36;
+MML.hitTables.humanoid.A[85] = 36;
+MML.hitTables.humanoid.A[86] = 36;
+MML.hitTables.humanoid.A[87] = 37;
+MML.hitTables.humanoid.A[88] = 37;
+MML.hitTables.humanoid.A[89] = 38;
+MML.hitTables.humanoid.A[90] = 38;
+MML.hitTables.humanoid.A[91] = 39;
+MML.hitTables.humanoid.A[92] = 39;
+MML.hitTables.humanoid.A[93] = 40;
+MML.hitTables.humanoid.A[94] = 40;
+MML.hitTables.humanoid.A[95] = 41;
+MML.hitTables.humanoid.A[96] = 42;
+MML.hitTables.humanoid.A[97] = 43;
+MML.hitTables.humanoid.A[98] = 44;
+MML.hitTables.humanoid.A[99] = 45;
+MML.hitTables.humanoid.A[100] = 46;
+MML.hitTables.humanoid.B = {};
+MML.hitTables.humanoid.B[1] = 1;
+MML.hitTables.humanoid.B[2] = 1;
+MML.hitTables.humanoid.B[3] = 2;
+MML.hitTables.humanoid.B[4] = 3;
+MML.hitTables.humanoid.B[5] = 3;
+MML.hitTables.humanoid.B[6] = 4;
+MML.hitTables.humanoid.B[7] = 4;
+MML.hitTables.humanoid.B[8] = 5;
+MML.hitTables.humanoid.B[9] = 5;
+MML.hitTables.humanoid.B[10] = 6;
+MML.hitTables.humanoid.B[11] = 7;
+MML.hitTables.humanoid.B[12] = 8;
+MML.hitTables.humanoid.B[13] = 8;
+MML.hitTables.humanoid.B[14] = 8;
+MML.hitTables.humanoid.B[15] = 8;
+MML.hitTables.humanoid.B[16] = 9;
+MML.hitTables.humanoid.B[17] = 9;
+MML.hitTables.humanoid.B[18] = 10;
+MML.hitTables.humanoid.B[19] = 10;
+MML.hitTables.humanoid.B[20] = 11;
+MML.hitTables.humanoid.B[21] = 11;
+MML.hitTables.humanoid.B[22] = 12;
+MML.hitTables.humanoid.B[23] = 12;
+MML.hitTables.humanoid.B[24] = 13;
+MML.hitTables.humanoid.B[25] = 13;
+MML.hitTables.humanoid.B[26] = 13;
+MML.hitTables.humanoid.B[27] = 13;
+MML.hitTables.humanoid.B[28] = 14;
+MML.hitTables.humanoid.B[29] = 14;
+MML.hitTables.humanoid.B[30] = 14;
+MML.hitTables.humanoid.B[31] = 14;
+MML.hitTables.humanoid.B[32] = 15;
+MML.hitTables.humanoid.B[33] = 15;
+MML.hitTables.humanoid.B[34] = 16;
+MML.hitTables.humanoid.B[35] = 16;
+MML.hitTables.humanoid.B[36] = 17;
+MML.hitTables.humanoid.B[37] = 17;
+MML.hitTables.humanoid.B[38] = 18;
+MML.hitTables.humanoid.B[39] = 18;
+MML.hitTables.humanoid.B[40] = 19;
+MML.hitTables.humanoid.B[41] = 19;
+MML.hitTables.humanoid.B[42] = 19;
+MML.hitTables.humanoid.B[43] = 19;
+MML.hitTables.humanoid.B[44] = 20;
+MML.hitTables.humanoid.B[45] = 21;
+MML.hitTables.humanoid.B[46] = 21;
+MML.hitTables.humanoid.B[47] = 22;
+MML.hitTables.humanoid.B[48] = 22;
+MML.hitTables.humanoid.B[49] = 23;
+MML.hitTables.humanoid.B[50] = 23;
+MML.hitTables.humanoid.B[51] = 24;
+MML.hitTables.humanoid.B[52] = 24;
+MML.hitTables.humanoid.B[53] = 25;
+MML.hitTables.humanoid.B[54] = 26;
+MML.hitTables.humanoid.B[55] = 26;
+MML.hitTables.humanoid.B[56] = 26;
+MML.hitTables.humanoid.B[57] = 26;
+MML.hitTables.humanoid.B[58] = 27;
+MML.hitTables.humanoid.B[59] = 27;
+MML.hitTables.humanoid.B[60] = 28;
+MML.hitTables.humanoid.B[61] = 28;
+MML.hitTables.humanoid.B[62] = 29;
+MML.hitTables.humanoid.B[63] = 29;
+MML.hitTables.humanoid.B[64] = 30;
+MML.hitTables.humanoid.B[65] = 30;
+MML.hitTables.humanoid.B[66] = 31;
+MML.hitTables.humanoid.B[67] = 31;
+MML.hitTables.humanoid.B[68] = 31;
+MML.hitTables.humanoid.B[69] = 31;
+MML.hitTables.humanoid.B[70] = 32;
+MML.hitTables.humanoid.B[71] = 32;
+MML.hitTables.humanoid.B[72] = 32;
+MML.hitTables.humanoid.B[73] = 33;
+MML.hitTables.humanoid.B[74] = 34;
+MML.hitTables.humanoid.B[75] = 34;
+MML.hitTables.humanoid.B[76] = 34;
+MML.hitTables.humanoid.B[77] = 35;
+MML.hitTables.humanoid.B[78] = 35;
+MML.hitTables.humanoid.B[79] = 35;
+MML.hitTables.humanoid.B[80] = 35;
+MML.hitTables.humanoid.B[81] = 36;
+MML.hitTables.humanoid.B[82] = 36;
+MML.hitTables.humanoid.B[83] = 36;
+MML.hitTables.humanoid.B[84] = 36;
+MML.hitTables.humanoid.B[85] = 37;
+MML.hitTables.humanoid.B[86] = 37;
+MML.hitTables.humanoid.B[87] = 37;
+MML.hitTables.humanoid.B[88] = 38;
+MML.hitTables.humanoid.B[89] = 38;
+MML.hitTables.humanoid.B[90] = 38;
+MML.hitTables.humanoid.B[91] = 39;
+MML.hitTables.humanoid.B[92] = 39;
+MML.hitTables.humanoid.B[93] = 40;
+MML.hitTables.humanoid.B[94] = 40;
+MML.hitTables.humanoid.B[95] = 41;
+MML.hitTables.humanoid.B[96] = 42;
+MML.hitTables.humanoid.B[97] = 43;
+MML.hitTables.humanoid.B[98] = 44;
+MML.hitTables.humanoid.B[99] = 45;
+MML.hitTables.humanoid.B[100] = 46;
+MML.hitTables.humanoid.C = {};
+MML.hitTables.humanoid.C[1] = 1;
+MML.hitTables.humanoid.C[2] = 1;
+MML.hitTables.humanoid.C[3] = 2;
+MML.hitTables.humanoid.C[4] = 3;
+MML.hitTables.humanoid.C[5] = 3;
+MML.hitTables.humanoid.C[6] = 4;
+MML.hitTables.humanoid.C[7] = 4;
+MML.hitTables.humanoid.C[8] = 5;
+MML.hitTables.humanoid.C[9] = 5;
+MML.hitTables.humanoid.C[10] = 6;
+MML.hitTables.humanoid.C[11] = 7;
+MML.hitTables.humanoid.C[12] = 8;
+MML.hitTables.humanoid.C[13] = 8;
+MML.hitTables.humanoid.C[14] = 8;
+MML.hitTables.humanoid.C[15] = 8;
+MML.hitTables.humanoid.C[16] = 8;
+MML.hitTables.humanoid.C[17] = 9;
+MML.hitTables.humanoid.C[18] = 9;
+MML.hitTables.humanoid.C[19] = 9;
+MML.hitTables.humanoid.C[20] = 9;
+MML.hitTables.humanoid.C[21] = 10;
+MML.hitTables.humanoid.C[22] = 10;
+MML.hitTables.humanoid.C[23] = 10;
+MML.hitTables.humanoid.C[24] = 11;
+MML.hitTables.humanoid.C[25] = 11;
+MML.hitTables.humanoid.C[26] = 12;
+MML.hitTables.humanoid.C[27] = 12;
+MML.hitTables.humanoid.C[28] = 12;
+MML.hitTables.humanoid.C[29] = 12;
+MML.hitTables.humanoid.C[30] = 13;
+MML.hitTables.humanoid.C[31] = 13;
+MML.hitTables.humanoid.C[32] = 13;
+MML.hitTables.humanoid.C[33] = 14;
+MML.hitTables.humanoid.C[34] = 14;
+MML.hitTables.humanoid.C[35] = 14;
+MML.hitTables.humanoid.C[36] = 14;
+MML.hitTables.humanoid.C[37] = 14;
+MML.hitTables.humanoid.C[38] = 15;
+MML.hitTables.humanoid.C[39] = 15;
+MML.hitTables.humanoid.C[40] = 16;
+MML.hitTables.humanoid.C[41] = 17;
+MML.hitTables.humanoid.C[42] = 18;
+MML.hitTables.humanoid.C[43] = 18;
+MML.hitTables.humanoid.C[44] = 19;
+MML.hitTables.humanoid.C[45] = 20;
+MML.hitTables.humanoid.C[46] = 20;
+MML.hitTables.humanoid.C[47] = 21;
+MML.hitTables.humanoid.C[48] = 21;
+MML.hitTables.humanoid.C[49] = 21;
+MML.hitTables.humanoid.C[50] = 21;
+MML.hitTables.humanoid.C[51] = 21;
+MML.hitTables.humanoid.C[52] = 22;
+MML.hitTables.humanoid.C[53] = 23;
+MML.hitTables.humanoid.C[54] = 23;
+MML.hitTables.humanoid.C[55] = 24;
+MML.hitTables.humanoid.C[56] = 24;
+MML.hitTables.humanoid.C[57] = 24;
+MML.hitTables.humanoid.C[58] = 25;
+MML.hitTables.humanoid.C[59] = 26;
+MML.hitTables.humanoid.C[60] = 26;
+MML.hitTables.humanoid.C[61] = 26;
+MML.hitTables.humanoid.C[62] = 26;
+MML.hitTables.humanoid.C[63] = 26;
+MML.hitTables.humanoid.C[64] = 27;
+MML.hitTables.humanoid.C[65] = 27;
+MML.hitTables.humanoid.C[66] = 27;
+MML.hitTables.humanoid.C[67] = 27;
+MML.hitTables.humanoid.C[68] = 27;
+MML.hitTables.humanoid.C[69] = 28;
+MML.hitTables.humanoid.C[70] = 29;
+MML.hitTables.humanoid.C[71] = 30;
+MML.hitTables.humanoid.C[72] = 30;
+MML.hitTables.humanoid.C[73] = 30;
+MML.hitTables.humanoid.C[74] = 30;
+MML.hitTables.humanoid.C[75] = 31;
+MML.hitTables.humanoid.C[76] = 32;
+MML.hitTables.humanoid.C[77] = 32;
+MML.hitTables.humanoid.C[78] = 32;
+MML.hitTables.humanoid.C[79] = 32;
+MML.hitTables.humanoid.C[80] = 33;
+MML.hitTables.humanoid.C[81] = 34;
+MML.hitTables.humanoid.C[82] = 35;
+MML.hitTables.humanoid.C[83] = 35;
+MML.hitTables.humanoid.C[84] = 35;
+MML.hitTables.humanoid.C[85] = 35;
+MML.hitTables.humanoid.C[86] = 36;
+MML.hitTables.humanoid.C[87] = 37;
+MML.hitTables.humanoid.C[88] = 37;
+MML.hitTables.humanoid.C[89] = 37;
+MML.hitTables.humanoid.C[90] = 37;
+MML.hitTables.humanoid.C[91] = 38;
+MML.hitTables.humanoid.C[92] = 39;
+MML.hitTables.humanoid.C[93] = 39;
+MML.hitTables.humanoid.C[94] = 40;
+MML.hitTables.humanoid.C[95] = 41;
+MML.hitTables.humanoid.C[96] = 42;
+MML.hitTables.humanoid.C[97] = 43;
+MML.hitTables.humanoid.C[98] = 44;
+MML.hitTables.humanoid.C[99] = 45;
+MML.hitTables.humanoid.C[100] = 46;
 
 // Armor Styles
 MML.items = {};
@@ -1669,8 +1979,8 @@ MML.items["Shovel"] = {
             hands: 2,
             primaryType: "Impact",
             primaryTask: 35,
-            primaryDamage: "",
-            secondaryType: "1d8",
+            primaryDamage: "1d8",
+            secondaryType: "",
             secondaryTask: 0,
             secondaryDamage: "",
             defense: 15,
@@ -1736,98 +2046,98 @@ MML.items["Pitch Fork"] = {
        }
     };
 MML.items["Short Bow"] = {
-    name: "Short Bow", 
+    name: "Short Bow",
     type: "weapon",
     weight: 0,
     grips: {
         "Two Hands": {
-            family: "MWD", 
-            hands: 2, 
-            pull: 45, 
-            initiative: 8, 
-            reload: 1, 
-            primaryType: "Pierce", 
-            range: { 
-                pointBlank: { task: 15, range: 74, damage: "3d6"}, 
-                effective: { task: 45, range: 149, damage: "2d8"}, 
-                long: { task: 25, range: 299, damage: "2d6"}, 
+            family: "MWD",
+            hands: 2,
+            pull: 45,
+            initiative: 8,
+            reload: 1,
+            primaryType: "Pierce",
+            range: {
+                pointBlank: { task: 15, range: 74, damage: "3d6"},
+                effective: { task: 45, range: 149, damage: "2d8"},
+                long: { task: 25, range: 299, damage: "2d6"},
                 extreme: { task: 0, range: 300, damage: "1d6"}
             }
         }
     }};
 MML.items["Medium Bow"] = {
-    name: "Medium Bow", 
+    name: "Medium Bow",
     type: "weapon",
     weight: 0,
     grips: {
-        "Two Hands": { 
-            family: "MWD", 
-            hands: 2, 
-            pull: 60, 
-            initiative: 7, 
-            reload: 1, 
-            primaryType: "Pierce", 
-            range: { 
-                pointBlank: { task: 15, range: 89, damage: "3d8"}, 
-                effective: { task: 45, range: 179, damage: "2d10"}, 
-                long: { task: 25, range: 449, damage: "2d8"}, 
-                extreme: { task: 0, range: 450, damage: "1d8"} 
+        "Two Hands": {
+            family: "MWD",
+            hands: 2,
+            pull: 60,
+            initiative: 7,
+            reload: 1,
+            primaryType: "Pierce",
+            range: {
+                pointBlank: { task: 15, range: 89, damage: "3d8"},
+                effective: { task: 45, range: 179, damage: "2d10"},
+                long: { task: 25, range: 449, damage: "2d8"},
+                extreme: { task: 0, range: 450, damage: "1d8"}
             }
         }
     }};
-MML.items["Long Bow"] = { 
-    name: "Long Bow", 
-    type: "weapon", 
-    weight: 0, 
+MML.items["Long Bow"] = {
+    name: "Long Bow",
+    type: "weapon",
+    weight: 0,
     grips: {
         "Two Hands": {
             family: "MWD",
-            hands: 2, 
-            pull: 80, 
-            initiative: 6, 
-            reload: 1, 
-            primaryType: "Pierce", 
-            range: { 
-                pointBlank: { task: 15, range: 149, damage: "3d10"}, 
-                effective: { task: 45, range: 269, damage: "3d8"}, 
-                long: { task: 25, range: 599, damage: "3d6"}, 
-                extreme: { task: 0, range: 600, damage: "1d10"} 
+            hands: 2,
+            pull: 80,
+            initiative: 6,
+            reload: 1,
+            primaryType: "Pierce",
+            range: {
+                pointBlank: { task: 15, range: 149, damage: "3d10"},
+                effective: { task: 45, range: 269, damage: "3d8"},
+                long: { task: 25, range: 599, damage: "3d6"},
+                extreme: { task: 0, range: 600, damage: "1d10"}
             }
         }
     }};
-MML.items["Heavy Long Bow"] = { 
-    name: "Heavy Long Bow", 
-    type: "weapon", 
-    weight: 0, 
+MML.items["Heavy Long Bow"] = {
+    name: "Heavy Long Bow",
+    type: "weapon",
+    weight: 0,
     grips: {
         "Two Hands": {
-            family: "MWD", 
-            hands: 2, 
-            pull: 100, 
+            family: "MWD",
+            hands: 2,
+            pull: 100,
             initiative: 4,
-            reload: 1, 
-            primaryType: "Pierce", 
-            range: { 
-                pointBlank: { task: 15, range: 179, damage: "3d12"}, 
-                effective: { task: 45, range: 299, damage: "3d10"}, 
-                long: { task: 25, range: 674, damage: "3d8"}, 
-                extreme: { task: 0, range: 675, damage: "1d10"} 
+            reload: 1,
+            primaryType: "Pierce",
+            range: {
+                pointBlank: { task: 15, range: 179, damage: "3d12"},
+                effective: { task: 45, range: 299, damage: "3d10"},
+                long: { task: 25, range: 674, damage: "3d8"},
+                extreme: { task: 0, range: 675, damage: "1d10"}
             }
         }
     }};
 MML.items["Short Composite Bow"] = {
-    name: "Short Composite Bow", 
+    name: "Short Composite Bow",
     type: "weapon",
-    weight: 0, 
+    weight: 0,
     grips: {
         "Two Hands": {
-            family: "MWD", 
-            hands: 2, 
-            pull: 60, 
-            initiative: 7, 
-            reload: 1, 
-            primaryType: "Pierce", 
-            range: { 
+            family: "MWD",
+            hands: 2,
+            pull: 60,
+            initiative: 7,
+            reload: 1,
+            primaryType: "Pierce",
+            range: {
                 pointBlank: { task: 15, range: 89, damage: "3d8"},
                 effective: { task: 45, range: 179, damage: "2d10"},
                 long: { task: 25, range: 449, damage: "2d8"},
@@ -1838,7 +2148,7 @@ MML.items["Short Composite Bow"] = {
 MML.items["Medium Composite Bow"] = {
     name: "Medium Composite Bow",
     type: "weapon",
-    weight: 0, 
+    weight: 0,
     grips: {
         "Two Hands": {
             family: "MWD",
@@ -1858,7 +2168,7 @@ MML.items["Medium Composite Bow"] = {
 MML.items["Light Cross Bow"] = {
     name: "Light Cross Bow",
     type: "weapon",
-    weight: 0, 
+    weight: 0,
     grips: {
         "Two Hands": {
             family: "MWM",
@@ -1868,25 +2178,25 @@ MML.items["Light Cross Bow"] = {
             reload: 4,
             primaryType: "Pierce",
             range: {
-                pointBlank: { task: 15, range: 179, damage: "3d10"}, 
-                effective: { task: 45, range: 299, damage: "3d8"}, 
-                long: { task: 25, range: 674, damage: "3d6"}, 
-                extreme: { task: 0, range: 675, damage: "1d10"} 
+                pointBlank: { task: 15, range: 179, damage: "3d10"},
+                effective: { task: 45, range: 299, damage: "3d8"},
+                long: { task: 25, range: 674, damage: "3d6"},
+                extreme: { task: 0, range: 675, damage: "1d10"}
             }
         }
     } };
 MML.items["Medium Cross Bow"] = {
-    name: "Medium Cross Bow", 
+    name: "Medium Cross Bow",
     type: "weapon",
-    weight: 0, 
+    weight: 0,
     grips: {
-        "Two Hands": { 
-            family: "MWM", 
-            hands: 2, 
-            pull: 100, 
-            initiative: 10, 
-            reload: 6, 
-            primaryType: "Pierce", 
+        "Two Hands": {
+            family: "MWM",
+            hands: 2,
+            pull: 100,
+            initiative: 10,
+            reload: 6,
+            primaryType: "Pierce",
             range: {
                 pointBlank: { task: 15, range: 224, damage: "3d12"},
                 effective: { task: 45, range: 374, damage: "3d10"},
@@ -1898,7 +2208,7 @@ MML.items["Medium Cross Bow"] = {
 MML.items["Heavy Cross Bow"] = {
     name: "Heavy Cross Bow",
     type: "weapon",
-    weight: 0, 
+    weight: 0,
     grips: {
         "Two Hands": {
             family: "MWM",
@@ -1915,21 +2225,21 @@ MML.items["Heavy Cross Bow"] = {
             }
         }
     }};
-MML.items["Battle Axe, Thrown"] = { 
-    name: "Battle Axe, Thrown", 
+MML.items["Battle Axe, Thrown"] = {
+    name: "Battle Axe, Thrown",
     type: "weapon",
-    weight: 0, 
+    weight: 0,
     grips: {
-        "Two Hands": { 
-            family: "TWH", 
-            hands: 1, 
-            initiative: 3, 
-            accuracyMod: -8, 
-            primaryType: "Chop", 
-            range: { 
-                pointBlank: { task: 35, loadDivider: 8, damage: "2d12"}, 
-                effective: { task: 45, loadDivider: 4, damage: "2d10"}, 
-                long: { task: 25, loadDivider: 3, damage: "2d6"}, 
+        "One Hand": {
+            family: "TWH",
+            hands: 1,
+            initiative: 3,
+            accuracyMod: -8,
+            primaryType: "Chop",
+            range: {
+                pointBlank: { task: 35, loadDivider: 8, damage: "2d12"},
+                effective: { task: 45, loadDivider: 4, damage: "2d10"},
+                long: { task: 25, loadDivider: 3, damage: "2d6"},
                 extreme: { task: 0, loadDivider: 2, damage: "1d6"}
             }
         }
@@ -2795,309 +3105,3 @@ MML.meleeDamageMods = [
 	{low: 106, high: 120, value: 4},
 	{low: 121, high: 999, value: 5},
 ];
-
-MML.hitTables = {};
-MML.hitTables.humanoid = {};
-MML.hitTables.humanoid.A = [];
-MML.hitTables.humanoid.A[1] = 1;
-MML.hitTables.humanoid.A[2] = 1;
-MML.hitTables.humanoid.A[3] = 2;
-MML.hitTables.humanoid.A[4] = 3;
-MML.hitTables.humanoid.A[5] = 3;
-MML.hitTables.humanoid.A[6] = 4;
-MML.hitTables.humanoid.A[7] = 4;
-MML.hitTables.humanoid.A[8] = 5;
-MML.hitTables.humanoid.A[9] = 5;
-MML.hitTables.humanoid.A[10] = 6;
-MML.hitTables.humanoid.A[11] = 7;
-MML.hitTables.humanoid.A[12] = 8;
-MML.hitTables.humanoid.A[13] = 8;
-MML.hitTables.humanoid.A[14] = 8;
-MML.hitTables.humanoid.A[15] = 8;
-MML.hitTables.humanoid.A[16] = 9;
-MML.hitTables.humanoid.A[17] = 9;
-MML.hitTables.humanoid.A[18] = 9;
-MML.hitTables.humanoid.A[19] = 9;
-MML.hitTables.humanoid.A[20] = 10;
-MML.hitTables.humanoid.A[21] = 10;
-MML.hitTables.humanoid.A[22] = 11;
-MML.hitTables.humanoid.A[23] = 11;
-MML.hitTables.humanoid.A[24] = 11;
-MML.hitTables.humanoid.A[25] = 11;
-MML.hitTables.humanoid.A[26] = 12;
-MML.hitTables.humanoid.A[27] = 12;
-MML.hitTables.humanoid.A[28] = 13;
-MML.hitTables.humanoid.A[29] = 13;
-MML.hitTables.humanoid.A[30] = 13;
-MML.hitTables.humanoid.A[31] = 13;
-MML.hitTables.humanoid.A[32] = 14;
-MML.hitTables.humanoid.A[33] = 14;
-MML.hitTables.humanoid.A[34] = 14;
-MML.hitTables.humanoid.A[35] = 15;
-MML.hitTables.humanoid.A[36] = 15;
-MML.hitTables.humanoid.A[37] = 16;
-MML.hitTables.humanoid.A[38] = 16;
-MML.hitTables.humanoid.A[39] = 17;
-MML.hitTables.humanoid.A[40] = 17;
-MML.hitTables.humanoid.A[41] = 17;
-MML.hitTables.humanoid.A[42] = 18;
-MML.hitTables.humanoid.A[43] = 18;
-MML.hitTables.humanoid.A[44] = 19;
-MML.hitTables.humanoid.A[45] = 19;
-MML.hitTables.humanoid.A[46] = 19;
-MML.hitTables.humanoid.A[47] = 19;
-MML.hitTables.humanoid.A[48] = 20;
-MML.hitTables.humanoid.A[49] = 20;
-MML.hitTables.humanoid.A[50] = 21;
-MML.hitTables.humanoid.A[51] = 21;
-MML.hitTables.humanoid.A[52] = 21;
-MML.hitTables.humanoid.A[53] = 22;
-MML.hitTables.humanoid.A[54] = 22;
-MML.hitTables.humanoid.A[55] = 23;
-MML.hitTables.humanoid.A[56] = 23;
-MML.hitTables.humanoid.A[57] = 23;
-MML.hitTables.humanoid.A[58] = 24;
-MML.hitTables.humanoid.A[59] = 24;
-MML.hitTables.humanoid.A[60] = 25;
-MML.hitTables.humanoid.A[61] = 25;
-MML.hitTables.humanoid.A[62] = 26;
-MML.hitTables.humanoid.A[63] = 26;
-MML.hitTables.humanoid.A[64] = 27;
-MML.hitTables.humanoid.A[65] = 27;
-MML.hitTables.humanoid.A[66] = 27;
-MML.hitTables.humanoid.A[67] = 28;
-MML.hitTables.humanoid.A[68] = 28;
-MML.hitTables.humanoid.A[69] = 29;
-MML.hitTables.humanoid.A[70] = 29;
-MML.hitTables.humanoid.A[71] = 29;
-MML.hitTables.humanoid.A[72] = 30;
-MML.hitTables.humanoid.A[73] = 30;
-MML.hitTables.humanoid.A[74] = 31;
-MML.hitTables.humanoid.A[75] = 31;
-MML.hitTables.humanoid.A[76] = 32;
-MML.hitTables.humanoid.A[77] = 32;
-MML.hitTables.humanoid.A[78] = 33;
-MML.hitTables.humanoid.A[79] = 34;
-MML.hitTables.humanoid.A[80] = 34;
-MML.hitTables.humanoid.A[81] = 35;
-MML.hitTables.humanoid.A[82] = 35;
-MML.hitTables.humanoid.A[83] = 35;
-MML.hitTables.humanoid.A[84] = 36;
-MML.hitTables.humanoid.A[85] = 36;
-MML.hitTables.humanoid.A[86] = 36;
-MML.hitTables.humanoid.A[87] = 37;
-MML.hitTables.humanoid.A[88] = 37;
-MML.hitTables.humanoid.A[89] = 38;
-MML.hitTables.humanoid.A[90] = 38;
-MML.hitTables.humanoid.A[91] = 39;
-MML.hitTables.humanoid.A[92] = 39;
-MML.hitTables.humanoid.A[93] = 40;
-MML.hitTables.humanoid.A[94] = 40;
-MML.hitTables.humanoid.A[95] = 41;
-MML.hitTables.humanoid.A[96] = 42;
-MML.hitTables.humanoid.A[97] = 43;
-MML.hitTables.humanoid.A[98] = 44;
-MML.hitTables.humanoid.A[99] = 45;
-MML.hitTables.humanoid.A[100] = 46;
-MML.hitTables.humanoid.B = [];
-MML.hitTables.humanoid.B[1] = 1;
-MML.hitTables.humanoid.B[2] = 1;
-MML.hitTables.humanoid.B[3] = 2;
-MML.hitTables.humanoid.B[4] = 3;
-MML.hitTables.humanoid.B[5] = 3;
-MML.hitTables.humanoid.B[6] = 4;
-MML.hitTables.humanoid.B[7] = 4;
-MML.hitTables.humanoid.B[8] = 5;
-MML.hitTables.humanoid.B[9] = 5;
-MML.hitTables.humanoid.B[10] = 6;
-MML.hitTables.humanoid.B[11] = 7;
-MML.hitTables.humanoid.B[12] = 8;
-MML.hitTables.humanoid.B[13] = 8;
-MML.hitTables.humanoid.B[14] = 8;
-MML.hitTables.humanoid.B[15] = 8;
-MML.hitTables.humanoid.B[16] = 9;
-MML.hitTables.humanoid.B[17] = 9;
-MML.hitTables.humanoid.B[18] = 10;
-MML.hitTables.humanoid.B[19] = 10;
-MML.hitTables.humanoid.B[20] = 11;
-MML.hitTables.humanoid.B[21] = 11;
-MML.hitTables.humanoid.B[22] = 12;
-MML.hitTables.humanoid.B[23] = 12;
-MML.hitTables.humanoid.B[24] = 13;
-MML.hitTables.humanoid.B[25] = 13;
-MML.hitTables.humanoid.B[26] = 13;
-MML.hitTables.humanoid.B[27] = 13;
-MML.hitTables.humanoid.B[28] = 14;
-MML.hitTables.humanoid.B[29] = 14;
-MML.hitTables.humanoid.B[30] = 14;
-MML.hitTables.humanoid.B[31] = 14;
-MML.hitTables.humanoid.B[32] = 15;
-MML.hitTables.humanoid.B[33] = 15;
-MML.hitTables.humanoid.B[34] = 16;
-MML.hitTables.humanoid.B[35] = 16;
-MML.hitTables.humanoid.B[36] = 17;
-MML.hitTables.humanoid.B[37] = 17;
-MML.hitTables.humanoid.B[38] = 18;
-MML.hitTables.humanoid.B[39] = 18;
-MML.hitTables.humanoid.B[40] = 19;
-MML.hitTables.humanoid.B[41] = 19;
-MML.hitTables.humanoid.B[42] = 19;
-MML.hitTables.humanoid.B[43] = 19;
-MML.hitTables.humanoid.B[44] = 20;
-MML.hitTables.humanoid.B[45] = 21;
-MML.hitTables.humanoid.B[46] = 21;
-MML.hitTables.humanoid.B[47] = 22;
-MML.hitTables.humanoid.B[48] = 22;
-MML.hitTables.humanoid.B[49] = 23;
-MML.hitTables.humanoid.B[50] = 23;
-MML.hitTables.humanoid.B[51] = 24;
-MML.hitTables.humanoid.B[52] = 24;
-MML.hitTables.humanoid.B[53] = 25;
-MML.hitTables.humanoid.B[54] = 26;
-MML.hitTables.humanoid.B[55] = 26;
-MML.hitTables.humanoid.B[56] = 26;
-MML.hitTables.humanoid.B[57] = 26;
-MML.hitTables.humanoid.B[58] = 27;
-MML.hitTables.humanoid.B[59] = 27;
-MML.hitTables.humanoid.B[60] = 28;
-MML.hitTables.humanoid.B[61] = 28;
-MML.hitTables.humanoid.B[62] = 29;
-MML.hitTables.humanoid.B[63] = 29;
-MML.hitTables.humanoid.B[64] = 30;
-MML.hitTables.humanoid.B[65] = 30;
-MML.hitTables.humanoid.B[66] = 31;
-MML.hitTables.humanoid.B[67] = 31;
-MML.hitTables.humanoid.B[68] = 31;
-MML.hitTables.humanoid.B[69] = 31;
-MML.hitTables.humanoid.B[70] = 32;
-MML.hitTables.humanoid.B[71] = 32;
-MML.hitTables.humanoid.B[72] = 32;
-MML.hitTables.humanoid.B[73] = 33;
-MML.hitTables.humanoid.B[74] = 34;
-MML.hitTables.humanoid.B[75] = 34;
-MML.hitTables.humanoid.B[76] = 34;
-MML.hitTables.humanoid.B[77] = 35;
-MML.hitTables.humanoid.B[78] = 35;
-MML.hitTables.humanoid.B[79] = 35;
-MML.hitTables.humanoid.B[80] = 35;
-MML.hitTables.humanoid.B[81] = 36;
-MML.hitTables.humanoid.B[82] = 36;
-MML.hitTables.humanoid.B[83] = 36;
-MML.hitTables.humanoid.B[84] = 36;
-MML.hitTables.humanoid.B[85] = 37;
-MML.hitTables.humanoid.B[86] = 37;
-MML.hitTables.humanoid.B[87] = 37;
-MML.hitTables.humanoid.B[88] = 38;
-MML.hitTables.humanoid.B[89] = 38;
-MML.hitTables.humanoid.B[90] = 38;
-MML.hitTables.humanoid.B[91] = 39;
-MML.hitTables.humanoid.B[92] = 39;
-MML.hitTables.humanoid.B[93] = 40;
-MML.hitTables.humanoid.B[94] = 40;
-MML.hitTables.humanoid.B[95] = 41;
-MML.hitTables.humanoid.B[96] = 42;
-MML.hitTables.humanoid.B[97] = 43;
-MML.hitTables.humanoid.B[98] = 44;
-MML.hitTables.humanoid.B[99] = 45;
-MML.hitTables.humanoid.B[100] = 46;
-MML.hitTables.humanoid.C = [];
-MML.hitTables.humanoid.C[1] = 1;
-MML.hitTables.humanoid.C[2] = 1;
-MML.hitTables.humanoid.C[3] = 2;
-MML.hitTables.humanoid.C[4] = 3;
-MML.hitTables.humanoid.C[5] = 3;
-MML.hitTables.humanoid.C[6] = 4;
-MML.hitTables.humanoid.C[7] = 4;
-MML.hitTables.humanoid.C[8] = 5;
-MML.hitTables.humanoid.C[9] = 5;
-MML.hitTables.humanoid.C[10] = 6;
-MML.hitTables.humanoid.C[11] = 7;
-MML.hitTables.humanoid.C[12] = 8;
-MML.hitTables.humanoid.C[13] = 8;
-MML.hitTables.humanoid.C[14] = 8;
-MML.hitTables.humanoid.C[15] = 8;
-MML.hitTables.humanoid.C[16] = 8;
-MML.hitTables.humanoid.C[17] = 9;
-MML.hitTables.humanoid.C[18] = 9;
-MML.hitTables.humanoid.C[19] = 9;
-MML.hitTables.humanoid.C[20] = 9;
-MML.hitTables.humanoid.C[21] = 10;
-MML.hitTables.humanoid.C[22] = 10;
-MML.hitTables.humanoid.C[23] = 10;
-MML.hitTables.humanoid.C[24] = 11;
-MML.hitTables.humanoid.C[25] = 11;
-MML.hitTables.humanoid.C[26] = 12;
-MML.hitTables.humanoid.C[27] = 12;
-MML.hitTables.humanoid.C[28] = 12;
-MML.hitTables.humanoid.C[29] = 12;
-MML.hitTables.humanoid.C[30] = 13;
-MML.hitTables.humanoid.C[31] = 13;
-MML.hitTables.humanoid.C[32] = 13;
-MML.hitTables.humanoid.C[33] = 14;
-MML.hitTables.humanoid.C[34] = 14;
-MML.hitTables.humanoid.C[35] = 14;
-MML.hitTables.humanoid.C[36] = 14;
-MML.hitTables.humanoid.C[37] = 14;
-MML.hitTables.humanoid.C[38] = 15;
-MML.hitTables.humanoid.C[39] = 15;
-MML.hitTables.humanoid.C[40] = 16;
-MML.hitTables.humanoid.C[41] = 17;
-MML.hitTables.humanoid.C[42] = 18;
-MML.hitTables.humanoid.C[43] = 18;
-MML.hitTables.humanoid.C[44] = 19;
-MML.hitTables.humanoid.C[45] = 20;
-MML.hitTables.humanoid.C[46] = 20;
-MML.hitTables.humanoid.C[47] = 21;
-MML.hitTables.humanoid.C[48] = 21;
-MML.hitTables.humanoid.C[49] = 21;
-MML.hitTables.humanoid.C[50] = 21;
-MML.hitTables.humanoid.C[51] = 21;
-MML.hitTables.humanoid.C[52] = 22;
-MML.hitTables.humanoid.C[53] = 23;
-MML.hitTables.humanoid.C[54] = 23;
-MML.hitTables.humanoid.C[55] = 24;
-MML.hitTables.humanoid.C[56] = 24;
-MML.hitTables.humanoid.C[57] = 24;
-MML.hitTables.humanoid.C[58] = 25;
-MML.hitTables.humanoid.C[59] = 26;
-MML.hitTables.humanoid.C[60] = 26;
-MML.hitTables.humanoid.C[61] = 26;
-MML.hitTables.humanoid.C[62] = 26;
-MML.hitTables.humanoid.C[63] = 26;
-MML.hitTables.humanoid.C[64] = 27;
-MML.hitTables.humanoid.C[65] = 27;
-MML.hitTables.humanoid.C[66] = 27;
-MML.hitTables.humanoid.C[67] = 27;
-MML.hitTables.humanoid.C[68] = 27;
-MML.hitTables.humanoid.C[69] = 28;
-MML.hitTables.humanoid.C[70] = 29;
-MML.hitTables.humanoid.C[71] = 30;
-MML.hitTables.humanoid.C[72] = 30;
-MML.hitTables.humanoid.C[73] = 30;
-MML.hitTables.humanoid.C[74] = 30;
-MML.hitTables.humanoid.C[75] = 31;
-MML.hitTables.humanoid.C[76] = 32;
-MML.hitTables.humanoid.C[77] = 32;
-MML.hitTables.humanoid.C[78] = 32;
-MML.hitTables.humanoid.C[79] = 32;
-MML.hitTables.humanoid.C[80] = 33;
-MML.hitTables.humanoid.C[81] = 34;
-MML.hitTables.humanoid.C[82] = 35;
-MML.hitTables.humanoid.C[83] = 35;
-MML.hitTables.humanoid.C[84] = 35;
-MML.hitTables.humanoid.C[85] = 35;
-MML.hitTables.humanoid.C[86] = 36;
-MML.hitTables.humanoid.C[87] = 37;
-MML.hitTables.humanoid.C[88] = 37;
-MML.hitTables.humanoid.C[89] = 37;
-MML.hitTables.humanoid.C[90] = 37;
-MML.hitTables.humanoid.C[91] = 38;
-MML.hitTables.humanoid.C[92] = 39;
-MML.hitTables.humanoid.C[93] = 39;
-MML.hitTables.humanoid.C[94] = 40;
-MML.hitTables.humanoid.C[95] = 41;
-MML.hitTables.humanoid.C[96] = 42;
-MML.hitTables.humanoid.C[97] = 43;
-MML.hitTables.humanoid.C[98] = 44;
-MML.hitTables.humanoid.C[99] = 45;
-MML.hitTables.humanoid.C[100] = 46;

@@ -11,14 +11,14 @@
     line-height: 1.1em;
     font-size: 1em;
     text-align: left;
-	font-family: "Arial", Helvetica, sans-serif;
+    font-family: "Arial", Helvetica, sans-serif;
     text-transform: uppercase;
 }
  
 .sheet-rolltemplate-universal .sheet-arrow-right {
     border-top: 3px solid transparent;
     border-bottom: 3px solid transparent;
-	border-left: 180px solid rgb(126, 45, 64);
+    border-left: 180px solid rgb(126, 45, 64);
 }
  
 .sheet-rolltemplate-universal .sheet-tcat {
@@ -85,14 +85,14 @@
     line-height: 1.1em;
     font-size: 1em;
     text-align: left;
-	font-family: "Arial", Helvetica, sans-serif;
+    font-family: "Arial", Helvetica, sans-serif;
     text-transform: uppercase;
 }
  
 .sheet-rolltemplate-damage .sheet-arrow-right {
     border-top: 3px solid transparent;
     border-bottom: 3px solid transparent;
-	border-left: 180px solid rgb(126, 45, 64);
+    border-left: 180px solid rgb(126, 45, 64);
 }
  
 .sheet-rolltemplate-damage .sheet-tcat {
@@ -122,14 +122,14 @@
     line-height: 1.1em;
     font-size: 1em;
     text-align: left;
-	font-family: "Arial", Helvetica, sans-serif;
+    font-family: "Arial", Helvetica, sans-serif;
     text-transform: uppercase;
 }
  
 .sheet-rolltemplate-hitPosition .sheet-arrow-right {
     border-top: 3px solid transparent;
     border-bottom: 3px solid transparent;
-	border-left: 180px solid rgb(126, 45, 64);
+    border-left: 180px solid rgb(126, 45, 64);
 }
  
 .sheet-rolltemplate-hitPosition .sheet-tcat {
@@ -166,7 +166,7 @@
 .sheet-rolltemplate-charMenu .sheet-arrow-right {
     border-top: 3px solid transparent;
     border-bottom: 3px solid transparent;
-	border-left: 180px solid rgb(126, 45, 64);
+    border-left: 180px solid rgb(126, 45, 64);
 }
  
 .sheet-rolltemplate-charMenu .sheet-tcat {
@@ -360,9 +360,6 @@ input.sheet-tab:checked::before {
 
 
 /* ===== BUTTONS ===== */
-.sheet-box button {
-   
-}
 
 .sheet-box button[type="roll"] {
     background: none;
@@ -371,9 +368,7 @@ input.sheet-tab:checked::before {
 .sheet-box button.sheet-roll-tracker:before {
     font-family: "Pictos" !important;
     content: "t" !important;
-}
-
-.sheet-dropdown 
+} 
 
 /* ===== INPUTS ===== */
 .sheet-box input[type=number]::-webkit-inner-spin-button,
@@ -477,12 +472,6 @@ input.sheet-tab:checked::before {
     -webkit-border-radius: 3px;
     border-radius: 3px;
 
-    background: #f6f6f6;
-    background: -moz-radial-gradient(#f6f6f6, #dfdfdf);
-    background: -webkit-radial-gradient(#f6f6f6, #dfdfdf);
-    background: -ms-radial-gradient(#f6f6f6, #dfdfdf);
-    background: -o-radial-gradient(#f6f6f6, #dfdfdf);
-    background: radial-gradient(#f6f6f6, #dfdfdf);
 }
 
 .sheet-box input[type="checkbox"]:checked ~ .sheet-checkbox:before {
@@ -566,63 +555,7 @@ input.sheet-tab:checked::before {
 
 
 /* -- Combat -- */
-
-.sheet-menuBody
-{
-    box-sizing: border-box;
-    font-size: 12px;
-    float: right;
-    margin: 0.2em;
-    overflow: auto;
-    outline: 1px solid gray;
-    border-top: white;
-    position: relative;
-    width: calc(100% - 110px);
-    top: 0px;
-    
-}
-
-input.sheet-menu {
-    width: 100px;
-    height: 20px;
-    
-    outline: none !important;
-    position: relative;
-    cursor: pointer;
-    z-index: 1;
-    display: table;
-}
-
-
-input.sheet-menu::before {
-    content: attr(title);
-    float: left;
-    background: #fff;
-    border: solid 1px #a8a8a8;
-    border-radius: 4px;
-
-    font-size: 14px;
-    font-weight: bold;
-    text-align: center;
-    
-    width: 100%;
-    height: 20px;
-}
-
-input.sheet-menu:checked::before {
-    border-right-color: white;
-    border-top-right-radius: 0px;
-    border-bottom-right-radius: 0px;
-}
-
-input.sheet-attackButton:not(:checked) ~ .sheet-menuBody.sheet-attackBody,
-input.sheet-castButton:not(:checked) ~ .sheet-menuBody.sheet-castBody,
-input.sheet-itemButton:not(:checked) ~ .sheet-menuBody.sheet-itemBody,
-input.sheet-observeButton:not(:checked) ~ .sheet-menuBody.sheet-observeBody
-{
-    display: none;
-}
-
+ 
 
 /* -- Spells -- */
 

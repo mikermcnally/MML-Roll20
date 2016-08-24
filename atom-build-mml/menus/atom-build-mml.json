@@ -1,0 +1,26 @@
+{
+  "context-menu": {
+    "atom-text-editor": [
+      {
+        "label": "Toggle atom-build-mml",
+        "command": "atom-build-mml:toggle"
+      }
+    ]
+  },
+  "menu": [
+    {
+      "label": "Packages",
+      "submenu": [
+        {
+          "label": "atom-build-mml",
+          "submenu": [
+            {
+              "label": "Toggle",
+              "command": "atom-build-mml:toggle"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

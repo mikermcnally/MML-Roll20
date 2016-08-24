@@ -1,3 +1,4 @@
+/* jshint -W069 */
 var MML = MML || {};
 
 MML.init = function init(){
@@ -46,5 +47,17 @@ MML.init = function init(){
     });
 	state.MML.characters = characters;
 
-	MML.test();
+    TokenCollisions = {
+        "Layer": "gmlayer"
+    };
+
+    log(TokenCollisions);
+// var data = [
+// ,,,];
+
+
+// state.MML.GM = data[0];
+// state.MML.players = data[1];
+// state.MML.characters =data[2];
+// MML.processCommand(data[3]);
 };
