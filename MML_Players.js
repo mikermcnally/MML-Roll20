@@ -1498,9 +1498,7 @@ MML.menuButtons.setProne = {
             type: "character",
             who: this.who,
             callback: "displayMovement",
-            input: {
-                display: true
-            }
+            input: {}
         });
     }
 };
@@ -1521,9 +1519,7 @@ MML.menuButtons.setCrawl = {
             type: "character",
             who: this.who,
             callback: "displayMovement",
-            input: {
-                display: true
-            }
+            input: {}
         });
     }
 };
@@ -1544,9 +1540,7 @@ MML.menuButtons.setStalk = {
             type: "character",
             who: this.who,
             callback: "displayMovement",
-            input: {
-                display: true
-            }
+            input: {}
         });
     }
 };
@@ -1567,9 +1561,7 @@ MML.menuButtons.setWalk = {
             type: "character",
             who: this.who,
             callback: "displayMovement",
-            input: {
-                display: true
-            }
+            input: {}
         });
     }
 };
@@ -1590,9 +1582,7 @@ MML.menuButtons.setJog = {
             type: "character",
             who: this.who,
             callback: "displayMovement",
-            input: {
-                display: true
-            }
+            input: {}
         });
     }
 };
@@ -1613,9 +1603,7 @@ MML.menuButtons.setRun = {
             type: "character",
             who: this.who,
             callback: "displayMovement",
-            input: {
-                display: true
-            }
+            input: {}
         });
     }
 };
@@ -1623,6 +1611,10 @@ MML.menuButtons.endMovement = {
     text: "End Movement",
     nextMenu: "menuIdle",
     callback: function(input) {
+        var path = getObj('path', this.pathID);
+        if (!_.isUndefined(path)) {
+            path.remove();
+        }
         MML.processCommand({
             type: "character",
             who: this.who,
