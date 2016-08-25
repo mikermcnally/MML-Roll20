@@ -75,7 +75,7 @@ on("ready", function() {
             var distance = MML.getDistance(left1, left2, top1, top2);
             var distanceAvailable = MML.movementRates[character.race][character.movementPosition] * character.movementAvailable;
 
-            if(state.MML.GM.actor === charName ){
+            if(state.MML.GM.actor === charName && distanceAvailable > 0){
                 // If they move too far, move the maxium distance in the same direction
                 if(distance > distanceAvailable){
                     left3 = Math.floor(((left2 - left1)/distance)*distanceAvailable + left1 + 0.5);
@@ -83,14 +83,22 @@ on("ready", function() {
                     obj.set("left", left3);
                     obj.set("top", top3);
 
-                    distance = distanceAvailable;
+                    MML.processCommand({
+                        type: "character",
+                        who: charName,
+                        callback: "setApiCharAttribute",
+                        input: {
+                            attribute: "movementAvailable",
+                            value: 0
+                        }
+                    });
                 }
                 MML.processCommand({
 		        	type: "character",
 		        	who: charName,
 		        	callback:"moveDistance",
 					input: {
-				    	distance: "distance"
+				    	distance: distance
 				  	}
 		        });
             }

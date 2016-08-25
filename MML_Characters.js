@@ -1,17 +1,50 @@
 /* jshint -W069 */
 //Combat Functions
-MML.displayMovement = function displayMovement(input) {
-    if (input.display) {
-        MML.getTokenFromChar(this.name).set("aura1_radius", MML.movementRates[this.race][this.movementPosition] * this.movementAvailable);
-        MML.getTokenFromChar(this.name).set("aura1_color", "#00FF00");
-    } else {
-        MML.getTokenFromChar(this.name).set("aura1_color", "transparent");
+MML.displayMovement = function displayMovement() {
+    var token = MML.getTokenFromChar(this.name);
+    var path = getObj('path', this.pathID);
+
+    if (!_.isUndefined(path)) {
+        path.remove();
     }
+    var pathID = MML.drawCirclePath(token.get("left"), token.get("top"), MML.movementRates[this.race][this.movementPosition] * this.movementAvailable).id;
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        callback: "setApiCharAttribute",
+        input: {
+            attribute: "pathID",
+            value: pathID
+        }
+    });
 };
 
-MML.moveDistance = function moveDistance(distance) {
-    this.movementAvailable -= (distance) / (MML.movementRates[this.race][this.movementPosition]);
-    MML.displayMovement.apply(this, [true]);
+MML.moveDistance = function moveDistance(input) {
+    var distance = input.distance;
+    var remainingMovement = this.movementAvailable - (distance) / (MML.movementRates[this.race][this.movementPosition]);
+    if (this.movementAvailable > 0) {
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            callback: "setApiCharAttribute",
+            input: {
+                attribute: "movementAvailable",
+                value: remainingMovement
+            }
+        });
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            callback: "displayMovement",
+            input: {}
+        });
+    } else {
+        var path = getObj('path', this.pathID);
+        if (!_.isUndefined(path)) {
+            path.remove();
+        }
+    }
+
 };
 
 MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input) {

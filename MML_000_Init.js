@@ -50,8 +50,6 @@ MML.init = function init(){
     TokenCollisions = {
         "Layer": "gmlayer"
     };
-
-    log(TokenCollisions);
 // var data = [
 // ,,,];
 

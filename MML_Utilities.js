@@ -226,6 +226,28 @@ MML.getDistance = function getDistance(left1, left2, top1, top2) {
     return distance;
 };
 
+MML.drawCirclePath = function drawCirclePath(left, top, radius) {
+    var pixelPerFoot = 14;
+    radius *= pixelPerFoot;
+    var pathArray = [["M", left - radius, top],
+            ["C", left - radius, top - (radius/2), left - (radius/2), top - radius, left, top - radius],
+            ["C", left + (radius/2), top - radius, left + radius, top - (radius/2), left + radius, top],
+            ["C", left + radius, top + (radius/2), left + (radius/2), top + radius, left, top + radius],
+            ["C", left - (radius/2), top + radius, left - radius, top + (radius/2), left - radius, top]];
+    var path = createObj("path", {
+        _path: JSON.stringify(pathArray),
+        _pageid: Campaign().get("playerpageid"),
+        layer: "map",
+        stroke: "#FFFF00",
+        width: radius * 2,
+        height: radius * 2,
+        top: top,
+        left: left,
+    });
+    toFront(path);
+    return path;
+};
+
 // Code borrowed from The Aaron from roll20.net forums
 var generateUUID = (function() {
     "use strict";

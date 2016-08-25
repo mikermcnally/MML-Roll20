@@ -47,6 +47,7 @@ MML.characterConstructor = function characterConstructor(charName) {
     this.movementRatio = MML.getCurrentAttributeAsFloat(this.name, "movementRatio");
     this.movementAvailable = MML.getCurrentAttributeAsFloat(this.name, "movementAvailable");
     this.movementPosition = MML.getCurrentAttribute(this.name, "movementPosition");
+    this.pathID = MML.getCurrentAttribute(this.name, "pathID");
     this.situationalMod = MML.getCurrentAttributeAsFloat(this.name, "situationalMod");
     this.attributeDefenseMod = MML.getCurrentAttributeAsFloat(this.name, "attributeDefenseMod");
     this.meleeDefenseMod = MML.getCurrentAttributeAsFloat(this.name, "meleeDefenseMod");
@@ -732,7 +733,12 @@ MML.computeAttribute.movementPosition = {
         return this.movementPosition;
     }
 };
-
+MML.computeAttribute.pathID = {
+    dependents: [],
+    compute: function() {
+        return this.pathID;
+    }
+};
 // Roll Modifiers
 MML.computeAttribute.situationalMod = {
     dependents: [],
