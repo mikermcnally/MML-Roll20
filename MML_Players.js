@@ -6,6 +6,7 @@ MML.playerClass = {
     buttons: {}, //{text: "Click Here", nextMenu: "mainMenu", callback: MML.callback}
     name: "",
     characters: [],
+    combatants: [],
     characterIndex: 0,
     who: "",
     menu: ""
@@ -45,36 +46,83 @@ MML.setApiPlayerAttribute = function(input) {
 
 MML.newRoundUpdatePlayer = function(input) {
     this.characterIndex = 0;
-    this.who = this.characters[this.characterIndex];
+    this.combatants = _.intersection(this.characters, state.MML.GM.combatants);
+    this.who = this.combatants[0];
     this.menu = "charMenuPrepareAction";
-    MML.processCommand({
-        type: "player",
-        who: this.name,
-        callback: "charMenuPrepareAction",
-        input: {
-            who: this.who
+
+    if (this.combatants.length > 0){
+        if (state.MML.characters[this.who].situationalInitBonus !== "No Combat") {
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "charMenuPrepareAction",
+                input: {
+                    who: this.who
+                }
+            });
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "displayMenu",
+                input: {}
+            });
+        } else {
+            MML.processCommand({
+                type: "character",
+                who: this.who,
+                callback: "setApiCharAttribute",
+                input: {
+                    attribute: "ready",
+                    value: true
+                }
+            });
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "prepareNextCharacter",
+                input: {}
+            });
         }
-    });
-    MML.processCommand({
-        type: "player",
-        who: this.name,
-        callback: "displayMenu",
-        input: {}
-    });
+    }
 };
 
 MML.prepareNextCharacter = function(input) {
     this.characterIndex++;
+    var charName = this.combatants[this.characterIndex];
 
-    if (this.characterIndex < this.characters.length) {
-        MML.processCommand({
-            type: "player",
-            who: this.name,
-            callback: "charMenuPrepareAction",
-            input: {
-                who: this.characters[this.characterIndex],
-            }
-        });
+    if (this.characterIndex < this.combatants.length) {
+        if (state.MML.characters[charName].situationalInitBonus !== "No Combat") {
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "charMenuPrepareAction",
+                input: {
+                    who: charName
+                }
+            });
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "displayMenu",
+                input: {}
+            });
+        } else {
+            MML.processCommand({
+                type: "character",
+                who: charName,
+                callback: "setApiCharAttribute",
+                input: {
+                    attribute: "ready",
+                    value: true
+                }
+            });
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "prepareNextCharacter",
+                input: {}
+            });
+        }
     } else if (this.name === state.MML.GM.player) {
         MML.processCommand({
             type: "player",
@@ -84,13 +132,13 @@ MML.prepareNextCharacter = function(input) {
                 who: "GM",
             }
         });
+        MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+        });
     }
-    MML.processCommand({
-        type: "player",
-        who: this.name,
-        callback: "displayMenu",
-        input: {}
-    });
 };
 
 MML.menuIdle = function menuIdle(input) {
@@ -608,6 +656,7 @@ MML.charMenuPrepareAction = function charMenuPrepareAction(input) {
         MML.menuButtons.setActionReadyItem,
         MML.menuButtons.setActionObserve
     ];
+
 };
 MML.charMenuAttack = function charMenuAttack(input) {
     this.who = input.who;
@@ -1362,8 +1411,8 @@ MML.menuButtons.actionPrepared = {
         state.MML.characters[this.who].updateCharacter("ready");
         state.MML.characters[this.who].updateCharacter("action");
         this.characterIndex++;
-        if (this.characterIndex < this.characters.length) {
-            MML.charMenuPrepareAction.apply(this, [this.characters[this.characterIndex]]);
+        if (this.characterIndex < this.combatants.length) {
+            MML.charMenuPrepareAction.apply(this, [this.combatants[this.characterIndex]]);
             MML.processCommand({
                 type: "player",
                 who: this.name,
@@ -1611,18 +1660,10 @@ MML.menuButtons.endMovement = {
     text: "End Movement",
     nextMenu: "menuIdle",
     callback: function(input) {
-        var path = getObj('path', this.pathID);
+        var path = getObj('path', state.MML.characters[this.who].pathID);
         if (!_.isUndefined(path)) {
             path.remove();
         }
-        MML.processCommand({
-            type: "character",
-            who: this.who,
-            callback: "displayMovement",
-            input: {
-                display: false
-            }
-        });
         MML.processCommand({
             type: "character",
             who: this.who,

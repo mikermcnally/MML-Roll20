@@ -134,7 +134,14 @@ MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input) {
         }
     });
     this.action = {};
-
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        callback:"updateCharacter",
+        input: {
+            attribute: "statusEffects"
+        }
+    });
     MML.processCommand({
         type: "character",
         who: this.name,
