@@ -41,7 +41,6 @@ MML.statusEffects["Disabling Wound"] = function(effect, index) {
             this.situationalInitBonus += -10;
         }
         this.situationalMod += -25;
-
         if (effect.bodyPart === "Head") {
             this.situationalInitBonus = "No Combat";
         } else if (effect.bodyPart === "Left Arm") {
