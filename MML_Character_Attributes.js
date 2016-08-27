@@ -953,7 +953,10 @@ MML.computeAttribute.statusEffects = {
             } else {
                 MML.statusEffects[index].apply(this, [effect, index]);
             }
+            MML.setCurrentAttribute(this.name, "repeating_statuseffects_" + effect.id + "_statusEffectName", index);
+            MML.setCurrentAttribute(this.name, "repeating_statuseffects_" + effect.id + "_statusEffectDescription", "description");
         }, this);
+
         return this.statusEffects;
     }
 };
@@ -1240,6 +1243,7 @@ MML.computeAttribute.action = {
 
         _.each(this.action.modifiers, function(modifier) {
             this.statusEffects[modifier] = {
+                id: generateRowID(),
                 name: modifier
             };
         }, this);

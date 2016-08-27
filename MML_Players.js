@@ -1457,7 +1457,6 @@ MML.menuButtons.initiativeRoll = {
     }
 };
 
-
 MML.menuButtons.acceptRoll = {
     text: "Accept",
     nextMenu: "menuIdle",

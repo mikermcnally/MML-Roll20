@@ -200,6 +200,7 @@ MML.alterHP = function alterHP(input) {
         } else if (currentHP < -maxHP) { //Mortal wound
             log("Mortal");
             this.statusEffects["Mortal Wound, " + bodyPart] = {
+                id: generateRowID(),
                 bodyPart: bodyPart
             };
             MML[state.MML.GM.currentAction.callback]();
@@ -307,7 +308,9 @@ MML.multiWoundRollApply = function multiWoundRollApply(input) {
     var result = state.MML.players[this.player].currentRoll.result;
     state.MML.GM.currentAction.multiWoundRoll = result;
     if (result === "Failure") {
-        this.statusEffects["Wound Fatiuge"] = {};
+        this.statusEffects["Wound Fatiuge"] = {
+            id: generateRowID()
+        };
     }
     MML[state.MML.GM.currentAction.callback]();
 };
@@ -371,6 +374,7 @@ MML.majorWoundRollApply = function majorWoundRollApply() {
     var bodyPart = state.MML.GM.currentAction.rolls.hitPositionRoll.bodyPart;
     if (result === "Failure") {
         this.statusEffects["Major Wound, " + bodyPart] = {
+            id: generateRowID(),
             duration: state.MML.GM.currentAction.woundDuration,
             bodyPart: bodyPart
         };
@@ -437,10 +441,12 @@ MML.disablingWoundRollApply = function disablingWoundRollApply() {
     var bodyPart = state.MML.GM.currentAction.rolls.hitPositionRoll.bodyPart;
 
     this.statusEffects["Disabling Wound, " + bodyPart] = {
+        id: generateRowID(),
         bodyPart: bodyPart
     };
     if (result === "Failure") {
         this.statusEffects["Stunned"] = {
+            id: generateRowID(),
             duration: state.MML.GM.currentAction.woundDuration
         };
     }
@@ -536,6 +542,7 @@ MML.knockdownRollApply = function knockdownRollApply(input) {
         this.movementPosition = "Prone";
     } else {
         this.statusEffects["Stumbling"] = {
+            id: generateRowID(),
             duration: 1
         };
     }
@@ -613,6 +620,7 @@ MML.sensitiveAreaRollApply = function sensitiveAreaRollApply(input) {
     var result = state.MML.players[this.player].currentRoll.result;
     if (result === "Critical Failure" || result === "Failure") {
         this.statusEffects["Sensitive Area"] = {
+            id: generateRowID(),
             duration: 1
         };
     }
@@ -902,6 +910,7 @@ MML.startAttackAction = function startAttackAction(input) {
             this.statusEffects["Taking Aim"].level++;
         } else {
             this.statusEffects["Taking Aim"] = {
+                id: generateRowID(),
                 name: "Taking Aim",
                 level: 1,
                 target: input.target
@@ -918,7 +927,9 @@ MML.startAttackAction = function startAttackAction(input) {
 };
 
 MML.processAttack = function processAttack(input) {
-    this.statusEffects["Melee This Round"] = {};
+    this.statusEffects["Melee This Round"] = {
+        id: generateRowID()
+    };
 
     if (MML.isUnarmed(this)) {
         MML.processCommand({
@@ -1410,6 +1421,7 @@ MML.meleeBlockRollApply = function meleeBlockRollApply(input) {
             this.statusEffects["Number of Defenses"].number++;
         } else {
             this.statusEffects["Number of Defenses"] = {
+                id: generateRowID(),
                 number: 1
             };
         }
@@ -1478,11 +1490,14 @@ MML.meleeDodgeRollApply = function meleeDodgeRollApply(input) {
             this.statusEffects["Number of Defenses"].number++;
         } else {
             this.statusEffects["Number of Defenses"] = {
+                id: generateRowID(),
                 number: 1
             };
         }
         if (!_.has(this.statusEffects, "Dodged This Round")) {
-            this.statusEffects["Dodged This Round"] = {};
+            this.statusEffects["Dodged This Round"] = {
+                id: generateRowID(),
+            };
         }
     }
 
@@ -1628,11 +1643,14 @@ MML.rangedDefenseRollApply = function missileBlockRollApply(input) {
             this.statusEffects["Number of Defenses"].number++;
         } else {
             this.statusEffects["Number of Defenses"] = {
+                id: generateRowID(),
                 number: 1
             };
         }
         if (!_.has(this.statusEffects, "Dodged This Round")) {
-            this.statusEffects["Dodged This Round"] = {};
+            this.statusEffects["Dodged This Round"] = {
+                id: generateRowID()
+            };
         }
     }
 

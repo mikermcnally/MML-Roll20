@@ -543,71 +543,16 @@
 
     <!-- ===== ===== ===== ===== Combat TAB ===== ===== ===== ===== -->
     <div class="sheet-tab2">
-
 	    <!-- _____ _____ Action Select Menu _____ _____ -->
         <table>
-            <input type="radio" name="attr_action" class="sheet-menu sheet-attackButton" title="Attack" value="1" checked="checked" />
-
-            <div class="sheet-menuBody sheet-attackBody">
-                    <div>
-                        <button type='roll' value='!setTarget @{Name}' name='roll_setTarget'>Set Target</button>
-                        <input type="text" name="attr_target" value="None" />
-                    </div>
-                    <div>
-                        <select name="attr_attackWeapon" class="sheet-menuSelect">
-                            <option value="primary">Primary</option>
-                            <option value="secondary">Secondary</option>
-                        </select>
-                    </div>
-                    <div>
-                        <select name="attr_attackStyle" class="sheet-menuSelect">
-                            <option value="standard">Standard</option>
-                            <option value="sweep">Sweep</option>
-                            <option value="cover">Shoot from Cover</option>
-                        </select>
-                    </div>
-					<div>
-                        <select name="attr_action.calledShot" class="sheet-menuSelect">
-							<option value="standard">Standard</option>
-                            <option value="head">Head</option>
-                            <option value="chest">Chest</option>
-                            <option value="abdomen">Abdomen</option>
-                            <option value="leftArm">Left Arm</option>
-                            <option value="rightArm">Right Arm</option>
-                            <option value="leftLeg">Left Leg</option>
-                            <option value="rightLeg">Right Leg</option>
-                        </select>
-                    </div>
-                    <div>
-                        <select name="attr_attackStance" class="sheet-menuSelect">
-                            <option value="neutral">Neutral</option>
-                            <option value="aggressive">Aggressive</option>
-                            <option value="defensive">Defensive</option>
-                        </select>
-                    </div>
-                    <div>
-                        <select name="attr_attackFlanking" class="sheet-menuSelect">
-                            <option value="none">None</option>
-                            <option value="flanking">Flanking</option>
-                            <option value="rear">Rear</option>
-                        </select>
-                    </div>
-                    <div>
-                        <select name="attr_attackElevation" class="sheet-menuSelect">
-                            <option value="level">Level</option>
-                            <option value="above">Above</option>
-                            <option value="below">Below</option>
-                        </select>
-                    </div>
-                </div>
-
-            <input type="radio" name="attr_action" class="sheet-menu sheet-castButton" title="Cast Spell" value="2" />
-            <div class="sheet-menuBody sheet-castBody">The Cast Spell Option is selected</div>
-            <input type="radio" name="attr_action" class="sheet-menu sheet-itemButton" title="Ready Item" value="3" />
-            <div class="sheet-menuBody sheet-itemBody">The Ready Item Option is selected</div>
-            <input type="radio" name="attr_action" class="sheet-menu sheet-observeButton" title="Observe" value="4" />
-            <div class="sheet-menuBody sheet-observeBody">The Observe Option is selected</div>
-
+            <fieldset class="repeating_statuseffects">
+                <!-- <div class="sheet-cell sheet-col1"> -->
+                    <input type="text" name="attr_statusEffectName" class="statuseffectname" value="name" />
+                <!-- </div> -->
+                <!-- <div class="sheet-cell sheet-col2"> -->
+                    <input type="text" name="attr_statusEffectDescription" class="statuseffectdescription" value="description" />
+                <!-- </div>  -->
+            </fieldset>
         </table>
 	</div> <!-- .sheet-tab2 -->
 
