@@ -95,6 +95,7 @@ MML.characterConstructor = function characterConstructor(charName) {
     this.damagedThisRound = MML.getCurrentAttributeAsBool(this.name, "damagedThisRound");
     this.skills = MML.getSkillAttributes(this.name, "skills");
     this.weaponSkills = MML.getSkillAttributes(this.name, "weaponskills");
+    this.fov = MML.getCurrentAttributeAsFloat(this.name, "fov");
 };
 
 MML.updateCharacter = function(input) {
@@ -739,6 +740,7 @@ MML.computeAttribute.pathID = {
         return this.pathID;
     }
 };
+
 // Roll Modifiers
 MML.computeAttribute.situationalMod = {
     dependents: [],
@@ -1048,7 +1050,8 @@ MML.computeAttribute.attributeInitBonus = {
 MML.computeAttribute.senseInitBonus = {
     dependents: [
         "initiative",
-        "attributeCastingMod"
+        "attributeCastingMod",
+        "fov"
     ],
     compute: function() {
         var armorList = _.where(this.inventory, {
@@ -1070,7 +1073,7 @@ MML.computeAttribute.senseInitBonus = {
             return 4;
         } else {
             //Head fully encased in metal
-            if (_.intersection(senseArray, ["Great Helm", "Sallet Helm", "Throat Guard"]).length > 0) {
+            if (senseArray.indexOf("Great Helm") !== -1 || (senseArray.indexOf("Sallet Helm") !== -1 && senseArray.indexOf("Throat Guard") !== -1)) {
                 return -2;
             }
             //wearing a helm
@@ -1247,7 +1250,6 @@ MML.computeAttribute.action = {
         return this.action;
     }
 };
-
 MML.computeAttribute.roundsRest = {
     dependents: [],
     compute: function() {
@@ -1260,7 +1262,29 @@ MML.computeAttribute.roundsExertion = {
         return this.roundsExertion;
     }
 };
-
+MML.computeAttribute.fov = {
+    dependents: [],
+    compute: function() {
+        switch (this.senseInitBonus) {
+            case 4:
+                return 180;
+            case 3:
+                return 170;
+            case 2:
+                return 160;
+            case 1:
+                return 150;
+            case 0:
+                return 140;
+            case -1:
+                return 130;
+            case -2:
+                return 120;
+            default:
+                return 180;
+        }
+    }
+};
 
 // Skills
 MML.computeAttribute.skills = {
