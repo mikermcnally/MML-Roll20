@@ -162,6 +162,16 @@ MML.setReady = function setReady(ready) {
     return this.ready;
 };
 
+MML.setCombatVision = function setCombatVision(inCombat) {
+    var token = MML.getTokenFromChar(this.name);
+    if (inCombat) {
+        token.set("light_losangle", this.fov);
+        token.set("light_hassight", true);
+    } else {
+        token.set("light_hassight", false);
+    }
+};
+
 // Health and Wounds
 MML.alterHP = function alterHP(input) {
     log(input.hpAmount);
