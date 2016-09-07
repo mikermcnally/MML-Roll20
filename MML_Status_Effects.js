@@ -1,25 +1,5 @@
 /* jshint -W069 */
 MML.statusEffects = {};
-// MML.statusEffects["Major Wound"] = function(character){
-//     this.bodyPart = "";
-//     this.duration = 1;
-//
-//     this.compute = function(effect, index){
-//         if(this[effect.bodyPart] > Math.round(this[effect.bodyPart + "Max"]/2)){
-//             delete this.statusEffects[index];
-//         }
-//         else{
-//             if(this.situationalInitBonus !== "No Combat"){
-//                 this.situationalInitBonus += -5;
-//             }
-//             if(effect.duration > 0){
-//                 this.situationalMod += -10;
-//             }
-//         }
-//     };
-// };
-
-
 
 MML.statusEffects["Major Wound"] = function(effect, index) {
     if (this.hp[effect.bodyPart] > Math.round(this.hpMax[effect.bodyPart] / 2)) {
@@ -31,6 +11,7 @@ MML.statusEffects["Major Wound"] = function(effect, index) {
         if (effect.duration > 0) {
             this.situationalMod += -10;
         }
+        this.statusEffects[index].description = "Situational Modifier: -10%. Initiative: -5";
     }
 };
 MML.statusEffects["Disabling Wound"] = function(effect, index) {
@@ -43,7 +24,9 @@ MML.statusEffects["Disabling Wound"] = function(effect, index) {
         this.situationalMod += -25;
         if (effect.bodyPart === "Head") {
             this.situationalInitBonus = "No Combat";
+            this.statusEffects[index].description = "Situational Modifier: -25%. Unconscious";
         } else if (effect.bodyPart === "Left Arm") {
+            this.statusEffects[index].description = "Situational Modifier: -25%. Initiative: -10. Left Arm Limp";
             MML.processCommand({
                 type: "character",
                 who: this.name,
@@ -56,6 +39,7 @@ MML.statusEffects["Disabling Wound"] = function(effect, index) {
                 }
             });
         } else if (effect.bodyPart === "Right Arm") {
+            this.statusEffects[index].description = "Situational Modifier: -25%. Initiative: -10. Right Arm Limp";
             MML.processCommand({
                 type: "character",
                 who: this.name,
@@ -75,6 +59,7 @@ MML.statusEffects["Mortal Wound"] = function(effect, index) {
         delete this.statusEffects[index];
     } else {
         this.situationalInitBonus = "No Combat";
+        this.statusEffects[index].description = "You're dying, broh!";
     }
 };
 MML.statusEffects["Wound Fatigue"] = function(effect, index) {
@@ -85,6 +70,7 @@ MML.statusEffects["Wound Fatigue"] = function(effect, index) {
             this.situationalInitBonus += -5;
         }
         this.situationalMod += -10;
+        this.statusEffects[index].description = "Situational Modifier: -10%. Initiative: -5";
     }
 };
 MML.statusEffects["Number of Defenses"] = function(effect, index) {
@@ -94,12 +80,14 @@ MML.statusEffects["Number of Defenses"] = function(effect, index) {
 
     this.rangedDefenseMod += -20 * effect.number;
     this.meleeDefenseMod += -20 * effect.number;
+    this.statusEffects[index].description = "Defense Modifier: " + -20 * effect.number + "%";
 };
 MML.statusEffects["Fatigue"] = function(effect, index) {
     if (this.situationalInitBonus !== "No Combat") {
         this.situationalInitBonus += -5 * effect.level;
     }
     this.situationalMod += -10 * effect.level;
+    this.statusEffects[index].description = "Situational Modifier: -10" + -10 * effect.level + "%. Initiative: " + -5 * effect.level;
 };
 MML.statusEffects["Sensitive Area"] = function(effect, index) {
     if (state.MML.GM.inCombat === false) {
@@ -113,9 +101,8 @@ MML.statusEffects["Sensitive Area"] = function(effect, index) {
         if (this.situationalInitBonus !== "No Combat") {
             this.situationalInitBonus += -5;
         }
-    }
-    if (effect.duration > 1) {
         this.situationalMod += -10;
+        this.statusEffects[index].description = "Situational Modifier: -10%. Initiative: -5";
     }
 };
 MML.statusEffects["Stumbling"] = function(effect, index) {
@@ -130,12 +117,11 @@ MML.statusEffects["Stumbling"] = function(effect, index) {
         if (this.situationalInitBonus !== "No Combat") {
             this.situationalInitBonus += -5;
         }
+        this.statusEffects[index].description = "Initiative: -5";
     }
 };
 MML.statusEffects["Called Shot"] = function(effect, index) {
-    if (state.MML.GM.inCombat === false) {
-        delete this.statusEffects[index];
-    } else if (!_.contains(this.action.modifiers, "Called Shot")) {
+    if (state.MML.GM.inCombat === false || !_.contains(this.action.modifiers, "Called Shot")) {
         delete this.statusEffects[index];
     } else {
         this.rangedDefenseMod += -10;
@@ -145,12 +131,11 @@ MML.statusEffects["Called Shot"] = function(effect, index) {
         if (this.situationalInitBonus !== "No Combat") {
             this.situationalInitBonus += -5;
         }
+        this.statusEffects[index].description = "Attack Modifier: -10%. Defense Modifier: -10%. Initiative: -5";
     }
 };
 MML.statusEffects["Called Shot Specific"] = function(effect, index) {
-    if (state.MML.GM.inCombat === false) {
-        delete this.statusEffects[index];
-    } else if (!_.contains(this.action.modifiers, "Called Shot Specific")) {
+    if (state.MML.GM.inCombat === false || !_.contains(this.action.modifiers, "Called Shot Specific")) {
         delete this.statusEffects[index];
     } else {
         this.rangedDefenseMod += -30;
@@ -160,15 +145,12 @@ MML.statusEffects["Called Shot Specific"] = function(effect, index) {
         if (this.situationalInitBonus !== "No Combat") {
             this.situationalInitBonus += -5;
         }
+        this.statusEffects[index].description = "Attack Modifier: -30%. Defense Modifier: -30%. Initiative: -5";
     }
 };
 MML.statusEffects["Aggressive Stance"] = function(effect, index) {
-    if (state.MML.GM.inCombat === false) {
+    if (state.MML.GM.inCombat === false || !_.contains(this.action.modifiers, "Aggressive Stance")) {
         delete this.statusEffects[index];
-    } else if (!_.contains(this.action.modifiers, "Aggressive Stance")) {
-        // log("aggro deleted");
-        delete this.statusEffects[index];
-        // log(this.statusEffects);
     } else {
         this.rangedDefenseMod += -40;
         this.meleeDefenseMod += -40;
@@ -177,12 +159,11 @@ MML.statusEffects["Aggressive Stance"] = function(effect, index) {
         if (this.situationalInitBonus !== "No Combat") {
             this.situationalInitBonus += 5;
         }
+        this.statusEffects[index].description = "Attack Modifier: +10%. Defense Modifier: -40%. Initiative: +5. Preception Modifier: -4";
     }
 };
 MML.statusEffects["Defensive Stance"] = function(effect, index) {
-    if (state.MML.GM.inCombat === false) {
-        delete this.statusEffects[index];
-    } else if (!_.contains(this.action.modifiers, "Defensive Stance")) {
+    if (state.MML.GM.inCombat === false || !_.contains(this.action.modifiers, "Defensive Stance")) {
         delete this.statusEffects[index];
     } else {
         this.rangedDefenseMod += 40;
@@ -192,6 +173,7 @@ MML.statusEffects["Defensive Stance"] = function(effect, index) {
         if (this.situationalInitBonus !== "No Combat") {
             this.situationalInitBonus += -5;
         }
+        this.statusEffects[index].description = "Attack Modifier: -30%. Defense Modifier: +40%. Initiative: -5. Preception Modifier: -4";
     }
 };
 MML.statusEffects["Observe"] = function(effect, index) {
@@ -208,33 +190,49 @@ MML.statusEffects["Observe"] = function(effect, index) {
         this.perceptionCheckMod += 4;
         this.rangedDefenseMod += -10;
         this.meleeDefenseMod += -10;
+        this.statusEffects[index].description = "Defense Modifier: -10%. Preception Modifier: +4";
     } else {
         //observed previous round
         this.situationalInitBonus += 5;
         if (MML.isWieldingRangedWeapon(this)) {
             this.missileAttackMod += 15;
+            this.statusEffects[index].description = "Missile Attack Modifier: +15%. Initiative: +5";
+        } else {
+            this.statusEffects[index].description = "Initiative: +5";
         }
     }
 };
 MML.statusEffects["Taking Aim"] = function(effect, index) {
-    if (state.MML.GM.inCombat === false) {
-        delete this.statusEffects[index];
-    } else if (_.has(this.statusEffects, "Number of Defenses") ||
+    if (state.MML.GM.inCombat === false ||
+        _.has(this.statusEffects, "Number of Defenses") ||
         _.has(this.statusEffects, "Damaged This Round") ||
         _.has(this.statusEffects, "Dodged This Round") ||
-        this.action.targets[0] !== effect.target) {
+        this.action.targets[0] !== effect.target
+    ) {
         delete this.statusEffects[index];
     } else {
         if (effect.level === 1) {
             this.missileAttackMod += 30;
+            this.statusEffects[index].description = "Missile Attack Modifier: +30%.";
         } else if (effect.level === 2) {
             this.missileAttackMod += 40;
+            this.statusEffects[index].description = "Missile Attack Modifier: +40%.";
         }
+    }
+};
+MML.statusEffects["Shoot From Cover"] = function(effect, index) {
+    if (state.MML.GM.inCombat === false || !_.contains(this.action.modifiers, "Shoot From Cover")) {
+        delete this.statusEffects[index];
+    } else {
+        this.missileAttackMod += -10;
+        this.statusEffects[index].description = "Missile attacks -10%. Missile attacks against -20%";
     }
 };
 MML.statusEffects["Damaged This Round"] = function(effect, index) {
     if (state.MML.GM.inCombat === false || state.MML.GM.roundStarted === false) {
         delete this.statusEffects[index];
+    } else {
+        this.statusEffects[index].description = "Took damage this round";
     }
 };
 MML.statusEffects["Dodged This Round"] = function(effect, index) {
@@ -244,12 +242,15 @@ MML.statusEffects["Dodged This Round"] = function(effect, index) {
         this.action.name = "Movement Only";
         this.action.callback = "endAction";
         delete this.action.getTargets;
+        this.statusEffects[index].description = "Only movement is allowed the remainder of the round";
     }
 };
 MML.statusEffects["Melee This Round"] = function(effect, index) {
     if (state.MML.GM.roundStarted === false) {
         this.roundsExertion++;
         delete this.statusEffects[index];
+    } else {
+        this.statusEffects[index].description = "Adds to rounds of exertion";
     }
 };
 MML.statusEffects["Stunned"] = function(effect, index) {
@@ -264,5 +265,6 @@ MML.statusEffects["Stunned"] = function(effect, index) {
         this.action.name = "Movement Only";
         this.action.callback = "endAction";
         delete this.action.getTargets;
+        this.statusEffects[index].description = "Only movement is allowed the next " + effect.duration + " of the round";
     }
 };

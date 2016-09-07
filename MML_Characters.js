@@ -694,6 +694,7 @@ MML.armorDamageReduction = function armorDamageReduction(character, position, da
     var damageApplied = false; //Accounts for partial coverage, once true the loop stops
     var damageDeflected = 0;
     log(character.apv);
+    log(position);
     // Iterates over apv values at given position (accounting for partial coverage)
     var apv;
     for (apv in character.apv[position][type]) {
@@ -1104,7 +1105,11 @@ MML.missileAttack = function missileAttack() {
     MML[currentAction.callback]();
 };
 
-MML.missileAttackRoll = function missleAttackRoll(rollName, character, task, skill) {
+MML.missileAttackRoll = function missleAttackRoll(rollName, character, task, skill, target) {
+    var mods = [task, skill, character.situationalMod, character.missileAttackMod, character.attributeMissileAttackMod];
+    if (_.has((this.statusEffects, "Shoot From Cover"))) {
+        mods.push(-20);
+    }
     MML.processCommand({
         type: "character",
         who: character.name,
@@ -1112,7 +1117,7 @@ MML.missileAttackRoll = function missleAttackRoll(rollName, character, task, ski
         input: {
             name: rollName,
             callback: "attackRollResult",
-            mods: [task, skill, character.situationalMod, character.missileAttackMod, character.attributeMissileAttackMod]
+            mods: mods
         }
     });
 };

@@ -803,54 +803,6 @@ MML.charMenuAttackStance = function charMenuAttackStance(input) {
         }
     }];
 
-    if (MML.isWieldingRangedWeapon(state.MML.characters[this.who])) {
-        _.each(buttons, function(button) {
-            button.nextMenu = "charMenuFinalizeAction";
-        });
-    } else {
-        _.each(buttons, function(button) {
-            button.nextMenu = "charMenuAttackStance";
-        });
-    }
-    this.buttons = buttons;
-};
-MML.charMenuAttackStance = function charMenuAttackStance(input) {
-    this.who = input.who;
-    this.message = "Attack Stance Menu";
-    var buttons = [{
-        text: "Neutral",
-        callback: function(input) {
-            MML.processCommand({
-                type: "player",
-                who: this.name,
-                callback: "displayMenu",
-                input: {}
-            });
-        }
-    }, {
-        text: "Defensive",
-        callback: function(input) {
-            state.MML.characters[this.who].action.modifiers.push("Defensive Stance");
-            MML.processCommand({
-                type: "player",
-                who: this.name,
-                callback: "displayMenu",
-                input: {}
-            });
-        }
-    }, {
-        text: "Aggressive",
-        callback: function(input) {
-            state.MML.characters[this.who].action.modifiers.push("Aggressive Stance");
-            MML.processCommand({
-                type: "player",
-                who: this.name,
-                callback: "displayMenu",
-                input: {}
-            });
-        }
-    }];
-
     if (MML.getMeleeWeapon(state.MML.characters[this.who]).secondaryType !== "") {
         _.each(buttons, function(button) {
             button.nextMenu = "charMenuSelectDamageType";
@@ -898,6 +850,14 @@ MML.menuCombatMovement = function menuCombatMovement(input) {
         MML.menuButtons.setRun,
         MML.menuButtons.endMovement
     ];
+
+    MML.processCommand({
+        type: "GM",
+        callback: "displayThreatZones",
+        input: {
+            toggle: true
+        }
+    });
 };
 MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(input) {
     var targetArray;
@@ -1663,6 +1623,13 @@ MML.menuButtons.endMovement = {
         if (!_.isUndefined(path)) {
             path.remove();
         }
+        MML.processCommand({
+            type: "GM",
+            callback: "displayThreatZones",
+            input: {
+                toggle: false
+            }
+        });
         MML.processCommand({
             type: "character",
             who: this.who,
