@@ -739,6 +739,7 @@ MML.computeAttribute.pathID = {
         return this.pathID;
     }
 };
+
 // Roll Modifiers
 MML.computeAttribute.situationalMod = {
     dependents: [],
@@ -942,8 +943,6 @@ MML.computeAttribute.statusEffects = {
             this[dependent] = 0;
         }, this);
         _.each(this.statusEffects, function(effect, index) {
-            log(effect);
-            log(index);
             if (index.indexOf("Major Wound") !== -1) {
                 MML.statusEffects["Major Wound"].apply(this, [effect, index]);
             } else if (index.indexOf("Disabling Wound") !== -1) {
@@ -953,7 +952,33 @@ MML.computeAttribute.statusEffects = {
             } else {
                 MML.statusEffects[index].apply(this, [effect, index]);
             }
+            MML.setCurrentAttribute(this.name, "repeating_statuseffects_" + effect.id + "_statusEffectName", index);
+            MML.setCurrentAttribute(this.name, "repeating_statuseffects_" + effect.id + "_statusEffectDescription", effect.description);
         }, this);
+
+        var regex = new RegExp('^repeating_statuseffects_.*?_.*?$');
+        var charObj = MML.getCharFromName(this.name);
+        var statusEffectIDs = _.pluck(this.statusEffects, "id");
+        var statusEffects = filterObjs(function(obj) {
+            if (obj.get('type') !== 'attribute' || obj.get('characterid') !== charObj.id) {
+                return false;
+            } else {
+                return regex.test(obj.get('name'));
+            }
+        });
+        var attributestoDelete = _.filter(statusEffects, function(effect){
+            var notFound = true;
+            _.each(statusEffectIDs, function(id) {
+                if (_.isString(effect.get("name", "current")) && effect.get("name", "current").indexOf(id) > -1) {
+                    notFound = false;
+                }
+            });
+            return notFound;
+        });
+        _.each(attributestoDelete, function (attribute) {
+            attribute.remove();
+        });
+
         return this.statusEffects;
     }
 };
@@ -1240,6 +1265,7 @@ MML.computeAttribute.action = {
 
         _.each(this.action.modifiers, function(modifier) {
             this.statusEffects[modifier] = {
+                id: generateRowID(),
                 name: modifier
             };
         }, this);

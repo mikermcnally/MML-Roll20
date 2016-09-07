@@ -38,7 +38,7 @@ on("ready", function() {
         var charName = characterObject.get("name");
         var attrName = attribute.get("name");
 
-        if(attrName.indexOf("repeating_skills") != -1){
+        if(attrName.indexOf("repeating_skills") !== -1){
             MML.processCommand({
 	        	type: "character",
 	        	who: charName,
@@ -47,8 +47,7 @@ on("ready", function() {
 			    	attribute: "skills"
 			  	}
 	        });
-        }
-        else if(attrName.indexOf("repeating_weaponskills") != -1){
+        } else if(attrName.indexOf("repeating_weaponskills") !== -1){
             MML.processCommand({
 	        	type: "character",
 	        	who: charName,
@@ -280,7 +279,7 @@ on("ready", function() {
 		        });
                 break;
             default:
-                if(attrName.indexOf("repeating_items") != -1){
+                if(attrName.indexOf("repeating_items") !== -1){
                     MML.processCommand({
 			        	type: "character",
 			        	who: charName,
@@ -290,7 +289,7 @@ on("ready", function() {
 					  	}
 			        });
                 }
-                else if(attrName.indexOf("repeating_skills") != -1){
+                else if(attrName.indexOf("repeating_skills") !== -1){
                     MML.processCommand({
 			        	type: "character",
 			        	who: charName,
@@ -300,8 +299,7 @@ on("ready", function() {
 					  	}
 			        });
                 }
-                else if(attrName.indexOf("repeating_weaponskills") != -1){
-                	log("weaponSkills");
+                else if(attrName.indexOf("repeating_weaponskills") !== -1){
                     MML.processCommand({
 			        	type: "character",
 			        	who: charName,
@@ -310,9 +308,16 @@ on("ready", function() {
 					    	attribute: "weaponSkills"
 					  	}
 			        });
-                }
-                else if(attrName != "tab"){
-                	log(attrName);
+                } else if(attrName.indexOf("repeating_statuseffects") !== -1){
+                    MML.processCommand({
+        	        	type: "character",
+        	        	who: charName,
+        	        	callback:"updateCharacter",
+        				input: {
+        			    	attribute: "statusEffects"
+        			  	}
+        	        });
+                } else if(attrName != "tab"){
                     MML.processCommand({
 			        	type: "character",
 			        	who: charName,
