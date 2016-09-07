@@ -53,7 +53,7 @@ MML.missileAttackAction = function missileAttackAction() {
     var rolls = currentAction.rolls;
 
     if (_.isUndefined(rolls.attackRoll)) {
-        MML.missileAttackRoll("attackRoll", character, attackerWeapon.task, attackerSkill);
+        MML.missileAttackRoll("attackRoll", character, attackerWeapon.task, attackerSkill, target);
     } else if (_.isUndefined(rolls.defenseRoll)) {
         if (rolls.attackRoll === "Critical Success" || rolls.attackRoll === "Success") {
             MML.rangedDefense(target, attackerWeapon, range);

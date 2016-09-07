@@ -2261,6 +2261,17 @@ MML.items["Medium Rectangular Shield"] = {name: "Medium Rectangular Shield", typ
 MML.items["Large Rectangular Shield"] = {name: "Large Rectangular Shield", type: "shield", weight: 16.6, attackMod: -15, defenseMod: 39};
 MML.items["Heater Shield"] = {name: "Heater Shield", type: "shield", weight: 10.6, attackMod: -10, defenseMod: 33};
 
+MML.weaponRanks = [
+    {low: 0, high: 2},
+    {low: 2, high: 5},
+    {low: 5, high: 8},
+    {low: 8, high: 12},
+    {low: 12, high: 15},
+    {low: 15, high: 18},
+    {low: 18, high: 21},
+    {low: 21, high: 24},
+];
+
 MML.HPTables = {};
 MML.HPTables["Dwarf"] = [];
 MML.HPTables["Dwarf"][9] = "-";

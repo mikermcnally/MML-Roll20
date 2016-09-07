@@ -248,6 +248,20 @@ MML.drawCirclePath = function drawCirclePath(left, top, radius) {
     return path;
 };
 
+MML.displayAura = function displayAura(token, radius, auraNumber, color) {
+    var auraRadius;
+    var auraColor;
+    if (auraNumber === 2) {
+        auraRadius = "aura2_radius";
+        auraColor = "aura2_color";
+    } else {
+        auraRadius = "aura1_radius";
+        auraColor = "aura1_color";
+    }
+    token.set(auraRadius, radius);
+    token.set(auraColor, color);
+};
+
 // Code borrowed from The Aaron from roll20.net forums
 var generateUUID = (function() {
     "use strict";

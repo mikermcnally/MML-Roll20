@@ -212,6 +212,25 @@ MML.checkReady = function checkReady() {
     return everyoneReady;
 };
 
+MML.displayThreatZones = function displayThreatZones(input) {
+    var toggle = input.toggle;
+    _.each(this.combatants, function(combatant) {
+        var character = state.MML.characters[combatant];
+        var token = MML.getTokenFromChar(combatant);
+        var radius1 = "";
+        var radius2 = "";
+        var color1 = "#FF0000";
+        var color2 = "#FFFF00";
+        if (toggle && !MML.isWieldingRangedWeapon(character) && !MML.isUnarmed(character)) {
+            var weapon = MML.getMeleeWeapon(character);
+            radius1 = MML.weaponRanks[weapon.rank].high;
+            radius2 = MML.weaponRanks[weapon.rank + 1].high;
+        }
+        MML.displayAura(token, radius1, 1, color1);
+        MML.displayAura(token, radius2, 2, color2);
+    });
+};
+
 // Turn Order Functions
 MML.setTurnOrder = function setTurnOrder() {
     var turnorder = [];
