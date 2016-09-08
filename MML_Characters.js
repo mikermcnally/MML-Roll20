@@ -162,13 +162,16 @@ MML.setReady = function setReady(ready) {
     return this.ready;
 };
 
-MML.setCombatVision = function setCombatVision(inCombat) {
+MML.setCombatVision = function setCombatVision(input) {
     var token = MML.getTokenFromChar(this.name);
+    var inCombat = input.inCombat;
+
     if (inCombat) {
         token.set("light_losangle", this.fov);
         token.set("light_hassight", true);
     } else {
-        token.set("light_hassight", false);
+        token.set("light_losangle", 360);
+        token.set("light_hassight", true);
     }
 };
 

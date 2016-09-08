@@ -126,6 +126,7 @@ MML.startRound = function startRound() {
 };
 
 MML.endCombat = function endCombat() {
+    log(this.combatants);
     if (this.combatants.length > 0) {
         _.each(this.combatants, function(charName) {
             MML.processCommand({

@@ -553,6 +553,7 @@ MML.computeAttribute.knockdown = {
 MML.computeAttribute.apv = {
     dependents: [],
     compute: function() {
+        var bodyType = this.bodyType;
         var armor = [];
         _.each(
             this.inventory,
@@ -566,7 +567,7 @@ MML.computeAttribute.apv = {
         var apvMatrix = {};
 
         // Initialize APV Matrix
-        _.each(MML.hitPositions[this.bodyType], function(position) {
+        _.each(MML.hitPositions[bodyType], function(position) {
             apvMatrix[position.name] = {
                 Surface: [{
                     value: 0,
@@ -604,7 +605,7 @@ MML.computeAttribute.apv = {
             var material = MML.APVList[piece.material];
 
             _.each(piece.protection, function(protection) {
-                var position = MML.hitPositions[this.bodyType][protection.position].name;
+                var position = MML.hitPositions[bodyType][protection.position].name;
                 var coverage = protection.coverage;
                 apvMatrix[position].Surface.push({
                     value: material.surface,
@@ -1086,7 +1087,7 @@ MML.computeAttribute.senseInitBonus = {
 
         _.each(bitsOfHelm, function(bit) {
             _.each(armorList, function(piece) {
-                if (bit === piece.name) {
+                if (piece.name.indexOf(bit) !== -1) {
                     senseArray.push(bit);
                 }
             });
