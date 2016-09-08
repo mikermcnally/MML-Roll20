@@ -19,6 +19,14 @@ MML.startCombat = function startCombat(input) {
             MML.processCommand({
                 type: "character",
                 who: charName,
+                callback: "setCombatVision",
+                input: {
+                    inCombat: true
+                }
+            });
+            MML.processCommand({
+                type: "character",
+                who: charName,
                 callback: "updateCharacter",
                 input: {
                     attribute: "initiative"
@@ -118,12 +126,27 @@ MML.startRound = function startRound() {
 };
 
 MML.endCombat = function endCombat() {
+    log(this.combatants);
     if (this.combatants.length > 0) {
-        var index = 0;
-        for (index in this.combatants) {
-            //remove token tints
-            this.characters[this.combatants[index]].setReady(false);
-        }
+        _.each(this.combatants, function(charName) {
+            MML.processCommand({
+                type: "character",
+                who: charName,
+                callback: "setApiCharAttribute",
+                input: {
+                    attribute: "ready",
+                    value: true
+                }
+            });
+            MML.processCommand({
+                type: "character",
+                who: charName,
+                callback: "setCombatVision",
+                input: {
+                    inCombat: false
+                }
+            });
+        });
         this.inCombat = false;
         this.combatants = [];
         Campaign().set("initiativepage", "false");

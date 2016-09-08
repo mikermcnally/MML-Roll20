@@ -95,6 +95,7 @@ MML.characterConstructor = function characterConstructor(charName) {
     this.damagedThisRound = MML.getCurrentAttributeAsBool(this.name, "damagedThisRound");
     this.skills = MML.getSkillAttributes(this.name, "skills");
     this.weaponSkills = MML.getSkillAttributes(this.name, "weaponskills");
+    this.fov = MML.getCurrentAttributeAsFloat(this.name, "fov");
 };
 
 MML.updateCharacter = function(input) {
@@ -552,6 +553,7 @@ MML.computeAttribute.knockdown = {
 MML.computeAttribute.apv = {
     dependents: [],
     compute: function() {
+        var bodyType = this.bodyType;
         var armor = [];
         _.each(
             this.inventory,
@@ -565,7 +567,7 @@ MML.computeAttribute.apv = {
         var apvMatrix = {};
 
         // Initialize APV Matrix
-        _.each(MML.hitPositions[this.bodyType], function(position) {
+        _.each(MML.hitPositions[bodyType], function(position) {
             apvMatrix[position.name] = {
                 Surface: [{
                     value: 0,
@@ -603,7 +605,7 @@ MML.computeAttribute.apv = {
             var material = MML.APVList[piece.material];
 
             _.each(piece.protection, function(protection) {
-                var position = MML.hitPositions[this.bodyType][protection.position].name;
+                var position = MML.hitPositions[bodyType][protection.position].name;
                 var coverage = protection.coverage;
                 apvMatrix[position].Surface.push({
                     value: material.surface,
@@ -1073,7 +1075,8 @@ MML.computeAttribute.attributeInitBonus = {
 MML.computeAttribute.senseInitBonus = {
     dependents: [
         "initiative",
-        "attributeCastingMod"
+        "attributeCastingMod",
+        "fov"
     ],
     compute: function() {
         var armorList = _.where(this.inventory, {
@@ -1084,7 +1087,7 @@ MML.computeAttribute.senseInitBonus = {
 
         _.each(bitsOfHelm, function(bit) {
             _.each(armorList, function(piece) {
-                if (bit === piece.name) {
+                if (piece.name.indexOf(bit) !== -1) {
                     senseArray.push(bit);
                 }
             });
@@ -1095,7 +1098,7 @@ MML.computeAttribute.senseInitBonus = {
             return 4;
         } else {
             //Head fully encased in metal
-            if (_.intersection(senseArray, ["Great Helm", "Sallet Helm", "Throat Guard"]).length > 0) {
+            if (senseArray.indexOf("Great Helm") !== -1 || (senseArray.indexOf("Sallet Helm") !== -1 && senseArray.indexOf("Throat Guard") !== -1)) {
                 return -2;
             }
             //wearing a helm
@@ -1273,7 +1276,6 @@ MML.computeAttribute.action = {
         return this.action;
     }
 };
-
 MML.computeAttribute.roundsRest = {
     dependents: [],
     compute: function() {
@@ -1286,7 +1288,29 @@ MML.computeAttribute.roundsExertion = {
         return this.roundsExertion;
     }
 };
-
+MML.computeAttribute.fov = {
+    dependents: [],
+    compute: function() {
+        switch (this.senseInitBonus) {
+            case 4:
+                return 180;
+            case 3:
+                return 170;
+            case 2:
+                return 160;
+            case 1:
+                return 150;
+            case 0:
+                return 140;
+            case -1:
+                return 130;
+            case -2:
+                return 120;
+            default:
+                return 180;
+        }
+    }
+};
 
 // Skills
 MML.computeAttribute.skills = {
