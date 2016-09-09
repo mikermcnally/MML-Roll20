@@ -1040,6 +1040,41 @@ MML.charMenuRangedDefenseRoll = function charMenuRangedDefenseRoll(input) {
         }
     }];
 };
+MML.charMenuMajorWoundRoll = function charMenuMajorWoundRoll(input) {
+    this.who = input.who;
+    this.message = "Major Wound Roll.";
+    this.buttons = [MML.menuButtons.rollDice];
+};
+MML.charMenuDisablingWoundRoll = function charMenuDisablingWoundRoll(input) {
+    this.who = input.who;
+    this.message = "Disabling Wound Roll.";
+    this.buttons = [MML.menuButtons.rollDice];
+};
+MML.charMenuWoundFatigueRoll = function charMenuWoundFatigueRoll(input) {
+    this.who = input.who;
+    this.message = "Wound Fatigue Roll.";
+    this.buttons = [MML.menuButtons.rollDice];
+};
+MML.charMenuSensitiveAreaRoll = function charMenuSensitiveAreaRoll(input) {
+    this.who = input.who;
+    this.message = "Sensitive Area Roll.";
+    this.buttons = [MML.menuButtons.rollDice];
+};
+MML.charMenuKnockdownRoll = function charMenuKnockdownRoll(input) {
+    this.who = input.who;
+    this.message = "Knockdown Roll.";
+    this.buttons = [MML.menuButtons.rollDice];
+};
+MML.charMenuFatigueRoll = function charMenuFatigueRoll(input) {
+    this.who = input.who;
+    this.message = "Fatigue Roll.";
+    this.buttons = [MML.menuButtons.rollDice];
+};
+MML.charMenuFatigueRecoveryRoll = function charMenuFatigueRecoveryRoll(input) {
+    this.who = input.who;
+    this.message = "Fatigue Recovery Roll.";
+    this.buttons = [MML.menuButtons.rollDice];
+};
 
 MML.menuButtons = {};
 MML.menuButtons.GmMenuMain = {
