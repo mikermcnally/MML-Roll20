@@ -86,6 +86,8 @@ MML.missileAttackAction = function missileAttackAction() {
     }
 };
 
+MML.unarmedAttackAction = function unarmedAttackAction() {};
+
 MML.damageTargetAction = function damageTargetAction(callback) {
     var currentAction = state.MML.GM.currentAction;
     var parameters = currentAction.parameters;
@@ -122,6 +124,16 @@ MML.damageTargetAction = function damageTargetAction(callback) {
         MML[callback]();
     }
 };
+
+MML.observeAction = function observeAction() {
+    var currentAction = state.MML.GM.currentAction;
+    var character = currentAction.character;
+
+};
+
+MML.readyItemAction = function readyItemAction() {};
+
+MML.castSpellAction = function castSpellAction() {};
 
 MML.endAction = function endAction() {
     var currentAction = state.MML.GM.currentAction;
