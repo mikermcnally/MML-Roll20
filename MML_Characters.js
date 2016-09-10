@@ -1815,13 +1815,3 @@ MML.missileDamageRollApply = function missileDamageRollApply(input) {
     state.MML.GM.currentAction.rolls.damageRoll = state.MML.players[this.player].currentRoll.result;
     MML[state.MML.GM.currentAction.callback]();
 };
-
-// Todo: Add sweep attack
-
-MML.unarmedAttack = function unarmedAttack(charName) {};
-
-MML.readyItemAction = function readyItemAction(charName) {};
-
-MML.castSpellAction = function castSpellAction(charName) {};
-
-MML.observeAction = function observeAction(charName) {};

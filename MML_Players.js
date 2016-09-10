@@ -1339,10 +1339,21 @@ MML.menuButtons.setActionReadyItem = {
 };
 MML.menuButtons.setActionObserve = {
     text: "Observe",
-    nextMenu: "charMenuPrepareAction",
+    nextMenu: "f",
     callback: function(input) {
-        state.MML.characters[this.who].action.name = input.text;
-        sendChat("", "Observe");
+        MML.processCommand({
+            type: "character",
+            who: this.who,
+            callback: "setApiCharAttribute",
+            input: {
+                attribute: "action",
+                value: {
+                    name: "Observe",
+                    callback: "startAttackAction",
+                    modifiers: []
+                }
+            }
+        });
         MML.processCommand({
             type: "player",
             who: this.name,
