@@ -207,7 +207,7 @@ MML.alterHP = function alterHP(input) {
             });
             MML.processCommand({
                 type: "player",
-                who: defender.player,
+                who: this.player,
                 callback: "displayMenu",
                 input: {}
             });
@@ -229,7 +229,7 @@ MML.alterHP = function alterHP(input) {
             });
             MML.processCommand({
                 type: "player",
-                who: defender.player,
+                who: this.player,
                 callback: "displayMenu",
                 input: {}
             });
