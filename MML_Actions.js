@@ -63,7 +63,7 @@ MML.missileAttackAction = function missileAttackAction() {
             MML.endAction();
         }
     } else if (_.isUndefined(rolls.hitPositionRoll)) {
-        if (rolls.defenseRoll === "Critical Success"){
+        if (rolls.defenseRoll === "Critical Success") {
             MML.processCommand({
                 type: "character",
                 who: target.name,
@@ -129,6 +129,34 @@ MML.observeAction = function observeAction() {
     var currentAction = state.MML.GM.currentAction;
     var character = currentAction.character;
 
+    MML.processCommand({
+        type: "character",
+        who: character.name,
+        callback: "setApiCharAttributeJSON",
+        input: {
+            attribute: "statusEffects",
+            index: "Observe",
+            value: {
+                id: generateRowID(),
+                name: "Observe",
+                startingRound: state.MML.GM.currentRound
+            }
+        }
+    });
+    MML.processCommand({
+        type: "player",
+        who: character.player,
+        callback: "charMenuObserveAction",
+        input: {
+            who: character.name
+        }
+    });
+    MML.processCommand({
+        type: "player",
+        who: character.player,
+        callback: "displayMenu",
+        input: {}
+    });
 };
 
 MML.readyItemAction = function readyItemAction() {};
@@ -155,7 +183,7 @@ MML.endAction = function endAction() {
             value: spentInitiative
         }
     });
-    if(currentInitiative > 0) {
+    if (currentInitiative > 0) {
         MML.processCommand({
             type: "player",
             who: character.player,

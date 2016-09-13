@@ -818,7 +818,7 @@ MML.charMenuAttackStance = function charMenuAttackStance(input) {
 
 MML.charMenuFinalizeAction = function charMenuFinalizeAction(input) {
     this.who = input.who;
-    log(state.MML.characters[this.who].action.modifiers);
+
     if (state.MML.GM.roundStarted === true) {
         this.message = "Accept or change action for " + this.who;
         this.buttons = [
@@ -1039,6 +1039,11 @@ MML.charMenuRangedDefenseRoll = function charMenuRangedDefenseRoll(input) {
             });
         }
     }];
+};
+MML.charMenuObserveAction = function charMenuObserveAction(input) {
+    this.who = input.who;
+    this.message = this.who + " observes the situation.";
+    this.buttons = [MML.menuButtons.endAction];
 };
 
 MML.menuButtons = {};
@@ -1339,7 +1344,7 @@ MML.menuButtons.setActionReadyItem = {
 };
 MML.menuButtons.setActionObserve = {
     text: "Observe",
-    nextMenu: "f",
+    nextMenu: "charMenuFinalizeAction",
     callback: function(input) {
         MML.processCommand({
             type: "character",
@@ -1349,7 +1354,7 @@ MML.menuButtons.setActionObserve = {
                 attribute: "action",
                 value: {
                     name: "Observe",
-                    callback: "startAttackAction",
+                    callback: "observeAction",
                     modifiers: []
                 }
             }

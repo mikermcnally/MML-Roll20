@@ -319,7 +319,6 @@ MML.dehexify = function dehexify(hexIn) {
     return dehexed;
 };
 
-
 // Rolling Functions
 MML.rollDice = function rollDice(amount, size) {
     var value = 0;

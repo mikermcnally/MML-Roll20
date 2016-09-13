@@ -1,6 +1,6 @@
 /* jshint -W069 */
 MML.startCombat = function startCombat(input) {
-    this.currentRound = 0;
+    this.currentRound = 1;
     this.combatants = input.selectedCharNames;
 
     if (this.combatants.length > 0) {
@@ -71,6 +71,7 @@ MML.startCombat = function startCombat(input) {
 };
 
 MML.newRound = function newRound() {
+    this.currentRound++;
     this.roundStarted = false;
     _.each(this.combatants, function(charName) {
         MML.processCommand({
@@ -94,7 +95,6 @@ MML.newRound = function newRound() {
 
 MML.startRound = function startRound() {
     if (MML.checkReady()) {
-        this.currentRound++;
         this.roundStarted = true;
 
         _.each(this.combatants, function(charName) {

@@ -166,7 +166,7 @@ MML.setCombatVision = function setCombatVision(input) {
     var token = MML.getTokenFromChar(this.name);
     var inCombat = input.inCombat;
 
-    if (inCombat) {
+    if (inCombat || !_.has(this.statusEffects, "Observe")) {
         token.set("light_losangle", this.fov);
         token.set("light_hassight", true);
     } else {
@@ -177,7 +177,6 @@ MML.setCombatVision = function setCombatVision(input) {
 
 // Health and Wounds
 MML.alterHP = function alterHP(input) {
-    log(input.hpAmount);
     var bodyPart = input.bodyPart;
     var hpAmount = parseInt(input.hpAmount);
     var initialHP = this.hp[bodyPart];
@@ -185,6 +184,7 @@ MML.alterHP = function alterHP(input) {
     var maxHP = this.hpMax[bodyPart];
 
     if (hpAmount < 0) { //if damage
+
         var duration;
         this.hp[bodyPart] = currentHP;
 
@@ -194,7 +194,7 @@ MML.alterHP = function alterHP(input) {
             if (initialHP >= Math.round(maxHP / 2) && !_.has(this.statusEffects, "Major Wound, " + bodyPart)) { //Fresh wound
                 duration = Math.round(maxHP / 2) - currentHP;
             } else { //Add damage to duration of effect
-                duration = -hpAmount;
+                duration = parseInt(this.statusEffects["Major Wound, " + bodyPart].duration) - hpAmount;
             }
             state.MML.GM.currentAction.woundDuration = duration;
             MML.processCommand({
@@ -208,7 +208,7 @@ MML.alterHP = function alterHP(input) {
             if (!_.has(this.statusEffects, "Disabling Wound, " + bodyPart)) { //Fresh wound
                 duration = -currentHP;
             } else { //Add damage to duration of effect
-                duration = -hpAmount;
+                duration = parseInt(this.statusEffects["Disabling Wound, " + bodyPart].duration) - hpAmount;
             }
             state.MML.GM.currentAction.woundDuration = duration;
             MML.processCommand({
@@ -246,10 +246,10 @@ MML.setMultiWound = function setMultiWound(input) {
             currentHP["Multiple Wounds"] -= this.hpMax[bodyPart] - currentHP[bodyPart];
         } else {
             currentHP["Multiple Wounds"] -= this.hpMax[bodyPart] - Math.round(this.hpMax[bodyPart] / 2);
+
         }
     }, this);
 
-    log(currentHP);
     MML.processCommand({
         type: "character",
         who: this.name,
@@ -396,6 +396,7 @@ MML.majorWoundRollApply = function majorWoundRollApply() {
         this.statusEffects["Major Wound, " + bodyPart] = {
             id: generateRowID(),
             duration: state.MML.GM.currentAction.woundDuration,
+            startingRound: state.MML.GM.currentRound,
             bodyPart: bodyPart
         };
     }
@@ -467,6 +468,7 @@ MML.disablingWoundRollApply = function disablingWoundRollApply() {
     if (result === "Failure") {
         this.statusEffects["Stunned"] = {
             id: generateRowID(),
+            startingRound: state.MML.GM.currentRound,
             duration: state.MML.GM.currentAction.woundDuration
         };
     }
@@ -563,7 +565,7 @@ MML.knockdownRollApply = function knockdownRollApply(input) {
     } else {
         this.statusEffects["Stumbling"] = {
             id: generateRowID(),
-            duration: 1
+            startingRound: state.MML.GM.currentRound
         };
     }
 
@@ -641,7 +643,7 @@ MML.sensitiveAreaRollApply = function sensitiveAreaRollApply(input) {
     if (result === "Critical Failure" || result === "Failure") {
         this.statusEffects["Sensitive Area"] = {
             id: generateRowID(),
-            duration: 1
+            startingRound: state.MML.GM.currentRound
         };
     }
     MML[state.MML.GM.currentAction.callback]();
@@ -875,7 +877,7 @@ MML.initiativeApply = function initiativeApply() {
 
 MML.startAction = function startAction(input) {
     state.MML.GM.currentAction = {
-        who: this.name
+        character: this
     };
 
     if (!_.isUndefined(this.action.getTargets)) {
@@ -1320,7 +1322,10 @@ MML.meleeDefense = function meleeDefense(defender, attackerWeapon) {
         input: {
             attribute: "statusEffects",
             index: "Melee This Round",
-            value: {}
+            value: {
+                id: generateRowID(),
+                name: "Melee This Round"
+            }
         }
     });
 
@@ -1545,7 +1550,10 @@ MML.rangedDefense = function rangedDefense(defender, attackerWeapon, range) {
         input: {
             attribute: "statusEffects",
             index: "Melee This Round",
-            value: {}
+            value: {
+                id: generateRowID(),
+                name: "Melee This Round"
+            }
         }
     });
 
