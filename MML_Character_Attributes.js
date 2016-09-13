@@ -440,7 +440,7 @@ MML.computeAttribute.hpMax = {
     dependents: ["hp"],
     compute: function() {
         var hpMax = MML.buildHpAttribute(this);
-        this.hp = hpMax;
+        this.hp = MML.buildHpAttribute(this);
         return hpMax;
     }
 };
@@ -954,8 +954,9 @@ MML.computeAttribute.statusEffects = {
             } else {
                 MML.statusEffects[index].apply(this, [effect, index]);
             }
+            log(effect);
             MML.setCurrentAttribute(this.name, "repeating_statuseffects_" + effect.id + "_statusEffectName", index);
-            MML.setCurrentAttribute(this.name, "repeating_statuseffects_" + effect.id + "_statusEffectDescription", effect.description);
+            MML.setCurrentAttribute(this.name, "repeating_statuseffects_" + effect.id + "_statusEffectDescription", (effect.description ? effect.description : ""));
         }, this);
 
         var regex = new RegExp('^repeating_statuseffects_.*?_.*?$');
@@ -1263,6 +1264,8 @@ MML.computeAttribute.action = {
                 initBonus = this.inventory[this.leftHand._id].grips[this.leftHand.grip].initiative;
                 this.action.skill = MML.getWeaponSkill(this, this.inventory[this.leftHand._id]);
             }
+        } else if (this.action.name === "Cast") {
+            this.action.skill = MML.getMagicSkill(this, this.action.spell);
         }
         this.action.initBonus = initBonus;
 

@@ -2,13 +2,17 @@
 MML.statusEffects = {};
 
 MML.statusEffects["Major Wound"] = function(effect, index) {
+    if (!state.MML.GM.inCombat) {
+        this.statusEffects[index].duration = 0;
+        effect.duration = 0;
+    }
     if (this.hp[effect.bodyPart] > Math.round(this.hpMax[effect.bodyPart] / 2)) {
         delete this.statusEffects[index];
     } else {
         if (this.situationalInitBonus !== "No Combat") {
             this.situationalInitBonus += -5;
         }
-        if (effect.duration > 0) {
+        if (state.MML.GM.currentRound - parseInt(effect.startingRound) > effect.duration) {
             this.situationalMod += -10;
         }
         this.statusEffects[index].description = "Situational Modifier: -10%. Initiative: -5";
@@ -90,13 +94,8 @@ MML.statusEffects["Fatigue"] = function(effect, index) {
     this.statusEffects[index].description = "Situational Modifier: -10" + -10 * effect.level + "%. Initiative: " + -5 * effect.level;
 };
 MML.statusEffects["Sensitive Area"] = function(effect, index) {
-    if (state.MML.GM.inCombat === false) {
+    if (state.MML.GM.inCombat === false || state.MML.GM.currentRound - parseInt(effect.startingRound) > 1) {
         delete this.statusEffects[index];
-    } else if (state.MML.GM.roundStarted === false) {
-        effect.duration--;
-        if (effect.duration < 1) {
-            delete this.statusEffects[index];
-        }
     } else {
         if (this.situationalInitBonus !== "No Combat") {
             this.situationalInitBonus += -5;
@@ -106,13 +105,8 @@ MML.statusEffects["Sensitive Area"] = function(effect, index) {
     }
 };
 MML.statusEffects["Stumbling"] = function(effect, index) {
-    if (state.MML.GM.inCombat === false) {
+    if (state.MML.GM.inCombat === false || state.MML.GM.currentRound - parseInt(effect.startingRound) > 1) {
         delete this.statusEffects[index];
-    } else if (state.MML.GM.roundStarted === false) {
-        effect.duration--;
-        if (effect.duration < 1) {
-            delete this.statusEffects[index];
-        }
     } else {
         if (this.situationalInitBonus !== "No Combat") {
             this.situationalInitBonus += -5;
@@ -177,15 +171,16 @@ MML.statusEffects["Defensive Stance"] = function(effect, index) {
     }
 };
 MML.statusEffects["Observe"] = function(effect, index) {
-    if (state.MML.GM.inCombat === false) {
+    if (state.MML.GM.inCombat === false ||
+        state.MML.GM.currentRound - parseInt(effect.startingRound) > 1 ||
+        this.situationalInitBonus === "No Combat" ||
+        _.has(this.statusEffects, "Number of Defenses") ||
+        _.has(this.statusEffects, "Damaged This Round") ||
+        _.has(this.statusEffects, "Melee This Round") ||
+        _.has(this.statusEffects, "Dodged This Round")
+    ) {
         delete this.statusEffects[index];
-    } else if (state.MML.GM.roundStarted === false) {
-        effect.duration--;
-    }
-
-    if (effect.duration < 1 || (this.situationalInitBonus !== "No Combat" && !_.has(this.statusEffects, "Number of Defenses"))) {
-        delete this.statusEffects[index];
-    } else if (effect.duration < 1) {
+    } else if (state.MML.GM.currentRound === parseInt(effect.startingRound)) {
         // Observing this round
         this.perceptionCheckMod += 4;
         this.rangedDefenseMod += -10;
@@ -193,6 +188,7 @@ MML.statusEffects["Observe"] = function(effect, index) {
         this.statusEffects[index].description = "Defense Modifier: -10%. Preception Modifier: +4";
     } else {
         //observed previous round
+        log("here");
         this.situationalInitBonus += 5;
         if (MML.isWieldingRangedWeapon(this)) {
             this.missileAttackMod += 15;
@@ -254,13 +250,8 @@ MML.statusEffects["Melee This Round"] = function(effect, index) {
     }
 };
 MML.statusEffects["Stunned"] = function(effect, index) {
-    if (state.MML.GM.inCombat === false) {
+    if (state.MML.GM.inCombat === false || state.MML.GM.currentRound - parseInt(effect.startingRound) > effect.duration) {
         delete this.statusEffects[index];
-    } else if (state.MML.GM.roundStarted === false) {
-        effect.duration--;
-        if (effect.duration < 1) {
-            delete this.statusEffects[index];
-        }
     } else {
         this.action.name = "Movement Only";
         this.action.callback = "endAction";

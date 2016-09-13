@@ -1073,7 +1073,7 @@ function getBodyParts_humanoid() {
 
     try {
         var result = MML.getBodyParts(character);
-        var expected = ["Head", "Chest", "Abdomin", "Right Arm", "Right Leg", "Left Arm", "Left Leg"];
+        var expected = ["Head", "Chest", "Abdomen", "Right Arm", "Right Leg", "Left Arm", "Left Leg"];
 
         if (_.isEmpty(_.difference(result, expected)) && result.length === expected.length) {
             console.log("getBodyParts_humanoid passed!");
