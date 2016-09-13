@@ -259,3 +259,68 @@ MML.statusEffects["Stunned"] = function(effect, index) {
         this.statusEffects[index].description = "Only movement is allowed the next " + effect.duration + " of the round";
     }
 };
+MML.statusEffects["Grappled"] = function(effect, index) {
+    if (!state.MML.GM.inCombat) {
+        delete this.statusEffects[index];
+    } else {
+        this.situationalMod += -10;
+        this.statusEffects[index].description = "Situational Modifier: -10%.";
+    }
+};
+MML.statusEffects["Held"] = function(effect, index) {
+    if (!state.MML.GM.inCombat) {
+        delete this.statusEffects[index];
+    } else {
+        this.rangedDefenseMod += -20;
+        this.meleeDefenseMod += -20;
+        this.meleeAttackMod += -10;
+        this.statusEffects[index].description = "Attack Modifier: -10%. Defense Modifier: -20";
+    }
+};
+MML.statusEffects["Holding"] = function(effect, index) {
+    if (!state.MML.GM.inCombat) {
+        delete this.statusEffects[index];
+    } else {
+        this.rangedDefenseMod += -20;
+        this.meleeDefenseMod += -20;
+        this.meleeAttackMod += -15;
+        this.statusEffects[index].description = "Attack Modifier: -15%. Defense Modifier: -20%";
+    }
+};
+MML.statusEffects["Pinned"] = function(effect, index) {
+    if (!state.MML.GM.inCombat) {
+        delete this.statusEffects[index];
+    } else {
+        if (this.situationalInitBonus !== "No Combat") {
+            this.situationalInitBonus += -10;
+        }
+        this.situationalMod += -20;
+
+        this.statusEffects[index].description = "Situational Modifier: -20%. Initiative: -10";
+    }
+};
+MML.statusEffects["Taken Down"] = function(effect, index) {
+    if (!state.MML.GM.inCombat) {
+        delete this.statusEffects[index];
+    } else {
+        if (this.situationalInitBonus !== "No Combat") {
+            this.situationalInitBonus += -15;
+        }
+        this.situationalMod += -10;
+
+        this.statusEffects[index].description = "Situational Modifier: -10%. Initiative: -15";
+    }
+};
+MML.statusEffects["Overborne"] = function(effect, index) {
+    if (!state.MML.GM.inCombat) {
+        delete this.statusEffects[index];
+    } else {
+        if (this.situationalInitBonus !== "No Combat") {
+            this.situationalInitBonus += -15;
+        }
+        this.rangedDefenseMod += -40;
+        this.meleeDefenseMod += -30;
+        this.meleeAttackMod += -20;
+        this.statusEffects[index].description = "Attack Modifier: -20%. Defense Modifier: -30%. Dodge Modifier: -40%. Initiative: -15";
+    }
+};
