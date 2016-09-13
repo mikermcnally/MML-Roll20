@@ -230,7 +230,7 @@ MML.buildHpAttribute = function buildHpAttribute(character) {
             hpAttribute = {
                 "Multiple Wounds": Math.round((character.health + character.stature + character.willpower) / 2),
                 "Head": MML.HPTables[character.race][Math.round(character.health + character.stature / 3)],
-                "Chest": MML.HPTables[character.race][Math.round((character.health + character.stature + character.strength) / 2)],
+                "Chest": MML.HPTables[character.race][Math.round(character.health + character.stature + character.strength)],
                 "Abdomen": MML.HPTables[character.race][Math.round(character.health + character.stature)],
                 "Left Arm": MML.HPTables[character.race][Math.round(character.health + character.stature)],
                 "Right Arm": MML.HPTables[character.race][Math.round(character.health + character.stature)],
