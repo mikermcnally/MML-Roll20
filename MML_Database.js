@@ -3116,3 +3116,18 @@ MML.meleeDamageMods = [
 	{low: 106, high: 120, value: 4},
 	{low: 121, high: 999, value: 5},
 ];
+
+MML.unarmedAttacks = {};
+MML.unarmedAttacks["Grapple"] = {attackTask: 35, defenseTask: 35, damage: "None", damageType: "None"};
+MML.unarmedAttacks["Place a Hold, Head, Arm, Leg"] = {attackTask: 0, defenseTask: 15, damage: "None", damageType: "None"};
+MML.unarmedAttacks["Place a Hold, Chest, Abdomen"] = {attackTask: 15, defenseTask: 25, damage: "None", damageType: "None"};
+MML.unarmedAttacks["Break a Hold"] = {attackTask: 0, defenseTask: 0, damage: "None", damageType: "None"};
+MML.unarmedAttacks["Punch"] = {attackTask: 25, defenseTask: 15, damage: "1d4", damageType: "Impact"};
+MML.unarmedAttacks["Punch, Padded"] = {attackTask: 25, defenseTask: 15, damage: "1d2", damageType: "Impact"};
+MML.unarmedAttacks["Punch, Mail, Studs"] = {attackTask: 25, defenseTask: 15, damage: "1d6", damageType: "Impact"};
+MML.unarmedAttacks["Punch, Plate"] = {attackTask: 25, defenseTask: 15, damage: "1d6", damageType: "Impact"};
+MML.unarmedAttacks["Kick"] = {attackTask: 15, defenseTask: 15, damage: "1d4", damageType: "Impact"};
+MML.unarmedAttacks["Kick, Heavy Boots"] = {attackTask: 15, defenseTask: 15, damage: "1d6", damageType: "Impact"};
+MML.unarmedAttacks["Kick, Plate"] = {attackTask: 15, defenseTask: 15, damage: "1d8", damageType: "Impact"};
+MML.unarmedAttacks["Head Butt"] = {attackTask: 25, defenseTask: 0, damage: "1d6", damageType: "Impact"};
+MML.unarmedAttacks["Bite"] = {attackTask: 25, defenseTask: 15, damage: "1d3", damageType: "Thrust"};

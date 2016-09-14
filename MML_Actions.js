@@ -100,7 +100,7 @@ MML.unarmedAttackAction = function unarmedAttackAction() {
     } else if (_.isUndefined(rolls.defenseRoll)) {
         if (rolls.attackRoll === "Critical Success" || rolls.attackRoll === "Success") {
             if (attackType.name === "Grapple" || attackType.name === "Place a Hold") {
-                MML.grappleDefenseWeaponOrBrawl(target);
+                MML.grappleDefense(target);
             } else {
                 MML.brawlDefense(target, attackType);
             }

@@ -661,20 +661,25 @@ MML.charMenuPrepareAction = function charMenuPrepareAction(input) {
 MML.charMenuAttack = function charMenuAttack(input) {
     this.who = input.who;
     this.message = "Attack Menu";
-    var buttons = [{
-        text: "Standard",
-        nextMenu: "charMenuAttackCalledShot",
-        callback: function(input) {
-            MML.processCommand({
-                type: "player",
-                who: this.name,
-                callback: "displayMenu",
-                input: {}
-            });
-        }
-    }];
+    var buttons = [];
+    var character = state.MML.characters[this.who];
 
-    if (MML.isWieldingRangedWeapon(state.MML.characters[this.who])) {
+    if (!MML.isUnarmed(character)) {
+        buttons.push({
+            text: "Standard",
+            nextMenu: "charMenuAttackCalledShot",
+            callback: function(input) {
+                MML.processCommand({
+                    type: "player",
+                    who: this.name,
+                    callback: "displayMenu",
+                    input: {}
+                });
+            }
+        });
+    }
+
+    if (MML.isWieldingRangedWeapon(character)) {
         buttons.push({
             text: "Shoot From Cover",
             nextMenu: "charMenuAttackCalledShot",
@@ -701,12 +706,126 @@ MML.charMenuAttack = function charMenuAttack(input) {
                 });
             }
         });
-    } else { //Melee
+    } else if (!MML.isUnarmed(character)) { //Melee
         buttons.push({
             text: "Sweep Attack",
             nextMenu: "charMenuAttackCalledShot",
             callback: function(input) {
                 state.MML.characters[this.who].action.modifiers.push("Sweep Attack");
+                MML.processCommand({
+                    type: "player",
+                    who: this.name,
+                    callback: "displayMenu",
+                    input: {}
+                });
+            }
+        });
+    }
+    buttons.push({
+        text: "Punch",
+        nextMenu: "charMenuAttackCalledShot",
+        callback: function(input) {
+            state.MML.characters[this.who].action.modifiers.push("Punch");
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "displayMenu",
+                input: {}
+            });
+        }
+    });
+    buttons.push({
+        text: "Kick",
+        nextMenu: "charMenuAttackCalledShot",
+        callback: function(input) {
+            state.MML.characters[this.who].action.modifiers.push("Punch");
+            MML.processCommand({
+                type: "player",
+                who: this.name,
+                callback: "displayMenu",
+                input: {}
+            });
+        }
+    });
+    if (!_.has(this.statusEffects, "Grappled")) {
+        buttons.push({
+            text: "Grapple",
+            nextMenu: "charMenuAttackStance",
+            callback: function(input) {
+                state.MML.characters[this.who].action.modifiers.push("Grapple");
+                MML.processCommand({
+                    type: "player",
+                    who: this.name,
+                    callback: "displayMenu",
+                    input: {}
+                });
+            }
+        });
+    }
+    if (!_.has(this.statusEffects, "Holding")) {
+        buttons.push({
+            text: "Place a Hold",
+            nextMenu: "charMenuAttackStance",
+            callback: function(input) {
+                state.MML.characters[this.who].action.modifiers.push("Place a Hold");
+                MML.processCommand({
+                    type: "player",
+                    who: this.name,
+                    callback: "displayMenu",
+                    input: {}
+                });
+            }
+        });
+    }
+    if (_.has(this.statusEffects, "Held") || _.has(this.statusEffects, "Grappled")) {
+        buttons.push({
+            text: "Break a Hold",
+            nextMenu: "charMenuAttackStance",
+            callback: function(input) {
+                state.MML.characters[this.who].action.modifiers.push("Break a Hold");
+                MML.processCommand({
+                    type: "player",
+                    who: this.name,
+                    callback: "displayMenu",
+                    input: {}
+                });
+            }
+        });
+    }
+    if (_.has(this.statusEffects, "Holding") || _.has(this.statusEffects, "Grappling")) {
+        buttons.push({
+            text: "Re a Hold",
+            nextMenu: "charMenuAttackStance",
+            callback: function(input) {
+                state.MML.characters[this.who].action.modifiers.push("Break a Hold");
+                MML.processCommand({
+                    type: "player",
+                    who: this.name,
+                    callback: "displayMenu",
+                    input: {}
+                });
+            }
+        });
+    }
+    if
+        buttons.push({
+            text: "Head Butt",
+            nextMenu: "charMenuAttackCalledShot",
+            callback: function(input) {
+                state.MML.characters[this.who].action.modifiers.push("Head Butt");
+                MML.processCommand({
+                    type: "player",
+                    who: this.name,
+                    callback: "displayMenu",
+                    input: {}
+                });
+            }
+        });
+        buttons.push({
+            text: "Bite",
+            nextMenu: "charMenuAttackCalledShot",
+            callback: function(input) {
+                state.MML.characters[this.who].action.modifiers.push("Bite");
                 MML.processCommand({
                     type: "player",
                     who: this.name,
@@ -803,7 +922,7 @@ MML.charMenuAttackStance = function charMenuAttackStance(input) {
         }
     }];
 
-    if (MML.getMeleeWeapon(state.MML.characters[this.who]).secondaryType !== "") {
+    if (!MML.isUnarmed(state.MML.characters[this.who]) && MML.getMeleeWeapon(state.MML.characters[this.who]).secondaryType !== "") {
         _.each(buttons, function(button) {
             button.nextMenu = "charMenuSelectDamageType";
         });
