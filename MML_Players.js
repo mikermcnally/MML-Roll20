@@ -738,7 +738,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
         text: "Kick",
         nextMenu: "charMenuAttackCalledShot",
         callback: function(input) {
-            state.MML.characters[this.who].action.modifiers.push("Punch");
+            state.MML.characters[this.who].action.modifiers.push("Kick");
             MML.processCommand({
                 type: "player",
                 who: this.name,
@@ -794,10 +794,10 @@ MML.charMenuAttack = function charMenuAttack(input) {
     }
     if (_.has(this.statusEffects, "Holding") || _.has(this.statusEffects, "Grappling")) {
         buttons.push({
-            text: "Re a Hold",
+            text: "Release a Hold",
             nextMenu: "charMenuAttackStance",
             callback: function(input) {
-                state.MML.characters[this.who].action.modifiers.push("Break a Hold");
+                state.MML.characters[this.who].action.modifiers.push("Release a Hold");
                 MML.processCommand({
                     type: "player",
                     who: this.name,
@@ -807,7 +807,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
             }
         });
     }
-    if
+    if (_.has(this.statusEffects, "Held") || _.has(this.statusEffects, "Grappled") || _.has(this.statusEffects, "Holding") || _.has(this.statusEffects, "Grappling")) {
         buttons.push({
             text: "Head Butt",
             nextMenu: "charMenuAttackCalledShot",
@@ -835,6 +835,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
             }
         });
     }
+
     this.buttons = buttons;
 };
 MML.charMenuAttackCalledShot = function charMenuCalledShot(input) {
@@ -1143,6 +1144,51 @@ MML.charMenuRangedDefenseRoll = function charMenuRangedDefenseRoll(input) {
                 callback: "rangedDefenseRoll",
                 input: {
                     defenseChance: defenseChance
+                }
+            });
+        }
+    }, {
+        text: "Take it",
+        nextMenu: "menuIdle",
+        callback: function(input) {
+            MML.processCommand({
+                type: "character",
+                who: this.who,
+                callback: "forgoDefense",
+                input: {}
+            });
+        }
+    }];
+};
+MML.charMenuGrappleDefenseRoll = function charMenuGrappleDefenseRoll(input) {
+    var brawlChance = input.brawlChance;
+    var weaponChance = input.weaponChance;
+
+    this.who = input.who;
+    this.message = "How will " + this.who + " defend?";
+    this.buttons = [{
+        text: "With Weapon: " + weaponChance + "%",
+        nextMenu: "menuIdle",
+        callback: function(input) {
+            MML.processCommand({
+                type: "character",
+                who: this.who,
+                callback: "meleeAttackRoll",
+                input: {
+                    weaponChance: weaponChance
+                }
+            });
+        }
+    }, {
+        text: "Brawl: " + brawlChance + "%",
+        nextMenu: "menuIdle",
+        callback: function(input) {
+            MML.processCommand({
+                type: "character",
+                who: this.who,
+                callback: "brawlRoll",
+                input: {
+                    brawlChance: brawlChance
                 }
             });
         }

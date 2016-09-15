@@ -124,9 +124,9 @@ MML.unarmedAttackAction = function unarmedAttackAction() {
         }
     } else if (_.isUndefined(rolls.damageRoll)) {
         if (rolls.attackRoll === "Critical Success") {
-            MML.meleeDamageRoll(character, attackType, true);
+            MML.meleeDamageRoll(character, attackType, true, bonusDamage);
         } else {
-            MML.meleeDamageRoll(character, attackType, false);
+            MML.meleeDamageRoll(character, attackType, false, bonusDamage);
         }
     } else {
         MML.damageTargetAction("endAction");
