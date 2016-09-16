@@ -133,6 +133,53 @@ MML.unarmedAttackAction = function unarmedAttackAction() {
     }
 };
 
+MML.grappleAttackAction = function grappleAttackAction() {
+    var currentAction = state.MML.GM.currentAction;
+    var character = currentAction.character;
+    var parameters = currentAction.parameters;
+    var attackerSkill = parameters.attackerSkill;
+    var attackType = parameters.attackType;
+    var target = parameters.target;
+    var rolls = currentAction.rolls;
+
+    if (_.isUndefined(rolls.attackRoll)) {
+        MML.meleeAttackRoll("attackRoll", character, attackType.task, attackerSkill);
+    } else if (_.isUndefined(rolls.defenseRoll)) {
+        if (rolls.attackRoll === "Critical Success" || rolls.attackRoll === "Success") {
+            if (attackType.name === "Grapple" || attackType.name === "Place a Hold") {
+                MML.grappleDefense(target);
+            } else {
+                MML.brawlDefense(target, attackType);
+            }
+        } else if (rolls.attackRoll === "Critical Failure") {
+            MML.endAction();
+        } else {
+            MML.endAction();
+        }
+    } else if (_.isUndefined(rolls.hitPositionRoll)) {
+        if (rolls.defenseRoll === "Critical Success") {
+            MML.processCommand({
+                type: "character",
+                who: target.name,
+                callback: "criticalDefense",
+                input: {}
+            });
+        } else if (rolls.defenseRoll === "Success") {
+            MML.endAction();
+        } else {
+            MML.hitPositionRoll(character);
+        }
+    } else if (_.isUndefined(rolls.damageRoll)) {
+        if (rolls.attackRoll === "Critical Success") {
+            MML.meleeDamageRoll(character, attackType, true, bonusDamage);
+        } else {
+            MML.meleeDamageRoll(character, attackType, false, bonusDamage);
+        }
+    } else {
+        MML.damageTargetAction("endAction");
+    }
+};
+
 MML.damageTargetAction = function damageTargetAction(callback) {
     var currentAction = state.MML.GM.currentAction;
     var parameters = currentAction.parameters;
