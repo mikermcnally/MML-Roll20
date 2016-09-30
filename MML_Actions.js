@@ -99,11 +99,7 @@ MML.unarmedAttackAction = function unarmedAttackAction() {
         MML.meleeAttackRoll("attackRoll", character, attackType.task, attackerSkill);
     } else if (_.isUndefined(rolls.defenseRoll)) {
         if (rolls.attackRoll === "Critical Success" || rolls.attackRoll === "Success") {
-            if (attackType.name === "Grapple" || attackType.name === "Place a Hold") {
-                MML.grappleDefense(target);
-            } else {
-                MML.brawlDefense(target, attackType);
-            }
+            MML.meleeDefense(target, attackerWeapon);
         } else if (rolls.attackRoll === "Critical Failure") {
             MML.endAction();
         } else {
