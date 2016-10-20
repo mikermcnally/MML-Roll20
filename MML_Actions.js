@@ -94,12 +94,13 @@ MML.unarmedAttackAction = function unarmedAttackAction() {
     var attackType = parameters.attackType;
     var target = parameters.target;
     var rolls = currentAction.rolls;
+    var bonusDamage = parameters.bonusDamage || [];
 
     if (_.isUndefined(rolls.attackRoll)) {
         MML.meleeAttackRoll("attackRoll", character, attackType.task, attackerSkill);
     } else if (_.isUndefined(rolls.defenseRoll)) {
         if (rolls.attackRoll === "Critical Success" || rolls.attackRoll === "Success") {
-            MML.meleeDefense(target, attackerWeapon);
+            MML.meleeDefense(target, attackType);
         } else if (rolls.attackRoll === "Critical Failure") {
             MML.endAction();
         } else {

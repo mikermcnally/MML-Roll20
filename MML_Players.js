@@ -725,7 +725,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
         text: "Punch",
         nextMenu: "charMenuAttackCalledShot",
         callback: function(input) {
-            state.MML.characters[this.who].action.modifiers.push("Punch");
+            state.MML.characters[this.who].action.weaponType = "Punch";
             MML.processCommand({
                 type: "player",
                 who: this.name,
@@ -738,7 +738,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
         text: "Kick",
         nextMenu: "charMenuAttackCalledShot",
         callback: function(input) {
-            state.MML.characters[this.who].action.modifiers.push("Kick");
+            state.MML.characters[this.who].action.weaponType = "Kick";
             MML.processCommand({
                 type: "player",
                 who: this.name,
@@ -752,7 +752,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
             text: "Grapple",
             nextMenu: "charMenuAttackStance",
             callback: function(input) {
-                state.MML.characters[this.who].action.modifiers.push("Grapple");
+                state.MML.characters[this.who].action.weaponType = "Grapple";
                 MML.processCommand({
                     type: "player",
                     who: this.name,
@@ -767,7 +767,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
             text: "Place a Hold",
             nextMenu: "charMenuAttackStance",
             callback: function(input) {
-                state.MML.characters[this.who].action.modifiers.push("Place a Hold");
+                state.MML.characters[this.who].action.weaponType = "Place a Hold";
                 MML.processCommand({
                     type: "player",
                     who: this.name,
@@ -782,7 +782,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
             text: "Break a Hold",
             nextMenu: "charMenuAttackStance",
             callback: function(input) {
-                state.MML.characters[this.who].action.modifiers.push("Break a Hold");
+                state.MML.characters[this.who].action.weaponType = "Break a Hold";
                 MML.processCommand({
                     type: "player",
                     who: this.name,
@@ -797,7 +797,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
             text: "Release a Hold",
             nextMenu: "charMenuAttackStance",
             callback: function(input) {
-                state.MML.characters[this.who].action.modifiers.push("Release a Hold");
+                state.MML.characters[this.who].action.weaponType = "Release a Hold";
                 MML.processCommand({
                     type: "player",
                     who: this.name,
@@ -812,7 +812,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
             text: "Head Butt",
             nextMenu: "charMenuAttackCalledShot",
             callback: function(input) {
-                state.MML.characters[this.who].action.modifiers.push("Head Butt");
+                state.MML.characters[this.who].action.weaponType = "Head Butt";
                 MML.processCommand({
                     type: "player",
                     who: this.name,
@@ -825,7 +825,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
             text: "Bite",
             nextMenu: "charMenuAttackCalledShot",
             callback: function(input) {
-                state.MML.characters[this.who].action.modifiers.push("Bite");
+                state.MML.characters[this.who].action.weaponType = "Bite";
                 MML.processCommand({
                     type: "player",
                     who: this.name,
@@ -889,6 +889,7 @@ MML.charMenuAttackCalledShot = function charMenuCalledShot(input) {
 MML.charMenuAttackStance = function charMenuAttackStance(input) {
     this.who = input.who;
     this.message = "Attack Stance Menu";
+    var character = state.MML.characters[this.who];
     var buttons = [{
         text: "Neutral",
         callback: function(input) {
@@ -923,7 +924,11 @@ MML.charMenuAttackStance = function charMenuAttackStance(input) {
         }
     }];
 
-    if (!MML.isUnarmed(state.MML.characters[this.who]) && MML.getMeleeWeapon(state.MML.characters[this.who]).secondaryType !== "") {
+    if (["Punch", "Kick", "Head Butt", "Bite", "Grapple", "Place a Hold", "Break a Hold", "Release a Hold"].indexOf(character.action.weaponType) > -1) {
+        _.each(buttons, function(button) {
+            button.nextMenu = "charMenuFinalizeAction";
+        });
+    } else if (!MML.isUnarmed(character) && MML.getMeleeWeapon(character).secondaryType !== "") {
         _.each(buttons, function(button) {
             button.nextMenu = "charMenuSelectDamageType";
         });

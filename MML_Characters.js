@@ -759,7 +759,7 @@ MML.armorDamageReduction = function armorDamageReduction(character, position, da
 
 MML.initiativeRoll = function initiativeRoll(input) {
   var rollValue = MML.rollDice(1, 10);
-
+  log(this.action);
   MML.processCommand({
     type: "character",
     who: this.name,
@@ -954,14 +954,14 @@ MML.processAttack = function processAttack(input) {
     id: generateRowID()
   };
 
-  if (_.intersection(this.action.modifiers, ["Punch", "Kick", "Head Butt", "Bite"]).length > 0) {
+  if (["Punch", "Kick", "Head Butt", "Bite"].indexOf(this.action.weaponType) > -1) {
     MML.processCommand({
       type: "character",
       who: this.name,
       callback: "unarmedAttack",
       input: {}
     });
-  } else if (_.intersection(this.action.modifiers, ["Grapple", "Place a Hold", "Break a Hold", "Release a Hold"]).length > 0) {
+  } else if (["Grapple", "Place a Hold", "Break a Hold", "Release a Hold"].indexOf(this.action.weaponType) > -1) {
     MML.processCommand({
       type: "character",
       who: this.name,
@@ -1145,12 +1145,28 @@ MML.missileAttackRoll = function missleAttackRoll(rollName, character, task, ski
 };
 
 MML.unarmedAttack = function unarmedAttack() {
+    switch (this.action.weaponType) {
+      case "Punch":
+        attackType = MML.unarmedAttacks["Punch"];
+        break;
+      case "Kick":
+        attackType = MML.unarmedAttacks["Kick"];
+        break;
+      case "Head Butt":
+        attackType = MML.unarmedAttacks["Head Butt"];
+        break;
+      case "Bite":
+        attackType = MML.unarmedAttacks["Bite"];
+        break;
+      default:
+
+    }
     var currentAction = {
       character: this,
-      callback: "meleeAttackAction",
+      callback: "unarmedAttackAction",
       parameters: {
-        attackerWeapon: attackerWeapon,
-        attackerSkill: MML.getWeaponSkill(this, item),
+        attackType: attackType,
+        attackerSkill:this.action.skill,
         target: state.MML.characters[state.MML.GM.currentAction.targetArray[0]]
       },
       rolls: {}
@@ -1397,8 +1413,11 @@ MML.meleeDefense = function meleeDefense(defender, attackerWeapon) {
   }
 
   if (attackerWeapon.family === "Flexible") {
-    dodgeChance -= 10;
-    blockChance -= 10;
+    dodgeChance += -10;
+    blockChance += -10;
+  } else if (attackerWeapon.family === "Unarmed") {
+    dodgeChance += attackerWeapon.defenseMod;
+    blockChance += attackerWeapon.defenseMod;
   }
 
   MML.processCommand({
