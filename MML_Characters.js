@@ -1176,8 +1176,35 @@ MML.unarmedAttack = function unarmedAttack() {
 };
 
 MML.grappleAttack = function grappleAttack() {
-    state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, currentAction);
-    MML[currentAction.callback]();
+  switch (this.action.weaponType) {
+    case "Grapple":
+      attackType = MML.unarmedAttacks["Grapple"];
+      break;
+    case "Place a Hold":
+      if (["Chest", "Abdomen"].indexOf(state.MML.GM.currentAction.calledShot)) {
+        attackType = MML.unarmedAttacks["Place a Hold, Chest, Abdomen"];
+      } else {
+        attackType = MML.unarmedAttacks["Place a Hold, Head, Arm, Leg"];
+      }
+      break;
+    case "Break a Hold":
+      attackType = MML.unarmedAttacks["Break a Hold"];
+      break;
+    default:
+
+  }
+  var currentAction = {
+    character: this,
+    callback: "grappleAttackAction",
+    parameters: {
+      attackType: attackType,
+      attackerSkill:this.action.skill,
+      target: state.MML.characters[state.MML.GM.currentAction.targetArray[0]]
+    },
+    rolls: {}
+  };
+  state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, currentAction);
+  MML[currentAction.callback]();
 };
 
 MML.attackRollResult = function attackRollResult(input) {
@@ -1372,10 +1399,10 @@ MML.meleeDefense = function meleeDefense(defender, attackerWeapon) {
     }
   });
 
-  if (_.isUndefined(defender.skills["Dodge"])) {
+  if (_.isUndefined(defender.weaponSkills["Dodge"])) {
     dodgeSkill = 0;
   } else {
-    dodgeSkill = defender.skills["Dodge"].level;
+    dodgeSkill = defender.weaponSkills["Dodge"].level;
   }
 
   if (dodgeSkill >= defaultMartialSkill) {
@@ -1735,6 +1762,76 @@ MML.rangedDefenseRollApply = function missileBlockRollApply(input) {
 
   state.MML.GM.currentAction.rolls.defenseRoll = result;
   MML[state.MML.GM.currentAction.callback]();
+};
+
+MML.grappleDefense = function grappleDefense(defender, attackerWeapon) {
+  var itemId;
+  var grip;
+  var defenderWeapon;
+  var brawlChance;
+  var weaponChance;
+  var brawlSkill;
+  var blockSkill;
+  var defaultMartialSkill = defender.weaponSkills["Default Martial"].level;
+  var shieldMod = MML.getShieldDefenseBonus(defender);
+  var defenseMod = defender.meleeDefenseMod + defender.attributeDefenseMod;
+  var sitMod = defender.situationalMod;
+
+  MML.processCommand({
+    type: "character",
+    who: defender.name,
+    callback: "setApiCharAttributeJSON",
+    input: {
+      attribute: "statusEffects",
+      index: "Melee This Round",
+      value: {
+        id: generateRowID(),
+        name: "Melee This Round"
+      }
+    }
+  });
+
+  if (_.isUndefined(defender.weaponSkills["Brawling"])) {
+    brawlSkill = 0;
+  } else {
+    brawlSkill = defender.weaponSkills["Brawling"].level;
+  }
+
+  if (brawlSkill >= defaultMartialSkill) {
+    brawlChance = defender.weaponSkills["Brawling"].level + defenseMod + sitMod;
+  } else {
+    brawlChance = defaultMartialSkill + defenseMod + sitMod;
+  }
+
+  if (MML.isUnarmed(defender)) {
+    MML.processCommand({
+      type: "player",
+      who: defender.player,
+      callback: "charMenuGrappleDefenseRoll",
+      input: {
+        who: defender.name,
+        brawlChance: brawlChance,
+        attackChance: attackChance
+      }
+    });
+    MML.processCommand({
+      type: "player",
+      who: defender.player,
+      callback: "displayMenu",
+      input: {}
+    });
+  } else {
+    MML.processCommand({
+      type: "player",
+      who: defender.player,
+      callback: "grappleDefenseRoll",
+      input: {
+        who: defender.name,
+        dodgeChance: dodgeChance,
+        blockChance: blockChance
+      }
+    });
+  }
 };
 
 MML.criticalDefense = function criticalDefense() {
