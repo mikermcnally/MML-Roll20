@@ -1764,17 +1764,13 @@ MML.rangedDefenseRollApply = function missileBlockRollApply(input) {
   MML[state.MML.GM.currentAction.callback]();
 };
 
-MML.grappleDefense = function grappleDefense(defender, attackerWeapon) {
-  var itemId;
-  var grip;
+MML.grappleDefense = function grappleDefense(defender, attackType) {
   var defenderWeapon;
   var brawlChance;
   var weaponChance;
   var brawlSkill;
-  var blockSkill;
   var defaultMartialSkill = defender.weaponSkills["Default Martial"].level;
-  var shieldMod = MML.getShieldDefenseBonus(defender);
-  var defenseMod = defender.meleeDefenseMod + defender.attributeDefenseMod;
+  var defenseMod = defender.meleeDefenseMod + defender.attributeDefenseMod + MML.unarmedAttacks[attackType].defenseMod;
   var sitMod = defender.situationalMod;
 
   MML.processCommand({
@@ -1807,6 +1803,16 @@ MML.grappleDefense = function grappleDefense(defender, attackerWeapon) {
     MML.processCommand({
       type: "player",
       who: defender.player,
+      callback: "grappleDefenseRoll",
+      input: {
+        who: defender.name,
+        brawlChance: brawlChance
+      }
+    });
+  } else {
+    MML.processCommand({
+      type: "player",
+      who: defender.player,
       callback: "charMenuGrappleDefenseRoll",
       input: {
         who: defender.name,
@@ -1814,24 +1820,13 @@ MML.grappleDefense = function grappleDefense(defender, attackerWeapon) {
         attackChance: attackChance
       }
     });
-    MML.processCommand({
-      type: "player",
-      who: defender.player,
-      callback: "displayMenu",
-      input: {}
-    });
-  } else {
-    MML.processCommand({
-      type: "player",
-      who: defender.player,
-      callback: "grappleDefenseRoll",
-      input: {
-        who: defender.name,
-        dodgeChance: dodgeChance,
-        blockChance: blockChance
-      }
-    });
   }
+  MML.processCommand({
+    type: "player",
+    who: defender.player,
+    callback: "displayMenu",
+    input: {}
+  });
 };
 
 MML.criticalDefense = function criticalDefense() {
