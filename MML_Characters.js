@@ -1829,6 +1829,63 @@ MML.grappleDefense = function grappleDefense(defender, attackType) {
   });
 };
 
+MML.grappleDefenseWeaponRoll = function meleeAttackRoll(rollName, character, task, skill) {
+  MML.processCommand({
+    type: "character",
+    who: character.name,
+    callback: "universalRoll",
+    input: {
+      name: rollName,
+      callback: "grappleDefenseWeaponRollResult",
+      mods: [task, skill, character.situationalMod, character.meleeAttackMod, character.attributeMeleeAttackMod]
+    }
+  });
+};
+
+MML.grappleDefenseWeaponRollResult = function grappleDefenseWeaponRollResult(input) {
+  var currentRoll = state.MML.players[this.player].currentRoll;
+
+  if (this.player === state.MML.GM.player) {
+    if (currentRoll.accepted === false) {
+      MML.processCommand({
+        type: "player",
+        who: this.player,
+        callback: "displayGmRoll",
+        input: {
+          currentRoll: currentRoll
+        }
+      });
+    } else {
+      MML.processCommand({
+        type: "character",
+        who: this.name,
+        callback: "grappleDefenseWeaponRollApply",
+        input: {}
+      });
+    }
+  } else {
+    MML.processCommand({
+      type: "player",
+      who: this.player,
+      callback: "displayPlayerRoll",
+      input: {
+        currentRoll: currentRoll
+      }
+    });
+    MML.processCommand({
+      type: "character",
+      who: this.name,
+      callback: "grappleDefenseWeaponRollApply",
+      input: {}
+    });
+  }
+};
+
+MML.grappleDefenseWeaponRollApply = function attackRollApply(input) {
+  state.MML.GM.currentAction.rolls.defenseRoll = state.MML.players[this.player].currentRoll.result;
+  MML[state.MML.GM.currentAction.callback]();
+};
+
 MML.criticalDefense = function criticalDefense() {
   MML.endAction();
 };
