@@ -1146,7 +1146,7 @@ MML.missileAttackRoll = function missleAttackRoll(rollName, character, task, ski
 };
 
 MML.unarmedAttack = function unarmedAttack() {
-  var attackType;
+    var attackType;
     switch (this.action.weaponType) {
         case "Punch":
             attackType = MML.unarmedAttacks["Punch"];
@@ -1177,22 +1177,24 @@ MML.unarmedAttack = function unarmedAttack() {
 };
 
 MML.grappleAttack = function grappleAttack() {
-  var attackType;
-  switch (this.action.weaponType) {
-      case "Grapple":
-          attackType = MML.unarmedAttacks["Grapple"];
-          break;
-      case "Place a Hold, Head, Arm, Leg":
-          attackType = MML.unarmedAttacks["Place a Hold, Head, Arm, Leg"];
-          break;
-      case "Place a Hold, Chest, Abdomen":
-          attackType = MML.unarmedAttacks["Place a Hold, Chest, Abdomen"];
-          break;
-      case "Break a Hold":
-          attackType = MML.unarmedAttacks["Break a Hold"];
-          break;
-      default:
-  }
+    var attackType;
+    switch (this.action.weaponType) {
+        case "Grapple":
+            attackType = MML.unarmedAttacks["Grapple"];
+            break;
+        case "Place a Hold":
+            if (["Chest", "Abdomen"].indexOf(state.MML.GM.currentAction.calledShot)) {
+                attackType = MML.unarmedAttacks["Place a Hold, Chest, Abdomen"];
+            } else {
+                attackType = MML.unarmedAttacks["Place a Hold, Head, Arm, Leg"];
+            }
+            break;
+        case "Break a Hold":
+            attackType = MML.unarmedAttacks["Break a Hold"];
+            break;
+        default:
+
+    }
     var currentAction = {
         character: this,
         callback: "grappleAttackAction",
@@ -1405,8 +1407,8 @@ MML.meleeDefense = function meleeDefense(defender, attackerWeapon) {
         dodgeSkill = defender.skills["Dodge"].level;
     }
 
-    if (dodgeSkill >= defaultMartialSkill) {
-        dodgeChance = defender.weaponSkills["Dodge"].level + defenseMod + sitMod;
+    if (_.isUndefined(defender.weaponSkills["Dodge"])) {
+        dodgeSkill = defender.weaponSkills["Dodge"].level;
     } else {
         dodgeChance = defaultMartialSkill + defenseMod + sitMod;
     }
@@ -1761,6 +1763,128 @@ MML.rangedDefenseRollApply = function missileBlockRollApply(input) {
     }
 
     state.MML.GM.currentAction.rolls.defenseRoll = result;
+    MML[state.MML.GM.currentAction.callback]();
+};
+
+MML.grappleDefense = function grappleDefense(defender, attackType) {
+    var defenderWeapon;
+    var brawlChance;
+    var weaponChance;
+    var brawlSkill;
+    var defaultMartialSkill = defender.weaponSkills["Default Martial"].level;
+    var defenseMod = defender.meleeDefenseMod + defender.attributeDefenseMod + MML.unarmedAttacks[attackType].defenseMod;
+    var sitMod = defender.situationalMod;
+
+    MML.processCommand({
+        type: "character",
+        who: defender.name,
+        callback: "setApiCharAttributeJSON",
+        input: {
+            attribute: "statusEffects",
+            index: "Melee This Round",
+            value: {
+                id: generateRowID(),
+                name: "Melee This Round"
+            }
+        }
+    });
+
+    if (_.isUndefined(defender.weaponSkills["Brawling"])) {
+        brawlSkill = 0;
+    } else {
+        brawlSkill = defender.weaponSkills["Brawling"].level;
+    }
+
+    if (brawlSkill >= defaultMartialSkill) {
+        brawlChance = defender.weaponSkills["Brawling"].level + defenseMod + sitMod;
+    } else {
+        brawlChance = defaultMartialSkill + defenseMod + sitMod;
+    }
+
+    if (MML.isUnarmed(defender)) {
+        MML.processCommand({
+            type: "player",
+            who: defender.player,
+            callback: "grappleDefenseRoll",
+            input: {
+                who: defender.name,
+                brawlChance: brawlChance
+            }
+        });
+    } else {
+        MML.processCommand({
+            type: "player",
+            who: defender.player,
+            callback: "charMenuGrappleDefenseRoll",
+            input: {
+                who: defender.name,
+                brawlChance: brawlChance,
+                attackChance: attackChance
+            }
+        });
+    }
+    MML.processCommand({
+        type: "player",
+        who: defender.player,
+        callback: "displayMenu",
+        input: {}
+    });
+};
+
+MML.grappleDefenseWeaponRoll = function meleeAttackRoll(rollName, character, task, skill) {
+    MML.processCommand({
+        type: "character",
+        who: character.name,
+        callback: "universalRoll",
+        input: {
+            name: rollName,
+            callback: "grappleDefenseWeaponRollResult",
+            mods: [task, skill, character.situationalMod, character.meleeAttackMod, character.attributeMeleeAttackMod]
+        }
+    });
+};
+
+MML.grappleDefenseWeaponRollResult = function grappleDefenseWeaponRollResult(input) {
+    var currentRoll = state.MML.players[this.player].currentRoll;
+
+    if (this.player === state.MML.GM.player) {
+        if (currentRoll.accepted === false) {
+            MML.processCommand({
+                type: "player",
+                who: this.player,
+                callback: "displayGmRoll",
+                input: {
+                    currentRoll: currentRoll
+                }
+            });
+        } else {
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                callback: "grappleDefenseWeaponRollApply",
+                input: {}
+            });
+        }
+    } else {
+        MML.processCommand({
+            type: "player",
+            who: this.player,
+            callback: "displayPlayerRoll",
+            input: {
+                currentRoll: currentRoll
+            }
+        });
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            callback: "grappleDefenseWeaponRollApply",
+            input: {}
+        });
+    }
+};
+
+MML.grappleDefenseWeaponRollApply = function attackRollApply(input) {
+    state.MML.GM.currentAction.rolls.defenseRoll = state.MML.players[this.player].currentRoll.result;
     MML[state.MML.GM.currentAction.callback]();
 };
 
