@@ -194,7 +194,7 @@ MML.getSingleTarget = function getSingleTarget(input) {
     MML.displayTargetSelection(input);
 };
 
-MML.setTargets = function selectTargets() {
+MML.setTargets = function setTargets() {
     this.targets = this.characters[this.actor].action.targets;
     this.targetIndex = 0;
     this.currentTarget = this.targets[0];
