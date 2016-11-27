@@ -747,7 +747,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
             });
         }
     });
-    if (!_.has(this.statusEffects, "Grappled")) {
+    if (!_.has(character.statusEffects, "Grappled")) {
         buttons.push({
             text: "Grapple",
             nextMenu: "charMenuAttackStance",
@@ -762,7 +762,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
             }
         });
     }
-    if (!_.has(this.statusEffects, "Holding")) {
+    if (!_.has(character.statusEffects, "Holding")) {
         buttons.push({
             text: "Place a Hold",
             nextMenu: "charMenuAttackStance",
@@ -777,7 +777,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
             }
         });
     }
-    if (_.has(this.statusEffects, "Held") || _.has(this.statusEffects, "Grappled")) {
+    if (_.has(character.statusEffects, "Held") || _.has(character.statusEffects, "Grappled")) {
         buttons.push({
             text: "Break a Hold",
             nextMenu: "charMenuAttackStance",
@@ -792,7 +792,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
             }
         });
     }
-    if (_.has(this.statusEffects, "Holding") || _.has(this.statusEffects, "Grappling")) {
+    if (_.has(character.statusEffects, "Holding")) {
         buttons.push({
             text: "Release a Hold",
             nextMenu: "charMenuAttackStance",
@@ -807,7 +807,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
             }
         });
     }
-    if (_.has(this.statusEffects, "Held") || _.has(this.statusEffects, "Grappled") || _.has(this.statusEffects, "Holding") || _.has(this.statusEffects, "Grappling")) {
+    if (_.has(character.statusEffects, "Held") || _.has(character.statusEffects, "Grappled") || _.has(character.statusEffects, "Holding") || _.has(character.statusEffects, "Grappling")) {
         buttons.push({
             text: "Head Butt",
             nextMenu: "charMenuAttackCalledShot",
@@ -1167,20 +1167,20 @@ MML.charMenuRangedDefenseRoll = function charMenuRangedDefenseRoll(input) {
 };
 MML.charMenuGrappleDefenseRoll = function charMenuGrappleDefenseRoll(input) {
     var brawlChance = input.brawlChance;
-    var weaponChance = input.weaponChance;
+    var attackChance = input.attackChance;
 
     this.who = input.who;
     this.message = "How will " + this.who + " defend?";
     this.buttons = [{
-        text: "With Weapon: " + weaponChance + "%",
+        text: "With Weapon: " + attackChance + "%",
         nextMenu: "menuIdle",
         callback: function(input) {
             MML.processCommand({
                 type: "character",
                 who: this.who,
-                callback: "meleeAttackRoll",
+                callback: "grappleDefenseWeaponRoll",
                 input: {
-                    weaponChance: weaponChance
+                    attackChance: attackChance
                 }
             });
         }
@@ -1191,7 +1191,7 @@ MML.charMenuGrappleDefenseRoll = function charMenuGrappleDefenseRoll(input) {
             MML.processCommand({
                 type: "character",
                 who: this.who,
-                callback: "brawlRoll",
+                callback: "grappleDefenseBrawlRoll",
                 input: {
                     brawlChance: brawlChance
                 }

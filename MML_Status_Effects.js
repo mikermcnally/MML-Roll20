@@ -256,7 +256,7 @@ MML.statusEffects["Stunned"] = function(effect, index) {
         this.action.name = "Movement Only";
         this.action.callback = "endAction";
         delete this.action.getTargets;
-        this.statusEffects[index].description = "Only movement is allowed the next " + effect.duration + " of the round";
+        this.statusEffects[index].description = "Only movement is allowed the next " + effect.duration + " rounds";
     }
 };
 MML.statusEffects["Grappled"] = function(effect, index) {

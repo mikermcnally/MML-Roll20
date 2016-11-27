@@ -73,6 +73,43 @@ MML.getMeleeWeapon = function getMeleeWeapon(character){
     return weapon;
 };
 
+MML.getCharacterWeaponAndSkill = function getCharacterWeaponAndSkill(character) {
+    var itemId;
+    var grip;
+
+    if (MML.getWeaponFamily(character, "rightHand") !== "unarmed") {
+        itemId = character.rightHand._id;
+        grip = character.rightHand.grip;
+    } else {
+        itemId = character.leftHand._id;
+        grip = character.leftHand.grip;
+    }
+    var item = character.inventory[itemId];
+    var characterWeapon = {
+        _id: itemId,
+        name: item.name,
+        type: "weapon",
+        weight: item.weight,
+        family: item.grips[grip].family,
+        hands: item.grips[grip].hands,
+        defense: item.grips[grip].defense,
+        initiative: item.grips[grip].initiative,
+        rank: item.grips[grip].rank
+    };
+
+    if (character.action.weaponType === "secondary") {
+        characterWeapon.damageType = item.grips[grip].secondaryType;
+        characterWeapon.task = item.grips[grip].secondaryTask;
+        characterWeapon.damage = item.grips[grip].secondaryDamage;
+    } else {
+        characterWeapon.damageType = item.grips[grip].primaryType;
+        characterWeapon.task = item.grips[grip].primaryTask;
+        characterWeapon.damage = item.grips[grip].primaryDamage;
+    }
+
+    return { characterWeapon: characterWeapon, skill: MML.getWeaponSkill(character, item) };
+};
+
 MML.getWeaponSkill = function getWeaponSkill(character, weapon) {
     var item = weapon;
     var grip;

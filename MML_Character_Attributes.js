@@ -157,6 +157,18 @@ MML.setApiCharAttributeJSON = function(input) {
     });
 };
 
+MML.removeStatusEffect = function(input) {
+    delete this.statusEffects[input.index];
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        callback: "updateCharacter",
+        input: {
+            attribute: "statusEffects"
+        }
+    });
+};
+
 MML.computeAttribute = {};
 MML.computeAttribute.name = {
     dependents: [],

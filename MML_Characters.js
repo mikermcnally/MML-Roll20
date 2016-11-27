@@ -876,7 +876,6 @@ MML.initiativeApply = function initiativeApply() {
 };
 
 MML.startAction = function startAction(input) {
-    log("fuck");
     state.MML.GM.currentAction = {
         character: this
     };
@@ -1008,45 +1007,14 @@ MML.processAttack = function processAttack(input) {
 };
 
 MML.meleeAttack = function meleeAttack(input) {
-    var itemId;
-    var grip;
-
-    if (MML.getWeaponFamily(this, "rightHand") !== "unarmed") {
-        itemId = this.rightHand._id;
-        grip = this.rightHand.grip;
-    } else {
-        itemId = this.leftHand._id;
-        grip = this.leftHand.grip;
-    }
-    var item = this.inventory[itemId];
-    var attackerWeapon = {
-        _id: itemId,
-        name: item.name,
-        type: "weapon",
-        weight: item.weight,
-        family: item.grips[grip].family,
-        hands: item.grips[grip].hands,
-        defense: item.grips[grip].defense,
-        initiative: item.grips[grip].initiative,
-        rank: item.grips[grip].rank
-    };
-
-    if (this.action.weaponType === "primary") {
-        attackerWeapon.damageType = item.grips[grip].primaryType;
-        attackerWeapon.task = item.grips[grip].primaryTask;
-        attackerWeapon.damage = item.grips[grip].primaryDamage;
-    } else {
-        attackerWeapon.damageType = item.grips[grip].secondaryType;
-        attackerWeapon.task = item.grips[grip].secondaryTask;
-        attackerWeapon.damage = item.grips[grip].secondaryDamage;
-    }
+    var characterWeaponInfo = MML.getCharacterWeaponAndSkill(this);
 
     var currentAction = {
         character: this,
         callback: "meleeAttackAction",
         parameters: {
-            attackerWeapon: attackerWeapon,
-            attackerSkill: MML.getWeaponSkill(this, item),
+            attackerWeapon: characterWeaponInfo.characterWeapon,
+            attackerSkill: characterWeaponInfo.skill,
             target: state.MML.characters[state.MML.GM.currentAction.targetArray[0]]
         },
         rolls: {}
@@ -1401,14 +1369,8 @@ MML.meleeDefense = function meleeDefense(defender, attackerWeapon) {
         }
     });
 
-    if (_.isUndefined(defender.skills["Dodge"])) {
-        dodgeSkill = 0;
-    } else {
-        dodgeSkill = defender.skills["Dodge"].level;
-    }
-
-    if (_.isUndefined(defender.weaponSkills["Dodge"])) {
-        dodgeSkill = defender.weaponSkills["Dodge"].level;
+    if (!_.isUndefined(defender.weaponSkills["Dodge"]) && defaultMartialSkill < defender.weaponSkills["Dodge"].level) {
+        dodgeChance = defender.weaponSkills["Dodge"].level + defenseMod + sitMod;
     } else {
         dodgeChance = defaultMartialSkill + defenseMod + sitMod;
     }
@@ -1772,7 +1734,7 @@ MML.grappleDefense = function grappleDefense(defender, attackType) {
     var weaponChance;
     var brawlSkill;
     var defaultMartialSkill = defender.weaponSkills["Default Martial"].level;
-    var defenseMod = defender.meleeDefenseMod + defender.attributeDefenseMod + MML.unarmedAttacks[attackType].defenseMod;
+    var defenseMod = defender.meleeDefenseMod + defender.attributeDefenseMod + attackType.defenseMod;
     var sitMod = defender.situationalMod;
 
     MML.processCommand({
@@ -1812,6 +1774,8 @@ MML.grappleDefense = function grappleDefense(defender, attackType) {
             }
         });
     } else {
+        var characterWeaponInfo = MML.getCharacterWeaponAndSkill(defender);
+        state.MML.GM.currentAction.parameters.defenderWeapon = characterWeaponInfo.characterWeapon;
         MML.processCommand({
             type: "player",
             who: defender.player,
@@ -1819,7 +1783,7 @@ MML.grappleDefense = function grappleDefense(defender, attackType) {
             input: {
                 who: defender.name,
                 brawlChance: brawlChance,
-                attackChance: attackChance
+                attackChance: characterWeaponInfo.characterWeapon.task + characterWeaponInfo.skill + defender.situationalMod + defender.meleeAttackMod + defender.attributeMeleeAttackMod
             }
         });
     }
@@ -1831,15 +1795,15 @@ MML.grappleDefense = function grappleDefense(defender, attackType) {
     });
 };
 
-MML.grappleDefenseWeaponRoll = function meleeAttackRoll(rollName, character, task, skill) {
+MML.grappleDefenseWeaponRoll = function grappleDefenseWeaponRoll(input) {
     MML.processCommand({
         type: "character",
-        who: character.name,
+        who: this.name,
         callback: "universalRoll",
         input: {
-            name: rollName,
+            name: "Weapon Defense Roll",
             callback: "grappleDefenseWeaponRollResult",
-            mods: [task, skill, character.situationalMod, character.meleeAttackMod, character.attributeMeleeAttackMod]
+            mods: [input.attackChance]
         }
     });
 };
@@ -1883,9 +1847,197 @@ MML.grappleDefenseWeaponRollResult = function grappleDefenseWeaponRollResult(inp
     }
 };
 
-MML.grappleDefenseWeaponRollApply = function attackRollApply(input) {
-    state.MML.GM.currentAction.rolls.defenseRoll = state.MML.players[this.player].currentRoll.result;
+MML.grappleDefenseWeaponRollApply = function grappleDefenseWeaponRollApply(input) {
+    state.MML.GM.currentAction.rolls.weaponDefenseRoll = state.MML.players[this.player].currentRoll.result;
     MML[state.MML.GM.currentAction.callback]();
+};
+
+MML.grappleDefenseBrawlRoll = function grappleDefenseBrawlRoll(input) {
+    MML.processCommand({
+        type: "character",
+        who: this.name,
+        callback: "universalRoll",
+        input: {
+            name: "Brawl Defense Roll",
+            callback: "grappleDefenseBrawlRollResult",
+            mods: [input.brawlChance]
+        }
+    });
+};
+
+MML.grappleDefenseBrawlRollResult = function grappleDefenseBrawlRollResult(input) {
+    var currentRoll = state.MML.players[this.player].currentRoll;
+
+    if (this.player === state.MML.GM.player) {
+        if (currentRoll.accepted === false) {
+            MML.processCommand({
+                type: "player",
+                who: this.player,
+                callback: "displayGmRoll",
+                input: {
+                    currentRoll: currentRoll
+                }
+            });
+        } else {
+            MML.processCommand({
+                type: "character",
+                who: this.name,
+                callback: "grappleDefenseBrawlRollApply",
+                input: {}
+            });
+        }
+    } else {
+        MML.processCommand({
+            type: "player",
+            who: this.player,
+            callback: "displayPlayerRoll",
+            input: {
+                currentRoll: currentRoll
+            }
+        });
+        MML.processCommand({
+            type: "character",
+            who: this.name,
+            callback: "grappleDefenseBrawlRollApply",
+            input: {}
+        });
+    }
+};
+
+MML.grappleDefenseBrawlRollApply = function grappleDefenseBrawlRollApply(input) {
+    state.MML.GM.currentAction.rolls.brawlDefenseRoll = state.MML.players[this.player].currentRoll.result;
+    MML[state.MML.GM.currentAction.callback]();
+};
+
+MML.applyGrapple = function applyGrapple(attacker, defender, attackName) {
+    switch (attacker.action.weaponType) {
+        case "Grapple":
+            MML.processCommand({
+                type: "character",
+                who: attacker.name,
+                callback: "setApiCharAttributeJSON",
+                input: {
+                    attribute: "statusEffects",
+                    index: "Grappled",
+                    value: {
+                        id: generateRowID(),
+                        name: "Grappled"
+                    }
+                }
+            });
+            MML.processCommand({
+                type: "character",
+                who: defender.name,
+                callback: "setApiCharAttributeJSON",
+                input: {
+                    attribute: "statusEffects",
+                    index: "Grappled",
+                    value: {
+                        id: generateRowID(),
+                        name: "Grappled"
+                    }
+                }
+            });
+            break;
+        case "Place a Hold":
+            if (!_.has(attacker.statusEffects, "Grappled")) {
+                MML.processCommand({
+                    type: "character",
+                    who: attacker.name,
+                    callback: "setApiCharAttributeJSON",
+                    input: {
+                        attribute: "statusEffects",
+                        index: "Grappled",
+                        value: {
+                            id: generateRowID(),
+                            name: "Grappled"
+                        }
+                    }
+                });
+            }
+            MML.processCommand({
+                type: "character",
+                who: attacker.name,
+                callback: "setApiCharAttributeJSON",
+                input: {
+                    attribute: "statusEffects",
+                    index: "Holding",
+                    value: {
+                        id: generateRowID(),
+                        name: "Holding"
+                    }
+                }
+            });
+            if (!_.has(defender.statusEffects, "Grappled")) {
+                MML.processCommand({
+                    type: "character",
+                    who: defender.name,
+                    callback: "setApiCharAttributeJSON",
+                    input: {
+                        attribute: "statusEffects",
+                        index: "Grappled",
+                        value: {
+                            id: generateRowID(),
+                            name: "Grappled"
+                        }
+                    }
+                });
+            }
+            MML.processCommand({
+                type: "character",
+                who: defender.name,
+                callback: "setApiCharAttributeJSON",
+                input: {
+                    attribute: "statusEffects",
+                    index: "Held",
+                    value: {
+                        id: generateRowID(),
+                        name: "Held"
+                    }
+                }
+            });
+            break;
+        case "Break a Hold":
+            if (_.has(defender.statusEffects, "Held")) {
+                MML.processCommand({
+                    type: "character",
+                    who: attacker.name,
+                    callback: "removeStatusEffect",
+                    input: {
+                        index: "Held"
+                    }
+                });
+                MML.processCommand({
+                    type: "character",
+                    who: defender.name,
+                    callback: "removeStatusEffect",
+                    input: {
+                        index: "Holding"
+                    }
+                });
+            } else {
+                MML.processCommand({
+                    type: "character",
+                    who: defender.name,
+                    callback: "removeStatusEffect",
+                    input: {
+                        index: "Grappled"
+                    }
+                });
+                MML.processCommand({
+                    type: "character",
+                    who: attacker.name,
+                    callback: "removeStatusEffect",
+                    input: {
+                        index: "Grappled"
+                    }
+                });
+            }
+            break;
+        default:
+
+    }
+    MML.endAction();
 };
 
 MML.criticalDefense = function criticalDefense() {
