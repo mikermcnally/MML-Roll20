@@ -1225,6 +1225,118 @@ MML.charMenuGrappleDefenseRoll = function charMenuGrappleDefenseRoll(input) {
         }
     }];
 };
+MML.charMenuMajorWoundRoll = function charMenuMajorWoundRoll(input) {
+    this.who = input.who;
+    this.message = "Major Wound Roll.";
+    this.buttons = [{
+        text: "Roll Willpower",
+        nextMenu: "menuIdle",
+        callback: function(input) {
+            MML.processCommand({
+                type: "character",
+                who: this.who,
+                callback: "majorWoundRoll",
+                input: {}
+            });
+        }
+    }];
+};
+MML.charMenuDisablingWoundRoll = function charMenuDisablingWoundRoll(input) {
+    this.who = input.who;
+    this.message = "Disabling Wound Roll.";
+    this.buttons = [{
+        text: "Roll System Strength",
+        nextMenu: "menuIdle",
+        callback: function(input) {
+            MML.processCommand({
+                type: "character",
+                who: this.who,
+                callback: "disablingWoundRoll",
+                input: {}
+            });
+        }
+    }];
+};
+MML.charMenuWoundFatigueRoll = function charMenuWoundFatigueRoll(input) {
+    this.who = input.who;
+    this.message = "Wound Fatigue Roll.";
+    this.buttons = [{
+        text: "Roll System Strength",
+        nextMenu: "menuIdle",
+        callback: function(input) {
+            MML.processCommand({
+                type: "character",
+                who: this.who,
+                callback: "multiWoundRoll",
+                input: {}
+            });
+        }
+    }];
+};
+MML.charMenuSensitiveAreaRoll = function charMenuSensitiveAreaRoll(input) {
+    this.who = input.who;
+    this.message = "Sensitive Area Roll.";
+    this.buttons = [{
+        text: "Roll Willpower",
+        nextMenu: "menuIdle",
+        callback: function(input) {
+            MML.processCommand({
+                type: "character",
+                who: this.who,
+                callback: "sensitiveAreaRoll",
+                input: {}
+            });
+        }
+    }];
+};
+MML.charMenuKnockdownRoll = function charMenuKnockdownRoll(input) {
+    this.who = input.who;
+    this.message = "Knockdown Roll.";
+    this.buttons = [{
+        text: "Roll System Strength",
+        nextMenu: "menuIdle",
+        callback: function(input) {
+            MML.processCommand({
+                type: "character",
+                who: this.who,
+                callback: "knockdownRoll",
+                input: {}
+            });
+        }
+    }];
+};
+MML.charMenuFatigueRoll = function charMenuFatigueRoll(input) {
+    this.who = input.who;
+    this.message = "Fatigue Roll.";
+    this.buttons = [{
+        text: "Roll Fitness",
+        nextMenu: "menuIdle",
+        callback: function(input) {
+            MML.processCommand({
+                type: "character",
+                who: this.who,
+                callback: "fatigueCheckRoll",
+                input: {}
+            });
+        }
+    }];
+};
+MML.charMenuFatigueRecoveryRoll = function charMenuFatigueRecoveryRoll(input) {
+    this.who = input.who;
+    this.message = "Fatigue Recovery Roll.";
+    this.buttons = [{
+        text: "Roll Health",
+        nextMenu: "menuIdle",
+        callback: function(input) {
+            MML.processCommand({
+                type: "character",
+                who: this.who,
+                callback: "fatigueRecoveryRoll",
+                input: {}
+            });
+        }
+    }];
+};
 MML.charMenuObserveAction = function charMenuObserveAction(input) {
     this.who = input.who;
     this.message = this.who + " observes the situation.";
@@ -1645,13 +1757,6 @@ MML.menuButtons.endAction = {
     nextMenu: "charMenuPrepareAction",
     callback: function(input) {
         MML.endAction();
-    }
-};
-MML.menuButtons.rollDice = {
-    text: "Roll",
-    nextMenu: "menuIdle",
-    callback: function(input) {
-        state.MML.GM.currentRoll.getRoll();
     }
 };
 MML.menuButtons.initiativeRoll = {

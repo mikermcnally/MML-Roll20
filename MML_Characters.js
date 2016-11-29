@@ -202,9 +202,17 @@ MML.alterHP = function alterHP(input) {
             }
             state.MML.GM.currentAction.woundDuration = duration;
             MML.processCommand({
-                type: "character",
-                who: this.name,
-                callback: "majorWoundRoll",
+                type: "player",
+                who: this.player,
+                callback: "charMenuMajorWoundRoll",
+                input: {
+                    who: this.name
+                }
+            });
+            MML.processCommand({
+                type: "player",
+                who: this.player,
+                callback: "displayMenu",
                 input: {}
             });
         } else if (currentHP < 0 && currentHP > -maxHP) { //Disabling wound
@@ -216,9 +224,17 @@ MML.alterHP = function alterHP(input) {
             }
             state.MML.GM.currentAction.woundDuration = duration;
             MML.processCommand({
-                type: "character",
-                who: this.name,
-                callback: "disablingWoundRoll",
+                type: "player",
+                who: this.player,
+                callback: "charMenuDisablingWoundRoll",
+                input: {
+                    who: this.name
+                }
+            });
+            MML.processCommand({
+                type: "player",
+                who: this.player,
+                callback: "displayMenu",
                 input: {}
             });
         } else if (currentHP < -maxHP) { //Mortal wound
@@ -266,9 +282,17 @@ MML.setMultiWound = function setMultiWound(input) {
 
     if (currentHP["Multiple Wounds"] < 0 && !_.has(this.statusEffects, "Wound Fatigue")) {
         MML.processCommand({
-            type: "character",
-            who: this.name,
-            callback: "multiWoundRoll",
+            type: "player",
+            who: this.player,
+            callback: "charMenuWoundFatigueRoll",
+            input: {
+                who: this.name
+            }
+        });
+        MML.processCommand({
+            type: "player",
+            who: defender.player,
+            callback: "displayMenu",
             input: {}
         });
     } else {
@@ -1246,9 +1270,9 @@ MML.hitPositionRoll = function hitPositionRoll(character) {
     var target = state.MML.characters[action.targetArray[action.targetIndex]];
 
     if (_.contains(character.action.modifiers, ["Called Shot Specific"])) {
-        rollValue = +_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
+        rollValue = parseInt(_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
             return hitPosition.name === action.calledShot;
-        });
+        }));
         range = rollValue + "-" + rollValue;
         result = MML.hitPositions[target.bodyType][rollValue];
     } else if (_.contains(character.action.modifiers, "Called Shot")) {
@@ -1259,9 +1283,9 @@ MML.hitPositionRoll = function hitPositionRoll(character) {
     } else {
         range = "1-" + _.keys(MML.hitPositions[target.bodyType]).length;
         result = MML.getHitPosition(target, MML.rollDice(1, 100));
-        rollValue = +_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
+        rollValue = parseInt(_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
             return hitPosition.name === result.name;
-        });
+        }));
     }
 
     MML.processCommand({
