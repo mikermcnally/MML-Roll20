@@ -747,7 +747,13 @@ MML.charMenuAttack = function charMenuAttack(input) {
             });
         }
     });
-    if (!_.has(character.statusEffects, "Grappled")) {
+    if (!_.has(character.statusEffects, "Grappled") &&
+        !_.has(character.statusEffects, "Holding") &&
+        !_.has(character.statusEffects, "Held") &&
+        !_.has(character.statusEffects, "Taken Down") &&
+        !_.has(character.statusEffects, "Pinned") &&
+        !_.has(character.statusEffects, "Overborne")
+    ) {
         buttons.push({
             text: "Grapple",
             nextMenu: "charMenuAttackStance",
@@ -762,10 +768,25 @@ MML.charMenuAttack = function charMenuAttack(input) {
             }
         });
     }
-    if (!_.has(character.statusEffects, "Holding")) {
+    if ((_.has(character.statusEffects, "Grappled") && _.has(character.movementPosition, "Prone")) || _.has(character.statusEffects, "Taken Down")) {
+        buttons.push({
+            text: "Regain Feet",
+            nextMenu: "charMenuAttackStance",
+            callback: function(input) {
+                state.MML.characters[this.who].action.weaponType = "Regain Feet";
+                MML.processCommand({
+                    type: "player",
+                    who: this.name,
+                    callback: "displayMenu",
+                    input: {}
+                });
+            }
+        });
+    }
+    if (!_.has(character.statusEffects, "Holding") && !_.has(character.statusEffects, "Held") && !_.has(character.statusEffects, "Pinned")) {
         buttons.push({
             text: "Place a Hold",
-            nextMenu: "charMenuAttackStance",
+            nextMenu: "charMenuAttackCalledShot",
             callback: function(input) {
                 state.MML.characters[this.who].action.weaponType = "Place a Hold";
                 MML.processCommand({
@@ -777,7 +798,12 @@ MML.charMenuAttack = function charMenuAttack(input) {
             }
         });
     }
-    if (_.has(character.statusEffects, "Held") || _.has(character.statusEffects, "Grappled")) {
+    if (_.has(character.statusEffects, "Held") ||
+        _.has(character.statusEffects, "Grappled") ||
+        _.has(character.statusEffects, "Taken Down") ||
+        _.has(character.statusEffects, "Pinned") ||
+        _.has(character.statusEffects, "Overborne")
+    ) {
         buttons.push({
             text: "Break a Hold",
             nextMenu: "charMenuAttackStance",
@@ -807,7 +833,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
             }
         });
     }
-    if (_.has(character.statusEffects, "Holding") || _.has(character.statusEffects, "Grappled")) {
+    if ((_.has(character.statusEffects, "Holding") || _.has(character.statusEffects, "Grappled")) && character.movementPosition !== "Prone") {
         buttons.push({
             text: "Takedown",
             nextMenu: "charMenuAttackStance",
@@ -822,7 +848,13 @@ MML.charMenuAttack = function charMenuAttack(input) {
             }
         });
     }
-    if (_.has(character.statusEffects, "Held") || _.has(character.statusEffects, "Grappled") || _.has(character.statusEffects, "Holding") || _.has(character.statusEffects, "Grappling")) {
+    if (_.has(character.statusEffects, "Held") ||
+        _.has(character.statusEffects, "Grappled") ||
+        _.has(character.statusEffects, "Holding") ||
+        _.has(character.statusEffects, "Taken Down") ||
+        _.has(character.statusEffects, "Pinned") ||
+        _.has(character.statusEffects, "Overborne")
+    ) {
         buttons.push({
             text: "Head Butt",
             nextMenu: "charMenuAttackCalledShot",
@@ -1144,7 +1176,9 @@ MML.charMenuMeleeDefenseRoll = function charMenuMeleeDefenseRoll(input) {
                 type: "character",
                 who: this.who,
                 callback: "forgoDefense",
-                input: {}
+                input: {
+                    rollName: "defenseRoll"
+                }
             });
         }
     }];
@@ -1175,7 +1209,9 @@ MML.charMenuRangedDefenseRoll = function charMenuRangedDefenseRoll(input) {
                 type: "character",
                 who: this.who,
                 callback: "forgoDefense",
-                input: {}
+                input: {
+                    rollName: "defenseRoll"
+                }
             });
         }
     }];
@@ -1220,7 +1256,9 @@ MML.charMenuGrappleDefenseRoll = function charMenuGrappleDefenseRoll(input) {
                 type: "character",
                 who: this.who,
                 callback: "forgoDefense",
-                input: {}
+                input: {
+                    rollName: "brawlDefenseRoll"
+                }
             });
         }
     }];

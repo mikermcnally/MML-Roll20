@@ -3123,6 +3123,7 @@ MML.unarmedAttacks["Takedown"] = {family: "Unarmed", initiative: 10, task: 35, d
 MML.unarmedAttacks["Place a Hold, Head, Arm, Leg"] = {family: "Unarmed", initiative: 10,  task: 0, defenseMod: 15, damage: "None", damageType: "None"};
 MML.unarmedAttacks["Place a Hold, Chest, Abdomen"] = {family: "Unarmed", initiative: 10,  task: 15, defenseMod: 25, damage: "None", damageType: "None"};
 MML.unarmedAttacks["Break a Hold"] = {family: "Unarmed", initiative: 10, task: 0, defenseMod: 0, damage: "None", damageType: "None"};
+MML.unarmedAttacks["Regain Feet"] = {family: "Unarmed", initiative: 10, task: 15, defenseMod: 25, damage: "None", damageType: "None"};
 MML.unarmedAttacks["Punch"] = {family: "Unarmed", initiative: 10, task: 25, defenseMod: 15, damage: "1d4", damageType: "Impact"};
 MML.unarmedAttacks["Punch, Padded"] = {family: "Unarmed", initiative: 10, task: 25, defenseMod: 15, damage: "1d2", damageType: "Impact"};
 MML.unarmedAttacks["Punch, Mail, Studs"] = {family: "Unarmed", initiative: 10, task: 25, defenseMod: 15, damage: "1d6", damageType: "Impact"};
