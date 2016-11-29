@@ -807,6 +807,21 @@ MML.charMenuAttack = function charMenuAttack(input) {
             }
         });
     }
+    if (_.has(character.statusEffects, "Holding") || _.has(character.statusEffects, "Grappled")) {
+        buttons.push({
+            text: "Takedown",
+            nextMenu: "charMenuAttackStance",
+            callback: function(input) {
+                state.MML.characters[this.who].action.weaponType = "Takedown";
+                MML.processCommand({
+                    type: "player",
+                    who: this.name,
+                    callback: "displayMenu",
+                    input: {}
+                });
+            }
+        });
+    }
     if (_.has(character.statusEffects, "Held") || _.has(character.statusEffects, "Grappled") || _.has(character.statusEffects, "Holding") || _.has(character.statusEffects, "Grappling")) {
         buttons.push({
             text: "Head Butt",

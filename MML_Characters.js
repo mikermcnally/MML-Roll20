@@ -49,13 +49,17 @@ MML.moveDistance = function moveDistance(input) {
 
 MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input) {
     if (_.has(this.statusEffects, "Melee This Round")) {
+        var fatigueRate = 1;
+        if (_.has(this.statusEffects, "Pinned")) {
+            var fatigueRate = 2;
+        }
         MML.processCommand({
             type: "character",
             who: this.name,
             callback: "setApiCharAttribute",
             input: {
                 attribute: "roundsExertion",
-                value: this.roundsExertion + 1
+                value: this.roundsExertion + fatigueRate
             }
         });
         MML.processCommand({
@@ -961,7 +965,7 @@ MML.processAttack = function processAttack(input) {
             callback: "unarmedAttack",
             input: {}
         });
-    } else if (["Grapple", "Place a Hold", "Break a Hold", "Release a Hold"].indexOf(this.action.weaponType) > -1) {
+    } else if (["Grapple", "Place a Hold", "Break a Hold", "Release a Hold", "Takedown"].indexOf(this.action.weaponType) > -1) {
         MML.processCommand({
             type: "character",
             who: this.name,
@@ -1159,6 +1163,9 @@ MML.grappleAttack = function grappleAttack() {
             break;
         case "Break a Hold":
             attackType = MML.unarmedAttacks["Break a Hold"];
+            break;
+        case "Takedown":
+            attackType = MML.unarmedAttacks["Takedown"];
             break;
         default:
 
@@ -1763,7 +1770,16 @@ MML.grappleDefense = function grappleDefense(defender, attackType) {
         brawlChance = defaultMartialSkill + defenseMod + sitMod;
     }
 
-    if (MML.isUnarmed(defender)) {
+    if (
+      MML.isUnarmed(defender) ||
+      _.has(character.statusEffects, "Holding") ||
+      _.has(character.statusEffects, "Held") ||
+      _.has(character.statusEffects, "Grappled") ||
+      _.has(character.statusEffects, "Holding") ||
+      _.has(character.statusEffects, "Taken Down") ||
+      _.has(character.statusEffects, "Pinned") ||
+      _.has(character.statusEffects, "Overborne")
+    ) {
         MML.processCommand({
             type: "player",
             who: defender.player,
@@ -1940,20 +1956,15 @@ MML.applyGrapple = function applyGrapple(attacker, defender, attackName) {
             });
             break;
         case "Place a Hold":
-            if (!_.has(attacker.statusEffects, "Grappled")) {
-                MML.processCommand({
-                    type: "character",
-                    who: attacker.name,
-                    callback: "setApiCharAttributeJSON",
-                    input: {
-                        attribute: "statusEffects",
-                        index: "Grappled",
-                        value: {
-                            id: generateRowID(),
-                            name: "Grappled"
-                        }
-                    }
-                });
+            if (_.has(attacker.statusEffects, "Grappled")) {
+              MML.processCommand({
+                  type: "character",
+                  who: attacker.name,
+                  callback: "removeStatusEffect",
+                  input: {
+                      index: "Grappled"
+                  }
+              });
             }
             MML.processCommand({
                 type: "character",
@@ -1968,37 +1979,34 @@ MML.applyGrapple = function applyGrapple(attacker, defender, attackName) {
                     }
                 }
             });
-            if (!_.has(defender.statusEffects, "Grappled")) {
+            if (_.has(defender.statusEffects, "Grappled")) {
+              MML.processCommand({
+                  type: "character",
+                  who: defender.name,
+                  callback: "removeStatusEffect",
+                  input: {
+                      index: "Grappled"
+                  }
+              });
+            }
+            if (["Chest", "Abdomen"].indexOf(state.GM.currentAction.calledShot) > -1 && defender.movementPosition === "Prone") {
                 MML.processCommand({
                     type: "character",
                     who: defender.name,
                     callback: "setApiCharAttributeJSON",
                     input: {
                         attribute: "statusEffects",
-                        index: "Grappled",
+                        index: "Pinned",
                         value: {
                             id: generateRowID(),
-                            name: "Grappled"
+                            name: "Pinned"
                         }
                     }
                 });
             }
-            MML.processCommand({
-                type: "character",
-                who: defender.name,
-                callback: "setApiCharAttributeJSON",
-                input: {
-                    attribute: "statusEffects",
-                    index: "Held",
-                    value: {
-                        id: generateRowID(),
-                        name: "Held"
-                    }
-                }
-            });
             break;
         case "Break a Hold":
-            if (_.has(defender.statusEffects, "Held")) {
+            if (_.has(attacker.statusEffects, "Held")) {
                 MML.processCommand({
                     type: "character",
                     who: attacker.name,
@@ -2013,6 +2021,75 @@ MML.applyGrapple = function applyGrapple(attacker, defender, attackName) {
                     callback: "removeStatusEffect",
                     input: {
                         index: "Holding"
+                    }
+                });
+                MML.processCommand({
+                    type: "character",
+                    who: attacker.name,
+                    callback: "setApiCharAttributeJSON",
+                    input: {
+                        attribute: "statusEffects",
+                        index: "Grappled",
+                        value: {
+                            id: generateRowID(),
+                            name: "Grappled"
+                        }
+                    }
+                });
+                MML.processCommand({
+                    type: "character",
+                    who: defender.name,
+                    callback: "setApiCharAttributeJSON",
+                    input: {
+                        attribute: "statusEffects",
+                        index: "Grappled",
+                        value: {
+                            id: generateRowID(),
+                            name: "Grappled"
+                        }
+                    }
+                });
+            } else if (_.has(attacker.statusEffects, "Pinned")) {
+                MML.processCommand({
+                    type: "character",
+                    who: attacker.name,
+                    callback: "removeStatusEffect",
+                    input: {
+                        index: "Pinned"
+                    }
+                });
+                MML.processCommand({
+                    type: "character",
+                    who: defender.name,
+                    callback: "removeStatusEffect",
+                    input: {
+                        index: "Holding"
+                    }
+                });
+                MML.processCommand({
+                    type: "character",
+                    who: attacker.name,
+                    callback: "setApiCharAttributeJSON",
+                    input: {
+                        attribute: "statusEffects",
+                        index: "Grappled",
+                        value: {
+                            id: generateRowID(),
+                            name: "Grappled"
+                        }
+                    }
+                });
+                MML.processCommand({
+                    type: "character",
+                    who: defender.name,
+                    callback: "setApiCharAttributeJSON",
+                    input: {
+                        attribute: "statusEffects",
+                        index: "Grappled",
+                        value: {
+                            id: generateRowID(),
+                            name: "Grappled"
+                        }
                     }
                 });
             } else {

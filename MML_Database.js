@@ -3119,6 +3119,7 @@ MML.meleeDamageMods = [
 
 MML.unarmedAttacks = {};
 MML.unarmedAttacks["Grapple"] = {family: "Unarmed", initiative: 10, task: 35, defenseMod: 35, damage: "None", damageType: "None"};
+MML.unarmedAttacks["Takedown"] = {family: "Unarmed", initiative: 10, task: 35, defenseMod: 35, damage: "None", damageType: "None"};
 MML.unarmedAttacks["Place a Hold, Head, Arm, Leg"] = {family: "Unarmed", initiative: 10,  task: 0, defenseMod: 15, damage: "None", damageType: "None"};
 MML.unarmedAttacks["Place a Hold, Chest, Abdomen"] = {family: "Unarmed", initiative: 10,  task: 15, defenseMod: 25, damage: "None", damageType: "None"};
 MML.unarmedAttacks["Break a Hold"] = {family: "Unarmed", initiative: 10, task: 0, defenseMod: 0, damage: "None", damageType: "None"};
