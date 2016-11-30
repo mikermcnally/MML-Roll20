@@ -1,4 +1,4 @@
-/* jshint -W069 */
+
 var MML = MML || {};
 
 MML.init = function init(){
@@ -59,7 +59,7 @@ MML.init = function init(){
 // state.MML.characters =data[2];
 // MML.processCommand(data[3]);
 };
-/* jshint -W069 */
+
 MML.meleeAttackAction = function meleeAttackAction() {
     var currentAction = state.MML.GM.currentAction;
     var character = currentAction.character;
@@ -362,7 +362,7 @@ MML.endAction = function endAction() {
         });
     }
 };
-/* jshint -W069 */
+
 //Combat Functions
 MML.displayMovement = function displayMovement() {
     var token = MML.getTokenFromChar(this.name);
@@ -2684,7 +2684,7 @@ MML.missileDamageRollApply = function missileDamageRollApply(input) {
     state.MML.GM.currentAction.rolls.damageRoll = state.MML.players[this.player].currentRoll.result;
     MML[state.MML.GM.currentAction.callback]();
 };
-/* jshint -W069 */
+
 // Character Creation
 MML.characterConstructor = function characterConstructor(charName) {
     // Basic Info
@@ -4101,7 +4101,7 @@ MML.computeAttribute.weaponSkills = {
         return characterSkills;
     }
 };
-/* jshint -W069 */
+
 MML.isSensitiveArea = function isSensitiveArea(position) {
     if (position === 2 || position === 6 || position === 33) {
         return true;
@@ -4390,7 +4390,7 @@ MML.getDistanceBetweenChars = function getDistanceBetweenChars(charName, targetN
 
     return MML.getDistance(charToken.get("left"), targetToken.get("left"), charToken.get("top"), targetToken.get("top"));
 };
-/* jshint -W069 */
+
 MML.skills = {};
 MML.skills["Acrobatics"] = {attribute: "coordination"};
 MML.skills["Acting"] = {attribute: "presence"};
@@ -7524,7 +7524,7 @@ MML.unarmedAttacks["Kick, Heavy Boots"] = {family: "Unarmed", initiative: 10, ta
 MML.unarmedAttacks["Kick, Plate"] = {family: "Unarmed", initiative: 10, task: 15, defenseMod: 15, damage: "1d8", damageType: "Impact"};
 MML.unarmedAttacks["Head Butt"] = {family: "Unarmed", initiative: 10, task: 25, defenseMod: 0, damage: "1d6", damageType: "Impact"};
 MML.unarmedAttacks["Bite"] = {family: "Unarmed", initiative: 10, task: 25, defenseMod: 15, damage: "1d3", damageType: "Thrust"};
-/* jshint -W069 */
+
 MML.startCombat = function startCombat(input) {
     this.currentRound = 1;
     this.combatants = input.selectedCharNames;
@@ -7971,7 +7971,7 @@ MML.parseCommand = function parseCommand(msg) {
         MML.processCommand(command);
     }
 };
-/* jshint -W069 */
+
 // This file contains all menus and defines the player object class
 
 MML.playerClass = {
@@ -9958,7 +9958,7 @@ MML.GmMenuWorld = function world(input) {
 MML.GmMenuUtilities = function utilities(input) {
     //edit states and other api stuff
 };
-/* jshint -W069 */
+
 on("ready", function() {
     MML.init();
 
@@ -10292,7 +10292,7 @@ on("ready", function() {
 
     });
 });
-/* jshint -W069 */
+
 MML.statusEffects = {};
 
 MML.statusEffects["Major Wound"] = function(effect, index) {
@@ -10618,7 +10618,7 @@ MML.statusEffects["Overborne"] = function(effect, index) {
         this.statusEffects[index].description = "Attack Modifier: -20%. Defense Modifier: -30%. Dodge Modifier: -40%. Initiative: -15";
     }
 };
-/* jshint -W069 */
+
 // Character Functions
 MML.getCharFromName = function getCharFromName(charName) {
     var character = findObjs({
@@ -11157,7 +11157,7 @@ MML.displayMenu = function displayMenu(input) {
 MML.displayTargetSelection = function displayTargetSelection(input) {
     sendChat("", "&{template:selectTarget} {{charName=" + input.charName + "}} {{input=" + MML.hexify(JSON.stringify(input)) + "}}");
 };
-/* jshint -W069 */
+
 MML.processCommand = function processCommand(command){
 	if(command.callback === MML.testedFunction){
 		MML.testResult = command;

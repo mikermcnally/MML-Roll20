@@ -1,4 +1,3 @@
-/* jshint -W069 */
 MML.skills = {};
 MML.skills["Acrobatics"] = {attribute: "coordination"};
 MML.skills["Acting"] = {attribute: "presence"};

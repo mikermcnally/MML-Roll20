@@ -1,4 +1,3 @@
-/* jshint -W069 */
 MML.processCommand = function processCommand(command){
 	if(command.callback === MML.testedFunction){
 		MML.testResult = command;
