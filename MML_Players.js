@@ -650,12 +650,31 @@ MML.GmMenuStartRound = function GmMenuStartRound(input) {
 MML.charMenuPrepareAction = function charMenuPrepareAction(input) {
   this.who = input.who;
   this.message = "Prepare " + this.who + "'s action";
-  this.buttons = [MML.menuButtons.setActionAttack,
+  var buttons = [MML.menuButtons.setActionAttack,
     MML.menuButtons.setActionCast,
     MML.menuButtons.setActionReadyItem,
     MML.menuButtons.setActionObserve
   ];
 
+  if (_.has(character.statusEffects, "Holding") ||
+    (_.has(character.statusEffects, "Grappled") && character.statusEffects["Grappled"].length === 1) &&
+    !_.contains(state.MML.characters[this.who].action.modifiers, "Release Opponent")
+  ) {
+    buttons.push({
+      text: "Release Opponent",
+      nextMenu: "charMenuPrepareAction",
+      callback: function(input) {
+        state.MML.characters[this.who].action.modifiers = "Release Opponent";
+        MML.processCommand({
+          type: "player",
+          who: this.name,
+          callback: "displayMenu",
+          input: {}
+        });
+      }
+    });
+  }
+  this.buttons = buttons;
 };
 MML.charMenuAttack = function charMenuAttack(input) {
   this.who = input.who;
@@ -678,7 +697,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
     });
   }
 
-  if (MML.isWieldingRangedWeapon(character)) {
+  if (MML.isWieldingRangedWeapon(character) ) {
     buttons.push({
       text: "Shoot From Cover",
       nextMenu: "charMenuAttackCalledShot",
@@ -782,7 +801,11 @@ MML.charMenuAttack = function charMenuAttack(input) {
       }
     });
   }
-  if (!_.has(character.statusEffects, "Holding") && !_.has(character.statusEffects, "Held") && !_.has(character.statusEffects, "Pinned")) {
+  if (!_.has(character.statusEffects, "Holding") &&
+    !_.has(character.statusEffects, "Held") &&
+    !_.has(character.statusEffects, "Pinned") &&
+    !(_.has(character.statusEffects, "Grappled") && character.statusEffects["Grappled"].targets.length > 1)
+  ) {
     buttons.push({
       text: "Place a Hold",
       nextMenu: "charMenuAttackCalledShot",
@@ -798,7 +821,6 @@ MML.charMenuAttack = function charMenuAttack(input) {
     });
   }
   if (_.has(character.statusEffects, "Held") ||
-    _.has(character.statusEffects, "Grappled") ||
     _.has(character.statusEffects, "Taken Down") ||
     _.has(character.statusEffects, "Pinned") ||
     _.has(character.statusEffects, "Overborne")
@@ -817,12 +839,15 @@ MML.charMenuAttack = function charMenuAttack(input) {
       }
     });
   }
-  if (_.has(character.statusEffects, "Holding")) {
+  if (_.has(character.statusEffects, "Grappled") &&
+    !_.has(character.statusEffects, "Pinned") &&
+    !_.has(character.statusEffects, "Held")
+  ) {
     buttons.push({
-      text: "Release a Hold",
+      text: "Break Grapple",
       nextMenu: "charMenuAttackStance",
       callback: function(input) {
-        state.MML.characters[this.who].action.weaponType = "Release a Hold";
+        state.MML.characters[this.who].action.weaponType = "Break Grapple";
         MML.processCommand({
           type: "player",
           who: this.name,
@@ -970,7 +995,7 @@ MML.charMenuAttackStance = function charMenuAttackStance(input) {
     }
   }];
 
-  if (["Punch", "Kick", "Head Butt", "Bite", "Grapple", "Place a Hold", "Break a Hold", "Release a Hold"].indexOf(character.action.weaponType) > -1) {
+  if (["Punch", "Kick", "Head Butt", "Bite", "Grapple", "Place a Hold", "Break a Hold", "Break Grapple"].indexOf(character.action.weaponType) > -1) {
     _.each(buttons, function(button) {
       button.nextMenu = "charMenuFinalizeAction";
     });

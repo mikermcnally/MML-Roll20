@@ -1989,6 +1989,17 @@ MML.applyGrapple = function applyGrapple(attacker, defender, attackName) {
           }
         }
       });
+
+      if (_.has(defender.statusEffects, "Holding")) {
+        MML.processCommand({
+          type: "character",
+          who: defender.name,
+          callback: "removeStatusEffect",
+          input: {
+            index: "Holding"
+          }
+        });
+      }
       MML.processCommand({
         type: "character",
         who: defender.name,
@@ -2073,6 +2084,7 @@ MML.applyGrapple = function applyGrapple(attacker, defender, attackName) {
           }
         });
       } else {
+        var holder = [{ name: attacker.name, bodyPart: state.MML.GM.currentAction.calledShot}];
         MML.processCommand({
           type: "character",
           who: defender.name,
@@ -2081,144 +2093,18 @@ MML.applyGrapple = function applyGrapple(attacker, defender, attackName) {
             attribute: "statusEffects",
             index: "Held",
             value: {
-              id: generateRowID(),
+              id: _.has(defender.statusEffects, "Held") ? defender.statusEffects["Held"].id : generateRowID(),
               name: "Held",
-              targets: [attacker.name],
-              bodyParts: [state.MML.GM.currentAction.calledShot]
+              targets: _.has(defender.statusEffects, "Pinned") ? defender.statusEffects["Pinned"].targets.push(holder) : [holder]
             }
           }
         });
       }
       break;
     case "Break a Hold":
-      if (_.has(attacker.statusEffects, "Held")) {
-        MML.processCommand({
-          type: "character",
-          who: attacker.name,
-          callback: "removeStatusEffect",
-          input: {
-            index: "Held"
-          }
-        });
-        MML.processCommand({
-          type: "character",
-          who: defender.name,
-          callback: "removeStatusEffect",
-          input: {
-            index: "Holding"
-          }
-        });
-        MML.processCommand({
-          type: "character",
-          who: attacker.name,
-          callback: "setApiCharAttributeJSON",
-          input: {
-            attribute: "statusEffects",
-            index: "Grappled",
-            value: {
-              id: generateRowID(),
-              name: "Grappled"
-            }
-          }
-        });
-        MML.processCommand({
-          type: "character",
-          who: defender.name,
-          callback: "setApiCharAttributeJSON",
-          input: {
-            attribute: "statusEffects",
-            index: "Grappled",
-            value: {
-              id: generateRowID(),
-              name: "Grappled"
-            }
-          }
-        });
-      } else if (_.has(attacker.statusEffects, "Pinned")) {
-        MML.processCommand({
-          type: "character",
-          who: attacker.name,
-          callback: "removeStatusEffect",
-          input: {
-            index: "Pinned"
-          }
-        });
-        MML.processCommand({
-          type: "character",
-          who: defender.name,
-          callback: "removeStatusEffect",
-          input: {
-            index: "Holding"
-          }
-        });
-        MML.processCommand({
-          type: "character",
-          who: attacker.name,
-          callback: "setApiCharAttributeJSON",
-          input: {
-            attribute: "statusEffects",
-            index: "Grappled",
-            value: {
-              id: generateRowID(),
-              name: "Grappled"
-            }
-          }
-        });
-        MML.processCommand({
-          type: "character",
-          who: defender.name,
-          callback: "setApiCharAttributeJSON",
-          input: {
-            attribute: "statusEffects",
-            index: "Grappled",
-            value: {
-              id: generateRowID(),
-              name: "Grappled"
-            }
-          }
-        });
-      } else {
-        MML.processCommand({
-          type: "character",
-          who: defender.name,
-          callback: "removeStatusEffect",
-          input: {
-            index: "Grappled"
-          }
-        });
-        MML.processCommand({
-          type: "character",
-          who: attacker.name,
-          callback: "removeStatusEffect",
-          input: {
-            index: "Grappled"
-          }
-        });
-      }
-      break;
-    case "Release a Hold":
-      if (_.has(defender.statusEffects, "Held")) {
-        MML.processCommand({
-          type: "character",
-          who: defender.name,
-          callback: "removeStatusEffect",
-          input: {
-            index: "Held"
-          }
-        });
-      } else if (_.has(defender.statusEffects, "Pinned")) {
-        MML.processCommand({
-          type: "character",
-          who: defender.name,
-          callback: "removeStatusEffect",
-          input: {
-            index: "Pinned"
-          }
-        });
-      }
       MML.processCommand({
         type: "character",
-        who: attacker.name,
+        who: defender.name,
         callback: "removeStatusEffect",
         input: {
           index: "Holding"
@@ -2226,60 +2112,192 @@ MML.applyGrapple = function applyGrapple(attacker, defender, attackName) {
       });
       MML.processCommand({
         type: "character",
-        who: attacker.name,
-        callback: "setApiCharAttributeJSON",
-        input: {
-          attribute: "statusEffects",
-          index: "Grappled",
-          value: {
-            id: generateRowID(),
-            name: "Grappled"
-          }
-        }
-      });
-      MML.processCommand({
-        type: "character",
         who: defender.name,
         callback: "setApiCharAttributeJSON",
         input: {
           attribute: "statusEffects",
           index: "Grappled",
           value: {
-            id: generateRowID(),
-            name: "Grappled"
+            id: _.has(defender.statusEffects, "Grappled") ? defender.statusEffects["Grappled"].id : generateRowID(),
+            name: "Grappled",
+            targets: _.has(defender.statusEffects, "Grappled") ? defender.statusEffects["Grappled"].targets.push(attacker.name) : [attacker.name]
           }
         }
       });
+      MML.processCommand({
+        type: "character",
+        who: attacker.name,
+        callback: "setApiCharAttributeJSON",
+        input: {
+          attribute: "statusEffects",
+          index: "Grappled",
+          value: {
+            id: _.has(attacker.statusEffects, "Grappled") ? attacker.statusEffects["Grappled"].id : generateRowID(),
+            name: "Grappled",
+            targets: _.has(attacker.statusEffects, "Grappled") ? attacker.statusEffects["Grappled"].targets.push(defender.name) : [defender.name]
+          }
+        }
+      });
+
+      if (_.has(attacker.statusEffects, "Held")) {
+        if (attacker.statusEffects["Held"].targets.length === 1) {
+          MML.processCommand({
+            type: "character",
+            who: attacker.name,
+            callback: "removeStatusEffect",
+            input: {
+              index: "Held"
+            }
+          });
+        } else {
+          MML.processCommand({
+            type: "character",
+            who: attacker.name,
+            callback: "setApiCharAttributeJSON",
+            input: {
+              attribute: "statusEffects",
+              index: "Held",
+              value: {
+                id: attacker.statusEffects["Held"].id,
+                name: "Held",
+                targets: _.reject(attacker.statusEffects["Held"].targets, function(target) { return target.name === defender.name; })
+              }
+            }
+          });
+        }
+      } else if (_.has(attacker.statusEffects, "Pinned")) {
+        if (attacker.statusEffects["Pinned"].targets.length === 1) {
+            MML.processCommand({
+            type: "character",
+            who: attacker.name,
+            callback: "removeStatusEffect",
+            input: {
+              index: "Pinned"
+            }
+          });
+        }  else {
+          MML.processCommand({
+            type: "character",
+            who: attacker.name,
+            callback: "setApiCharAttributeJSON",
+            input: {
+              attribute: "statusEffects",
+              index: "Pinned",
+              value: {
+                id: attacker.statusEffects["Pinned"].id,
+                name: "Pinned",
+                targets: _.without(attacker.statusEffects["Pinned"].targets, defender.name)
+              }
+            }
+          });
+        }
+
+      }
+      break;
+    case "Break Grapple":
+      if (true) {
+        MML.processCommand({
+          type: "character",
+          who: defender.name,
+          callback: "removeStatusEffect",
+          input: {
+            index: "Grappled"
+          }
+        });
+        MML.processCommand({
+          type: "character",
+          who: attacker.name,
+          callback: "removeStatusEffect",
+          input: {
+            index: "Grappled"
+          }
+        });
+      }
       break;
     case 'Takedown':
+      var grapplers = _.has(defender.statusEffects, "Grappled") ? defender.statusEffects["Grappled"].targets : [];
+      var holders = _.has(defender.statusEffects, "Held") ? defender.statusEffects["Held"].targets : [];
+      if (grapplers.length + holders.length > 1) {
+        MML.processCommand({
+          type: "character",
+          who: defender.name,
+          callback: "setApiCharAttributeJSON",
+          input: {
+            attribute: "statusEffects",
+            index: "Overborne",
+            value: {
+              id: generateRowID(),
+              name: "Overborne"
+            }
+          }
+        });
+      } else {
+        MML.processCommand({
+          type: "character",
+          who: defender.name,
+          callback: "setApiCharAttributeJSON",
+          input: {
+            attribute: "statusEffects",
+            index: "Taken Down",
+            value: {
+              id: generateRowID(),
+              name: "Taken Down"
+            }
+          }
+        });
+      }
+      if (holders.length > 0) {
+        var targets = [];
+        _.each(holders, function(target) {
+          if (["Chest", "Abdomen"].indexOf(target.bodyPart)) {
+            targets.push(target.name);
+          }
+          MML.processCommand({
+            type: "character",
+            who: target.name,
+            callback: "setApiCharAttribute",
+            input: {
+              attribute: "movementPosition",
+              value: "Prone"
+            }
+          });
+        });
+        if (targets.length > 0) {
+          MML.processCommand({
+            type: "character",
+            who: defender.name,
+            callback: "setApiCharAttributeJSON",
+            input: {
+              attribute: "statusEffects",
+              index: "Pinned",
+              value: {
+                id: generateRowID(),
+                name: "Pinned",
+                targets: targets
+              }
+            }
+          });
+        }
+      }
+      if (grapplers.length > 0) {
+        _.each(defender.statusEffects["Grappled"].targets, function(target) {
+          MML.processCommand({
+            type: "character",
+            who: target.name,
+            callback: "setApiCharAttribute",
+            input: {
+              attribute: "movementPosition",
+              value: "Prone"
+            }
+          });
+        });
+      }
       MML.processCommand({
         type: "character",
         who: defender.name,
         callback: "removeStatusEffect",
         input: {
           index: "Grappled"
-        }
-      });
-      MML.processCommand({
-        type: "character",
-        who: defender.name,
-        callback: "setApiCharAttributeJSON",
-        input: {
-          attribute: "statusEffects",
-          index: "Taken Down",
-          value: {
-            id: generateRowID(),
-            name: "Taken Down"
-          }
-        }
-      });
-      MML.processCommand({
-        type: "character",
-        who: attacker.name,
-        callback: "setApiCharAttribute",
-        input: {
-          attribute: "movementPosition",
-          value: "Prone"
         }
       });
       MML.processCommand({
@@ -2296,6 +2314,62 @@ MML.applyGrapple = function applyGrapple(attacker, defender, attackName) {
 
   }
   MML.endAction();
+};
+
+MML.releaseHold = function releaseHold(attacker, defender) {
+  if (_.has(defender.statusEffects, "Held")) {
+    MML.processCommand({
+      type: "character",
+      who: defender.name,
+      callback: "removeStatusEffect",
+      input: {
+        index: "Held"
+      }
+    });
+  } else if (_.has(defender.statusEffects, "Pinned")) {
+    MML.processCommand({
+      type: "character",
+      who: defender.name,
+      callback: "removeStatusEffect",
+      input: {
+        index: "Pinned"
+      }
+    });
+  }
+  MML.processCommand({
+    type: "character",
+    who: attacker.name,
+    callback: "removeStatusEffect",
+    input: {
+      index: "Holding"
+    }
+  });
+  MML.processCommand({
+    type: "character",
+    who: attacker.name,
+    callback: "setApiCharAttributeJSON",
+    input: {
+      attribute: "statusEffects",
+      index: "Grappled",
+      value: {
+        id: generateRowID(),
+        name: "Grappled"
+      }
+    }
+  });
+  MML.processCommand({
+    type: "character",
+    who: defender.name,
+    callback: "setApiCharAttributeJSON",
+    input: {
+      attribute: "statusEffects",
+      index: "Grappled",
+      value: {
+        id: generateRowID(),
+        name: "Grappled"
+      }
+    }
+  });
 };
 
 MML.criticalDefense = function criticalDefense() {
