@@ -804,7 +804,10 @@ MML.charMenuAttack = function charMenuAttack(input) {
       }
     });
   }
-  if ((_.has(character.statusEffects, "Grappled") && _.has(character.movementPosition, "Prone")) || _.has(character.statusEffects, "Taken Down")) {
+  if (((_.has(character.statusEffects, "Grappled") || _.has(character.statusEffects, "Held") || _.has(character.statusEffects, "Holding")) &&
+    character.movementPosition === "Prone") ||
+    ((_.has(character.statusEffects, "Taken Down") || _.has(character.statusEffects, "Overborne")) && !_.has(character.statusEffects, "Pinned"))
+  ) {
     buttons.push({
       text: "Regain Feet",
       nextMenu: "menuPause",
@@ -850,11 +853,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
       }
     });
   }
-  if (_.has(character.statusEffects, "Held") ||
-    _.has(character.statusEffects, "Taken Down") ||
-    _.has(character.statusEffects, "Pinned") ||
-    _.has(character.statusEffects, "Overborne")
-  ) {
+  if (_.has(character.statusEffects, "Held") || _.has(character.statusEffects, "Pinned")) {
     buttons.push({
       text: "Break a Hold",
       nextMenu: "menuPause",
@@ -875,7 +874,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
       }
     });
   }
-  if (_.has(character.statusEffects, "Grappled") &&
+  if ((_.has(character.statusEffects, "Grappled")) &&
     !_.has(character.statusEffects, "Pinned") &&
     !_.has(character.statusEffects, "Held")
   ) {
@@ -899,7 +898,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
       }
     });
   }
-  if ((_.has(character.statusEffects, "Holding") || _.has(character.statusEffects, "Grappled")) && character.movementPosition !== "Prone") {
+  if ((_.has(character.statusEffects, "Holding") || _.has(character.statusEffects, "Grappled") || _.has(character.statusEffects, "Held")) && character.movementPosition !== "Prone") {
     buttons.push({
       text: "Takedown",
       nextMenu: "menuPause",
@@ -1054,7 +1053,7 @@ MML.charMenuAttackStance = function charMenuAttackStance(input) {
     }
   }];
 
-  if (["Punch", "Kick", "Head Butt", "Bite", "Grapple", "Place a Hold", "Break a Hold", "Break Grapple", "Takedown"].indexOf(character.action.weaponType) > -1) {
+  if (["Punch", "Kick", "Head Butt", "Bite", "Grapple", "Place a Hold", "Break a Hold", "Break Grapple", "Takedown", "Regain Feet"].indexOf(character.action.weaponType) > -1) {
     _.each(buttons, function(button) {
       button.nextMenu = "charMenuFinalizeAction";
     });

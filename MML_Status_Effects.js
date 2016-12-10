@@ -79,11 +79,11 @@ MML.statusEffects["Wound Fatigue"] = function(effect, index) {
 MML.statusEffects["Number of Defenses"] = function(effect, index) {
   if (state.MML.GM.roundStarted === false) {
     delete this.statusEffects[index];
+  } else {
+    this.rangedDefenseMod += -20 * effect.number;
+    this.meleeDefenseMod += -20 * effect.number;
+    this.statusEffects[index].description = "Defense Modifier: " + -20 * effect.number + "%";
   }
-
-  this.rangedDefenseMod += -20 * effect.number;
-  this.meleeDefenseMod += -20 * effect.number;
-  this.statusEffects[index].description = "Defense Modifier: " + -20 * effect.number + "%";
 };
 MML.statusEffects["Fatigue"] = function(effect, index) {
   if (this.situationalInitBonus !== "No Combat") {
@@ -265,6 +265,8 @@ MML.statusEffects["Stunned"] = function(effect, index) {
 MML.statusEffects["Grappled"] = function(effect, index) {
   if (!state.MML.GM.inCombat) {
     delete this.statusEffects[index];
+  } else if (_.has(this.statusEffects, "Overborne") || _.has(this.statusEffects, "Taken Down")) {
+    this.statusEffects[index].description = "Effect does not stack with Overborne or Taken Down";
   } else {
     this.situationalMod += -10;
     this.statusEffects[index].description = "Situational Modifier: -10%.";
@@ -303,7 +305,12 @@ MML.statusEffects["Pinned"] = function(effect, index) {
   }
 };
 MML.statusEffects["Taken Down"] = function(effect, index) {
-  if (!state.MML.GM.inCombat) {
+  if (!state.MML.GM.inCombat ||
+    (!_.has(this.statusEffects, "Grappled") &&
+    !_.has(this.statusEffects, "Held") &&
+    !_.has(this.statusEffects, "Holding") &&
+    !_.has(this.statusEffects, "Pinned"))
+  ) {
     delete this.statusEffects[index];
   } else {
     if (this.situationalInitBonus !== "No Combat") {
@@ -315,7 +322,12 @@ MML.statusEffects["Taken Down"] = function(effect, index) {
   }
 };
 MML.statusEffects["Overborne"] = function(effect, index) {
-  if (!state.MML.GM.inCombat) {
+  if (!state.MML.GM.inCombat ||
+    (!_.has(this.statusEffects, "Grappled") &&
+    !_.has(this.statusEffects, "Held") &&
+    !_.has(this.statusEffects, "Holding") &&
+    !_.has(this.statusEffects, "Pinned"))
+  ) {
     delete this.statusEffects[index];
   } else {
     if (this.situationalInitBonus !== "No Combat") {

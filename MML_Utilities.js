@@ -38,7 +38,6 @@ MML.createAbility = function createAbility(name, action, istokenaction, characte
 
 MML.getCharAttribute = function getCharAttribute(charName, attribute) {
   var character = MML.getCharFromName(charName);
-
   var charAttribute = findObjs({
     _type: "attribute",
     _characterid: character.get("_id"),
