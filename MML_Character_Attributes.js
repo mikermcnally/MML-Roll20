@@ -962,7 +962,6 @@ MML.computeAttribute.statusEffects = {
       } else {
         MML.statusEffects[index].apply(this, [effect, index]);
       }
-      log(effect);
       MML.setCurrentAttribute(this.name, "repeating_statuseffects_" + effect.id + "_statusEffectName", index);
       MML.setCurrentAttribute(this.name, "repeating_statuseffects_" + effect.id + "_statusEffectDescription", (effect.description ? effect.description : ""));
     }, this);

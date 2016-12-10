@@ -223,7 +223,7 @@ MML.grappleAttackAction = function grappleAttackAction() {
         } else if (rolls.defenseRoll === "Success") {
             MML.endAction();
         } else {
-            MML.applyGrapple(character, target, attackType.name);
+            MML.grappleHandler(character, target, attackType.name);
         }
     } else if (!_.isUndefined(rolls.weaponDefenseRoll) && _.isUndefined(rolls.hitPositionRoll)) {
         if (rolls.weaponDefenseRoll === "Critical Success" || rolls.weaponDefenseRoll === "Success") {
@@ -231,7 +231,7 @@ MML.grappleAttackAction = function grappleAttackAction() {
             state.MML.GM.currentAction.parameters.defender = target;
             MML.hitPositionRoll(target);
         } else {
-            MML.applyGrapple(character, target, attackType.name);
+            MML.grappleHandler(character, target, attackType.name);
         }
     } else if (!_.isUndefined(rolls.hitPositionRoll) && _.isUndefined(rolls.damageRoll)) {
         if (rolls.weaponDefenseRoll === "Critical Success") {
@@ -2337,7 +2337,7 @@ MML.grappleDefenseBrawlRollApply = function grappleDefenseBrawlRollApply(input) 
     MML[state.MML.GM.currentAction.callback]();
 };
 
-MML.applyGrapple = function applyGrapple(attacker, defender, attackName) {
+MML.grappleHandler = function grappleHandler(attacker, defender, attackName) {
     switch (attacker.action.weaponType) {
         case "Grapple":
             MML.processCommand({
