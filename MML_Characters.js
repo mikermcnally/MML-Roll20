@@ -2024,14 +2024,7 @@ MML.applyGrapple = function applyGrapple(attacker, defender) {
   });
 
   if (_.has(defender.statusEffects, "Holding")) {
-    MML.processCommand({
-      type: "character",
-      who: defender.name,
-      callback: "removeStatusEffect",
-      input: {
-        index: "Holding"
-      }
-    });
+    MML.applyHoldBreak(state.MML.characters[defender.statusEffects["Holding"].targets[0]], defender);
   }
   MML.processCommand({
     type: "character",
@@ -2255,6 +2248,7 @@ MML.applyGrappleBreak = function applyGrappleBreak(attacker, defender) {
       }
     });
   }
+  log(defender.statusEffects["Grappled"]);
   if (defender.statusEffects["Grappled"].targets.length === 1) {
       MML.processCommand({
       type: "character",
@@ -2280,6 +2274,7 @@ MML.applyGrappleBreak = function applyGrappleBreak(attacker, defender) {
       }
     });
   }
+  log(defender.statusEffects["Grappled"]);
 };
 
 MML.applyTakedown = function applyTakedown(attacker, defender) {
