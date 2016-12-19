@@ -1,4 +1,3 @@
-/* jshint -W069 */
 MML.skills = {};
 MML.skills["Acrobatics"] = {attribute: "coordination"};
 MML.skills["Acting"] = {attribute: "presence"};
@@ -3116,3 +3115,21 @@ MML.meleeDamageMods = [
 	{low: 106, high: 120, value: 4},
 	{low: 121, high: 999, value: 5},
 ];
+
+MML.unarmedAttacks = {};
+MML.unarmedAttacks["Grapple"] = {name: "Grapple", family: "Unarmed", initiative: 10, task: 35, defenseMod: 35, damage: "None", damageType: "None"};
+MML.unarmedAttacks["Takedown"] = {name: "Takedown", family: "Unarmed", initiative: 10, task: 15, defenseMod: 25, damage: "None", damageType: "None"};
+MML.unarmedAttacks["Place a Hold, Head, Arm, Leg"] = {name: "Place a Hold, Head, Arm, Leg", family: "Unarmed", initiative: 10,  task: 0, defenseMod: 15, damage: "None", damageType: "None"};
+MML.unarmedAttacks["Place a Hold, Chest, Abdomen"] = {name: "Place a Hold, Chest, Abdomen", family: "Unarmed", initiative: 10,  task: 15, defenseMod: 25, damage: "None", damageType: "None"};
+MML.unarmedAttacks["Break a Hold"] = {name: "Break a Hold", family: "Unarmed", initiative: 10, task: 0, defenseMod: 0, damage: "None", damageType: "None"};
+MML.unarmedAttacks["Break Grapple"] = {name: "Break Grapple", family: "Unarmed", initiative: 10, task: 15, defenseMod: 25, damage: "None", damageType: "None"};
+MML.unarmedAttacks["Regain Feet"] = {name: "Regain Feet", family: "Unarmed", initiative: 10, task: 15, defenseMod: 25, damage: "None", damageType: "None"};
+MML.unarmedAttacks["Punch"] = {name: "Punch", family: "Unarmed", initiative: 10, task: 25, defenseMod: 15, damage: "1d4", damageType: "Impact"};
+MML.unarmedAttacks["Punch, Padded"] = {name: "Punch, Padded", family: "Unarmed", initiative: 10, task: 25, defenseMod: 15, damage: "1d2", damageType: "Impact"};
+MML.unarmedAttacks["Punch, Mail, Studs"] = {name: "Punch, Mail, Studs", family: "Unarmed", initiative: 10, task: 25, defenseMod: 15, damage: "1d6", damageType: "Impact"};
+MML.unarmedAttacks["Punch, Plate"] = {name: "Punch, Plate", family: "Unarmed", initiative: 10, task: 25, defenseMod: 15, damage: "1d6", damageType: "Impact"};
+MML.unarmedAttacks["Kick"] = {name: "Kick", family: "Unarmed", initiative: 10, task: 15, defenseMod: 15, damage: "1d4", damageType: "Impact"};
+MML.unarmedAttacks["Kick, Heavy Boots"] = {name: "Kick, Heavy Boots", family: "Unarmed", initiative: 10, task: 15, defenseMod: 15, damage: "1d6", damageType: "Impact"};
+MML.unarmedAttacks["Kick, Plate"] = {name: "Kick, Plate", family: "Unarmed", initiative: 10, task: 15, defenseMod: 15, damage: "1d8", damageType: "Impact"};
+MML.unarmedAttacks["Head Butt"] = {name: "Head Butt", family: "Unarmed", initiative: 10, task: 25, defenseMod: 0, damage: "1d6", damageType: "Impact"};
+MML.unarmedAttacks["Bite"] = {name: "Bite", family: "Unarmed", initiative: 10, task: 25, defenseMod: 15, damage: "1d3", damageType: "Thrust"};
