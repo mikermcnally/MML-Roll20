@@ -286,3 +286,37 @@ MML.getDistanceBetweenChars = function getDistanceBetweenChars(charName, targetN
 
   return MML.getDistance(charToken.get("left"), targetToken.get("left"), charToken.get("top"), targetToken.get("top"));
 };
+
+MML.getEpCost = function getEpCost(skill, ep) {
+  if (skill < 6) {
+    return MML.epModifiers[ep][0];
+  } else if (skill < 11) {
+    return MML.epModifiers[ep][1];
+  } else if (skill < 16) {
+    return MML.epModifiers[ep][2];
+  } else if (skill < 21) {
+    return MML.epModifiers[ep][3];
+  } else if (skill < 26) {
+    return MML.epModifiers[ep][4];
+  } else if (skill < 31) {
+    return MML.epModifiers[ep][5];
+  } else if (skill < 36) {
+    return MML.epModifiers[ep][6];
+  } else if (skill < 41) {
+    return MML.epModifiers[ep][7];
+  } else if (skill < 46) {
+    return MML.epModifiers[ep][8];
+  } else if (skill < 51) {
+    return MML.epModifiers[ep][9];
+  } else if (skill < 56) {
+    return MML.epModifiers[ep][10];
+  } else if (skill < 61) {
+    return MML.epModifiers[ep][11];
+  } else if (skill < 66) {
+    return MML.epModifiers[ep][12];
+  } else if (skill < 71) {
+    return MML.epModifiers[ep][13];
+  } else {
+    return MML.epModifiers[ep][14];
+  }
+};
