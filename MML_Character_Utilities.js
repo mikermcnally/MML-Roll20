@@ -275,7 +275,7 @@ MML.buildHpAttribute = function buildHpAttribute(character) {
       };
       break;
     default:
-      console.log("Fuck!");
+      console.log("Oh No!");
   }
   return hpAttribute;
 };
@@ -287,36 +287,33 @@ MML.getDistanceBetweenChars = function getDistanceBetweenChars(charName, targetN
   return MML.getDistance(charToken.get("left"), targetToken.get("left"), charToken.get("top"), targetToken.get("top"));
 };
 
-MML.getEpCost = function getEpCost(skill, ep) {
-  if (skill < 6) {
-    return MML.epModifiers[ep][0];
-  } else if (skill < 11) {
-    return MML.epModifiers[ep][1];
-  } else if (skill < 16) {
-    return MML.epModifiers[ep][2];
-  } else if (skill < 21) {
-    return MML.epModifiers[ep][3];
-  } else if (skill < 26) {
-    return MML.epModifiers[ep][4];
-  } else if (skill < 31) {
-    return MML.epModifiers[ep][5];
-  } else if (skill < 36) {
-    return MML.epModifiers[ep][6];
-  } else if (skill < 41) {
-    return MML.epModifiers[ep][7];
-  } else if (skill < 46) {
-    return MML.epModifiers[ep][8];
-  } else if (skill < 51) {
-    return MML.epModifiers[ep][9];
-  } else if (skill < 56) {
-    return MML.epModifiers[ep][10];
-  } else if (skill < 61) {
-    return MML.epModifiers[ep][11];
-  } else if (skill < 66) {
-    return MML.epModifiers[ep][12];
-  } else if (skill < 71) {
-    return MML.epModifiers[ep][13];
+MML.getEpCost = function getEpCost(skillName, skillLevel, ep) {
+  skillName = skillName.replace(/(Earth|Air|Fire|Water|Life)\s/, "");
+  if (skillLevel < 6) {
+    return MML.epModifiers[skillName][ep][0];
+  } else if (skillLevel < 11) {
+    return MML.epModifiers[skillName][ep][1];
+  } else if (skillLevel < 16) {
+    return MML.epModifiers[skillName][ep][2];
+  } else if (skillLevel < 21) {
+    return MML.epModifiers[skillName][ep][3];
+  } else if (skillLevel < 26) {
+    return MML.epModifiers[skillName][ep][4];
+  } else if (skillLevel < 31) {
+    return MML.epModifiers[skillName][ep][5];
+  } else if (skillLevel < 36) {
+    return MML.epModifiers[skillName][ep][6];
+  } else if (skillLevel < 41) {
+    return MML.epModifiers[skillName][ep][7];
+  } else if (skillLevel < 46) {
+    return MML.epModifiers[skillName][ep][8];
+  } else if (skillLevel < 51) {
+    return MML.epModifiers[skillName][ep][9];
+  } else if (skillLevel < 60) {
+    return MML.epModifiers[skillName][ep][10];
+  } else if (skillLevel < 70) {
+    return MML.epModifiers[skillName][ep][11];
   } else {
-    return MML.epModifiers[ep][14];
+    return MML.epModifiers[skillName][ep][12];
   }
 };
