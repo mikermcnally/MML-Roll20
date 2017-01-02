@@ -1690,7 +1690,7 @@ MML.rangedDefense = function rangedDefense(defender, attackerWeapon, range) {
   });
 };
 
-MML.rangedDefenseRoll = function missileBlockRoll(input) {
+MML.rangedDefenseRoll = function rangedDefenseRoll(input) {
   MML.processCommand({
     type: "character",
     who: this.name,
@@ -1702,7 +1702,7 @@ MML.rangedDefenseRoll = function missileBlockRoll(input) {
   });
 };
 
-MML.rangedDefenseRollResult = function missileBlockRollResult(input) {
+MML.rangedDefenseRollResult = function rangedDefenseRollResult(input) {
   var currentRoll = state.MML.players[this.player].currentRoll;
 
   if (this.player === state.MML.GM.player) {
@@ -1741,7 +1741,7 @@ MML.rangedDefenseRollResult = function missileBlockRollResult(input) {
   }
 };
 
-MML.rangedDefenseRollApply = function missileBlockRollApply(input) {
+MML.rangedDefenseRollApply = function rangedDefenseRollApply(input) {
   var result = state.MML.players[this.player].currentRoll.result;
 
   if (result === "Success") {
@@ -2587,7 +2587,7 @@ MML.meleeDamageRollApply = function meleeDamageRollApply(input) {
   MML[state.MML.GM.currentAction.callback]();
 };
 
-MML.missileDamageRoll = function missileDamageRoll(character, attackerWeapon, crit, bonusDamage, range) {
+MML.missileDamageRoll = function missileDamageRoll(character, attackerWeapon, crit, bonusDamage) {
   bonusDamage = 0;
   state.MML.GM.currentAction.parameters.damageType = attackerWeapon.damageType;
   MML.processCommand({

@@ -56,6 +56,7 @@ MML.characterConstructor = function characterConstructor(charName) {
   this.attributeMeleeAttackMod = MML.getCurrentAttributeAsFloat(this.name, "attributeMeleeAttackMod");
   this.meleeDamageMod = MML.getCurrentAttributeAsFloat(this.name, "meleeDamageMod");
   this.attributeMissileAttackMod = MML.getCurrentAttributeAsFloat(this.name, "attributeMissileAttackMod");
+  this.castingMod = MML.getCurrentAttributeAsFloat(this.name, "castingMod");
   this.attributeCastingMod = MML.getCurrentAttributeAsFloat(this.name, "attributeCastingMod");
   this.spellLearningMod = MML.getCurrentAttributeAsFloat(this.name, "spellLearningMod");
   this.statureCheckMod = MML.getCurrentAttributeAsFloat(this.name, "statureCheckMod");
@@ -819,6 +820,12 @@ MML.computeAttribute.attributeMissileAttackMod = {
     return MML.attributeMods.perception[this.perception] + MML.attributeMods.coordination[this.coordination] + MML.attributeMods.strength[this.strength];
   }
 };
+MML.computeAttribute.castingMod = {
+  dependents: [],
+  compute: function() {
+    return this.castingMod;
+  }
+};
 MML.computeAttribute.attributeCastingMod = {
   dependents: [],
   compute: function() {
@@ -947,6 +954,7 @@ MML.computeAttribute.statusEffects = {
     "meleeDefenseMod",
     "missileAttackMod",
     "meleeAttackMod",
+    "castingMod",
     "perceptionCheckMod",
     "roundsExertion"
   ],

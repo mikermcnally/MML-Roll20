@@ -339,3 +339,22 @@ MML.statusEffects["Overborne"] = function(effect, index) {
     this.statusEffects[index].description = "Attack Modifier: -20%. Defense Modifier: -30%. Dodge Modifier: -40%. Initiative: -15";
   }
 };
+MML.statusEffects["Hasten Spell"] = function(effect, index) {
+  this.castingMod += -10;
+  this.statusEffects[index].description = "Casting Modifier: -10%";
+  if (this.situationalInitBonus !== "No Combat" && this.action.spell.actions === 1) {
+    this.situationalInitBonus += 5;
+    this.statusEffects[index].description += ". Initiative: -15";
+  } else {
+    this.action.spell.actions -= 1;
+    this.statusEffects[index].description += ". Spell Actions Required: -1";
+  }
+};
+MML.statusEffects["Ease Spell"] = function(effect, index) {
+  this.castingMod += 10;
+  this.action.spell.actions += 1;
+  this.statusEffects[index].description = "Casting Modifier: +10%. Spell Actions Required: +1";
+};
+MML.statusEffects["Spell Range Increase"] = function(effect, index) {
+
+};

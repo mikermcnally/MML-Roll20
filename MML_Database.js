@@ -3182,3 +3182,13 @@ MML.epModifiers["Symbolism"][23] = [22,21,20,19,18,17,15,14,13,12,11,10,8];
 MML.epModifiers["Symbolism"][25] = [24,23,22,21,19,18,17,16,14,13,12,11,9];
 MML.epModifiers["Symbolism"][28] = [27,26,24,23,22,20,19,17,16,15,13,12,11];
 MML.epModifiers["Symbolism"][30] = [29,28,26,25,23,22,20,19,17,16,14,13,11];
+MML.epModifiers["Target Size"] = {};
+MML.epModifiers["Target Size"]["Very Small"] = 0.25;
+MML.epModifiers["Target Size"]["Small"] = 0.5;
+MML.epModifiers["Target Size"]["Medium"] = 1;
+MML.epModifiers["Target Size"]["Large"] = 2;
+MML.epModifiers["Target Size"]["Very Large"] = 3;
+MML.epModifiers["Target Size"]["Huge"] = 5;
+MML.epModifiers["Target Size"]["Massive"] = 8;
+
+MML.metaMagic = {};
