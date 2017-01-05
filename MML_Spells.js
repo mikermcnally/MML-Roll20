@@ -52,9 +52,9 @@ MML.spells["Dart"] = {
       }
     } else if (_.isUndefined(rolls.damageRoll)) {
       if (rolls.attackRoll === "Critical Success") {
-        MML.missileDamageRoll(character, {damageType: "Pierce", damage: _.isUndefined(currentAction.metaMagic["Increase Potency"]) ? "3d6" : (3*currentAction.metaMagic["Increase Potency"]) + "d" + 6}, true);
+        MML.missileDamageRoll(character, {damageType: "Pierce", damage: _.contains(character.action.modifiers, ["Increase Potency"]) ? (3*character.action.modifiers["Increase Potency"]) + "d6" : "3d6"}, true);
       } else {
-        MML.missileDamageRoll(character, {damageType: "Pierce", damage: _.isUndefined(currentAction.metaMagic["Increase Potency"]) ? "3d6" : (3*currentAction.metaMagic["Increase Potency"]) + "d" + 6}, false);
+        MML.missileDamageRoll(character, {damageType: "Pierce", damage: _.contains(character.action.modifiers, ["Increase Potency"]) ? (3*character.action.modifiers["Increase Potency"]) + "d6" : "3d6"}, false);
       }
     } else {
       MML.damageTargetAction("endAction");
