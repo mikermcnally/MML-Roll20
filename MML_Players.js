@@ -652,7 +652,6 @@ MML.charMenuPrepareAction = function charMenuPrepareAction(input) {
   this.message = "Prepare " + this.who + "'s action";
   var character = state.MML.characters[this.who];
   var buttons = [MML.menuButtons.setActionAttack,
-    MML.menuButtons.setActionCast,
     MML.menuButtons.setActionReadyItem,
     MML.menuButtons.setActionObserve
   ];
@@ -665,6 +664,23 @@ MML.charMenuPrepareAction = function charMenuPrepareAction(input) {
       nextMenu: "charMenuPrepareAction",
       callback: function(input) {
         state.MML.characters[this.who].action.modifiers = "Release Opponent";
+        MML.processCommand({
+          type: "player",
+          who: this.name,
+          callback: "displayMenu",
+          input: {}
+        });
+      }
+    });
+  }
+  if (character.spells.length > 0) {
+    buttons.push(MML.menuButtons.setActionCast);
+  }
+  if (!_.isUndefined(character.action.spell) && character.action.spell.actions > 1) {
+    buttons.push({
+      text: "Continue Casting",
+      nextMenu: "charMenuFinalizeAction",
+      callback: function(input) {
         MML.processCommand({
           type: "player",
           who: this.name,
@@ -1072,6 +1088,92 @@ MML.charMenuAttackStance = function charMenuAttackStance(input) {
     });
   }
   this.buttons = buttons;
+};
+
+MML.charMenuCast = function charMenuCast(input) {
+  this.who = input.who;
+  this.message = "Choose a spell";
+  this.buttons = [];
+  var character = state.MML.characters[this.who];
+  _.each(character.spells, function(spellName) {
+
+    this.buttons.push({
+      text: spellName,
+      nextMenu: "menuPause",
+      callback: function(input) {
+        MML.processCommand({
+          type: "character",
+          who: this.who,
+          callback: "setApiCharAttribute",
+          input: {
+            attribute: "action",
+            value: {
+              name: "Cast",
+              spell: MML.spells[spellName],
+              callback: "startCastAction",
+              modifiers: []
+            }
+          }
+        });
+        MML.processCommand({
+          type: "player",
+          who: this.name,
+          callback: "charMenuMetaMagic",
+          input: {who: this.who}
+        });
+        MML.processCommand({
+          type: "player",
+          who: this.name,
+          callback: "displayMenu",
+          input: {}
+        });
+      }
+    });
+  }, this);
+};
+MML.charMenuMetaMagic = function charMenuMetaMagic(input) {
+  this.who = input.who;
+  this.message = "Choose meta magic";
+  this.buttons = [];
+  var character = state.MML.characters[this.who];
+  log(character.action);
+  _.each(character.action.spell.metaMagic.concat(["Hasten Spell", "Ease Spell"]), function(metaMagicName) {
+    this.buttons.push({
+      text: metaMagicName,
+      nextMenu: "menuPause",
+      callback: function(input) {
+        if (_.contains(character.action.modifiers, metaMagicName)) {
+          state.MML.characters[this.who].action.modifiers = _.without(state.MML.characters[this.who].action.modifiers, metaMagicName);
+        } else {
+          state.MML.characters[this.who].action.modifiers.push(metaMagicName);
+        }
+        MML.processCommand({
+          type: "player",
+          who: this.name,
+          callback: "charMenuMetaMagic",
+          input: {who: this.who}
+        });
+        MML.processCommand({
+          type: "player",
+          who: this.name,
+          callback: "displayMenu",
+          input: {}
+        });
+      }
+    });
+  }, this);
+  this.buttons.push({
+    text: "Next Menu",
+    nextMenu: "charMenuFinalizeAction",
+    callback: function(input) {
+      MML.processCommand({
+        type: "player",
+        who: this.name,
+        callback: "displayMenu",
+        input: {}
+      });
+    }
+  });
 };
 
 MML.charMenuFinalizeAction = function charMenuFinalizeAction(input) {

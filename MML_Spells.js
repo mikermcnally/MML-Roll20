@@ -1,5 +1,7 @@
 MML.spells = {};
 MML.spells["Flame Bolt"] = {
+  name: "Flame Bolt",
+  family: "Fire",
   components: ["Spoken"],
   actions: 1,
   task: 45,
@@ -9,6 +11,8 @@ MML.spells["Flame Bolt"] = {
   target: [15, 1]
 };
 MML.spells["Dart"] = {
+  name: "Dart",
+  family: "Air",
   components: ["Spoken", "Physical", "Substantive"],
   actions: 1,
   task: 55,

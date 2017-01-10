@@ -88,6 +88,18 @@ MML.getCurrentAttributeAsBool = function getCurrentAttributeAsBool(charName, att
   }
 };
 
+MML.getCurrentAttributeAsArray = function getCurrentAttributeAsArray(charName, attribute) {
+  var result = MML.getCurrentAttribute(charName, attribute);
+
+  try {
+    result = JSON.parse(result);
+  } catch (e) {
+    MML.setCurrentAttribute(charName, attribute, "[]");
+    result = [];
+  }
+  return result;
+};
+
 MML.getCurrentAttributeJSON = function getCurrentAttributeJSON(charName, attribute) {
   var result = MML.getCurrentAttribute(charName, attribute);
 

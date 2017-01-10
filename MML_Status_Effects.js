@@ -340,20 +340,34 @@ MML.statusEffects["Overborne"] = function(effect, index) {
   }
 };
 MML.statusEffects["Hasten Spell"] = function(effect, index) {
-  this.castingMod += -10;
-  this.statusEffects[index].description = "Casting Modifier: -10%";
-  if (this.situationalInitBonus !== "No Combat" && this.action.spell.actions === 1) {
-    this.situationalInitBonus += 5;
-    this.statusEffects[index].description += ". Initiative: -15";
+  if (state.MML.GM.inCombat === false || !_.contains(this.action.modifiers, "Hasten Spell")) {
+    delete this.statusEffects[index];
   } else {
-    this.action.spell.actions -= 1;
-    this.statusEffects[index].description += ". Spell Actions Required: -1";
+    this.castingMod += -10;
+    this.statusEffects[index].description = "Casting Modifier: -10%";
+    if (this.situationalInitBonus !== "No Combat" && this.action.spell.actions === 1) {
+      this.situationalInitBonus += 5;
+      this.statusEffects[index].description += ". Initiative: -15";
+    } else {
+      if (!effect.applied) {
+        this.action.spell.actions -= 1;
+        effect.applied = true;
+      }
+      this.statusEffects[index].description += ". Spell Actions Required: -1";
+    }
   }
 };
 MML.statusEffects["Ease Spell"] = function(effect, index) {
-  this.castingMod += 10;
-  this.action.spell.actions += 1;
-  this.statusEffects[index].description = "Casting Modifier: +10%. Spell Actions Required: +1";
+  if (state.MML.GM.inCombat === false || !_.contains(this.action.modifiers, "Ease Spell")) {
+    delete this.statusEffects[index];
+  } else {
+    this.castingMod += 10;
+    if (!effect.applied) {
+      this.action.spell.actions += 1;
+      effect.applied = true;
+    }
+    this.statusEffects[index].description = "Casting Modifier: +10%. Spell Actions Required: +1";
+  }
 };
 MML.statusEffects["Spell Range Increase"] = function(effect, index) {
 

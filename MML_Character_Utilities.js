@@ -287,6 +287,78 @@ MML.getDistanceBetweenChars = function getDistanceBetweenChars(charName, targetN
   return MML.getDistance(charToken.get("left"), targetToken.get("left"), charToken.get("top"), targetToken.get("top"));
 };
 
+MML.getMagicSkill = function getMagicSkill(character, spell) {
+  if (["Fire", "Earth", "Water", "Air", "Life"].indexOf(spell.family)) {
+    var wizardry_skill = 0;
+    var elementalism_skill = 0;
+    if (!_.isUndefined(character.skills["Wizardry"])) {
+      wizardry_skill = character.skills["Wizardry"].level;
+    }
+    switch (spell.family) {
+      case "Fire":
+        if (!_.isUndefined(character.skills["Fire Elementalism"])) {
+          elementalism_skill = character.skills["Fire Elementalism"].level;
+        }
+        if (!_.isUndefined(character.skills["Lore: Element of Fire"]) && character.skills["Lore: Element of Fire"].level > 19) {
+          wizardry_skill -= 10;
+        } else {
+          wizardry_skill -= 20;
+        }
+        break;
+      case "Earth":
+        if (!_.isUndefined(character.skills["Earth Elementalism"])) {
+          elementalism_skill = character.skills["Earth Elementalism"].level;
+        }
+        if (!_.isUndefined(character.skills["Lore: Element of Earth"]) && character.skills["Lore: Element of Earth"].level > 19) {
+          wizardry_skill -= 10;
+        } else {
+          wizardry_skill -= 20;
+        }
+        break;
+      case "Water":
+        if (!_.isUndefined(character.skills["Water Elementalism"])) {
+          elementalism_skill = character.skills["Water Elementalism"].level;
+        }
+        if (!_.isUndefined(character.skills["Lore: Element of Water"]) && character.skills["Lore: Element of Water"].level > 19) {
+          wizardry_skill -= 10;
+        } else {
+          wizardry_skill -= 20;
+        }
+        break;
+      case "Air":
+        if (!_.isUndefined(character.skills["Air Elementalism"])) {
+          elementalism_skill = character.skills["Air Elementalism"].level;
+        }
+        if (!_.isUndefined(character.skills["Lore: Element of Air"]) && character.skills["Lore: Element of Air"].level > 19) {
+          wizardry_skill -= 10;
+        } else {
+          wizardry_skill -= 20;
+        }
+        break;
+      case "Life":
+        if (!_.isUndefined(character.skills["Life Elementalism"])) {
+          elementalism_skill = character.skills["Life Elementalism"].level;
+        }
+        if (!_.isUndefined(character.skills["Lore: Element of Life"]) && character.skills["Lore: Element of Life"].level > 19) {
+          wizardry_skill -= 10;
+        } else {
+          wizardry_skill -= 20;
+        }
+        break;
+      default:
+    }
+    if (wizardry_skill > elementalism_skill) {
+      return wizardry_skill;
+    } else {
+      return elementalism_skill;
+    }
+  } else if (spell.family === "Symbolism") {
+    return character.skills["Symbolism"].level;
+  } else {
+    return character.skills["Wizardry"].level;
+  }
+};
+
 MML.getEpCost = function getEpCost(skillName, skillLevel, ep) {
   skillName = skillName.replace(/(Earth|Air|Fire|Water|Life)\s/, "");
   if (skillLevel < 6) {

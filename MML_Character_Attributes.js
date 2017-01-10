@@ -96,6 +96,7 @@ MML.characterConstructor = function characterConstructor(charName) {
   this.skills = MML.getSkillAttributes(this.name, "skills");
   this.weaponSkills = MML.getSkillAttributes(this.name, "weaponskills");
   this.fov = MML.getCurrentAttributeAsFloat(this.name, "fov");
+  this.spells = MML.getCurrentAttributeAsArray(this.name, 'spells');
 };
 
 MML.updateCharacter = function(input) {
@@ -1418,5 +1419,11 @@ MML.computeAttribute.weaponSkills = {
 
     this.weaponSkills = characterSkills;
     return characterSkills;
+  }
+};
+MML.computeAttribute.spells = {
+  dependents: [],
+  compute: function() {
+    return this.spells;
   }
 };
