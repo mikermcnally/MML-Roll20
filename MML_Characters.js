@@ -907,7 +907,14 @@ MML.startAction = function startAction(input) {
     character: this
   };
 
-  if (!_.isUndefined(this.action.getTargets)) {
+  if (_.contains(this.action.modifiers, "Release Opponent")) {
+    MML.processCommand({
+      type: "character",
+      who: this.name,
+      callback: "releaseOpponentAction",
+      input: {}
+    });
+  } else if (!_.isUndefined(this.action.getTargets)) {
     MML.processCommand({
       type: "character",
       who: this.name,
@@ -1801,10 +1808,10 @@ MML.grappleDefense = function grappleDefense(defender, attackType) {
 
   if (
     MML.isUnarmed(defender) ||
+    _.has(defender.statusEffects, "Stunned") ||
     _.has(defender.statusEffects, "Holding") ||
     _.has(defender.statusEffects, "Held") ||
     _.has(defender.statusEffects, "Grappled") ||
-    _.has(defender.statusEffects, "Holding") ||
     _.has(defender.statusEffects, "Taken Down") ||
     _.has(defender.statusEffects, "Pinned") ||
     _.has(defender.statusEffects, "Overborne")
@@ -2464,58 +2471,27 @@ MML.applyRegainFeet = function applyRegainFeet(attacker, defender) {
 };
 
 MML.releaseHold = function releaseHold(attacker, defender) {
-  if (_.has(defender.statusEffects, "Held")) {
-    MML.processCommand({
-      type: "character",
-      who: defender.name,
-      callback: "removeStatusEffect",
-      input: {
-        index: "Held"
-      }
-    });
-  } else if (_.has(defender.statusEffects, "Pinned")) {
-    MML.processCommand({
-      type: "character",
-      who: defender.name,
-      callback: "removeStatusEffect",
-      input: {
-        index: "Pinned"
-      }
-    });
-  }
+  MML.applyHoldBreak(defender, attacker);
   MML.processCommand({
-    type: "character",
-    who: attacker.name,
-    callback: "removeStatusEffect",
+    type: "player",
+    who: defender.player,
+    callback: "charMenuResistRelease",
     input: {
-      index: "Holding"
+      who: defender.name,
+      attacker: attacker,
+      defender: defender
     }
   });
+};
+
+MML.releaseGrapple = function releaseGrapple(attacker, defender) {
+  MML.applyGrappleBreak(defender, attacker);
+  state.MML.characters[character.name].action.modifiers = _.without(state.MML.characters[character.name].action.modifiers, "Release Opponent");
   MML.processCommand({
     type: "character",
-    who: attacker.name,
-    callback: "setApiCharAttributeJSON",
-    input: {
-      attribute: "statusEffects",
-      index: "Grappled",
-      value: {
-        id: generateRowID(),
-        name: "Grappled"
-      }
-    }
-  });
-  MML.processCommand({
-    type: "character",
-    who: defender.name,
-    callback: "setApiCharAttributeJSON",
-    input: {
-      attribute: "statusEffects",
-      index: "Grappled",
-      value: {
-        id: generateRowID(),
-        name: "Grappled"
-      }
-    }
+    who: character.name,
+    callback: "startAction",
+    input: {}
   });
 };
 

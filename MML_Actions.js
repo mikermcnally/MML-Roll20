@@ -182,6 +182,33 @@ MML.grappleAttackAction = function grappleAttackAction() {
   }
 };
 
+MML.releaseOpponentAction = function releaseOpponentAction() {
+  var currentAction = state.MML.GM.currentAction;
+  var character = currentAction.character;
+  var parameters = currentAction.parameters;
+  var target = parameters.target;
+  var rolls = currentAction.rolls;
+
+  if (_.has(character.statusEffects, "Holding")) {
+    MML.releaseHold(character, target);
+  } else if (parameters.targetAgreed) {
+    MML.releaseGrapple(character, target);
+  } else {
+    MML.processCommand({
+      type: "character",
+      who: character.name,
+      callback: "setApiCharAttribute",
+      input: {
+        attribute: "action",
+        value: {
+          name: "Attack",
+          weaponType: "Break Grapple"
+        }
+      }
+    });
+  }
+};
+
 MML.damageTargetAction = function damageTargetAction(callback) {
   var currentAction = state.MML.GM.currentAction;
   var parameters = currentAction.parameters;

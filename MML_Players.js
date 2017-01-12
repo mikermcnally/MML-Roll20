@@ -657,14 +657,15 @@ MML.charMenuPrepareAction = function charMenuPrepareAction(input) {
     MML.menuButtons.setActionObserve
   ];
 
-  if ((_.has(character.statusEffects, "Holding") || _.has(character.statusEffects, "Grappled")) &&
+  if ((_.has(character.statusEffects, "Holding") ||
+    (_.has(character.statusEffects, "Grappled")) && character.statusEffects["Grappled"].targets.length === 1) &&
     !_.contains(character.action.modifiers, "Release Opponent")
   ) {
     buttons.push({
       text: "Release Opponent",
       nextMenu: "charMenuPrepareAction",
       callback: function(input) {
-        state.MML.characters[this.who].action.modifiers = "Release Opponent";
+        state.MML.characters[this.who].action.modifiers.push("Release Opponent");
         MML.processCommand({
           type: "player",
           who: this.name,
@@ -1305,11 +1306,8 @@ MML.charMenuGrappleDefenseRoll = function charMenuGrappleDefenseRoll(input) {
   this.who = input.who;
   this.message = "How will " + this.who + " defend?";
   var buttons = [];
-  log(!MML.isUnarmed(state.MML.characters[this.who]));
-  log(_.intersection( _.keys(state.MML.characters[this.who].statusEffects), ["Stunned", "Grappled", "Held", "Holding", "Pinned", "Taken Down", "Overborne"]));
-  if (_.intersection( _.keys(state.MML.characters[this.who].statusEffects), ["Stunned", "Grappled", "Held", "Holding", "Pinned", "Taken Down", "Overborne"]).length === 0 ||
-    !MML.isUnarmed(state.MML.characters[this.who])
-  ) {
+
+  if (!_.isUndefined(attackChance)) {
     buttons.push({
       text: "With Weapon: " + attackChance + "%",
       nextMenu: "menuIdle",
@@ -1353,6 +1351,43 @@ MML.charMenuGrappleDefenseRoll = function charMenuGrappleDefenseRoll(input) {
       });
     }
   });
+  this.buttons = buttons;
+};
+MML.charMenuResistRelease = function charMenuResistRelease(input) {
+  this.who = input.who;
+  this.message = "Allow " + input.attacker + " to release grapple?";
+  var defender = input.defender;
+  // var brawlSkill;
+  // var defaultMartialSkill = defender.weaponSkills["Default Martial"].level;
+  // var defenseMod = defender.meleeDefenseMod + defender.attributeDefenseMod + attackType.defenseMod;
+  // var sitMod = defender.situationalMod;
+  //
+  // if (_.isUndefined(defender.weaponSkills["Brawling"])) {
+  //   brawlSkill = 0;
+  // } else {
+  //   brawlSkill = defender.weaponSkills["Brawling"].level;
+  // }
+  //
+  // if (brawlSkill >= defaultMartialSkill) {
+  //   brawlChance = defender.weaponSkills["Brawling"].level + defenseMod + sitMod;
+  // } else {
+  //   brawlChance = defaultMartialSkill + defenseMod + sitMod;
+  // }
+
+  var buttons = [{
+    text: "Yes",
+    nextMenu: "menuIdle",
+    callback: function(input) {
+      state.MML.GM.currentAction.parameters.targetAgreed = true;
+      MML.releaseOpponentAction();
+    }
+  },{
+    text: "No",
+    nextMenu: "menuIdle",
+    callback: function(input) {
+      MML.releaseOpponentAction();
+    }
+  }];
   this.buttons = buttons;
 };
 MML.charMenuMajorWoundRoll = function charMenuMajorWoundRoll(input) {
