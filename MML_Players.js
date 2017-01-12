@@ -832,7 +832,7 @@ MML.charMenuAttack = function charMenuAttack(input) {
   if (!_.has(character.statusEffects, "Holding") &&
     !_.has(character.statusEffects, "Held") &&
     !_.has(character.statusEffects, "Pinned") &&
-    !(_.has(character.statusEffects, "Grappled") && character.statusEffects["Grappled"].targets.length > 1)
+    (!_.has(character.statusEffects, "Grappled") || character.statusEffects["Grappled"].targets.length === 1)
   ) {
     buttons.push({
       text: "Place a Hold",
@@ -899,7 +899,11 @@ MML.charMenuAttack = function charMenuAttack(input) {
       }
     });
   }
-  if ((_.has(character.statusEffects, "Holding") || _.has(character.statusEffects, "Grappled") || _.has(character.statusEffects, "Held")) && character.movementPosition !== "Prone") {
+  if ((_.has(character.statusEffects, "Holding") ||
+    (_.has(character.statusEffects, "Grappled") && character.statusEffects["Grappled"].targets.length === 1) ||
+    (_.has(character.statusEffects, "Held") && character.statusEffects["Held"].targets.length === 1)) &&
+    character.movementPosition !== "Prone"
+  ) {
     buttons.push({
       text: "Takedown",
       nextMenu: "menuPause",
