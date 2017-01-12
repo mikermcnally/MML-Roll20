@@ -151,14 +151,14 @@ MML.grappleAttackAction = function grappleAttackAction() {
       MML.endAction();
     }
   } else if (!_.isUndefined(rolls.brawlDefenseRoll)) {
-    if (rolls.defenseRoll === "Critical Success") {
+    if (rolls.brawlDefenseRoll === "Critical Success") {
       MML.processCommand({
         type: "character",
         who: target.name,
         callback: "criticalDefense",
         input: {}
       });
-    } else if (rolls.defenseRoll === "Success") {
+    } else if (rolls.brawlDefenseRoll === "Success") {
       MML.endAction();
     } else {
       MML.grappleHandler(character, target, attackType.name);
@@ -189,8 +189,27 @@ MML.releaseOpponentAction = function releaseOpponentAction() {
   var target = parameters.target;
   var rolls = currentAction.rolls;
 
-  if (_.has(character.statusEffects, "Holding")) {
-    MML.releaseHold(character, target);
+  if (_.isUndefined(parameters.targetAgreed)) {
+    if (_.has(character.statusEffects, "Holding")) {
+      MML.releaseHold(character, target);
+    } else {
+      MML.processCommand({
+        type: "player",
+        who: target.player,
+        callback: "charMenuResistRelease",
+        input: {
+          who: target.name,
+          attacker: character,
+          defender: target
+        }
+      });
+      MML.processCommand({
+        type: "player",
+        who: target.player,
+        callback: "displayMenu",
+        input: {}
+      });
+    }
   } else if (parameters.targetAgreed) {
     MML.releaseGrapple(character, target);
   } else {
@@ -202,9 +221,23 @@ MML.releaseOpponentAction = function releaseOpponentAction() {
         attribute: "action",
         value: {
           name: "Attack",
-          weaponType: "Break Grapple"
+          callback: "startAttackAction",
+          weaponType: "Break Grapple",
+          modifiers: []
         }
       }
+    });
+    state.MML.GM.currentAction = {
+      character: state.MML.characters[character.name],
+      targetArray: [target.name],
+      targetIndex: 0,
+      resistRelease: true
+    };
+    MML.processCommand({
+      type: "character",
+      who: character.name,
+      callback: state.MML.characters[character.name].action.callback,
+      input: {}
     });
   }
 };

@@ -1253,7 +1253,7 @@ MML.computeAttribute.action = {
       var leftHand = MML.getWeaponFamily(this, "leftHand");
       var rightHand = MML.getWeaponFamily(this, "rightHand");
 
-      if (["Punch", "Kick", "Head Butt", "Bite", "Grapple", "Place a Hold", "Break a Hold", "Release a Hold"].indexOf(this.action.weaponType) > -1 ||
+      if (["Punch", "Kick", "Head Butt", "Bite", "Grapple", "Place a Hold", "Break a Hold", "Break Grapple"].indexOf(this.action.weaponType) > -1 ||
         (leftHand === "unarmed" && rightHand === "unarmed")
       ) {
         if (!_.isUndefined(this.weaponSkills["Brawling"]) && this.weaponSkills["Brawling"].level > this.weaponSkills["Default Martial"].level) {
@@ -1280,7 +1280,7 @@ MML.computeAttribute.action = {
     }
     this.action.initBonus = initBonus;
 
-    _.each(this.action.modifiers, function(modifier) {
+    _.each(_.without(this.action.modifiers, "Release Opponent"), function(modifier) {
       this.statusEffects[modifier] = {
         id: generateRowID(),
         name: modifier

@@ -658,7 +658,7 @@ MML.charMenuPrepareAction = function charMenuPrepareAction(input) {
   ];
 
   if ((_.has(character.statusEffects, "Holding") ||
-    (_.has(character.statusEffects, "Grappled")) && character.statusEffects["Grappled"].targets.length === 1) &&
+    (_.has(character.statusEffects, "Grappled") && character.statusEffects["Grappled"].targets.length === 1)) &&
     !_.contains(character.action.modifiers, "Release Opponent")
   ) {
     buttons.push({
@@ -1359,24 +1359,7 @@ MML.charMenuGrappleDefenseRoll = function charMenuGrappleDefenseRoll(input) {
 };
 MML.charMenuResistRelease = function charMenuResistRelease(input) {
   this.who = input.who;
-  this.message = "Allow " + input.attacker + " to release grapple?";
-  var defender = input.defender;
-  // var brawlSkill;
-  // var defaultMartialSkill = defender.weaponSkills["Default Martial"].level;
-  // var defenseMod = defender.meleeDefenseMod + defender.attributeDefenseMod + attackType.defenseMod;
-  // var sitMod = defender.situationalMod;
-  //
-  // if (_.isUndefined(defender.weaponSkills["Brawling"])) {
-  //   brawlSkill = 0;
-  // } else {
-  //   brawlSkill = defender.weaponSkills["Brawling"].level;
-  // }
-  //
-  // if (brawlSkill >= defaultMartialSkill) {
-  //   brawlChance = defender.weaponSkills["Brawling"].level + defenseMod + sitMod;
-  // } else {
-  //   brawlChance = defaultMartialSkill + defenseMod + sitMod;
-  // }
+  this.message = "Allow " + input.attacker.name + " to release grapple?";
 
   var buttons = [{
     text: "Yes",
@@ -1389,6 +1372,7 @@ MML.charMenuResistRelease = function charMenuResistRelease(input) {
     text: "No",
     nextMenu: "menuIdle",
     callback: function(input) {
+      state.MML.GM.currentAction.parameters.targetAgreed = false;
       MML.releaseOpponentAction();
     }
   }];
@@ -1769,7 +1753,7 @@ MML.menuButtons.setActionAttack = {
           name: "Attack",
           getTargets: "getSingleTarget",
           callback: "startAttackAction",
-          modifiers: []
+          modifiers: state.MML.characters[this.who].action.modifiers
         }
       }
     });
@@ -1821,7 +1805,7 @@ MML.menuButtons.setActionObserve = {
         value: {
           name: "Observe",
           callback: "observeAction",
-          modifiers: []
+          modifiers: state.MML.characters[this.who].action.modifiers
         }
       }
     });

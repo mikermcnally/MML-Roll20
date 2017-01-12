@@ -136,7 +136,7 @@ MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input) {
       value: 0
     }
   });
-  this.action = {};
+  this.action = { modifiers: [] };
   MML.processCommand({
     type: "character",
     who: this.name,
@@ -908,6 +908,8 @@ MML.startAction = function startAction(input) {
   };
 
   if (_.contains(this.action.modifiers, "Release Opponent")) {
+    var targetName = _.has(this.statusEffects, "Holding") ? this.statusEffects["Holding"].targets[0] : this.statusEffects["Grappled"].targets[0];
+    state.MML.GM.currentAction.parameters = { target: state.MML.characters[targetName]};
     MML.processCommand({
       type: "character",
       who: this.name,
@@ -984,9 +986,19 @@ MML.startAttackAction = function startAttackAction(input) {
 };
 
 MML.processAttack = function processAttack(input) {
-  this.statusEffects["Melee This Round"] = {
-    id: generateRowID()
-  };
+  MML.processCommand({
+    type: "character",
+    who: this.name,
+    callback: "setApiCharAttributeJSON",
+    input: {
+      attribute: "statusEffects",
+      index: "Melee This Round",
+      value: {
+        id: generateRowID(),
+        name: "Melee This Round"
+      }
+    }
+  });
 
   if (["Punch", "Kick", "Head Butt", "Bite"].indexOf(this.action.weaponType) > -1) {
     MML.processCommand({
@@ -1911,6 +1923,7 @@ MML.grappleDefenseWeaponRollApply = function grappleDefenseWeaponRollApply(input
         number: 1
       };
     }
+    
   }
   state.MML.GM.currentAction.rolls.weaponDefenseRoll = state.MML.players[this.player].currentRoll.result;
   MML[state.MML.GM.currentAction.callback]();
@@ -2023,9 +2036,9 @@ MML.applyGrapple = function applyGrapple(attacker, defender) {
       attribute: "statusEffects",
       index: "Grappled",
       value: {
-        id: generateRowID(),
+        id: _.has(attacker.statusEffects, "Grappled") ? attacker.statusEffects["Grappled"].id : generateRowID(),
         name: "Grappled",
-        targets: [defender.name]
+        targets: _.has(attacker.statusEffects, "Grappled") ? attacker.statusEffects["Grappled"].targets.push(defender.name) : [defender.name]
       }
     }
   });
@@ -2477,14 +2490,20 @@ MML.releaseHold = function releaseHold(attacker, defender) {
       defender: defender
     }
   });
+  MML.processCommand({
+    type: "player",
+    who: defender.player,
+    callback: "displayMenu",
+    input: {}
+  });
 };
 
 MML.releaseGrapple = function releaseGrapple(attacker, defender) {
   MML.applyGrappleBreak(defender, attacker);
-  state.MML.characters[character.name].action.modifiers = _.without(state.MML.characters[character.name].action.modifiers, "Release Opponent");
+  state.MML.characters[attacker.name].action.modifiers = _.without(state.MML.characters[attacker.name].action.modifiers, "Release Opponent");
   MML.processCommand({
     type: "character",
-    who: character.name,
+    who: attacker.name,
     callback: "startAction",
     input: {}
   });
