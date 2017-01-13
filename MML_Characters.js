@@ -136,7 +136,11 @@ MML.newRoundUpdateCharacter = function newRoundUpdateCharacter(input) {
       value: 0
     }
   });
-  this.action = {};
+
+  if (_.isUndefined(this.action.spell) || this.action.spell.actions < 2) {
+    this.action = { modifiers: [] };
+  }
+
   MML.processCommand({
     type: "character",
     who: this.name,

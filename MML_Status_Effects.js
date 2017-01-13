@@ -372,3 +372,15 @@ MML.statusEffects["Ease Spell"] = function(effect, index) {
 MML.statusEffects["Spell Range Increase"] = function(effect, index) {
 
 };
+MML.statusEffects["Increase Potency"] = function(effect, index) {
+  if (state.MML.GM.inCombat === false || !_.contains(this.action.modifiers, "Increase Potency")) {
+    delete this.statusEffects[index];
+  } else {
+    this.castingMod += 10;
+    if (!effect.applied) {
+      this.action.spell.actions += 1;
+      effect.applied = true;
+    }
+    this.statusEffects[index].description = "Increase";
+  }
+};
