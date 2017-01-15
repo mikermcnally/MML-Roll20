@@ -191,7 +191,6 @@ MML.statusEffects["Observe"] = function(effect, index) {
     this.statusEffects[index].description = "Defense Modifier: -10%. Preception Modifier: +4";
   } else {
     //observed previous round
-    log("here");
     this.situationalInitBonus += 5;
     if (MML.isWieldingRangedWeapon(this)) {
       this.missileAttackMod += 15;

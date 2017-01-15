@@ -1007,7 +1007,7 @@ MML.processAttack = function processAttack(input) {
       callback: "unarmedAttack",
       input: {}
     });
-  } else if (["Grapple", "Place a Hold", "Break a Hold", "Break Grapple", "Release a Hold", "Takedown", "Regain Feet"].indexOf(this.action.weaponType) > -1) {
+  } else if (["Grapple", "Place a Hold", "Break a Hold", "Break Grapple", "Takedown", "Regain Feet"].indexOf(this.action.weaponType) > -1) {
     MML.processCommand({
       type: "character",
       who: this.name,
@@ -1709,7 +1709,7 @@ MML.rangedDefense = function rangedDefense(defender, attackerWeapon, range) {
   });
 };
 
-MML.rangedDefenseRoll = function missileBlockRoll(input) {
+MML.rangedDefenseRoll = function rangedDefenseRoll(input) {
   MML.processCommand({
     type: "character",
     who: this.name,
@@ -1721,7 +1721,7 @@ MML.rangedDefenseRoll = function missileBlockRoll(input) {
   });
 };
 
-MML.rangedDefenseRollResult = function missileBlockRollResult(input) {
+MML.rangedDefenseRollResult = function rangedDefenseRollResult(input) {
   var currentRoll = state.MML.players[this.player].currentRoll;
 
   if (this.player === state.MML.GM.player) {
@@ -1760,7 +1760,7 @@ MML.rangedDefenseRollResult = function missileBlockRollResult(input) {
   }
 };
 
-MML.rangedDefenseRollApply = function missileBlockRollApply(input) {
+MML.rangedDefenseRollApply = function rangedDefenseRollApply(input) {
   var result = state.MML.players[this.player].currentRoll.result;
 
   if (result === "Success") {
@@ -1923,7 +1923,7 @@ MML.grappleDefenseWeaponRollApply = function grappleDefenseWeaponRollApply(input
         number: 1
       };
     }
-    
+
   }
   state.MML.GM.currentAction.rolls.weaponDefenseRoll = state.MML.players[this.player].currentRoll.result;
   MML[state.MML.GM.currentAction.callback]();
@@ -2038,7 +2038,7 @@ MML.applyGrapple = function applyGrapple(attacker, defender) {
       value: {
         id: _.has(attacker.statusEffects, "Grappled") ? attacker.statusEffects["Grappled"].id : generateRowID(),
         name: "Grappled",
-        targets: _.has(attacker.statusEffects, "Grappled") ? attacker.statusEffects["Grappled"].targets.push(defender.name) : [defender.name]
+        targets: _.has(attacker.statusEffects, "Grappled") ? attacker.statusEffects["Grappled"].targets.concat([defender.name]) : [defender.name]
       }
     }
   });
@@ -2056,7 +2056,7 @@ MML.applyGrapple = function applyGrapple(attacker, defender) {
       value: {
         id: _.has(defender.statusEffects, "Grappled") ? defender.statusEffects["Grappled"].id : generateRowID(),
         name: "Grappled",
-        targets: _.has(defender.statusEffects, "Grappled") ? defender.statusEffects["Grappled"].targets.push(attacker.name) : [attacker.name]
+        targets: _.has(defender.statusEffects, "Grappled") ? defender.statusEffects["Grappled"].targets.concat([attacker.name]) : [attacker.name]
       }
     }
   });
@@ -2099,7 +2099,7 @@ MML.applyHold = function applyHold(attacker, defender) {
         value: {
           id: _.has(defender.statusEffects, "Pinned") ? defender.statusEffects["Pinned"].id : generateRowID(),
           name: "Pinned",
-          targets: _.has(defender.statusEffects, "Pinned") ? defender.statusEffects["Pinned"].targets.push(attacker.name) : [attacker.name]
+          targets: _.has(defender.statusEffects, "Pinned") ? defender.statusEffects["Pinned"].targets.concat([attacker.name]) : [attacker.name]
         }
       }
     });
@@ -2115,7 +2115,7 @@ MML.applyHold = function applyHold(attacker, defender) {
         value: {
           id: _.has(defender.statusEffects, "Held") ? defender.statusEffects["Held"].id : generateRowID(),
           name: "Held",
-          targets: _.has(defender.statusEffects, "Pinned") ? defender.statusEffects["Pinned"].targets.push(holder) : [holder]
+          targets: _.has(defender.statusEffects, "Pinned") ? defender.statusEffects["Pinned"].targets.concat([holder]) : [holder]
         }
       }
     });
@@ -2160,7 +2160,7 @@ MML.applyHoldBreak = function applyHoldBreak(attacker, defender) {
       value: {
         id: _.has(defender.statusEffects, "Grappled") ? defender.statusEffects["Grappled"].id : generateRowID(),
         name: "Grappled",
-        targets: _.has(defender.statusEffects, "Grappled") ? defender.statusEffects["Grappled"].targets.push(attacker.name) : [attacker.name]
+        targets: _.has(defender.statusEffects, "Grappled") ? defender.statusEffects["Grappled"].targets.concat([attacker.name]) : [attacker.name]
       }
     }
   });
@@ -2182,7 +2182,7 @@ MML.applyHoldBreak = function applyHoldBreak(attacker, defender) {
       value: {
         id: _.has(attacker.statusEffects, "Grappled") ? attacker.statusEffects["Grappled"].id : generateRowID(),
         name: "Grappled",
-        targets: _.has(attacker.statusEffects, "Grappled") ? attacker.statusEffects["Grappled"].targets.push(defender.name) : [defender.name]
+        targets: _.has(attacker.statusEffects, "Grappled") ? attacker.statusEffects["Grappled"].targets.concat([defender.name]) : [defender.name]
       }
     }
   });
@@ -2331,12 +2331,12 @@ MML.applyTakedown = function applyTakedown(attacker, defender) {
   }
   if (holders.length > 0) {
     var targets = [];
-    _.each(holders, function(target) {
-      if (["Chest", "Abdomen"].indexOf(target.bodyPart)) {
-        targets.push(target.name);
+    _.each(holders, function(holder) {
+      if (["Chest", "Abdomen"].indexOf(holder.bodyPart) > -1) {
+        targets.push(holder.name);
         MML.processCommand({
           type: "character",
-          who: target.name,
+          who: holder.name,
           callback: "setApiCharAttribute",
           input: {
             attribute: "movementPosition",
@@ -2360,7 +2360,7 @@ MML.applyTakedown = function applyTakedown(attacker, defender) {
           }
         }
       });
-      if (_.reject(attacker.statusEffects["Held"].targets, function(target) { return ["Chest", "Abdomen"].indexOf(target.bodyPart) > -1; }) === 1) {
+      if (_.reject(defender.statusEffects["Held"].targets, function(target) { return ["Chest", "Abdomen"].indexOf(target.bodyPart) > -1; }).length === 0) {
         MML.processCommand({
           type: "character",
           who: defender.name,
