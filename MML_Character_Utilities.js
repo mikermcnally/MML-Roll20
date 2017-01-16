@@ -389,3 +389,77 @@ MML.getEpCost = function getEpCost(skillName, skillLevel, ep) {
     return MML.epModifiers[skillName][ep][12];
   }
 };
+
+MML.validateAction = function validateAction(character) {
+  var valid = true;
+
+  switch (character.action.name) {
+    case "Attack":
+      switch (character.action.weaponType) {
+        case "Grapple":
+          if (_.has(character.statusEffects, "Grappled") &&
+            _.has(character.statusEffects, "Held") &&
+            _.has(character.statusEffects, "Taken Down") &&
+            _.has(character.statusEffects, "Pinned") &&
+            _.has(character.statusEffects, "Overborne")
+          ) {
+            valid = false;
+          }
+          break;
+        case "Regain Feet":
+          if (!((_.has(character.statusEffects, "Grappled") || _.has(character.statusEffects, "Held") || _.has(character.statusEffects, "Holding")) &&
+            character.movementPosition === "Prone") ||
+            (!(_.has(character.statusEffects, "Taken Down") || _.has(character.statusEffects, "Overborne")) || _.has(character.statusEffects, "Pinned"))
+          ) {
+            valid = false;
+          }
+          break;
+          case "Place a Hold":
+            if (_.has(character.statusEffects, "Holding") &&
+              _.has(character.statusEffects, "Held") &&
+              _.has(character.statusEffects, "Pinned") &&
+              (_.has(character.statusEffects, "Grappled") && character.statusEffects["Grappled"].targets.length > 1)
+            ) {
+              valid = false;
+            }
+            break;
+          case "Break a Hold":
+            if (!_.has(character.statusEffects, "Held") && !_.has(character.statusEffects, "Pinned")) {
+              valid = false;
+            }
+            break;
+          case "Break Grapple":
+            if (!_.has(character.statusEffects, "Grappled")) {
+              valid = false;
+            }
+            break;
+          case "Takedown":
+            if (((!_.has(character.statusEffects, "Holding") &&
+              (!_.has(character.statusEffects, "Grappled") || character.statusEffects["Grappled"].targets.length > 1) &&
+              (!_.has(character.statusEffects, "Held") || character.statusEffects["Held"].targets.length > 1))) ||
+              (_.has(character.statusEffects, "Grappled") && _.has(character.statusEffects, "Held")) ||
+              character.movementPosition === "Prone"
+            ) {
+              valid = false;
+            }
+            break;
+          case "Head Butt":
+          case "Bite":
+            if (!_.has(character.statusEffects, "Held") &&
+              !_.has(character.statusEffects, "Grappled") &&
+              !_.has(character.statusEffects, "Holding") &&
+              !_.has(character.statusEffects, "Taken Down") &&
+              !_.has(character.statusEffects, "Pinned") &&
+              !_.has(character.statusEffects, "Overborne")
+            ) {
+              valid = false;
+            }
+            break;
+        default:
+      }
+      break;
+    default:
+  }
+
+  return valid;
+};

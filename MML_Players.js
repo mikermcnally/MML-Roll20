@@ -656,14 +656,16 @@ MML.charMenuPrepareAction = function charMenuPrepareAction(input) {
     MML.menuButtons.setActionObserve
   ];
 
-  if ((_.has(character.statusEffects, "Holding") || _.has(character.statusEffects, "Grappled")) &&
-    !_.contains(character.action.modifiers, "Release Opponent")
+  if ((_.has(character.statusEffects, "Holding") ||
+      (_.has(character.statusEffects, "Grappled") && character.statusEffects["Grappled"].targets.length === 1)) &&
+      !_.has(character.statusEffects, "Held") &&
+      !_.contains(character.action.modifiers, "Release Opponent")
   ) {
     buttons.push({
       text: "Release Opponent",
       nextMenu: "charMenuPrepareAction",
       callback: function(input) {
-        state.MML.characters[this.who].action.modifiers = "Release Opponent";
+        state.MML.characters[this.who].action.modifiers.push("Release Opponent");
         MML.processCommand({
           type: "player",
           who: this.name,
@@ -698,7 +700,15 @@ MML.charMenuAttack = function charMenuAttack(input) {
   var buttons = [];
   var character = state.MML.characters[this.who];
 
-  if (!MML.isUnarmed(character)) {
+  if (!MML.isUnarmed(character) &&
+    ((!_.has(character.statusEffects, "Grappled") &&
+    !_.has(character.statusEffects, "Holding") &&
+    !_.has(character.statusEffects, "Held") &&
+    !_.has(character.statusEffects, "Taken Down") &&
+    !_.has(character.statusEffects, "Pinned") &&
+    !_.has(character.statusEffects, "Overborne")) ||
+    (!MML.isWieldingRangedWeapon(character) && MML.getMeleeWeapon(character).rank < 2))
+  ) {
     buttons.push({
       text: "Standard",
       nextMenu: "charMenuAttackCalledShot",
@@ -711,50 +721,56 @@ MML.charMenuAttack = function charMenuAttack(input) {
         });
       }
     });
+    if (MML.isWieldingRangedWeapon(character)) {
+      buttons.push({
+        text: "Shoot From Cover",
+        nextMenu: "charMenuAttackCalledShot",
+        callback: function(input) {
+          state.MML.characters[this.who].action.modifiers.push("Shoot From Cover");
+          MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+          });
+        }
+      });
+      buttons.push({
+        text: "Aim",
+        nextMenu: "charMenuPrepareAction",
+        callback: function(input) {
+          state.MML.characters[this.who].action.modifiers.push("Aim");
+          MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+          });
+        }
+      });
+    } else if (!_.has(character.statusEffects, "Grappled") &&
+      !_.has(character.statusEffects, "Holding") &&
+      !_.has(character.statusEffects, "Held") &&
+      !_.has(character.statusEffects, "Taken Down") &&
+      !_.has(character.statusEffects, "Pinned") &&
+      !_.has(character.statusEffects, "Overborne")
+    ) {
+      buttons.push({
+        text: "Sweep Attack",
+        nextMenu: "charMenuAttackCalledShot",
+        callback: function(input) {
+          state.MML.characters[this.who].action.modifiers.push("Sweep Attack");
+          MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+          });
+        }
+      });
+    }
   }
 
-  if (MML.isWieldingRangedWeapon(character)) {
-    buttons.push({
-      text: "Shoot From Cover",
-      nextMenu: "charMenuAttackCalledShot",
-      callback: function(input) {
-        state.MML.characters[this.who].action.modifiers.push("Shoot From Cover");
-        MML.processCommand({
-          type: "player",
-          who: this.name,
-          callback: "displayMenu",
-          input: {}
-        });
-      }
-    });
-    buttons.push({
-      text: "Aim",
-      nextMenu: "charMenuPrepareAction",
-      callback: function(input) {
-        state.MML.characters[this.who].action.modifiers.push("Aim");
-        MML.processCommand({
-          type: "player",
-          who: this.name,
-          callback: "displayMenu",
-          input: {}
-        });
-      }
-    });
-  } else if (!MML.isUnarmed(character)) { //Melee
-    buttons.push({
-      text: "Sweep Attack",
-      nextMenu: "charMenuAttackCalledShot",
-      callback: function(input) {
-        state.MML.characters[this.who].action.modifiers.push("Sweep Attack");
-        MML.processCommand({
-          type: "player",
-          who: this.name,
-          callback: "displayMenu",
-          input: {}
-        });
-      }
-    });
-  }
   buttons.push({
     text: "Punch",
     nextMenu: "menuPause",
@@ -763,8 +779,8 @@ MML.charMenuAttack = function charMenuAttack(input) {
       MML.processCommand({
         type: "player",
         who: this.name,
-        callback: "charMenuAttackStance",
-        input: {who: this.who}
+        callback: "charMenuAttackCalledShot",
+        input: { who: this.who }
       });
       MML.processCommand({
         type: "player",
@@ -782,8 +798,8 @@ MML.charMenuAttack = function charMenuAttack(input) {
       MML.processCommand({
         type: "player",
         who: this.name,
-        callback: "charMenuAttackStance",
-        input: {who: this.who}
+        callback: "charMenuAttackCalledShot",
+        input: { who: this.who }
       });
       MML.processCommand({
         type: "player",
@@ -793,197 +809,202 @@ MML.charMenuAttack = function charMenuAttack(input) {
       });
     }
   });
-  if (!_.has(character.statusEffects, "Grappled") &&
-    !_.has(character.statusEffects, "Holding") &&
-    !_.has(character.statusEffects, "Held") &&
-    !_.has(character.statusEffects, "Taken Down") &&
-    !_.has(character.statusEffects, "Pinned") &&
-    !_.has(character.statusEffects, "Overborne")
-  ) {
-    buttons.push({
-      text: "Grapple",
-      nextMenu: "menuPause",
-      callback: function(input) {
-        state.MML.characters[this.who].action.weaponType = "Grapple";
-        MML.processCommand({
-          type: "player",
-          who: this.name,
-          callback: "charMenuAttackStance",
-          input: {who: this.who}
-        });
-        MML.processCommand({
-          type: "player",
-          who: this.name,
-          callback: "displayMenu",
-          input: {}
-        });
-      }
-    });
-  }
-  if (((_.has(character.statusEffects, "Grappled") || _.has(character.statusEffects, "Held") || _.has(character.statusEffects, "Holding")) &&
-    character.movementPosition === "Prone") ||
-    ((_.has(character.statusEffects, "Taken Down") || _.has(character.statusEffects, "Overborne")) && !_.has(character.statusEffects, "Pinned"))
-  ) {
-    buttons.push({
-      text: "Regain Feet",
-      nextMenu: "menuPause",
-      callback: function(input) {
-        state.MML.characters[this.who].action.weaponType = "Regain Feet";
-        MML.processCommand({
-          type: "player",
-          who: this.name,
-          callback: "charMenuAttackStance",
-          input: {who: this.who}
-        });
-        MML.processCommand({
-          type: "player",
-          who: this.name,
-          callback: "displayMenu",
-          input: {}
-        });
-      }
-    });
-  }
-  if (!_.has(character.statusEffects, "Holding") &&
-    !_.has(character.statusEffects, "Held") &&
-    !_.has(character.statusEffects, "Pinned") &&
-    (!_.has(character.statusEffects, "Grappled") || character.statusEffects["Grappled"].targets.length === 1)
-  ) {
-    buttons.push({
-      text: "Place a Hold",
-      nextMenu: "menuPause",
-      callback: function(input) {
-        state.MML.characters[this.who].action.weaponType = "Place a Hold";
-        MML.processCommand({
-          type: "player",
-          who: this.name,
-          callback: "charMenuAttackStance",
-          input: {who: this.who}
-        });
-        MML.processCommand({
-          type: "player",
-          who: this.name,
-          callback: "displayMenu",
-          input: {}
-        });
-      }
-    });
-  }
-  if (_.has(character.statusEffects, "Held") || _.has(character.statusEffects, "Pinned")) {
-    buttons.push({
-      text: "Break a Hold",
-      nextMenu: "menuPause",
-      callback: function(input) {
-        state.MML.characters[this.who].action.weaponType = "Break a Hold";
-        MML.processCommand({
-          type: "player",
-          who: this.name,
-          callback: "charMenuAttackStance",
-          input: {who: this.who}
-        });
-        MML.processCommand({
-          type: "player",
-          who: this.name,
-          callback: "displayMenu",
-          input: {}
-        });
-      }
-    });
-  }
-  if ((_.has(character.statusEffects, "Grappled")) &&
-    !_.has(character.statusEffects, "Pinned") &&
-    !_.has(character.statusEffects, "Held")
-  ) {
-    buttons.push({
-      text: "Break Grapple",
-      nextMenu: "menuPause",
-      callback: function(input) {
-        state.MML.characters[this.who].action.weaponType = "Break Grapple";
-        MML.processCommand({
-          type: "player",
-          who: this.name,
-          callback: "charMenuAttackStance",
-          input: {who: this.who}
-        });
-        MML.processCommand({
-          type: "player",
-          who: this.name,
-          callback: "displayMenu",
-          input: {}
-        });
-      }
-    });
-  }
-  if ((_.has(character.statusEffects, "Holding") ||
-    (_.has(character.statusEffects, "Grappled") && character.statusEffects["Grappled"].targets.length === 1) ||
-    (_.has(character.statusEffects, "Held") && character.statusEffects["Held"].targets.length === 1)) &&
-    character.movementPosition !== "Prone"
-  ) {
-    buttons.push({
-      text: "Takedown",
-      nextMenu: "menuPause",
-      callback: function(input) {
-        state.MML.characters[this.who].action.weaponType = "Takedown";
-        MML.processCommand({
-          type: "player",
-          who: this.name,
-          callback: "charMenuAttackStance",
-          input: {who: this.who}
-        });
-        MML.processCommand({
-          type: "player",
-          who: this.name,
-          callback: "displayMenu",
-          input: {}
-        });
-      }
-    });
-  }
-  if (_.has(character.statusEffects, "Held") ||
-    _.has(character.statusEffects, "Grappled") ||
-    _.has(character.statusEffects, "Holding") ||
-    _.has(character.statusEffects, "Taken Down") ||
-    _.has(character.statusEffects, "Pinned") ||
-    _.has(character.statusEffects, "Overborne")
-  ) {
-    buttons.push({
-      text: "Head Butt",
-      nextMenu: "menuPause",
-      callback: function(input) {
-        state.MML.characters[this.who].action.weaponType = "Head Butt";
-        MML.processCommand({
-          type: "player",
-          who: this.name,
-          callback: "charMenuAttackStance",
-          input: {who: this.who}
-        });
-        MML.processCommand({
-          type: "player",
-          who: this.name,
-          callback: "displayMenu",
-          input: {}
-        });
-      }
-    });
-    buttons.push({
-      text: "Bite",
-      nextMenu: "menuPause",
-      callback: function(input) {
-        state.MML.characters[this.who].action.weaponType = "Bite";
-        MML.processCommand({
-          type: "player",
-          who: this.name,
-          callback: "charMenuAttackStance",
-          input: {who: this.who}
-        });
-        MML.processCommand({
-          type: "player",
-          who: this.name,
-          callback: "displayMenu",
-          input: {}
+  if (!_.contains(character.action.modifiers, "Release Opponent")) {
+    if (!_.has(character.statusEffects, "Grappled") &&
+      !_.has(character.statusEffects, "Holding") &&
+      !_.has(character.statusEffects, "Held") &&
+      !_.has(character.statusEffects, "Taken Down") &&
+      !_.has(character.statusEffects, "Pinned") &&
+      !_.has(character.statusEffects, "Overborne")
+    ) {
+      buttons.push({
+        text: "Grapple",
+        nextMenu: "menuPause",
+        callback: function(input) {
+          state.MML.characters[this.who].action.weaponType = "Grapple";
+          MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "charMenuAttackStance",
+            input: { who: this.who }
+          });
+          MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+          });
+        }
+      });
+    }
+    if (((_.has(character.statusEffects, "Grappled") || _.has(character.statusEffects, "Held") || _.has(character.statusEffects, "Holding")) &&
+        character.movementPosition === "Prone") ||
+      ((_.has(character.statusEffects, "Taken Down") || _.has(character.statusEffects, "Overborne")) && !_.has(character.statusEffects, "Pinned"))
+    ) {
+      buttons.push({
+        text: "Regain Feet",
+        nextMenu: "menuPause",
+        callback: function(input) {
+          state.MML.characters[this.who].action.weaponType = "Regain Feet";
+          MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "charMenuAttackStance",
+            input: { who: this.who }
+          });
+          MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+          });
+        }
+      });
+    }
+    if (!_.has(character.statusEffects, "Holding") &&
+      !_.has(character.statusEffects, "Held") &&
+      !_.has(character.statusEffects, "Pinned") &&
+      (!_.has(character.statusEffects, "Grappled") || character.statusEffects["Grappled"].targets.length === 1)
+    ) {
+      buttons.push({
+        text: "Place a Hold",
+        nextMenu: "menuPause",
+        callback: function(input) {
+          state.MML.characters[this.who].action.weaponType = "Place a Hold";
+          MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "charMenuAttackStance",
+            input: { who: this.who }
+          });
+          MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+          });
+        }
+      });
+    }
+    if (_.has(character.statusEffects, "Held") || _.has(character.statusEffects, "Pinned")) {
+      buttons.push({
+        text: "Break a Hold",
+        nextMenu: "menuPause",
+        callback: function(input) {
+          state.MML.characters[this.who].action.weaponType = "Break a Hold";
+          MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "charMenuAttackStance",
+            input: { who: this.who }
+          });
+          MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+          });
+        }
+      });
+    }
+    if ((_.has(character.statusEffects, "Grappled")) &&
+      !_.has(character.statusEffects, "Pinned") &&
+      !_.has(character.statusEffects, "Held")
+    ) {
+      buttons.push({
+        text: "Break Grapple",
+        nextMenu: "menuPause",
+        callback: function(input) {
+          state.MML.characters[this.who].action.weaponType = "Break Grapple";
+          MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "charMenuAttackStance",
+            input: { who: this.who }
+          });
+          MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+          });
+        }
+      });
+    }
+    if ((_.has(character.statusEffects, "Holding") ||
+      (_.has(character.statusEffects, "Grappled") && character.statusEffects["Grappled"].targets.length === 1) ||
+      (_.has(character.statusEffects, "Held") && character.statusEffects["Held"].targets.length === 1)) &&
+      !(_.has(character.statusEffects, "Grappled") && _.has(character.statusEffects, "Held")) &&
+      character.movementPosition !== "Prone"
+    ) {
+      buttons.push({
+        text: "Takedown",
+        nextMenu: "menuPause",
+        callback: function(input) {
+          state.MML.characters[this.who].action.weaponType = "Takedown";
+          MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "charMenuAttackStance",
+            input: { who: this.who }
+          });
+          MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+          });
+        }
+      });
+    }
+    if (_.has(character.statusEffects, "Held") ||
+      _.has(character.statusEffects, "Grappled") ||
+      _.has(character.statusEffects, "Holding") ||
+      _.has(character.statusEffects, "Taken Down") ||
+      _.has(character.statusEffects, "Pinned") ||
+      _.has(character.statusEffects, "Overborne")
+    ) {
+      if (_.has(character.statusEffects, "Held") && _.filter(character.statusEffects["Held"].targets, function (target) { return target.bodyPart === "Head"; }).length === 0 ) {
+        buttons.push({
+          text: "Head Butt",
+          nextMenu: "menuPause",
+          callback: function(input) {
+            state.MML.characters[this.who].action.weaponType = "Head Butt";
+            MML.processCommand({
+              type: "player",
+              who: this.name,
+              callback: "charMenuAttackStance",
+              input: { who: this.who }
+            });
+            MML.processCommand({
+              type: "player",
+              who: this.name,
+              callback: "displayMenu",
+              input: {}
+            });
+          }
         });
       }
-    });
+      buttons.push({
+        text: "Bite",
+        nextMenu: "menuPause",
+        callback: function(input) {
+          state.MML.characters[this.who].action.weaponType = "Bite";
+          MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "charMenuAttackCalledShot",
+            input: { who: this.who }
+          });
+          MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+          });
+        }
+      });
+    }
   }
   this.buttons = buttons;
 };
@@ -1194,10 +1215,23 @@ MML.charMenuFinalizeAction = function charMenuFinalizeAction(input) {
   }
 };
 
-MML.GmMenuStartAction = function GmMenuStartAction(input) {
+MML.charMenuStartAction = function charMenuStartAction(input) {
   this.who = input.who;
-  this.message = "Start " + state.MML.GM.actor + "'s action";
-  this.buttons = [MML.menuButtons.startAction];
+  this.message = "Start or change " + state.MML.GM.actor + "'s action";
+
+  if (input.actionValid) {
+    this.buttons = [MML.menuButtons.startAction, MML.menuButtons.changeAction];
+  } else {
+    sendChat("GM", '/w "' + this.name + '"' + this.who + "'s action no longer valid.'");
+    MML.processCommand({
+      type: "player",
+      who: this.name,
+      callback: 'charMenuPrepareAction',
+      input: {
+        who: this.who
+      }
+    });
+  }
 };
 MML.menuCombatMovement = function menuCombatMovement(input) {
   this.who = input.who;
@@ -1411,11 +1445,8 @@ MML.charMenuGrappleDefenseRoll = function charMenuGrappleDefenseRoll(input) {
   this.who = input.who;
   this.message = "How will " + this.who + " defend?";
   var buttons = [];
-  log(!MML.isUnarmed(state.MML.characters[this.who]));
-  log(_.intersection( _.keys(state.MML.characters[this.who].statusEffects), ["Stunned", "Grappled", "Held", "Holding", "Pinned", "Taken Down", "Overborne"]));
-  if (_.intersection( _.keys(state.MML.characters[this.who].statusEffects), ["Stunned", "Grappled", "Held", "Holding", "Pinned", "Taken Down", "Overborne"]).length === 0 ||
-    !MML.isUnarmed(state.MML.characters[this.who])
-  ) {
+
+  if (!_.isUndefined(attackChance)) {
     buttons.push({
       text: "With Weapon: " + attackChance + "%",
       nextMenu: "menuIdle",
@@ -1459,6 +1490,27 @@ MML.charMenuGrappleDefenseRoll = function charMenuGrappleDefenseRoll(input) {
       });
     }
   });
+  this.buttons = buttons;
+};
+MML.charMenuResistRelease = function charMenuResistRelease(input) {
+  this.who = input.who;
+  this.message = "Allow " + input.attacker.name + " to release grapple?";
+
+  var buttons = [{
+    text: "Yes",
+    nextMenu: "menuIdle",
+    callback: function(input) {
+      state.MML.GM.currentAction.parameters.targetAgreed = true;
+      MML.releaseOpponentAction();
+    }
+  }, {
+    text: "No",
+    nextMenu: "menuIdle",
+    callback: function(input) {
+      state.MML.GM.currentAction.parameters.targetAgreed = false;
+      MML.releaseOpponentAction();
+    }
+  }];
   this.buttons = buttons;
 };
 MML.charMenuMajorWoundRoll = function charMenuMajorWoundRoll(input) {
@@ -1836,7 +1888,7 @@ MML.menuButtons.setActionAttack = {
           name: "Attack",
           getTargets: "getSingleTarget",
           callback: "startAttackAction",
-          modifiers: []
+          modifiers: state.MML.characters[this.who].action.modifiers
         }
       }
     });
@@ -1888,7 +1940,7 @@ MML.menuButtons.setActionObserve = {
         value: {
           name: "Observe",
           callback: "observeAction",
-          modifiers: []
+          modifiers: state.MML.characters[this.who].action.modifiers
         }
       }
     });
@@ -1976,6 +2028,15 @@ MML.menuButtons.acceptAction = {
     MML.processCommand({
       type: "character",
       who: this.who,
+      callback: "setApiCharAttribute",
+      input: {
+        attribute: "spentInitiative",
+        value: state.MML.characters[this.who].spentInitiative - 10
+      }
+    });
+    MML.processCommand({
+      type: "character",
+      who: this.who,
       callback: "updateCharacter",
       input: {
         attribute: "action"
@@ -1984,6 +2045,18 @@ MML.menuButtons.acceptAction = {
     MML.processCommand({
       type: "GM",
       callback: "nextAction",
+      input: {}
+    });
+  }
+};
+MML.menuButtons.startAction = {
+  text: "Start Action",
+  nextMenu: "menuCombatMovement",
+  callback: function(input) {
+    MML.processCommand({
+      type: "player",
+      who: this.name,
+      callback: "displayMenu",
       input: {}
     });
   }

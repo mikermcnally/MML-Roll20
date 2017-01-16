@@ -191,7 +191,6 @@ MML.statusEffects["Observe"] = function(effect, index) {
     this.statusEffects[index].description = "Defense Modifier: -10%. Preception Modifier: +4";
   } else {
     //observed previous round
-    log("here");
     this.situationalInitBonus += 5;
     if (MML.isWieldingRangedWeapon(this)) {
       this.missileAttackMod += 15;
@@ -384,3 +383,4 @@ MML.statusEffects["Increase Potency"] = function(effect, index) {
     this.statusEffects[index].description = "Increase Dice Rolled and EP Cost x" + effect.level;
   }
 };
+MML.statusEffects["Release Opponent"] = function(effect, index) {};
