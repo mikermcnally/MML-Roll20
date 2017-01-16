@@ -166,9 +166,10 @@ MML.nextAction = function nextAction() {
       MML.processCommand({
         type: "player",
         who: playerName,
-        callback: "menuCombatMovement",
+        callback: "charMenuStartAction",
         input: {
-          who: this.actor
+          who: this.actor,
+          actionValid: MML.validateAction(state.MML.characters[this.actor])
         }
       });
       MML.processCommand({

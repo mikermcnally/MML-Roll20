@@ -191,7 +191,6 @@ MML.statusEffects["Observe"] = function(effect, index) {
     this.statusEffects[index].description = "Defense Modifier: -10%. Preception Modifier: +4";
   } else {
     //observed previous round
-    log("here");
     this.situationalInitBonus += 5;
     if (MML.isWieldingRangedWeapon(this)) {
       this.missileAttackMod += 15;
@@ -339,3 +338,4 @@ MML.statusEffects["Overborne"] = function(effect, index) {
     this.statusEffects[index].description = "Attack Modifier: -20%. Defense Modifier: -30%. Dodge Modifier: -40%. Initiative: -15";
   }
 };
+MML.statusEffects["Release Opponent"] = function(effect, index) {};
