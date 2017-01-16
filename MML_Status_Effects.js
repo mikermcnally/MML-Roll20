@@ -378,7 +378,7 @@ MML.statusEffects["Increase Potency"] = function(effect, index) {
   } else {
     this.castingMod += 10;
     if (!effect.applied) {
-      this.action.spell.ep *= 1;
+      this.action.spell.ep *= effect.level;
       effect.applied = true;
     }
     this.statusEffects[index].description = "Increase Dice Rolled and EP Cost x" + effect.level;
