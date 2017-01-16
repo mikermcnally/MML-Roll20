@@ -338,3 +338,4 @@ MML.statusEffects["Overborne"] = function(effect, index) {
     this.statusEffects[index].description = "Attack Modifier: -20%. Defense Modifier: -30%. Dodge Modifier: -40%. Initiative: -15";
   }
 };
+MML.statusEffects["Release Opponent"] = function(effect, index) {};

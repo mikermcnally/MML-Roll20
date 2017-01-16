@@ -1280,7 +1280,7 @@ MML.computeAttribute.action = {
     }
     this.action.initBonus = initBonus;
 
-    _.each(_.without(this.action.modifiers, "Release Opponent"), function(modifier) {
+    _.each(this.action.modifiers, function(modifier) {
       this.statusEffects[modifier] = {
         id: generateRowID(),
         name: modifier
