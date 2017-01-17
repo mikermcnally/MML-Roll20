@@ -315,8 +315,6 @@ MML.observeAction = function observeAction() {
 
 MML.readyItemAction = function readyItemAction() {};
 
-MML.castSpellAction = function castSpellAction() {};
-
 MML.endAction = function endAction() {
   var currentAction = state.MML.GM.currentAction;
   var character = currentAction.character;
@@ -324,7 +322,7 @@ MML.endAction = function endAction() {
   var currentInitiative = character.initiative + spentInitiative;
 
   // Prevents character from gaining initiative when these status effects are removed
-  if (_.has(this.statusEffects, "Called Shot") || _.has(this.statusEffects, "Called Shot Specific")) {
+  if (_.has(character.statusEffects, "Called Shot") || _.has(character.statusEffects, "Called Shot Specific")) {
     spentInitiative += -5;
   }
 

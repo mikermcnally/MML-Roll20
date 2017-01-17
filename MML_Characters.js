@@ -680,15 +680,101 @@ MML.sensitiveAreaRollApply = function sensitiveAreaRollApply(input) {
   MML[state.MML.GM.currentAction.callback]();
 };
 
-MML.fatigueCheckRoll = function fatigueCheckRoll(modifier) {
-  if (MML.attributeCheckRoll(charName, "fitness", [modifier])) {
+MML.alterEP = function alterEP(input) {
+  var currentEP = this.ep + input.epAmount;
+
+  MML.processCommand({
+    type: "character",
+    who: this.name,
+    callback: "setApiCharAttribute",
+    input: {
+      attribute: "ep",
+      value: currentEP
+    }
+  });
+
+  if (currentEP < Math.round(0.75 * this.epMax)) {
     MML.processCommand({
       type: "character",
       who: this.name,
-      callback: "setApiCharAttribute",
+      callback: "fatigueCheckRoll",
       input: {
-        attribute: "fatigueLevel",
-        value: this.fatigueLevel + 1
+        modifier: 0
+      }
+    });
+  } else {
+    MML[state.MML.GM.currentAction.callback]();
+  }
+};
+
+MML.fatigueCheckRoll = function fatigueCheckRoll(input) {
+  MML.processCommand({
+    type: "character",
+    who: this.name,
+    callback: "attributeCheckRoll",
+    input: {
+      name: "Fatigue Check Fitness Roll",
+      attribute: "fitness",
+      mods: [input.modifier],
+      callback: "fatigueCheckRollResult"
+    }
+  });
+};
+
+MML.fatigueCheckRollResult = function fatigueCheckRollResult(input) {
+  var currentRoll = state.MML.players[this.player].currentRoll;
+
+  if (this.player === state.MML.GM.player) {
+    if (currentRoll.accepted === false) {
+      MML.processCommand({
+        type: "player",
+        who: this.player,
+        callback: "displayGmRoll",
+        input: {
+          currentRoll: currentRoll
+        }
+      });
+    } else {
+      MML.processCommand({
+        type: "character",
+        who: this.name,
+        callback: "fatigueCheckRollApply",
+        input: currentRoll
+      });
+    }
+  } else {
+    MML.processCommand({
+      type: "player",
+      who: this.player,
+      callback: "displayPlayerRoll",
+      input: {
+        currentRoll: currentRoll
+      }
+    });
+    MML.processCommand({
+      type: "character",
+      who: this.name,
+      callback: "fatigueCheckRollApply",
+      input: currentRoll
+    });
+  }
+};
+
+MML.fatigueCheckRollApply = function fatigueCheckRollApply(input) {
+  var result = state.MML.players[this.player].currentRoll.result;
+  if (result === "Critical Failure" || result === "Failure") {
+    MML.processCommand({
+      type: "character",
+      who: this.name,
+      callback: "setApiCharAttributeJSON",
+      input: {
+        attribute: "statusEffects",
+        index: "Fatigue",
+        value: {
+          id: _.has(this.statusEffects, "Fatigue") ? this.statusEffects["Fatigue"].id : generateRowID(),
+          name: "Fatigue",
+          level: _.has(this.statusEffects, "Fatigue") ? this.statusEffects["Fatigue"].level + 1 : 1
+        }
       }
     });
     MML.processCommand({
@@ -701,6 +787,7 @@ MML.fatigueCheckRoll = function fatigueCheckRoll(modifier) {
       }
     });
   }
+  MML[state.MML.GM.currentAction.callback]();
 };
 
 MML.fatigueRecoveryRoll = function fatigueRecoveryRoll(modifier) {

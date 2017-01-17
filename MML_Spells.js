@@ -29,6 +29,7 @@ MML.spells["Dart"] = {
     var spell = parameters.spell;
     var target = parameters.target;
     var range = parameters.range;
+    var epModified = parameters.epModified;
     var rolls = currentAction.rolls;
 
     if (_.isUndefined(rolls.attackRoll)) {
@@ -56,10 +57,20 @@ MML.spells["Dart"] = {
       }
     } else if (_.isUndefined(rolls.damageRoll)) {
       if (rolls.attackRoll === "Critical Success") {
-        MML.missileDamageRoll(character, {damageType: "Pierce", damage: _.contains(character.action.modifiers, ["Increase Potency"]) ? (3*character.action.modifiers["Increase Potency"]) + "d6" : "3d6"}, true);
+        MML.missileDamageRoll(character, {damageType: "Pierce", damage: _.has(character.statusEffects, "Increase Potency") ? (3*character.statusEffects["Increase Potency"].level) + "d6" : "3d6"}, true);
       } else {
-        MML.missileDamageRoll(character, {damageType: "Pierce", damage: _.contains(character.action.modifiers, ["Increase Potency"]) ? (3*character.action.modifiers["Increase Potency"]) + "d6" : "3d6"}, false);
+        MML.missileDamageRoll(character, {damageType: "Pierce", damage: _.has(character.statusEffects, "Increase Potency") ? (3*character.statusEffects["Increase Potency"].level) + "d6" : "3d6"}, false);
       }
+    } else if (epModified !== true) {
+      state.MML.GM.currentAction.parameters.epModified = true;
+      MML.alterEP({
+        type: "character",
+        who: character.name,
+        callback: "endAction",
+        input: {
+          epAmount: -1 * character.action.spell.epCost
+        }
+      });
     } else {
       MML.damageTargetAction("endAction");
     }
