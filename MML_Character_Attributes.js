@@ -1285,7 +1285,9 @@ MML.computeAttribute.action = {
         this.action.skill = MML.getWeaponSkill(this, this.inventory[this.leftHand._id]);
       }
     } else if (this.action.name === "Cast") {
-      this.action.skill = MML.getMagicSkill(this, this.action.spell);
+      var skillInfo = MML.getMagicSkill(this, this.action.spell);
+      this.action.skill = skillInfo.level;
+      this.action.skillName = skillInfo.name;
     }
     this.action.initBonus = initBonus;
 

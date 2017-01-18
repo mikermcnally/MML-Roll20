@@ -1139,7 +1139,7 @@ MML.charMenuCast = function charMenuCast(input) {
         MML.processCommand({
           type: "player",
           who: this.name,
-          callback: "charMenuMetaMagic",
+          callback: "charMenuMetaMagicInitiative",
           input: {who: this.who}
         });
         MML.processCommand({
@@ -1152,13 +1152,127 @@ MML.charMenuCast = function charMenuCast(input) {
     });
   }, this);
 };
+MML.charMenuMetaMagicInitiative = function charMenuMetaMagic(input) {
+  this.who = input.who;
+  this.message = "Choose meta magic";
+  this.buttons = [];
+  var character = state.MML.characters[this.who];
+  log(character.action);
+  if (_.contains(character.action.spell.metaMagic, "Called Shot")) {
+    this.buttons.push({
+      text: "Called Shot",
+      nextMenu: "menuPause",
+      callback: function(input) {
+        if (_.contains(character.action.modifiers, "Called Shot")) {
+          state.MML.characters[this.who].action.modifiers = _.without(character.action.modifiers, "Called Shot");
+        } else {
+          state.MML.characters[this.who].action.modifiers = _.without(character.action.modifiers, "Called Shot Specific").push("Called Shot");
+        }
+        MML.processCommand({
+          type: "player",
+          who: this.name,
+          callback: "charMenuMetaMagicInitiative",
+          input: {who: this.who}
+        });
+        MML.processCommand({
+          type: "player",
+          who: this.name,
+          callback: "displayMenu",
+          input: {}
+        });
+      }
+    });
+    this.buttons.push({
+      text: "Called Shot Specific",
+      nextMenu: "menuPause",
+      callback: function(input) {
+        if (_.contains(character.action.modifiers, "Called Shot Specific")) {
+          state.MML.characters[this.who].action.modifiers = _.without(character.action.modifiers, "Called Shot Specific");
+        } else {
+          state.MML.characters[this.who].action.modifiers = _.without(character.action.modifiers, "Called Shot").push("Called Shot Specific");
+        }
+        MML.processCommand({
+          type: "player",
+          who: this.name,
+          callback: "charMenuMetaMagicInitiative",
+          input: {who: this.who}
+        });
+        MML.processCommand({
+          type: "player",
+          who: this.name,
+          callback: "displayMenu",
+          input: {}
+        });
+      }
+    });
+  }
+  this.buttons.push({
+    text: "Ease Spell",
+    nextMenu: "menuPause",
+    callback: function(input) {
+      if (_.contains(character.action.modifiers, "Ease Spell")) {
+        state.MML.characters[this.who].action.modifiers = _.without(character.action.modifiers, "Ease Spell");
+      } else {
+        state.MML.characters[this.who].action.modifiers = _.without(character.action.modifiers, "Hasten Spell").push("Ease Spell");
+      }
+      MML.processCommand({
+        type: "player",
+        who: this.name,
+        callback: "charMenuMetaMagicInitiative",
+        input: {who: this.who}
+      });
+      MML.processCommand({
+        type: "player",
+        who: this.name,
+        callback: "displayMenu",
+        input: {}
+      });
+    }
+  });
+  this.buttons.push({
+    text: "Hasten Spell",
+    nextMenu: "menuPause",
+    callback: function(input) {
+      if (_.contains(character.action.modifiers, "Hasten Spell")) {
+        state.MML.characters[this.who].action.modifiers = _.without(character.action.modifiers, "Hasten Spell");
+      } else {
+        state.MML.characters[this.who].action.modifiers = _.without(character.action.modifiers, "Ease Spell").push("Hasten Spell");
+      }
+      MML.processCommand({
+        type: "player",
+        who: this.name,
+        callback: "charMenuMetaMagicInitiative",
+        input: {who: this.who}
+      });
+      MML.processCommand({
+        type: "player",
+        who: this.name,
+        callback: "displayMenu",
+        input: {}
+      });
+    }
+  });
+
+  this.buttons.push({
+    text: "Next Menu",
+    nextMenu: "charMenuFinalizeAction",
+    callback: function(input) {
+      MML.processCommand({
+        type: "player",
+        who: this.name,
+        callback: "displayMenu",
+        input: {}
+      });
+    }
+  });
+};
 MML.charMenuMetaMagic = function charMenuMetaMagic(input) {
   this.who = input.who;
   this.message = "Choose meta magic";
   this.buttons = [];
   var character = state.MML.characters[this.who];
   log(character.action);
-  _.each(character.action.spell.metaMagic.concat(["Hasten Spell", "Ease Spell"]), function(metaMagicName) {
+  _.each(_.without(character.action.spell.metaMagic, "Called Shot", "Called Shot Specific"), function(metaMagicName) {
     this.buttons.push({
       text: metaMagicName,
       nextMenu: "menuPause",
@@ -1184,13 +1298,13 @@ MML.charMenuMetaMagic = function charMenuMetaMagic(input) {
     });
   }, this);
   this.buttons.push({
-    text: "Next Menu",
-    nextMenu: "charMenuFinalizeAction",
+    text: "Cast Spell",
+    nextMenu: "menuPause",
     callback: function(input) {
       MML.processCommand({
-        type: "player",
-        who: this.name,
-        callback: "displayMenu",
+        type: "character",
+        who: this.who,
+        callback: "chooseSpellTargets",
         input: {}
       });
     }

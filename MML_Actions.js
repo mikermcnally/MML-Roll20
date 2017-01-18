@@ -242,6 +242,10 @@ MML.releaseOpponentAction = function releaseOpponentAction() {
   }
 };
 
+MML.castAction = function castAction() {
+  MML.spells[state.MML.GM.currentAction.parameters.spell.name].process();
+};
+
 MML.damageTargetAction = function damageTargetAction(callback) {
   var currentAction = state.MML.GM.currentAction;
   var parameters = currentAction.parameters;

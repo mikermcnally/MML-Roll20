@@ -20,7 +20,7 @@ MML.spells["Dart"] = {
   range: 100,
   duration: 0,
   target: "Single",
-  metaMagic: ["Increase Range", "Increase Potency", "Increase Targets"],
+  metaMagic: ["Increase Range", "Increase Potency", "Increase Targets", "Called Shot", "Called Shot Specific"],
   process: function () {
     var currentAction = state.MML.GM.currentAction;
     var character = currentAction.character;
@@ -29,6 +29,7 @@ MML.spells["Dart"] = {
     var spell = parameters.spell;
     var target = parameters.target;
     var range = parameters.range;
+    var epCost = parameters.epCost;
     var epModified = parameters.epModified;
     var rolls = currentAction.rolls;
 
@@ -63,16 +64,20 @@ MML.spells["Dart"] = {
       }
     } else if (epModified !== true) {
       state.MML.GM.currentAction.parameters.epModified = true;
-      MML.alterEP({
+      MML.processCommand({
         type: "character",
         who: character.name,
-        callback: "endAction",
+        callback: "alterEP",
         input: {
-          epAmount: -1 * character.action.spell.epCost
+          epAmount: -1 * epCost
         }
       });
     } else {
-      MML.damageTargetAction("endAction");
+      if (_.isUndefined(state.MML.GM.currentAction.targetArray[state.MML.GM.currentAction.targetIndex + 1])) {
+        MML.damageTargetAction("endAction");
+      } else {
+        MML.damageTargetAction("nextTarget");
+      }
     }
   }
 };

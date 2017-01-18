@@ -304,6 +304,11 @@ MML.getMagicSkill = function getMagicSkill(character, spell) {
         } else {
           wizardry_skill -= 20;
         }
+        if (wizardry_skill > elementalism_skill) {
+          return { name: "Wizardry", level: wizardry_skill };
+        } else {
+          return { name: "Fire Elementalism", level: elementalism_skill };
+        }
         break;
       case "Earth":
         if (!_.isUndefined(character.skills["Earth Elementalism"])) {
@@ -313,6 +318,11 @@ MML.getMagicSkill = function getMagicSkill(character, spell) {
           wizardry_skill -= 10;
         } else {
           wizardry_skill -= 20;
+        }
+        if (wizardry_skill > elementalism_skill) {
+          return { name: "Wizardry", level: wizardry_skill };
+        } else {
+          return { name: "Earth Elementalism", level: elementalism_skill };
         }
         break;
       case "Water":
@@ -324,6 +334,11 @@ MML.getMagicSkill = function getMagicSkill(character, spell) {
         } else {
           wizardry_skill -= 20;
         }
+        if (wizardry_skill > elementalism_skill) {
+          return { name: "Wizardry", level: wizardry_skill };
+        } else {
+          return { name: "Water Elementalism", level: elementalism_skill };
+        }
         break;
       case "Air":
         if (!_.isUndefined(character.skills["Air Elementalism"])) {
@@ -333,6 +348,11 @@ MML.getMagicSkill = function getMagicSkill(character, spell) {
           wizardry_skill -= 10;
         } else {
           wizardry_skill -= 20;
+        }
+        if (wizardry_skill > elementalism_skill) {
+          return { name: "Wizardry", level: wizardry_skill };
+        } else {
+          return { name: "Air Elementalism", level: elementalism_skill };
         }
         break;
       case "Life":
@@ -344,18 +364,18 @@ MML.getMagicSkill = function getMagicSkill(character, spell) {
         } else {
           wizardry_skill -= 20;
         }
+        if (wizardry_skill > elementalism_skill) {
+          return { name: "Wizardry", level: wizardry_skill };
+        } else {
+          return { name: "Life Elementalism", level: elementalism_skill };
+        }
         break;
       default:
     }
-    if (wizardry_skill > elementalism_skill) {
-      return wizardry_skill;
-    } else {
-      return elementalism_skill;
-    }
   } else if (spell.family === "Symbolism") {
-    return character.skills["Symbolism"].level;
+    return { name: "Symbolism", level: character.skills["Symbolism"].level };
   } else {
-    return character.skills["Wizardry"].level;
+    return { name: "Wizardry", level: character.skills["Wizardry"].level };
   }
 };
 
