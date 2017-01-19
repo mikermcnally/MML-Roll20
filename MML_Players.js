@@ -1278,16 +1278,21 @@ MML.charMenuMetaMagic = function charMenuMetaMagic(input) {
       nextMenu: "menuPause",
       callback: function(input) {
         if (_.contains(character.action.modifiers, metaMagicName)) {
-          state.MML.characters[this.who].action.modifiers = _.without(state.MML.characters[this.who].action.modifiers, metaMagicName);
+          delete state.MML.GM.currentAction.metaMagic[metaMagicName];
+          MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "charMenuMetaMagic",
+            input: {who: this.who}
+          });
         } else {
-          state.MML.characters[this.who].action.modifiers.push(metaMagicName);
+          MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "charMenu" + metaMagicName.replace(/\s/g, ""),
+            input: {who: this.who}
+          });
         }
-        MML.processCommand({
-          type: "player",
-          who: this.name,
-          callback: "charMenuMetaMagic",
-          input: {who: this.who}
-        });
         MML.processCommand({
           type: "player",
           who: this.name,
@@ -1305,6 +1310,59 @@ MML.charMenuMetaMagic = function charMenuMetaMagic(input) {
         type: "character",
         who: this.who,
         callback: "chooseSpellTargets",
+        input: {}
+      });
+    }
+  });
+};
+
+MML.charMenuIncreasePotency = function charMenuIncreasePotency(input) {
+  this.who = input.who;
+  this.message = "Increase potency by how many times?";
+  this.buttons = [];
+  var character = state.MML.characters[this.who];
+  var parameters = state.MML.GM.currentAction.parameters;
+  var epProduct = _.reduce(_.pluck(parameters.metaMagic, "epMod"), function(memo, num){ return memo * num; }) * parameters.epCost;
+  var i = 2;
+  log("HERE");
+  log(character.ep);
+  log(parameters.metaMagic);
+  log(_.pluck(parameters.metaMagic, "epMod"));
+  log(parameters.epCost);
+  log(2*epProduct);
+
+  while (character.ep > Math.pow(2, i - 1)*epProduct) {
+    log(Math.pow(2, i - 1));
+    log(Math.pow(2, i - 1)*epProduct);
+    this.buttons.push({
+      text: "Times: " + i + " EP Cost: " + Math.pow(2, i - 1)*epProduct,
+      nextMenu: "menuPause",
+      callback: function(input) {
+        state.MML.GM.currentAction.parameters.metaMagic["Increase Potency"] = { epMod: Math.pow(2, i - 1), castingMod: -10, level: i };
+        MML.processCommand({
+          type: "player",
+          who: this.name,
+          callback: "charMenuMetaMagic",
+          input: {who: this.who}
+        });
+        MML.processCommand({
+          type: "player",
+          who: this.name,
+          callback: "displayMenu",
+          input: {}
+        });
+      }
+    });
+    i++;
+  }
+  this.buttons.push({
+    text: "Back",
+    nextMenu: "menuPause",
+    callback: function(input) {
+      MML.processCommand({
+        type: "character",
+        who: this.who,
+        callback: "charMenuMetaMagic",
         input: {}
       });
     }

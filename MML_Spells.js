@@ -8,7 +8,12 @@ MML.spells["Flame Bolt"] = {
   ep: 20,
   range: 0,
   duration: 0,
-  target: [15, 1]
+  target: [15, 1],
+  targetSizeMatters: false,
+  metaMagic: ["Increase Potency", "Increase Dimension"],
+  process: function () {
+
+  }
 };
 MML.spells["Dart"] = {
   name: "Dart",
@@ -20,6 +25,7 @@ MML.spells["Dart"] = {
   range: 100,
   duration: 0,
   target: "Single",
+  targetSizeMatters: false,
   metaMagic: ["Increase Range", "Increase Potency", "Increase Targets", "Called Shot", "Called Shot Specific"],
   process: function () {
     var currentAction = state.MML.GM.currentAction;
@@ -31,10 +37,11 @@ MML.spells["Dart"] = {
     var range = parameters.range;
     var epCost = parameters.epCost;
     var epModified = parameters.epModified;
+    var metaMagic = parameters.metaMagic;
     var rolls = currentAction.rolls;
 
     if (_.isUndefined(rolls.attackRoll)) {
-      MML.castingRoll("castingRoll", character, spell.task, casterSkill, target);
+      MML.castingRoll("castingRoll", character, spell.task, casterSkill, _.reduce(_.pluck(metaMagic, "castingMod"), function(memo, num){ return memo + num; }));
     } else if (_.isUndefined(rolls.defenseRoll)) {
       if (rolls.attackRoll === "Critical Success" || rolls.attackRoll === "Success") {
         MML.rangedDefense(target, {family: "MWM"}, range);
@@ -58,9 +65,9 @@ MML.spells["Dart"] = {
       }
     } else if (_.isUndefined(rolls.damageRoll)) {
       if (rolls.attackRoll === "Critical Success") {
-        MML.missileDamageRoll(character, {damageType: "Pierce", damage: _.has(character.statusEffects, "Increase Potency") ? (3*character.statusEffects["Increase Potency"].level) + "d6" : "3d6"}, true);
+        MML.missileDamageRoll(character, {damageType: "Pierce", damage: _.has(metaMagic, "Increase Potency") ? (3*metaMagic["Increase Potency"].level) + "d6" : "3d6"}, true);
       } else {
-        MML.missileDamageRoll(character, {damageType: "Pierce", damage: _.has(character.statusEffects, "Increase Potency") ? (3*character.statusEffects["Increase Potency"].level) + "d6" : "3d6"}, false);
+        MML.missileDamageRoll(character, {damageType: "Pierce", damage: _.has(metaMagic, "Increase Potency") ? (3*metaMagic["Increase Potency"].level) + "d6" : "3d6"}, false);
       }
     } else if (epModified !== true) {
       state.MML.GM.currentAction.parameters.epModified = true;
@@ -69,7 +76,7 @@ MML.spells["Dart"] = {
         who: character.name,
         callback: "alterEP",
         input: {
-          epAmount: -1 * epCost
+          epAmount: -1 * epCost * _.reduce(_.pluck(metaMagic, "epMod"), function(memo, num){ return memo * num; })
         }
       });
     } else {

@@ -1011,6 +1011,23 @@ MML.startAction = function startAction(input) {
     if (this.action.spell.actions > 1) {
       this.action.spell.actions += -1;
     } else {
+      var currentAction = {
+        callback: "castAction",
+        parameters: {
+          spell: this.action.spell,
+          casterSkill: this.action.skill,
+          epCost: MML.getEpCost(this.action.skillName, this.action.skill, this.action.spell.ep),
+          metaMagic: {
+            base: {
+              epMod: 1,
+              castingMod: 0
+            }
+          }
+        },
+        rolls: {}
+      };
+
+      state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, currentAction);
       MML.processCommand({
         type: "player",
         who: this.player,
@@ -1064,20 +1081,8 @@ MML.chooseSpellTargets = function chooseSpellTargets() {
 };
 
 MML.startCastAction = function startCastAction(input) {
-  var currentAction = {
-    character: this,
-    callback: "castAction",
-    parameters: {
-      spell: this.action.spell,
-      casterSkill: this.action.skill,
-      target: state.MML.characters[state.MML.GM.currentAction.targetArray[0]],
-      epCost: MML.getEpCost(this.action.skillName, this.action.skill, this.action.spell.ep)
-    },
-    rolls: {}
-  };
-
-  state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, currentAction);
-  MML[currentAction.callback]();
+  state.MML.GM.currentAction.parameters.target = state.MML.characters[state.MML.GM.currentAction.targetArray[0]];
+  MML[state.MML.GM.currentAction.callback]();
 };
 
 MML.startAttackAction = function startAttackAction(input) {
@@ -2789,7 +2794,7 @@ MML.missileDamageRollApply = function missileDamageRollApply(input) {
   MML[state.MML.GM.currentAction.callback]();
 };
 
-MML.castingRoll = function castingRoll(rollName, character, task, skill) {
+MML.castingRoll = function castingRoll(rollName, character, task, skill, metaMagicMod) {
   MML.processCommand({
     type: "character",
     who: character.name,
@@ -2797,7 +2802,7 @@ MML.castingRoll = function castingRoll(rollName, character, task, skill) {
     input: {
       name: rollName,
       callback: "castingRollResult",
-      mods: [task, skill, character.situationalMod, character.castingMod, character.attributeCastingMod]
+      mods: [task, skill, character.situationalMod, character.castingMod, character.attributeCastingMod, metaMagicMod]
     }
   });
 };
