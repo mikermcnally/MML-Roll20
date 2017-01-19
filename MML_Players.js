@@ -1445,6 +1445,65 @@ MML.charMenuIncreaseDimension = function charMenuIncreaseDimension(input) {
   });
 };
 
+MML.charMenuIncreasePotency = function charMenuIncreasePotency(input) {
+  this.who = input.who;
+  this.message = "Increase potency by how many times?";
+  this.buttons = [];
+  var character = state.MML.characters[this.who];
+  var parameters = state.MML.GM.currentAction.parameters;
+  var epProduct = _.reduce(_.pluck(parameters.metaMagic, "epMod"), function(memo, num){ return memo * num; }) * parameters.epCost;
+  var dimensionIndex;
+
+  switch (input.dimension) {
+    case "Length":
+      dimensionIndex = 0;
+      break;
+    case "Width":
+      dimensionIndex = 1;
+      break;
+    case "Height":
+      dimensionIndex = 2;
+      break;
+    default:
+  }
+
+  var i = 2;
+  while (character.ep > Math.pow(i, 2)*epProduct) {
+    this.buttons.push({
+      text: "Times: " + i + " EP Cost: " + Math.pow(i, 2)*epProduct,
+      nextMenu: "menuPause",
+      callback: function(input) {
+        state.MML.GM.currentAction.parameters.metaMagic["Increase Dimension"] = { epMod: Math.pow(i, 2), castingMod: -10, level: i };
+        MML.processCommand({
+          type: "player",
+          who: this.name,
+          callback: "charMenuIncreaseDimension",
+          input: {who: this.who}
+        });
+        MML.processCommand({
+          type: "player",
+          who: this.name,
+          callback: "displayMenu",
+          input: {}
+        });
+      }
+    });
+    i++;
+  }
+  this.buttons.push({
+    text: "Back",
+    nextMenu: "menuPause",
+    callback: function(input) {
+      MML.processCommand({
+        type: "character",
+        who: this.who,
+        callback: "charMenuIncreaseDimension",
+        input: {}
+      });
+    }
+  });
+};
+
 MML.charMenuFinalizeAction = function charMenuFinalizeAction(input) {
   this.who = input.who;
 
