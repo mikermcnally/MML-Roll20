@@ -346,7 +346,7 @@ MML.statusEffects["Hasten Spell"] = function(effect, index) {
     this.statusEffects[index].description = "Casting Modifier: -10%";
     if (this.situationalInitBonus !== "No Combat" && this.action.spell.actions === 1) {
       this.situationalInitBonus += 5;
-      this.statusEffects[index].description += ". Initiative: -15";
+      this.statusEffects[index].description += ". Initiative: +5";
     } else {
       if (!effect.applied) {
         this.action.spell.actions -= 1;
@@ -366,21 +366,6 @@ MML.statusEffects["Ease Spell"] = function(effect, index) {
       effect.applied = true;
     }
     this.statusEffects[index].description = "Casting Modifier: +10%. Spell Actions Required: +1";
-  }
-};
-MML.statusEffects["Spell Range Increase"] = function(effect, index) {
-
-};
-MML.statusEffects["Increase Potency"] = function(effect, index) {
-  if (state.MML.GM.inCombat === false || !_.contains(this.action.modifiers, "Increase Potency")) {
-    delete this.statusEffects[index];
-  } else {
-    this.castingMod += 10;
-    if (!effect.applied) {
-      this.action.spell.ep *= effect.level;
-      effect.applied = true;
-    }
-    this.statusEffects[index].description = "Increase Dice Rolled and EP Cost x" + effect.level;
   }
 };
 MML.statusEffects["Release Opponent"] = function(effect, index) {};

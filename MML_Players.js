@@ -1324,12 +1324,6 @@ MML.charMenuIncreasePotency = function charMenuIncreasePotency(input) {
   var parameters = state.MML.GM.currentAction.parameters;
   var epProduct = _.reduce(_.pluck(parameters.metaMagic, "epMod"), function(memo, num){ return memo * num; }) * parameters.epCost;
   var i = 2;
-  log("HERE");
-  log(character.ep);
-  log(parameters.metaMagic);
-  log(_.pluck(parameters.metaMagic, "epMod"));
-  log(parameters.epCost);
-  log(2*epProduct);
 
   while (character.ep > Math.pow(2, i - 1)*epProduct) {
     log(Math.pow(2, i - 1));
@@ -1355,6 +1349,88 @@ MML.charMenuIncreasePotency = function charMenuIncreasePotency(input) {
     });
     i++;
   }
+  this.buttons.push({
+    text: "Back",
+    nextMenu: "menuPause",
+    callback: function(input) {
+      MML.processCommand({
+        type: "character",
+        who: this.who,
+        callback: "charMenuMetaMagic",
+        input: {}
+      });
+    }
+  });
+};
+
+MML.charMenuIncreaseDimension = function charMenuIncreaseDimension(input) {
+  this.who = input.who;
+  this.message = "Pick a dimension to increase:";
+  this.buttons = [];
+
+  this.buttons.push({
+      text: "Length",
+      nextMenu: "menuPause",
+      callback: function(input) {
+        MML.processCommand({
+          type: "player",
+          who: this.name,
+          callback: "charMenuIncreaseDimensionAmount",
+          input: {
+            who: this.who,
+            dimension: "Length"
+          }
+        });
+        MML.processCommand({
+          type: "player",
+          who: this.name,
+          callback: "displayMenu",
+          input: {}
+        });
+      }
+    });
+    this.buttons.push({
+        text: "Width",
+        nextMenu: "menuPause",
+        callback: function(input) {
+          MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "charMenuIncreaseDimensionAmount",
+            input: {
+              who: this.who,
+              dimension: "Width"
+            }
+          });
+          MML.processCommand({
+            type: "player",
+            who: this.name,
+            callback: "displayMenu",
+            input: {}
+          });
+        }
+      });
+      this.buttons.push({
+          text: "Height",
+          nextMenu: "menuPause",
+          callback: function(input) {
+            MML.processCommand({
+              type: "player",
+              who: this.name,
+              callback: "charMenuIncreaseDimensionAmount",
+              input: {
+                who: this.who,
+                dimension: "Height"
+              }
+            });
+            MML.processCommand({
+              type: "player",
+              who: this.name,
+              callback: "displayMenu",
+              input: {}
+            });
+          }
+        });
   this.buttons.push({
     text: "Back",
     nextMenu: "menuPause",
