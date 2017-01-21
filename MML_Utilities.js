@@ -508,17 +508,11 @@ MML.attributeCheckResult = function attributeCheckResult(roll) {
 };
 
 MML.displayGmRoll = function displayGmRoll(input) {
-  sendChat(this.name, '/w "' + this.name + '" &{template:rollMenu} {{title=' + this.currentRoll.message + "}}");
-  // if(this.currentRoll.type === "damage"){
-  //     sendChat(this.name, '/w "' + this.player + '" &{template:damage} {{title=' + this.currentRoll.title + "}} {{value=" + this.currentRoll.value + "}} {{type=" + this.currentRoll.type + "}} {{range=" + this.currentRoll.range + "}} ");
-  // }
-  // else if(this.currentRoll.type === "universal" || this.currentRoll.type === "attribute"){
-  //     sendChat(this.name, '/w "' + this.player + '" &{template:universal} {{title=' + this.currentRoll.title + "}} {{result=" + this.currentRoll.result + "}} {{target=" + this.currentRoll.target + "}} {{range=" + this.currentRoll.range + "}} {{value=" + this.currentRoll.value + "}} ");
-  // }
-  // else if(this.currentRoll.type === "hitPosition"){
-  //     sendChat(this.name, '/w "' + this.player + '" &{template:hitPosition} {{title=' + this.currentRoll.title + "}} {{result=" + this.currentRoll.result + "}} {{range=" + this.currentRoll.range + "}} {{value=" + this.currentRoll.value + "}} ");
-  // }
+  sendChat(this.name, '/w "' + this.name + '" &{template:rollMenuGM} {{title=' + this.currentRoll.message + "}}");
+};
 
+MML.displayPlayerRoll = function displayGmRoll(input) {
+  sendChat(this.name, '/w "' + this.name + '" &{template:rollMenu} {{title=' + this.currentRoll.message + "}}");
 };
 
 //Menu Functions

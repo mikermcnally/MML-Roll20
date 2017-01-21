@@ -361,6 +361,7 @@ MML.parseCommand = function parseCommand(msg) {
   if (msg.type === "api" && msg.content.indexOf("!MML|") !== -1) {
     var command = "parse failed";
     var content = msg.content.replace("!MML|", "");
+    var who = msg.who.replace(" (GM)", "");
     var input;
 
     if (content.indexOf("selectTarget") !== -1) {
@@ -384,7 +385,7 @@ MML.parseCommand = function parseCommand(msg) {
 
       command = {
         type: "player",
-        who: msg.who.replace(" (GM)", ""),
+        who: who,
         callback: input.callback,
         input: input
       };
@@ -404,8 +405,8 @@ MML.parseCommand = function parseCommand(msg) {
         sendChat("Error", "Please enter a numerical value.");
       }
     } else if (content.indexOf("acceptRoll") !== -1) {
-      if (state.MML.players[state.MML.GM.player].currentRoll.accepted === false) {
-        var player = state.MML.players[state.MML.GM.player];
+      if (state.MML.players[who].currentRoll.accepted === false) {
+        var player = state.MML.players[who];
         state.MML.players[player.name].currentRoll.accepted = true;
 
         command = {
@@ -422,7 +423,7 @@ MML.parseCommand = function parseCommand(msg) {
 
       command = {
         type: "player",
-        who: msg.who.replace(" (GM)", ""),
+        who: who,
         callback: "displayItemOptions",
         input: {
           who: who,

@@ -10,26 +10,32 @@ MML.init = function init() {
     currentRound: 0,
     roundStarted: false
   };
-
+  var playerObjects = findObjs({
+    _type: "player",
+    online: true
+  }, {
+    caseInsensitive: false
+  });
   state.MML.players = {};
-  state.MML.players["Robot"] = {
-    name: "Robot",
+  state.MML.players[state.MML.GM.player] = {
+    name: state.MML.GM.player,
     who: "GM",
     menu: "GmMenuMain",
     buttons: [MML.menuButtons.GmMenuMain],
     characters: [],
     characterIndex: 0
   };
-  state.MML.players["Andrew"] = {
-    name: "Andrew",
-    who: "",
-    menu: "",
-    characters: [],
-    characterIndex: 0
-  };
-  _.each(state.MML.players, function(player) {
-    //Clear players' list of characters
-    player.characters = [];
+
+  _.each(playerObjects, function (player) {
+    if (player.get("displayname") !== state.MML.GM.player) {
+      state.MML.players[player.get("displayname")] = {
+        name: player.get("displayname"),
+        who: "",
+        menu: "menuIdle",
+        characters: [],
+        characterIndex: 0
+      };
+    }
   });
 
   var characters = {};
@@ -44,6 +50,9 @@ MML.init = function init() {
     var charName = character.get("name");
     characters[charName] = new MML.characterConstructor(charName);
     //Add to player's list of characters
+    if (_.isUndefined(state.MML.players[characters[charName].player])) {
+      characters[charName].player = state.MML.GM.player;
+    }
     state.MML.players[characters[charName].player].characters.push(charName);
   });
   state.MML.characters = characters;
