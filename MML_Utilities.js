@@ -272,6 +272,18 @@ MML.displayAura = function displayAura(token, radius, auraNumber, color) {
   token.set(auraColor, color);
 };
 
+MML.getPlayerFromName = function getPlayerFromName(playerName) {
+  var player = findObjs({
+    _type: "player",
+    online: true,
+    _displayname: playerName
+  }, {
+    caseInsensitive: false
+  });
+
+  return player[0];
+};
+
 // Code borrowed from The Aaron from roll20.net forums
 var generateUUID = (function() {
     "use strict";

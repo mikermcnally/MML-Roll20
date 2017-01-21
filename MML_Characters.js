@@ -1062,11 +1062,13 @@ MML.startAction = function startAction(input) {
 
 MML.chooseSpellTargets = function chooseSpellTargets() {
   switch (this.action.spell.target) {
+    case "Caster":
+    case "Touch":
     case "Single":
       MML.processCommand({
         type: "character",
         who: this.name,
-        callback: "getSingleTarget",
+        callback: "getSpellTargets",
         input: {}
       });
       break;
@@ -2829,7 +2831,7 @@ MML.castingRollResult = function castingRollResult() {
       MML.processCommand({
         type: "character",
         who: this.name,
-        callback: "attackRollApply",
+        callback: "castingRollApply",
         input: {}
       });
     }
@@ -2850,7 +2852,7 @@ MML.castingRollResult = function castingRollResult() {
     MML.processCommand({
       type: "character",
       who: this.name,
-      callback: "attackRollApply",
+      callback: "castingRollApply",
       input: {}
     });
   }

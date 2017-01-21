@@ -182,6 +182,16 @@ MML.computeAttribute.name = {
 MML.computeAttribute.player = {
   dependents: [],
   compute: function() {
+    var newPlayer = MML.getPlayerFromName(this.player);
+    MML.getCharFromName(this.name).set("controlledby", newPlayer.id);
+    _.each(state.MML.players, function (player) {
+      if (player.name === this.player) {
+        player.characters.push(this.name);
+      } else {
+        player.characters = _.without(player.characters, this.name);
+      }
+    }, this);
+    log(state.MML.players["Robot"].characters);
     return this.player;
   }
 };

@@ -319,6 +319,13 @@ MML.observeAction = function observeAction() {
 
 MML.readyItemAction = function readyItemAction() {};
 
+MML.nextTarget = function nextTarget() {
+  state.MML.GM.currentAction.targetIndex += 1;
+  state.MML.GM.currentAction.parameters.target = state.MML.characters[state.MML.GM.currentAction.targetArray[state.MML.GM.currentAction.targetIndex]];
+  state.MML.GM.currentAction.rolls = _.isUndefined(state.MML.GM.currentAction.rolls.castingRoll) ? {} : { castingRoll: state.MML.GM.currentAction.rolls.castingRoll };
+  MML[state.MML.GM.currentAction.callback]();
+};
+
 MML.endAction = function endAction() {
   var currentAction = state.MML.GM.currentAction;
   var character = currentAction.character;

@@ -10,7 +10,7 @@ MML.spells["Flame Bolt"] = {
   duration: 0,
   target: [15, 1],
   targetSizeMatters: false,
-  metaMagic: ["Increase Potency", "Increase Dimension"],
+  metaMagic: ["Increase Potency"],
   process: function () {
 
   }
@@ -26,7 +26,7 @@ MML.spells["Dart"] = {
   duration: 0,
   target: "Single",
   targetSizeMatters: false,
-  metaMagic: ["Increase Range", "Increase Potency", "Increase Targets", "Called Shot", "Called Shot Specific"],
+  metaMagic: ["Increase Potency", "Called Shot", "Called Shot Specific"],
   process: function () {
     var currentAction = state.MML.GM.currentAction;
     var character = currentAction.character;
@@ -34,18 +34,17 @@ MML.spells["Dart"] = {
     var casterSkill = parameters.casterSkill;
     var spell = parameters.spell;
     var target = parameters.target;
-    var range = parameters.range;
     var epCost = parameters.epCost;
     var epModified = parameters.epModified;
     var metaMagic = parameters.metaMagic;
     var rolls = currentAction.rolls;
 
-    if (_.isUndefined(rolls.attackRoll)) {
+    if (_.isUndefined(rolls.castingRoll)) {
       MML.castingRoll("castingRoll", character, spell.task, casterSkill, _.reduce(_.pluck(metaMagic, "castingMod"), function(memo, num){ return memo + num; }));
     } else if (_.isUndefined(rolls.defenseRoll)) {
-      if (rolls.attackRoll === "Critical Success" || rolls.attackRoll === "Success") {
-        MML.rangedDefense(target, {family: "MWM"}, range);
-      } else if (rolls.attackRoll === "Critical Failure") {
+      if (rolls.castingRoll === "Critical Success" || rolls.castingRoll === "Success") {
+        MML.rangedDefense(target, {family: "MWM"}, MML.getDistanceBetweenChars(character.name, target.name));
+      } else if (rolls.castingRoll === "Critical Failure") {
         MML.endAction();
       } else {
         MML.endAction();
@@ -64,7 +63,7 @@ MML.spells["Dart"] = {
         MML.hitPositionRoll(character);
       }
     } else if (_.isUndefined(rolls.damageRoll)) {
-      if (rolls.attackRoll === "Critical Success") {
+      if (rolls.castingRoll === "Critical Success") {
         MML.missileDamageRoll(character, {damageType: "Pierce", damage: _.has(metaMagic, "Increase Potency") ? (3*metaMagic["Increase Potency"].level) + "d6" : "3d6"}, true);
       } else {
         MML.missileDamageRoll(character, {damageType: "Pierce", damage: _.has(metaMagic, "Increase Potency") ? (3*metaMagic["Increase Potency"].level) + "d6" : "3d6"}, false);

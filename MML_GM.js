@@ -4,8 +4,11 @@ MML.startCombat = function startCombat(input) {
 
   if (this.combatants.length > 0) {
     this.inCombat = true;
-
+    _.each(state.MML.players, function (player) {
+      player.combatants = [];
+    });
     _.each(this.combatants, function(charName) {
+      state.MML.players[state.MML.characters[charName].player].combatants.push(charName);
       MML.processCommand({
         type: "character",
         who: charName,
@@ -191,6 +194,12 @@ MML.nextAction = function nextAction() {
 MML.getSingleTarget = function getSingleTarget(input) {
   input.charName = this.name;
   input.callback = "setCurrentCharacterTargets";
+  MML.displayTargetSelection(input);
+};
+
+MML.getSpellTargets = function getSpellTargets(input) {
+  input.charName = this.name;
+  input.callback = "getAdditionTarget";
   MML.displayTargetSelection(input);
 };
 

@@ -282,6 +282,29 @@ on("ready", function() {
           }
         });
         break;
+        case "player":
+          if (_.isUndefined(state.MML.players[attribute.get("current")])) {
+            MML.processCommand({
+              type: "character",
+              who: charName,
+              callback: "setApiCharAttribute",
+              input: {
+                attribute: "player",
+                value: state.MML.GM.player
+              }
+            });
+          } else {
+            MML.processCommand({
+              type: "character",
+              who: charName,
+              callback: "setApiCharAttribute",
+              input: {
+                attribute: "player",
+                value: attribute.get("current")
+              }
+            });
+          }
+          break;
       default:
         if (attrName.indexOf("repeating_items") !== -1) {
           MML.processCommand({
