@@ -305,9 +305,15 @@ MML.getMagicSkill = function getMagicSkill(character, spell) {
           wizardry_skill -= 20;
         }
         if (wizardry_skill > elementalism_skill) {
-          return { name: "Wizardry", level: wizardry_skill };
+          return {
+            name: "Wizardry",
+            level: wizardry_skill
+          };
         } else {
-          return { name: "Fire Elementalism", level: elementalism_skill };
+          return {
+            name: "Fire Elementalism",
+            level: elementalism_skill
+          };
         }
         break;
       case "Earth":
@@ -320,9 +326,15 @@ MML.getMagicSkill = function getMagicSkill(character, spell) {
           wizardry_skill -= 20;
         }
         if (wizardry_skill > elementalism_skill) {
-          return { name: "Wizardry", level: wizardry_skill };
+          return {
+            name: "Wizardry",
+            level: wizardry_skill
+          };
         } else {
-          return { name: "Earth Elementalism", level: elementalism_skill };
+          return {
+            name: "Earth Elementalism",
+            level: elementalism_skill
+          };
         }
         break;
       case "Water":
@@ -335,9 +347,15 @@ MML.getMagicSkill = function getMagicSkill(character, spell) {
           wizardry_skill -= 20;
         }
         if (wizardry_skill > elementalism_skill) {
-          return { name: "Wizardry", level: wizardry_skill };
+          return {
+            name: "Wizardry",
+            level: wizardry_skill
+          };
         } else {
-          return { name: "Water Elementalism", level: elementalism_skill };
+          return {
+            name: "Water Elementalism",
+            level: elementalism_skill
+          };
         }
         break;
       case "Air":
@@ -350,9 +368,15 @@ MML.getMagicSkill = function getMagicSkill(character, spell) {
           wizardry_skill -= 20;
         }
         if (wizardry_skill > elementalism_skill) {
-          return { name: "Wizardry", level: wizardry_skill };
+          return {
+            name: "Wizardry",
+            level: wizardry_skill
+          };
         } else {
-          return { name: "Air Elementalism", level: elementalism_skill };
+          return {
+            name: "Air Elementalism",
+            level: elementalism_skill
+          };
         }
         break;
       case "Life":
@@ -365,17 +389,29 @@ MML.getMagicSkill = function getMagicSkill(character, spell) {
           wizardry_skill -= 20;
         }
         if (wizardry_skill > elementalism_skill) {
-          return { name: "Wizardry", level: wizardry_skill };
+          return {
+            name: "Wizardry",
+            level: wizardry_skill
+          };
         } else {
-          return { name: "Life Elementalism", level: elementalism_skill };
+          return {
+            name: "Life Elementalism",
+            level: elementalism_skill
+          };
         }
         break;
       default:
     }
   } else if (spell.family === "Symbolism") {
-    return { name: "Symbolism", level: character.skills["Symbolism"].level };
+    return {
+      name: "Symbolism",
+      level: character.skills["Symbolism"].level
+    };
   } else {
-    return { name: "Wizardry", level: character.skills["Wizardry"].level };
+    return {
+      name: "Wizardry",
+      level: character.skills["Wizardry"].level
+    };
   }
 };
 
@@ -410,6 +446,37 @@ MML.getEpCost = function getEpCost(skillName, skillLevel, ep) {
   }
 };
 
+MML.getModifiedEpCost = function getModifiedEpCost(caster, targets, spell) {
+  
+};
+
+MML.getRangeCastingModifier = function getRangeCastingModifier(caster, targets, spell) {
+  var mod = 0;
+  if (["Caster", "Touch", "Single"].indexOf(spell.target) === -1) {
+    var distance = MML.getDistanceBetweenChars(caster.name, spell.name);
+    if (distance > spell.range) {
+      mod += Math.round(((spell.range - distance) / distance) * 10);
+    }
+  } else {
+    _.each(targets, function(target) {
+      var distance = MML.getDistanceBetweenChars(caster.name, target.name);
+      if (spell.range === "Caster" && target.name !== caster.name) {
+        mod += -10;
+      }
+      if (spell.range === "Caster" || spell.range === "Touch") {
+        if (distance > rank1) {
+          mod += rank1 - distance;
+        }
+      } else {
+        if (distance > spell.range) {
+          mod += Math.round(((spell.range - distance) / distance) * 10);
+        }
+      }
+    });
+  }
+  return mod;
+};
+
 MML.validateAction = function validateAction(character) {
   var valid = true;
 
@@ -428,53 +495,53 @@ MML.validateAction = function validateAction(character) {
           break;
         case "Regain Feet":
           if (!((_.has(character.statusEffects, "Grappled") || _.has(character.statusEffects, "Held") || _.has(character.statusEffects, "Holding")) &&
-            character.movementPosition === "Prone") ||
+              character.movementPosition === "Prone") ||
             (!(_.has(character.statusEffects, "Taken Down") || _.has(character.statusEffects, "Overborne")) || _.has(character.statusEffects, "Pinned"))
           ) {
             valid = false;
           }
           break;
-          case "Place a Hold":
-            if (_.has(character.statusEffects, "Holding") &&
-              _.has(character.statusEffects, "Held") &&
-              _.has(character.statusEffects, "Pinned") &&
-              (_.has(character.statusEffects, "Grappled") && character.statusEffects["Grappled"].targets.length > 1)
-            ) {
-              valid = false;
-            }
-            break;
-          case "Break a Hold":
-            if (!_.has(character.statusEffects, "Held") && !_.has(character.statusEffects, "Pinned")) {
-              valid = false;
-            }
-            break;
-          case "Break Grapple":
-            if (!_.has(character.statusEffects, "Grappled")) {
-              valid = false;
-            }
-            break;
-          case "Takedown":
-            if (((!_.has(character.statusEffects, "Holding") &&
+        case "Place a Hold":
+          if (_.has(character.statusEffects, "Holding") &&
+            _.has(character.statusEffects, "Held") &&
+            _.has(character.statusEffects, "Pinned") &&
+            (_.has(character.statusEffects, "Grappled") && character.statusEffects["Grappled"].targets.length > 1)
+          ) {
+            valid = false;
+          }
+          break;
+        case "Break a Hold":
+          if (!_.has(character.statusEffects, "Held") && !_.has(character.statusEffects, "Pinned")) {
+            valid = false;
+          }
+          break;
+        case "Break Grapple":
+          if (!_.has(character.statusEffects, "Grappled")) {
+            valid = false;
+          }
+          break;
+        case "Takedown":
+          if (((!_.has(character.statusEffects, "Holding") &&
               (!_.has(character.statusEffects, "Grappled") || character.statusEffects["Grappled"].targets.length > 1) &&
               (!_.has(character.statusEffects, "Held") || character.statusEffects["Held"].targets.length > 1))) ||
-              (_.has(character.statusEffects, "Grappled") && _.has(character.statusEffects, "Held")) ||
-              character.movementPosition === "Prone"
-            ) {
-              valid = false;
-            }
-            break;
-          case "Head Butt":
-          case "Bite":
-            if (!_.has(character.statusEffects, "Held") &&
-              !_.has(character.statusEffects, "Grappled") &&
-              !_.has(character.statusEffects, "Holding") &&
-              !_.has(character.statusEffects, "Taken Down") &&
-              !_.has(character.statusEffects, "Pinned") &&
-              !_.has(character.statusEffects, "Overborne")
-            ) {
-              valid = false;
-            }
-            break;
+            (_.has(character.statusEffects, "Grappled") && _.has(character.statusEffects, "Held")) ||
+            character.movementPosition === "Prone"
+          ) {
+            valid = false;
+          }
+          break;
+        case "Head Butt":
+        case "Bite":
+          if (!_.has(character.statusEffects, "Held") &&
+            !_.has(character.statusEffects, "Grappled") &&
+            !_.has(character.statusEffects, "Holding") &&
+            !_.has(character.statusEffects, "Taken Down") &&
+            !_.has(character.statusEffects, "Pinned") &&
+            !_.has(character.statusEffects, "Overborne")
+          ) {
+            valid = false;
+          }
+          break;
         default:
       }
       break;

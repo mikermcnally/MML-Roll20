@@ -1420,146 +1420,50 @@ MML.charMenuIncreasePotency = function charMenuIncreasePotency(input) {
   });
 };
 
-// MML.charMenuIncreaseDimension = function charMenuIncreaseDimension(input) {
-//   this.who = input.who;
-//   this.message = "Pick a dimension to increase:";
-//   this.buttons = [];
-//
-//   this.buttons.push({
-//       text: "Length",
-//       nextMenu: "menuPause",
-//       callback: function(input) {
-//         MML.processCommand({
-//           type: "player",
-//           who: this.name,
-//           callback: "charMenuIncreaseDimensionAmount",
-//           input: {
-//             who: this.who,
-//             dimension: "Length"
-//           }
-//         });
-//         MML.processCommand({
-//           type: "player",
-//           who: this.name,
-//           callback: "displayMenu",
-//           input: {}
-//         });
-//       }
-//     });
-//     this.buttons.push({
-//         text: "Width",
-//         nextMenu: "menuPause",
-//         callback: function(input) {
-//           MML.processCommand({
-//             type: "player",
-//             who: this.name,
-//             callback: "charMenuIncreaseDimensionAmount",
-//             input: {
-//               who: this.who,
-//               dimension: "Width"
-//             }
-//           });
-//           MML.processCommand({
-//             type: "player",
-//             who: this.name,
-//             callback: "displayMenu",
-//             input: {}
-//           });
-//         }
-//       });
-//       this.buttons.push({
-//           text: "Height",
-//           nextMenu: "menuPause",
-//           callback: function(input) {
-//             MML.processCommand({
-//               type: "player",
-//               who: this.name,
-//               callback: "charMenuIncreaseDimensionAmount",
-//               input: {
-//                 who: this.who,
-//                 dimension: "Height"
-//               }
-//             });
-//             MML.processCommand({
-//               type: "player",
-//               who: this.name,
-//               callback: "displayMenu",
-//               input: {}
-//             });
-//           }
-//         });
-//   this.buttons.push({
-//     text: "Back",
-//     nextMenu: "menuPause",
-//     callback: function(input) {
-//       MML.processCommand({
-//         type: "character",
-//         who: this.who,
-//         callback: "charMenuMetaMagic",
-//         input: {}
-//       });
-//     }
-//   });
-// };
-//
-// MML.charMenuIncreasePotency = function charMenuIncreasePotency(input) {
-//   this.who = input.who;
-//   this.message = "Increase potency by how many times?";
-//   this.buttons = [];
-//   var character = state.MML.characters[this.who];
-//   var parameters = state.MML.GM.currentAction.parameters;
-//   var epProduct = _.reduce(_.pluck(parameters.metaMagic, "epMod"), function(memo, num){ return memo * num; }) * parameters.epCost;
-//   var dimensionIndex;
-//
-//   switch (input.dimension) {
-//     case "Length":
-//       dimensionIndex = 0;
-//       break;
-//     case "Width":
-//       dimensionIndex = 1;
-//       break;
-//     case "Height":
-//       dimensionIndex = 2;
-//       break;
-//     default:
-//   }
-//
-//   var i = 2;
-//   while (character.ep > Math.pow(i, 2)*epProduct) {
-//     this.buttons.push({
-//       text: "Times: " + i + " EP Cost: " + Math.pow(i, 2)*epProduct,
-//       nextMenu: "menuPause",
-//       callback: function(input) {
-//         state.MML.GM.currentAction.parameters.metaMagic["Increase Dimension"] = { epMod: Math.pow(i, 2), castingMod: -10, level: i };
-//         MML.processCommand({
-//           type: "player",
-//           who: this.name,
-//           callback: "charMenuIncreaseDimension",
-//           input: {who: this.who}
-//         });
-//         MML.processCommand({
-//           type: "player",
-//           who: this.name,
-//           callback: "displayMenu",
-//           input: {}
-//         });
-//       }
-//     });
-//     i++;
-//   }
-//   this.buttons.push({
-//     text: "Back",
-//     nextMenu: "menuPause",
-//     callback: function(input) {
-//       MML.processCommand({
-//         type: "character",
-//         who: this.who,
-//         callback: "charMenuIncreaseDimension",
-//         input: {}
-//       });
-//     }
-//   });
-// };
+MML.charMenuIncreaseDuration = function charMenuIncreaseDuration(input) {
+  this.who = input.who;
+  this.message = "Increase duration by how many times?";
+  this.buttons = [];
+  var character = state.MML.characters[this.who];
+  var parameters = state.MML.GM.currentAction.parameters;
+  var epProduct = _.reduce(_.pluck(parameters.metaMagic, "epMod"), function(memo, num){ return memo * num; }) * parameters.epCost;
+  var i = 2;
+
+  while (character.ep > i*epProduct) {
+    this.buttons.push({
+      text: "Times: " + i + " EP Cost: " + i*epProduct,
+      nextMenu: "menuPause",
+      callback: function(input) {
+        state.MML.GM.currentAction.parameters.metaMagic["Increase Duration"] = { epMod: i, castingMod: 0, level: i };
+        MML.processCommand({
+          type: "player",
+          who: this.name,
+          callback: "charMenuMetaMagic",
+          input: {who: this.who}
+        });
+        MML.processCommand({
+          type: "player",
+          who: this.name,
+          callback: "displayMenu",
+          input: {}
+        });
+      }
+    });
+    i++;
+  }
+  this.buttons.push({
+    text: "Back",
+    nextMenu: "menuPause",
+    callback: function(input) {
+      MML.processCommand({
+        type: "character",
+        who: this.who,
+        callback: "charMenuMetaMagic",
+        input: {}
+      });
+    }
+  });
+};
 
 MML.charMenuFinalizeAction = function charMenuFinalizeAction(input) {
   this.who = input.who;
