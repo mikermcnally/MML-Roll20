@@ -16,7 +16,7 @@ MML.getWeaponFamily = function getWeaponFamily(character, hand) {
   }
 };
 
-MML.getShieldDefenseBonus = function getShieldBonus(character) {
+MML.getShieldDefenseBonus = function getShieldDefenseBonus(character) {
   var rightHand = character.inventory[character.rightHand._id];
   var leftHand = character.inventory[character.leftHand._id];
   var bonus = 0;
@@ -447,7 +447,7 @@ MML.getEpCost = function getEpCost(skillName, skillLevel, ep) {
 };
 
 MML.getModifiedEpCost = function getModifiedEpCost(caster, targets, spell) {
-  
+
 };
 
 MML.getRangeCastingModifier = function getRangeCastingModifier(caster, targets, spell) {

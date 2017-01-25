@@ -203,6 +203,24 @@ MML.getSpellTargets = function getSpellTargets(input) {
   MML.displayTargetSelection(input);
 };
 
+MML.getRadiusSpellTargets = function getRadiusSpellTargets(input) {
+  var token = MML.getTokenFromChar(this.name);
+  var graphic = createObj('graphic', {
+       name: "spellMarker",
+       _pageid: token.get("_pageid"),
+       layer: "objects",
+       left: token.get("left"),
+       top: token.get("top"),
+       width: input.radius*14*2,
+       height: input.radius*14*2,
+       imgsrc: "https://s3.amazonaws.com/files.d20.io/images/27869253/ixTcySIkxTEEsbospj4PpA/thumb.png?1485314508",
+       controlledby: MML.getPlayerFromName(this.player).get("id")
+     });
+     toBack(graphic);
+     log("show me");
+     log(graphic);
+};
+
 MML.setTargets = function setTargets() {
   this.targets = this.characters[this.actor].action.targets;
   this.targetIndex = 0;

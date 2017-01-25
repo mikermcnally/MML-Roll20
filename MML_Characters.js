@@ -1061,24 +1061,31 @@ MML.startAction = function startAction(input) {
 };
 
 MML.chooseSpellTargets = function chooseSpellTargets() {
-  switch (this.action.spell.target) {
-    case "Caster":
-    case "Touch":
-    case "Single":
+  log("whyyyyyyy");
+  log(this.action.spell.target);
+  if (["Caster", "Touch", "Single"].indexOf(this.action.spell.target) > -1) {
       MML.processCommand({
         type: "character",
         who: this.name,
         callback: "getSpellTargets",
         input: {}
       });
-      break;
-    default:
-      MML.processCommand({
-        type: "character",
-        who: this.name,
-        callback: this.action.callback,
-        input: {}
-      });
+  } else if (this.action.spell.target.indexOf("' Radius") > -1) {
+    MML.processCommand({
+      type: "character",
+      who: this.name,
+      callback: "getRadiusSpellTargets",
+      input: {
+        radius: parseInt(this.action.spell.target.replace("' Radius", ""))
+      }
+    });
+  } else {
+    MML.processCommand({
+      type: "character",
+      who: this.name,
+      callback: this.action.callback,
+      input: {}
+    });
   }
 };
 

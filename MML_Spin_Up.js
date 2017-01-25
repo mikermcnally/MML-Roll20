@@ -67,7 +67,7 @@ on("ready", function() {
   });
 
   on("change:token", function(obj, prev) {
-    if (obj.get("left") !== prev["left"] && obj.get("top") !== prev["top"] && state.MML.GM.inCombat === true) {
+    if (obj.get("name") !== "spellMarker" && obj.get("left") !== prev["left"] && obj.get("top") !== prev["top"] && state.MML.GM.inCombat === true) {
       var charName = MML.getCharFromToken(obj);
       var character = state.MML.characters[charName];
       var left1 = prev["left"];
