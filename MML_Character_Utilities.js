@@ -287,6 +287,34 @@ MML.getDistanceBetweenChars = function getDistanceBetweenChars(charName, targetN
   return MML.getDistance(charToken.get("left"), targetToken.get("left"), charToken.get("top"), targetToken.get("top"));
 };
 
+MML.getCharactersWithinRadius = function getCharactersWithinRadius(left, top, radius) {
+  var targets = [];
+  _.each(state.MML.characters, function (character) {
+    var charToken = MML.getTokenFromChar(character.name);
+
+    if (MML.getDistance(charToken.get("left"), left, charToken.get("top"), top) < MML.raceSizes[character.race].radius + radius) {
+      targets.push(character.name);
+    }
+  });
+  return targets;
+};
+
+MML.getCharactersWithinRectangle = function getCharactersWithinRectangle(left, top, width, height) {
+  var targets = [];
+  _.each(state.MML.characters, function (character) {
+    var charToken = MML.getTokenFromChar(character.name);
+
+    if (charToken.get("left") + (MML.raceSizes[character.race].radius*14) > left - (width/2) &&
+      charToken.get("left") - (MML.raceSizes[character.race].radius*14) < left + (width/2) &&
+      charToken.get("top") - (MML.raceSizes[character.race].radius*14) > top + (height/2) &&
+      charToken.get("top") + (MML.raceSizes[character.race].radius*14) < top - (height/2)
+    ) {
+      targets.push(character.name);
+    }
+  });
+  return targets;
+};
+
 MML.getMagicSkill = function getMagicSkill(character, spell) {
   if (["Fire", "Earth", "Water", "Air", "Life"].indexOf(spell.family)) {
     var wizardry_skill = 0;

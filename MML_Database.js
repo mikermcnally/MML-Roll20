@@ -3078,6 +3078,14 @@ MML.racialAttributeBonuses["Wood Elf"].systemStrength = 0;
 MML.racialAttributeBonuses["Wood Elf"].fitness = 0;
 MML.racialAttributeBonuses["Wood Elf"].load = 5;
 
+MML.raceSizes = {};
+MML.raceSizes["Human"] = { size: "Medium", radius: 1 };
+MML.raceSizes["Dwarf"] = { size: "Medium", radius: 1 };
+MML.raceSizes["Gnome"] = { size: "Medium", radius: 1 };
+MML.raceSizes["Hobbit"] = { size: "Medium", radius: 0.75 };
+MML.raceSizes["Gray Elf"] = { size: "Medium", radius: 1 };
+MML.raceSizes["Wood Elf"] = { size: "Medium", radius: 1 };
+
 MML.fitnessModLookup = [];
 MML.fitnessModLookup[6] = 2.1;
 MML.fitnessModLookup[7] = 2.2;
