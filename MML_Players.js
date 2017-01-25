@@ -1345,7 +1345,7 @@ MML.charMenuAddTarget = function charMenuAddTarget(input) {
   state.MML.GM.currentAction.parameters.metaMagic["Increase Targets"] = { epMod: state.MML.GM.currentAction.targetArray.length, castingMod: -10*state.MML.GM.currentAction.targetArray.length};
   var parameters = state.MML.GM.currentAction.parameters;
   var epProduct = _.reduce(_.pluck(parameters.metaMagic, "epMod"), function(memo, num){ return memo * num; }) * parameters.epCost;
-  this.message = "Current EP Cost: " + epProduct + "\nAdd another target or cast spell:";
+  this.message = "Current EP Cost: " + epProduct + "\n" + + "\nAdd another target or cast spell:";
 
   if (character.ep > epProduct) {
     this.buttons.push({
