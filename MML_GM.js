@@ -204,21 +204,33 @@ MML.getSpellTargets = function getSpellTargets(input) {
 };
 
 MML.getRadiusSpellTargets = function getRadiusSpellTargets(input) {
+  state.MML.GM.currentAction.parameters.spellMarker = "spellMarkerCircle";
   var token = MML.getTokenFromChar(this.name);
   var graphic = createObj('graphic', {
-       name: "spellMarker",
+       name: "spellMarkerCircle",
        _pageid: token.get("_pageid"),
        layer: "objects",
        left: token.get("left"),
        top: token.get("top"),
-       width: input.radius*14*2,
-       height: input.radius*14*2,
+       width: MML.feetToPixels(input.radius*2),
+       height: MML.feetToPixels(input.radius*2),
        imgsrc: "https://s3.amazonaws.com/files.d20.io/images/27869253/ixTcySIkxTEEsbospj4PpA/thumb.png?1485314508",
        controlledby: MML.getPlayerFromName(this.player).get("id")
      });
-     toBack(graphic);
-     log("show me");
-     log(graphic);
+   toBack(graphic);
+
+   MML.processCommand({
+     type: "player",
+     who: this.player,
+     callback: "charMenuPlaceSpellMarker",
+     input: { who: this.name }
+   });
+   MML.processCommand({
+     type: "player",
+     who: this.player,
+     callback: "displayMenu",
+     input: {}
+   });
 };
 
 MML.setTargets = function setTargets() {
@@ -385,10 +397,11 @@ MML.processCommand = function processCommand(command) {
 };
 
 MML.parseCommand = function parseCommand(msg) {
+  var who;
   if (msg.type === "api" && msg.content.indexOf("!MML|") !== -1) {
     var command = "parse failed";
     var content = msg.content.replace("!MML|", "");
-    var who = msg.who.replace(" (GM)", "");
+    who = msg.who.replace(" (GM)", "");
     var input;
 
     if (content.indexOf("selectTarget") !== -1) {
@@ -445,7 +458,7 @@ MML.parseCommand = function parseCommand(msg) {
       }
     } else if (content.indexOf("displayItemOptions") !== -1) {
       input = content.replace("displayItemOptions ", "").split("|");
-      var who = input[0];
+      who = input[0];
       var itemId = input[1];
 
       command = {

@@ -1524,12 +1524,14 @@ MML.menuCombatMovement = function menuCombatMovement(input) {
 MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(input) {
   var targetArray;
 
-  if (_.isUndefined(input.target)) {
+  if (!_.isUndefined(input.target)) {
     targetArray = [input.target];
   } else {
     targetArray = input.targets;
   }
-
+  log("fuck");
+  log(input);
+  log(targetArray);
   state.MML.GM.currentAction.targetArray = targetArray;
   state.MML.GM.currentAction.targetIndex = 0;
 
@@ -1562,6 +1564,43 @@ MML.getAdditionTarget = function getAdditionTarget(input) {
     callback: "displayMenu",
     input: {}
   });
+};
+MML.charMenuPlaceSpellMarker = function charMenuPlaceSpellMarker(input) {
+  this.who = input.who;
+  this.message = "Move and resize spell marker.";
+  this.buttons = [{
+    text: "Accept",
+    nextMenu: "menuPause",
+    callback: function(input) {
+      var spellMarker = MML.getTokenFromName(state.MML.GM.currentAction.parameters.spellMarker);
+      var targets;
+
+      switch (state.MML.GM.currentAction.parameters.spellMarker) {
+        case "spellMarkerCircle":
+          targets = MML.getCharactersWithinRadius(spellMarker.get("left"), spellMarker.get("top"), spellMarker.get("width")/2);
+          break;
+        case "spellMarkerRectangle":
+
+          break;
+        case "spellMarkerTriangle":
+
+          break;
+        default:
+      }
+      log("wtf");
+      log(targets);
+      spellMarker.remove();
+      MML.processCommand({
+        type: "player",
+        who: this.name,
+        callback: "setCurrentCharacterTargets",
+        input: {
+          targets: targets,
+          charName: this.who
+        }
+      });
+    }
+  }];
 };
 MML.charMenuSelectBodyPart = function charMenuSelectBodyPart(input) {
   this.who = input.who;

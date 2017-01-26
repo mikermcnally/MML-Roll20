@@ -67,7 +67,7 @@ on("ready", function() {
   });
 
   on("change:token", function(obj, prev) {
-    if (obj.get("name") !== "spellMarker" && obj.get("left") !== prev["left"] && obj.get("top") !== prev["top"] && state.MML.GM.inCombat === true) {
+    if (obj.get("name").indexOf("spellMarker") === -1 && obj.get("left") !== prev["left"] && obj.get("top") !== prev["top"] && state.MML.GM.inCombat === true) {
       var charName = MML.getCharFromToken(obj);
       var character = state.MML.characters[charName];
       var left1 = prev["left"];
@@ -107,6 +107,9 @@ on("ready", function() {
         obj.set("left", prev["left"]);
         obj.set("top", prev["top"]);
       }
+    } else if (obj.get("name").indexOf("spellMarker") > -1) {
+      sendChat("GM", 'new ep and difficulty');
+      toBack(obj);
     }
   });
 

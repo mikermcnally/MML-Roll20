@@ -112,7 +112,8 @@ MML.spells["Hail of Stones"] = {
     var metaMagic = parameters.metaMagic;
     var stonesRemaining = parameters.stonesRemaining;
     var rolls = currentAction.rolls;
-
+    log(target);
+    log(state.MML.GM.currentAction.targetArray);
     if (_.isUndefined(rolls.castingRoll)) {
       MML.castingRoll("castingRoll", character, spell.task, casterSkill, _.reduce(_.pluck(metaMagic, "castingMod"), function(memo, num) { return memo + num; }));
     } else if (_.isUndefined(rolls.numberOfStonesRoll)) {

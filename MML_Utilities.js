@@ -203,6 +203,17 @@ MML.getTokenFromChar = function getTokenFromChar(charName) {
   return tokens[0];
 };
 
+MML.getTokenFromName = function getTokenFromName(name) {
+  var tokens = findObjs({
+    _pageid: Campaign().get("playerpageid"),
+    _type: "graphic",
+    _subtype: "token",
+    name: name
+  });
+
+  return tokens[0];
+};
+
 MML.getSelectedTokens = function getSelectedTokens(selected) {
   tokens = [];
 
@@ -225,12 +236,33 @@ MML.getSelectedCharNames = function getSelectedCharNames(selected) {
   return characters;
 };
 
+MML.displayAura = function displayAura(token, radius, auraNumber, color) {
+  var auraRadius;
+  var auraColor;
+  if (auraNumber === 2) {
+    auraRadius = "aura2_radius";
+    auraColor = "aura2_color";
+  } else {
+    auraRadius = "aura1_radius";
+    auraColor = "aura1_color";
+  }
+  token.set(auraRadius, radius);
+  token.set(auraColor, color);
+};
+
+// Geometry Functions
+MML.feetToPixels = function feetToPixels(pixels) {
+  return pixels*14;
+};
+
+MML.pixelsToFeet = function pixelsToFeet(feet) {
+  return Math.floor((feet/14) + 0.5);
+};
+
 MML.getDistance = function getDistance(left1, left2, top1, top2) {
-  var pixelPerFoot = 14;
   var leftDistance = Math.abs(left2 - left1);
   var topDistance = Math.abs(top2 - top1);
-  var distance = Math.sqrt(leftDistance * leftDistance + topDistance * topDistance) / pixelPerFoot;
-  distance = Math.floor(distance + 0.5);
+  var distance = MML.pixelsToFeet(Math.sqrt(Math.pow(leftDistance, 2) + Math.pow(topDistance, 2)));
   return distance;
 };
 
@@ -258,20 +290,7 @@ MML.drawCirclePath = function drawCirclePath(left, top, radius) {
   return path;
 };
 
-MML.displayAura = function displayAura(token, radius, auraNumber, color) {
-  var auraRadius;
-  var auraColor;
-  if (auraNumber === 2) {
-    auraRadius = "aura2_radius";
-    auraColor = "aura2_color";
-  } else {
-    auraRadius = "aura1_radius";
-    auraColor = "aura1_color";
-  }
-  token.set(auraRadius, radius);
-  token.set(auraColor, color);
-};
-
+// Player Functions
 MML.getPlayerFromName = function getPlayerFromName(playerName) {
   var player = findObjs({
     _type: "player",

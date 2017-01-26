@@ -1061,8 +1061,6 @@ MML.startAction = function startAction(input) {
 };
 
 MML.chooseSpellTargets = function chooseSpellTargets() {
-  log("whyyyyyyy");
-  log(this.action.spell.target);
   if (["Caster", "Touch", "Single"].indexOf(this.action.spell.target) > -1) {
       MML.processCommand({
         type: "character",
