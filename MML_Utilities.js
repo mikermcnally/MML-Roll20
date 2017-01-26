@@ -290,6 +290,13 @@ MML.drawCirclePath = function drawCirclePath(left, top, radius) {
   return path;
 };
 
+MML.rotateAxes = function rotateAxes(left, top, angle) {
+  var leftNew = left*Math.cos(angle * Math.PI / 180) - top*Math.sin(angle * Math.PI / 180);
+  var topNew = -left*Math.sin(angle * Math.PI / 180) + top*Math.cos(angle * Math.PI / 180);
+
+  return [leftNew, topNew];
+};
+
 // Player Functions
 MML.getPlayerFromName = function getPlayerFromName(playerName) {
   var player = findObjs({
@@ -370,10 +377,17 @@ MML.rollDice = function rollDice(amount, size) {
   return value;
 };
 
-MML.rollDamage = function rollDamage(input) {
-  var diceArray = input.damageDice.split("d");
+MML.parseDice = function parseDice(dice) {
+  var diceArray = dice.split("d");
   var amount = diceArray[0] * 1;
   var size = diceArray[1] * 1;
+  return { amount: amount, size: size };
+};
+
+MML.rollDamage = function rollDamage(input) {
+  var dice = MML.parseDice(input.damageDice);
+  var amount = dice.amount;
+  var size = dice.size;
   var damageMod = 0;
   var value;
 
@@ -534,6 +548,50 @@ MML.attributeCheckResult = function attributeCheckResult(roll) {
     "\nTarget: " + roll.target +
     "\nResult: " + roll.result +
     "\nRange: " + roll.range;
+
+  return roll;
+};
+
+MML.genericRoll = function genericRoll(input) {
+  // log("genericRoll");
+  // log(input.callback);
+  // log(input.mods);
+  // "numberOfStonesRoll", "1d3", "Number of stones cast at " + target.name
+  var dice = MML.parseDice(input.dice);
+  var roll = {
+    type: "generic",
+    name: input.name,
+    character: this.name,
+    callback: input.callback,
+    value: MML.rollDice(dice.amount, dice.size),
+    range: input.dice,
+    accepted: false
+  };
+
+  roll = MML.genericRollResult(roll);
+
+  MML.processCommand({
+    type: "player",
+    who: this.player,
+    callback: "setApiPlayerAttribute",
+    input: {
+      attribute: "currentRoll",
+      value: roll
+    }
+  });
+  MML.processCommand({
+    type: "character",
+    who: this.name,
+    callback: input.callback,
+    input: {}
+  });
+};
+
+MML.genericRollResult = function genericRollResult(roll) {
+  roll.result = roll.value;
+  roll.message = "Roll: " + roll.value +
+  "\nResult: " + roll.result +
+  "\nRange: " + roll.range;
 
   return roll;
 };

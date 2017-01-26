@@ -320,6 +320,8 @@ MML.changeRoll = function changeRoll(input) {
         this.currentRoll = MML.universalRollResult(this.currentRoll);
       } else if (this.currentRoll.type === "attribute") {
         this.currentRoll = MML.attributeCheckResult(this.currentRoll);
+      } else if (this.currentRoll.type === "generic") {
+        this.currentRoll = MML.genericRollResult(this.currentRoll);
       }
     }
   } else {

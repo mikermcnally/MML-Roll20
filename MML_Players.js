@@ -1955,6 +1955,29 @@ MML.charMenuFatigueRecoveryRoll = function charMenuFatigueRecoveryRoll(input) {
     }
   }];
 };
+MML.charMenuGenericRoll = function charMenuGenericRoll(input) {
+  this.who = input.who;
+  this.message = input.message;
+  var rollDice = input.dice;
+  var rollName = input.name;
+  var rollCallback = input.callback;
+  this.buttons = [{
+    text: "Roll " + rollDice,
+    nextMenu: "menuIdle",
+    callback: function(input) {
+      MML.processCommand({
+        type: "character",
+        who: this.who,
+        callback: "genericRoll",
+        input: {
+          name: rollName,
+          dice: rollDice,
+          callback: rollCallback
+        }
+      });
+    }
+  }];
+};
 MML.charMenuObserveAction = function charMenuObserveAction(input) {
   this.who = input.who;
   this.message = this.who + " observes the situation.";

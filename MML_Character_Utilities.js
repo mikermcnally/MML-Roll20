@@ -291,7 +291,7 @@ MML.getCharactersWithinRadius = function getCharactersWithinRadius(left, top, ra
   var targets = [];
   _.each(state.MML.characters, function (character) {
     var charToken = MML.getTokenFromChar(character.name);
-    
+
     if (MML.getDistance(charToken.get("left"), left, charToken.get("top"), top) < MML.raceSizes[character.race].radius + MML.pixelsToFeet(radius)) {
       targets.push(character.name);
     }
@@ -299,15 +299,18 @@ MML.getCharactersWithinRadius = function getCharactersWithinRadius(left, top, ra
   return targets;
 };
 
-MML.getCharactersWithinRectangle = function getCharactersWithinRectangle(left, top, width, height) {
+MML.getCharactersWithinRectangle = function getCharactersWithinRectangle(leftOriginal, topOriginal, width, height, rotation) {
   var targets = [];
+  var transformedCoordinates = MML.rotateAxes(leftOriginal, topOriginal, rotation);
+  var left = transformedCoordinates[0];
+  var top = transformedCoordinates[1];
   _.each(state.MML.characters, function (character) {
     var charToken = MML.getTokenFromChar(character.name);
-
-    if (charToken.get("left") + (MML.feetToPixels(MML.raceSizes[character.race].radius)) > left - (width/2) &&
-      charToken.get("left") - (MML.feetToPixels(MML.raceSizes[character.race].radius)) < left + (width/2) &&
-      charToken.get("top") - (MML.feetToPixels(MML.raceSizes[character.race].radius)) > top + (height/2) &&
-      charToken.get("top") + (MML.feetToPixels(MML.raceSizes[character.race].radius)) < top - (height/2)
+    var tokenCoordinates = MML.rotateAxes(charToken.get("left"), charToken.get("top"), rotation);
+    if (tokenCoordinates[0] + (MML.feetToPixels(MML.raceSizes[character.race].radius)) > left - (width/2) &&
+      tokenCoordinates[0] - (MML.feetToPixels(MML.raceSizes[character.race].radius)) < left + (width/2) &&
+      tokenCoordinates[1] - (MML.feetToPixels(MML.raceSizes[character.race].radius)) > top + (height/2) &&
+      tokenCoordinates[1] + (MML.feetToPixels(MML.raceSizes[character.race].radius)) < top - (height/2)
     ) {
       targets.push(character.name);
     }

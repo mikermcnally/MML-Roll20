@@ -118,7 +118,18 @@ MML.spells["Hail of Stones"] = {
       MML.castingRoll("castingRoll", character, spell.task, casterSkill, _.reduce(_.pluck(metaMagic, "castingMod"), function(memo, num) { return memo + num; }));
     } else if (_.isUndefined(rolls.numberOfStonesRoll)) {
       if (rolls.castingRoll === "Critical Success" || rolls.castingRoll === "Success") {
-        MML.genericRoll("numberOfStonesRoll", "1d3", "Number of stones cast at " + target.name);
+        MML.processCommand({
+          type: "player",
+          who: this.player,
+          callback: "charMenuGenericRoll",
+          input: {
+            who: character.name,
+            name: "numberOfStonesRoll",
+            dice: "1d3",
+            message: "Number of stones cast at " + target.name,
+            callback: "genericRollResult"
+          }
+        });
       } else if (rolls.castingRoll === "Critical Failure") {
         MML.endAction();
       } else {
