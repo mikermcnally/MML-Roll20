@@ -1374,7 +1374,6 @@ MML.charMenuAddTarget = function charMenuAddTarget(input) {
     }
   });
 };
-
 MML.charMenuIncreasePotency = function charMenuIncreasePotency(input) {
   this.who = input.who;
   this.message = "Increase potency by how many times?";
@@ -1419,7 +1418,6 @@ MML.charMenuIncreasePotency = function charMenuIncreasePotency(input) {
     }
   });
 };
-
 MML.charMenuIncreaseDuration = function charMenuIncreaseDuration(input) {
   this.who = input.who;
   this.message = "Increase duration by how many times?";
@@ -1460,6 +1458,32 @@ MML.charMenuIncreaseDuration = function charMenuIncreaseDuration(input) {
         who: this.who,
         callback: "charMenuMetaMagic",
         input: {}
+      });
+    }
+  });
+};
+
+MML.charMenuReadyItem = function charMenuReadyItem(input) {
+  this.who = input.who;
+  this.message = "Choose item or items for" + this.who;
+  this.buttons = [];
+  var character = state.MML.characters[this.who];
+
+  _.each(character.inventory, function (item) {
+    if (["weapon", "spellComponent", "shield", "potion", "misc"].indexOf(item.type)) {
+      this.buttons.push({
+        text: item.name,
+        nextMenu: "menuPause",
+        callback: function(input) {
+          MML.processCommand({
+            type: "character",
+            who: this.who,
+            callback: "charMenuChooseHands",
+            input: {
+              item: item
+            }
+          });
+        }
       });
     }
   });
@@ -1984,6 +2008,7 @@ MML.charMenuObserveAction = function charMenuObserveAction(input) {
   this.buttons = [MML.menuButtons.endAction];
 };
 
+
 MML.menuButtons = {};
 MML.menuButtons.GmMenuMain = {
   text: "GmMenuMain",
@@ -2271,7 +2296,6 @@ MML.menuButtons.setActionReadyItem = {
   nextMenu: "charMenuReadyItem",
   callback: function(input) {
     state.MML.characters[this.who].action.name = input.text;
-    sendChat("", "Ready Item not ready...lol");
     MML.processCommand({
       type: "player",
       who: this.name,
