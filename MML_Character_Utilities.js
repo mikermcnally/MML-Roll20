@@ -289,7 +289,7 @@ MML.getDistanceBetweenChars = function getDistanceBetweenChars(charName, targetN
 
 MML.getCharactersWithinRadius = function getCharactersWithinRadius(left, top, radius) {
   var targets = [];
-  _.each(state.MML.characters, function (character) {
+  _.each(state.MML.characters, function(character) {
     var charToken = MML.getTokenFromChar(character.name);
 
     if (MML.getDistance(charToken.get("left"), left, charToken.get("top"), top) < MML.raceSizes[character.race].radius + MML.pixelsToFeet(radius)) {
@@ -304,13 +304,13 @@ MML.getCharactersWithinRectangle = function getCharactersWithinRectangle(leftOri
   var transformedCoordinates = MML.rotateAxes(leftOriginal, topOriginal, rotation);
   var left = transformedCoordinates[0];
   var top = transformedCoordinates[1];
-  _.each(state.MML.characters, function (character) {
+  _.each(state.MML.characters, function(character) {
     var charToken = MML.getTokenFromChar(character.name);
     var tokenCoordinates = MML.rotateAxes(charToken.get("left"), charToken.get("top"), rotation);
-    if (tokenCoordinates[0] + (MML.feetToPixels(MML.raceSizes[character.race].radius)) > left - (width/2) &&
-      tokenCoordinates[0] - (MML.feetToPixels(MML.raceSizes[character.race].radius)) < left + (width/2) &&
-      tokenCoordinates[1] - (MML.feetToPixels(MML.raceSizes[character.race].radius)) > top + (height/2) &&
-      tokenCoordinates[1] + (MML.feetToPixels(MML.raceSizes[character.race].radius)) < top - (height/2)
+    if (tokenCoordinates[0] + (MML.feetToPixels(MML.raceSizes[character.race].radius)) > left - (width / 2) &&
+      tokenCoordinates[0] - (MML.feetToPixels(MML.raceSizes[character.race].radius)) < left + (width / 2) &&
+      tokenCoordinates[1] - (MML.feetToPixels(MML.raceSizes[character.race].radius)) > top + (height / 2) &&
+      tokenCoordinates[1] + (MML.feetToPixels(MML.raceSizes[character.race].radius)) < top - (height / 2)
     ) {
       targets.push(character.name);
     }
@@ -478,7 +478,13 @@ MML.getEpCost = function getEpCost(skillName, skillLevel, ep) {
 };
 
 MML.getModifiedEpCost = function getModifiedEpCost(caster, targets, spell) {
+  var area;
+  var areaModified;
+  var epModifiers = [];
 
+  if (areaModified > area) {
+    epModifiers.push(Math.pow(areaModified/area, 2));
+  }
 };
 
 MML.getRangeCastingModifier = function getRangeCastingModifier(caster, targets, spell) {
