@@ -477,6 +477,25 @@ MML.getEpCost = function getEpCost(skillName, skillLevel, ep) {
   }
 };
 
+MML.getModifiedEpCost = function getModifiedEpCost(spellMarker, spell) {
+  var area;
+  var areaModified;
+  var epModifiers = [];
+
+  if (typeof spell.target === "string" && spell.target.indexOf("' Radius'")) {
+    area = Math.pow(parseInt(spell.target.replace("' Radius'", "")), 2);
+    areaModified = Math.pow(MML.pixelsToFeet(spellMarker.get("width")/2), 2);
+  } else if (_.isArray(spell.target)) {
+    area = spell.target[0] * spell.target[1];
+    areaModified = spellMarker.get("width") * spellMarker.get("height");
+  }
+
+  if (areaModified > area) {
+    epModifiers.push(Math.pow(areaModified/area, 2));
+  }
+};
+
+
 MML.getModifiedEpCost = function getModifiedEpCost(caster, targets, spell) {
   var area;
   var areaModified;
