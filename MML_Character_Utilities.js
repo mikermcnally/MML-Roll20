@@ -495,7 +495,6 @@ MML.getModifiedEpCost = function getModifiedEpCost(spellMarker, spell) {
   }
 };
 
-
 MML.getModifiedEpCost = function getModifiedEpCost(caster, targets, spell) {
   var area;
   var areaModified;
@@ -520,8 +519,8 @@ MML.getRangeCastingModifier = function getRangeCastingModifier(caster, targets, 
         mod += -10;
       }
       if (spell.range === "Caster" || spell.range === "Touch") {
-        if (distance > rank1) {
-          mod += rank1 - distance;
+        if (distance > MML.weaponRanks[1].high) {
+          mod += MML.weaponRanks[1].high - distance;
         }
       } else {
         if (distance > spell.range) {
