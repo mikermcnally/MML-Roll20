@@ -460,7 +460,7 @@ MML.parseCommand = function parseCommand(msg) {
       }
     } else if (content.indexOf("displayItemOptions") !== -1) {
       input = content.replace("displayItemOptions ", "").split("|");
-      who = input[0];
+      var charName = input[0];
       var itemId = input[1];
 
       command = {
@@ -468,7 +468,7 @@ MML.parseCommand = function parseCommand(msg) {
         who: who,
         callback: "displayItemOptions",
         input: {
-          who: who,
+          who: charName,
           itemId: itemId
         }
       };
@@ -479,7 +479,7 @@ MML.parseCommand = function parseCommand(msg) {
       } catch (e) {
         log(command);
         log(content);
-        sendChat("", "JSON parse failed");
+        sendChat("Game", "JSON parse failed");
       }
 
       command.input.selectedCharNames = MML.getSelectedCharNames(msg.selected);
