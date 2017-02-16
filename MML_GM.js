@@ -484,7 +484,9 @@ MML.parseCommand = function parseCommand(msg) {
 
       command.input.selectedCharNames = MML.getSelectedCharNames(msg.selected);
     }
-
+    if (state.MML.commandRecorder) {
+      state.MML.commandArray.push(command);
+    }
     MML.processCommand(command);
   }
 };

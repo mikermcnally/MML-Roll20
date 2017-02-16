@@ -181,7 +181,9 @@ MML.getCharFromToken = function getCharFromToken(token) {
   var tokenObject = getObj("graphic", token.id);
   var charName = getObj("character", tokenObject.get("represents"));
 
-  if (_.isUndefined(charName)) {
+  if (tokenObject.get("name").indexOf("spellMarker") > -1) {
+    // Do nothing
+  } else if (_.isUndefined(charName)) {
     tokenObject.set("tint_color", "#FFFF00");
     sendChat("Error", "Selected Token(s) not associated to a character.");
   } else {
