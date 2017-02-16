@@ -1470,10 +1470,137 @@ MML.charMenuReadyItem = function charMenuReadyItem(input) {
   var character = state.MML.characters[this.who];
 
   _.each(character.inventory, function (item) {
-    if (["weapon", "spellComponent", "shield", "potion", "misc"].indexOf(item.type)) {
+    if (["weapon", "spellComponent", "shield", "potion", "misc"].indexOf(item.type) &&
+      character.rightHand._id !== _id &&
+      character.leftHand._id !== _id
+    ) {
       this.buttons.push({
         text: item.name,
-        nextMenu: "menuPause",
+        nextMenu: "charMenuChooseHands",
+        callback: function(input) {
+          MML.processCommand({
+            type: "character",
+            who: this.who,
+            callback: "charMenuChooseHands",
+            input: {
+              item: item
+            }
+          });
+        }
+      });
+    }
+  });
+};
+MML.charMenuChooseHands = function charMenuChooseHands(input) {
+  this.who = input.who;
+  this.message = "Choose item or items for" + this.who;
+  this.buttons = [];
+  var character = state.MML.characters[this.who];
+
+    if (["spellComponent", "shield", "potion", "misc"].indexOf(input.item.type) ||
+      (input.item.type === "weapon" && _.has(input.item.grips, "One Hand"))
+    ) {
+      this.buttons.push({
+        text: "Left",
+        nextMenu: "charMenuReadyAdditionalItem",
+        callback: function(input) {
+          MML.processCommand({
+            type: "character",
+            who: this.who,
+            callback: "setApiCharAttributeJSON",
+            input: {
+              attribute: "action",
+              index: "items",
+              value: [{
+                item: input.item,
+                grip: "Left"
+              }]
+            }
+          });
+          MML.processCommand({
+            type: "character",
+            who: this.who,
+            callback: "charMenuReadyAdditionalItem",
+            input: {
+              hand: "Right"
+            }
+          });
+        }
+      });
+      this.buttons.push({
+        text: "Right",
+        nextMenu: "charMenuReadyAdditionalItem",
+        callback: function(input) {
+          MML.processCommand({
+            type: "character",
+            who: this.who,
+            callback: "setApiCharAttributeJSON",
+            input: {
+              attribute: "action",
+              index: "items",
+              value: [{
+                item: input.item,
+                grip: "Right"
+              }]
+            }
+          });
+          MML.processCommand({
+            type: "character",
+            who: this.who,
+            callback: "charMenuReadyAdditionalItem",
+            input: {
+              hand: "Left"
+            }
+          });
+        }
+      });
+    }
+    if (input.item.type === "weapon") {
+      _.each(input.item.grips, function (grip, name) {
+        if (name !== "One Hand") {
+          this.buttons.push({
+            text: name,
+            nextMenu: "charMenuFinalizeAction",
+            callback: function(input) {
+              MML.processCommand({
+                type: "character",
+                who: this.who,
+                callback: "setApiCharAttributeJSON",
+                input: {
+                  attribute: "action",
+                  index: "items",
+                  value: [{
+                    item: input.item,
+                    grip: name
+                  }]
+                }
+              });
+              MML.processCommand({
+                type: "character",
+                who: this.who,
+                callback: "charMenuFinalizeAction",
+                input: {}
+              });
+            }
+          });
+        }
+      });
+    }
+};
+MML.charMenuReadyAdditionalItem = function charMenuReadyAdditionalItem(input) {
+  this.who = input.who;
+  this.message = "Choose item or finalize action for " + this.who;
+  this.buttons = [];
+  var character = state.MML.characters[this.who];
+
+  _.each(character.inventory, function (item) {
+    if (["weapon", "spellComponent", "shield", "potion", "misc"].indexOf(item.type) &&
+      character.rightHand._id !== _id &&
+      character.leftHand._id !== _id
+    ) {
+      this.buttons.push({
+        text: item.name,
+        nextMenu: "charMenuChooseHands",
         callback: function(input) {
           MML.processCommand({
             type: "character",
