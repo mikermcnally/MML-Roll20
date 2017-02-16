@@ -1465,11 +1465,11 @@ MML.charMenuIncreaseDuration = function charMenuIncreaseDuration(input) {
 
 MML.charMenuReadyItem = function charMenuReadyItem(input) {
   this.who = input.who;
-  this.message = "Choose item or items for" + this.who;
+  this.message = "Choose item or items for " + this.who;
   this.buttons = [];
   var character = state.MML.characters[this.who];
-
-  _.each(character.inventory, function (item) {
+  log(character.inventory);
+  _.each(character.inventory, function (item, _id) {
     if (["weapon", "spellComponent", "shield", "potion", "misc"].indexOf(item.type) &&
       character.rightHand._id !== _id &&
       character.leftHand._id !== _id
@@ -1487,6 +1487,18 @@ MML.charMenuReadyItem = function charMenuReadyItem(input) {
             }
           });
         }
+      });
+    }
+  });
+  this.buttons.push({
+    text: "Back",
+    nextMenu: "charMenuPrepareAction",
+    callback: function(input) {
+      MML.processCommand({
+        type: "player",
+        who: this.name,
+        callback: "displayMenu",
+        input: {}
       });
     }
   });
