@@ -8907,6 +8907,12 @@ MML.assignNewItem = function assignNewItem(input) {
       value: state.MML.GM.newItem
     }
   });
+  MML.processCommand({
+    type: "player",
+    who: state.MML.characters[input.target].player,
+    callback: "displayMenu",
+    input: {}
+  });
 };
 
 // var exampleCommand = {
@@ -9218,6 +9224,10 @@ MML.menuIdle = function menuIdle(input) {
   this.who = input.who;
   this.message = "Menu Closed";
   this.buttons = [];
+  if (state.MML.GM.player === this.name && !state.MML.GM.inCombat) {
+    this.menu = "GmMenuMain";
+    this.buttons = [MML.menuButtons.GmMenuMain];
+  }
 };
 
 MML.menuPause = function menuPause(input) {};
@@ -9275,7 +9285,8 @@ MML.GmMenuNewItem = function GmMenuNewItem(input) {
     MML.menuButtons.newShield,
     MML.menuButtons.newArmor,
     MML.menuButtons.newSpellComponent,
-    MML.menuButtons.newMiscItem
+    MML.menuButtons.newMiscItem,
+    MML.menuButtons.toMainGmMenu
   ];
 };
 
@@ -10675,7 +10686,7 @@ MML.charMenuChooseHands = function charMenuChooseHands(input) {
 MML.charMenuReadyAdditionalItem = function charMenuReadyAdditionalItem(input) {
   this.who = input.who;
   this.message = "Choose item or finalize action for " + this.who;
-  this.buttons = [];
+  var buttons = [];
   var character = state.MML.characters[this.who];
 
   _.each(character.inventory, function (item, _id) {
@@ -10684,7 +10695,7 @@ MML.charMenuReadyAdditionalItem = function charMenuReadyAdditionalItem(input) {
       character.leftHand._id !== _id &&
       input.previousItemId !== _id
     ) {
-      this.buttons.push({
+      buttons.push({
         text: item.name,
         nextMenu: "charMenuChooseHands",
         callback: function(input) {
@@ -10701,7 +10712,7 @@ MML.charMenuReadyAdditionalItem = function charMenuReadyAdditionalItem(input) {
     }
   });
 
-  this.buttons.push({
+  buttons.push({
     text: "Next Menu",
     nextMenu: "charMenuFinalizeAction",
     callback: function(input) {
@@ -10713,6 +10724,7 @@ MML.charMenuReadyAdditionalItem = function charMenuReadyAdditionalItem(input) {
       });
     }
   });
+  this.buttons = buttons;
 };
 
 MML.charMenuFinalizeAction = function charMenuFinalizeAction(input) {

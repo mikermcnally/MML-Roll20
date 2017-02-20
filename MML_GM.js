@@ -346,6 +346,12 @@ MML.assignNewItem = function assignNewItem(input) {
       value: state.MML.GM.newItem
     }
   });
+  MML.processCommand({
+    type: "player",
+    who: state.MML.characters[input.target].player,
+    callback: "displayMenu",
+    input: {}
+  });
 };
 
 // var exampleCommand = {
