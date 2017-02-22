@@ -1522,8 +1522,7 @@ MML.charMenuChooseHands = function charMenuChooseHands(input) {
   this.message = "Choose item or items for" + this.who;
   this.buttons = [];
   var character = state.MML.characters[this.who];
-  log("here");
-  log(input);
+
   if (["spellComponent", "shield", "potion", "misc"].indexOf(input.item.type) ||
     (input.item.type === "weapon" && _.has(input.item.grips, "One Hand"))
   ) {
@@ -1597,7 +1596,7 @@ MML.charMenuChooseHands = function charMenuChooseHands(input) {
       if (name !== "One Hand") {
         this.buttons.push({
           text: name,
-          nextMenu: "charMenuFinalizeAction",
+          nextMenu: "charMenuReadyItemFollowup",
           callback: function(input) {
             MML.processCommand({
               type: "character",
@@ -1626,10 +1625,12 @@ MML.charMenuChooseHands = function charMenuChooseHands(input) {
 };
 MML.charMenuReadyAdditionalItem = function charMenuReadyAdditionalItem(input) {
   this.who = input.who;
-  this.message = "Choose item or finalize action for " + this.who;
+  this.message = "Choose another item or finalize action for " + this.who;
   var buttons = [];
   var character = state.MML.characters[this.who];
-
+  var itemArray = character.action.items;
+  log("here");
+  log(input);
   _.each(character.inventory, function (item, _id) {
     if (["weapon", "spellComponent", "shield", "potion", "misc"].indexOf(item.type) > -1 &&
       character.rightHand._id !== _id &&
@@ -1638,14 +1639,20 @@ MML.charMenuReadyAdditionalItem = function charMenuReadyAdditionalItem(input) {
     ) {
       buttons.push({
         text: item.name,
-        nextMenu: "charMenuChooseHands",
+        nextMenu: "charMenuReadyItemFollowup",
         callback: function(input) {
+          itemArray.push({ itemId: input.itemId, grip: input.hand });
           MML.processCommand({
             type: "character",
             who: this.who,
-            callback: "charMenuChooseHands",
+            callback: "setApiCharAttributeJSON",
             input: {
-              item: item
+              attribute: "action",
+              index: "items",
+              value: [{
+                itemId: input.itemId,
+                grip: "Right"
+              }]
             }
           });
         }
@@ -1655,7 +1662,7 @@ MML.charMenuReadyAdditionalItem = function charMenuReadyAdditionalItem(input) {
 
   buttons.push({
     text: "Next Menu",
-    nextMenu: "charMenuFinalizeAction",
+    nextMenu: "charMenuReadyItemFollowup",
     callback: function(input) {
       MML.processCommand({
         type: "player",
@@ -1665,6 +1672,50 @@ MML.charMenuReadyAdditionalItem = function charMenuReadyAdditionalItem(input) {
       });
     }
   });
+  this.buttons = buttons;
+};
+MML.charMenuReadyItemFollowup = function charMenuReadyItemFollowup(input) {
+  this.who = input.who;
+  this.message = "Prepare " + this.who + "'s action";
+  var character = state.MML.characters[this.who];
+  var buttons = [MML.menuButtons.setActionAttack];
+
+  if ((_.has(character.statusEffects, "Holding") ||
+      (_.has(character.statusEffects, "Grappled") && character.statusEffects["Grappled"].targets.length === 1)) &&
+      !_.has(character.statusEffects, "Held") &&
+      !_.contains(character.action.modifiers, "Release Opponent")
+  ) {
+    buttons.push({
+      text: "Release Opponent",
+      nextMenu: "charMenuPrepareAction",
+      callback: function(input) {
+        state.MML.characters[this.who].action.modifiers.push("Release Opponent");
+        MML.processCommand({
+          type: "player",
+          who: this.name,
+          callback: "displayMenu",
+          input: {}
+        });
+      }
+    });
+  }
+  if (character.spells.length > 0) {
+    buttons.push(MML.menuButtons.setActionCast);
+  }
+  if (!_.isUndefined(character.action.spell) && character.action.spell.actions > 1) {
+    buttons.push({
+      text: "Continue Casting",
+      nextMenu: "charMenuFinalizeAction",
+      callback: function(input) {
+        MML.processCommand({
+          type: "player",
+          who: this.name,
+          callback: "displayMenu",
+          input: {}
+        });
+      }
+    });
+  }
   this.buttons = buttons;
 };
 
@@ -2473,7 +2524,18 @@ MML.menuButtons.setActionReadyItem = {
   text: "Ready Item",
   nextMenu: "charMenuReadyItem",
   callback: function(input) {
-    state.MML.characters[this.who].action.name = input.text;
+    MML.processCommand({
+      type: "character",
+      who: this.who,
+      callback: "setApiCharAttribute",
+      input: {
+        attribute: "action",
+        value: {
+          name: "Ready Item",
+          callback: "startReadyItemAction"
+        }
+      }
+    });
     MML.processCommand({
       type: "player",
       who: this.name,

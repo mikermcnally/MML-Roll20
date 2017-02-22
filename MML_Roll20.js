@@ -10690,7 +10690,7 @@ MML.charMenuReadyAdditionalItem = function charMenuReadyAdditionalItem(input) {
   var character = state.MML.characters[this.who];
 
   _.each(character.inventory, function (item, _id) {
-    if (["weapon", "spellComponent", "shield", "potion", "misc"].indexOf(item.type) &&
+    if (["weapon", "spellComponent", "shield", "potion", "misc"].indexOf(item.type) > -1 &&
       character.rightHand._id !== _id &&
       character.leftHand._id !== _id &&
       input.previousItemId !== _id
