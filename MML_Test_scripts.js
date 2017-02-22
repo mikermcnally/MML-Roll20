@@ -14,7 +14,7 @@ var MML = require('./MML_test').MML;
 
 runTests();
 
-function runTests() {
+function() {
   test_setup();
   buildHpAttributeHumanoid();
   meleeAttackRoll();
@@ -54,7 +54,7 @@ function runTests() {
   // rollHitPosition_humanoid_calledshotSpecific();
 }
 
-function buildHpAttributeHumanoid() {
+function() {
   var character = {
     bodyType: "humanoid",
     race: "Human",
@@ -90,7 +90,7 @@ function buildHpAttributeHumanoid() {
   }
 }
 
-function meleeAttackRoll() {
+function() {
   MML.testedFunction = "attackRollResult";
   var target = {
     inventory: {
@@ -147,7 +147,7 @@ function meleeAttackRoll() {
   }
 }
 
-function applyDamage() {
+function() {
   state.MML.GM.currentAction = {
     hitPosition: {
       name: "Top of Head",
@@ -158,7 +158,7 @@ function applyDamage() {
 
 }
 
-function hitPositionRollApply() {
+function() {
   var input = {
     hitPosition: {
       name: "Top of Head",
@@ -202,7 +202,7 @@ function hitPositionRollApply() {
   }
 }
 
-function test_setup() {
+function() {
   state.MML = {};
   state.MML.GM = state.MML.GM || {
     player: "Robot",
@@ -213,8 +213,8 @@ function test_setup() {
     roundStarted: false
   };
 
-  state.MML.players = {};
-  state.MML.players["Robot"] = {
+  MML.players = {};
+  MML.players["Robot"] = {
     name: "Robot",
     who: "GM",
     menu: "GmMenuMain",
@@ -222,12 +222,12 @@ function test_setup() {
     characters: [],
     characterIndex: 0
   };
-  _.each(state.MML.players, function(player) {
+  _.each(MML.players, function(player) {
     //Clear players' list of characters
     player.characters = [];
   });
 
-  state.MML.characters = {};
+  MML.characters = {};
 
   _.each(["test1", "test2"], function(charName) {
     var character = createObj("character", {
@@ -264,28 +264,28 @@ function test_setup() {
     // console.log(character.id);
     // console.log(MML.getCharAttribute(charName, "race"));
 
-    state.MML.characters[charName] = new MML.characterConstructor(charName);
+    MML.characters[charName] = new MML.Character(charName);
 
     MML.processCommand({
       type: "character",
       who: charName,
-      callback: "updateCharacter",
+      callback: "update",
       input: {
         attribute: "race"
       }
     });
   });
-  // console.log(state.MML.players);
-  // _.each(state.MML.characters, function(character) {
+  // console.log(MML.players);
+  // _.each(MML.characters, function(character) {
   //     console.log(character);
-  //     state.MML.players[character.player].characters.push(charName);
+  //     MML.players[character.player].characters.push(charName);
   // });
 }
 
 
-function rollHitPosition_humanoid_default() {
+function() {
   MML.testedFunction = "hitPositionRoll";
-  state.MML.characters.target = {
+  MML.characters.target = {
     inventory: {
       emptyHand: {
         type: "empty",
@@ -314,7 +314,7 @@ function rollHitPosition_humanoid_default() {
 
   try {
     MML.hitPositionRoll.apply(actor, [input]);
-    var result = state.MML.players["Robot"].currentRoll;
+    var result = MML.players["Robot"].currentRoll;
     var expected = {
       character: "actor",
       type: "hitPosition",
@@ -341,8 +341,8 @@ function rollHitPosition_humanoid_default() {
   }
 }
 
-function rollHitPosition_humanoid_calledshot() {
-  state.MML.characters.target = {
+function() {
+  MML.characters.target = {
     inventory: {
       emptyHand: {
         type: "empty",
@@ -374,7 +374,7 @@ function rollHitPosition_humanoid_calledshot() {
 
   try {
     MML.hitPositionRoll.apply(actor, [input]);
-    var result = state.MML.players["Robot"].currentRoll;
+    var result = MML.players["Robot"].currentRoll;
     var expected = {
       character: "actor",
       type: "hitPosition",
@@ -401,8 +401,8 @@ function rollHitPosition_humanoid_calledshot() {
   }
 }
 
-function rollHitPosition_humanoid_calledshotSpecific() {
-  state.MML.characters.target = {
+function() {
+  MML.characters.target = {
     inventory: {
       emptyHand: {
         type: "empty",
@@ -434,7 +434,7 @@ function rollHitPosition_humanoid_calledshotSpecific() {
 
   try {
     MML.hitPositionRoll.apply(actor, [input]);
-    var result = state.MML.players["Robot"].currentRoll;
+    var result = MML.players["Robot"].currentRoll;
     var expected = {
       character: "actor",
       type: "hitPosition",
@@ -461,7 +461,7 @@ function rollHitPosition_humanoid_calledshotSpecific() {
   }
 }
 
-function getHitTableHumanoid_unarmed() {
+function() {
   var character = {
     inventory: {
       emptyHand: {
@@ -495,7 +495,7 @@ function getHitTableHumanoid_unarmed() {
   }
 }
 
-function getHitTableHumanoid_meleeLeft() {
+function() {
   var character = {
     inventory: {
       emptyHand: {
@@ -531,7 +531,7 @@ function getHitTableHumanoid_meleeLeft() {
   }
 }
 
-function getHitTableHumanoid_meleeRight() {
+function() {
   var character = {
     inventory: {
       emptyHand: {
@@ -567,7 +567,7 @@ function getHitTableHumanoid_meleeRight() {
   }
 }
 
-function getHitTableHumanoid_thrown() {
+function() {
   var character = {
     inventory: {
       emptyHand: {
@@ -603,7 +603,7 @@ function getHitTableHumanoid_thrown() {
   }
 }
 
-function getHitTableHumanoid_missile() {
+function() {
   var character = {
     inventory: {
       emptyHand: {
@@ -640,7 +640,7 @@ function getHitTableHumanoid_missile() {
   }
 }
 
-function getHitTableHumanoid_dualWield() {
+function() {
   var character = {
     inventory: {
       emptyHand: {
@@ -678,7 +678,7 @@ function getHitTableHumanoid_dualWield() {
   }
 }
 
-function getHitTableHumanoid_twohander() {
+function() {
   var character = {
     inventory: {
       emptyHand: {
@@ -715,7 +715,7 @@ function getHitTableHumanoid_twohander() {
   }
 }
 
-function getHitTableHumanoid_shieldWeapon() {
+function() {
   var character = {
     inventory: {
       emptyHand: {
@@ -752,7 +752,7 @@ function getHitTableHumanoid_shieldWeapon() {
   }
 }
 
-function getHitTableHumanoid_shieldOnly() {
+function() {
   var character = {
     inventory: {
       emptyHand: {
@@ -788,7 +788,7 @@ function getHitTableHumanoid_shieldOnly() {
   }
 }
 
-function getHitPostionHumanoid_A_1() {
+function() {
   var character = {
     hitTable: "A",
     bodyType: "humanoid"
@@ -812,7 +812,7 @@ function getHitPostionHumanoid_A_1() {
 
 }
 
-function getHitPostionHumanoid_A_50() {
+function() {
   var character = {
     hitTable: "A",
     bodyType: "humanoid"
@@ -835,7 +835,7 @@ function getHitPostionHumanoid_A_50() {
   }
 }
 
-function getHitPostionHumanoid_A_100() {
+function() {
   var character = {
     hitTable: "A",
     bodyType: "humanoid"
@@ -858,7 +858,7 @@ function getHitPostionHumanoid_A_100() {
   }
 }
 
-function getHitPostionHumanoid_A_101() {
+function() {
   var character = {
     hitTable: "A",
     bodyType: "humanoid"
@@ -881,7 +881,7 @@ function getHitPostionHumanoid_A_101() {
   }
 }
 
-function getHitPostionHumanoid_A_0() {
+function() {
   var character = {
     hitTable: "A",
     bodyType: "humanoid"
@@ -904,7 +904,7 @@ function getHitPostionHumanoid_A_0() {
   }
 }
 
-function getHitPostionHumanoid_A_undefined() {
+function() {
   var character = {
     hitTable: "A",
     bodyType: "humanoid"
@@ -927,7 +927,7 @@ function getHitPostionHumanoid_A_undefined() {
   }
 }
 
-function getHitPostionHumanoid_B_1() {
+function() {
   var character = {
     hitTable: "B",
     bodyType: "humanoid"
@@ -951,7 +951,7 @@ function getHitPostionHumanoid_B_1() {
 
 }
 
-function getHitPostionHumanoid_B_50() {
+function() {
   var character = {
     hitTable: "B",
     bodyType: "humanoid"
@@ -974,7 +974,7 @@ function getHitPostionHumanoid_B_50() {
   }
 }
 
-function getHitPostionHumanoid_B_100() {
+function() {
   var character = {
     hitTable: "B",
     bodyType: "humanoid"
@@ -997,7 +997,7 @@ function getHitPostionHumanoid_B_100() {
   }
 }
 
-function getHitPostionHumanoid_C_1() {
+function() {
   var character = {
     hitTable: "C",
     bodyType: "humanoid"
@@ -1021,7 +1021,7 @@ function getHitPostionHumanoid_C_1() {
 
 }
 
-function getHitPostionHumanoid_C_50() {
+function() {
   var character = {
     hitTable: "C",
     bodyType: "humanoid"
@@ -1044,7 +1044,7 @@ function getHitPostionHumanoid_C_50() {
   }
 }
 
-function getHitPostionHumanoid_C_100() {
+function() {
   var character = {
     hitTable: "C",
     bodyType: "humanoid"
@@ -1067,7 +1067,7 @@ function getHitPostionHumanoid_C_100() {
   }
 }
 
-function getBodyParts_humanoid() {
+function() {
   var character = {
     bodyType: "humanoid"
   };
@@ -1090,7 +1090,7 @@ function getBodyParts_humanoid() {
   }
 }
 
-function getBodyParts_NonexistantBodyType() {
+function() {
   var character = {
     bodyType: ""
   };
@@ -1112,7 +1112,7 @@ function getBodyParts_NonexistantBodyType() {
   }
 }
 
-function getCalledShotHitPositionHumanoid_head_1() {
+function() {
   var character = {
     bodyType: "humanoid"
   };
@@ -1136,7 +1136,7 @@ function getCalledShotHitPositionHumanoid_head_1() {
   }
 }
 
-function getCalledShotHitPositionHumanoid_head_7() {
+function() {
   var character = {
     bodyType: "humanoid"
   };
@@ -1160,7 +1160,7 @@ function getCalledShotHitPositionHumanoid_head_7() {
   }
 }
 
-function getCalledShotHitPositionHumanoid_head_8() {
+function() {
   var character = {
     bodyType: "humanoid"
   };
@@ -1184,7 +1184,7 @@ function getCalledShotHitPositionHumanoid_head_8() {
   }
 }
 
-function getCalledShotHitPositionHumanoid_head_0() {
+function() {
   var character = {
     bodyType: "humanoid"
   };
@@ -1208,7 +1208,7 @@ function getCalledShotHitPositionHumanoid_head_0() {
   }
 }
 
-function getCalledShotHitPositionHumanoid_plumbus() {
+function() {
   var character = {
     bodyType: "humanoid"
   };
@@ -1232,7 +1232,7 @@ function getCalledShotHitPositionHumanoid_plumbus() {
   }
 }
 
-function getHitPositionNames_humanoid() {
+function() {
   var character = {
     bodyType: "humanoid"
   };
@@ -1301,7 +1301,7 @@ function getHitPositionNames_humanoid() {
   }
 }
 
-function getHitPositionNames_NonexistantBodyType() {
+function() {
   var character = {
     bodyType: ""
   };
@@ -1323,7 +1323,7 @@ function getHitPositionNames_NonexistantBodyType() {
   }
 }
 
-function attackAction_Melee_Standard_NoCalledshot() {
+function() {
   state.MML.GM.currentAction = {
     character: {},
     parameters: {},

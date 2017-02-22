@@ -1,14 +1,14 @@
-MML.startCombat = function startCombat(input) {
+MML.startCombat = function(input) {
   this.currentRound = 1;
   this.combatants = input.selectedCharNames;
 
   if (this.combatants.length > 0) {
     this.inCombat = true;
-    _.each(state.MML.players, function (player) {
+    _.each(MML.players, function(player) {
       player.combatants = [];
     });
     _.each(this.combatants, function(charName) {
-      state.MML.players[state.MML.characters[charName].player].combatants.push(charName);
+      MML.players[MML.characters[charName].player].combatants.push(charName);
       MML.processCommand({
         type: "character",
         who: charName,
@@ -29,7 +29,7 @@ MML.startCombat = function startCombat(input) {
       MML.processCommand({
         type: "character",
         who: charName,
-        callback: "updateCharacter",
+        callback: "update",
         input: {
           attribute: "initiative"
         }
@@ -72,7 +72,7 @@ MML.startCombat = function startCombat(input) {
   }
 };
 
-MML.newRound = function newRound() {
+MML.newRound = function() {
   this.currentRound++;
   this.roundStarted = false;
   _.each(this.combatants, function(charName) {
@@ -83,7 +83,7 @@ MML.newRound = function newRound() {
       input: {}
     });
   });
-  _.each(state.MML.players, function(player) {
+  _.each(MML.players, function(player) {
     MML.processCommand({
       type: "player",
       who: player.name,
@@ -95,7 +95,7 @@ MML.newRound = function newRound() {
   });
 };
 
-MML.startRound = function startRound() {
+MML.startRound = function() {
   if (MML.checkReady()) {
     this.roundStarted = true;
 
@@ -103,7 +103,7 @@ MML.startRound = function startRound() {
       MML.processCommand({
         type: "character",
         who: charName,
-        callback: "updateCharacter",
+        callback: "update",
         input: {
           attribute: "initiativeRoll"
         }
@@ -114,7 +114,7 @@ MML.startRound = function startRound() {
         callback: "setApiCharAttribute",
         input: {
           attribute: "movementAvailable",
-          value: state.MML.characters[charName].movementRatio
+          value: MML.characters[charName].movementRatio
         }
       });
     });
@@ -127,7 +127,7 @@ MML.startRound = function startRound() {
   }
 };
 
-MML.endCombat = function endCombat() {
+MML.endCombat = function() {
   if (this.combatants.length > 0) {
     _.each(this.combatants, function(charName) {
       MML.processCommand({
@@ -154,7 +154,7 @@ MML.endCombat = function endCombat() {
   }
 };
 
-MML.nextAction = function nextAction() {
+MML.nextAction = function() {
   MML.processCommand({
     type: "GM",
     callback: "setTurnOrder",
@@ -162,9 +162,9 @@ MML.nextAction = function nextAction() {
   });
 
   if (MML.checkReady()) {
-    if (state.MML.characters[this.combatants[0]].initiative > 0) {
+    if (MML.characters[this.combatants[0]].initiative > 0) {
       this.actor = this.combatants[0];
-      var playerName = state.MML.characters[this.actor].player;
+      var playerName = MML.characters[this.actor].player;
 
       MML.processCommand({
         type: "player",
@@ -172,7 +172,7 @@ MML.nextAction = function nextAction() {
         callback: "charMenuStartAction",
         input: {
           who: this.actor,
-          actionValid: MML.validateAction(state.MML.characters[this.actor])
+          actionValid: MML.validateAction(MML.characters[this.actor])
         }
       });
       MML.processCommand({
@@ -191,19 +191,19 @@ MML.nextAction = function nextAction() {
   }
 };
 
-MML.getSingleTarget = function getSingleTarget(input) {
+MML.getSingleTarget = function(input) {
   input.charName = this.name;
   input.callback = "setCurrentCharacterTargets";
   MML.displayTargetSelection(input);
 };
 
-MML.getSpellTargets = function getSpellTargets(input) {
+MML.getSpellTargets = function(input) {
   input.charName = this.name;
   input.callback = "getAdditionTarget";
   MML.displayTargetSelection(input);
 };
 
-MML.getRadiusSpellTargets = function getRadiusSpellTargets(input) {
+MML.getRadiusSpellTargets = function(input) {
   state.MML.GM.currentAction.parameters.spellMarker = "spellMarkerCircle";
   var token = MML.getTokenFromChar(this.name);
   var graphic = createObj('graphic', {
@@ -233,17 +233,17 @@ MML.getRadiusSpellTargets = function getRadiusSpellTargets(input) {
    });
 };
 
-MML.setTargets = function setTargets() {
+MML.setTargets = function() {
   this.targets = this.characters[this.actor].action.targets;
   this.targetIndex = 0;
   this.currentTarget = this.targets[0];
 };
 
-MML.checkReady = function checkReady() {
+MML.checkReady = function() {
   var everyoneReady = true;
 
   _.each(state.MML.GM.combatants, function(charName) {
-    if (state.MML.characters[charName].ready === false) {
+    if (MML.characters[charName].ready === false) {
       everyoneReady = false;
     }
   });
@@ -251,10 +251,10 @@ MML.checkReady = function checkReady() {
   return everyoneReady;
 };
 
-MML.displayThreatZones = function displayThreatZones(input) {
+MML.displayThreatZones = function(input) {
   var toggle = input.toggle;
   _.each(this.combatants, function(combatant) {
-    var character = state.MML.characters[combatant];
+    var character = MML.characters[combatant];
     var token = MML.getTokenFromChar(combatant);
     var radius1 = "";
     var radius2 = "";
@@ -271,14 +271,14 @@ MML.displayThreatZones = function displayThreatZones(input) {
 };
 
 // Turn Order Functions
-MML.setTurnOrder = function setTurnOrder() {
+MML.setTurnOrder = function() {
   var turnorder = [];
 
   var index;
   for (index in this.combatants) {
     turnorder.push({
       id: MML.getTokenFromChar(this.combatants[index]).id,
-      pr: state.MML.characters[this.combatants[index]].initiative,
+      pr: MML.characters[this.combatants[index]].initiative,
       custom: ""
     });
   }
@@ -304,7 +304,7 @@ MML.setTurnOrder = function setTurnOrder() {
   Campaign().set("turnorder", JSON.stringify(turnorder));
 };
 
-MML.changeRoll = function changeRoll(input) {
+MML.changeRoll = function(input) {
   var value = input.value;
   var range = this.currentRoll.range.split("-");
   var low = parseInt(range[0]);
@@ -335,7 +335,7 @@ MML.changeRoll = function changeRoll(input) {
   });
 };
 
-MML.assignNewItem = function assignNewItem(input) {
+MML.assignNewItem = function(input) {
   MML.processCommand({
     type: "character",
     who: input.target,
@@ -348,7 +348,7 @@ MML.assignNewItem = function assignNewItem(input) {
   });
   MML.processCommand({
     type: "player",
-    who: state.MML.characters[input.target].player,
+    who: MML.characters[input.target].player,
     callback: "displayMenu",
     input: {}
   });
@@ -356,35 +356,25 @@ MML.assignNewItem = function assignNewItem(input) {
 
 // var exampleCommand = {
 //   type: "player",
-//   who: state.MML.players[playerName],
+//   who: MML.players[playerName],
 //   callback:"menuCommand",
 //   input: {
 //     rollResult: "Success"
 //   }
 // };
 
-function commandLock() {
-  switch (state.MML.GM.gameState) {
-    case "non-combat":
-
-      break;
-    default:
-
-  }
-}
-
-MML.processCommand = function processCommand(command) {
+MML.processCommand = function(command) {
   try {
     switch (command.type) {
       case "character":
-        var character = state.MML.characters[command.who];
+        var character = MML.characters[command.who];
         MML[command.callback].apply(character, [command.input]);
-        state.MML.characters[command.who] = character;
+        MML.characters[command.who] = character;
         break;
       case "player":
-        var player = state.MML.players[command.who];
+        var player = MML.players[command.who];
         MML[command.callback].apply(player, [command.input]);
-        state.MML.players[command.who] = player;
+        MML.players[command.who] = player;
         break;
       case "GM":
         MML[command.callback].apply(state.MML.GM, [command.input]);
@@ -395,8 +385,8 @@ MML.processCommand = function processCommand(command) {
   } catch (error) {
     sendChat("", "processCommand failed");
     // log(state.MML.GM);
-    // log(state.MML.players);
-    // log(state.MML.characters);
+    // log(MML.players);
+    // log(MML.characters);
     log(MML[command.callback]);
     log(command);
     log(error.message);
@@ -404,7 +394,7 @@ MML.processCommand = function processCommand(command) {
   }
 };
 
-MML.parseCommand = function parseCommand(msg) {
+MML.parseCommand = function(msg) {
   var who;
   if (msg.type === "api" && msg.content.indexOf("!MML|") !== -1) {
     var command = "parse failed";
@@ -453,9 +443,9 @@ MML.parseCommand = function parseCommand(msg) {
         sendChat("Error", "Please enter a numerical value.");
       }
     } else if (content.indexOf("acceptRoll") !== -1) {
-      if (state.MML.players[who].currentRoll.accepted === false) {
-        var player = state.MML.players[who];
-        state.MML.players[player.name].currentRoll.accepted = true;
+      if (MML.players[who].currentRoll.accepted === false) {
+        var player = MML.players[who];
+        MML.players[player.name].currentRoll.accepted = true;
 
         command = {
           type: "character",

@@ -1,5 +1,5 @@
 // Character Creation
-MML.characterConstructor = function characterConstructor(charName) {
+MML.Character = function(charName) {
   // Basic Info
   this.name = charName;
   this.player = MML.getCurrentAttribute(this.name, "player");
@@ -99,9 +99,9 @@ MML.characterConstructor = function characterConstructor(charName) {
   this.spells = MML.getCurrentAttributeAsArray(this.name, 'spells');
 };
 
-MML.updateCharacter = function(input) {
-  var attributeArray = [input.attribute];
-  var dependents = MML.computeAttribute[input.attribute].dependents;
+MML.update = function(attribute) {
+  var attributeArray = [attribute];
+  var dependents = MML.computeAttribute[attribute].dependents;
   attributeArray.push.apply(attributeArray, dependents);
 
   // for(var i = 0; i < attributeArray.length; i++){ //length of array is dynamic, for-in doesn't work here
@@ -127,14 +127,7 @@ MML.updateCharacter = function(input) {
   }, this);
 
   _.each(dependents, function(attribute) {
-    MML.processCommand({
-      type: "character",
-      who: this.name,
-      callback: "updateCharacter",
-      input: {
-        attribute: attribute
-      }
-    });
+    this.update(attribute);
   }, this);
 };
 
@@ -143,7 +136,7 @@ MML.setApiCharAttribute = function(input) {
   MML.processCommand({
     type: "character",
     who: this.name,
-    callback: "updateCharacter",
+    callback: "update",
     input: input
   });
 };
@@ -153,7 +146,7 @@ MML.setApiCharAttributeJSON = function(input) {
   MML.processCommand({
     type: "character",
     who: this.name,
-    callback: "updateCharacter",
+    callback: "update",
     input: input
   });
 };
@@ -164,7 +157,7 @@ MML.removeStatusEffect = function(input) {
     MML.processCommand({
       type: "character",
       who: this.name,
-      callback: "updateCharacter",
+      callback: "update",
       input: {
         attribute: "statusEffects"
       }
@@ -184,14 +177,14 @@ MML.computeAttribute.player = {
   compute: function() {
     var newPlayer = MML.getPlayerFromName(this.player);
     MML.getCharFromName(this.name).set("controlledby", newPlayer.id);
-    _.each(state.MML.players, function (player) {
+    _.each(MML.players, function(player) {
       if (player.name === this.player) {
         player.characters.push(this.name);
       } else {
         player.characters = _.without(player.characters, this.name);
       }
     }, this);
-    log(state.MML.players["Robot"].characters);
+    log(MML.players["Robot"].characters);
     return this.player;
   }
 };

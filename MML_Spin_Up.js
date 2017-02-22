@@ -24,12 +24,12 @@ on("ready", function() {
       _id: "emptyHand"
     }), "", character);
 
-    state.MML.characters[charName] = new MML.characterConstructor(charName);
+    MML.characters[charName] = new MML.Character(charName);
 
     MML.processCommand({
       type: "character",
       who: charName,
-      callback: "updateCharacter",
+      callback: "update",
       input: {
         attribute: "race"
       }
@@ -45,7 +45,7 @@ on("ready", function() {
       MML.processCommand({
         type: "character",
         who: charName,
-        callback: "updateCharacter",
+        callback: "update",
         input: {
           attribute: "skills"
         }
@@ -54,7 +54,7 @@ on("ready", function() {
       MML.processCommand({
         type: "character",
         who: charName,
-        callback: "updateCharacter",
+        callback: "update",
         input: {
           attribute: "weaponSkills"
         }
@@ -69,7 +69,7 @@ on("ready", function() {
   on("change:token", function(obj, prev) {
     if (obj.get("name").indexOf("spellMarker") === -1 && obj.get("left") !== prev["left"] && obj.get("top") !== prev["top"] && state.MML.GM.inCombat === true) {
       var charName = MML.getCharFromToken(obj);
-      var character = state.MML.characters[charName];
+      var character = MML.characters[charName];
       var left1 = prev["left"];
       var left2 = obj.get("left");
       var top1 = prev["top"];
@@ -121,7 +121,7 @@ on("ready", function() {
     }, {
       caseInsensitive: false
     });
-    var apiNames = _.keys(state.MML.characters);
+    var apiNames = _.keys(MML.characters);
     var characterNames = [];
 
     _.each(characters, function(character) {
@@ -130,13 +130,13 @@ on("ready", function() {
 
     var oldName = _.difference(apiNames, characterNames)[0];
 
-    state.MML.characters[newName] = state.MML.characters[oldName];
-    delete state.MML.characters[oldName];
-    state.MML.characters[newName].name = newName;
+    MML.characters[newName] = MML.characters[oldName];
+    delete MML.characters[oldName];
+    MML.characters[newName].name = newName;
     MML.processCommand({
       type: "character",
       who: newName,
-      callback: "updateCharacter",
+      callback: "update",
       input: {
         attribute: "name"
       }
@@ -159,7 +159,7 @@ on("ready", function() {
         MML.processCommand({
           type: "character",
           who: charName,
-          callback: "updateCharacter",
+          callback: "update",
           input: {
             attribute: "stature"
           }
@@ -174,7 +174,7 @@ on("ready", function() {
         MML.processCommand({
           type: "character",
           who: charName,
-          callback: "updateCharacter",
+          callback: "update",
           input: {
             attribute: "strength"
           }
@@ -189,7 +189,7 @@ on("ready", function() {
         MML.processCommand({
           type: "character",
           who: charName,
-          callback: "updateCharacter",
+          callback: "update",
           input: {
             attribute: "coordination"
           }
@@ -204,7 +204,7 @@ on("ready", function() {
         MML.processCommand({
           type: "character",
           who: charName,
-          callback: "updateCharacter",
+          callback: "update",
           input: {
             attribute: "health"
           }
@@ -219,7 +219,7 @@ on("ready", function() {
         MML.processCommand({
           type: "character",
           who: charName,
-          callback: "updateCharacter",
+          callback: "update",
           input: {
             attribute: "beauty"
           }
@@ -234,7 +234,7 @@ on("ready", function() {
         MML.processCommand({
           type: "character",
           who: charName,
-          callback: "updateCharacter",
+          callback: "update",
           input: {
             attribute: "intellect"
           }
@@ -249,7 +249,7 @@ on("ready", function() {
         MML.processCommand({
           type: "character",
           who: charName,
-          callback: "updateCharacter",
+          callback: "update",
           input: {
             attribute: "reason"
           }
@@ -264,7 +264,7 @@ on("ready", function() {
         MML.processCommand({
           type: "character",
           who: charName,
-          callback: "updateCharacter",
+          callback: "update",
           input: {
             attribute: "creativity"
           }
@@ -279,14 +279,14 @@ on("ready", function() {
         MML.processCommand({
           type: "character",
           who: charName,
-          callback: "updateCharacter",
+          callback: "update",
           input: {
             attribute: "presence"
           }
         });
         break;
         case "player":
-          if (_.isUndefined(state.MML.players[attribute.get("current")])) {
+          if (_.isUndefined(MML.players[attribute.get("current")])) {
             MML.processCommand({
               type: "character",
               who: charName,
@@ -313,7 +313,7 @@ on("ready", function() {
           MML.processCommand({
             type: "character",
             who: charName,
-            callback: "updateCharacter",
+            callback: "update",
             input: {
               attribute: "inventory"
             }
@@ -322,7 +322,7 @@ on("ready", function() {
           MML.processCommand({
             type: "character",
             who: charName,
-            callback: "updateCharacter",
+            callback: "update",
             input: {
               attribute: "skills"
             }
@@ -331,7 +331,7 @@ on("ready", function() {
           MML.processCommand({
             type: "character",
             who: charName,
-            callback: "updateCharacter",
+            callback: "update",
             input: {
               attribute: "weaponSkills"
             }
@@ -340,7 +340,7 @@ on("ready", function() {
           MML.processCommand({
             type: "character",
             who: charName,
-            callback: "updateCharacter",
+            callback: "update",
             input: {
               attribute: "statusEffects"
             }
@@ -349,7 +349,7 @@ on("ready", function() {
           MML.processCommand({
             type: "character",
             who: charName,
-            callback: "updateCharacter",
+            callback: "update",
             input: {
               attribute: attrName
             }

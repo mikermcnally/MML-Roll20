@@ -1,6 +1,6 @@
 var MML = MML || {};
 
-MML.init = function init() {
+MML.init = function() {
   state.MML = state.MML || {};
   state.MML.GM = state.MML.GM || {
     player: "Robot",
@@ -16,8 +16,8 @@ MML.init = function init() {
   }, {
     caseInsensitive: false
   });
-  state.MML.players = {};
-  state.MML.players[state.MML.GM.player] = {
+  MML.players = {};
+  MML.players[state.MML.GM.player] = {
     name: state.MML.GM.player,
     who: "GM",
     menu: "GmMenuMain",
@@ -26,9 +26,9 @@ MML.init = function init() {
     characterIndex: 0
   };
 
-  _.each(playerObjects, function (player) {
+  _.each(playerObjects, function(player) {
     if (player.get("displayname") !== state.MML.GM.player) {
-      state.MML.players[player.get("displayname")] = {
+      MML.players[player.get("displayname")] = {
         name: player.get("displayname"),
         who: "",
         menu: "menuIdle",
@@ -48,14 +48,14 @@ MML.init = function init() {
 
   _.each(characterObjects, function(character) {
     var charName = character.get("name");
-    characters[charName] = new MML.characterConstructor(charName);
+    characters[charName] = new MML.Character(charName);
     //Add to player's list of characters
-    if (_.isUndefined(state.MML.players[characters[charName].player])) {
+    if (_.isUndefined(MML.players[characters[charName].player])) {
       characters[charName].player = state.MML.GM.player;
     }
-    state.MML.players[characters[charName].player].characters.push(charName);
+    MML.players[characters[charName].player].characters.push(charName);
   });
-  state.MML.characters = characters;
+  MML.characters = characters;
 
   TokenCollisions = {
     "Layer": "gmlayer"
@@ -65,7 +65,7 @@ MML.init = function init() {
 
 
   // state.MML.GM = data[0];
-  // state.MML.players = data[1];
-  // state.MML.characters =data[2];
+  // MML.players = data[1];
+  // MML.characters =data[2];
   // MML.processCommand(data[3]);
 };

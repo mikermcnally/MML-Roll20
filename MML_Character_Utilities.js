@@ -1,4 +1,4 @@
-MML.isSensitiveArea = function isSensitiveArea(position) {
+MML.isSensitiveArea = function(position) {
   if (position === 2 || position === 6 || position === 33) {
     return true;
   } else {
@@ -6,7 +6,7 @@ MML.isSensitiveArea = function isSensitiveArea(position) {
   }
 };
 
-MML.getWeaponFamily = function getWeaponFamily(character, hand) {
+MML.getWeaponFamily = function(character, hand) {
   var item = character.inventory[character[hand]._id];
 
   if (!_.isUndefined(item) && item.type === "weapon") {
@@ -16,7 +16,7 @@ MML.getWeaponFamily = function getWeaponFamily(character, hand) {
   }
 };
 
-MML.getShieldDefenseBonus = function getShieldDefenseBonus(character) {
+MML.getShieldDefenseBonus = function(character) {
   var rightHand = character.inventory[character.rightHand._id];
   var leftHand = character.inventory[character.leftHand._id];
   var bonus = 0;
@@ -30,7 +30,7 @@ MML.getShieldDefenseBonus = function getShieldDefenseBonus(character) {
   return bonus;
 };
 
-MML.getWeaponGrip = function getWeaponGrip(character) {
+MML.getWeaponGrip = function(character) {
   if (character["rightHand"].grip !== "unarmed") {
     grip = character["rightHand"].grip;
   } else {
@@ -39,7 +39,7 @@ MML.getWeaponGrip = function getWeaponGrip(character) {
   return grip;
 };
 
-MML.getMeleeWeapon = function getMeleeWeapon(character) {
+MML.getMeleeWeapon = function(character) {
   var grip = MML.getWeaponGrip(character);
   var weapon;
   var item;
@@ -72,7 +72,7 @@ MML.getMeleeWeapon = function getMeleeWeapon(character) {
   return weapon;
 };
 
-MML.getCharacterWeaponAndSkill = function getCharacterWeaponAndSkill(character) {
+MML.getCharacterWeaponAndSkill = function(character) {
   var itemId;
   var grip;
 
@@ -112,7 +112,7 @@ MML.getCharacterWeaponAndSkill = function getCharacterWeaponAndSkill(character) 
   };
 };
 
-MML.getWeaponSkill = function getWeaponSkill(character, weapon) {
+MML.getWeaponSkill = function(character, weapon) {
   var item = weapon;
   var grip;
   var skillName;
@@ -156,14 +156,14 @@ MML.getWeaponSkill = function getWeaponSkill(character, weapon) {
   return skill;
 };
 
-MML.isWieldingRangedWeapon = function isWieldingRangedWeapon(character) {
+MML.isWieldingRangedWeapon = function(character) {
   var leftFamily = MML.getWeaponFamily(character, "leftHand");
   var rightFamily = MML.getWeaponFamily(character, "rightHand");
   var rangedFamilies = ["MWD", "MWM", "TWH", "TWK", "TWS", "SLI"];
   return (rangedFamilies.indexOf(leftFamily) > -1 || rangedFamilies.indexOf(rightFamily) > -1);
 };
 
-MML.isUnarmed = function isUnarmed(character) {
+MML.isUnarmed = function(character) {
   var leftHand = MML.getWeaponFamily(character, "leftHand");
   var rightHand = MML.getWeaponFamily(character, "rightHand");
 
@@ -174,7 +174,7 @@ MML.isUnarmed = function isUnarmed(character) {
   }
 };
 
-MML.isDualWielding = function isDualWielding(character) {
+MML.isDualWielding = function(character) {
   var leftHand = MML.getWeaponFamily(character, "leftHand");
   var rightHand = MML.getWeaponFamily(character, "rightHand");
 
@@ -187,7 +187,7 @@ MML.isDualWielding = function isDualWielding(character) {
   }
 };
 
-MML.getHitPosition = function getHitPosition(character, rollValue) {
+MML.getHitPosition = function(character, rollValue) {
   if (isNaN(rollValue)) {
     return "Error: Value is not a number";
   } else if (rollValue < 1 || rollValue > 100) {
@@ -197,7 +197,7 @@ MML.getHitPosition = function getHitPosition(character, rollValue) {
   }
 };
 
-MML.getHitTable = function getHitTable(character) {
+MML.getHitTable = function(character) {
   var table;
   switch (character.bodyType) {
     case "humanoid":
@@ -217,7 +217,7 @@ MML.getHitTable = function getHitTable(character) {
   return table;
 };
 
-MML.getHitPositionNames = function getHitPositionNames(character) {
+MML.getHitPositionNames = function(character) {
   if (_.isUndefined(MML.hitPositions[character.bodyType])) {
     return "Error: Body type not found";
   } else {
@@ -225,7 +225,7 @@ MML.getHitPositionNames = function getHitPositionNames(character) {
   }
 };
 
-MML.getBodyParts = function getBodyParts(character) {
+MML.getBodyParts = function(character) {
   if (_.isUndefined(MML.hitPositions[character.bodyType])) {
     return "Error: Body type not found";
   } else {
@@ -233,7 +233,7 @@ MML.getBodyParts = function getBodyParts(character) {
   }
 };
 
-MML.getAvailableHitPositions = function getAvailableHitPositions(character, bodyPart) {
+MML.getAvailableHitPositions = function(character, bodyPart) {
   var availableHitPositions = _.where(MML.hitPositions[character.bodyType], {
     bodyPart: bodyPart
   });
@@ -245,7 +245,7 @@ MML.getAvailableHitPositions = function getAvailableHitPositions(character, body
   }
 };
 
-MML.getCalledShotHitPosition = function getCalledShotHitPosition(character, rollValue, bodyPart) {
+MML.getCalledShotHitPosition = function(character, rollValue, bodyPart) {
   var availableHitPositions = MML.getAvailableHitPositions(character, bodyPart);
 
   if (isNaN(rollValue)) {
@@ -259,7 +259,7 @@ MML.getCalledShotHitPosition = function getCalledShotHitPosition(character, roll
   }
 };
 
-MML.buildHpAttribute = function buildHpAttribute(character) {
+MML.buildHpAttribute = function(character) {
   var hpAttribute;
   switch (character.bodyType) {
     case "humanoid":
@@ -280,16 +280,16 @@ MML.buildHpAttribute = function buildHpAttribute(character) {
   return hpAttribute;
 };
 
-MML.getDistanceBetweenChars = function getDistanceBetweenChars(charName, targetName) {
+MML.getDistanceBetweenChars = function(charName, targetName) {
   var charToken = MML.getTokenFromChar(charName);
   var targetToken = MML.getTokenFromChar(targetName);
 
   return MML.getDistance(charToken.get("left"), targetToken.get("left"), charToken.get("top"), targetToken.get("top"));
 };
 
-MML.getCharactersWithinRadius = function getCharactersWithinRadius(left, top, radius) {
+MML.getCharactersWithinRadius = function(left, top, radius) {
   var targets = [];
-  _.each(state.MML.characters, function(character) {
+  _.each(MML.characters, function(character) {
     var charToken = MML.getTokenFromChar(character.name);
 
     if (MML.getDistance(charToken.get("left"), left, charToken.get("top"), top) < MML.raceSizes[character.race].radius + MML.pixelsToFeet(radius)) {
@@ -299,12 +299,12 @@ MML.getCharactersWithinRadius = function getCharactersWithinRadius(left, top, ra
   return targets;
 };
 
-MML.getCharactersWithinRectangle = function getCharactersWithinRectangle(leftOriginal, topOriginal, width, height, rotation) {
+MML.getCharactersWithinRectangle = function(leftOriginal, topOriginal, width, height, rotation) {
   var targets = [];
   var transformedCoordinates = MML.rotateAxes(leftOriginal, topOriginal, rotation);
   var left = transformedCoordinates[0];
   var top = transformedCoordinates[1];
-  _.each(state.MML.characters, function(character) {
+  _.each(MML.characters, function(character) {
     var charToken = MML.getTokenFromChar(character.name);
     var tokenCoordinates = MML.rotateAxes(charToken.get("left"), charToken.get("top"), rotation);
     if (tokenCoordinates[0] + (MML.feetToPixels(MML.raceSizes[character.race].radius)) > left - (width / 2) &&
@@ -318,7 +318,7 @@ MML.getCharactersWithinRectangle = function getCharactersWithinRectangle(leftOri
   return targets;
 };
 
-MML.getMagicSkill = function getMagicSkill(character, spell) {
+MML.getMagicSkill = function(character, spell) {
   if (["Fire", "Earth", "Water", "Air", "Life"].indexOf(spell.family)) {
     var wizardry_skill = 0;
     var elementalism_skill = 0;
@@ -446,7 +446,7 @@ MML.getMagicSkill = function getMagicSkill(character, spell) {
   }
 };
 
-MML.getEpCost = function getEpCost(skillName, skillLevel, ep) {
+MML.getEpCost = function(skillName, skillLevel, ep) {
   skillName = skillName.replace(/(Earth|Air|Fire|Water|Life)\s/, "");
   if (skillLevel < 6) {
     return MML.epModifiers[skillName][ep][0];
@@ -477,7 +477,7 @@ MML.getEpCost = function getEpCost(skillName, skillLevel, ep) {
   }
 };
 
-MML.getModifiedEpCost = function getModifiedEpCost(spellMarker, spell) {
+MML.getModifiedEpCost = function(spellMarker, spell) {
   var area;
   var areaModified;
   var epModifiers = [];
@@ -495,7 +495,7 @@ MML.getModifiedEpCost = function getModifiedEpCost(spellMarker, spell) {
   }
 };
 
-MML.getModifiedEpCost = function getModifiedEpCost(caster, targets, spell) {
+MML.getModifiedEpCost = function(caster, targets, spell) {
   var area;
   var areaModified;
   var epModifiers = [];
@@ -505,7 +505,7 @@ MML.getModifiedEpCost = function getModifiedEpCost(caster, targets, spell) {
   }
 };
 
-MML.getRangeCastingModifier = function getRangeCastingModifier(caster, targets, spell) {
+MML.getRangeCastingModifier = function(caster, targets, spell) {
   var mod = 0;
   if (["Caster", "Touch", "Single"].indexOf(spell.target) === -1) {
     var distance = MML.getDistanceBetweenChars(caster.name, spell.name);
@@ -532,7 +532,7 @@ MML.getRangeCastingModifier = function getRangeCastingModifier(caster, targets, 
   return mod;
 };
 
-MML.validateAction = function validateAction(character) {
+MML.validateAction = function(character) {
   var valid = true;
 
   switch (character.action.name) {

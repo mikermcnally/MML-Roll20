@@ -1,4 +1,4 @@
-MML.processCommand = function processCommand(command){
+MML.processCommand = function(command){
 	if(command.callback === MML.testedFunction){
 		MML.testResult = command;
 	}
@@ -6,14 +6,14 @@ MML.processCommand = function processCommand(command){
 		try{
 			switch(command.type){
 				case "character":
-					var character = state.MML.characters[command.who];
+					var character = MML.characters[command.who];
 					MML[command.callback].apply(character, [command.input]);
-		  			state.MML.characters[command.who] = character;
+		  			MML.characters[command.who] = character;
 		  			break;
 		  		case "player":
-		  			var player = state.MML.players[command.who];
+		  			var player = MML.players[command.who];
 		  			MML[command.callback].apply(player, [command.input]);
-					state.MML.players[command.who] = player;
+					MML.players[command.who] = player;
 		  			break;
 		  		case "GM":
 		  			MML[command.callback].apply(state.MML.GM, [command.input]);

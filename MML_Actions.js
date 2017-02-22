@@ -1,4 +1,4 @@
-MML.meleeAttackAction = function meleeAttackAction() {
+MML.meleeAttackAction = function() {
   var currentAction = state.MML.GM.currentAction;
   var character = currentAction.character;
   var parameters = currentAction.parameters;
@@ -41,7 +41,7 @@ MML.meleeAttackAction = function meleeAttackAction() {
   }
 };
 
-MML.missileAttackAction = function missileAttackAction() {
+MML.missileAttackAction = function() {
   var currentAction = state.MML.GM.currentAction;
   var character = currentAction.character;
   var parameters = currentAction.parameters;
@@ -85,7 +85,7 @@ MML.missileAttackAction = function missileAttackAction() {
   }
 };
 
-MML.unarmedAttackAction = function unarmedAttackAction() {
+MML.unarmedAttackAction = function() {
   var currentAction = state.MML.GM.currentAction;
   var character = currentAction.character;
   var parameters = currentAction.parameters;
@@ -129,7 +129,7 @@ MML.unarmedAttackAction = function unarmedAttackAction() {
   }
 };
 
-MML.grappleAttackAction = function grappleAttackAction() {
+MML.grappleAttackAction = function() {
   var currentAction = state.MML.GM.currentAction;
   var character = currentAction.character;
   var parameters = currentAction.parameters;
@@ -182,7 +182,7 @@ MML.grappleAttackAction = function grappleAttackAction() {
   }
 };
 
-MML.releaseOpponentAction = function releaseOpponentAction() {
+MML.releaseOpponentAction = function() {
   var currentAction = state.MML.GM.currentAction;
   var character = currentAction.character;
   var parameters = currentAction.parameters;
@@ -228,7 +228,7 @@ MML.releaseOpponentAction = function releaseOpponentAction() {
       }
     });
     state.MML.GM.currentAction = {
-      character: state.MML.characters[character.name],
+      character: MML.characters[character.name],
       targetArray: [target.name],
       targetIndex: 0,
       resistRelease: true
@@ -236,17 +236,17 @@ MML.releaseOpponentAction = function releaseOpponentAction() {
     MML.processCommand({
       type: "character",
       who: character.name,
-      callback: state.MML.characters[character.name].action.callback,
+      callback: MML.characters[character.name].action.callback,
       input: {}
     });
   }
 };
 
-MML.castAction = function castAction() {
+MML.castAction = function() {
   MML.spells[state.MML.GM.currentAction.parameters.spell.name].process();
 };
 
-MML.damageTargetAction = function damageTargetAction(callback) {
+MML.damageTargetAction = function(callback) {
   var currentAction = state.MML.GM.currentAction;
   var parameters = currentAction.parameters;
   var target = parameters.target;
@@ -283,7 +283,7 @@ MML.damageTargetAction = function damageTargetAction(callback) {
   }
 };
 
-MML.observeAction = function observeAction() {
+MML.observeAction = function() {
   var currentAction = state.MML.GM.currentAction;
   var character = currentAction.character;
 
@@ -317,16 +317,16 @@ MML.observeAction = function observeAction() {
   });
 };
 
-MML.readyItemAction = function readyItemAction() {};
+MML.readyItemAction = function() {};
 
-MML.nextTarget = function nextTarget() {
+MML.nextTarget = function() {
   state.MML.GM.currentAction.targetIndex += 1;
-  state.MML.GM.currentAction.parameters.target = state.MML.characters[state.MML.GM.currentAction.targetArray[state.MML.GM.currentAction.targetIndex]];
+  state.MML.GM.currentAction.parameters.target = MML.characters[state.MML.GM.currentAction.targetArray[state.MML.GM.currentAction.targetIndex]];
   state.MML.GM.currentAction.rolls = _.isUndefined(state.MML.GM.currentAction.rolls.castingRoll) ? {} : { castingRoll: state.MML.GM.currentAction.rolls.castingRoll };
   MML[state.MML.GM.currentAction.callback]();
 };
 
-MML.endAction = function endAction() {
+MML.endAction = function() {
   var currentAction = state.MML.GM.currentAction;
   var character = currentAction.character;
   var spentInitiative = character.spentInitiative + character.actionTempo;
