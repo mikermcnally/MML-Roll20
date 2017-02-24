@@ -3,15 +3,15 @@ var MML = MML || {};
 MML.init = function() {
   state.MML = state.MML || {};
   state.MML.GM = state.MML.GM || {
-    player: "Robot",
-    name: "GM",
+    player: 'Robot',
+    name: 'GM',
     currentAction: {},
     inCombat: false,
     currentRound: 0,
     roundStarted: false
   };
   var playerObjects = findObjs({
-    _type: "player",
+    _type: 'player',
     online: true
   }, {
     caseInsensitive: false
@@ -19,19 +19,19 @@ MML.init = function() {
   MML.players = {};
   MML.players[state.MML.GM.player] = {
     name: state.MML.GM.player,
-    who: "GM",
-    menu: "GmMenuMain",
+    who: 'GM',
+    menu: 'GmMenuMain',
     buttons: [MML.menuButtons.GmMenuMain],
     characters: [],
     characterIndex: 0
   };
 
   _.each(playerObjects, function(player) {
-    if (player.get("displayname") !== state.MML.GM.player) {
-      MML.players[player.get("displayname")] = {
-        name: player.get("displayname"),
-        who: "",
-        menu: "menuIdle",
+    if (player.get('displayname') !== state.MML.GM.player) {
+      MML.players[player.get('displayname')] = {
+        name: player.get('displayname'),
+        who: '',
+        menu: 'menuIdle',
         characters: [],
         characterIndex: 0
       };
@@ -40,14 +40,14 @@ MML.init = function() {
 
   var characters = {};
   var characterObjects = findObjs({
-    _type: "character",
+    _type: 'character',
     archived: false
   }, {
     caseInsensitive: false
   });
 
   _.each(characterObjects, function(character) {
-    var charName = character.get("name");
+    var charName = character.get('name');
     characters[charName] = new MML.Character(charName);
     //Add to player's list of characters
     if (_.isUndefined(MML.players[characters[charName].player])) {
@@ -58,7 +58,7 @@ MML.init = function() {
   MML.characters = characters;
 
   TokenCollisions = {
-    "Layer": "gmlayer"
+    'Layer': 'gmlayer'
   };
   // var data = [
   // ,,,];
