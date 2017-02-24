@@ -254,7 +254,7 @@ MML.damageTargetAction = function(callback) {
 
   if (_.isUndefined(parameters.damageApplied)) {
     state.MML.GM.currentAction.parameters.damageApplied = "complete";
-    var damageAfterArmor = MML.armorDamageReduction(target, rolls.hitPositionRoll.name, rolls.damageRoll, parameters.damageType, randomInteger(100));
+    var damageAfterArmor = target.armorDamageReduction(rolls.hitPositionRoll.name, rolls.damageRoll, parameters.damageType, randomInteger(100));
     MML.processCommand({
       type: "character",
       who: target.name,

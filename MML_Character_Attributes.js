@@ -49,17 +49,61 @@ MML.Character = function(charName) {
     'movementPosition': { get: function() { return MML.getCurrentAttribute(this.name, 'movementPosition'); } },
     'pathID': { get: function() { return MML.getCurrentAttribute(this.name, 'pathID'); } },
     'situationalMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'situationalMod'); } },
-    'attributeDefenseMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'attributeDefenseMod'); } },
+    'attributeDefenseMod': { get: function() { return MML.attributeMods.strength[this.strength] + MML.attributeMods.coordination[this.coordination]; } },
     'meleeDefenseMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'meleeDefenseMod'); } },
     'rangedDefenseMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'rangedDefenseMod'); } },
     'meleeAttackMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'meleeAttackMod'); } },
+    'attributeMeleeAttackMod': { get: function() { return MML.attributeMods.strength[this.strength] + MML.attributeMods.coordination[this.coordination]; } },
+    'meleeDamageMod': {
+      get: function() {
+        var meleeDamageMod;
+        var load = this.load;
+
+        var index;
+        for (index in MML.meleeDamageMods) {
+          var data = MML.meleeDamageMods[index];
+
+          if (load >= data.low && load <= data.high) {
+            meleeDamageMod = data.value;
+            break;
+          }
+        }
+        return meleeDamageMod;
+      }
+    },
     'missileAttackMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'missileAttackMod'); } },
-    'attributeMeleeAttackMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'attributeMeleeAttackMod'); } },
-    'meleeDamageMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'meleeDamageMod'); } },
-    'attributeMissileAttackMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'attributeMissileAttackMod'); } },
+    'attributeMissileAttackMod': { get: function() { return MML.attributeMods.perception[this.perception] + MML.attributeMods.coordination[this.coordination] + MML.attributeMods.strength[this.strength]; } },
     'castingMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'castingMod'); } },
-    'attributeCastingMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'attributeCastingMod'); } },
-    'spellLearningMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'spellLearningMod'); } },
+    'attributeCastingMod': {
+      get: function() {
+        var attributeCastingMod = MML.attributeMods.reason[this.reason];
+
+        if (this.senseInitBonus > 2) {
+          attributeCastingMod += 0;
+        } else if (this.senseInitBonus > 0) {
+          attributeCastingMod -= 10;
+        } else if (this.senseInitBonus > -2) {
+          attributeCastingMod -= 20;
+        } else {
+          attributeCastingMod -= 30;
+        }
+
+        if (this.fomInitBonus === 3 || this.fomInitBonus === 2) {
+          attributeCastingMod -= 5;
+        } else if (this.fomInitBonus === 1) {
+          attributeCastingMod -= 10;
+        } else if (this.fomInitBonus === 0) {
+          attributeCastingMod -= 15;
+        } else if (this.fomInitBonus === -1) {
+          attributeCastingMod -= 20;
+        } else if (this.fomInitBonus === -2) {
+          attributeCastingMod -= 30;
+        }
+
+        return attributeCastingMod;
+      }
+    },
+    'spellLearningMod': { get: function() { return MML.attributeMods.intellect[this.intellect]; } },
     'statureCheckMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'statureCheckMod'); } },
     'strengthCheckMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'strengthCheckMod'); } },
     'coordinationCheckMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'coordinationCheckMod'); } },
@@ -75,16 +119,204 @@ MML.Character = function(charName) {
     'systemStrengthCheckMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'systemStrengthCheckMod'); } },
     'fitnessCheckMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'fitnessCheckMod'); } },
     'statusEffects': { get: function() { return MML.getCurrentAttributeJSON(this.name, 'statusEffects'); } },
-    'initiative': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'initiative'); } },
+    'initiative': {
+      get: function() {
+        var initiative = this.initiativeRoll +
+          this.situationalInitBonus +
+          this.movementRatioInitBonus +
+          this.attributeInitBonus +
+          this.senseInitBonus +
+          this.fomInitBonus +
+          this.firstActionInitBonus +
+          this.spentInitiative;
+        if (initiative < 0 ||
+          state.MML.GM.roundStarted === false ||
+          this.situationalInitBonus === 'No Combat' ||
+          this.movementRatioInitBonus === 'No Combat') {
+          return 0;
+        } else {
+          return initiative;
+        }
+      }
+    },
     'initiativeRoll': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'initiativeRoll'); } },
     'situationalInitBonus': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'situationalInitBonus'); } },
-    'movementRatioInitBonus': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'movementRatioInitBonus'); } },
-    'attributeInitBonus': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'attributeInitBonus'); } },
-    'senseInitBonus': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'senseInitBonus'); } },
+    'movementRatioInitBonus': {
+      get: function() {
+        if (this.movementRatio < 0.6) {
+          return 'No Combat';
+        } else if (this.movementRatio === 0.6) {
+          return -4;
+        } else if (this.movementRatio < 0.7 && this.movementRatio <= 0.8) {
+          return -3;
+        } else if (this.movementRatio > 0.8 && this.movementRatio <= 1.0) {
+          return -2;
+        } else if (this.movementRatio > 1.0 && this.movementRatio <= 1.2) {
+          return -1;
+        } else if (this.movementRatio > 1.2 && this.movementRatio <= 1.4) {
+          return 0;
+        } else if (this.movementRatio > 1.4 && this.movementRatio <= 1.7) {
+          return 1;
+        } else if (this.movementRatio > 1.7 && this.movementRatio <= 2.0) {
+          return 2;
+        } else if (this.movementRatio > 2.0 && this.movementRatio <= 2.5) {
+          return 3;
+        } else if (this.movementRatio > 2.5 && this.movementRatio <= 3.2) {
+          return 4;
+        } else if (this.movementRatio > 3.2) {
+          return 5;
+        }
+      }
+    },
+    'attributeInitBonus': {
+      get: function() {
+        var attributeArray = [this.strength, this.coordination, this.reason, this.perception];
+        var rankingAttribute = attributeArray.sort(function(a, b) {
+          return a - b;
+        })[0];
+
+        if (rankingAttribute <= 9) {
+          return -1;
+        } else if (rankingAttribute === 10 || rankingAttribute === 11) {
+          return 0;
+        } else if (rankingAttribute === 12 || rankingAttribute === 13) {
+          return 1;
+        } else if (rankingAttribute === 14 || rankingAttribute === 15) {
+          return 2;
+        } else if (rankingAttribute === 16 || rankingAttribute === 17) {
+          return 3;
+        } else if (rankingAttribute === 18 || rankingAttribute === 19) {
+          return 4;
+        } else if (rankingAttribute >= 20) {
+          return 5;
+        }
+      }
+    },
+    'senseInitBonus': {
+      get: function() {
+        var armorList = _.where(this.inventory, {
+          type: 'armor'
+        });
+        var bitsOfHelm = ['Barbute Helm', 'Bascinet Helm', 'Camail', 'Camail-Conical', 'Cap', 'Cheeks', 'Conical Helm', 'Duerne Helm', 'Dwarven War Hood', 'Face Plate', 'Great Helm', 'Half-Face Plate', 'Hood', 'Nose Guard', 'Pot Helm', 'Sallet Helm', 'Throat Guard', 'War Hat'];
+        var senseArray = [];
+
+        _.each(bitsOfHelm, function(bit) {
+          _.each(armorList, function(piece) {
+            if (piece.name.indexOf(bit) !== -1) {
+              senseArray.push(bit);
+            }
+          });
+        });
+
+        //nothing on head
+        if (senseArray.length === 0) {
+          return 4;
+        } else {
+          //Head fully encased in metal
+          if (senseArray.indexOf('Great Helm') !== -1 || (senseArray.indexOf('Sallet Helm') !== -1 && senseArray.indexOf('Throat Guard') !== -1)) {
+            return -2;
+          }
+          //wearing a helm
+          else if (_.intersection(senseArray, ['Barbute Helm', 'Sallet Helm', 'Bascinet Helm', 'Duerne Helm', 'Cap', 'Pot Helm', 'Conical Helm', 'War Hat']).length > 0) {
+            //Has faceplate
+            if (senseArray.indexOf('Face Plate') !== -1) {
+              //Enclosed Sides
+              if (_.intersection(senseArray, ['Barbute Helm', 'Bascinet Helm', 'Duerne Helm']).length > 0) {
+                return -2;
+              } else {
+                return -1;
+              }
+            }
+            //These types of helms or half face plate
+            else if (_.intersection(senseArray, ['Barbute Helm', 'Sallet Helm', 'Bascinet Helm', 'Duerne Helm', 'Half-Face Plate']).length > 0) {
+              return 0;
+            }
+            //has camail or cheeks
+            else if (_.intersection(senseArray, ['Camail', 'Camail-Conical', 'Cheeks']).length > 0) {
+              return 1;
+            }
+            //Wearing a hood
+            else if (_.intersection(senseArray, ['Dwarven War Hood', 'Hood']).length > 0) {
+              _.each(armorList, function(piece) {
+                if (piece.name === 'Dwarven War Hood' || piece.name === 'Hood') {
+                  if (piece.family === 'Cloth') {
+                    return 2;
+                  } else {
+                    return 1;
+                  }
+                }
+              });
+            }
+            //has nose guard
+            else if (senseArray.indexOf('Nose Guard') !== -1) {
+              return 2;
+            }
+            // just a cap
+            else {
+              return 3;
+            }
+          }
+          //Wearing a hood
+          else if (_.intersection(senseArray, ['Dwarven War Hood', 'Hood']).length > 0) {
+            _.each(armorList, function(piece) {
+              if (piece.name === 'Dwarven War Hood' || piece.name === 'Hood') {
+                if (piece.family === 'Cloth') {
+                  return 2;
+                } else {
+                  return 1;
+                }
+              }
+            });
+          }
+        }
+      }
+    },
     'fomInitBonus': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'fomInitBonus'); } },
-    'firstActionInitBonus': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'firstActionInitBonus'); } },
+    'firstActionInitBonus': {
+      get: function() {
+        if (state.MML.GM.roundStarted === false) {
+          this.firstActionInitBonus = this.action.initBonus;
+        }
+        return this.firstActionInitBonus;
+      }
+    },
     'spentInitiative': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'spentInitiative'); } },
-    'actionTempo': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'actionTempo'); } },
+    'actionTempo': {
+      get: function() {
+        var tempo;
+
+        if (_.isUndefined(this.action.skill) || this.action.skill < 30) {
+          tempo = 0;
+        } else if (this.action.skill < 40) {
+          tempo = 1;
+        } else if (this.action.skill < 50) {
+          tempo = 2;
+        } else if (this.action.skill < 60) {
+          tempo = 3;
+        } else if (this.action.skill < 70) {
+          tempo = 4;
+        } else {
+          tempo = 5;
+        }
+
+        // If Dual Wielding
+        if (this.action.name === 'Attack' && MML.isDualWielding(this)) {
+          var twfSkill = this.weaponskills['Two Weapon Fighting'].level;
+          if (twfSkill > 19 && twfSkill) {
+            tempo += 1;
+          } else if (twfSkill >= 40 && twfSkill < 60) {
+            tempo += 2;
+          } else if (twfSkill >= 60) {
+            tempo += 3;
+          }
+          // If Dual Wielding identical weapons
+          if (this.inventory[this.leftHand._id].name === this.inventory[this.rightHand._id].name) {
+            tempo += 1;
+          }
+        }
+        return MML.attackTempoTable[tempo];
+      }
+    },
     'ready': { get: function() { return MML.getCurrentAttribute(this.name, 'ready'); } },
     'action': { get: function() { return MML.getCurrentAttributeJSON(this.name, 'action'); } },
     'defensesThisRound': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'defensesThisRound'); } },
@@ -94,9 +326,60 @@ MML.Character = function(charName) {
     'roundsRest': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'roundsRest'); } },
     'roundsExertion': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'roundsExertion'); } },
     'damagedThisRound': { get: function() { return MML.getCurrentAttributeAsBool(this.name, 'damagedThisRound'); } },
-    'skills': { get: function() { return MML.getSkillAttributes(this.name, 'skills'); } },
-    'weaponSkills': { get: function() { return MML.getSkillAttributes(this.name, 'weaponskills'); } },
-    'fov': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'fov'); } },
+    'skills': {
+      get: function() {
+        var characterSkills = MML.getSkillAttributes(this.name, 'skills');
+        _.each(
+          characterSkills,
+          function(characterSkill, skillName) {
+            var level = characterSkill.input;
+            var attribute = MML.skills[skillName].attribute;
+
+            level += MML.attributeMods[attribute][this[attribute]];
+
+            if (_.isUndefined(MML.skillMods[this.race]) === false && _.isUndefined(MML.skillMods[this.race][skillName]) === false) {
+              level += MML.skillMods[this.race][skillName];
+            }
+            if (_.isUndefined(MML.skillMods[this.gender]) === false && _.isUndefined(MML.skillMods[this.gender][skillName]) === false) {
+              level += MML.skillMods[this.gender][skillName];
+            }
+            characterSkill.level = level;
+            MML.setCurrentAttribute(this.name, 'repeating_skills_' + characterSkill._id + '_name', skillName);
+            MML.setCurrentAttribute(this.name, 'repeating_skills_' + characterSkill._id + '_input', characterSkill.input);
+            MML.setCurrentAttribute(this.name, 'repeating_skills_' + characterSkill._id + '_level', level);
+          },
+          this
+        );
+
+        this.skills = characterSkills;
+        return characterSkills;
+      }
+    },
+    'weaponSkills': {
+      get: function() { return MML.getSkillAttributes(this.name, 'weaponskills'); }
+    },
+    'fov': {
+      get: function() {
+        switch (this.senseInitBonus) {
+          case 4:
+            return 180;
+          case 3:
+            return 170;
+          case 2:
+            return 160;
+          case 1:
+            return 150;
+          case 0:
+            return 140;
+          case -1:
+            return 130;
+          case -2:
+            return 120;
+          default:
+            return 180;
+        }
+      }
+    },
     'spells': { get: function() { return MML.getCurrentAttributeAsArray(this.name, 'spells'); } },
   });
 };
@@ -485,12 +768,6 @@ MML.computeAttribute.situationalMod = {
     return this.situationalMod;
   }
 };
-MML.computeAttribute.attributeDefenseMod = {
-  dependents: [],
-  compute: function() {
-    return MML.attributeMods.strength[this.strength] + MML.attributeMods.coordination[this.coordination];
-  }
-};
 MML.computeAttribute.meleeDefenseMod = {
   dependents: [],
   compute: function() {
@@ -539,48 +816,13 @@ MML.computeAttribute.meleeDamageMod = {
     return meleeDamageMod;
   }
 };
-MML.computeAttribute.attributeMissileAttackMod = {
-  dependents: [],
-  compute: function() {
-    return MML.attributeMods.perception[this.perception] + MML.attributeMods.coordination[this.coordination] + MML.attributeMods.strength[this.strength];
-  }
-};
 MML.computeAttribute.castingMod = {
   dependents: [],
   compute: function() {
     return this.castingMod;
   }
 };
-MML.computeAttribute.attributeCastingMod = {
-  dependents: [],
-  compute: function() {
-    var attributeCastingMod = MML.attributeMods.reason[this.reason];
 
-    if (this.senseInitBonus > 2) {
-      attributeCastingMod += 0;
-    } else if (this.senseInitBonus > 0) {
-      attributeCastingMod -= 10;
-    } else if (this.senseInitBonus > -2) {
-      attributeCastingMod -= 20;
-    } else {
-      attributeCastingMod -= 30;
-    }
-
-    if (this.fomInitBonus === 3 || this.fomInitBonus === 2) {
-      attributeCastingMod -= 5;
-    } else if (this.fomInitBonus === 1) {
-      attributeCastingMod -= 10;
-    } else if (this.fomInitBonus === 0) {
-      attributeCastingMod -= 15;
-    } else if (this.fomInitBonus === -1) {
-      attributeCastingMod -= 20;
-    } else if (this.fomInitBonus === -2) {
-      attributeCastingMod -= 30;
-    }
-
-    return attributeCastingMod;
-  }
-};
 MML.computeAttribute.spellLearningMod = {
   dependents: [],
   compute: function() {
@@ -590,85 +832,85 @@ MML.computeAttribute.spellLearningMod = {
 MML.computeAttribute.statureCheckMod = {
   dependents: [],
   compute: function() {
-    return this.situationalMod;
+    return this.statureCheckMod;
   }
 };
 MML.computeAttribute.strengthCheckMod = {
   dependents: [],
   compute: function() {
-    return this.situationalMod;
+    return this.strengthCheckMod;
   }
 };
 MML.computeAttribute.coordinationCheckMod = {
   dependents: [],
   compute: function() {
-    return this.situationalMod;
+    return this.coordinationCheckMod;
   }
 };
 MML.computeAttribute.healthCheckMod = {
   dependents: [],
   compute: function() {
-    return this.situationalMod;
+    return this.healthCheckMod;
   }
 };
 MML.computeAttribute.beautyCheckMod = {
   dependents: [],
   compute: function() {
-    return this.situationalMod;
+    return this.beautyCheckMod;
   }
 };
 MML.computeAttribute.intellectCheckMod = {
   dependents: [],
   compute: function() {
-    return this.situationalMod;
+    return this.intellectCheckMod;
   }
 };
 MML.computeAttribute.reasonCheckMod = {
   dependents: [],
   compute: function() {
-    return this.situationalMod;
+    return this.reasonCheckMod;
   }
 };
 MML.computeAttribute.creativityCheckMod = {
   dependents: [],
   compute: function() {
-    return this.situationalMod;
+    return this.creativityCheckMod;
   }
 };
 MML.computeAttribute.presenceCheckMod = {
   dependents: [],
   compute: function() {
-    return this.situationalMod;
+    return this.presenceCheckMod;
   }
 };
 MML.computeAttribute.willpowerCheckMod = {
   dependents: [],
   compute: function() {
-    return this.situationalMod;
+    return this.willpowerCheckMod;
   }
 };
 MML.computeAttribute.evocationCheckMod = {
   dependents: [],
   compute: function() {
-    return this.situationalMod;
+    return this.evocationCheckMod;
   }
 };
 MML.computeAttribute.perceptionCheckMod = {
   dependents: [],
   compute: function() {
-    return this.situationalMod;
+    return this.perceptionCheckMod;
   }
 };
 MML.computeAttribute.systemStrengthCheckMod = {
   dependents: [],
   compute: function() {
-    return this.situationalMod;
+    return this.systemStrengthCheckMod;
   }
 };
 MML.computeAttribute.fitnessCheckMod = {
   dependents: [],
   compute: function() {
-    return this.situationalMod;
+    return this.fitnessCheckMod;
   }
 };
 MML.computeAttribute.statusEffects = {
@@ -729,27 +971,6 @@ MML.computeAttribute.statusEffects = {
 };
 
 // Initiative
-MML.computeAttribute.initiative = {
-  dependents: [],
-  compute: function() {
-    var initiative = this.initiativeRoll +
-      this.situationalInitBonus +
-      this.movementRatioInitBonus +
-      this.attributeInitBonus +
-      this.senseInitBonus +
-      this.fomInitBonus +
-      this.firstActionInitBonus +
-      this.spentInitiative;
-    if (initiative < 0 ||
-      state.MML.GM.roundStarted === false ||
-      this.situationalInitBonus === 'No Combat' ||
-      this.movementRatioInitBonus === 'No Combat') {
-      return 0;
-    } else {
-      return initiative;
-    }
-  }
-};
 MML.computeAttribute.initiativeRoll = {
   dependents: ['initiative'],
   compute: function() {
@@ -762,202 +983,10 @@ MML.computeAttribute.situationalInitBonus = {
     return this.situationalInitBonus;
   }
 };
-MML.computeAttribute.movementRatioInitBonus = {
-  dependents: ['initiative'],
-  compute: function() {
-    if (this.movementRatio < 0.6) {
-      return 'No Combat';
-    } else if (this.movementRatio === 0.6) {
-      return -4;
-    } else if (this.movementRatio < 0.7 && this.movementRatio <= 0.8) {
-      return -3;
-    } else if (this.movementRatio > 0.8 && this.movementRatio <= 1.0) {
-      return -2;
-    } else if (this.movementRatio > 1.0 && this.movementRatio <= 1.2) {
-      return -1;
-    } else if (this.movementRatio > 1.2 && this.movementRatio <= 1.4) {
-      return 0;
-    } else if (this.movementRatio > 1.4 && this.movementRatio <= 1.7) {
-      return 1;
-    } else if (this.movementRatio > 1.7 && this.movementRatio <= 2.0) {
-      return 2;
-    } else if (this.movementRatio > 2.0 && this.movementRatio <= 2.5) {
-      return 3;
-    } else if (this.movementRatio > 2.5 && this.movementRatio <= 3.2) {
-      return 4;
-    } else if (this.movementRatio > 3.2) {
-      return 5;
-    }
-  }
-};
-MML.computeAttribute.attributeInitBonus = {
-  dependents: ['initiative'],
-  compute: function() {
-    var attributeArray = [this.strength, this.coordination, this.reason, this.perception];
-    var rankingAttribute = attributeArray.sort(function(a, b) {
-      return a - b;
-    })[0];
-
-    if (rankingAttribute <= 9) {
-      return -1;
-    } else if (rankingAttribute === 10 || rankingAttribute === 11) {
-      return 0;
-    } else if (rankingAttribute === 12 || rankingAttribute === 13) {
-      return 1;
-    } else if (rankingAttribute === 14 || rankingAttribute === 15) {
-      return 2;
-    } else if (rankingAttribute === 16 || rankingAttribute === 17) {
-      return 3;
-    } else if (rankingAttribute === 18 || rankingAttribute === 19) {
-      return 4;
-    } else if (rankingAttribute >= 20) {
-      return 5;
-    }
-  }
-};
-MML.computeAttribute.senseInitBonus = {
-  dependents: [
-    'initiative',
-    'attributeCastingMod',
-    'fov'
-  ],
-  compute: function() {
-    var armorList = _.where(this.inventory, {
-      type: 'armor'
-    });
-    var bitsOfHelm = ['Barbute Helm', 'Bascinet Helm', 'Camail', 'Camail-Conical', 'Cap', 'Cheeks', 'Conical Helm', 'Duerne Helm', 'Dwarven War Hood', 'Face Plate', 'Great Helm', 'Half-Face Plate', 'Hood', 'Nose Guard', 'Pot Helm', 'Sallet Helm', 'Throat Guard', 'War Hat'];
-    var senseArray = [];
-
-    _.each(bitsOfHelm, function(bit) {
-      _.each(armorList, function(piece) {
-        if (piece.name.indexOf(bit) !== -1) {
-          senseArray.push(bit);
-        }
-      });
-    });
-
-    //nothing on head
-    if (senseArray.length === 0) {
-      return 4;
-    } else {
-      //Head fully encased in metal
-      if (senseArray.indexOf('Great Helm') !== -1 || (senseArray.indexOf('Sallet Helm') !== -1 && senseArray.indexOf('Throat Guard') !== -1)) {
-        return -2;
-      }
-      //wearing a helm
-      else if (_.intersection(senseArray, ['Barbute Helm', 'Sallet Helm', 'Bascinet Helm', 'Duerne Helm', 'Cap', 'Pot Helm', 'Conical Helm', 'War Hat']).length > 0) {
-        //Has faceplate
-        if (senseArray.indexOf('Face Plate') !== -1) {
-          //Enclosed Sides
-          if (_.intersection(senseArray, ['Barbute Helm', 'Bascinet Helm', 'Duerne Helm']).length > 0) {
-            return -2;
-          } else {
-            return -1;
-          }
-        }
-        //These types of helms or half face plate
-        else if (_.intersection(senseArray, ['Barbute Helm', 'Sallet Helm', 'Bascinet Helm', 'Duerne Helm', 'Half-Face Plate']).length > 0) {
-          return 0;
-        }
-        //has camail or cheeks
-        else if (_.intersection(senseArray, ['Camail', 'Camail-Conical', 'Cheeks']).length > 0) {
-          return 1;
-        }
-        //Wearing a hood
-        else if (_.intersection(senseArray, ['Dwarven War Hood', 'Hood']).length > 0) {
-          _.each(armorList, function(piece) {
-            if (piece.name === 'Dwarven War Hood' || piece.name === 'Hood') {
-              if (piece.family === 'Cloth') {
-                return 2;
-              } else {
-                return 1;
-              }
-            }
-          });
-        }
-        //has nose guard
-        else if (senseArray.indexOf('Nose Guard') !== -1) {
-          return 2;
-        }
-        // just a cap
-        else {
-          return 3;
-        }
-      }
-      //Wearing a hood
-      else if (_.intersection(senseArray, ['Dwarven War Hood', 'Hood']).length > 0) {
-        _.each(armorList, function(piece) {
-          if (piece.name === 'Dwarven War Hood' || piece.name === 'Hood') {
-            if (piece.family === 'Cloth') {
-              return 2;
-            } else {
-              return 1;
-            }
-          }
-        });
-      }
-    }
-  }
-};
-MML.computeAttribute.fomInitBonus = {
-  dependents: [
-    'initiative',
-    'attributeCastingMod'
-  ],
-  compute: function() {
-    return this.fomInitBonus;
-  }
-};
-MML.computeAttribute.firstActionInitBonus = {
-  dependents: ['initiative'],
-  compute: function() {
-    if (state.MML.GM.roundStarted === false) {
-      this.firstActionInitBonus = this.action.initBonus;
-    }
-    return this.firstActionInitBonus;
-  }
-};
 MML.computeAttribute.spentInitiative = {
   dependents: ['initiative'],
   compute: function() {
     return this.spentInitiative;
-  }
-};
-MML.computeAttribute.actionTempo = {
-  dependents: [],
-  compute: function() {
-    var tempo;
-
-    if (_.isUndefined(this.action.skill) || this.action.skill < 30) {
-      tempo = 0;
-    } else if (this.action.skill < 40) {
-      tempo = 1;
-    } else if (this.action.skill < 50) {
-      tempo = 2;
-    } else if (this.action.skill < 60) {
-      tempo = 3;
-    } else if (this.action.skill < 70) {
-      tempo = 4;
-    } else {
-      tempo = 5;
-    }
-
-    // If Dual Wielding
-    if (this.action.name === 'Attack' && MML.isDualWielding(this)) {
-      var twfSkill = this.weaponskills['Two Weapon Fighting'].level;
-      if (twfSkill > 19 && twfSkill) {
-        tempo += 1;
-      } else if (twfSkill >= 40 && twfSkill < 60) {
-        tempo += 2;
-      } else if (twfSkill >= 60) {
-        tempo += 3;
-      }
-      // If Dual Wielding identical weapons
-      if (this.inventory[this.leftHand._id].name === this.inventory[this.rightHand._id].name) {
-        tempo += 1;
-      }
-    }
-    return MML.attackTempoTable[tempo];
   }
 };
 
@@ -1037,116 +1066,9 @@ MML.computeAttribute.roundsExertion = {
     return this.roundsExertion;
   }
 };
-MML.computeAttribute.fov = {
-  dependents: [],
-  compute: function() {
-    switch (this.senseInitBonus) {
-      case 4:
-        return 180;
-      case 3:
-        return 170;
-      case 2:
-        return 160;
-      case 1:
-        return 150;
-      case 0:
-        return 140;
-      case -1:
-        return 130;
-      case -2:
-        return 120;
-      default:
-        return 180;
-    }
-  }
-};
 
 // Skills
-MML.computeAttribute.skills = {
-  dependents: ['actionTempo'],
-  compute: function() {
-    var characterSkills = MML.getSkillAttributes(this.name, 'skills');
-    _.each(
-      characterSkills,
-      function(characterSkill, skillName) {
-        var level = characterSkill.input;
-        var attribute = MML.skills[skillName].attribute;
 
-        level += MML.attributeMods[attribute][this[attribute]];
-
-        if (_.isUndefined(MML.skillMods[this.race]) === false && _.isUndefined(MML.skillMods[this.race][skillName]) === false) {
-          level += MML.skillMods[this.race][skillName];
-        }
-        if (_.isUndefined(MML.skillMods[this.gender]) === false && _.isUndefined(MML.skillMods[this.gender][skillName]) === false) {
-          level += MML.skillMods[this.gender][skillName];
-        }
-        characterSkill.level = level;
-        MML.setCurrentAttribute(this.name, 'repeating_skills_' + characterSkill._id + '_name', skillName);
-        MML.setCurrentAttribute(this.name, 'repeating_skills_' + characterSkill._id + '_input', characterSkill.input);
-        MML.setCurrentAttribute(this.name, 'repeating_skills_' + characterSkill._id + '_level', level);
-      },
-      this
-    );
-
-    this.skills = characterSkills;
-    return characterSkills;
-  }
-};
-MML.computeAttribute.weaponSkills = {
-  dependents: ['actionTempo'],
-  compute: function() {
-    var characterSkills = MML.getSkillAttributes(this.name, 'weaponskills');
-    var highestSkill;
-
-    _.each(
-      characterSkills,
-      function(characterSkill, skillName) {
-        var level = characterSkill.input;
-
-        // This may need to include other modifiers
-        if (_.isUndefined(MML.weaponSkillMods[this.race]) === false && _.isUndefined(MML.weaponSkillMods[this.race][skillName]) === false) {
-          level += MML.weaponSkillMods[this.race][skillName];
-        }
-        characterSkill.level = level;
-      },
-      this
-    );
-
-    highestSkill = _.max(characterSkills, function(skill) {
-      return skill.level;
-    }).level;
-    if (isNaN(highestSkill)) {
-      highestSkill = 0;
-    }
-
-    if (_.isUndefined(characterSkills['Default Martial'])) {
-      characterSkills['Default Martial'] = {
-        input: 0,
-        level: 0,
-        _id: generateRowID()
-      };
-    }
-
-    if (highestSkill < 20) {
-      characterSkills['Default Martial'].level = 1;
-    } else {
-      characterSkills['Default Martial'].level = Math.round(highestSkill / 2);
-    }
-
-    _.each(
-      characterSkills,
-      function(characterSkill, skillName) {
-        MML.setCurrentAttribute(this.name, 'repeating_weaponskills_' + characterSkill._id + '_name', skillName);
-        MML.setCurrentAttribute(this.name, 'repeating_weaponskills_' + characterSkill._id + '_input', characterSkill.input);
-        MML.setCurrentAttribute(this.name, 'repeating_weaponskills_' + characterSkill._id + '_level', characterSkill.level);
-      },
-      this
-    );
-
-    this.weaponSkills = characterSkills;
-    return characterSkills;
-  }
-};
 MML.computeAttribute.spells = {
   dependents: [],
   compute: function() {
