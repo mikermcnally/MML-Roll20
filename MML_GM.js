@@ -1,74 +1,23 @@
-MML.startCombat = function(input) {
+MML.startCombat = function(selectedCharNames) {
   this.currentRound = 1;
-  this.combatants = input.selectedCharNames;
+  this.combatants = selectedCharNames;
 
   if (this.combatants.length > 0) {
     this.inCombat = true;
-    _.each(MML.players, function(player) {
-      player.combatants = [];
-    });
+    _.each(MML.players, function(player) { player.combatants = []; });
     _.each(this.combatants, function(charName) {
-      MML.players[MML.characters[charName].player].combatants.push(charName);
-      MML.processCommand({
-        type: 'character',
-        who: charName,
-        callback: 'setApiCharAttribute',
-        input: {
-          attribute: 'ready',
-          value: false
-        }
-      });
-      MML.processCommand({
-        type: 'character',
-        who: charName,
-        callback: 'setCombatVision',
-        input: {
-          inCombat: true
-        }
-      });
-      MML.processCommand({
-        type: 'character',
-        who: charName,
-        callback: 'update',
-        input: {
-          attribute: 'initiative'
-        }
-      });
+      var character = MML.characters[charName];
+      MML.players[character.player].combatants.push(charName);
+      character.setReady(false);
+      character.setCombatVision();
     });
-
-    MML.processCommand({
-      type: 'GM',
-      callback: 'setTurnOrder',
-      input: {}
-    });
-
+    MML.setTurnOrder();
     Campaign().set('initiativepage', 'true');
-
-    MML.processCommand({
-      type: 'GM',
-      callback: 'newRound',
-      input: {}
-    });
+    MML.newRound();
   } else {
     sendChat('', '&{template:charMenu} {{name=Error}} {{message=No tokens selected}}');
-
-    MML.processCommand({
-      type: 'player',
-      who: this.player,
-      callback: 'setApiPlayerAttribute',
-      input: {
-        buttons: [MML.menuButtons.combatMenu]
-      }
-    });
-    MML.processCommand({
-      type: 'player',
-      who: this.player,
-      callback: 'menuCommand',
-      input: {
-        who: this.player,
-        buttonText: 'Combat'
-      }
-    });
+    this.player.buttons = [MML.menuButtons.combatMenu];
+    this.player.menuCommand(this.player, 'Combat');
   }
 };
 
@@ -189,18 +138,6 @@ MML.nextAction = function() {
       });
     }
   }
-};
-
-MML.getSingleTarget = function(input) {
-  input.charName = this.name;
-  input.callback = 'setCurrentCharacterTargets';
-  MML.displayTargetSelection(input);
-};
-
-MML.getSpellTargets = function(input) {
-  input.charName = this.name;
-  input.callback = 'getAdditionTarget';
-  MML.displayTargetSelection(input);
 };
 
 MML.getRadiusSpellTargets = function(input) {

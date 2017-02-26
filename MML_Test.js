@@ -8760,7 +8760,7 @@ MML.getSingleTarget = function(input) {
 
 MML.getSpellTargets = function(input) {
   input.charName = this.name;
-  input.callback = "getAdditionTarget";
+  input.callback = "getAdditionalTarget";
   MML.displayTargetSelection(input);
 };
 
@@ -10804,7 +10804,7 @@ MML.setCurrentCharacterTargets = function(input) {
     input: {}
   });
 };
-MML.getAdditionTarget = function(input) {
+MML.getAdditionalTarget = function(input) {
   var targetArray;
 
   if (_.isUndefined(state.MML.GM.currentAction.targetArray)) {

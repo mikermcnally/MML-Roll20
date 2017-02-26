@@ -84,25 +84,9 @@ on("ready", function() {
           top3 = Math.floor(((top2 - top1) / distance) * distanceAvailable + top1 + 0.5);
           obj.set("left", left3);
           obj.set("top", top3);
-
-          MML.processCommand({
-            type: "character",
-            who: charName,
-            callback: "setApiCharAttribute",
-            input: {
-              attribute: "movementAvailable",
-              value: 0
-            }
-          });
+          character.movementAvailable(0);
         }
-        MML.processCommand({
-          type: "character",
-          who: charName,
-          callback: "moveDistance",
-          input: {
-            distance: distance
-          }
-        });
+        character.moveDistance(distance);
       } else {
         obj.set("left", prev["left"]);
         obj.set("top", prev["top"]);
@@ -133,14 +117,6 @@ on("ready", function() {
     MML.characters[newName] = MML.characters[oldName];
     delete MML.characters[oldName];
     MML.characters[newName].name = newName;
-    MML.processCommand({
-      type: "character",
-      who: newName,
-      callback: "update",
-      input: {
-        attribute: "name"
-      }
-    });
   });
 
   on("change:attribute:current", function(attribute) {

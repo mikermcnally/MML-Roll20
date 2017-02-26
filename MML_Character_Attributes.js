@@ -3,7 +3,7 @@ MML.Character = function(charName) {
   // Basic Info
   Object.defineProperties(this, {
     'name': { value: charName, enumerable: true },
-    'player': { value: MML.getCurrentAttribute(this.name, 'player') },
+    'player': { value: MML.players[MML.getCurrentAttribute(this.name, 'player')] },
     'race': { get: function() { return MML.getCurrentAttribute(this.name, 'race'); } },
     'bodyType': { get: function() { return MML.bodyTypes[this.race]; } },
     'gender': { get: function() { return MML.getCurrentAttribute(this.name, 'gender'); } },
