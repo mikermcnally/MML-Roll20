@@ -2,84 +2,167 @@
 MML.Character = function(charName) {
   // Basic Info
   Object.defineProperties(this, {
-    'name': { value: charName, enumerable: true },
-    'player': { value: MML.players[MML.getCurrentAttribute(this.name, 'player')] },
-    'race': { get: function() { return MML.getCurrentAttribute(this.name, 'race'); } },
-    'bodyType': { get: function() { return MML.bodyTypes[this.race]; } },
-    'gender': { get: function() { return MML.getCurrentAttribute(this.name, 'gender'); } },
-    'height': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'statureRoll')].height; } },
-    'weight': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'statureRoll')].weight; } },
-    'handedness': { get: function() { return MML.getCurrentAttribute(this.name, 'handedness'); } },
-    'stature': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'statureRoll')].stature; } },
-    'strength': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'strengthRoll')].strength; } },
-    'coordination': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'coordinationRoll')].coordination; } },
-    'health': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'healthRoll')].health; } },
-    'beauty': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'beautyRoll')].beauty; } },
-    'intellect': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'intellectRoll')].intellect; } },
-    'reason': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'reasonRoll')].reason; } },
-    'creativity': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'creativityRoll')].creativity; } },
-    'presence': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'presenceRoll')].presence; } },
-    'willpower': { get: function() { return Math.round((2 * this.presence + this.health) / 3); } },
-    'evocation': { get: function() { return this.intellect + this.reason + this.creativity + this.health + this.willpower + MML.racialAttributeBonuses[this.race].evocation; } },
-    'perception': { get: function() { return Math.round((this.intellect + this.reason + this.creativity) / 3) + MML.racialAttributeBonuses[this.race].perception; } },
-    'systemStrength': { get: function() { return Math.round((this.presence + 2 * this.health) / 3); } },
-    'fitness': { get: function() { return Math.round((this.health + this.strength) / 2) + MML.racialAttributeBonuses[this.race].fitness; } },
+    'name': { value: charName, writable: true, enumerable: true },
+    'player': { value: MML.players[MML.getCurrentAttribute(this.name, 'player')], writable: true, enumerable: true },
+    'race': { get: function() { return MML.getCurrentAttribute(this.name, 'race'); }, enumerable: true },
+    'bodyType': { get: function() { return MML.bodyTypes[this.race]; }, enumerable: true },
+    'gender': { get: function() { return MML.getCurrentAttribute(this.name, 'gender'); }, enumerable: true },
+    'height': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'statureRoll')].height; }, enumerable: true },
+    'weight': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'statureRoll')].weight; }, enumerable: true },
+    'handedness': { get: function() { return MML.getCurrentAttribute(this.name, 'handedness'); }, enumerable: true },
+    'stature': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'statureRoll')].stature; }, enumerable: true },
+    'strength': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'strengthRoll')].strength; }, enumerable: true },
+    'coordination': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'coordinationRoll')].coordination; }, enumerable: true },
+    'health': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'healthRoll')].health; }, enumerable: true },
+    'beauty': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'beautyRoll')].beauty; }, enumerable: true },
+    'intellect': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'intellectRoll')].intellect; }, enumerable: true },
+    'reason': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'reasonRoll')].reason; }, enumerable: true },
+    'creativity': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'creativityRoll')].creativity; }, enumerable: true },
+    'presence': { get: function() { return MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'presenceRoll')].presence; }, enumerable: true},
+    'willpower': { get: function() { return Math.round((2 * this.presence + this.health) / 3); }, enumerable: true },
+    'evocation': { get: function() { return this.intellect + this.reason + this.creativity + this.health + this.willpower + MML.racialAttributeBonuses[this.race].evocation; }, enumerable: true },
+    'perception': { get: function() { return Math.round((this.intellect + this.reason + this.creativity) / 3) + MML.racialAttributeBonuses[this.race].perception; }, enumerable: true },
+    'systemStrength': { get: function() { return Math.round((this.presence + 2 * this.health) / 3); }, enumerable: true },
+    'fitness': { get: function() { return Math.round((this.health + this.strength) / 2) + MML.racialAttributeBonuses[this.race].fitness; }, enumerable: true },
     'fitnessMod': { get: function() { return MML.fitnessModLookup[this.fitness]; } },
-    'load': { get: function() { return Math.round(this.stature * this.fitnessMod) + MML.racialAttributeBonuses[this.race].load; } },
-    'overhead': { get: function() { return this.load * 2; } },
-    'deadLift': { get: function() { return this.load * 4; } },
-    'hpMax': { get: function() { return MML.getCurrentAttributeJSON(this.name, 'hpMax'); } },
-    'hp': { get: function() { return MML.getCurrentAttributeJSON(this.name, 'hp'); } },
-    'epMax': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'epMax'); } },
-    'ep': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'ep'); } },
-    'fatigueMax': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'fatigueMax'); } },
-    'fatigue': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'fatigue'); } },
-    'hpRecovery': { get: function() { return MML.recoveryMods[this.health].hp; } },
-    'epRecovery': { get: function() { return MML.recoveryMods[this.health].ep; } },
-    'inventory': { get: function() { return MML.getCurrentAttributeJSON(this.name, 'inventory'); } },
-    'totalWeightCarried': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'totalWeightCarried'); } },
-    'knockdownMax': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'knockdownMax'); } },
-    'knockdown': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'knockdown'); } },
-    'apv': { get: function() { return MML.getCurrentAttributeJSON(this.name, 'apv'); } },
-    'leftHand': { get: function() { return MML.getCurrentAttributeJSON(this.name, 'leftHand'); } },
-    'rightHand': { get: function() { return MML.getCurrentAttributeJSON(this.name, 'rightHand'); } },
-    'hitTable': { get: function() { return MML.getCurrentAttribute(this.name, 'hitTable'); } },
-    'movementRatio': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'movementRatio'); } },
-    'movementAvailable': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'movementAvailable'); } },
-    'movementPosition': { get: function() { return MML.getCurrentAttribute(this.name, 'movementPosition'); } },
-    'pathID': { get: function() { return MML.getCurrentAttribute(this.name, 'pathID'); } },
-    'situationalMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'situationalMod'); } },
-    'attributeDefenseMod': { get: function() { return MML.attributeMods.strength[this.strength] + MML.attributeMods.coordination[this.coordination]; } },
-    'meleeDefenseMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'meleeDefenseMod'); } },
-    'rangedDefenseMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'rangedDefenseMod'); } },
-    'meleeAttackMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'meleeAttackMod'); } },
-    'attributeMeleeAttackMod': { get: function() { return MML.attributeMods.strength[this.strength] + MML.attributeMods.coordination[this.coordination]; } },
-    'meleeDamageMod': {
-      get: function() {
-        var meleeDamageMod;
-        var load = this.load;
-
-        var index;
-        for (index in MML.meleeDamageMods) {
-          var data = MML.meleeDamageMods[index];
-
-          if (load >= data.low && load <= data.high) {
-            meleeDamageMod = data.value;
-            break;
+    'load': { get: function() { return Math.round(this.stature * this.fitnessMod) + MML.racialAttributeBonuses[this.race].load; }, enumerable: true },
+    'overhead': { get: function() { return this.load * 2; }, enumerable: true },
+    'deadLift': { get: function() { return this.load * 4; }, enumerable: true },
+    'hpMax': { get: function() { return MML.buildHpAttribute(this); }, enumerable: true },
+    'hp': { value: _.isEmpty(MML.getCurrentAttributeJSON(this.name, 'hp')) ? MML.buildHpAttribute(this) : MML.getCurrentAttributeJSON(this.name, 'hp'), writable: true, enumerable: true },
+    'epMax': { get: function() { return this.evocation; }, enumerable: true },
+    'ep': { value: isNaN(parseFloat(MML.getCurrentAttribute(this.name, 'ep'))) ? this.evocation : MML.getCurrentAttributeAsFloat(this.name, 'ep'), writable: true, enumerable: true },
+    'fatigueMax': { get: function() { return this.fitness; }, enumerable: true },
+    'fatigue': { value: isNaN(parseFloat(MML.getCurrentAttribute(this.name, 'fatigue'))) ? this.fitness : MML.getCurrentAttributeAsFloat(this.name, 'fatigue'), writable: true, enumerable: true },
+    'hpRecovery': { get: function() { return MML.recoveryMods[this.health].hp; }, enumerable: true },
+    'epRecovery': { get: function() { return MML.recoveryMods[this.health].ep; }, enumerable: true },
+    'inventory': { value: MML.getCurrentAttributeJSON(this.name, 'inventory'), writable: true, enumerable: true },
+    'totalWeightCarried': { get: function() { return _.reduce(_.pluck(this.inventory, weight), function(total, weight){ return total + weight; }, 0); }, enumerable: true },
+    'knockdownMax': { get: function() { return Math.round(this.stature + (this.totalWeightCarried / 10)); }, enumerable: true },
+    'knockdown': { value: isNaN(parseFloat(MML.getCurrentAttribute(this.name, 'knockdown'))) ? this.knockdownMax : MML.getCurrentAttributeAsFloat(this.name, 'knockdown'), writable: true, enumerable: true },
+    'apv': { get: function() {
+      var bodyType = this.bodyType;
+      var armor = [];
+      _.each(
+        this.inventory,
+        function(item) {
+          if (item.type === 'armor') {
+            armor.push(item);
           }
+        },
+        this);
+
+      var apvMatrix = {};
+      // Initialize APV Matrix
+      _.each(MML.hitPositions[bodyType], function(position) {
+        apvMatrix[position.name] = {
+          Surface: [{ value: 0, coverage: 100 }],
+          Cut: [{ value: 0, coverage: 100 }],
+          Chop: [{ value: 0, coverage: 100 }],
+          Pierce: [{ value: 0, coverage: 100 }],
+          Thrust: [{ value: 0, coverage: 100 }],
+          Impact: [{ value: 0, coverage: 100 }],
+          Flanged: [{ value: 0, coverage: 100 }]
+        };
+      });
+      //Creates raw matrix of individual pieces of armor (no layering or partial coverage)
+
+      _.each(armor, function(piece) {
+        var material = MML.APVList[piece.material];
+
+        _.each(piece.protection, function(protection) {
+          var position = MML.hitPositions[bodyType][protection.position].name;
+          var coverage = protection.coverage;
+          apvMatrix[position].Surface.push({ value: material.surface, coverage: coverage });
+          apvMatrix[position].Cut.push({ value: material.cut,  coverage: coverage });
+          apvMatrix[position].Chop.push({ value: material.chop, coverage: coverage });
+          apvMatrix[position].Pierce.push({ value: material.pierce, coverage: coverage });
+          apvMatrix[position].Thrust.push({ value: material.thrust, coverage: coverage });
+          apvMatrix[position].Impact.push({ value: material.impact, coverage: coverage });
+          apvMatrix[position].Flanged.push({ value: material.flanged, coverage: coverage });
+        });
+      });
+
+      //This loop accounts for layered armor and partial coverage and outputs final APVs
+      _.each(apvMatrix, function(position, positionName) {
+        _.each(position, function(rawAPVArray, type) {
+          var apvFinalArray = [];
+          var coverageArray = [];
+
+          //Creates an array of armor coverage in ascending order.
+          _.each(rawAPVArray, function(apv) {
+            if (coverageArray.indexOf(apv.coverage) === -1) {
+              coverageArray.push(apv.coverage);
+            }
+          });
+          coverageArray = coverageArray.sort(function(a, b) {
+            return a - b;
+          });
+
+          //Creates APV array per damage type per position
+          _.each(coverageArray, function(apvCoverage) {
+            var apvToLayerArray = [];
+            var apvValue = 0;
+
+            //Builds an array of APVs that meet or exceed the coverage value
+            _.each(rawAPVArray, function(apv) {
+              if (apv.coverage >= apvCoverage) {
+                apvToLayerArray.push(apv.value);
+              }
+            });
+            apvToLayerArray = apvToLayerArray.sort(function(a, b) {
+              return b - a;
+            });
+
+            //Adds the values at coverage value with diminishing returns on layered armor
+            _.each(apvToLayerArray, function(value, index) {
+              apvValue += value * Math.pow(2, -index);
+              apvValue = Math.round(apvValue);
+            });
+            //Puts final APV and associated Coverage into final APV array for that damage type.
+            apvFinalArray.push({ value: apvValue, coverage: apvCoverage });
+          });
+          apvMatrix[positionName][type] = apvFinalArray;
+        });
+      });
+      return apvMatrix;
+    }, enumerable: true },
+    'leftHand': { value: MML.getCurrentAttributeJSON(this.name, 'leftHand'), writable: true, enumerable: true },
+    'rightHand': { value: MML.getCurrentAttributeJSON(this.name, 'rightHand'), writable: true, enumerable: true },
+    'hitTable': { get: function() { return MML.getHitTable(this); }, enumerable: true },
+    'movementRatio': {
+      get: function() {
+        var movementRatio;
+
+        if (this.totalWeightCarried === 0) {
+          movementRatio = Math.round(10 * this.load) / 10;
+        } else {
+          movementRatio = Math.round(10 * this.load / this.totalWeightCarried) / 10;
         }
-        return meleeDamageMod;
-      }
-    },
-    'missileAttackMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'missileAttackMod'); } },
+
+        if (movementRatio > 4.0) {
+          movementRatio = 4.0;
+        }
+        return movementRatio;
+    }, enumerable: true},
+    'movementAvailable': { value: MML.getCurrentAttributeAsFloat(this.name, 'movementAvailable'), writable: true, enumerable: true },
+    'movementPosition': { value: MML.getCurrentAttribute(this.name, 'movementPosition'), writable: true, enumerable: true },
+    'pathID': { get: function() { return MML.getCurrentAttribute(this.name, 'pathID'); } },
+    'situationalMod': { value: MML.getCurrentAttributeAsFloat(this.name, 'situationalMod'), writable: true, enumerable: true },
+    'attributeDefenseMod': { get: function() { return MML.attributeMods.strength[this.strength] + MML.attributeMods.coordination[this.coordination]; }, enumerable: true },
+    'meleeDefenseMod': { value: MML.getCurrentAttributeAsFloat(this.name, 'meleeDefenseMod'), writable: true, enumerable: true },
+    'rangedDefenseMod': { value: MML.getCurrentAttributeAsFloat(this.name, 'rangedDefenseMod'), writable: true, enumerable: true },
+    'meleeAttackMod': { value: MML.getCurrentAttributeAsFloat(this.name, 'meleeAttackMod'), writable: true, enumerable: true },
+    'attributeMeleeAttackMod': { get: function() { return MML.attributeMods.strength[this.strength] + MML.attributeMods.coordination[this.coordination]; }, enumerable: true },
+    'meleeDamageMod': { get: function() { return _.find(MML.meleeDamageMods, function(mod){ return this.load >= mod.low && this.load <= mod.high; }, this).value; }, enumerable: true },
+    'missileAttackMod': { value: MML.getCurrentAttributeAsFloat(this.name, 'missileAttackMod'), writable: true, enumerable: true },
     'attributeMissileAttackMod': { get: function() { return MML.attributeMods.perception[this.perception] + MML.attributeMods.coordination[this.coordination] + MML.attributeMods.strength[this.strength]; } },
-    'castingMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'castingMod'); } },
+    'castingMod': { value: MML.getCurrentAttributeAsFloat(this.name, 'castingMod'), writable: true, enumerable: true },
     'attributeCastingMod': {
       get: function() {
         var attributeCastingMod = MML.attributeMods.reason[this.reason];
 
         if (this.senseInitBonus > 2) {
-          attributeCastingMod += 0;
         } else if (this.senseInitBonus > 0) {
           attributeCastingMod -= 10;
         } else if (this.senseInitBonus > -2) {
@@ -101,24 +184,24 @@ MML.Character = function(charName) {
         }
 
         return attributeCastingMod;
-      }
+      }, enumerable: true
     },
-    'spellLearningMod': { get: function() { return MML.attributeMods.intellect[this.intellect]; } },
-    'statureCheckMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'statureCheckMod'); } },
-    'strengthCheckMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'strengthCheckMod'); } },
-    'coordinationCheckMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'coordinationCheckMod'); } },
-    'healthCheckMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'healthCheckMod'); } },
-    'beautyCheckMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'beautyCheckMod'); } },
-    'intellectCheckMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'intellectCheckMod'); } },
-    'reasonCheckMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'reasonCheckMod'); } },
-    'creativityCheckMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'creativityCheckMod'); } },
-    'presenceCheckMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'presenceCheckMod'); } },
-    'willpowerCheckMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'willpowerCheckMod'); } },
-    'evocationCheckMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'evocationCheckMod'); } },
-    'perceptionCheckMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'perceptionCheckMod'); } },
-    'systemStrengthCheckMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'systemStrengthCheckMod'); } },
-    'fitnessCheckMod': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'fitnessCheckMod'); } },
-    'statusEffects': { get: function() { return MML.getCurrentAttributeJSON(this.name, 'statusEffects'); } },
+    'spellLearningMod': { get: function () { return MML.attributeMods.intellect[this.intellect]; }, enumerable: true },
+    'statureCheckMod': { value: MML.getCurrentAttributeAsFloat(this.name, 'statureCheckMod'), writable: true, enumerable: true },
+    'strengthCheckMod': { value: MML.getCurrentAttributeAsFloat(this.name, 'strengthCheckMod'), writable: true, enumerable: true },
+    'coordinationCheckMod': { value: MML.getCurrentAttributeAsFloat(this.name, 'coordinationCheckMod'), writable: true, enumerable: true },
+    'healthCheckMod': { value: MML.getCurrentAttributeAsFloat(this.name, 'healthCheckMod'), writable: true, enumerable: true },
+    'beautyCheckMod': { value: MML.getCurrentAttributeAsFloat(this.name, 'beautyCheckMod'), writable: true, enumerable: true },
+    'intellectCheckMod': { value: MML.getCurrentAttributeAsFloat(this.name, 'intellectCheckMod'), writable: true, enumerable: true },
+    'reasonCheckMod': { value: MML.getCurrentAttributeAsFloat(this.name, 'reasonCheckMod'), writable: true, enumerable: true },
+    'creativityCheckMod': { value: MML.getCurrentAttributeAsFloat(this.name, 'creativityCheckMod'), writable: true, enumerable: true },
+    'presenceCheckMod': { value: MML.getCurrentAttributeAsFloat(this.name, 'presenceCheckMod'), writable: true, enumerable: true },
+    'willpowerCheckMod': { value: MML.getCurrentAttributeAsFloat(this.name, 'willpowerCheckMod'), writable: true, enumerable: true },
+    'evocationCheckMod': { value: MML.getCurrentAttributeAsFloat(this.name, 'evocationCheckMod'), writable: true, enumerable: true },
+    'perceptionCheckMod': { value: MML.getCurrentAttributeAsFloat(this.name, 'perceptionCheckMod'), writable: true, enumerable: true },
+    'systemStrengthCheckMod': { value: MML.getCurrentAttributeAsFloat(this.name, 'systemStrengthCheckMod'), writable: true, enumerable: true },
+    'fitnessCheckMod': { value: MML.getCurrentAttributeAsFloat(this.name, 'fitnessCheckMod'), writable: true, enumerable: true },
+    'statusEffects': { value: MML.getCurrentAttributeJSON(this.name, 'statusEffects'), writable: true, enumerable: true },
     'initiative': {
       get: function() {
         var initiative = this.initiativeRoll +
@@ -139,8 +222,8 @@ MML.Character = function(charName) {
         }
       }
     },
-    'initiativeRoll': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'initiativeRoll'); } },
-    'situationalInitBonus': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'situationalInitBonus'); } },
+    'initiativeRoll': { value: MML.getCurrentAttributeAsFloat(this.name, 'initiativeRoll'), writable: true, enumerable: true },
+    'situationalInitBonus': { value: MML.getCurrentAttributeAsFloat(this.name, 'situationalInitBonus'), writable: true, enumerable: true },
     'movementRatioInitBonus': {
       get: function() {
         if (this.movementRatio < 0.6) {
@@ -166,7 +249,7 @@ MML.Character = function(charName) {
         } else if (this.movementRatio > 3.2) {
           return 5;
         }
-      }
+      }, enumerable: true
     },
     'attributeInitBonus': {
       get: function() {
@@ -190,7 +273,7 @@ MML.Character = function(charName) {
         } else if (rankingAttribute >= 20) {
           return 5;
         }
-      }
+      }, enumerable: true
     },
     'senseInitBonus': {
       get: function() {
@@ -269,18 +352,18 @@ MML.Character = function(charName) {
             });
           }
         }
-      }
+      }, enumerable: true
     },
-    'fomInitBonus': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'fomInitBonus'); } },
+    'fomInitBonus': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'fomInitBonus'); }, enumerable: true },
     'firstActionInitBonus': {
       get: function() {
         if (state.MML.GM.roundStarted === false) {
           this.firstActionInitBonus = this.action.initBonus;
         }
         return this.firstActionInitBonus;
-      }
+      }, enumerable: true
     },
-    'spentInitiative': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'spentInitiative'); } },
+    'spentInitiative': { value: MML.getCurrentAttributeAsFloat(this.name, 'spentInitiative'), writable: true, enumerable: true },
     'actionTempo': {
       get: function() {
         var tempo;
@@ -315,17 +398,13 @@ MML.Character = function(charName) {
           }
         }
         return MML.attackTempoTable[tempo];
-      }
+      }, enumerable: true
     },
-    'ready': { get: function() { return MML.getCurrentAttribute(this.name, 'ready'); } },
-    'action': { get: function() { return MML.getCurrentAttributeJSON(this.name, 'action'); } },
-    'defensesThisRound': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'defensesThisRound'); } },
-    'dodgedThisRound': { get: function() { return MML.getCurrentAttributeAsBool(this.name, 'dodgedThisRound'); } },
-    'meleeThisRound': { get: function() { return MML.getCurrentAttributeAsBool(this.name, 'meleeThisRound'); } },
-    'fatigueLevel': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'fatigueLevel'); } },
-    'roundsRest': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'roundsRest'); } },
-    'roundsExertion': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'roundsExertion'); } },
-    'damagedThisRound': { get: function() { return MML.getCurrentAttributeAsBool(this.name, 'damagedThisRound'); } },
+    'ready': { value: MML.getCurrentAttribute(this.name, 'ready'), writable: true, enumerable: true },
+    'action': { value: MML.getCurrentAttributeJSON(this.name, 'action'), writable: true, enumerable: true },
+    'fatigueLevel': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'fatigueLevel'); }, enumerable: true },
+    'roundsRest': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'roundsRest'); }, enumerable: true },
+    'roundsExertion': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'roundsExertion'); }, enumerable: true },
     'skills': {
       get: function() {
         var characterSkills = MML.getSkillAttributes(this.name, 'skills');
@@ -353,11 +432,9 @@ MML.Character = function(charName) {
 
         this.skills = characterSkills;
         return characterSkills;
-      }
+      }, enumerable: true
     },
-    'weaponSkills': {
-      get: function() { return MML.getSkillAttributes(this.name, 'weaponskills'); }
-    },
+    'weaponSkills': { get: function() { return MML.getSkillAttributes(this.name, 'weaponskills'); } },
     'fov': {
       get: function() {
         switch (this.senseInitBonus) {
@@ -1923,49 +2000,6 @@ MML.computeAttribute.player = {
   }
 };
 
-// HP stuff
-MML.computeAttribute.hpMax = {
-  dependents: ['hp'],
-  compute: function() {
-    var hpMax = MML.buildHpAttribute(this);
-    this.hp = MML.buildHpAttribute(this);
-    return hpMax;
-  }
-};
-MML.computeAttribute.hp = {
-  dependents: ['statusEffects'],
-  compute: function() {
-    return this.hp;
-  }
-};
-MML.computeAttribute.epMax = {
-  dependents: ['ep'],
-  compute: function() {
-    var epMax = this.evocation;
-    this.ep = epMax;
-    return epMax;
-  }
-};
-MML.computeAttribute.ep = {
-  dependents: ['statusEffects'],
-  compute: function() {
-    return this.ep;
-  }
-};
-MML.computeAttribute.fatigueMax = {
-  dependents: ['fatigue'],
-  compute: function() {
-    var fatigueMax = this.fitness;
-    this.fatigue = fatigueMax;
-    return fatigueMax;
-  }
-};
-MML.computeAttribute.fatigue = {
-  dependents: ['statusEffects'],
-  compute: function() {
-    return this.fatigue;
-  }
-};
 
 // Inventory stuff
 MML.computeAttribute.inventory = {
@@ -1994,382 +2028,9 @@ MML.computeAttribute.inventory = {
     return items;
   }
 };
-MML.computeAttribute.totalWeightCarried = {
-  dependents: [
-    'knockdownMax',
-    'movementRatio'
-  ],
-  compute: function() {
-    var totalWeightCarried = 0;
 
-    _.each(this.inventory, function(item) {
-      totalWeightCarried += item.weight;
-    });
-    return totalWeightCarried;
-  }
-};
-MML.computeAttribute.knockdownMax = {
-  dependents: ['knockdown'],
-  compute: function() {
-    var knockdownMax = Math.round(this.stature + (this.totalWeightCarried / 10));
-    this.knockdown = knockdownMax;
-    return knockdownMax;
-  }
-};
-MML.computeAttribute.knockdown = {
-  dependents: [],
-  compute: function() {
-    if (state.MML.GM.roundStarted === false) {
-      return this.knockdownMax;
-    } else {
-      return this.knockdown;
-    }
-  }
-};
-MML.computeAttribute.apv = {
-  dependents: [],
-  compute: function() {
-    var bodyType = this.bodyType;
-    var armor = [];
-    _.each(
-      this.inventory,
-      function(item) {
-        if (item.type === 'armor') {
-          armor.push(item);
-        }
-      },
-      this);
 
-    var apvMatrix = {};
 
-    // Initialize APV Matrix
-    _.each(MML.hitPositions[bodyType], function(position) {
-      apvMatrix[position.name] = {
-        Surface: [{
-          value: 0,
-          coverage: 100
-        }],
-        Cut: [{
-          value: 0,
-          coverage: 100
-        }],
-        Chop: [{
-          value: 0,
-          coverage: 100
-        }],
-        Pierce: [{
-          value: 0,
-          coverage: 100
-        }],
-        Thrust: [{
-          value: 0,
-          coverage: 100
-        }],
-        Impact: [{
-          value: 0,
-          coverage: 100
-        }],
-        Flanged: [{
-          value: 0,
-          coverage: 100
-        }]
-      };
-    });
-    //Creates raw matrix of individual pieces of armor (no layering or partial coverage)
-
-    _.each(armor, function(piece) {
-      var material = MML.APVList[piece.material];
-
-      _.each(piece.protection, function(protection) {
-        var position = MML.hitPositions[bodyType][protection.position].name;
-        var coverage = protection.coverage;
-        apvMatrix[position].Surface.push({
-          value: material.surface,
-          coverage: coverage
-        });
-        apvMatrix[position].Cut.push({
-          value: material.cut,
-          coverage: coverage
-        });
-        apvMatrix[position].Chop.push({
-          value: material.chop,
-          coverage: coverage
-        });
-        apvMatrix[position].Pierce.push({
-          value: material.pierce,
-          coverage: coverage
-        });
-        apvMatrix[position].Thrust.push({
-          value: material.thrust,
-          coverage: coverage
-        });
-        apvMatrix[position].Impact.push({
-          value: material.impact,
-          coverage: coverage
-        });
-        apvMatrix[position].Flanged.push({
-          value: material.flanged,
-          coverage: coverage
-        });
-      });
-    });
-
-    //This loop accounts for layered armor and partial coverage and outputs final APVs
-    _.each(apvMatrix, function(position, positionName) {
-      _.each(position, function(rawAPVArray, type) {
-        var apvFinalArray = [];
-        var coverageArray = [];
-
-        //Creates an array of armor coverage in ascending order.
-        _.each(rawAPVArray, function(apv) {
-          if (coverageArray.indexOf(apv.coverage) === -1) {
-            coverageArray.push(apv.coverage);
-          }
-        });
-        coverageArray = coverageArray.sort(function(a, b) {
-          return a - b;
-        });
-
-        //Creates APV array per damage type per position
-        _.each(coverageArray, function(apvCoverage) {
-          var apvToLayerArray = [];
-          var apvValue = 0;
-
-          //Builds an array of APVs that meet or exceed the coverage value
-          _.each(rawAPVArray, function(apv) {
-            if (apv.coverage >= apvCoverage) {
-              apvToLayerArray.push(apv.value);
-            }
-          });
-          apvToLayerArray = apvToLayerArray.sort(function(a, b) {
-            return b - a;
-          });
-
-          //Adds the values at coverage value with diminishing returns on layered armor
-          _.each(apvToLayerArray, function(value, index) {
-            apvValue += value * Math.pow(2, -index);
-            apvValue = Math.round(apvValue);
-          });
-          //Puts final APV and associated Coverage into final APV array for that damage type.
-          apvFinalArray.push({
-            value: apvValue,
-            coverage: apvCoverage
-          });
-        });
-        apvMatrix[positionName][type] = apvFinalArray;
-      });
-    });
-    return apvMatrix;
-  }
-};
-MML.computeAttribute.leftHand = {
-  dependents: ['hitTable'],
-  compute: function() {
-    return this.leftHand;
-  }
-};
-MML.computeAttribute.rightHand = {
-  dependents: ['hitTable'],
-  compute: function() {
-    return this.rightHand;
-  }
-};
-MML.computeAttribute.hitTable = {
-  dependents: [],
-  compute: function() {
-    return MML.getHitTable(this);
-  }
-};
-
-// Movement
-MML.computeAttribute.movementRatio = {
-  dependents: ['movementRatioInitBonus'],
-  compute: function() {
-    var movementRatio;
-
-    if (this.totalWeightCarried === 0) {
-      movementRatio = Math.round(10 * this.load) / 10;
-    } else {
-      movementRatio = Math.round(10 * this.load / this.totalWeightCarried) / 10;
-    }
-
-    if (movementRatio > 4.0) {
-      movementRatio = 4.0;
-    }
-    return movementRatio;
-  }
-};
-MML.computeAttribute.movementAvailable = {
-  dependents: [],
-  compute: function() {
-    return this.movementAvailable;
-  }
-};
-MML.computeAttribute.movementPosition = {
-  dependents: [],
-  compute: function() {
-    return this.movementPosition;
-  }
-};
-MML.computeAttribute.pathID = {
-  dependents: [],
-  compute: function() {
-    return this.pathID;
-  }
-};
-
-// Roll Modifiers
-MML.computeAttribute.situationalMod = {
-  dependents: [],
-  compute: function() {
-    return this.situationalMod;
-  }
-};
-MML.computeAttribute.meleeDefenseMod = {
-  dependents: [],
-  compute: function() {
-    return this.meleeDefenseMod;
-  }
-};
-MML.computeAttribute.rangedDefenseMod = {
-  dependents: [],
-  compute: function() {
-    return this.rangedDefenseMod;
-  }
-};
-MML.computeAttribute.meleeAttackMod = {
-  dependents: [],
-  compute: function() {
-    return this.meleeAttackMod;
-  }
-};
-MML.computeAttribute.missileAttackMod = {
-  dependents: [],
-  compute: function() {
-    return this.missileAttackMod;
-  }
-};
-MML.computeAttribute.attributeMeleeAttackMod = {
-  dependents: [],
-  compute: function() {
-    return MML.attributeMods.strength[this.strength] + MML.attributeMods.coordination[this.coordination];
-  }
-};
-MML.computeAttribute.meleeDamageMod = {
-  dependents: [],
-  compute: function() {
-    var meleeDamageMod;
-    var load = this.load;
-
-    var index;
-    for (index in MML.meleeDamageMods) {
-      var data = MML.meleeDamageMods[index];
-
-      if (load >= data.low && load <= data.high) {
-        meleeDamageMod = data.value;
-        break;
-      }
-    }
-    return meleeDamageMod;
-  }
-};
-MML.computeAttribute.castingMod = {
-  dependents: [],
-  compute: function() {
-    return this.castingMod;
-  }
-};
-
-MML.computeAttribute.spellLearningMod = {
-  dependents: [],
-  compute: function() {
-    return MML.attributeMods.intellect[this.intellect];
-  }
-};
-MML.computeAttribute.statureCheckMod = {
-  dependents: [],
-  compute: function() {
-    return this.statureCheckMod;
-  }
-};
-MML.computeAttribute.strengthCheckMod = {
-  dependents: [],
-  compute: function() {
-    return this.strengthCheckMod;
-  }
-};
-MML.computeAttribute.coordinationCheckMod = {
-  dependents: [],
-  compute: function() {
-    return this.coordinationCheckMod;
-  }
-};
-MML.computeAttribute.healthCheckMod = {
-  dependents: [],
-  compute: function() {
-    return this.healthCheckMod;
-  }
-};
-MML.computeAttribute.beautyCheckMod = {
-  dependents: [],
-  compute: function() {
-    return this.beautyCheckMod;
-  }
-};
-MML.computeAttribute.intellectCheckMod = {
-  dependents: [],
-  compute: function() {
-    return this.intellectCheckMod;
-  }
-};
-MML.computeAttribute.reasonCheckMod = {
-  dependents: [],
-  compute: function() {
-    return this.reasonCheckMod;
-  }
-};
-MML.computeAttribute.creativityCheckMod = {
-  dependents: [],
-  compute: function() {
-    return this.creativityCheckMod;
-  }
-};
-MML.computeAttribute.presenceCheckMod = {
-  dependents: [],
-  compute: function() {
-    return this.presenceCheckMod;
-  }
-};
-MML.computeAttribute.willpowerCheckMod = {
-  dependents: [],
-  compute: function() {
-    return this.willpowerCheckMod;
-  }
-};
-MML.computeAttribute.evocationCheckMod = {
-  dependents: [],
-  compute: function() {
-    return this.evocationCheckMod;
-  }
-};
-MML.computeAttribute.perceptionCheckMod = {
-  dependents: [],
-  compute: function() {
-    return this.perceptionCheckMod;
-  }
-};
-MML.computeAttribute.systemStrengthCheckMod = {
-  dependents: [],
-  compute: function() {
-    return this.systemStrengthCheckMod;
-  }
-};
-MML.computeAttribute.fitnessCheckMod = {
-  dependents: [],
-  compute: function() {
-    return this.fitnessCheckMod;
-  }
-};
 MML.computeAttribute.statusEffects = {
   dependents: [
     'situationalInitBonus',
@@ -2427,25 +2088,6 @@ MML.computeAttribute.statusEffects = {
   }
 };
 
-// Initiative
-MML.computeAttribute.initiativeRoll = {
-  dependents: ['initiative'],
-  compute: function() {
-    return this.initiativeRoll;
-  }
-};
-MML.computeAttribute.situationalInitBonus = {
-  dependents: ['initiative'],
-  compute: function() {
-    return this.situationalInitBonus;
-  }
-};
-MML.computeAttribute.spentInitiative = {
-  dependents: ['initiative'],
-  compute: function() {
-    return this.spentInitiative;
-  }
-};
 
 // Combat
 MML.computeAttribute.ready = {
@@ -2509,26 +2151,5 @@ MML.computeAttribute.action = {
     }, this);
 
     return this.action;
-  }
-};
-MML.computeAttribute.roundsRest = {
-  dependents: [],
-  compute: function() {
-    return this.roundsRest;
-  }
-};
-MML.computeAttribute.roundsExertion = {
-  dependents: [],
-  compute: function() {
-    return this.roundsExertion;
-  }
-};
-
-// Skills
-
-MML.computeAttribute.spells = {
-  dependents: [],
-  compute: function() {
-    return this.spells;
   }
 };
