@@ -3,7 +3,18 @@ MML.Character = function(charName) {
   // Basic Info
   Object.defineProperties(this, {
     'name': { value: charName, writable: true, enumerable: true },
-    'player': { value: MML.players[MML.getCurrentAttribute(this.name, 'player')], writable: true, enumerable: true },
+    'player': { get: function () {
+      this.player = MML.players[MML.getCurrentAttribute(this.name, 'player')];
+      var newPlayer = MML.getPlayerFromName(this.player);
+      MML.getCharFromName(this.name).set('controlledby', newPlayer.id);
+      _.each(MML.players, function(player) {
+        if (player.name === this.player) {
+          player.characters.push(this.name);
+        } else {
+          player.characters = _.without(player.characters, this.name);
+        }
+      }, this);
+    }, enumerable: true },
     'race': { get: function() { return MML.getCurrentAttribute(this.name, 'race'); }, enumerable: true },
     'bodyType': { get: function() { return MML.bodyTypes[this.race]; }, enumerable: true },
     'gender': { get: function() { return MML.getCurrentAttribute(this.name, 'gender'); }, enumerable: true },
@@ -357,9 +368,7 @@ MML.Character = function(charName) {
     'fomInitBonus': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'fomInitBonus'); }, enumerable: true },
     'firstActionInitBonus': {
       get: function() {
-        if (state.MML.GM.roundStarted === false) {
-          this.firstActionInitBonus = this.action.initBonus;
-        }
+
         return this.firstActionInitBonus;
       }, enumerable: true
     },
@@ -400,11 +409,10 @@ MML.Character = function(charName) {
         return MML.attackTempoTable[tempo];
       }, enumerable: true
     },
-    'ready': { value: MML.getCurrentAttribute(this.name, 'ready'), writable: true, enumerable: true },
+    'ready': { value: MML.getCurrentAttributeAsBool(this.name, 'ready'), writable: true, enumerable: true },
     'action': { value: MML.getCurrentAttributeJSON(this.name, 'action'), writable: true, enumerable: true },
-    'fatigueLevel': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'fatigueLevel'); }, enumerable: true },
-    'roundsRest': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'roundsRest'); }, enumerable: true },
-    'roundsExertion': { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'roundsExertion'); }, enumerable: true },
+    'roundsRest': { value: MML.getCurrentAttributeAsFloat(this.name, 'roundsRest'), writable: true, enumerable: true },
+    'roundsExertion': { value: MML.getCurrentAttributeAsFloat(this.name, 'roundsExertion'), enumerable: true },
     'skills': {
       get: function() {
         var characterSkills = MML.getSkillAttributes(this.name, 'skills');
@@ -463,7 +471,7 @@ MML.Character = function(charName) {
   //Combat Functions
   this.displayRoll = function (callback) {
     var currentRoll = this.player.currentRoll;
-    if (this.player.name === state.MML.GM.player) {
+    if (this.player.name === state.MML.GM.name) {
       if (currentRoll.accepted === false) {
         this.player.displayGmRoll(currentRoll);
       } else {
@@ -537,12 +545,12 @@ MML.Character = function(charName) {
   };
 
   this.setReady = function(ready) {
-    if (state.MML.GM.inCombat === true && this.ready === 'false') {
+    if (state.MML.GM.inCombat === true && ready === false) {
       MML.getTokenFromChar(this.name).set('tint_color', '#FF0000');
     } else {
       MML.getTokenFromChar(this.name).set('tint_color', 'transparent');
     }
-    return this.ready;
+    this.ready = ready;
   };
 
   this.setCombatVision = function() {
@@ -895,6 +903,52 @@ MML.Character = function(charName) {
     return damage;
   };
 
+  this.setAction = function() {
+    var initBonus = 10;
+
+    if (this.action.name === 'Attack') {
+      var leftHand = MML.getWeaponFamily(this, 'leftHand');
+      var rightHand = MML.getWeaponFamily(this, 'rightHand');
+
+      if (['Punch', 'Kick', 'Head Butt', 'Bite', 'Grapple', 'Takedown', 'Place a Hold', 'Break a Hold', 'Break Grapple'].indexOf(this.action.weaponType) > -1 ||
+        (leftHand === 'unarmed' && rightHand === 'unarmed')
+      ) {
+        if (!_.isUndefined(this.weaponSkills['Brawling']) && this.weaponSkills['Brawling'].level > this.weaponSkills['Default Martial'].level) {
+          this.action.skill = this.weaponSkills['Brawling'].level;
+        } else {
+          this.action.skill = this.weaponSkills['Default Martial'].level;
+        }
+      } else if (leftHand !== 'unarmed' && rightHand !== 'unarmed') {
+        var weaponInits = [this.inventory[this.leftHand._id].grips[this.leftHand.grip].initiative,
+          this.inventory[this.rightHand._id].grips[this.rightHand.grip].initiative
+        ];
+        initBonus = _.min(weaponInits);
+        // this.action.skill = this.weaponSkills.[this.inventory[this.leftHand._id].name].level or this.weaponSkills['Default Martial Skill'].level;
+        //Dual Wielding
+      } else if (rightHand !== 'unarmed' && leftHand === 'unarmed') {
+        initBonus = this.inventory[this.rightHand._id].grips[this.rightHand.grip].initiative;
+        this.action.skill = MML.getWeaponSkill(this, this.inventory[this.rightHand._id]);
+      } else {
+        initBonus = this.inventory[this.leftHand._id].grips[this.leftHand.grip].initiative;
+        this.action.skill = MML.getWeaponSkill(this, this.inventory[this.leftHand._id]);
+      }
+    } else if (this.action.name === 'Cast') {
+      var skillInfo = MML.getMagicSkill(this, this.action.spell);
+      this.action.skill = skillInfo.level;
+      this.action.skillName = skillInfo.name;
+    }
+    if (state.MML.GM.roundStarted === false) {
+      this.firstActionInitBonus = initBonus;
+    }
+
+    _.each(this.action.modifiers, function(modifier) {
+      this.statusEffects[modifier] = {
+        id: generateRowID(),
+        name: modifier
+      };
+    }, this);
+  };
+
   this.initiativeRoll = function() {
     var rollValue = MML.rollDice(1, 10);
     this.setAction();
@@ -930,30 +984,9 @@ MML.Character = function(charName) {
   };
 
   this.initiativeApply = function() {
-    MML.processCommand({
-      type: 'character',
-      who: this.name,
-      callback: 'setApiCharAttribute',
-      input: {
-        attribute: 'initiativeRoll',
-        value: this.player.currentRoll.value
-      }
-    });
-    MML.processCommand({
-      type: 'character',
-      who: this.name,
-      callback: 'setApiCharAttribute',
-      input: {
-        attribute: 'ready',
-        value: true
-      }
-    });
-    MML.processCommand({
-      type: 'player',
-      who: this.player,
-      callback: 'prepareNextCharacter',
-      input: {}
-    });
+    this.initiativeRoll = this.player.currentRoll.value;
+    this.setReady(true);
+    this.player.prepareNextCharacter();
   };
 
   this.startAction = function() {
@@ -1227,7 +1260,7 @@ MML.Character = function(charName) {
   this.attackRollResult = function() {
     var currentRoll = this.player.currentRoll;
 
-    if (this.player.name === state.MML.GM.player) {
+    if (this.player.name === state.MML.GM.name) {
       if (currentRoll.accepted === false) {
         this.player.displayGmRoll(currentRoll);
       } else {
@@ -1889,7 +1922,7 @@ MML.Character = function(charName) {
   this.castingRollResult = function() {
     var currentRoll = this.player.currentRoll;
 
-    if (this.player.name === state.MML.GM.player) {
+    if (this.player.name === state.MML.GM.name) {
       if (currentRoll.accepted === false) {
         this.player.displayGmRoll(currentRoll);
       } else {
@@ -1916,135 +1949,19 @@ MML.Character = function(charName) {
     MML[state.MML.GM.currentAction.callback]();
   };
 
-};
-
-MML.update = function(attribute) {
-  var attributeArray = [attribute];
-  var dependents = MML.computeAttribute[attribute].dependents;
-  attributeArray.push.apply(attributeArray, dependents);
-
-  // for(var i = 0; i < attributeArray.length; i++){ //length of array is dynamic, for-in doesn't work here
-  //     var localAttribute = MML.computeAttribute[attributeArray[i]];
-
-  //     if(_.isUndefined(localAttribute)){
-  //         log(attributeArray[i]);
-  //     }
-  //     else{
-  //         attributeArray = _.difference(attributeArray, localAttribute.dependents);
-  //         attributeArray.push.apply(attributeArray, localAttribute.dependents);
-  //     }
-  // }
-
-  _.each(attributeArray, function(attribute) {
-    var value = MML.computeAttribute[attribute].compute.apply(this, []); // Run compute function from character scope
-    // log(attribute + ' ' + value);
-    this[attribute] = value;
-    if (typeof(value) === 'object') {
-      value = JSON.stringify(value);
-    }
-    MML.setCurrentAttribute(this.name, attribute, value);
-  }, this);
-
-  _.each(dependents, function(attribute) {
-    this.update(attribute);
-  }, this);
-};
-
-MML.setApiCharAttribute = function(input) {
-  this[input.attribute] = input.value;
-  MML.processCommand({
-    type: 'character',
-    who: this.name,
-    callback: 'update',
-    input: input
-  });
-};
-
-MML.setApiCharAttributeJSON = function(input) {
-  this[input.attribute][input.index] = input.value;
-  MML.processCommand({
-    type: 'character',
-    who: this.name,
-    callback: 'update',
-    input: input
-  });
-};
-
-MML.removeStatusEffect = function(input) {
-  if (!_.isUndefined(this.statusEffects[input.index])) {
-    delete this.statusEffects[input.index];
-    MML.processCommand({
-      type: 'character',
-      who: this.name,
-      callback: 'update',
-      input: {
-        attribute: 'statusEffects'
-      }
-    });
-  }
-};
-
-MML.computeAttribute.player = {
-  dependents: [],
-  compute: function() {
-    var newPlayer = MML.getPlayerFromName(this.player);
-    MML.getCharFromName(this.name).set('controlledby', newPlayer.id);
-    _.each(MML.players, function(player) {
-      if (player.name === this.player) {
-        player.characters.push(this.name);
-      } else {
-        player.characters = _.without(player.characters, this.name);
-      }
-    }, this);
-    return this.player;
-  }
-};
-
-
-// Inventory stuff
-MML.computeAttribute.inventory = {
-  dependents: [
-    'totalWeightCarried',
-    'apv',
-    'leftHand',
-    'rightHand',
-    'senseInitBonus'
-  ],
-  compute: function() {
-    var items = _.omit(this.inventory, 'emptyHand');
-
-    _.each(
-      items,
-      function(item, _id) {
-        MML.setCurrentAttribute(this.name, 'repeating_items_' + _id + '_itemName', item.name);
-        MML.setCurrentAttribute(this.name, 'repeating_items_' + _id + '_itemId', _id);
-      },
-      this
-    );
-    items.emptyHand = {
-      type: 'empty',
-      weight: 0
-    };
-    return items;
-  }
-};
-
-
-
-MML.computeAttribute.statusEffects = {
-  dependents: [
-    'situationalInitBonus',
-    'situationalMod',
-    'rangedDefenseMod',
-    'meleeDefenseMod',
-    'missileAttackMod',
-    'meleeAttackMod',
-    'castingMod',
-    'perceptionCheckMod',
-    'roundsExertion'
-  ],
-  compute: function() {
-    _.each(MML.computeAttribute.statusEffects.dependents, function(dependent) {
+  this.applyStatusEffects = function() {
+    var dependents = [
+      'situationalInitBonus',
+      'situationalMod',
+      'rangedDefenseMod',
+      'meleeDefenseMod',
+      'missileAttackMod',
+      'meleeAttackMod',
+      'castingMod',
+      'perceptionCheckMod',
+      'roundsExertion'
+    ];
+    _.each(dependents, function(dependent) {
       this[dependent] = 0;
     }, this);
     _.each(this.statusEffects, function(effect, index) {
@@ -2083,73 +2000,63 @@ MML.computeAttribute.statusEffects = {
     _.each(attributestoDelete, function(attribute) {
       attribute.remove();
     });
+  };
 
-    return this.statusEffects;
-  }
+  this.addStatusEffect = function(index, effect) {
+    this.statusEffects[index] = effect;
+    this.applyStatusEffects();
+  };
+
+  this.removeStatusEffect = function(index) {
+    if (!_.isUndefined(this.statusEffects[index])) {
+      delete this.statusEffects[index];
+      this.applyStatusEffects();
+    }
+  };
+
+  this.updateInventory = function() {
+    var items = _.omit(this.inventory, 'emptyHand');
+    _.each(items,
+      function(item, _id) {
+        MML.setCurrentAttribute(this.name, 'repeating_items_' + _id + '_itemName', item.name);
+        MML.setCurrentAttribute(this.name, 'repeating_items_' + _id + '_itemId', _id);
+      }, this);
+    items.emptyHand = {
+      type: 'empty',
+      weight: 0
+    };
+    return items;
+  };
 };
 
+MML.update = function(attribute) {
+  var attributeArray = [attribute];
+  var dependents = MML.computeAttribute[attribute].dependents;
+  attributeArray.push.apply(attributeArray, dependents);
 
-// Combat
-MML.computeAttribute.ready = {
-  dependents: [],
-  compute: function() {
-    if (state.MML.GM.inCombat === true && this.ready === false) {
-      MML.getTokenFromChar(this.name).set('tint_color', '#FF0000');
-    } else {
-      MML.getTokenFromChar(this.name).set('tint_color', 'transparent');
+  // for(var i = 0; i < attributeArray.length; i++){ //length of array is dynamic, for-in doesn't work here
+  //     var localAttribute = MML.computeAttribute[attributeArray[i]];
+
+  //     if(_.isUndefined(localAttribute)){
+  //         log(attributeArray[i]);
+  //     }
+  //     else{
+  //         attributeArray = _.difference(attributeArray, localAttribute.dependents);
+  //         attributeArray.push.apply(attributeArray, localAttribute.dependents);
+  //     }
+  // }
+
+  _.each(attributeArray, function(attribute) {
+    var value = MML.computeAttribute[attribute].compute.apply(this, []); // Run compute function from character scope
+    // log(attribute + ' ' + value);
+    this[attribute] = value;
+    if (typeof(value) === 'object') {
+      value = JSON.stringify(value);
     }
-    return this.ready;
-  }
-};
-MML.computeAttribute.action = {
-  dependents: [
-    'firstActionInitBonus',
-    'actionTempo',
-    'statusEffects'
-  ],
-  compute: function() {
-    var initBonus = 10;
+    MML.setCurrentAttribute(this.name, attribute, value);
+  }, this);
 
-    if (this.action.name === 'Attack') {
-      var leftHand = MML.getWeaponFamily(this, 'leftHand');
-      var rightHand = MML.getWeaponFamily(this, 'rightHand');
-
-      if (['Punch', 'Kick', 'Head Butt', 'Bite', 'Grapple', 'Takedown', 'Place a Hold', 'Break a Hold', 'Break Grapple'].indexOf(this.action.weaponType) > -1 ||
-        (leftHand === 'unarmed' && rightHand === 'unarmed')
-      ) {
-        if (!_.isUndefined(this.weaponSkills['Brawling']) && this.weaponSkills['Brawling'].level > this.weaponSkills['Default Martial'].level) {
-          this.action.skill = this.weaponSkills['Brawling'].level;
-        } else {
-          this.action.skill = this.weaponSkills['Default Martial'].level;
-        }
-      } else if (leftHand !== 'unarmed' && rightHand !== 'unarmed') {
-        var weaponInits = [this.inventory[this.leftHand._id].grips[this.leftHand.grip].initiative,
-          this.inventory[this.rightHand._id].grips[this.rightHand.grip].initiative
-        ];
-        initBonus = _.min(weaponInits);
-        // this.action.skill = this.weaponSkills.[this.inventory[this.leftHand._id].name].level or this.weaponSkills['Default Martial Skill'].level;
-        //Dual Wielding
-      } else if (rightHand !== 'unarmed' && leftHand === 'unarmed') {
-        initBonus = this.inventory[this.rightHand._id].grips[this.rightHand.grip].initiative;
-        this.action.skill = MML.getWeaponSkill(this, this.inventory[this.rightHand._id]);
-      } else {
-        initBonus = this.inventory[this.leftHand._id].grips[this.leftHand.grip].initiative;
-        this.action.skill = MML.getWeaponSkill(this, this.inventory[this.leftHand._id]);
-      }
-    } else if (this.action.name === 'Cast') {
-      var skillInfo = MML.getMagicSkill(this, this.action.spell);
-      this.action.skill = skillInfo.level;
-      this.action.skillName = skillInfo.name;
-    }
-    this.action.initBonus = initBonus;
-
-    _.each(this.action.modifiers, function(modifier) {
-      this.statusEffects[modifier] = {
-        id: generateRowID(),
-        name: modifier
-      };
-    }, this);
-
-    return this.action;
-  }
+  _.each(dependents, function(attribute) {
+    this.update(attribute);
+  }, this);
 };

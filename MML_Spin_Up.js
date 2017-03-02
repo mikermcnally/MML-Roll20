@@ -3,7 +3,7 @@ on("ready", function() {
 
   on("add:character", function(character) {
     var charName = character.get("name");
-    MML.createAttribute("player", state.MML.GM.player, "", character);
+    MML.createAttribute("player", state.MML.GM.name, "", character);
     MML.createAttribute("name", charName, "", character);
     MML.createAttribute("race", "Human", "", character);
     MML.createAttribute("gender", "Male", "", character);
@@ -269,7 +269,7 @@ on("ready", function() {
               callback: "setApiCharAttribute",
               input: {
                 attribute: "player",
-                value: state.MML.GM.player
+                value: state.MML.GM.name
               }
             });
           } else {

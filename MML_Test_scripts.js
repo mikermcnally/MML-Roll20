@@ -240,7 +240,7 @@ function() {
       "controlledby": "",
       "avatar": ""
     });
-    MML.createAttribute("player", state.MML.GM.player, "", character);
+    MML.createAttribute("player", state.MML.GM.name, "", character);
     MML.createAttribute("name", charName, "", character);
     MML.createAttribute("race", "Human", "", character);
     MML.createAttribute("gender", "Male", "", character);

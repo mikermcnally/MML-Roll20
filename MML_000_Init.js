@@ -17,8 +17,8 @@ MML.init = function() {
     caseInsensitive: false
   });
   MML.players = {};
-  MML.players[state.MML.GM.player] = {
-    name: state.MML.GM.player,
+  MML.players[state.MML.GM.name] = {
+    name: state.MML.GM.name,
     who: 'GM',
     menu: 'GmMenuMain',
     buttons: [MML.menuButtons.GmMenuMain],
@@ -27,7 +27,7 @@ MML.init = function() {
   };
 
   _.each(playerObjects, function(player) {
-    if (player.get('displayname') !== state.MML.GM.player) {
+    if (player.get('displayname') !== state.MML.GM.name) {
       MML.players[player.get('displayname')] = {
         name: player.get('displayname'),
         who: '',
@@ -51,7 +51,7 @@ MML.init = function() {
     characters[charName] = new MML.Character(charName);
     //Add to player's list of characters
     if (_.isUndefined(MML.players[characters[charName].player])) {
-      characters[charName].player = state.MML.GM.player;
+      characters[charName].player.name = state.MML.GM.name;
     }
     MML.players[characters[charName].player].characters.push(charName);
   });

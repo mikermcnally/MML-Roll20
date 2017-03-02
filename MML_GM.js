@@ -367,7 +367,7 @@ MML.parseCommand = function(msg) {
       if (!isNaN(value)) {
         command = {
           type: 'player',
-          who: state.MML.GM.player,
+          who: state.MML.GM.name,
           callback: 'changeRoll',
           input: {
             value: value

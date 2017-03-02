@@ -17,8 +17,8 @@ MML.init = function() {
     caseInsensitive: false
   });
   MML.players = {};
-  MML.players[state.MML.GM.player] = {
-    name: state.MML.GM.player,
+  MML.players[state.MML.GM.name] = {
+    name: state.MML.GM.name,
     who: "GM",
     menu: "GmMenuMain",
     buttons: [MML.menuButtons.GmMenuMain],
@@ -27,7 +27,7 @@ MML.init = function() {
   };
 
   _.each(playerObjects, function(player) {
-    if (player.get("displayname") !== state.MML.GM.player) {
+    if (player.get("displayname") !== state.MML.GM.name) {
       MML.players[player.get("displayname")] = {
         name: player.get("displayname"),
         who: "",
@@ -51,7 +51,7 @@ MML.init = function() {
     characters[charName] = new MML.Character(charName);
     //Add to player's list of characters
     if (_.isUndefined(MML.players[characters[charName].player])) {
-      characters[charName].player = state.MML.GM.player;
+      characters[charName].player = state.MML.GM.name;
     }
     MML.players[characters[charName].player].characters.push(charName);
   });
@@ -761,7 +761,7 @@ MML.multiWoundRoll = function(input) {
 MML.multiWoundRollResult = function() {
   var currentRoll = MML.players[this.player].currentRoll;
 
-  if (this.player === state.MML.GM.player) {
+  if (this.player === state.MML.GM.name) {
     if (currentRoll.accepted === false) {
       MML.processCommand({
         type: "player",
@@ -825,7 +825,7 @@ MML.majorWoundRoll = function(input) {
 MML.majorWoundRollResult = function(input) {
   var currentRoll = MML.players[this.player].currentRoll;
 
-  if (this.player === state.MML.GM.player) {
+  if (this.player === state.MML.GM.name) {
     if (currentRoll.accepted === false) {
       MML.processCommand({
         type: "player",
@@ -893,7 +893,7 @@ MML.disablingWoundRoll = function(input) {
 MML.disablingWoundRollResult = function(input) {
   var currentRoll = MML.players[this.player].currentRoll;
 
-  if (this.player === state.MML.GM.player) {
+  if (this.player === state.MML.GM.name) {
     if (currentRoll.accepted === false) {
       MML.processCommand({
         type: "player",
@@ -994,7 +994,7 @@ MML.knockdownRoll = function() {
 MML.knockdownRollResult = function() {
   var currentRoll = MML.players[this.player].currentRoll;
 
-  if (this.player === state.MML.GM.player) {
+  if (this.player === state.MML.GM.name) {
     if (currentRoll.accepted === false) {
       MML.processCommand({
         type: "player",
@@ -1075,7 +1075,7 @@ MML.sensitiveAreaRoll = function(input) {
 MML.sensitiveAreaRollResult = function(input) {
   var currentRoll = MML.players[this.player].currentRoll;
 
-  if (this.player === state.MML.GM.player) {
+  if (this.player === state.MML.GM.name) {
     if (currentRoll.accepted === false) {
       MML.processCommand({
         type: "player",
@@ -1166,7 +1166,7 @@ MML.fatigueCheckRoll = function(input) {
 MML.fatigueCheckRollResult = function(input) {
   var currentRoll = MML.players[this.player].currentRoll;
 
-  if (this.player === state.MML.GM.player) {
+  if (this.player === state.MML.GM.name) {
     if (currentRoll.accepted === false) {
       MML.processCommand({
         type: "player",
@@ -1372,7 +1372,7 @@ MML.initiativeResult = function(input) {
     "\nResult: " + currentRoll.rollResult +
     "\nRange: " + currentRoll.range;
 
-  if (this.player === state.MML.GM.player) {
+  if (this.player === state.MML.GM.name) {
     if (currentRoll.accepted === false) {
       MML.processCommand({
         type: "player",
@@ -1836,7 +1836,7 @@ MML.grappleAttack = function() {
 MML.attackRollResult = function(input) {
   var currentRoll = MML.players[this.player].currentRoll;
 
-  if (this.player === state.MML.GM.player) {
+  if (this.player === state.MML.GM.name) {
     if (currentRoll.accepted === false) {
       MML.processCommand({
         type: "player",
@@ -1955,7 +1955,7 @@ MML.hitPositionRollResult = function(input) {
     "\nResult: " + currentRoll.result.name +
     "\nRange: " + currentRoll.range;
 
-  if (this.player === state.MML.GM.player) {
+  if (this.player === state.MML.GM.name) {
     if (currentRoll.accepted === false) {
       MML.processCommand({
         type: "player",
@@ -2100,7 +2100,7 @@ MML.meleeBlockRoll = function(input) {
 MML.meleeBlockRollResult = function(input) {
   var currentRoll = MML.players[this.player].currentRoll;
 
-  if (this.player === state.MML.GM.player) {
+  if (this.player === state.MML.GM.name) {
     if (currentRoll.accepted === false) {
       MML.processCommand({
         type: "player",
@@ -2169,7 +2169,7 @@ MML.meleeDodgeRoll = function(input) {
 MML.meleeDodgeRollResult = function(input) {
   var currentRoll = MML.players[this.player].currentRoll;
 
-  if (this.player === state.MML.GM.player) {
+  if (this.player === state.MML.GM.name) {
     if (currentRoll.accepted === false) {
       MML.processCommand({
         type: "player",
@@ -2325,7 +2325,7 @@ MML.rangedDefenseRoll = function(input) {
 MML.rangedDefenseRollResult = function(input) {
   var currentRoll = MML.players[this.player].currentRoll;
 
-  if (this.player === state.MML.GM.player) {
+  if (this.player === state.MML.GM.name) {
     if (currentRoll.accepted === false) {
       MML.processCommand({
         type: "player",
@@ -2476,7 +2476,7 @@ MML.grappleDefenseWeaponRoll = function(input) {
 MML.grappleDefenseWeaponRollResult = function(input) {
   var currentRoll = MML.players[this.player].currentRoll;
 
-  if (this.player === state.MML.GM.player) {
+  if (this.player === state.MML.GM.name) {
     if (currentRoll.accepted === false) {
       MML.processCommand({
         type: "player",
@@ -2546,7 +2546,7 @@ MML.grappleDefenseBrawlRoll = function(input) {
 MML.grappleDefenseBrawlRollResult = function(input) {
   var currentRoll = MML.players[this.player].currentRoll;
 
-  if (this.player === state.MML.GM.player) {
+  if (this.player === state.MML.GM.name) {
     if (currentRoll.accepted === false) {
       MML.processCommand({
         type: "player",
@@ -3142,7 +3142,7 @@ MML.meleeDamageRoll = function(character, attackerWeapon, crit, bonusDamage) {
 MML.meleeDamageResult = function(input) {
   var currentRoll = MML.players[this.player].currentRoll;
 
-  if (this.player === state.MML.GM.player) {
+  if (this.player === state.MML.GM.name) {
     if (currentRoll.accepted === false) {
       MML.processCommand({
         type: "player",
@@ -3202,7 +3202,7 @@ MML.missileDamageRoll = function(character, attackerWeapon, crit, bonusDamage) {
 MML.missileDamageResult = function(input) {
   var currentRoll = MML.players[this.player].currentRoll;
 
-  if (this.player === state.MML.GM.player) {
+  if (this.player === state.MML.GM.name) {
     if (currentRoll.accepted === false) {
       MML.processCommand({
         type: "player",
@@ -3259,7 +3259,7 @@ MML.castingRoll = function(rollName, character, task, skill, metaMagicMod) {
 MML.castingRollResult = function() {
   var currentRoll = MML.players[this.player].currentRoll;
 
-  if (this.player === state.MML.GM.player) {
+  if (this.player === state.MML.GM.name) {
     if (currentRoll.accepted === false) {
       MML.processCommand({
         type: "player",
@@ -9004,7 +9004,7 @@ MML.parseCommand = function(msg) {
       if (!isNaN(value)) {
         command = {
           type: "player",
-          who: state.MML.GM.player,
+          who: state.MML.GM.name,
           callback: "changeRoll",
           input: {
             value: value
@@ -9139,7 +9139,7 @@ MML.newRoundUpdatePlayer = function(input) {
         input: {}
       });
     }
-  } else if (this.name === state.MML.GM.player) {
+  } else if (this.name === state.MML.GM.name) {
     MML.processCommand({
       type: "player",
       who: this.name,
@@ -9194,7 +9194,7 @@ MML.prepareNextCharacter = function(input) {
         input: {}
       });
     }
-  } else if (this.name === state.MML.GM.player) {
+  } else if (this.name === state.MML.GM.name) {
     MML.processCommand({
       type: "player",
       who: this.name,
@@ -9224,7 +9224,7 @@ MML.menuIdle = function(input) {
   this.who = input.who;
   this.message = "Menu Closed";
   this.buttons = [];
-  if (state.MML.GM.player === this.name && !state.MML.GM.inCombat) {
+  if (state.MML.GM.name === this.name && !state.MML.GM.inCombat) {
     this.menu = "GmMenuMain";
     this.buttons = [MML.menuButtons.GmMenuMain];
   }
@@ -11594,7 +11594,7 @@ MML.menuButtons.actionPrepared = {
         callback: "displayMenu",
         input: {}
       });
-    } else if (this.name === state.MML.GM.player) {
+    } else if (this.name === state.MML.GM.name) {
       MML.GmMenuStartRound.apply(this, ["GM"]);
       MML.processCommand({
         type: "player",
@@ -12096,7 +12096,7 @@ on("ready", function() {
 
   on("add:character", function(character) {
     var charName = character.get("name");
-    MML.createAttribute("player", state.MML.GM.player, "", character);
+    MML.createAttribute("player", state.MML.GM.name, "", character);
     MML.createAttribute("name", charName, "", character);
     MML.createAttribute("race", "Human", "", character);
     MML.createAttribute("gender", "Male", "", character);
@@ -12386,7 +12386,7 @@ on("ready", function() {
               callback: "setApiCharAttribute",
               input: {
                 attribute: "player",
-                value: state.MML.GM.player
+                value: state.MML.GM.name
               }
             });
           } else {
