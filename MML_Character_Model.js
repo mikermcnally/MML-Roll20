@@ -2027,36 +2027,13 @@ MML.Character = function(charName) {
     };
     return items;
   };
-};
 
-MML.update = function(attribute) {
-  var attributeArray = [attribute];
-  var dependents = MML.computeAttribute[attribute].dependents;
-  attributeArray.push.apply(attributeArray, dependents);
-
-  // for(var i = 0; i < attributeArray.length; i++){ //length of array is dynamic, for-in doesn't work here
-  //     var localAttribute = MML.computeAttribute[attributeArray[i]];
-
-  //     if(_.isUndefined(localAttribute)){
-  //         log(attributeArray[i]);
-  //     }
-  //     else{
-  //         attributeArray = _.difference(attributeArray, localAttribute.dependents);
-  //         attributeArray.push.apply(attributeArray, localAttribute.dependents);
-  //     }
-  // }
-
-  _.each(attributeArray, function(attribute) {
-    var value = MML.computeAttribute[attribute].compute.apply(this, []); // Run compute function from character scope
-    // log(attribute + ' ' + value);
-    this[attribute] = value;
-    if (typeof(value) === 'object') {
-      value = JSON.stringify(value);
-    }
-    MML.setCurrentAttribute(this.name, attribute, value);
-  }, this);
-
-  _.each(dependents, function(attribute) {
-    this.update(attribute);
-  }, this);
+  this.updateCharacterSheet = function() {
+    _.each(this, function(value, attribute) {
+      if (typeof(value) === 'object') {
+        value = JSON.stringify(value);
+      }
+      MML.setCurrentAttribute(this.name, attribute, value);
+    }, this);
+  };
 };

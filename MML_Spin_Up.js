@@ -25,15 +25,7 @@ on("ready", function() {
     }), "", character);
 
     MML.characters[charName] = new MML.Character(charName);
-
-    MML.processCommand({
-      type: "character",
-      who: charName,
-      callback: "update",
-      input: {
-        attribute: "race"
-      }
-    });
+    MML.characters[charName].updateCharacterSheet();
   });
 
   on("add:attribute", function(attribute) {
@@ -121,7 +113,7 @@ on("ready", function() {
 
   on("change:attribute:current", function(attribute) {
     var characterObject = getObj("character", attribute.get("_characterid"));
-    var charName = characterObject.get("name");
+    var character = MML.characters[characterObject.get("name")];
     var attrName = attribute.get("name");
     var roll;
 
@@ -130,209 +122,79 @@ on("ready", function() {
         roll = parseFloat(attribute.get("current"));
         if (isNaN(roll) || roll < 6) {
           roll = 6;
-          MML.setCurrentAttribute(charName, attrName, roll);
+          MML.setCurrentAttribute(character.name, attrName, roll);
         }
-        MML.processCommand({
-          type: "character",
-          who: charName,
-          callback: "update",
-          input: {
-            attribute: "stature"
-          }
-        });
+        character.updateCharacterSheet();
         break;
       case "strengthRoll":
         roll = parseFloat(attribute.get("current"));
         if (isNaN(roll) || roll < 6) {
           roll = 6;
-          MML.setCurrentAttribute(charName, attrName, roll);
+          MML.setCurrentAttribute(character.name, attrName, roll);
         }
-        MML.processCommand({
-          type: "character",
-          who: charName,
-          callback: "update",
-          input: {
-            attribute: "strength"
-          }
-        });
+        character.updateCharacterSheet();
         break;
       case "coordinationRoll":
         roll = parseFloat(attribute.get("current"));
         if (isNaN(roll) || roll < 6) {
           roll = 6;
-          MML.setCurrentAttribute(charName, attrName, roll);
+          MML.setCurrentAttribute(character.name, attrName, roll);
         }
-        MML.processCommand({
-          type: "character",
-          who: charName,
-          callback: "update",
-          input: {
-            attribute: "coordination"
-          }
-        });
+        character.updateCharacterSheet();
         break;
       case "healthRoll":
         roll = parseFloat(attribute.get("current"));
         if (isNaN(roll) || roll < 6) {
           roll = 6;
-          MML.setCurrentAttribute(charName, attrName, roll);
+          MML.setCurrentAttribute(character.name, attrName, roll);
         }
-        MML.processCommand({
-          type: "character",
-          who: charName,
-          callback: "update",
-          input: {
-            attribute: "health"
-          }
-        });
+        character.updateCharacterSheet();
         break;
       case "beautyRoll":
         roll = parseFloat(attribute.get("current"));
         if (isNaN(roll) || roll < 6) {
           roll = 6;
-          MML.setCurrentAttribute(charName, attrName, roll);
+          MML.setCurrentAttribute(character.name, attrName, roll);
         }
-        MML.processCommand({
-          type: "character",
-          who: charName,
-          callback: "update",
-          input: {
-            attribute: "beauty"
-          }
-        });
+        character.updateCharacterSheet();
         break;
       case "intellectRoll":
         roll = parseFloat(attribute.get("current"));
         if (isNaN(roll) || roll < 6) {
           roll = 6;
-          MML.setCurrentAttribute(charName, attrName, roll);
+          MML.setCurrentAttribute(character.name, attrName, roll);
         }
-        MML.processCommand({
-          type: "character",
-          who: charName,
-          callback: "update",
-          input: {
-            attribute: "intellect"
-          }
-        });
+        character.updateCharacterSheet();
         break;
       case "reasonRoll":
         roll = parseFloat(attribute.get("current"));
         if (isNaN(roll) || roll < 6) {
           roll = 6;
-          MML.setCurrentAttribute(charName, attrName, roll);
+          MML.setCurrentAttribute(character.name, attrName, roll);
         }
-        MML.processCommand({
-          type: "character",
-          who: charName,
-          callback: "update",
-          input: {
-            attribute: "reason"
-          }
-        });
+        character.updateCharacterSheet();
         break;
       case "creativityRoll":
         roll = parseFloat(attribute.get("current"));
         if (isNaN(roll) || roll < 6) {
           roll = 6;
-          MML.setCurrentAttribute(charName, attrName, roll);
+          MML.setCurrentAttribute(character.name, attrName, roll);
         }
-        MML.processCommand({
-          type: "character",
-          who: charName,
-          callback: "update",
-          input: {
-            attribute: "creativity"
-          }
-        });
+        character.updateCharacterSheet();
         break;
       case "presenceRoll":
         roll = parseFloat(attribute.get("current"));
         if (isNaN(roll) || roll < 6) {
           roll = 6;
-          MML.setCurrentAttribute(charName, attrName, roll);
+          MML.setCurrentAttribute(character.name, attrName, roll);
         }
-        MML.processCommand({
-          type: "character",
-          who: charName,
-          callback: "update",
-          input: {
-            attribute: "presence"
-          }
-        });
+        character.updateCharacterSheet();
         break;
-        case "player":
-          if (_.isUndefined(MML.players[attribute.get("current")])) {
-            MML.processCommand({
-              type: "character",
-              who: charName,
-              callback: "setApiCharAttribute",
-              input: {
-                attribute: "player",
-                value: state.MML.GM.name
-              }
-            });
-          } else {
-            MML.processCommand({
-              type: "character",
-              who: charName,
-              callback: "setApiCharAttribute",
-              input: {
-                attribute: "player",
-                value: attribute.get("current")
-              }
-            });
-          }
-          break;
       default:
-        if (attrName.indexOf("repeating_items") !== -1) {
-          MML.processCommand({
-            type: "character",
-            who: charName,
-            callback: "update",
-            input: {
-              attribute: "inventory"
-            }
-          });
-        } else if (attrName.indexOf("repeating_skills") !== -1) {
-          MML.processCommand({
-            type: "character",
-            who: charName,
-            callback: "update",
-            input: {
-              attribute: "skills"
-            }
-          });
-        } else if (attrName.indexOf("repeating_weaponskills") !== -1) {
-          MML.processCommand({
-            type: "character",
-            who: charName,
-            callback: "update",
-            input: {
-              attribute: "weaponSkills"
-            }
-          });
-        } else if (attrName.indexOf("repeating_statuseffects") !== -1) {
-          MML.processCommand({
-            type: "character",
-            who: charName,
-            callback: "update",
-            input: {
-              attribute: "statusEffects"
-            }
-          });
-        } else if (attrName != "tab") {
-          MML.processCommand({
-            type: "character",
-            who: charName,
-            callback: "update",
-            input: {
-              attribute: attrName
-            }
-          });
+        if (attrName != "tab") {
+          character.updateCharacterSheet();
         }
         break;
     }
-
   });
 });
