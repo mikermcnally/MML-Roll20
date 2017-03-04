@@ -3,8 +3,8 @@ var MML = MML || {};
 MML.init = function() {
   state.MML = state.MML || {};
   state.MML.GM = state.MML.GM || {
-    player: 'Robot',
-    name: 'GM',
+    player: new MML.Player('Robot', true),
+    name: 'Robot',
     currentAction: {},
     inCombat: false,
     currentRound: 0,
@@ -17,28 +17,14 @@ MML.init = function() {
     caseInsensitive: false
   });
   MML.players = {};
-  MML.players[state.MML.GM.name] = {
-    name: state.MML.GM.name,
-    who: 'GM',
-    menu: 'GmMenuMain',
-    buttons: [MML.menuButtons.GmMenuMain],
-    characters: [],
-    characterIndex: 0
-  };
+  MML.players[state.MML.GM.name] = state.MML.GM.player;
 
   _.each(playerObjects, function(player) {
     if (player.get('displayname') !== state.MML.GM.name) {
-      MML.players[player.get('displayname')] = {
-        name: player.get('displayname'),
-        who: '',
-        menu: 'menuIdle',
-        characters: [],
-        characterIndex: 0
-      };
+      MML.players[player.get('displayname')] = new MML.Player(player.get('displayname'), false);
     }
   });
 
-  var characters = {};
   var characterObjects = findObjs({
     _type: 'character',
     archived: false
@@ -46,26 +32,10 @@ MML.init = function() {
     caseInsensitive: false
   });
 
-  _.each(characterObjects, function(character) {
-    var charName = character.get('name');
-    characters[charName] = new MML.Character(charName);
-    //Add to player's list of characters
-    if (_.isUndefined(MML.players[characters[charName].player])) {
-      characters[charName].player.name = state.MML.GM.name;
-    }
-    MML.players[characters[charName].player].characters.push(charName);
+  MML.characters = {};
+  _.each(characterObjects, function(characterObject) {
+    var character = new MML.Character(characterObject.get('name'), characterObject.id);
+    character.setPlayer();
+    MML.characters[character.name] = character;
   });
-  MML.characters = characters;
-
-  TokenCollisions = {
-    'Layer': 'gmlayer'
-  };
-  // var data = [
-  // ,,,];
-
-
-  // state.MML.GM = data[0];
-  // MML.players = data[1];
-  // MML.characters =data[2];
-  // MML.processCommand(data[3]);
 };

@@ -10,16 +10,44 @@
 //   who: '',
 //   menu: ''
 // };
-MML.Player = function(name) {
+MML.Player = function(name, isGM) {
   this.menuCommand = function(who, buttonText, selectedCharNames) {
     var button = _.findWhere(this.buttons, {
       text: buttonText
     });
+    log(button);
     if (!_.isUndefined(button)) {
       this.menu = button.nextMenu;
       this[button.nextMenu](who);
-      this[button.callback](button.text, selectedCharNames);
+      button.callback.apply(this, [button.text, selectedCharNames]);
     }
+  };
+
+  this.displayMenu = function() {
+    var toChat = '/w "' + this.name + '" &{template:charMenu} {{name=' + this.message + '}} ';
+
+    _.each(this.buttons, function(button) {
+      var noSpace = button.text.replace(/\s+/g, '');
+      var command = JSON.stringify({
+        type: "player",
+        who: this.name,
+        input: [this.who, button.text],
+        callback: "menuCommand"
+      });
+
+      toChat = toChat + '{{' + noSpace + '=[' + button.text + '](!MML|' + MML.hexify(command) + ')}} ';
+    }, this);
+    sendChat(this.name, toChat, null, {
+      noarchive: false
+    }); //Change to true this when they fix the bug
+  };
+
+  this.displayGmRoll = function() {
+    sendChat(this.name, '/w "' + this.name + '" &{template:rollMenuGM} {{title=' + this.currentRoll.message + "}}");
+  };
+
+  this.displayPlayerRoll = function() {
+    sendChat(this.name, '/w "' + this.name + '" &{template:rollMenu} {{title=' + this.currentRoll.message + "}}");
   };
 
   this.setApiPlayerAttribute = function(attribute, value) {
@@ -32,7 +60,9 @@ MML.Player = function(name) {
     this.who = this.combatants[0];
     this.menu = 'charMenuPrepareAction';
     var character = MML.characters[this.who];
-
+    log(state.MML.GM.combatants);
+    log(this.characters);
+    log(this.combatants);
 
     if (this.combatants.length > 0) {
       if (character.situationalInitBonus !== 'No Combat') {
@@ -81,7 +111,7 @@ MML.Player = function(name) {
 
   this.menuPause = function() {};
 
-  this.GmMenuMain = function() {
+  this.GmMenuMain = function(who) {
     this.who = who;
     this.message = 'Main Menu: ';
     this.buttons = [this.menuButtons.combatMenu,
@@ -108,11 +138,11 @@ MML.Player = function(name) {
     });
   };
 
-  this.displayPlayerRoll = function(who) {
-    this.who = who;
-    this.message = this.currentRoll.message;
-    this.buttons = [this.menuButtons.acceptRoll];
-  };
+  // this.displayPlayerRoll = function(who) {
+  //   this.who = who;
+  //   this.message = this.currentRoll.message;
+  //   this.buttons = [this.menuButtons.acceptRoll];
+  // };
 
   this.GmMenuCombat = function(who) {
     this.who = who;
@@ -1035,7 +1065,7 @@ MML.Player = function(name) {
     this.who = who;
     this.message = 'Start or change ' + state.MML.GM.actor + '\'s action';
 
-    if (actionValid) {
+    if (validAction) {
       this.buttons = [this.menuButtons.startAction, this.menuButtons.changeAction];
     } else {
       sendChat('GM', '/w "' + this.name + '"' + who + '\'s action no longer valid.');
@@ -1339,6 +1369,19 @@ MML.Player = function(name) {
     this.who = who;
     this.message = this.who + ' observes the situation.';
     this.buttons = [this.menuButtons.endAction];
+  };
+
+  this.setCurrentCharacterTargets = function(targets) {
+    var targetArray;
+
+    if (!_.isArray(targets)) {
+      targetArray = [target];
+    } else {
+      targetArray = targets;
+    }
+    state.MML.GM.currentAction.targetArray = targetArray;
+    state.MML.GM.currentAction.targetIndex = 0;
+    state.MML.GM.currentAction.character[state.MML.GM.currentAction.character.action.callback]();
   };
 
   this.menuButtons = {};
@@ -1681,11 +1724,17 @@ MML.Player = function(name) {
     }
   };
 
-  MML.GmMenuWorld = function(input) {
+  this.GmMenuWorld = function(input) {
     //pass time, travel, other stuff
   };
 
-  MML.GmMenuUtilities = function(input) {
+  this.GmMenuUtilities = function(input) {
     //edit states and other api stuff
   };
+  this.name = name;
+  this.who = name;
+  this.menu = isGM ? 'GmMenuMain' : 'menuPause';
+  this.buttons = isGM ? [this.menuButtons.GmMenuMain] : [];
+  this.characters = [];
+  this.characterIndex = 0;
 };

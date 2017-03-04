@@ -275,7 +275,7 @@ MML.buildHpAttribute = function(character) {
       };
       break;
     default:
-      console.log('Oh No!');
+      log('Oh No!');
   }
   return hpAttribute;
 };

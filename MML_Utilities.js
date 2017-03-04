@@ -598,37 +598,7 @@ MML.genericRollResult = function(roll) {
   return roll;
 };
 
-MML.displayGmRoll = function(input) {
-  sendChat(this.name, '/w "' + this.name + '" &{template:rollMenuGM} {{title=' + this.currentRoll.message + "}}");
-};
-
-MML.displayPlayerRoll = function(input) {
-  sendChat(this.name, '/w "' + this.name + '" &{template:rollMenu} {{title=' + this.currentRoll.message + "}}");
-};
-
 //Menu Functions
-MML.displayMenu = function(input) {
-  var toChat = '/w "' + this.name + '" &{template:charMenu} {{name=' + this.message + '}} ';
-
-  _.each(this.buttons, function(button) {
-    var noSpace = button.text.replace(/\s+/g, '');
-    var command = JSON.stringify({
-      type: "player",
-      who: this.name,
-      input: {
-        who: this.who,
-        buttonText: button.text
-      },
-      callback: "menuCommand"
-    });
-
-    toChat = toChat + '{{' + noSpace + '=[' + button.text + '](!MML|' + MML.hexify(command) + ')}} ';
-  }, this);
-  sendChat(this.name, toChat, null, {
-    noarchive: false
-  }); //Change to true this when they fix the bug
-};
-
 MML.displayTargetSelection = function(input) {
   sendChat("", "&{template:selectTarget} {{charName=" + input.charName + "}} {{input=" + MML.hexify(JSON.stringify(input)) + "}}");
 };
