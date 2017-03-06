@@ -40,10 +40,10 @@ MML.spells['Dart'] = {
     var rolls = currentAction.rolls;
 
     if (_.isUndefined(rolls.castingRoll)) {
-      MML.castingRoll('castingRoll', character, spell.task, casterSkill, _.reduce(_.pluck(metaMagic, 'castingMod'), function(memo, num) { return memo + num; }));
+      character.castingRoll('castingRoll', character, spell.task, casterSkill, _.reduce(_.pluck(metaMagic, 'castingMod'), function(memo, num) { return memo + num; }));
     } else if (_.isUndefined(rolls.defenseRoll)) {
       if (rolls.castingRoll === 'Critical Success' || rolls.castingRoll === 'Success') {
-        MML.rangedDefense(target, { family: 'MWM' }, MML.getDistanceBetweenChars(character.name, target.name));
+        target.rangedDefense({ family: 'MWM' }, MML.getDistanceBetweenChars(character.name, target.name));
       } else if (rolls.castingRoll === 'Critical Failure') {
         MML.endAction();
       } else {
@@ -51,34 +51,22 @@ MML.spells['Dart'] = {
       }
     } else if (_.isUndefined(rolls.hitPositionRoll)) {
       if (rolls.defenseRoll === 'Critical Success') {
-        // MML.processCommand({
-        //   type: 'character',
-        //   who: target.name,
-        //   callback: 'criticalDefense',
-        //   input: {}
-        // });
+        // criticalDefense
         MML[state.MML.GM.currentAction.callback]();
       } else if (rolls.defenseRoll === 'Success') {
         MML[state.MML.GM.currentAction.callback]();
       } else {
-        MML.hitPositionRoll(character);
+        character.hitPositionRoll();
       }
     } else if (_.isUndefined(rolls.damageRoll) && rolls.defenseRoll !== 'Success' && rolls.defenseRoll !== 'Critical Success') {
       if (rolls.castingRoll === 'Critical Success') {
-        MML.missileDamageRoll(character, { damageType: 'Pierce', damage: _.has(metaMagic, 'Increase Potency') ? (3 * metaMagic['Increase Potency'].level) + 'd6' : '3d6' }, true);
+        character.missileDamageRoll({ damageType: 'Pierce', damage: _.has(metaMagic, 'Increase Potency') ? (3 * metaMagic['Increase Potency'].level) + 'd6' : '3d6' }, true);
       } else {
-        MML.missileDamageRoll(character, { damageType: 'Pierce', damage: _.has(metaMagic, 'Increase Potency') ? (3 * metaMagic['Increase Potency'].level) + 'd6' : '3d6' }, false);
+        character.missileDamageRoll({ damageType: 'Pierce', damage: _.has(metaMagic, 'Increase Potency') ? (3 * metaMagic['Increase Potency'].level) + 'd6' : '3d6' }, false);
       }
     } else if (epModified !== true) {
       state.MML.GM.currentAction.parameters.epModified = true;
-      MML.processCommand({
-        type: 'character',
-        who: character.name,
-        callback: 'alterEP',
-        input: {
-          epAmount: -1 * epCost * _.reduce(_.pluck(metaMagic, 'epMod'), function(memo, num) { return memo * num; })
-        }
-      });
+      character.alterEP(-1 * epCost * _.reduce(_.pluck(metaMagic, 'epMod'), function(memo, num) { return memo * num; }));
     } else {
       if (_.isUndefined(state.MML.GM.currentAction.targetArray[state.MML.GM.currentAction.targetIndex + 1])) {
         MML.damageTargetAction('endAction');
@@ -115,21 +103,10 @@ MML.spells['Hail of Stones'] = {
     log(target);
     log(state.MML.GM.currentAction.targetArray);
     if (_.isUndefined(rolls.castingRoll)) {
-      MML.castingRoll('castingRoll', character, spell.task, casterSkill, _.reduce(_.pluck(metaMagic, 'castingMod'), function(memo, num) { return memo + num; }));
+      character.castingRoll('castingRoll', spell.task, casterSkill, _.reduce(_.pluck(metaMagic, 'castingMod'), function(memo, num) { return memo + num; }));
     } else if (_.isUndefined(rolls.numberOfStonesRoll)) {
       if (rolls.castingRoll === 'Critical Success' || rolls.castingRoll === 'Success') {
-        MML.processCommand({
-          type: 'player',
-          who: this.player,
-          callback: 'charMenuGenericRoll',
-          input: {
-            who: character.name,
-            name: 'numberOfStonesRoll',
-            dice: '1d3',
-            message: 'Number of stones cast at ' + target.name,
-            callback: 'genericRollResult'
-          }
-        });
+        this.player.charMenuGenericRoll(character.name, 'numberOfStonesRoll', '1d3', 'Number of stones cast at ' + target.name, 'genericRollResult');
       } else if (rolls.castingRoll === 'Critical Failure') {
         MML.endAction();
       } else {
@@ -137,29 +114,24 @@ MML.spells['Hail of Stones'] = {
       }
     } else if (rolls.numberOfStonesRoll > 0) {
       if (_.isUndefined(rolls.defenseRoll)) {
-        MML.rangedDefense(target, { family: 'SLI' }, MML.getDistanceBetweenChars(character.name, target.name));
+        target.rangedDefense({ family: 'SLI' }, MML.getDistanceBetweenChars(character.name, target.name));
       } else if (_.isUndefined(rolls.hitPositionRoll)) {
         if (rolls.defenseRoll === 'Critical Success') {
           state.MML.GM.currentAction.rolls.numberOfStonesRoll += -1;
           delete state.MML.GM.currentAction.rolls.defenseRoll;
-          MML.processCommand({
-            type: 'character',
-            who: target.name,
-            callback: 'criticalDefense',
-            input: {}
-          });
+          // target.criticalDefense();
         } else if (rolls.defenseRoll === 'Success') {
           state.MML.GM.currentAction.rolls.numberOfStonesRoll += -1;
           delete state.MML.GM.currentAction.rolls.defenseRoll;
           MML[state.MML.GM.currentAction.callback]();
         } else {
-          MML.hitPositionRoll(character);
+          character.hitPositionRoll();
         }
       } else if (_.isUndefined(rolls.damageRoll)) {
         if (rolls.castingRoll === 'Critical Success') {
-          MML.missileDamageRoll(character, { damageType: 'Impact', damage: _.has(metaMagic, 'Increase Potency') ? (2 * metaMagic['Increase Potency'].level) + 'd8' : '2d8' }, true);
+          character.missileDamageRoll({ damageType: 'Impact', damage: _.has(metaMagic, 'Increase Potency') ? (2 * metaMagic['Increase Potency'].level) + 'd8' : '2d8' }, true);
         } else {
-          MML.missileDamageRoll(character, { damageType: 'Impact', damage: _.has(metaMagic, 'Increase Potency') ? (2 * metaMagic['Increase Potency'].level) + 'd8' : '2d8' }, false);
+          character.missileDamageRoll({ damageType: 'Impact', damage: _.has(metaMagic, 'Increase Potency') ? (2 * metaMagic['Increase Potency'].level) + 'd8' : '2d8' }, false);
         }
       } else {
         state.MML.GM.currentAction.rolls.numberOfStonesRoll += -1;
@@ -170,14 +142,7 @@ MML.spells['Hail of Stones'] = {
       }
     } else if (epModified !== true) {
       state.MML.GM.currentAction.parameters.epModified = true;
-      MML.processCommand({
-        type: 'character',
-        who: character.name,
-        callback: 'alterEP',
-        input: {
-          epAmount: -1 * epCost * _.reduce(_.pluck(metaMagic, 'epMod'), function(memo, num) { return memo * num; })
-        }
-      });
+      character.alterEP(-1 * epCost * _.reduce(_.pluck(metaMagic, 'epMod'), function(memo, num) { return memo * num; }));
     } else {
       if (_.isUndefined(state.MML.GM.currentAction.targetArray[state.MML.GM.currentAction.targetIndex + 1])) {
         MML.damageTargetAction('endAction');

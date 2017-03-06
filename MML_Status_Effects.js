@@ -30,30 +30,10 @@ MML.statusEffects['Disabling Wound'] = function(effect, index) {
       this.statusEffects[index].description = 'Situational Modifier: -25%. Unconscious';
     } else if (effect.bodyPart === 'Left Arm') {
       this.statusEffects[index].description = 'Situational Modifier: -25%. Initiative: -10. Left Arm Limp';
-      MML.processCommand({
-        type: 'character',
-        who: this.name,
-        callback: 'setApiCharAttribute',
-        input: {
-          attribute: 'leftHand',
-          value: {
-            _id: 'emptyHand'
-          }
-        }
-      });
+      this.leftHand = { _id: 'emptyHand' };
     } else if (effect.bodyPart === 'Right Arm') {
       this.statusEffects[index].description = 'Situational Modifier: -25%. Initiative: -10. Right Arm Limp';
-      MML.processCommand({
-        type: 'character',
-        who: this.name,
-        callback: 'setApiCharAttribute',
-        input: {
-          attribute: 'rightHand',
-          value: {
-            _id: 'emptyHand'
-          }
-        }
-      });
+      this.rightHand = { _id: 'emptyHand' };
     } // TODO: else if legs limit movement
   }
 };
