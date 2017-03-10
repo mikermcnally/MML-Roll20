@@ -1031,15 +1031,7 @@ MML.Player = function(name, isGM) {
     if (character.spells.length > 0) {
       buttons.push(this.menuButtons.setActionCast);
     }
-    if (!_.isUndefined(character.action.spell) && character.action.spell.actions > 1) {
-      buttons.push({
-        text: 'Continue Casting',
-        nextMenu: 'charMenuFinalizeAction',
-        callback: function() {
-          this.displayMenu();
-        }
-      });
-    }
+    
     this.buttons = buttons;
   };
 
@@ -1560,18 +1552,10 @@ MML.Player = function(name, isGM) {
     text: 'Ready Item',
     nextMenu: 'charMenuReadyItem',
     callback: function() {
-      MML.processCommand({
-        type: 'character',
-        who: this.who,
-        callback: 'setApiCharAttribute',
-        input: {
-          attribute: 'action',
-          value: {
-            name: 'Ready Item',
-            callback: 'startReadyItemAction'
-          }
-        }
-      });
+      MML.characters[this.who].action = {
+        name: 'Ready Item',
+        callback: 'startReadyItemAction'
+      };
       this.displayMenu();
     }
   };
