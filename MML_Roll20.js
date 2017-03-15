@@ -4791,7 +4791,7 @@ MML.getWeaponGrip = function(character) {
   return grip;
 };
 
-MML.getMeleeWeapon = function(character) {
+MML.getEquippedWeapon = function(character) {
   var grip = MML.getWeaponGrip(character);
   var weapon;
   var item;
@@ -8822,7 +8822,7 @@ MML.displayThreatZones = function(input) {
     var color1 = "#FF0000";
     var color2 = "#FFFF00";
     if (toggle && !MML.isWieldingRangedWeapon(character) && !MML.isUnarmed(character)) {
-      var weapon = MML.getMeleeWeapon(character);
+      var weapon = MML.getEquippedWeapon(character);
       radius1 = MML.weaponRanks[weapon.rank].high;
       radius2 = MML.weaponRanks[weapon.rank + 1].high;
     }
@@ -9794,7 +9794,7 @@ MML.charMenuAttack = function(input) {
     !_.has(character.statusEffects, "Taken Down") &&
     !_.has(character.statusEffects, "Pinned") &&
     !_.has(character.statusEffects, "Overborne")) ||
-    (!MML.isWieldingRangedWeapon(character) && MML.getMeleeWeapon(character).rank < 2))
+    (!MML.isWieldingRangedWeapon(character) && MML.getEquippedWeapon(character).rank < 2))
   ) {
     buttons.push({
       text: "Standard",
@@ -10185,7 +10185,7 @@ MML.charMenuAttackStance = function(input) {
     _.each(buttons, function(button) {
       button.nextMenu = "charMenuFinalizeAction";
     });
-  } else if (!MML.isUnarmed(character) && MML.getMeleeWeapon(character).secondaryType !== "") {
+  } else if (!MML.isUnarmed(character) && MML.getEquippedWeapon(character).secondaryType !== "") {
     _.each(buttons, function(button) {
       button.nextMenu = "charMenuSelectDamageType";
     });

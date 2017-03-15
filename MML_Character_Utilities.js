@@ -39,7 +39,7 @@ MML.getWeaponGrip = function(character) {
   return grip;
 };
 
-MML.getMeleeWeapon = function(character) {
+MML.getEquippedWeapon = function(character) {
   var grip = MML.getWeaponGrip(character);
   var weapon;
   var item;
@@ -48,27 +48,40 @@ MML.getMeleeWeapon = function(character) {
   if (character['rightHand'].grip !== 'unarmed') {
     itemId = character.rightHand._id;
     item = character.inventory[itemId];
-  } else {
+  } else if (character['leftHand'].grip !== 'unarmed') {
     itemId = character.leftHand._id;
     item = character.inventory[itemId];
+  } else {
+    return 'unarmed';
   }
-  weapon = {
-    _id: itemId,
+  return buildWeaponObject(item, grip);
+};
+
+MML.buildWeaponObject = function (item, grip) {
+  var weapon =  {
+    _id: item._id,
     name: item.name,
     type: 'weapon',
     weight: item.weight,
     family: item.grips[grip].family,
-    hands: item.grips[grip].hands,
-    defense: item.grips[grip].defense,
-    initiative: item.grips[grip].initiative,
-    rank: item.grips[grip].rank,
-    primaryType: item.grips[grip].primaryType,
-    primaryTask: item.grips[grip].primaryTask,
-    primaryDamage: item.grips[grip].primaryDamage,
-    secondaryType: item.grips[grip].secondaryType,
-    secondaryTask: item.grips[grip].secondaryTask,
-    secondaryDamage: item.grips[grip].secondaryDamage
+    hands: item.grips[grip].hands
   };
+
+  if (['MWD', 'MWM', 'TWH', 'TWK', 'TWS', 'SLI'].indexOf(weapon.family)) {
+    _.extend(weapon, item.grips[grip]);
+  } else {
+    _.extend(weapon, {
+      defense: item.grips[grip].defense,
+      initiative: item.grips[grip].initiative,
+      rank: item.grips[grip].rank,
+      primaryType: item.grips[grip].primaryType,
+      primaryTask: item.grips[grip].primaryTask,
+      primaryDamage: item.grips[grip].primaryDamage,
+      secondaryType: item.grips[grip].secondaryType,
+      secondaryTask: item.grips[grip].secondaryTask,
+      secondaryDamage: item.grips[grip].secondaryDamage
+    });
+  }
   return weapon;
 };
 
@@ -161,6 +174,10 @@ MML.isWieldingRangedWeapon = function(character) {
   var rightFamily = MML.getWeaponFamily(character, 'rightHand');
   var rangedFamilies = ['MWD', 'MWM', 'TWH', 'TWK', 'TWS', 'SLI'];
   return (rangedFamilies.indexOf(leftFamily) > -1 || rangedFamilies.indexOf(rightFamily) > -1);
+};
+
+MML.isRangedWeapon = function (weapon) {
+  return ['MWD', 'MWM', 'TWH', 'TWK', 'TWS', 'SLI'].indexOf(weapon.family);
 };
 
 MML.isUnarmed = function(character) {

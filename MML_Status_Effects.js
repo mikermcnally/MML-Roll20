@@ -227,7 +227,7 @@ MML.statusEffects['Dodged This Round'] = function(effect, index) {
   }
 };
 MML.statusEffects['Melee This Round'] = function(effect, index) {
-  if (state.MML.GM.roundStarted === false) {
+  if (state.MML.GM.inCombat === false || state.MML.GM.roundStarted === false) {
     this.roundsExertion++;
     delete this.statusEffects[index];
   } else {
@@ -352,3 +352,11 @@ MML.statusEffects['Ease Spell'] = function(effect, index) {
   }
 };
 MML.statusEffects['Release Opponent'] = function(effect, index) {};
+MML.statusEffects['Ready Item'] = function(effect, index) {
+  if (state.MML.GM.inCombat === false || state.MML.GM.roundStarted === false) {
+    delete this.statusEffects[index];
+  } else {
+    this.situationalInitBonus += -10;
+    this.statusEffects[index].description = 'Initiative: -10';
+  }
+};

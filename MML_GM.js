@@ -122,7 +122,7 @@ MML.displayThreatZones = function(toggle) {
     var color1 = '#FF0000';
     var color2 = '#FFFF00';
     if (toggle && !MML.isWieldingRangedWeapon(character) && !MML.isUnarmed(character)) {
-      var weapon = MML.getMeleeWeapon(character);
+      var weapon = MML.getEquippedWeapon(character);
       radius1 = MML.weaponRanks[weapon.rank].high;
       radius2 = MML.weaponRanks[weapon.rank + 1].high;
     }

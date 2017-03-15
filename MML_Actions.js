@@ -256,6 +256,7 @@ MML.endAction = function() {
     spentInitiative += -5;
   }
   character.spentInitiative = spentInitiative;
+  character.previousAction = character.action;
 
   if (currentInitiative > 0) {
     character.player.charMenuPrepareAction(character.name);

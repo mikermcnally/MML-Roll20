@@ -401,6 +401,7 @@ MML.Character = function(charName, id) {
   });
   Object.defineProperty(this, 'ready', { value: MML.getCurrentAttributeAsBool(this.name, 'ready'), writable: true, enumerable: true });
   Object.defineProperty(this, 'action', { value: MML.getCurrentAttributeJSON(this.name, 'action'), writable: true, enumerable: true });
+  Object.defineProperty(this, 'previousAction', { value: MML.getCurrentAttributeJSON(this.name, 'previousAction'), writable: true, enumerable: true });
   Object.defineProperty(this, 'roundsRest', { value: MML.getCurrentAttributeAsFloat(this.name, 'roundsRest'), writable: true, enumerable: true });
   Object.defineProperty(this, 'roundsExertion', { value: MML.getCurrentAttributeAsFloat(this.name, 'roundsExertion'), enumerable: true });
   Object.defineProperty(this, 'skills', {
@@ -535,9 +536,8 @@ MML.Character = function(charName, id) {
         this.knockdown = this.knockdownMax;
         this.spentInitiative = 0;
 
-        if (_.isUndefined(this.action.spell) || this.action.spell.actions < 2) {
-          this.action = { modifiers: [] };
-        }
+        this.previousAction = this.action;
+        this.action = { modifiers: [] };
         this.applyStatusEffects();
         this.setReady(false);
       }
@@ -1052,6 +1052,23 @@ MML.Character = function(charName, id) {
         state.MML.GM.currentAction = {
           character: this
         };
+
+        if (_.contains(this.action.modifiers, ['Ready Item'])) {
+          _.each(this.action.items, function (item) {
+            if (item.grip === 'Left') {
+              this.leftHand._id = item.itemId;
+              this.leftHand.grip = 'One Hand';
+            } else if (item.grip === 'Right') {
+              this.rightHand._id = item.itemId;
+              this.rightHand.grip = 'One Hand';
+            } else {
+              this.leftHand._id = item.itemId;
+              this.leftHand.grip = item.grip;
+              this.rightHand._id = item.itemId;
+              this.rightHand.grip = item.grip;
+            }
+          });
+        }
 
         if (_.contains(this.action.modifiers, 'Release Opponent')) {
           var targetName = _.has(this.statusEffects, 'Holding') ? this.statusEffects['Holding'].targets[0] : this.statusEffects['Grappled'].targets[0];
@@ -2191,7 +2208,7 @@ MML.Character = function(charName, id) {
     'updateInventory': {
       value: function() {
         var items = _.omit(this.inventory, 'emptyHand');
-        _.each(items,function(item, _id) {
+        _.each(items, function(item, _id) {
           MML.setCurrentAttribute(this.name, 'repeating_items_' + _id + '_itemName', item.name);
           MML.setCurrentAttribute(this.name, 'repeating_items_' + _id + '_itemId', _id);
         }, this);
