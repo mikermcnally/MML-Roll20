@@ -301,15 +301,26 @@ MML.getDistanceBetweenChars = function(charName, targetName) {
   var charToken = MML.getTokenFromChar(charName);
   var targetToken = MML.getTokenFromChar(targetName);
 
-  return MML.getDistance(charToken.get('left'), targetToken.get('left'), charToken.get('top'), targetToken.get('top'));
+  return MML.getDistanceFeet(charToken.get('left'), targetToken.get('left'), charToken.get('top'), targetToken.get('top'));
+};
+
+MML.getAoESpellTargets = function (spellMarker) {
+  switch (spellMarker.get('name')) {
+    case 'spellMarkerCircle':
+      return MML.getCharactersWithinRadius(spellMarker.get('left'), spellMarker.get('top'), spellMarker.get('width') / 2);
+    case 'spellMarkerRectangle':
+      return MML.getCharactersWithinRectangle(spellMarker.get('left'), spellMarker.get('top'), spellMarker.get('width'), spellMarker.get('height'), spellMarker.get('rotation'));
+    case 'spellMarkerTriangle':
+      return MML.getCharactersWithinTriangle(spellMarker.get('left'), spellMarker.get('top'), spellMarker.get('width'), spellMarker.get('height'), spellMarker.get('rotation'));
+    default:
+  }
 };
 
 MML.getCharactersWithinRadius = function(left, top, radius) {
   var targets = [];
   _.each(MML.characters, function(character) {
     var charToken = MML.getTokenFromChar(character.name);
-
-    if (MML.getDistance(charToken.get('left'), left, charToken.get('top'), top) < MML.raceSizes[character.race].radius + MML.pixelsToFeet(radius)) {
+    if (MML.getDistanceFeet(charToken.get('left'), left, charToken.get('top'), top) < MML.raceSizes[character.race].radius + MML.pixelsToFeet(radius)) {
       targets.push(character.name);
     }
   });
@@ -324,10 +335,41 @@ MML.getCharactersWithinRectangle = function(leftOriginal, topOriginal, width, he
   _.each(MML.characters, function(character) {
     var charToken = MML.getTokenFromChar(character.name);
     var tokenCoordinates = MML.rotateAxes(charToken.get('left'), charToken.get('top'), rotation);
-    if (tokenCoordinates[0] + (MML.feetToPixels(MML.raceSizes[character.race].radius)) > left - (width / 2) &&
-      tokenCoordinates[0] - (MML.feetToPixels(MML.raceSizes[character.race].radius)) < left + (width / 2) &&
-      tokenCoordinates[1] - (MML.feetToPixels(MML.raceSizes[character.race].radius)) > top + (height / 2) &&
-      tokenCoordinates[1] + (MML.feetToPixels(MML.raceSizes[character.race].radius)) < top - (height / 2)
+    var tokenRadius = MML.feetToPixels(MML.raceSizes[character.race].radius);
+    if (tokenCoordinates[0] + tokenRadius > left - (width / 2) &&
+      tokenCoordinates[0] - tokenRadius < left + (width / 2) &&
+      tokenCoordinates[1] - tokenRadius > top + (height / 2) &&
+      tokenCoordinates[1] + tokenRadius < top - (height / 2)
+    ) {
+      targets.push(character.name);
+    }
+  });
+  return targets;
+};
+
+MML.getCharactersWithinTriangle = function(leftOriginal, topOriginal, width, height, rotation) {
+  var targets = [];
+
+  _.each(MML.characters, function(character) {
+    var charToken = MML.getTokenFromChar(character.name);
+    var tokenCoordinates = MML.rotateAxes(charToken.get('left') - leftOriginal, charToken.get('top') - topOriginal, rotation);
+    var tokenRadius = MML.feetToPixels(MML.raceSizes[character.race].radius);
+    var ax = ((-width*tokenCoordinates[1])/(2*height)) - (height/2);
+    var ay = tokenCoordinates[1];
+    var bx = tokenCoordinates[0];
+    var by = ((-2*height*tokenCoordinates[1])/width) + (height/2);
+    var cx = ((width*tokenCoordinates[1])/(2*height)) - (height/2);
+    var cy = tokenCoordinates[1];
+    var dx = tokenCoordinates[0];
+    var dy = ((2*height*tokenCoordinates[1])/width) + (height/2);
+
+    if (tokenCoordinates[1] - tokenRadius > top + (height / 2) &&
+      tokenCoordinates[1] + tokenRadius < top - (height / 2) &&
+      (
+        (MML.getDistance(ax, tokenCoordinates[0], ay, tokenCoordinates[1])*MML.getDistance(bx, tokenCoordinates[0], by, tokenCoordinates[1]))/MML.getDistance(ax, bx, ay, by) < tokenRadius ||
+        (MML.getDistance(cx, tokenCoordinates[0], cy, tokenCoordinates[1])*MML.getDistance(dx, tokenCoordinates[0], dy, tokenCoordinates[1]))/MML.getDistance(cx, dx, cy, dy) < tokenRadius ||
+        (tokenCoordinates[0] < ax && tokenCoordinates[0] > cx)
+      )
     ) {
       targets.push(character.name);
     }
@@ -494,32 +536,29 @@ MML.getEpCost = function(skillName, skillLevel, ep) {
   }
 };
 
-MML.getModifiedEpCost = function(spellMarker, spell) {
+MML.getAoESpellModifier = function(spellMarker, spell) {
   var area;
   var areaModified;
-  var epModifiers = [];
+  var epMod = 0;
+  var castingMod;
 
   if (typeof spell.target === 'string' && spell.target.indexOf('\' Radius')) {
     area = Math.pow(parseInt(spell.target.replace('\' Radius', '')), 2);
     areaModified = Math.pow(MML.pixelsToFeet(spellMarker.get('width')/2), 2);
-  } else if (_.isArray(spell.target)) {
+    castingMod = Math.round(Math.log2(MML.pixelsToFeet(spellMarker.get('width')/2)/parseInt(spell.target.replace('\' Radius', '')))*20);
+  } else {
     area = spell.target[0] * spell.target[1];
     areaModified = spellMarker.get('width') * spellMarker.get('height');
+    castingMod = Math.round(Math.log2(spellMarker.get('width')/spell.target[0])*10 + Math.log2(spellMarker.get('height')/spell.target[1])*10);
   }
 
   if (areaModified > area) {
     epModifiers.push(Math.pow(areaModified/area, 2));
   }
-};
-
-MML.getModifiedEpCost = function(caster, targets, spell) {
-  var area;
-  var areaModified;
-  var epModifiers = [];
-
-  if (areaModified > area) {
-    epModifiers.push(Math.pow(areaModified/area, 2));
+  if (castingMod > 0) {
+    castingMod = 0;
   }
+  return { epMod: epMod, castingMod: castingMod };
 };
 
 MML.getRangeCastingModifier = function(caster, targets, spell) {

@@ -5036,7 +5036,7 @@ MML.getDistanceBetweenChars = function(charName, targetName) {
   var charToken = MML.getTokenFromChar(charName);
   var targetToken = MML.getTokenFromChar(targetName);
 
-  return MML.getDistance(charToken.get("left"), targetToken.get("left"), charToken.get("top"), targetToken.get("top"));
+  return MML.getDistanceFeet(charToken.get("left"), targetToken.get("left"), charToken.get("top"), targetToken.get("top"));
 };
 
 MML.getCharactersWithinRadius = function(left, top, radius) {
@@ -5044,7 +5044,7 @@ MML.getCharactersWithinRadius = function(left, top, radius) {
   _.each(MML.characters, function(character) {
     var charToken = MML.getTokenFromChar(character.name);
 
-    if (MML.getDistance(charToken.get("left"), left, charToken.get("top"), top) < MML.raceSizes[character.race].radius + MML.pixelsToFeet(radius)) {
+    if (MML.getDistanceFeet(charToken.get("left"), left, charToken.get("top"), top) < MML.raceSizes[character.race].radius + MML.pixelsToFeet(radius)) {
       targets.push(character.name);
     }
   });
@@ -12167,7 +12167,7 @@ on("ready", function() {
       var left2 = obj.get("left");
       var top1 = prev["top"];
       var top2 = obj.get("top");
-      var distance = MML.getDistance(left1, left2, top1, top2);
+      var distance = MML.getDistanceFeet(left1, left2, top1, top2);
       var distanceAvailable = MML.movementRates[character.race][character.movementPosition] * character.movementAvailable;
 
       if (state.MML.GM.actor === charName && distanceAvailable > 0) {
@@ -13087,7 +13087,7 @@ MML.pixelsToFeet = function(feet) {
   return Math.floor((feet/14) + 0.5);
 };
 
-MML.getDistance = function(left1, left2, top1, top2) {
+MML.getDistanceFeet = function(left1, left2, top1, top2) {
   var leftDistance = Math.abs(left2 - left1);
   var topDistance = Math.abs(top2 - top1);
   var distance = MML.pixelsToFeet(Math.sqrt(Math.pow(leftDistance, 2) + Math.pow(topDistance, 2)));

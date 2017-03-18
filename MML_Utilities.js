@@ -264,8 +264,11 @@ MML.pixelsToFeet = function(feet) {
 MML.getDistance = function(left1, left2, top1, top2) {
   var leftDistance = Math.abs(left2 - left1);
   var topDistance = Math.abs(top2 - top1);
-  var distance = MML.pixelsToFeet(Math.sqrt(Math.pow(leftDistance, 2) + Math.pow(topDistance, 2)));
-  return distance;
+  return Math.sqrt(Math.pow(leftDistance, 2) + Math.pow(topDistance, 2));
+};
+
+MML.getDistanceFeet = function(left1, left2, top1, top2) {
+  return MML.pixelsToFeet(getDistance(left1, left2, top1, top2));
 };
 
 MML.drawCirclePath = function(left, top, radius) {

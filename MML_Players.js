@@ -1,15 +1,3 @@
-// This file contains all menus and defines the player object class
-
-// MML.playerClass = {
-//   message: '', //
-//   buttons: {}, //{text: 'Click Here', nextMenu: 'mainMenu', callback: MML.callback}
-//   name: '',
-//   characters: [],
-//   combatants: [],
-//   characterIndex: 0,
-//   who: '',
-//   menu: ''
-// };
 MML.Player = function(name, isGM) {
   this.menuCommand = function(who, buttonText, selectedCharNames) {
     var button = _.findWhere(this.buttons, {
@@ -1063,20 +1051,10 @@ MML.Player = function(name, isGM) {
       nextMenu: 'menuPause',
       callback: function() {
         var spellMarker = MML.getTokenFromName(state.MML.GM.currentAction.parameters.spellMarker);
-        var targets;
-
-        switch (state.MML.GM.currentAction.parameters.spellMarker) {
-          case 'spellMarkerCircle':
-            targets = MML.getCharactersWithinRadius(spellMarker.get('left'), spellMarker.get('top'), spellMarker.get('width') / 2);
-            break;
-          case 'spellMarkerRectangle':
-
-            break;
-          case 'spellMarkerTriangle':
-
-            break;
-          default:
-        }
+        var targets = MML.getAoESpellTargets(spellMarker);
+        _.each(state.MML.characters, function (character) {
+          MML.getTokenFromChar(character.name).set('tint_color', 'transparent');
+        });
         spellMarker.remove();
         MML.characters[who].setCurrentCharacterTargets(targets);
       }
