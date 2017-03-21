@@ -57,8 +57,8 @@ MML.getEquippedWeapon = function(character) {
   return buildWeaponObject(item, grip);
 };
 
-MML.buildWeaponObject = function (item, grip) {
-  var weapon =  {
+MML.buildWeaponObject = function(item, grip) {
+  var weapon = {
     _id: item._id,
     name: item.name,
     type: 'weapon',
@@ -176,7 +176,7 @@ MML.isWieldingRangedWeapon = function(character) {
   return (rangedFamilies.indexOf(leftFamily) > -1 || rangedFamilies.indexOf(rightFamily) > -1);
 };
 
-MML.isRangedWeapon = function (weapon) {
+MML.isRangedWeapon = function(weapon) {
   return ['MWD', 'MWM', 'TWH', 'TWK', 'TWS', 'SLI'].indexOf(weapon.family);
 };
 
@@ -304,7 +304,7 @@ MML.getDistanceBetweenChars = function(charName, targetName) {
   return MML.getDistanceFeet(charToken.get('left'), targetToken.get('left'), charToken.get('top'), targetToken.get('top'));
 };
 
-MML.getAoESpellTargets = function (spellMarker) {
+MML.getAoESpellTargets = function(spellMarker) {
   switch (spellMarker.get('name')) {
     case 'spellMarkerCircle':
       return MML.getCharactersWithinRadius(spellMarker.get('left'), spellMarker.get('top'), spellMarker.get('width') / 2);
@@ -329,17 +329,16 @@ MML.getCharactersWithinRadius = function(left, top, radius) {
 
 MML.getCharactersWithinRectangle = function(leftOriginal, topOriginal, width, height, rotation) {
   var targets = [];
-  var transformedCoordinates = MML.rotateAxes(leftOriginal, topOriginal, rotation);
-  var left = transformedCoordinates[0];
-  var top = transformedCoordinates[1];
+
   _.each(MML.characters, function(character) {
     var charToken = MML.getTokenFromChar(character.name);
-    var tokenCoordinates = MML.rotateAxes(charToken.get('left'), charToken.get('top'), rotation);
+    var tokenCoordinates = MML.rotateAxes(charToken.get('left') - leftOriginal, charToken.get('top') - topOriginal, rotation);
     var tokenRadius = MML.feetToPixels(MML.raceSizes[character.race].radius);
-    if (tokenCoordinates[0] + tokenRadius > left - (width / 2) &&
-      tokenCoordinates[0] - tokenRadius < left + (width / 2) &&
-      tokenCoordinates[1] - tokenRadius > top + (height / 2) &&
-      tokenCoordinates[1] + tokenRadius < top - (height / 2)
+
+    if (tokenCoordinates[0] + tokenRadius > width / -2 &&
+      tokenCoordinates[0] - tokenRadius < width / 2 &&
+      tokenCoordinates[1] - tokenRadius < height / 2 &&
+      tokenCoordinates[1] + tokenRadius > height / -2
     ) {
       targets.push(character.name);
     }
@@ -354,22 +353,20 @@ MML.getCharactersWithinTriangle = function(leftOriginal, topOriginal, width, hei
     var charToken = MML.getTokenFromChar(character.name);
     var tokenCoordinates = MML.rotateAxes(charToken.get('left') - leftOriginal, charToken.get('top') - topOriginal, rotation);
     var tokenRadius = MML.feetToPixels(MML.raceSizes[character.race].radius);
-    var ax = ((-width*tokenCoordinates[1])/(2*height)) - (height/2);
+    var ax = (-width * (tokenCoordinates[1] - (height / 2))) / (2 * height);
     var ay = tokenCoordinates[1];
     var bx = tokenCoordinates[0];
-    var by = ((-2*height*tokenCoordinates[1])/width) + (height/2);
-    var cx = ((width*tokenCoordinates[1])/(2*height)) - (height/2);
+    var by = ((-2 * height * tokenCoordinates[0]) / width) + (height / 2);
+    var cx = (width * (tokenCoordinates[1] - (height / 2))) / (2 * height);
     var cy = tokenCoordinates[1];
     var dx = tokenCoordinates[0];
-    var dy = ((2*height*tokenCoordinates[1])/width) + (height/2);
+    var dy = ((2 * height * tokenCoordinates[0]) / width) + (height / 2);
 
-    if (tokenCoordinates[1] - tokenRadius > top + (height / 2) &&
-      tokenCoordinates[1] + tokenRadius < top - (height / 2) &&
-      (
-        (MML.getDistance(ax, tokenCoordinates[0], ay, tokenCoordinates[1])*MML.getDistance(bx, tokenCoordinates[0], by, tokenCoordinates[1]))/MML.getDistance(ax, bx, ay, by) < tokenRadius ||
-        (MML.getDistance(cx, tokenCoordinates[0], cy, tokenCoordinates[1])*MML.getDistance(dx, tokenCoordinates[0], dy, tokenCoordinates[1]))/MML.getDistance(cx, dx, cy, dy) < tokenRadius ||
-        (tokenCoordinates[0] < ax && tokenCoordinates[0] > cx)
-      )
+    if (tokenCoordinates[1] - tokenRadius < height / 2 &&
+      tokenCoordinates[1] + tokenRadius > height / -2 &&
+      ((MML.getDistance(ax, tokenCoordinates[0], ay, tokenCoordinates[1]) * MML.getDistance(bx, tokenCoordinates[0], by, tokenCoordinates[1])) / MML.getDistance(ax, bx, ay, by) < tokenRadius ||
+        (MML.getDistance(cx, tokenCoordinates[0], cy, tokenCoordinates[1]) * MML.getDistance(dx, tokenCoordinates[0], dy, tokenCoordinates[1])) / MML.getDistance(cx, dx, cy, dy) < tokenRadius ||
+        (tokenCoordinates[0] < ax && tokenCoordinates[0] > cx))
     ) {
       targets.push(character.name);
     }
@@ -536,6 +533,43 @@ MML.getEpCost = function(skillName, skillLevel, ep) {
   }
 };
 
+MML.getModifiedCastingChance = function() {
+  var currentAction = state.MML.GM.currentAction;
+  var character = c
+  var thing = {
+    "spell": {
+      "name": "Hail of Stones",
+      "family": "Earth",
+      "components": ["Spoken", "Physical"],
+      "actions": 1,
+      "task": 35,
+      "ep": 30,
+      "range": 75,
+      "duration": 0,
+      "target": "5' Radius",
+      "targetSizeMatters": false,
+      "metaMagic": ["Increase Potency"]
+    },
+    "casterSkill": 29,
+    "epCost": 12,
+    "metaMagic": { "base": { "epMod": 1, "castingMod": 0 }, "Modified AoE": { "epMod": 3.8415999999999997, "castingMod": 0 } },
+    "spellMarker": "spellMarkerCircle"
+  };
+  var task;
+  var skill;
+  var this.situationalMod;
+  var this.castingMod;
+  var this.attributeCastingMod;
+  var metaMagicMod = _.reduce(_.pluck(.parameters.metaMagic, 'castingMod'), function(memo, num) { return memo + num; });
+  return metaMagicMod;
+};
+
+MML.getModifiedEpCost = function() {
+  log(state.MML.GM.currentAction.parameters.metaMagic);
+  log(state.MML.GM.currentAction.parameters);
+  return _.reduce(_.pluck(state.MML.GM.currentAction.parameters.metaMagic, 'epMod'), function(memo, num) { return memo * num; }, 1) * state.MML.GM.currentAction.parameters.epCost;
+};
+
 MML.getAoESpellModifier = function(spellMarker, spell) {
   var area;
   var areaModified;
@@ -544,16 +578,16 @@ MML.getAoESpellModifier = function(spellMarker, spell) {
 
   if (typeof spell.target === 'string' && spell.target.indexOf('\' Radius')) {
     area = Math.pow(parseInt(spell.target.replace('\' Radius', '')), 2);
-    areaModified = Math.pow(MML.pixelsToFeet(spellMarker.get('width')/2), 2);
-    castingMod = Math.round(Math.log2(MML.pixelsToFeet(spellMarker.get('width')/2)/parseInt(spell.target.replace('\' Radius', '')))*20);
+    areaModified = Math.pow(MML.pixelsToFeet(spellMarker.get('width') / 2), 2);
+    castingMod = Math.round(Math.log2(MML.pixelsToFeet(spellMarker.get('width') / 2) / parseInt(spell.target.replace('\' Radius', ''))) * 20);
   } else {
     area = spell.target[0] * spell.target[1];
     areaModified = spellMarker.get('width') * spellMarker.get('height');
-    castingMod = Math.round(Math.log2(spellMarker.get('width')/spell.target[0])*10 + Math.log2(spellMarker.get('height')/spell.target[1])*10);
+    castingMod = Math.round(Math.log2(spellMarker.get('width') / spell.target[0]) * 10 + Math.log2(spellMarker.get('height') / spell.target[1]) * 10);
   }
 
   if (areaModified > area) {
-    epModifiers.push(Math.pow(areaModified/area, 2));
+    epMod = Math.pow(areaModified / area, 2);
   }
   if (castingMod > 0) {
     castingMod = 0;

@@ -47,6 +47,7 @@ MML.getCharAttribute = function(charName, attribute) {
   })[0];
 
   if (typeof(charAttribute) === "undefined") {
+    log(attribute);
     charAttribute = MML.createAttribute(attribute, "", "", MML.getCharFromName(charName));
   }
 
@@ -268,7 +269,7 @@ MML.getDistance = function(left1, left2, top1, top2) {
 };
 
 MML.getDistanceFeet = function(left1, left2, top1, top2) {
-  return MML.pixelsToFeet(getDistance(left1, left2, top1, top2));
+  return MML.pixelsToFeet(MML.getDistance(left1, left2, top1, top2));
 };
 
 MML.drawCirclePath = function(left, top, radius) {
@@ -296,7 +297,7 @@ MML.drawCirclePath = function(left, top, radius) {
 };
 
 MML.rotateAxes = function(left, top, angle) {
-  var leftNew = left*Math.cos(angle * Math.PI / 180) - top*Math.sin(angle * Math.PI / 180);
+  var leftNew = left*Math.cos(angle * Math.PI / 180) + top*Math.sin(angle * Math.PI / 180);
   var topNew = -left*Math.sin(angle * Math.PI / 180) + top*Math.cos(angle * Math.PI / 180);
 
   return [leftNew, topNew];

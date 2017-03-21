@@ -382,7 +382,7 @@ MML.Player = function(name, isGM) {
       this.menuButtons.setActionObserve
     ];
 
-    if (!_.contains(this.action.modifiers, ['Ready Item'])) {
+    if (!_.contains(character.action.modifiers, ['Ready Item'])) {
       buttons.push(this.menuButtons.setActionReadyItem);
     }
     if ((_.has(character.statusEffects, 'Holding') ||
@@ -1052,7 +1052,7 @@ MML.Player = function(name, isGM) {
       callback: function() {
         var spellMarker = MML.getTokenFromName(state.MML.GM.currentAction.parameters.spellMarker);
         var targets = MML.getAoESpellTargets(spellMarker);
-        _.each(state.MML.characters, function (character) {
+        _.each(MML.characters, function (character) {
           MML.getTokenFromChar(character.name).set('tint_color', 'transparent');
         });
         spellMarker.remove();

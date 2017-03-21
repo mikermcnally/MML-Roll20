@@ -71,15 +71,18 @@ on('ready', function() {
       }
     } else if (obj.get('name').indexOf('spellMarker') > -1) {
       var targets = MML.getAoESpellTargets(obj);
-      _.each(state.MML.characters, function (character) {
+      _.each(MML.characters, function (character) {
         if (targets.indexOf(character.name) > -1) {
           MML.getTokenFromChar(character.name).set('tint_color', '#00FF00');
         } else {
           MML.getTokenFromChar(character.name).set('tint_color', 'transparent');
         }
       });
-      state.MML.GM.currentAction.parameters.metaMagic['Modified AoE'] = MML.getAoESpellModifier(spellMarker, state.MML.GM.currentAction.parameters.spell);
-      sendChat('GM', 'new ep and difficulty');
+      state.MML.GM.currentAction.parameters.metaMagic['Modified AoE'] = MML.getAoESpellModifier(obj, state.MML.GM.currentAction.parameters.spell);
+      sendChat('GM',
+        'EP Cost: ' + MML.getModifiedEpCost() + '\n' +
+        'Chance to Cast: ' + MML.getModifiedCastingChance()
+      );
       toBack(obj);
     }
   });
