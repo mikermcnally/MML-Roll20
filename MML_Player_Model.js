@@ -1056,7 +1056,8 @@ MML.Player = function(name, isGM) {
           MML.getTokenFromChar(character.name).set('tint_color', 'transparent');
         });
         spellMarker.remove();
-        MML.characters[who].setCurrentCharacterTargets(targets);
+        this.setCurrentCharacterTargets(targets);
+        character[character.action.callback]();
       }
     }];
   };

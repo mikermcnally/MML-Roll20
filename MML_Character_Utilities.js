@@ -535,33 +535,14 @@ MML.getEpCost = function(skillName, skillLevel, ep) {
 
 MML.getModifiedCastingChance = function() {
   var currentAction = state.MML.GM.currentAction;
-  var character = c
-  var thing = {
-    "spell": {
-      "name": "Hail of Stones",
-      "family": "Earth",
-      "components": ["Spoken", "Physical"],
-      "actions": 1,
-      "task": 35,
-      "ep": 30,
-      "range": 75,
-      "duration": 0,
-      "target": "5' Radius",
-      "targetSizeMatters": false,
-      "metaMagic": ["Increase Potency"]
-    },
-    "casterSkill": 29,
-    "epCost": 12,
-    "metaMagic": { "base": { "epMod": 1, "castingMod": 0 }, "Modified AoE": { "epMod": 3.8415999999999997, "castingMod": 0 } },
-    "spellMarker": "spellMarkerCircle"
-  };
-  var task;
-  var skill;
-  var this.situationalMod;
-  var this.castingMod;
-  var this.attributeCastingMod;
-  var metaMagicMod = _.reduce(_.pluck(.parameters.metaMagic, 'castingMod'), function(memo, num) { return memo + num; });
-  return metaMagicMod;
+  var character = currentAction.character;
+
+  return currentAction.casterSkill +
+    currentAction.spell.task +
+    character.situationalMod +
+    character.castingMod +
+    character.attributeCastingMod +
+    _.reduce(_.pluck(currentAction.parameters.metaMagic, 'castingMod'), function(memo, num) { return memo + num; });
 };
 
 MML.getModifiedEpCost = function() {

@@ -638,8 +638,8 @@ Object.defineProperties(this, {
           state.MML.GM.currentAction.parameters = { target: MML.characters[targetName] };
           this.releaseOpponentAction();
         } else if (this.action.name === 'Cast') {
-          if (this.action.spell.actions > 1) {
-            this.action.spell.actions += -1;
+          if (!_.isUndefined(this.previousAction) && !_.isUndefined(this.previousAction.spell) && this.previousAction.spell.actions > 1) {
+            this.action.spell.actions = this.previousAction.spell.actions -1;
           } else {
             var currentAction = {
               callback: 'castAction',

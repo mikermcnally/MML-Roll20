@@ -80,7 +80,7 @@ MML.spells['Hail of Stones'] = {
   name: 'Hail of Stones',
   family: 'Earth',
   components: ['Spoken', 'Physical'],
-  actions: 1,//2,
+  actions: 2,
   task: 35,
   ep: 30,
   range: 75,
