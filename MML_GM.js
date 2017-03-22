@@ -269,9 +269,7 @@ MML.parseCommand = function(msg) {
           type: 'player',
           who: state.MML.GM.name,
           callback: 'changeRoll',
-          input: {
-            value: value
-          }
+          input: [value]
         };
       } else {
         sendChat('Error', 'Please enter a numerical value.');
@@ -285,7 +283,7 @@ MML.parseCommand = function(msg) {
           type: 'character',
           who: player.who,
           callback: player.currentRoll.callback,
-          input: {}
+          input: []
         };
       }
     } else if (content.indexOf('displayItemOptions') !== -1) {
@@ -297,10 +295,7 @@ MML.parseCommand = function(msg) {
         type: 'player',
         who: who,
         callback: 'displayItemOptions',
-        input: {
-          who: charName,
-          itemId: itemId
-        }
+        input: [charName, itemId]
       };
     } else {
       command = MML.dehexify(content);

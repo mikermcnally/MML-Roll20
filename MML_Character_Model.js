@@ -620,10 +620,18 @@ Object.defineProperties(this, {
           _.each(this.action.items, function (item) {
             if (item.grip === 'Left') {
               this.leftHand._id = item.itemId;
-              this.leftHand.grip = 'One Hand';
+              if (item.type === 'weapon') {
+                this.leftHand.grip = 'One Hand';
+              } else {
+                this.leftHand.grip = 'unarmed';
+              }
             } else if (item.grip === 'Right') {
               this.rightHand._id = item.itemId;
-              this.rightHand.grip = 'One Hand';
+              if (item.type === 'weapon') {
+                this.rightHand.grip = 'One Hand';
+              } else {
+                this.rightHand.grip = 'unarmed';
+              }
             } else {
               this.leftHand._id = item.itemId;
               this.leftHand.grip = item.grip;
@@ -1946,8 +1954,8 @@ Object.defineProperties(this, {
     },
     enumerable: true
   });
-  Object.defineProperty(this, 'leftHand', { value: _.isEmpty(MML.getCurrentAttributeJSON(this.name, 'leftHand')) ? JSON.stringify({_id: 'emptyHand'}) : MML.getCurrentAttributeJSON(this.name, 'leftHand'), writable: true, enumerable: true });
-  Object.defineProperty(this, 'rightHand', { value: _.isEmpty(MML.getCurrentAttributeJSON(this.name, 'rightHand')) ? JSON.stringify({_id: 'emptyHand'}) : MML.getCurrentAttributeJSON(this.name, 'rightHand'), writable: true, enumerable: true });
+  Object.defineProperty(this, 'leftHand', { value: _.isEmpty(MML.getCurrentAttributeJSON(this.name, 'leftHand')) ? JSON.stringify({_id: 'emptyHand', grip: 'unarmed'}) : MML.getCurrentAttributeJSON(this.name, 'leftHand'), writable: true, enumerable: true });
+  Object.defineProperty(this, 'rightHand', { value: _.isEmpty(MML.getCurrentAttributeJSON(this.name, 'rightHand')) ? JSON.stringify({_id: 'emptyHand', grip: 'unarmed'}) : MML.getCurrentAttributeJSON(this.name, 'rightHand'), writable: true, enumerable: true });
   this.updateCharacterSheet();
   Object.defineProperty(this, 'hitTable', { get: function() { return MML.getHitTable(this); }, enumerable: true });
   Object.defineProperty(this, 'movementRatio', {

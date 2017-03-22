@@ -3,7 +3,6 @@ MML.Player = function(name, isGM) {
     var button = _.findWhere(this.buttons, {
       text: buttonText
     });
-    log(button);
     if (!_.isUndefined(button)) {
       this.menu = button.nextMenu;
       this[button.nextMenu](who);
@@ -48,9 +47,6 @@ MML.Player = function(name, isGM) {
     this.who = this.combatants[0];
     this.menu = 'charMenuPrepareAction';
     var character = MML.characters[this.who];
-    log(state.MML.GM.combatants);
-    log(this.characters);
-    log(this.combatants);
 
     if (this.combatants.length > 0) {
       if (character.situationalInitBonus !== 'No Combat') {
@@ -281,18 +277,18 @@ MML.Player = function(name, isGM) {
 
         if (character.leftHand._id === itemId && character.rightHand._id === itemId) {
           unequipButton.callback = function() {
-            character.leftHand = { _id: 'emptyHand' };
-            character.rightHand = { _id: 'emptyHand' };
+            character.leftHand = { _id: 'emptyHand', grip: 'unarmed' };
+            character.rightHand = { _id: 'emptyHand', grip: 'unarmed' };
             this.displayMenu();
           };
         } else if (character.leftHand._id === itemId) {
           unequipButton.callback = function() {
-            character.leftHand = { _id: 'emptyHand' };
+            character.leftHand = { _id: 'emptyHand', grip: 'unarmed' };
             this.displayMenu();
           };
         } else {
           unequipButton.callback = function() {
-            character.rightHand = { _id: 'emptyHand' };
+            character.rightHand = { _id: 'emptyHand', grip: 'unarmed' };
             this.displayMenu();
           };
         }
@@ -382,9 +378,25 @@ MML.Player = function(name, isGM) {
       this.menuButtons.setActionObserve
     ];
 
-    if (!_.contains(character.action.modifiers, ['Ready Item'])) {
+    if (!_.contains(character.action.modifiers, 'Ready Item')) {
       buttons.push(this.menuButtons.setActionReadyItem);
+      character.action.weapon = MML.getEquippedWeapon(character);
+    } else {
+      log(character.action.items);
+      var weapon = _.find(character.action.items, function (item) {
+        return this.inventory[item.itemId].type === 'weapon';
+      }, character);
+      if (_.isUndefined(weapon)) {
+        character.action.weapon = 'unarmed';
+      } else {
+        if (weapon.grip === 'Right' || weapon.grip === 'Left') {
+          character.action.weapon = MML.buildWeaponObject(character.inventory[weapon.itemId], 'One Hand');
+        } else {
+          character.action.weapon = MML.buildWeaponObject(character.inventory[weapon.itemId], weapon.grip);
+        }
+      }
     }
+
     if ((_.has(character.statusEffects, 'Holding') ||
         (_.has(character.statusEffects, 'Grappled') && character.statusEffects['Grappled'].targets.length === 1)) &&
       !_.has(character.statusEffects, 'Held') &&
@@ -669,7 +681,7 @@ MML.Player = function(name, isGM) {
       _.each(buttons, function(button) {
         button.nextMenu = 'charMenuFinalizeAction';
       });
-    } else if (!MML.isUnarmed(character) && MML.getEquippedWeapon(character).secondaryType !== '') {
+    } else if (!MML.isUnarmed(character) && character.action.weapon.secondaryType !== '') {
       _.each(buttons, function(button) {
         button.nextMenu = 'charMenuSelectDamageType';
       });
@@ -709,7 +721,7 @@ MML.Player = function(name, isGM) {
     this.message = 'Choose meta magic';
     this.buttons = [];
     var character = MML.characters[who];
-    log(character.action);
+
     if (_.contains(character.action.spell.metaMagic, 'Called Shot')) {
       this.buttons.push({
         text: 'Called Shot',
@@ -777,7 +789,7 @@ MML.Player = function(name, isGM) {
     this.message = 'Choose meta magic';
     this.buttons = [];
     var character = MML.characters[who];
-    log(character.action);
+
     _.each(_.without(character.action.spell.metaMagic, 'Called Shot', 'Called Shot Specific'), function(metaMagicName) {
       this.buttons.push({
         text: metaMagicName,
@@ -1323,7 +1335,7 @@ MML.Player = function(name, isGM) {
     var targetArray;
 
     if (!_.isArray(targets)) {
-      targetArray = [target];
+      targetArray = [targets];
     } else {
       targetArray = targets;
     }
@@ -1488,25 +1500,10 @@ MML.Player = function(name, isGM) {
     nextMenu: 'charMenuAttack',
     callback: function() {
       var character = MML.characters[this.who];
-      var weapon;
-      if (_.contains(character.action.modifiers, ['Ready Item'])) {
-        weapon = _.find(character.action.items, function (item) {
-          return this.inventory[item.itemId].type === 'weapon';
-        }, character);
-
-        if (_.isUndefined(weapon)) {
-          weapon = 'unarmed';
-        } else {
-          weapon = MML.buildWeaponObject(character.inventory[weapon.itemId], weapon.grip);
-        }
-      } else {
-        weapon = MML.getEquippedWeapon(character);
-      }
       _.extend(character.action, {
         name: 'Attack',
         getTargets: 'getSingleTarget',
-        callback: 'startAttackAction',
-        weapon: weapon
+        callback: 'startAttackAction'
       });
       this.displayMenu();
     }

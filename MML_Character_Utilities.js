@@ -32,11 +32,12 @@ MML.getShieldDefenseBonus = function(character) {
 
 MML.getWeaponGrip = function(character) {
   if (character['rightHand'].grip !== 'unarmed') {
-    grip = character['rightHand'].grip;
+    return character['rightHand'].grip;
+  } else if (character['leftHand'].grip !== 'unarmed') {
+    return character['leftHand'].grip;
   } else {
-    grip = character['leftHand'].grip;
+    return 'unarmed';
   }
-  return grip;
 };
 
 MML.getEquippedWeapon = function(character) {
@@ -45,16 +46,18 @@ MML.getEquippedWeapon = function(character) {
   var item;
   var itemId;
 
-  if (character['rightHand'].grip !== 'unarmed') {
+  log(character['rightHand'].grip);
+  log(character['leftHand'].grip);
+  if (MML.isUnarmed(character)) {
+    return 'unarmed';
+  } else if (character['rightHand'].grip !== 'unarmed') {
     itemId = character.rightHand._id;
     item = character.inventory[itemId];
-  } else if (character['leftHand'].grip !== 'unarmed') {
+  } else {
     itemId = character.leftHand._id;
     item = character.inventory[itemId];
-  } else {
-    return 'unarmed';
   }
-  return buildWeaponObject(item, grip);
+  return MML.buildWeaponObject(item, grip);
 };
 
 MML.buildWeaponObject = function(item, grip) {
