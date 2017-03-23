@@ -518,50 +518,44 @@ Object.defineProperties(this, {
 
     'setAction': {
       value: function() {
-        var initBonus = 10;
+      var initBonus = 10;
 
-        if (this.action.name === 'Attack') {
-          var leftHand = MML.getWeaponFamily(this, 'leftHand');
-          var rightHand = MML.getWeaponFamily(this, 'rightHand');
-
-          if (['Punch', 'Kick', 'Head Butt', 'Bite', 'Grapple', 'Takedown', 'Place a Hold', 'Break a Hold', 'Break Grapple'].indexOf(this.action.weaponType) > -1 ||
-            (leftHand === 'unarmed' && rightHand === 'unarmed')
-          ) {
-            if (!_.isUndefined(this.weaponSkills['Brawling']) && this.weaponSkills['Brawling'].level > this.weaponSkills['Default Martial'].level) {
-              this.action.skill = this.weaponSkills['Brawling'].level;
-            } else {
-              this.action.skill = this.weaponSkills['Default Martial'].level;
-            }
-          } else if (leftHand !== 'unarmed' && rightHand !== 'unarmed') {
-            var weaponInits = [this.inventory[this.leftHand._id].grips[this.leftHand.grip].initiative,
-          this.inventory[this.rightHand._id].grips[this.rightHand.grip].initiative
-        ];
-            initBonus = _.min(weaponInits);
-            // this.action.skill = this.weaponSkills.[this.inventory[this.leftHand._id].name].level or this.weaponSkills['Default Martial Skill'].level;
-            //Dual Wielding
-          } else if (rightHand !== 'unarmed' && leftHand === 'unarmed') {
-            initBonus = this.inventory[this.rightHand._id].grips[this.rightHand.grip].initiative;
-            this.action.skill = MML.getWeaponSkill(this, this.inventory[this.rightHand._id]);
+      if (this.action.name === 'Attack') {
+        if (['Punch', 'Kick', 'Head Butt', 'Bite', 'Grapple', 'Takedown', 'Place a Hold', 'Break a Hold', 'Break Grapple'].indexOf(this.action.weaponType) > -1 ||
+          this.action.weapon === 'unarmed'
+        ) {
+          if (!_.isUndefined(this.weaponSkills['Brawling']) && this.weaponSkills['Brawling'].level > this.weaponSkills['Default Martial'].level) {
+            this.action.skill = this.weaponSkills['Brawling'].level;
           } else {
-            initBonus = this.inventory[this.leftHand._id].grips[this.leftHand.grip].initiative;
-            this.action.skill = MML.getWeaponSkill(this, this.inventory[this.leftHand._id]);
+            this.action.skill = this.weaponSkills['Default Martial'].level;
           }
-        } else if (this.action.name === 'Cast') {
-          var skillInfo = MML.getMagicSkill(this, this.action.spell);
-          this.action.skill = skillInfo.level;
-          this.action.skillName = skillInfo.name;
+        // } else if (leftHand !== 'unarmed' && rightHand !== 'unarmed') {
+        //   var weaponInits = [this.inventory[this.leftHand._id].grips[this.leftHand.grip].initiative,
+        //     this.inventory[this.rightHand._id].grips[this.rightHand.grip].initiative
+        //   ];
+        //   initBonus = _.min(weaponInits);
+          // this.action.skill = this.weaponSkills.[this.inventory[this.leftHand._id].name].level or this.weaponSkills['Default Martial Skill'].level;
+          //Dual Wielding
+        } else {
+          initBonus = this.action.initiative;
+          this.action.skill = MML.getWeaponSkill(this, this.action.weapon);
         }
-        if (state.MML.GM.roundStarted === false) {
-          this.firstActionInitBonus = initBonus;
-        }
-
-        _.each(this.action.modifiers, function(modifier) {
-          this.statusEffects[modifier] = {
-            id: generateRowID(),
-            name: modifier
-          };
-        }, this);
+      } else if (this.action.name === 'Cast') {
+        var skillInfo = MML.getMagicSkill(this, this.action.spell);
+        this.action.skill = skillInfo.level;
+        this.action.skillName = skillInfo.name;
       }
+      if (state.MML.GM.roundStarted === false) {
+        this.firstActionInitBonus = initBonus;
+      }
+
+      _.each(this.action.modifiers, function(modifier) {
+        this.statusEffects[modifier] = {
+          id: generateRowID(),
+          name: modifier
+        };
+      }, this);
+    }
     },
 
     'initiativeRoll': {
@@ -708,12 +702,11 @@ Object.defineProperties(this, {
           if (_.has(this.statusEffects, 'Taking Aim')) {
             this.statusEffects['Taking Aim'].level++;
           } else {
-            this.statusEffects['Taking Aim'] = {
-              id: generateRowID(),
+            this.addStatusEffects('Taking Aim', {
               name: 'Taking Aim',
               level: 1,
               target: target
-            };
+            });
           }
         } else {
           this.processAttack();
@@ -723,10 +716,7 @@ Object.defineProperties(this, {
 
     'processAttack': {
       value: function() {
-        this.statusEffects['Melee This Round']({
-          id: generateRowID(),
-          name: 'Melee This Round'
-        });
+        this.addStatusEffect('Melee This Round', { name: 'Melee This Round' });
 
         if (['Punch', 'Kick', 'Head Butt', 'Bite'].indexOf(this.action.weaponType) > -1) {
           this.unarmedAttack();
@@ -1110,10 +1100,10 @@ Object.defineProperties(this, {
           if (_.has(this.statusEffects, 'Number of Defenses')) {
             this.statusEffects['Number of Defenses'].number++;
           } else {
-            this.statusEffects['Number of Defenses'] = {
-              id: generateRowID(),
+            this.addStatusEffect('Number of Defenses', {
+              name: 'Number of Defenses',
               number: 1
-            };
+            });
           }
         }
 
@@ -1762,6 +1752,7 @@ Object.defineProperties(this, {
 
     'addStatusEffect': {
       value: function(index, effect) {
+        effect.id = generateRowID();
         this.statusEffects[index] = effect;
         this.applyStatusEffects();
       }
