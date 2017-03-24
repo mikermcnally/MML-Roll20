@@ -19,6 +19,7 @@ MML.spells['Dart'] = {
   name: 'Dart',
   family: 'Air',
   components: ['Spoken', 'Physical', 'Substantive'],
+  requiredItem: 'Dart',
   actions: 1,
   task: 55,
   ep: 14,
@@ -34,12 +35,14 @@ MML.spells['Dart'] = {
     var casterSkill = parameters.casterSkill;
     var spell = parameters.spell;
     var target = parameters.target;
+    var targetArray = state.MML.GM.currentAction.targetArray;
     var epCost = parameters.epCost;
     var epModified = parameters.epModified;
     var metaMagic = parameters.metaMagic;
     var rolls = currentAction.rolls;
 
     if (_.isUndefined(rolls.castingRoll)) {
+      _.findWhere(character.inventory, { name: 'Dart' }).quantity -= targetArray.length;
       character.castingRoll('castingRoll', character, spell.task, casterSkill, _.reduce(_.pluck(metaMagic, 'castingMod'), function(memo, num) { return memo + num; }));
     } else if (_.isUndefined(rolls.defenseRoll)) {
       if (rolls.castingRoll === 'Critical Success' || rolls.castingRoll === 'Success') {
@@ -65,10 +68,10 @@ MML.spells['Dart'] = {
         character.missileDamageRoll({ damageType: 'Pierce', damage: _.has(metaMagic, 'Increase Potency') ? (3 * metaMagic['Increase Potency'].level) + 'd6' : '3d6' }, false);
       }
     } else if (epModified !== true) {
-      state.MML.GM.currentAction.parameters.epModified = true;
+      parameters.epModified = true;
       character.alterEP(-1 * epCost * _.reduce(_.pluck(metaMagic, 'epMod'), function(memo, num) { return memo * num; }));
     } else {
-      if (_.isUndefined(state.MML.GM.currentAction.targetArray[state.MML.GM.currentAction.targetIndex + 1])) {
+      if (_.isUndefined(targetArray[state.MML.GM.currentAction.targetIndex + 1])) {
         MML.damageTargetAction('endAction');
       } else {
         MML.damageTargetAction('nextTarget');

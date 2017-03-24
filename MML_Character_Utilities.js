@@ -540,8 +540,8 @@ MML.getModifiedCastingChance = function() {
   var currentAction = state.MML.GM.currentAction;
   var character = currentAction.character;
 
-  return currentAction.casterSkill +
-    currentAction.spell.task +
+  return currentAction.parameters.casterSkill +
+    currentAction.parameters.spell.task +
     character.situationalMod +
     character.castingMod +
     character.attributeCastingMod +

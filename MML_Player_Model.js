@@ -700,20 +700,27 @@ MML.Player = function(name, isGM) {
     this.buttons = [];
     var character = MML.characters[who];
     _.each(character.spells, function(spellName) {
-      this.buttons.push({
-        text: spellName,
-        nextMenu: 'menuPause',
-        callback: function() {
-          character.action = {
-            name: 'Cast',
-            spell: MML.spells[spellName],
-            callback: 'startCastAction',
-            modifiers: []
-          };
-          this.charMenuMetaMagicInitiative(who);
-          this.displayMenu();
-        }
-      });
+      if (_.isUndefined(MML.spells[spellName].requiredItem) ||
+        (_.isUndefined(character.action.items) &&
+          (character.inventory[character.rightHand._id].name === MML.spells[spellName].requiredItem || character.inventory[character.leftHand._id].name === MML.spells[spellName].requiredItem)) ||
+        (!_.isUndefined(character.action.items) &&
+          _.filter(character.action.items, function (item) { return character.inventory[item.itemId].name === MML.spells[spellName].requiredItem; }, character).length > 0)
+      ) {
+        this.buttons.push({
+          text: spellName,
+          nextMenu: 'menuPause',
+          callback: function() {
+            character.action = {
+              name: 'Cast',
+              spell: MML.spells[spellName],
+              callback: 'startCastAction',
+              modifiers: []
+            };
+            this.charMenuMetaMagicInitiative(who);
+            this.displayMenu();
+          }
+        });
+      }
     }, this);
   };
   this.charMenuMetaMagicInitiative = function(who) {

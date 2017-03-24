@@ -192,10 +192,7 @@ Object.defineProperties(this, {
             this.player.displayMenu();
           } else if (currentHP < -maxHP) { //Mortal wound
             log('Mortal');
-            this.statusEffects['Mortal Wound, ' + bodyPart] = {
-              id: generateRowID(),
-              bodyPart: bodyPart
-            };
+            this.addStatusEffect('Mortal Wound, ' + bodyPart, { bodyPart: bodyPart });
             MML[state.MML.GM.currentAction.callback]();
           } else {
             log('Minor');
@@ -252,9 +249,7 @@ Object.defineProperties(this, {
         var result = this.player.currentRoll.result;
         state.MML.GM.currentAction.multiWoundRoll = result;
         if (result === 'Failure') {
-          this.statusEffects['Wound Fatiuge'] = {
-            id: generateRowID()
-          };
+          this.addStatusEffect('Wound Fatiuge', {});
         }
         MML[state.MML.GM.currentAction.callback]();
       }
@@ -278,12 +273,11 @@ Object.defineProperties(this, {
         state.MML.GM.currentAction.woundRoll = result;
         var bodyPart = state.MML.GM.currentAction.rolls.hitPositionRoll.bodyPart;
         if (result === 'Failure') {
-          this.statusEffects['Major Wound, ' + bodyPart] = {
-            id: generateRowID(),
+          this.addStatusEffect('Major Wound, ' + bodyPart, {
             duration: state.MML.GM.currentAction.woundDuration,
             startingRound: state.MML.GM.currentRound,
             bodyPart: bodyPart
-          };
+          });
         }
         MML[state.MML.GM.currentAction.callback]();
       }
@@ -307,16 +301,12 @@ Object.defineProperties(this, {
         state.MML.GM.currentAction.woundRoll = result;
         var bodyPart = state.MML.GM.currentAction.rolls.hitPositionRoll.bodyPart;
 
-        this.statusEffects['Disabling Wound, ' + bodyPart] = {
-          id: generateRowID(),
-          bodyPart: bodyPart
-        };
+        this.statusEffects('Disabling Wound, ' + bodyPart, { bodyPart: bodyPart });
         if (result === 'Failure') {
-          this.statusEffects['Stunned'] = {
-            id: generateRowID(),
+          this.addStatusEffect('Stunned', {
             startingRound: state.MML.GM.currentRound,
             duration: state.MML.GM.currentAction.woundDuration
-          };
+          });
         }
         MML[state.MML.GM.currentAction.callback]();
       }
@@ -352,10 +342,7 @@ Object.defineProperties(this, {
         if (result === 'Critical Failure' || result === 'Failure') {
           this.movementPosition = 'Prone';
         } else {
-          this.statusEffects['Stumbling'] = {
-            id: generateRowID(),
-            startingRound: state.MML.GM.currentRound
-          };
+          this.addStatusEffect('Stumbling', { startingRound: state.MML.GM.currentRound });
         }
 
         MML[state.MML.GM.currentAction.callback]();
@@ -388,10 +375,7 @@ Object.defineProperties(this, {
       value: function() {
         var result = this.player.currentRoll.result;
         if (result === 'Critical Failure' || result === 'Failure') {
-          this.statusEffects['Sensitive Area'] = {
-            id: generateRowID(),
-            startingRound: state.MML.GM.currentRound
-          };
+          this.addStatusEffect('Sensitive Area', { startingRound: state.MML.GM.currentRound });
         }
         MML[state.MML.GM.currentAction.callback]();
       }
@@ -425,13 +409,11 @@ Object.defineProperties(this, {
       value: function() {
         var result = this.player.currentRoll.result;
         if (result === 'Critical Failure' || result === 'Failure') {
-          this.statusEffects['Fatigue'] = {
-            value: {
-              id: _.has(this.statusEffects, 'Fatigue') ? this.statusEffects['Fatigue'].id : generateRowID(),
-              name: 'Fatigue',
-              level: _.has(this.statusEffects, 'Fatigue') ? this.statusEffects['Fatigue'].level + 1 : 1
-            }
-          };
+          if (_.has(this.statusEffects, 'Fatigue')) {
+            this.statusEffects['Fatigue'].level += 1;
+          } else {
+            this.addStatusEffect('Fatigue', { level: 1 });
+          }
           this.roundsExertion = 0;
         }
         MML[state.MML.GM.currentAction.callback]();
@@ -518,44 +500,41 @@ Object.defineProperties(this, {
 
     'setAction': {
       value: function() {
-      var initBonus = 10;
+        var initBonus = 10;
 
-      if (this.action.name === 'Attack') {
-        if (['Punch', 'Kick', 'Head Butt', 'Bite', 'Grapple', 'Takedown', 'Place a Hold', 'Break a Hold', 'Break Grapple'].indexOf(this.action.weaponType) > -1 ||
-          this.action.weapon === 'unarmed'
-        ) {
-          if (!_.isUndefined(this.weaponSkills['Brawling']) && this.weaponSkills['Brawling'].level > this.weaponSkills['Default Martial'].level) {
-            this.action.skill = this.weaponSkills['Brawling'].level;
+        if (this.action.name === 'Attack') {
+          if (['Punch', 'Kick', 'Head Butt', 'Bite', 'Grapple', 'Takedown', 'Place a Hold', 'Break a Hold', 'Break Grapple'].indexOf(this.action.weaponType) > -1 ||
+            this.action.weapon === 'unarmed'
+          ) {
+            if (!_.isUndefined(this.weaponSkills['Brawling']) && this.weaponSkills['Brawling'].level > this.weaponSkills['Default Martial'].level) {
+              this.action.skill = this.weaponSkills['Brawling'].level;
+            } else {
+              this.action.skill = this.weaponSkills['Default Martial'].level;
+            }
+          // } else if (leftHand !== 'unarmed' && rightHand !== 'unarmed') {
+          //   var weaponInits = [this.inventory[this.leftHand._id].grips[this.leftHand.grip].initiative,
+          //     this.inventory[this.rightHand._id].grips[this.rightHand.grip].initiative
+          //   ];
+          //   initBonus = _.min(weaponInits);
+            // this.action.skill = this.weaponSkills.[this.inventory[this.leftHand._id].name].level or this.weaponSkills['Default Martial Skill'].level;
+            //Dual Wielding
           } else {
-            this.action.skill = this.weaponSkills['Default Martial'].level;
+            initBonus = this.action.initiative;
+            this.action.skill = MML.getWeaponSkill(this, this.action.weapon);
           }
-        // } else if (leftHand !== 'unarmed' && rightHand !== 'unarmed') {
-        //   var weaponInits = [this.inventory[this.leftHand._id].grips[this.leftHand.grip].initiative,
-        //     this.inventory[this.rightHand._id].grips[this.rightHand.grip].initiative
-        //   ];
-        //   initBonus = _.min(weaponInits);
-          // this.action.skill = this.weaponSkills.[this.inventory[this.leftHand._id].name].level or this.weaponSkills['Default Martial Skill'].level;
-          //Dual Wielding
-        } else {
-          initBonus = this.action.initiative;
-          this.action.skill = MML.getWeaponSkill(this, this.action.weapon);
+        } else if (this.action.name === 'Cast') {
+          var skillInfo = MML.getMagicSkill(this, this.action.spell);
+          this.action.skill = skillInfo.level;
+          this.action.skillName = skillInfo.name;
         }
-      } else if (this.action.name === 'Cast') {
-        var skillInfo = MML.getMagicSkill(this, this.action.spell);
-        this.action.skill = skillInfo.level;
-        this.action.skillName = skillInfo.name;
-      }
-      if (state.MML.GM.roundStarted === false) {
-        this.firstActionInitBonus = initBonus;
-      }
+        if (state.MML.GM.roundStarted === false) {
+          this.firstActionInitBonus = initBonus;
+        }
 
-      _.each(this.action.modifiers, function(modifier) {
-        this.statusEffects[modifier] = {
-          id: generateRowID(),
-          name: modifier
-        };
-      }, this);
-    }
+        _.each(this.action.modifiers, function(modifier) {
+          this.addStatusEffect(modifier, {});
+        }, this);
+      }
     },
 
     'initiativeRoll': {
@@ -703,7 +682,6 @@ Object.defineProperties(this, {
             this.statusEffects['Taking Aim'].level++;
           } else {
             this.addStatusEffects('Taking Aim', {
-              name: 'Taking Aim',
               level: 1,
               target: target
             });
@@ -1100,10 +1078,7 @@ Object.defineProperties(this, {
           if (_.has(this.statusEffects, 'Number of Defenses')) {
             this.statusEffects['Number of Defenses'].number++;
           } else {
-            this.addStatusEffect('Number of Defenses', {
-              name: 'Number of Defenses',
-              number: 1
-            });
+            this.addStatusEffect('Number of Defenses', { number: 1 });
           }
         }
 
@@ -1132,15 +1107,10 @@ Object.defineProperties(this, {
           if (_.has(this.statusEffects, 'Number of Defenses')) {
             this.statusEffects['Number of Defenses'].number++;
           } else {
-            this.statusEffects['Number of Defenses'] = {
-              id: generateRowID(),
-              number: 1
-            };
+            this.addStatusEffect('Number of Defenses', {number: 1 });
           }
           if (!_.has(this.statusEffects, 'Dodged This Round')) {
-            this.statusEffects['Dodged This Round'] = {
-              id: generateRowID(),
-            };
+            this.addStatusEffect('Dodged This Round', {});
           }
         }
 
@@ -1228,18 +1198,12 @@ Object.defineProperties(this, {
           if (_.has('Number of Defenses')) {
             this.statusEffects['Number of Defenses'].number++;
           } else {
-            this.statusEffects['Number of Defenses'] = {
-              id: generateRowID(),
-              number: 1
-            };
+            this.addStatusEffect('Number of Defenses', { number: 1 });
           }
           if (!_.has(this.statusEffects, 'Dodged This Round')) {
-            this.statusEffects['Dodged This Round'] = {
-              id: generateRowID()
-            };
+            this.addStatusEffect('Dodged This Round', {});
           }
         }
-
         state.MML.GM.currentAction.rolls.defenseRoll = result;
         MML[state.MML.GM.currentAction.callback]();
       }
@@ -1255,7 +1219,7 @@ Object.defineProperties(this, {
         var defenseMod = this.meleeDefenseMod + this.attributeDefenseMod + attackType.defenseMod;
         var sitMod = this.situationalMod;
 
-        this.statusEffects['Melee This Round'] = { id: generateRowID(), name: 'Melee This Round' };
+        this.addStatusEffect('Melee This Round', {});
 
         if (_.isUndefined(this.weaponSkills['Brawling'])) {
           brawlSkill = 0;
@@ -1313,10 +1277,7 @@ Object.defineProperties(this, {
           if (_.has(this.statusEffects, 'Number of Defenses')) {
             this.statusEffects['Number of Defenses'].number++;
           } else {
-            this.statusEffects['Number of Defenses'] = {
-              id: generateRowID(),
-              number: 1
-            };
+            this.addStatusEffect('Number of Defenses', { number: 1 });
           }
 
         }
@@ -1345,10 +1306,7 @@ Object.defineProperties(this, {
           if (_.has(this.statusEffects, 'Number of Defenses')) {
             this.statusEffects['Number of Defenses'].number++;
           } else {
-            this.statusEffects['Number of Defenses'] = {
-              id: generateRowID(),
-              number: 1
-            };
+            this.addStatusEffect('Number of Defenses', { number: 1 });
           }
         }
         state.MML.GM.currentAction.rolls.brawlDefenseRoll = this.player.currentRoll.result;
@@ -1383,6 +1341,8 @@ Object.defineProperties(this, {
           default:
             sendChat('Error', 'Unhappy grapple :(');
         }
+        this.applyStatusEffects();
+        defender.applyStatusEffects();
         MML.endAction();
       }
     },
@@ -1753,6 +1713,7 @@ Object.defineProperties(this, {
     'addStatusEffect': {
       value: function(index, effect) {
         effect.id = generateRowID();
+        effect.name = index;
         this.statusEffects[index] = effect;
         this.applyStatusEffects();
       }
