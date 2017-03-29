@@ -382,7 +382,6 @@ MML.Player = function(name, isGM) {
       buttons.push(this.menuButtons.setActionReadyItem);
       character.action.weapon = MML.getEquippedWeapon(character);
     } else {
-      log(character.action.items);
       var weapon = _.find(character.action.items, function (item) {
         return this.inventory[item.itemId].type === 'weapon';
       }, character);

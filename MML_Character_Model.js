@@ -566,7 +566,7 @@ Object.defineProperties(this, {
           this.firstActionInitBonus +
           this.spentInitiative;
 
-        this.player.message =
+        this.player.currentRoll.message =
           'Roll: ' + this.player.currentRoll.value +
           '\nResult: ' + this.player.currentRoll.rollResult +
           '\nRange: ' + this.player.currentRoll.range;
@@ -589,18 +589,18 @@ Object.defineProperties(this, {
           character: this
         };
 
-        if (_.contains(this.action.modifiers, ['Ready Item'])) {
+        if (_.contains(this.action.modifiers, 'Ready Item')) {
           _.each(this.action.items, function (item) {
             if (item.grip === 'Left') {
               this.leftHand._id = item.itemId;
-              if (item.type === 'weapon') {
+              if (this.inventory[item.itemId].type === 'weapon') {
                 this.leftHand.grip = 'One Hand';
               } else {
                 this.leftHand.grip = 'unarmed';
               }
             } else if (item.grip === 'Right') {
               this.rightHand._id = item.itemId;
-              if (item.type === 'weapon') {
+              if (this.inventory[item.itemId].type === 'weapon') {
                 this.rightHand.grip = 'One Hand';
               } else {
                 this.rightHand.grip = 'unarmed';
@@ -611,7 +611,7 @@ Object.defineProperties(this, {
               this.rightHand._id = item.itemId;
               this.rightHand.grip = item.grip;
             }
-          });
+          }, this);
         }
 
         if (_.contains(this.action.modifiers, 'Release Opponent')) {
@@ -677,7 +677,7 @@ Object.defineProperties(this, {
         } else if (_.has(this.statusEffects, 'Called Shot Specific')) {
           this.player.charMenuSelectHitPosition(this.name);
           this.player.displayMenu();
-        } else if (_.contains(this.action.modifiers, ['Aim'])) {
+        } else if (_.contains(this.action.modifiers, 'Aim')) {
           if (_.has(this.statusEffects, 'Taking Aim')) {
             this.statusEffects['Taking Aim'].level++;
           } else {
@@ -695,7 +695,6 @@ Object.defineProperties(this, {
     'processAttack': {
       value: function() {
         this.addStatusEffect('Melee This Round', { name: 'Melee This Round' });
-
         if (['Punch', 'Kick', 'Head Butt', 'Bite'].indexOf(this.action.weaponType) > -1) {
           this.unarmedAttack();
         } else if (['Grapple', 'Place a Hold', 'Break a Hold', 'Break Grapple', 'Takedown', 'Regain Feet'].indexOf(this.action.weaponType) > -1) {
@@ -740,8 +739,8 @@ Object.defineProperties(this, {
     },
 
     'meleeAttackRoll': {
-      value: function(rollName, character, task, skill) {
-        this.universalRoll(rollName, 'attackRollResult', [task, skill, character.situationalMod, character.meleeAttackMod, character.attributeMeleeAttackMod]);
+      value: function(rollName, task, skill) {
+        MML.universalRoll(this, rollName, [task, skill, this.situationalMod, this.meleeAttackMod, this.attributeMeleeAttackMod], 'attackRollResult');
       }
     },
 
@@ -812,7 +811,7 @@ Object.defineProperties(this, {
         if (_.has((target.statusEffects, 'Shoot From Cover'))) {
           mods.push(-20);
         }
-        this.universalRoll(rollName, 'attackRollResult', mods);
+        MML.universalRoll(this, rollName, mods, 'attackRollResult');
       }
     },
 
@@ -901,7 +900,7 @@ Object.defineProperties(this, {
           if (currentRoll.accepted === false) {
             this.player.displayGmRoll(currentRoll);
           } else {
-            if (_.contains(this.action.modifiers, ['Called Shot Specific']) && currentRoll.value - currentRoll.target < 11) {
+            if (_.contains(this.action.modifiers, 'Called Shot Specific') && currentRoll.value - currentRoll.target < 11) {
               this.action.modifiers = _.without(this.action.modifiers, 'Called Shot Specific');
               this.action.modifiers.push('Called Shot');
               currentRoll.result = 'Success';
@@ -910,7 +909,7 @@ Object.defineProperties(this, {
           }
         } else {
           this.player.displayPlayerRoll(currentRoll);
-          if (_.contains(this.action.modifiers, ['Called Shot Specific']) && currentRoll.value - currentRoll.target < 11) {
+          if (_.contains(this.action.modifiers, 'Called Shot Specific') && currentRoll.value - currentRoll.target < 11) {
             this.action.modifiers = _.without(this.action.modifiers, 'Called Shot Specific');
             this.action.modifiers.push('Called Shot');
             currentRoll.result = 'Success';
@@ -935,7 +934,7 @@ Object.defineProperties(this, {
         var action = state.MML.GM.currentAction;
         var target = MML.characters[action.targetArray[action.targetIndex]];
 
-        if (_.contains(this.action.modifiers, ['Called Shot Specific'])) {
+        if (_.contains(this.action.modifiers, 'Called Shot Specific')) {
           rollValue = parseInt(_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
             return hitPosition.name === action.calledShot;
           }));
@@ -1060,7 +1059,7 @@ Object.defineProperties(this, {
 
     'meleeBlockRoll': {
       value: function(blockChance) {
-        this.universalRoll('meleeBlockRollResult', [blockChance]);
+        MML.universalRoll(this, 'meleeBlockRoll', [blockChance], 'meleeBlockRollResult');
       }
     },
 
@@ -1089,7 +1088,7 @@ Object.defineProperties(this, {
 
     'meleeDodgeRoll': {
       value: function(dodgeChance) {
-        this.universalRoll.meleeDodgeRollResult([dodgeChance]);
+        MML.universalRoll(this, 'meleeDodgeRoll', [dodgeChance], 'meleeDodgeRollResult');
       }
     },
 
@@ -1180,7 +1179,7 @@ Object.defineProperties(this, {
 
     'rangedDefenseRoll': {
       value: function(defenseChance) {
-        this.universalRoll('rangedDefenseRollResult', [input.defenseChance]);
+        MML.universalRoll(this, 'rangedDefenseRoll', [input.defenseChance], 'rangedDefenseRollResult');
       }
     },
 
@@ -1259,7 +1258,7 @@ Object.defineProperties(this, {
 
     'grappleDefenseWeaponRoll': {
       value: function(attackChance) {
-        this.universalRoll('Weapon Defense Roll', 'grappleDefenseWeaponRollResult', [attackChance]);
+        MML.universalRoll(this, 'Weapon Defense Roll', [attackChance], 'grappleDefenseWeaponRollResult');
       }
     },
 
@@ -1287,8 +1286,8 @@ Object.defineProperties(this, {
     },
 
     'grappleDefenseBrawlRoll': {
-      value: function() {
-        this.universalRoll('Brawl Defense Roll', 'grappleDefenseBrawlRollResult', [input.brawlChance]);
+      value: function(brawlChance) {
+        MML.universalRoll(this, 'Brawl Defense Roll', [brawlChance], 'grappleDefenseBrawlRollResult');
       }
     },
 
@@ -1617,7 +1616,7 @@ Object.defineProperties(this, {
 
     'castingRoll': {
       value: function(rollName, task, skill, metaMagicMod) {
-        this.universalRoll(rollName, 'castingRollResult', [task, skill, this.situationalMod, this.castingMod, this.attributeCastingMod, metaMagicMod]);
+        MML.universalRoll(this, rollName, [task, skill, this.situationalMod, this.castingMod, this.attributeCastingMod, metaMagicMod], 'castingRollResult');
       }
     },
 
@@ -1629,7 +1628,7 @@ Object.defineProperties(this, {
           if (currentRoll.accepted === false) {
             this.player.displayGmRoll(currentRoll);
           } else {
-            if (_.contains(this.action.modifiers, ['Called Shot Specific']) && currentRoll.value - currentRoll.target < 11) {
+            if (_.contains(this.action.modifiers, 'Called Shot Specific') && currentRoll.value - currentRoll.target < 11) {
               this.action.modifiers = _.without(this.action.modifiers, 'Called Shot Specific');
               this.action.modifiers.push('Called Shot');
               currentRoll.result = 'Success';
@@ -1638,7 +1637,7 @@ Object.defineProperties(this, {
           }
         } else {
           this.player.displayPlayerRoll(currentRoll);
-          if (_.contains(this.action.modifiers, ['Called Shot Specific']) && currentRoll.value - currentRoll.target < 11) {
+          if (_.contains(this.action.modifiers, 'Called Shot Specific') && currentRoll.value - currentRoll.target < 11) {
             this.action.modifiers = _.without(this.action.modifiers, 'Called Shot Specific');
             this.action.modifiers.push('Called Shot');
             currentRoll.result = 'Success';

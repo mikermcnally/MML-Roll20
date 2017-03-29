@@ -47,7 +47,6 @@ MML.getCharAttribute = function(charName, attribute) {
   })[0];
 
   if (typeof(charAttribute) === "undefined") {
-    log(attribute);
     charAttribute = MML.createAttribute(attribute, "", "", MML.getCharFromName(charName));
   }
 
@@ -438,22 +437,22 @@ MML.rollDamage = function(input) {
   });
 };
 
-MML.universalRoll = function(input) {
+MML.universalRoll = function(character, rollName, mods, callback) {
   // log("universalRoll");
   // log(input.callback);
   // log(input.mods);
   var target = 0;
 
   var mod;
-  _.each(input.mods, function(mod) {
+  _.each(mods, function(mod) {
     target += mod;
   });
 
   var roll = {
     type: "universal",
-    name: input.name,
-    character: this.name,
-    callback: input.callback,
+    name: rollName,
+    character: character.name,
+    callback: callback,
     value: MML.rollDice(1, 100),
     range: "1-100",
     target: target,
@@ -462,21 +461,8 @@ MML.universalRoll = function(input) {
 
   roll = MML.universalRollResult(roll);
 
-  MML.processCommand({
-    type: "player",
-    who: this.player,
-    callback: "setApiPlayerAttribute",
-    input: {
-      attribute: "currentRoll",
-      value: roll
-    }
-  });
-  MML.processCommand({
-    type: "character",
-    who: this.name,
-    callback: input.callback,
-    input: {}
-  });
+  character.player.currentRoll = roll;
+  character[callback]();
 };
 
 MML.universalRollResult = function(roll) {

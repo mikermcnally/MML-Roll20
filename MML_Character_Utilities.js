@@ -46,8 +46,6 @@ MML.getEquippedWeapon = function(character) {
   var item;
   var itemId;
 
-  log(character['rightHand'].grip);
-  log(character['leftHand'].grip);
   if (MML.isUnarmed(character)) {
     return 'unarmed';
   } else if (character['rightHand'].grip !== 'unarmed') {
