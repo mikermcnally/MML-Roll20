@@ -995,7 +995,7 @@ Object.defineProperties(this, {
     },
 
     'meleeDefense': {
-      value: function(defender, attackerWeapon) {
+      value: function(attackerWeapon) {
         var itemId;
         var grip;
         var defenderWeapon;
@@ -1003,15 +1003,15 @@ Object.defineProperties(this, {
         var blockChance;
         var dodgeSkill;
         var blockSkill;
-        var defaultMartialSkill = defender.weaponSkills['Default Martial'].level;
-        var shieldMod = MML.getShieldDefenseBonus(defender);
-        var defenseMod = defender.meleeDefenseMod + defender.attributeDefenseMod;
-        var sitMod = defender.situationalMod;
+        var defaultMartialSkill = this.weaponSkills['Default Martial'].level;
+        var shieldMod = MML.getShieldDefenseBonus(this);
+        var defenseMod = this.meleeDefenseMod + this.attributeDefenseMod;
+        var sitMod = this.situationalMod;
 
-        defender.statusEffects['Melee This Round'] = { id: generateRowID(), name: 'Melee This Round' };
+        this.statusEffects['Melee This Round'] = { id: generateRowID(), name: 'Melee This Round' };
 
-        if (!_.isUndefined(defender.weaponSkills['Dodge']) && defaultMartialSkill < defender.weaponSkills['Dodge'].level) {
-          dodgeChance = defender.weaponSkills['Dodge'].level + defenseMod + sitMod;
+        if (!_.isUndefined(this.weaponSkills['Dodge']) && defaultMartialSkill < this.weaponSkills['Dodge'].level) {
+          dodgeChance = this.weaponSkills['Dodge'].level + defenseMod + sitMod;
         } else {
           dodgeChance = defaultMartialSkill + defenseMod + sitMod;
         }
@@ -1020,22 +1020,22 @@ Object.defineProperties(this, {
           dodgeChance += 15;
         }
 
-        if (MML.isDualWielding(defender)) {
+        if (MML.isDualWielding(this)) {
           log('Dual Wield defense');
-        } else if (MML.isUnarmed(defender) || MML.isWieldingRangedWeapon(defender)) {
+        } else if (MML.isUnarmed(this) || MML.isWieldingRangedWeapon(this)) {
           blockChance = 0;
         } else {
-          if (MML.getWeaponFamily(defender, 'rightHand') !== 'unarmed') {
-            itemId = defender.rightHand._id;
-            grip = defender.rightHand.grip;
+          if (MML.getWeaponFamily(this, 'rightHand') !== 'unarmed') {
+            itemId = this.rightHand._id;
+            grip = this.rightHand.grip;
           } else {
-            itemId = defender.leftHand._id;
-            grip = defender.leftHand.grip;
+            itemId = this.leftHand._id;
+            grip = this.leftHand.grip;
           }
 
-          defenderWeapon = defender.inventory[itemId];
+          defenderWeapon = this.inventory[itemId];
           blockChance = defenderWeapon.grips[grip].defense + sitMod + defenseMod + shieldMod;
-          blockSkill = Math.round(MML.getWeaponSkill(defender, defenderWeapon) / 2);
+          blockSkill = Math.round(MML.getWeaponSkill(this, defenderWeapon) / 2);
 
           if (blockSkill >= defaultMartialSkill) {
             blockChance += blockSkill;
@@ -1052,8 +1052,8 @@ Object.defineProperties(this, {
           blockChance += attackerWeapon.defenseMod;
         }
 
-        defender.player.charMenuMeleeDefenseRoll(defender.name, dodgeChance, blockChance);
-        defender.player.displayMenu();
+        this.player.charMenuMeleeDefenseRoll(this.name, dodgeChance, blockChance);
+        this.player.displayMenu();
       }
     },
 
@@ -1119,18 +1119,18 @@ Object.defineProperties(this, {
     },
 
     'rangedDefense': {
-      value: function(defender, attackerWeapon, range) {
+      value: function(attackerWeapon, range) {
         var defenseChance;
-        var defaultMartialSkill = defender.weaponSkills['Default Martial'].level;
-        var shieldMod = MML.getShieldDefenseBonus(defender);
-        var defenseMod = defender.rangedDefenseMod + defender.attributeDefenseMod;
-        var sitMod = defender.situationalMod;
+        var defaultMartialSkill = this.weaponSkills['Default Martial'].level;
+        var shieldMod = MML.getShieldDefenseBonus(this);
+        var defenseMod = this.rangedDefenseMod + this.attributeDefenseMod;
+        var sitMod = this.situationalMod;
         var rangeMod;
 
-        defender.statusEffects['Melee This Round'] = { id: generateRowID(), name: 'Melee This Round' };
+        this.statusEffects['Melee This Round'] = { id: generateRowID(), name: 'Melee This Round' };
 
-        if (!_.isUndefined(defender.skills['Dodge']) && defender.skills['Dodge'].level >= defaultMartialSkill) {
-          defenseChance = defender.weaponSkills['Dodge'].level + defenseMod + sitMod + shieldMod;
+        if (!_.isUndefined(this.skills['Dodge']) && this.skills['Dodge'].level >= defaultMartialSkill) {
+          defenseChance = this.weaponSkills['Dodge'].level + defenseMod + sitMod + shieldMod;
         } else {
           defenseChance = defaultMartialSkill + defenseMod + sitMod + shieldMod;
         }
@@ -1172,8 +1172,8 @@ Object.defineProperties(this, {
           defenseChance += rangeMod;
         }
 
-        defender.player.charMenuRangedDefenseRoll(defender.name, defenseChance);
-        defender.player.displayMenu();
+        this.player.charMenuRangedDefenseRoll(this.name, defenseChance);
+        this.player.displayMenu();
       }
     },
 

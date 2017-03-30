@@ -37,6 +37,31 @@ MML.Player = function(name, isGM) {
     sendChat(this.name, '/w "' + this.name + '" &{template:rollMenu} {{title=' + this.currentRoll.message + "}}");
   };
 
+  this.changeRoll = function(value) {
+    var range = this.currentRoll.range.split('-');
+    var low = parseInt(range[0]);
+    var high = parseInt(range[1]);
+  
+    if (value >= low && value <= high) {
+      if (this.currentRoll.type === 'damage') {
+        this.currentRoll.value = -value;
+        this.currentRoll.message = 'Roll: ' + value + '\nRange: ' + this.currentRoll.range;
+      } else {
+        this.currentRoll.value = value;
+        if (this.currentRoll.type === 'universal') {
+          this.currentRoll = MML.universalRollResult(this.currentRoll);
+        } else if (this.currentRoll.type === 'attribute') {
+          this.currentRoll = MML.attributeCheckResult(this.currentRoll);
+        } else if (this.currentRoll.type === 'generic') {
+          this.currentRoll = MML.genericRollResult(this.currentRoll);
+        }
+      }
+    } else {
+      sendChat('Error', 'New roll value out of range.');
+    }
+    MML.characters[this.currentRoll.character][this.currentRoll.callback]();
+  };
+
   this.setApiPlayerAttribute = function(attribute, value) {
     this[attribute] = value;
   };
@@ -121,12 +146,6 @@ MML.Player = function(name, isGM) {
       });
     });
   };
-
-  // this.displayPlayerRoll = function(who) {
-  //   this.who = who;
-  //   this.message = this.currentRoll.message;
-  //   this.buttons = [this.menuButtons.acceptRoll];
-  // };
 
   this.GmMenuCombat = function(who) {
     this.who = who;
@@ -1002,7 +1021,8 @@ MML.Player = function(name, isGM) {
           text: item.name,
           nextMenu: 'charMenuPrepareAction',
           callback: function() {
-            character.action.items.push({ itemId: itemId, grip: hand });
+            character.action.items.push({ itemId: _id, grip: hand });
+            this.displayMenu();
           }
         });
       }
@@ -1337,13 +1357,13 @@ MML.Player = function(name, isGM) {
     this.buttons = [this.menuButtons.endAction];
   };
 
-  this.setCurrentCharacterTargets = function(targets) {
+  this.setCurrentCharacterTargets = function(input) {
     var targetArray;
 
-    if (!_.isArray(targets)) {
-      targetArray = [targets];
+    if (!_.isUndefined(input.target)) {
+      targetArray = [input.target];
     } else {
-      targetArray = targets;
+      targetArray = input.targets;
     }
     state.MML.GM.currentAction.targetArray = targetArray;
     state.MML.GM.currentAction.targetIndex = 0;

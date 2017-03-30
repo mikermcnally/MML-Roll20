@@ -146,32 +146,6 @@ MML.setTurnOrder = function() {
   Campaign().set('turnorder', JSON.stringify(turnorder));
 };
 
-MML.changeRoll = function(value) {
-  var gm = state.MML.GM;
-  var range = gm.currentRoll.range.split('-');
-  var low = parseInt(range[0]);
-  var high = parseInt(range[1]);
-
-  if (value >= low && value <= high) {
-    if (gm.currentRoll.type === 'damage') {
-      gm.currentRoll.value = -value;
-      gm.currentRoll.message = 'Roll: ' + value + '\nRange: ' + gm.currentRoll.range;
-    } else {
-      gm.currentRoll.value = value;
-      if (gm.currentRoll.type === 'universal') {
-        gm.currentRoll = MML.universalRollResult(gm.currentRoll);
-      } else if (gm.currentRoll.type === 'attribute') {
-        gm.currentRoll = MML.attributeCheckResult(gm.currentRoll);
-      } else if (gm.currentRoll.type === 'generic') {
-        gm.currentRoll = MML.genericRollResult(gm.currentRoll);
-      }
-    }
-  } else {
-    sendChat('Error', 'New roll value out of range.');
-  }
-  MML.characters[gm.currentRoll.character][gm.currentRoll.callback]();
-};
-
 MML.assignNewItem = function(input) {
   MML.processCommand({
     type: 'character',
@@ -259,18 +233,13 @@ MML.parseCommand = function(msg) {
         type: 'player',
         who: who,
         callback: input.callback,
-        input: input
+        input: [input]
       };
     } else if (content.indexOf('changeRoll') !== -1) {
       var value = parseInt(content.replace('changeRoll ', ''));
 
       if (!isNaN(value)) {
-        command = {
-          type: 'player',
-          who: state.MML.GM.name,
-          callback: 'changeRoll',
-          input: [value]
-        };
+        MML.players[who].changeRoll(value);
       } else {
         sendChat('Error', 'Please enter a numerical value.');
       }
