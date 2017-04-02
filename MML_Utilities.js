@@ -389,54 +389,6 @@ MML.parseDice = function(dice) {
   return { amount: amount, size: size };
 };
 
-MML.rollDamage = function(input) {
-  var dice = MML.parseDice(input.damageDice);
-  var amount = dice.amount;
-  var size = dice.size;
-  var damageMod = 0;
-  var value;
-
-  var mod;
-  _.each(input.mods, function(mod) {
-    damageMod += mod;
-  });
-
-  if (input.crit) {
-    value = MML.rollDice(amount, size) + amount * size + damageMod;
-    range = (amount * size + amount + damageMod) + "-" + (2 * amount * size + damageMod);
-  } else {
-    value = MML.rollDice(amount, size) + damageMod;
-    range = (amount + damageMod) + "-" + (amount * size + damageMod);
-  }
-
-  var roll = {
-    type: "damage",
-    character: this.name,
-    accepted: false,
-    value: value,
-    result: -value,
-    range: range,
-    message: "Roll: " + value + "\nRange: " + range,
-    callback: input.callback
-  };
-
-  MML.processCommand({
-    type: "player",
-    who: this.player,
-    callback: "setApiPlayerAttribute",
-    input: {
-      attribute: "currentRoll",
-      value: roll
-    }
-  });
-  MML.processCommand({
-    type: "character",
-    who: this.name,
-    callback: input.callback,
-    input: {}
-  });
-};
-
 MML.universalRoll = function(character, rollName, mods, callback) {
   // log("universalRoll");
   // log(input.callback);

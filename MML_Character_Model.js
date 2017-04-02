@@ -1,6 +1,6 @@
 // Character Creation
 MML.Character = function(charName, id) {
-Object.defineProperties(this, {
+  Object.defineProperties(this, {
     //Combat Functions
     'displayRoll': {
       value: function(callback) {
@@ -17,7 +17,6 @@ Object.defineProperties(this, {
         }
       }
     },
-
     'displayMovement': {
       value: function() {
         var token = MML.getTokenFromChar(this.name);
@@ -30,7 +29,6 @@ Object.defineProperties(this, {
         this.pathID = pathID;
       }
     },
-
     'moveDistance': {
       value: function(distance) {
         var remainingMovement = this.movementAvailable - (distance) / (MML.movementRates[this.race][this.movementPosition]);
@@ -45,7 +43,6 @@ Object.defineProperties(this, {
         }
       }
     },
-
     'newRoundUpdateCharacter': {
       value: function() {
         if (_.has(this.statusEffects, 'Melee This Round')) {
@@ -83,7 +80,6 @@ Object.defineProperties(this, {
         this.setReady(false);
       }
     },
-
     'setReady': {
       value: function(ready) {
         if (state.MML.GM.inCombat === true && ready === false) {
@@ -94,7 +90,6 @@ Object.defineProperties(this, {
         this.ready = ready;
       }
     },
-
     'setCombatVision': {
       value: function() {
         var token = MML.getTokenFromChar(this.name);
@@ -107,19 +102,16 @@ Object.defineProperties(this, {
         }
       }
     },
-
     'getSingleTarget': {
       value: function() {
         MML.displayTargetSelection({ charName: this.name, callback: 'setCurrentCharacterTargets' });
       }
     },
-
     'getSpellTargets': {
       value: function() {
         MML.displayTargetSelection({ charName: this.name, callback: 'getAdditionalTarget' });
       }
     },
-
     'getAdditionalTarget': {
       value: function(target) {
         var targetArray;
@@ -135,26 +127,25 @@ Object.defineProperties(this, {
         this.player.displayMenu();
       }
     },
-
     'getRadiusSpellTargets': {
       value: function(radius) {
         state.MML.GM.currentAction.parameters.spellMarker = 'spellMarkerCircle';
         var token = MML.getTokenFromChar(this.name);
         var graphic = createObj('graphic', {
-             name: 'spellMarkerCircle',
-             _pageid: token.get('_pageid'),
-             layer: 'objects',
-             left: token.get('left'),
-             top: token.get('top'),
-             width: MML.feetToPixels(radius*2),
-             height: MML.feetToPixels(radius*2),
-             imgsrc: 'https://s3.amazonaws.com/files.d20.io/images/27869253/ixTcySIkxTEEsbospj4PpA/thumb.png?1485314508',
-             controlledby: MML.getPlayerFromName(this.player.name).get('id')
-           });
-         toBack(graphic);
+          name: 'spellMarkerCircle',
+          _pageid: token.get('_pageid'),
+          layer: 'objects',
+          left: token.get('left'),
+          top: token.get('top'),
+          width: MML.feetToPixels(radius * 2),
+          height: MML.feetToPixels(radius * 2),
+          imgsrc: 'https://s3.amazonaws.com/files.d20.io/images/27869253/ixTcySIkxTEEsbospj4PpA/thumb.png?1485314508',
+          controlledby: MML.getPlayerFromName(this.player.name).get('id')
+        });
+        toBack(graphic);
 
-         this.player.charMenuPlaceSpellMarker(this.name);
-         this.player.displayMenu();
+        this.player.charMenuPlaceSpellMarker(this.name);
+        this.player.displayMenu();
       }
     },
 
@@ -207,7 +198,6 @@ Object.defineProperties(this, {
         }
       }
     },
-
     'setMultiWound': {
       value: function() {
         var currentHP = this.hp;
@@ -231,19 +221,16 @@ Object.defineProperties(this, {
         }
       }
     },
-
     'multiWoundRoll': {
       value: function() {
         this.attributeCheckRoll('systemStrength', [0], 'multiWoundRollResult');
       }
     },
-
     'multiWoundRollResult': {
       value: function() {
         this.displayRoll('multiWoundRollApply');
       }
     },
-
     'multiWoundRollApply': {
       value: function() {
         var result = this.player.currentRoll.result;
@@ -254,19 +241,16 @@ Object.defineProperties(this, {
         MML[state.MML.GM.currentAction.callback]();
       }
     },
-
     'majorWoundRoll': {
       value: function() {
         this.attributeCheckRoll('Major Wound Willpower Roll', 'willpower', [0], 'majorWoundRollResult');
       }
     },
-
     'majorWoundRollResult': {
       value: function() {
         this.displayRoll('majorWoundRollApply');
       }
     },
-
     'majorWoundRollApply': {
       value: function() {
         var result = this.player.currentRoll.result;
@@ -282,19 +266,16 @@ Object.defineProperties(this, {
         MML[state.MML.GM.currentAction.callback]();
       }
     },
-
     'disablingWoundRoll': {
       value: function() {
         this.attributeCheckRoll('Disabling Wound System Strength Roll', 'systemStrength', [0], 'disablingWoundRollResult');
       }
     },
-
     'disablingWoundRollResult': {
       value: function() {
         this.displayRoll('disablingWoundRollApply');
       }
     },
-
     'disablingWoundRollApply': {
       value: function() {
         var result = this.player.currentRoll.result;
@@ -311,7 +292,6 @@ Object.defineProperties(this, {
         MML[state.MML.GM.currentAction.callback]();
       }
     },
-
     'knockdownCheck': {
       value: function(damage) {
         this.knockdown += damage;
@@ -322,19 +302,16 @@ Object.defineProperties(this, {
         }
       }
     },
-
     'knockdownRoll': {
       value: function() {
         this.attributeCheckRoll('Knockdown System Strength Roll', 'systemStrength', [_.has(this.statusEffects, 'Stumbling') ? -5 : 0], 'getKnockdownRoll');
       }
     },
-
     'knockdownRollResult': {
       value: function() {
         this.displayRoll('knockdownRollApply');
       }
     },
-
     'knockdownRollApply': {
       value: function() {
         var result = this.player.currentRoll.result;
@@ -348,7 +325,6 @@ Object.defineProperties(this, {
         MML[state.MML.GM.currentAction.callback]();
       }
     },
-
     'sensitiveAreaCheck': {
       value: function(hitPosition) {
         if (MML.sensitiveAreas[this.bodyType].indexOf(hitPosition) > -1) {
@@ -358,19 +334,16 @@ Object.defineProperties(this, {
         }
       }
     },
-
     'sensitiveAreaRoll': {
       value: function() {
         this.attributeCheckRoll('Sensitive Area Willpower Roll', 'willpower', [0], 'sensitiveAreaRollResult');
       }
     },
-
     'sensitiveAreaRollResult': {
       value: function() {
         this.displayRoll('sensitiveAreaRollApply');
       }
     },
-
     'sensitiveAreaRollApply': {
       value: function() {
         var result = this.player.currentRoll.result;
@@ -380,7 +353,6 @@ Object.defineProperties(this, {
         MML[state.MML.GM.currentAction.callback]();
       }
     },
-
     'alterEP': {
       value: function(epAmount) {
         this.ep += epAmount;
@@ -392,19 +364,16 @@ Object.defineProperties(this, {
         }
       }
     },
-
     'fatigueCheckRoll': {
       value: function(modifier) {
         this.attributeCheckRoll('Fatigue Check Fitness Roll', 'fitness', [modifier], 'fatigueCheckRollResult');
       }
     },
-
     'fatigueCheckRollResult': {
       value: function() {
         this.displayRoll('fatigueCheckRollApply');
       }
     },
-
     'fatigueCheckRollApply': {
       value: function() {
         var result = this.player.currentRoll.result;
@@ -419,19 +388,16 @@ Object.defineProperties(this, {
         MML[state.MML.GM.currentAction.callback]();
       }
     },
-
     'fatigueRecoveryRoll': {
       value: function(modifier) {
         this.attributeCheckRoll('Fatigue Recovery Check Health Roll', 'health', [modifier], 'fatigueRecoveryRollResult');
       }
     },
-
     'fatigueRecoveryRollResult': {
       value: function() {
         this.displayRoll('fatigueRecoveryRollApply');
       }
     },
-
     'fatigueRecoveryRollApply': {
       value: function() {
         var result = this.player.currentRoll.result;
@@ -443,7 +409,6 @@ Object.defineProperties(this, {
         MML[state.MML.GM.currentAction.callback]();
       }
     },
-
     'armorDamageReduction': {
       value: function(position, damage, type, coverageRoll) {
         var damageApplied = false; //Accounts for partial coverage, once true the loop stops
@@ -511,11 +476,11 @@ Object.defineProperties(this, {
             } else {
               this.action.skill = this.weaponSkills['Default Martial'].level;
             }
-          // } else if (leftHand !== 'unarmed' && rightHand !== 'unarmed') {
-          //   var weaponInits = [this.inventory[this.leftHand._id].grips[this.leftHand.grip].initiative,
-          //     this.inventory[this.rightHand._id].grips[this.rightHand.grip].initiative
-          //   ];
-          //   initBonus = _.min(weaponInits);
+            // } else if (leftHand !== 'unarmed' && rightHand !== 'unarmed') {
+            //   var weaponInits = [this.inventory[this.leftHand._id].grips[this.leftHand.grip].initiative,
+            //     this.inventory[this.rightHand._id].grips[this.rightHand.grip].initiative
+            //   ];
+            //   initBonus = _.min(weaponInits);
             // this.action.skill = this.weaponSkills.[this.inventory[this.leftHand._id].name].level or this.weaponSkills['Default Martial Skill'].level;
             //Dual Wielding
           } else {
@@ -536,7 +501,6 @@ Object.defineProperties(this, {
         }, this);
       }
     },
-
     'initiativeRoll': {
       value: function() {
         var rollValue = MML.rollDice(1, 10);
@@ -553,7 +517,6 @@ Object.defineProperties(this, {
         this.initiativeResult();
       }
     },
-
     'initiativeResult': {
       value: function() {
         this.player.rollResult =
@@ -574,7 +537,6 @@ Object.defineProperties(this, {
         this.displayRoll('initiativeApply');
       }
     },
-
     'initiativeApply': {
       value: function() {
         this.initiativeRollValue = this.player.currentRoll.value;
@@ -582,7 +544,6 @@ Object.defineProperties(this, {
         this.player.prepareNextCharacter();
       }
     },
-
     'startAction': {
       value: function() {
         state.MML.GM.currentAction = {
@@ -590,7 +551,7 @@ Object.defineProperties(this, {
         };
 
         if (_.contains(this.action.modifiers, 'Ready Item')) {
-          _.each(this.action.items, function (item) {
+          _.each(this.action.items, function(item) {
             if (item.grip === 'Left') {
               this.leftHand._id = item.itemId;
               if (this.inventory[item.itemId].type === 'weapon') {
@@ -620,7 +581,7 @@ Object.defineProperties(this, {
           this.releaseOpponentAction();
         } else if (this.action.name === 'Cast') {
           if (!_.isUndefined(this.previousAction) && !_.isUndefined(this.previousAction.spell) && this.previousAction.spell.actions > 1) {
-            this.action.spell.actions = this.previousAction.spell.actions -1;
+            this.action.spell.actions = this.previousAction.spell.actions - 1;
           } else {
             var currentAction = {
               callback: 'castAction',
@@ -661,7 +622,6 @@ Object.defineProperties(this, {
         }
       }
     },
-
     'startCastAction': {
       value: function() {
         state.MML.GM.currentAction.parameters.target = MML.characters[state.MML.GM.currentAction.targetArray[0]];
@@ -691,7 +651,6 @@ Object.defineProperties(this, {
         }
       }
     },
-
     'processAttack': {
       value: function() {
         this.addStatusEffect('Melee This Round', { name: 'Melee This Round' });
@@ -717,7 +676,6 @@ Object.defineProperties(this, {
         }
       }
     },
-
     'meleeAttack': {
       value: function() {
         var characterWeaponInfo = MML.getCharacterWeaponAndSkill(this);
@@ -737,13 +695,11 @@ Object.defineProperties(this, {
         MML[currentAction.callback]();
       }
     },
-
     'meleeAttackRoll': {
       value: function(rollName, task, skill) {
         MML.universalRoll(this, rollName, [task, skill, this.situationalMod, this.meleeAttackMod, this.attributeMeleeAttackMod], 'attackRollResult');
       }
     },
-
     'missileAttack': {
       value: function() {
         var target = MML.characters[state.MML.GM.currentAction.targetArray[0]];
@@ -804,7 +760,6 @@ Object.defineProperties(this, {
         MML[currentAction.callback]();
       }
     },
-
     'missileAttackRoll': {
       value: function(rollName, task, skill, target) {
         var mods = [task, skill, this.situationalMod, this.missileAttackMod, this.attributeMissileAttackMod];
@@ -814,7 +769,6 @@ Object.defineProperties(this, {
         MML.universalRoll(this, rollName, mods, 'attackRollResult');
       }
     },
-
     'unarmedAttack': {
       value: function() {
         var attackType;
@@ -847,7 +801,6 @@ Object.defineProperties(this, {
         MML[currentAction.callback]();
       }
     },
-
     'grappleAttack': {
       value: function() {
         var attackType;
@@ -891,7 +844,6 @@ Object.defineProperties(this, {
         MML[currentAction.callback]();
       }
     },
-
     'attackRollResult': {
       value: function() {
         var currentRoll = this.player.currentRoll;
@@ -918,14 +870,12 @@ Object.defineProperties(this, {
         }
       }
     },
-
     'attackRollApply': {
       value: function() {
         state.MML.GM.currentAction.rolls.attackRoll = this.player.currentRoll.result;
         MML[state.MML.GM.currentAction.callback]();
       }
     },
-
     'hitPositionRoll': {
       value: function() {
         var rollValue;
@@ -965,7 +915,6 @@ Object.defineProperties(this, {
         this.hitPositionRollResult();
       }
     },
-
     'hitPositionRollResult': {
       value: function() {
         var currentRoll = this.player.currentRoll;
@@ -983,17 +932,15 @@ Object.defineProperties(this, {
           '\nRange: ' + currentRoll.range;
 
         this.player.currentRoll = currentRoll;
-        this.displayRoll(hitPositionRollApply);
+        this.displayRoll('hitPositionRollApply');
       }
     },
-
     'hitPositionRollApply': {
       value: function(currentRoll) {
         state.MML.GM.currentAction.rolls.hitPositionRoll = currentRoll.result;
         MML[state.MML.GM.currentAction.callback]();
       }
     },
-
     'meleeDefense': {
       value: function(attackerWeapon) {
         var itemId;
@@ -1056,19 +1003,16 @@ Object.defineProperties(this, {
         this.player.displayMenu();
       }
     },
-
     'meleeBlockRoll': {
       value: function(blockChance) {
         MML.universalRoll(this, 'meleeBlockRoll', [blockChance], 'meleeBlockRollResult');
       }
     },
-
     'meleeBlockRollResult': {
       value: function() {
-        displayRoll('meleeBlockRollApply');
+        this.displayRoll('meleeBlockRollApply');
       }
     },
-
     'meleeBlockRollApply': {
       value: function() {
         var result = this.player.currentRoll.result;
@@ -1085,19 +1029,16 @@ Object.defineProperties(this, {
         MML[state.MML.GM.currentAction.callback]();
       }
     },
-
     'meleeDodgeRoll': {
       value: function(dodgeChance) {
         MML.universalRoll(this, 'meleeDodgeRoll', [dodgeChance], 'meleeDodgeRollResult');
       }
     },
-
     'meleeDodgeRollResult': {
       value: function() {
         displayRoll('meleeDodgeRollApply');
       }
     },
-
     'meleeDodgeRollApply': {
       value: function() {
         var result = this.player.currentRoll.result;
@@ -1106,7 +1047,7 @@ Object.defineProperties(this, {
           if (_.has(this.statusEffects, 'Number of Defenses')) {
             this.statusEffects['Number of Defenses'].number++;
           } else {
-            this.addStatusEffect('Number of Defenses', {number: 1 });
+            this.addStatusEffect('Number of Defenses', { number: 1 });
           }
           if (!_.has(this.statusEffects, 'Dodged This Round')) {
             this.addStatusEffect('Dodged This Round', {});
@@ -1117,7 +1058,6 @@ Object.defineProperties(this, {
         MML[state.MML.GM.currentAction.callback]();
       }
     },
-
     'rangedDefense': {
       value: function(attackerWeapon, range) {
         var defenseChance;
@@ -1176,19 +1116,16 @@ Object.defineProperties(this, {
         this.player.displayMenu();
       }
     },
-
     'rangedDefenseRoll': {
       value: function(defenseChance) {
         MML.universalRoll(this, 'rangedDefenseRoll', [input.defenseChance], 'rangedDefenseRollResult');
       }
     },
-
     'rangedDefenseRollResult': {
       value: function() {
         this.displayRoll('rangedDefenseRollApply');
       }
     },
-
     'rangedDefenseRollApply': {
       value: function() {
         var result = this.player.currentRoll.result;
@@ -1207,7 +1144,6 @@ Object.defineProperties(this, {
         MML[state.MML.GM.currentAction.callback]();
       }
     },
-
     'grappleDefense': {
       value: function(attackType) {
         var defenderWeapon;
@@ -1255,19 +1191,16 @@ Object.defineProperties(this, {
         this.player.displayMenu();
       }
     },
-
     'grappleDefenseWeaponRoll': {
       value: function(attackChance) {
         MML.universalRoll(this, 'Weapon Defense Roll', [attackChance], 'grappleDefenseWeaponRollResult');
       }
     },
-
     'grappleDefenseWeaponRollResult': {
       value: function() {
         this.displayRoll('grappleDefenseWeaponRollApply');
       }
     },
-
     'grappleDefenseWeaponRollApply': {
       value: function() {
         var result = this.player.currentRoll.result;
@@ -1284,19 +1217,16 @@ Object.defineProperties(this, {
         MML[state.MML.GM.currentAction.callback]();
       }
     },
-
     'grappleDefenseBrawlRoll': {
       value: function(brawlChance) {
         MML.universalRoll(this, 'Brawl Defense Roll', [brawlChance], 'grappleDefenseBrawlRollResult');
       }
     },
-
     'grappleDefenseBrawlRollResult': {
       value: function() {
         this.displayRoll('grappleDefenseBrawlRollApply');
       }
     },
-
     'grappleDefenseBrawlRollApply': {
       value: function() {
         var result = this.player.currentRoll.result;
@@ -1312,7 +1242,6 @@ Object.defineProperties(this, {
         MML[state.MML.GM.currentAction.callback]();
       }
     },
-
     'grappleHandler': {
       value: function(defender, attackName) {
         switch (attackName) {
@@ -1345,7 +1274,6 @@ Object.defineProperties(this, {
         MML.endAction();
       }
     },
-
     'applyGrapple': {
       value: function(defender) {
         this.statusEffects['Grappled'] = {
@@ -1364,7 +1292,6 @@ Object.defineProperties(this, {
         };
       }
     },
-
     'applyHold': {
       value: function(defender) {
         if (_.has(this.statusEffects, 'Grappled')) {
@@ -1403,7 +1330,6 @@ Object.defineProperties(this, {
         }
       }
     },
-
     'applyHoldBreak': {
       value: function(defender) {
         defender.statusEffects['Grappled'] = {
@@ -1441,7 +1367,6 @@ Object.defineProperties(this, {
         }
       }
     },
-
     'applyGrappleBreak': {
       value: function(defender) {
         if (this.statusEffects['Grappled'].targets.length === 1) {
@@ -1464,7 +1389,6 @@ Object.defineProperties(this, {
         }
       }
     },
-
     'applyTakedown': {
       value: function(defender) {
         var grapplers = _.has(defender.statusEffects, 'Grappled') ? defender.statusEffects['Grappled'].targets : [];
@@ -1514,7 +1438,6 @@ Object.defineProperties(this, {
         this.movementPosition = 'Prone';
       }
     },
-
     'applyRegainFeet': {
       value: function(defender) {
         var grapplers = _.has(this.statusEffects, 'Grappled') ? this.statusEffects['Grappled'].targets : [];
@@ -1536,7 +1459,6 @@ Object.defineProperties(this, {
         this.movementPosition = 'Walk';
       }
     },
-
     'releaseHold': {
       value: function(defender) {
         defender.applyHoldBreak(this);
@@ -1544,7 +1466,6 @@ Object.defineProperties(this, {
         defender.player.displayMenu();
       }
     },
-
     'releaseGrapple': {
       value: function(defender) {
         this.applyGrappleBreak(defender, this);
@@ -1552,47 +1473,76 @@ Object.defineProperties(this, {
         this.startAction();
       }
     },
-
     'criticalDefense': {
       value: function() {
         MML.endAction();
       }
     },
-
     'forgoDefense': {
       value: function() {
         state.MML.GM.currentAction.rolls[input.rollName] = 'Failure';
         MML[state.MML.GM.currentAction.callback]();
       }
     },
-
     'equipmentFailure': {
       value: function() {
         log('equipmentFailure');
       }
     },
+    'rollDamage': {
+      value: function(damageDice, mods, crit, callback) {
+        var dice = MML.parseDice(damageDice);
+        var amount = dice.amount;
+        var size = dice.size;
+        var damageMod = 0;
+        var value;
 
+        var mod;
+        _.each(mods, function(mod) {
+          damageMod += mod;
+        });
+
+        if (crit) {
+          value = MML.rollDice(amount, size) + amount * size + damageMod;
+          range = (amount * size + amount + damageMod) + "-" + (2 * amount * size + damageMod);
+        } else {
+          value = MML.rollDice(amount, size) + damageMod;
+          range = (amount + damageMod) + "-" + (amount * size + damageMod);
+        }
+
+        var roll = {
+          type: "damage",
+          character: this.name,
+          accepted: false,
+          value: value,
+          result: -value,
+          range: range,
+          message: "Roll: " + value + "\nRange: " + range,
+          callback: callback
+        };
+
+        this.player.currentRoll.value = roll;
+        this[callback]();
+      }
+    },
     'meleeDamageRoll': {
       value: function(attackerWeapon, crit, bonusDamage) {
         bonusDamage = 0;
         state.MML.GM.currentAction.parameters.damageType = attackerWeapon.damageType;
-        this.rollDamage('meleeDamageResult', crit, attackerWeapon.damage, [character.meleeDamageMod, bonusDamage]);
+        this.rollDamage(attackerWeapon.damage, [this.meleeDamageMod, bonusDamage], crit, 'meleeDamageResult');
       }
     },
-
     'meleeDamageResult': {
       value: function() {
         this.displayRoll('meleeDamageRollApply');
       }
     },
-
     'meleeDamageRollApply': {
       value: function() {
         state.MML.GM.currentAction.rolls.damageRoll = this.player.currentRoll.result;
         MML[state.MML.GM.currentAction.callback]();
       }
     },
-
     'missileDamageRoll': {
       value: function(attackerWeapon, crit, bonusDamage) {
         bonusDamage = 0;
@@ -1600,26 +1550,22 @@ Object.defineProperties(this, {
         this.rollDamage('missileDamageResult', crit, attackerWeapon.damage, [bonusDamage]);
       }
     },
-
     'missileDamageResult': {
       value: function() {
         this.displayRoll('missileDamageRollApply');
       }
     },
-
     'missileDamageRollApply': {
       value: function() {
         state.MML.GM.currentAction.rolls.damageRoll = this.player.currentRoll.result;
         MML[state.MML.GM.currentAction.callback]();
       }
     },
-
     'castingRoll': {
       value: function(rollName, task, skill, metaMagicMod) {
         MML.universalRoll(this, rollName, [task, skill, this.situationalMod, this.castingMod, this.attributeCastingMod, metaMagicMod], 'castingRollResult');
       }
     },
-
     'castingRollResult': {
       value: function() {
         var currentRoll = this.player.currentRoll;
@@ -1646,14 +1592,12 @@ Object.defineProperties(this, {
         }
       }
     },
-
     'castingRollApply': {
       value: function() {
         state.MML.GM.currentAction.rolls.castingRoll = this.player.currentRoll.result;
         MML[state.MML.GM.currentAction.callback]();
       }
     },
-
     'applyStatusEffects': {
       value: function() {
         var dependents = [
@@ -1708,7 +1652,6 @@ Object.defineProperties(this, {
         });
       }
     },
-
     'addStatusEffect': {
       value: function(index, effect) {
         effect.id = generateRowID();
@@ -1717,7 +1660,6 @@ Object.defineProperties(this, {
         this.applyStatusEffects();
       }
     },
-
     'removeStatusEffect': {
       value: function(index) {
         if (!_.isUndefined(this.statusEffects[index])) {
@@ -1726,7 +1668,6 @@ Object.defineProperties(this, {
         }
       }
     },
-
     'updateInventory': {
       value: function() {
         var items = _.omit(this.inventory, 'emptyHand');
@@ -1741,7 +1682,6 @@ Object.defineProperties(this, {
         this.inventory = items;
       }
     },
-
     'updateCharacterSheet': {
       value: function() {
         _.each(this, function(value, attribute) {
@@ -1752,7 +1692,6 @@ Object.defineProperties(this, {
         }, this);
       }
     },
-
     'setPlayer': {
       value: function() {
         var playerName = MML.getCurrentAttribute(this.name, 'player');
@@ -1773,7 +1712,6 @@ Object.defineProperties(this, {
       }
     }
   });
-
   Object.defineProperty(this, 'name', { value: charName, writable: true, enumerable: true });
   Object.defineProperty(this, 'id', { value: id });
   Object.defineProperty(this, 'player', { get: function() { return MML.players[MML.getCurrentAttribute(this.name, 'player')]; } });
@@ -1905,8 +1843,8 @@ Object.defineProperties(this, {
     },
     enumerable: true
   });
-  Object.defineProperty(this, 'leftHand', { value: _.isEmpty(MML.getCurrentAttributeJSON(this.name, 'leftHand')) ? JSON.stringify({_id: 'emptyHand', grip: 'unarmed'}) : MML.getCurrentAttributeJSON(this.name, 'leftHand'), writable: true, enumerable: true });
-  Object.defineProperty(this, 'rightHand', { value: _.isEmpty(MML.getCurrentAttributeJSON(this.name, 'rightHand')) ? JSON.stringify({_id: 'emptyHand', grip: 'unarmed'}) : MML.getCurrentAttributeJSON(this.name, 'rightHand'), writable: true, enumerable: true });
+  Object.defineProperty(this, 'leftHand', { value: _.isEmpty(MML.getCurrentAttributeJSON(this.name, 'leftHand')) ? JSON.stringify({ _id: 'emptyHand', grip: 'unarmed' }) : MML.getCurrentAttributeJSON(this.name, 'leftHand'), writable: true, enumerable: true });
+  Object.defineProperty(this, 'rightHand', { value: _.isEmpty(MML.getCurrentAttributeJSON(this.name, 'rightHand')) ? JSON.stringify({ _id: 'emptyHand', grip: 'unarmed' }) : MML.getCurrentAttributeJSON(this.name, 'rightHand'), writable: true, enumerable: true });
   this.updateCharacterSheet();
   Object.defineProperty(this, 'hitTable', { get: function() { return MML.getHitTable(this); }, enumerable: true });
   Object.defineProperty(this, 'movementRatio', {

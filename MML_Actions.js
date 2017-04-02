@@ -257,7 +257,10 @@ MML.endAction = function() {
   }
   character.spentInitiative = spentInitiative;
   character.previousAction = character.action;
-
+  character.updateCharacterSheet();
+  _.each(currentAction.targetArray, function (target) {
+    MML.characters[target].updateCharacterSheet();
+  });
   if (currentInitiative > 0) {
     character.player.charMenuPrepareAction(character.name);
     character.player.displayMenu();

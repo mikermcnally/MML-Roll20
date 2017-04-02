@@ -41,7 +41,7 @@ MML.Player = function(name, isGM) {
     var range = this.currentRoll.range.split('-');
     var low = parseInt(range[0]);
     var high = parseInt(range[1]);
-  
+
     if (value >= low && value <= high) {
       if (this.currentRoll.type === 'damage') {
         this.currentRoll.value = -value;
@@ -1171,6 +1171,7 @@ MML.Player = function(name, isGM) {
     this.buttons = [this.menuButtons.rollDice];
   };
   this.charMenuMeleeDefenseRoll = function(who, blockChance, dodgeChance) {
+    var character = MML.characters[who];
     this.who = who;
     this.message = 'How will ' + who + ' defend?';
     this.buttons = [{
