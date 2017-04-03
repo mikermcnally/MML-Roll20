@@ -1,0 +1,17 @@
+{
+  "uploadOnSave": true,
+  "useAtomicWrites": false,
+  "deleteLocal": false,
+  "hostname": "127.0.0.1",
+  "port": "22",
+  "target": "r20",
+  "ignore": [
+    ".remote-sync.json",
+    ".git/**",
+    ".jshintrc"
+  ],
+  "username": "mmcnally",
+  "password": "1337Sauc3",
+  "watch": [],
+  "transport": "scp"
+}

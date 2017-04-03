@@ -1,6 +1,6 @@
 MML.startCombat = function(selectedCharNames) {
   var gm = state.MML.GM;
-  gm.currentRound = 1;
+  gm.currentRound = 0;
   gm.combatants = selectedCharNames;
 
   if (gm.combatants.length > 0) {

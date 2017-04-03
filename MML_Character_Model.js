@@ -1601,16 +1601,16 @@ MML.Character = function(charName, id) {
     'applyStatusEffects': {
       value: function() {
         var dependents = [
-      'situationalInitBonus',
-      'situationalMod',
-      'rangedDefenseMod',
-      'meleeDefenseMod',
-      'missileAttackMod',
-      'meleeAttackMod',
-      'castingMod',
-      'perceptionCheckMod',
-      'roundsExertion'
-    ];
+          'situationalInitBonus',
+          'situationalMod',
+          'rangedDefenseMod',
+          'meleeDefenseMod',
+          'missileAttackMod',
+          'meleeAttackMod',
+          'castingMod',
+          'perceptionCheckMod',
+          'roundsExertion'
+        ];
         _.each(dependents, function(dependent) {
           this[dependent] = 0;
         }, this);
