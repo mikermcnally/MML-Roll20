@@ -7,12 +7,12 @@ MML.Character = function(charName, id) {
         var currentRoll = this.player.currentRoll;
         if (this.player.name === state.MML.GM.name) {
           if (currentRoll.accepted === false) {
-            this.player.displayGmRoll(currentRoll);
+            this.player.displayGmRoll();
           } else {
             this[callback](currentRoll);
           }
         } else {
-          this.player.displayPlayerRoll(currentRoll);
+          this.player.displayPlayerRoll();
           this[callback](currentRoll);
         }
       }
@@ -519,7 +519,7 @@ MML.Character = function(charName, id) {
     },
     'initiativeResult': {
       value: function() {
-        this.player.rollResult =
+        this.player.currentRoll.rollResult =
           this.player.currentRoll.value +
           this.situationalInitBonus +
           this.movementRatioInitBonus +

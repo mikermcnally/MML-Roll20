@@ -68,7 +68,6 @@ MML.Player = function(name, isGM) {
 
   this.newRoundUpdatePlayer = function() {
     this.characterIndex = 0;
-    this.combatants = _.intersection(this.characters, state.MML.GM.combatants);
     this.who = this.combatants[0];
     this.menu = 'charMenuPrepareAction';
     var character = MML.characters[this.who];

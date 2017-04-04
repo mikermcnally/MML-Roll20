@@ -63,6 +63,9 @@ function runTests() {
           MML.createAttribute("leftHand", JSON.stringify({
             _id: "emptyHand"
           }), "", character);
+          MML.createAttribute('repeating_weaponskills_1_name', 'Default Martial', "", character);
+          MML.createAttribute('repeating_weaponskills_1_input', '1', "", character);
+          MML.createAttribute('repeating_weaponskills_1_level', '1', "", character);
           MML.characters['test' + i] = new MML.Character('test' + i, character.id);
           createObj("graphic", {
             name: 'test' + i,
@@ -73,9 +76,21 @@ function runTests() {
             tint_color: 'transparent'
           });
         }
-
-        MML.startCombat(['test0', 'test1']);
-        player.menuCommand('test0', 'Start Round', []);
+        player.menuCommand(player.name, 'GmMenuMain');
+        player.menuCommand(player.name, 'Combat');
+        player.menuCommand(player.name, 'Start Combat', ['test0', 'test1']);
+        player.menuCommand(player.who, 'Attack');
+        player.menuCommand(player.who, 'Punch');
+        player.menuCommand(player.who, 'None');
+        player.menuCommand(player.who, 'Neutral');
+        player.menuCommand(player.who, 'Roll');
+        player.currentRoll.accepted = true;
+        MML.characters[player.who][player.currentRoll.callback]();
+        player.menuCommand(player.who, 'Observe');
+        player.menuCommand(player.who, 'Roll');
+        player.currentRoll.accepted = true;
+        MML.characters[player.who][player.currentRoll.callback]();
+        player.menuCommand(player.name, 'Start Round');
       });
     });
   });
