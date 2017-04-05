@@ -45,6 +45,7 @@ MML.Player = function(name, isGM) {
     if (value >= low && value <= high) {
       if (this.currentRoll.type === 'damage') {
         this.currentRoll.value = -value;
+        this.currentRoll.result = -value;
         this.currentRoll.message = 'Roll: ' + value + '\nRange: ' + this.currentRoll.range;
       } else {
         this.currentRoll.value = value;
@@ -1177,12 +1178,14 @@ MML.Player = function(name, isGM) {
       text: 'Dodge: ' + dodgeChance + '%',
       nextMenu: 'menuIdle',
       callback: function() {
+        character.statusEffects['Melee This Round'] = { id: generateRowID(), name: 'Melee This Round' };
         character.meleeDodgeRoll(dodgeChance);
       }
     }, {
       text: 'Block: ' + blockChance + '%',
       nextMenu: 'menuIdle',
       callback: function() {
+        character.statusEffects['Melee This Round'] = { id: generateRowID(), name: 'Melee This Round' };
         character.meleeBlockRoll(blockChance);
       }
     }, {
@@ -1201,6 +1204,7 @@ MML.Player = function(name, isGM) {
       text: 'Defend: ' + defenseChance + '%',
       nextMenu: 'menuIdle',
       callback: function() {
+        character.statusEffects['Melee This Round'] = { id: generateRowID(), name: 'Melee This Round' };
         character.rangedDefenseRoll(defenseChance);
       }
     }, {

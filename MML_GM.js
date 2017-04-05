@@ -2,8 +2,7 @@ MML.startCombat = function(selectedCharNames) {
   var gm = state.MML.GM;
   gm.currentRound = 0;
   gm.combatants = selectedCharNames;
-  console.log("SHOW ME WHAT YOU GOT");
-  console.log(gm.combatants);
+
   if (gm.combatants.length > 0) {
     gm.inCombat = true;
     _.each(MML.players, function(player) { player.combatants = []; });
@@ -13,7 +12,6 @@ MML.startCombat = function(selectedCharNames) {
       character.setReady(false);
       character.setCombatVision();
     });
-    console.log(MML.players.Robot.combatants);
     MML.setTurnOrder();
     Campaign().set('initiativepage', 'true');
     MML.newRound();
@@ -28,12 +26,10 @@ MML.newRound = function() {
   var gm = state.MML.GM;
   gm.currentRound++;
   gm.roundStarted = false;
-  console.log(MML.players.Robot.combatants);
   _.each(gm.combatants, function(charName) {
     MML.characters[charName].newRoundUpdateCharacter();
   });
   _.each(MML.players, function(player) {
-    console.log(MML.players[player.name].combatants);
     MML.players[player.name].newRoundUpdatePlayer();
   });
 };

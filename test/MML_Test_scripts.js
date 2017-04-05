@@ -1,4 +1,16 @@
+var fs = require('fs');
 _ = require('underscore');
+
+var roll20String = '';
+var filenames = fs.readdirSync('../r20').filter(function(filename) {
+  return filename.search(/MML_(?!Test|Roll20).*\.js/) !== -1;
+});
+_.each(filenames, function(filename, index) {
+  roll20String += fs.readFileSync('../r20/' + filename, 'utf-8');
+});
+roll20String += 'module.exports = { MML: MML };';
+fs.writeFileSync('../r20/MML_Test.js', roll20String, 'utf8');
+
 roll20 = require('../Roll20 Emulation/Roll20');
 state = roll20.state;
 log = roll20.log;
@@ -14,85 +26,151 @@ on = function(event) {};
 var expect = require('chai').expect;
 var MML = require('../MML_Test.js').MML;
 
-function runTests() {
-  describe('Character', function() {
-    describe('Constructor', function() {
-      it('should create a character', function() {
-        Campaign().playerpageid = 'test';
-        var player = new MML.Player('Robot', true);
-        MML.players = {'Robot': player };
-        state.MML = {};
-        state.MML.GM = {
-          player: player,
-          name: 'Robot',
-          currentAction: {},
-          inCombat: false,
-          currentRound: 0,
-          roundStarted: false
-        };
-        MML.characters = {};
-        var character;
-        for (var i = 0; i < 2; i++) {
-          character = createObj("character", {
-            name: 'test' + i,
-            "bio": "",
-            "gmnotes": "",
-            "_defaulttoken": "",
-            "archived": false,
-            "inplayerjournals": "",
-            "controlledby": "",
-            "avatar": ""
-          });
-          MML.createAttribute("player", 'Robot', "", character);
-          MML.createAttribute("name", 'test', "", character);
-          MML.createAttribute("race", "Human", "", character);
-          MML.createAttribute("gender", "Male", "", character);
-          MML.createAttribute("statureRoll", 10, "", character);
-          MML.createAttribute("strengthRoll", 10, "", character);
-          MML.createAttribute("coordinationRoll", 10, "", character);
-          MML.createAttribute("healthRoll", 10, "", character);
-          MML.createAttribute("beautyRoll", 10, "", character);
-          MML.createAttribute("intellectRoll", 10, "", character);
-          MML.createAttribute("reasonRoll", 10, "", character);
-          MML.createAttribute("creativityRoll", 10, "", character);
-          MML.createAttribute("presenceRoll", 10, "", character);
-          MML.createAttribute("fomInitBonus", 6, "", character);
-          MML.createAttribute("rightHand", JSON.stringify({
-            _id: "emptyHand"
-          }), "", character);
-          MML.createAttribute("leftHand", JSON.stringify({
-            _id: "emptyHand"
-          }), "", character);
-          MML.createAttribute('repeating_weaponskills_1_name', 'Default Martial', "", character);
-          MML.createAttribute('repeating_weaponskills_1_input', '1', "", character);
-          MML.createAttribute('repeating_weaponskills_1_level', '1', "", character);
-          MML.characters['test' + i] = new MML.Character('test' + i, character.id);
-          createObj("graphic", {
-            name: 'test' + i,
-            _pageid: Campaign().get("playerpageid"),
-            _type: "graphic",
-            _subtype: "token",
-            represents: character.id,
-            tint_color: 'transparent'
-          });
-        }
-        player.menuCommand(player.name, 'GmMenuMain');
-        player.menuCommand(player.name, 'Combat');
-        player.menuCommand(player.name, 'Start Combat', ['test0', 'test1']);
-        player.menuCommand(player.who, 'Attack');
-        player.menuCommand(player.who, 'Punch');
-        player.menuCommand(player.who, 'None');
-        player.menuCommand(player.who, 'Neutral');
-        player.menuCommand(player.who, 'Roll');
-        player.currentRoll.accepted = true;
-        MML.characters[player.who][player.currentRoll.callback]();
-        player.menuCommand(player.who, 'Observe');
-        player.menuCommand(player.who, 'Roll');
-        player.currentRoll.accepted = true;
-        MML.characters[player.who][player.currentRoll.callback]();
-        player.menuCommand(player.name, 'Start Round');
-      });
-    });
-  });
-}
 runTests();
+
+function runTests() {
+  describe('Combat', function() {
+    this.timeout(15000);
+    var player;
+
+    beforeEach(function() {
+      player = resetEnvironment();
+      createTestCharacters(2);
+      startTestCombat(player, _.pluck(MML.characters, 'name'));
+    });
+
+    it('standard punch with no defense', function() {
+      player.menuCommand(player.who, 'Attack');
+      player.menuCommand(player.who, 'Punch');
+      player.menuCommand(player.who, 'None');
+      player.menuCommand(player.who, 'Neutral');
+      player.menuCommand(player.who, 'Roll');
+      testSetRoll(player, 10);
+      player.menuCommand(player.who, 'Observe');
+      player.menuCommand(player.who, 'Roll');
+      testSetRoll(player, 1);
+      player.menuCommand(player.name, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "setCurrentCharacterTargets"
+      });
+      testSetRoll(player, 5);
+      player.menuCommand(player.who, 'Take it');
+      testSetRoll(player, 1);
+      testSetRoll(player, 1);
+
+      expect(MML.characters['test1'].hp.Head, 'should do 1 damage').to.equal(MML.characters['test1'].hpMax.Head - 1);
+      expect(MML.characters['test1'].hp['Multiple Wounds'], 'should do 1 damage').to.equal(MML.characters['test1'].hpMax['Multiple Wounds'] - 1);
+      expect(MML.characters['test0'].spentInitiative, 'should cost 25 initiative').to.equal(-25);
+      expect(MML.characters['test0'].statusEffects, 'should create "Melee This Round" status effect for attacker').to.have.property("Melee This Round");
+      expect(MML.characters['test1'].statusEffects, 'should not create "Melee This Round" status effect for defender').not.to.have.property("Melee This Round");
+      expect(MML.characters['test1'].statusEffects, 'should not create "Number of Defenses" status effect for defender').not.to.have.property("Number of Defenses");
+
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      expect(MML.characters['test1'].statusEffects, 'observe action should create "Observe" status effect').to.have.property("Observe");
+      expect(MML.characters['test1'].spentInitiative, 'observe action should cost 25 initiative').to.equal(-25);
+      player.menuCommand(player.who, 'End Action');
+      expect(MML.characters['test1'].statusEffects, 'observe action should not create "Melee This Round" status effect').not.to.have.property("Melee This Round");
+    });
+
+    // it('observe action', function() {
+    //   player.menuCommand(player.who, 'Observe');
+    //   player.menuCommand(player.who, 'Roll');
+    //   testSetRoll(player, 10);
+    //   player.menuCommand(player.who, 'Observe');
+    //   player.menuCommand(player.who, 'Roll');
+    //   testSetRoll(player, 1);
+    //   player.menuCommand(player.name, 'Start Round');
+    //
+    // });
+  });
+  // it('should add to roundsExertion for attacker', function() {
+  //   expect(MML.characters['test0'].roundsExertion).to.equal(1);
+  // });
+  // it('should not add to roundsExertion for defender', function() {
+  //   expect(MML.characters['test1'].roundsExertion).to.equal(0);
+  // });
+}
+
+function testSetRoll(player, value) {
+  player.changeRoll(value);
+  player.currentRoll.accepted = true;
+  MML.characters[player.who][player.currentRoll.callback]();
+}
+
+function resetEnvironment() {
+  Campaign().playerpageid = 'test';
+  var player = new MML.Player('Robot', true);
+  MML.players = {
+    'Robot': player
+  };
+  state.MML = {};
+  state.MML.GM = {
+    player: player,
+    name: 'Robot',
+    currentAction: {},
+    inCombat: false,
+    currentRound: 0,
+    roundStarted: false
+  };
+  MML.characters = {};
+  return player;
+}
+
+function createTestCharacters(amount) {
+  var character;
+  for (var i = 0; i < amount; i++) {
+    character = createObj("character", {
+      name: 'test' + i,
+      "bio": "",
+      "gmnotes": "",
+      "_defaulttoken": "",
+      "archived": false,
+      "inplayerjournals": "",
+      "controlledby": "",
+      "avatar": ""
+    });
+    MML.createAttribute("player", 'Robot', "", character);
+    MML.createAttribute("name", 'test', "", character);
+    MML.createAttribute("race", "Human", "", character);
+    MML.createAttribute("gender", "Male", "", character);
+    MML.createAttribute("statureRoll", 10, "", character);
+    MML.createAttribute("strengthRoll", 10, "", character);
+    MML.createAttribute("coordinationRoll", 10, "", character);
+    MML.createAttribute("healthRoll", 10, "", character);
+    MML.createAttribute("beautyRoll", 10, "", character);
+    MML.createAttribute("intellectRoll", 10, "", character);
+    MML.createAttribute("reasonRoll", 10, "", character);
+    MML.createAttribute("creativityRoll", 10, "", character);
+    MML.createAttribute("presenceRoll", 10, "", character);
+    MML.createAttribute("fomInitBonus", 6, "", character);
+    MML.createAttribute("rightHand", JSON.stringify({
+      _id: "emptyHand"
+    }), "", character);
+    MML.createAttribute("leftHand", JSON.stringify({
+      _id: "emptyHand"
+    }), "", character);
+    MML.createAttribute('repeating_weaponskills_1_name', 'Default Martial', "", character);
+    MML.createAttribute('repeating_weaponskills_1_input', '1', "", character);
+    MML.createAttribute('repeating_weaponskills_1_level', '1', "", character);
+    MML.characters['test' + i] = new MML.Character('test' + i, character.id);
+    createObj("graphic", {
+      name: 'test' + i,
+      _pageid: Campaign().get("playerpageid"),
+      _type: "graphic",
+      _subtype: "token",
+      represents: character.id,
+      tint_color: 'transparent'
+    });
+  }
+}
+
+function startTestCombat(player, characters) {
+  player.menuCommand(player.name, 'GmMenuMain');
+  player.menuCommand(player.name, 'Combat');
+  player.menuCommand(player.name, 'Start Combat', characters);
+}

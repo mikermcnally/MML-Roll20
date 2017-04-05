@@ -162,7 +162,6 @@ MML.Character = function(charName, id) {
 
           //Wounds
           if (currentHP < Math.round(maxHP / 2) && currentHP >= 0) { //Major wound
-            log('Major');
             if (initialHP >= Math.round(maxHP / 2) && !_.has(this.statusEffects, 'Major Wound, ' + bodyPart)) { //Fresh wound
               duration = Math.round(maxHP / 2) - currentHP;
             } else { //Add damage to duration of effect
@@ -172,7 +171,6 @@ MML.Character = function(charName, id) {
             this.player.charMenuMajorWoundRoll(this.name);
             this.player.displayMenu();
           } else if (currentHP < 0 && currentHP > -maxHP) { //Disabling wound
-            log('Disabling');
             if (!_.has(this.statusEffects, 'Disabling Wound, ' + bodyPart)) { //Fresh wound
               duration = -currentHP;
             } else { //Add damage to duration of effect
@@ -182,11 +180,11 @@ MML.Character = function(charName, id) {
             this.player.charMenuDisablingWoundRoll(this.name);
             this.player.displayMenu();
           } else if (currentHP < -maxHP) { //Mortal wound
-            log('Mortal');
             this.addStatusEffect('Mortal Wound, ' + bodyPart, { bodyPart: bodyPart });
             MML[state.MML.GM.currentAction.callback]();
           } else {
-            log('Minor');
+            console.log("SHOW ME WHAT YOU GOT");
+            console.log(state.MML.GM.currentAction.callback);
             MML[state.MML.GM.currentAction.callback]();
           }
         } else { //if healing
@@ -413,8 +411,6 @@ MML.Character = function(charName, id) {
       value: function(position, damage, type, coverageRoll) {
         var damageApplied = false; //Accounts for partial coverage, once true the loop stops
         var damageDeflected = 0;
-        log(this.apv);
-        log(position);
         // Iterates over apv values at given position (accounting for partial coverage)
         var apv;
         for (apv in this.apv[position][type]) {
@@ -606,7 +602,7 @@ MML.Character = function(charName, id) {
         } else if (!_.isUndefined(this.action.getTargets)) {
           this[this.action.getTargets]();
         } else {
-          this.action.callback();
+          MML[this.action.callback]();
         }
       }
     },
@@ -954,8 +950,6 @@ MML.Character = function(charName, id) {
         var shieldMod = MML.getShieldDefenseBonus(this);
         var defenseMod = this.meleeDefenseMod + this.attributeDefenseMod;
         var sitMod = this.situationalMod;
-
-        this.statusEffects['Melee This Round'] = { id: generateRowID(), name: 'Melee This Round' };
 
         if (!_.isUndefined(this.weaponSkills['Dodge']) && defaultMartialSkill < this.weaponSkills['Dodge'].level) {
           dodgeChance = this.weaponSkills['Dodge'].level + defenseMod + sitMod;
@@ -1479,8 +1473,8 @@ MML.Character = function(charName, id) {
       }
     },
     'forgoDefense': {
-      value: function() {
-        state.MML.GM.currentAction.rolls[input.rollName] = 'Failure';
+      value: function(rollName) {
+        state.MML.GM.currentAction.rolls[rollName] = 'Failure';
         MML[state.MML.GM.currentAction.callback]();
       }
     },
@@ -1521,7 +1515,7 @@ MML.Character = function(charName, id) {
           callback: callback
         };
 
-        this.player.currentRoll.value = roll;
+        this.player.currentRoll = roll;
         this[callback]();
       }
     },
