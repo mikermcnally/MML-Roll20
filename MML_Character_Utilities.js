@@ -604,6 +604,15 @@ MML.getRangeCastingModifier = function(caster, targets, spell) {
   return mod;
 };
 
+MML.removeAimAndObserve = function (character) {
+  if (_.has(character.statusEffects, 'Taking Aim')) {
+    character.removeStatusEffect('Taking Aim');
+  }
+  if (_.has(character.statusEffects, 'Observe')) {
+    character.removeStatusEffect('Observe');
+  }
+};
+
 MML.validateAction = function(character) {
   var valid = true;
 

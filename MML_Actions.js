@@ -217,7 +217,7 @@ MML.damageTargetAction = function(callback) {
     target.sensitiveAreaCheck(rolls.hitPositionRoll.name);
   } else if (_.isUndefined(parameters.knockdown)) {
     state.MML.GM.currentAction.parameters.knockdown = 'complete';
-    target.knockdownCheck(rolls.damageRoll.value);
+    target.knockdownCheck(rolls.damageRoll);
   } else {
     MML[callback]();
   }
@@ -227,11 +227,11 @@ MML.observeAction = function() {
   var currentAction = state.MML.GM.currentAction;
   var character = currentAction.character;
 
-  character.statusEffects['Observe'] = {
+  character.addStatusEffect('Observe', {
     id: generateRowID(),
     name: 'Observe',
     startingRound: state.MML.GM.currentRound
-  };
+  });
   character.player.charMenuObserveAction(character.name);
   character.player.displayMenu();
 };
@@ -257,9 +257,9 @@ MML.endAction = function() {
   }
   character.spentInitiative = spentInitiative;
   character.previousAction = character.action;
-  character.updateCharacterSheet();
+  character.updateCharacter();
   _.each(currentAction.targetArray, function (target) {
-    MML.characters[target].updateCharacterSheet();
+    MML.characters[target].updateCharacter();
   });
   if (currentInitiative > 0) {
     character.player.charMenuPrepareAction(character.name);

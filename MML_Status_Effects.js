@@ -62,7 +62,7 @@ MML.statusEffects['Number of Defenses'] = function(effect, index) {
   } else {
     this.rangedDefenseMod += -20 * effect.number;
     this.meleeDefenseMod += -20 * effect.number;
-    this.statusEffects[index].description = 'Defense Modifier: ' + -20 * effect.number + '%';
+    this.statusEffects[index].description = 'Defense Modifier: ' + (-20 * effect.number) + '%';
   }
 };
 MML.statusEffects['Fatigue'] = function(effect, index) {
@@ -159,11 +159,7 @@ MML.statusEffects['Defensive Stance'] = function(effect, index) {
 MML.statusEffects['Observe'] = function(effect, index) {
   if (state.MML.GM.inCombat === false ||
     state.MML.GM.currentRound - parseInt(effect.startingRound) > 1 ||
-    this.situationalInitBonus === 'No Combat' ||
-    _.has(this.statusEffects, 'Number of Defenses') ||
-    _.has(this.statusEffects, 'Damaged This Round') ||
-    _.has(this.statusEffects, 'Melee This Round') ||
-    _.has(this.statusEffects, 'Dodged This Round')
+    this.situationalInitBonus === 'No Combat'
   ) {
     delete this.statusEffects[index];
   } else if (state.MML.GM.currentRound === parseInt(effect.startingRound)) {
@@ -184,11 +180,7 @@ MML.statusEffects['Observe'] = function(effect, index) {
   }
 };
 MML.statusEffects['Taking Aim'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false ||
-    _.has(this.statusEffects, 'Number of Defenses') ||
-    _.has(this.statusEffects, 'Damaged This Round') ||
-    _.has(this.statusEffects, 'Dodged This Round') ||
-    this.action.targets[0] !== effect.target
+  if (state.MML.GM.inCombat === false || this.action.targets[0] !== effect.target
   ) {
     delete this.statusEffects[index];
   } else {

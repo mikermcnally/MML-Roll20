@@ -50,7 +50,7 @@ MML.Character = function(charName, id) {
           if (_.has(this.statusEffects, 'Pinned')) {
             fatigueRate = 2;
           }
-          this.roundsExertion = this.roundsExertion + fatigueRate;
+          this.roundsExertion += fatigueRate;
           this.roundsRest = 0;
 
           if (!_.has(this.statusEffects, 'Fatigue')) {
@@ -183,8 +183,6 @@ MML.Character = function(charName, id) {
             this.addStatusEffect('Mortal Wound, ' + bodyPart, { bodyPart: bodyPart });
             MML[state.MML.GM.currentAction.callback]();
           } else {
-            console.log("SHOW ME WHAT YOU GOT");
-            console.log(state.MML.GM.currentAction.callback);
             MML[state.MML.GM.currentAction.callback]();
           }
         } else { //if healing
@@ -293,7 +291,7 @@ MML.Character = function(charName, id) {
     'knockdownCheck': {
       value: function(damage) {
         this.knockdown += damage;
-        if (this.movementPosition !== 'Prone' && this.knockdown < 1) {
+      if (this.movementPosition !== 'Prone' && this.knockdown < 1) {
           this.knockdownRoll();
         } else {
           MML[state.MML.GM.currentAction.callback]();
@@ -993,6 +991,7 @@ MML.Character = function(charName, id) {
           blockChance += attackerWeapon.defenseMod;
         }
 
+        MML.removeAimAndObserve(this);
         this.player.charMenuMeleeDefenseRoll(this.name, dodgeChance, blockChance);
         this.player.displayMenu();
       }
@@ -1011,12 +1010,10 @@ MML.Character = function(charName, id) {
       value: function() {
         var result = this.player.currentRoll.result;
 
-        if (result === 'Success') {
-          if (_.has(this.statusEffects, 'Number of Defenses')) {
-            this.statusEffects['Number of Defenses'].number++;
-          } else {
-            this.addStatusEffect('Number of Defenses', { number: 1 });
-          }
+        if (_.has(this.statusEffects, 'Number of Defenses')) {
+          this.statusEffects['Number of Defenses'].number++;
+        } else {
+          this.addStatusEffect('Number of Defenses', { number: 1 });
         }
 
         state.MML.GM.currentAction.rolls.defenseRoll = result;
@@ -1106,6 +1103,7 @@ MML.Character = function(charName, id) {
           defenseChance += rangeMod;
         }
 
+        MML.removeAimAndObserve(this);
         this.player.charMenuRangedDefenseRoll(this.name, defenseChance);
         this.player.displayMenu();
       }
@@ -1686,6 +1684,13 @@ MML.Character = function(charName, id) {
         }, this);
       }
     },
+    'updateCharacter': {
+      value: function() {
+        this.applyStatusEffects();
+        this.updateInventory();
+        this.updateCharacterSheet();
+      }
+    },
     'setPlayer': {
       value: function() {
         var playerName = MML.getCurrentAttribute(this.name, 'player');
@@ -2112,7 +2117,7 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'action', { value: MML.getCurrentAttributeJSON(this.name, 'action'), writable: true, enumerable: true });
   Object.defineProperty(this, 'previousAction', { value: MML.getCurrentAttributeJSON(this.name, 'previousAction'), writable: true, enumerable: true });
   Object.defineProperty(this, 'roundsRest', { value: MML.getCurrentAttributeAsFloat(this.name, 'roundsRest'), writable: true, enumerable: true });
-  Object.defineProperty(this, 'roundsExertion', { value: MML.getCurrentAttributeAsFloat(this.name, 'roundsExertion'), enumerable: true });
+  Object.defineProperty(this, 'roundsExertion', { value: MML.getCurrentAttributeAsFloat(this.name, 'roundsExertion'), writable: true, enumerable: true });
   Object.defineProperty(this, 'skills', {
     get: function() {
       var characterSkills = MML.getSkillAttributes(this.name, 'skills');
