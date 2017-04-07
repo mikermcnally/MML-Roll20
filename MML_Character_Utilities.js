@@ -609,7 +609,7 @@ MML.removeAimAndObserve = function (character) {
     character.removeStatusEffect('Taking Aim');
   }
   if (_.has(character.statusEffects, 'Observe')) {
-    character.removeStatusEffect('Observe');
+    // character.removeStatusEffect('Observe');
   }
 };
 

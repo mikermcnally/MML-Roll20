@@ -28,15 +28,12 @@ MML.Player = function(name, isGM) {
       noarchive: false
     }); //Change to true this when they fix the bug
   };
-
   this.displayGmRoll = function() {
     sendChat(this.name, '/w "' + this.name + '" &{template:rollMenuGM} {{title=' + this.currentRoll.message + "}}");
   };
-
   this.displayPlayerRoll = function() {
     sendChat(this.name, '/w "' + this.name + '" &{template:rollMenu} {{title=' + this.currentRoll.message + "}}");
   };
-
   this.changeRoll = function(value) {
     var range = this.currentRoll.range.split('-');
     var low = parseInt(range[0]);
@@ -62,11 +59,9 @@ MML.Player = function(name, isGM) {
     }
     MML.characters[this.currentRoll.character][this.currentRoll.callback]();
   };
-
   this.setApiPlayerAttribute = function(attribute, value) {
     this[attribute] = value;
   };
-
   this.newRoundUpdatePlayer = function() {
     this.characterIndex = 0;
     this.who = this.combatants[0];
@@ -86,7 +81,6 @@ MML.Player = function(name, isGM) {
       this.displayMenu();
     }
   };
-
   this.prepareNextCharacter = function() {
     this.characterIndex++;
     var charName = this.combatants[this.characterIndex];
@@ -107,7 +101,6 @@ MML.Player = function(name, isGM) {
       this.displayMenu();
     }
   };
-
   this.menuIdle = function(who) {
     this.who = who;
     this.message = 'Menu Closed';
@@ -117,9 +110,7 @@ MML.Player = function(name, isGM) {
       this.buttons = [this.menuButtons.GmMenuMain];
     }
   };
-
   this.menuPause = function() {};
-
   this.GmMenuMain = function(who) {
     this.who = who;
     this.message = 'Main Menu: ';
@@ -129,7 +120,6 @@ MML.Player = function(name, isGM) {
       this.menuButtons.utilitiesMenu
     ];
   };
-
   this.GmMenuAssignStatusEffect = function(who) {
     this.who = who;
     this.message = 'Choose a Status Effect: ';
@@ -154,7 +144,6 @@ MML.Player = function(name, isGM) {
       this.menuButtons.toMainGmMenu,
     ];
   };
-
   this.GmMenuNewItem = function(who) {
     this.who = who;
     this.message = 'Select item type:';
@@ -185,7 +174,6 @@ MML.Player = function(name, isGM) {
       }
     }, this);
   };
-
   this.GmMenuNewShield = function(who) {
     this.who = who;
     this.message = 'Select shield type:';
@@ -204,7 +192,6 @@ MML.Player = function(name, isGM) {
       }
     }, this);
   };
-
   this.GmMenuNewArmor = function(who) {
     this.who = who;
     this.message = 'Select armor style:';
@@ -223,7 +210,6 @@ MML.Player = function(name, isGM) {
       }
     }, this);
   };
-
   this.GmMenuArmorMaterial = function(who) {
     this.who = who;
     this.message = 'Select armor material:';
@@ -243,13 +229,11 @@ MML.Player = function(name, isGM) {
       });
     }, this);
   };
-
   this.GmMenuNewItemProperties = function(who) {
     this.who = who;
     this.message = 'Add new properties:';
     this.buttons = [this.menuButtons.assignNewItem];
   };
-
   this.GmMenuassignNewItem = function(who) {
     this.who = who;
     this.message = 'Select character:';
@@ -265,7 +249,6 @@ MML.Player = function(name, isGM) {
       });
     }, this);
   };
-
   this.GmMenuItemQuality = function(who) {
     this.who = who;
     this.message = 'Select a quality level:';
@@ -275,7 +258,6 @@ MML.Player = function(name, isGM) {
       this.menuButtons.itemQualityMasterWork
     ];
   };
-
   this.displayItemOptions = function(who, itemId) {
     var character = MML.characters[who];
     var item = character.inventory[itemId];
@@ -1174,27 +1156,32 @@ MML.Player = function(name, isGM) {
     var character = MML.characters[who];
     this.who = who;
     this.message = 'How will ' + who + ' defend?';
-    this.buttons = [{
+    this.buttons = [];
+    if (!MML.isUnarmed(character) || MML.isUnarmed(state.MML.GM.currentAction.character)) {
+      this.buttons.push({
+        text: 'Block: ' + blockChance + '%',
+        nextMenu: 'menuIdle',
+        callback: function() {
+          character.statusEffects['Melee This Round'] = { id: generateRowID(), name: 'Melee This Round' };
+          character.meleeBlockRoll(blockChance);
+        }
+      });
+    }
+    this.buttons.push({
       text: 'Dodge: ' + dodgeChance + '%',
       nextMenu: 'menuIdle',
       callback: function() {
         character.statusEffects['Melee This Round'] = { id: generateRowID(), name: 'Melee This Round' };
         character.meleeDodgeRoll(dodgeChance);
       }
-    }, {
-      text: 'Block: ' + blockChance + '%',
-      nextMenu: 'menuIdle',
-      callback: function() {
-        character.statusEffects['Melee This Round'] = { id: generateRowID(), name: 'Melee This Round' };
-        character.meleeBlockRoll(blockChance);
-      }
-    }, {
+    });
+    this.buttons.push({
       text: 'Take it',
       nextMenu: 'menuIdle',
       callback: function() {
         character.forgoDefense('defenseRoll');
       }
-    }];
+    });
   };
   this.charMenuRangedDefenseRoll = function(who, defenseChance) {
     var character = MML.characters[who];

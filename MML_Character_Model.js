@@ -1027,24 +1027,20 @@ MML.Character = function(charName, id) {
     },
     'meleeDodgeRollResult': {
       value: function() {
-        displayRoll('meleeDodgeRollApply');
+        this.displayRoll('meleeDodgeRollApply');
       }
     },
     'meleeDodgeRollApply': {
       value: function() {
         var result = this.player.currentRoll.result;
-
-        if (result === 'Success') {
-          if (_.has(this.statusEffects, 'Number of Defenses')) {
-            this.statusEffects['Number of Defenses'].number++;
-          } else {
-            this.addStatusEffect('Number of Defenses', { number: 1 });
-          }
-          if (!_.has(this.statusEffects, 'Dodged This Round')) {
-            this.addStatusEffect('Dodged This Round', {});
-          }
+        if (_.has(this.statusEffects, 'Number of Defenses')) {
+          this.statusEffects['Number of Defenses'].number++;
+        } else {
+          this.addStatusEffect('Number of Defenses', { number: 1 });
         }
-
+        if (!_.has(this.statusEffects, 'Dodged This Round')) {
+          this.addStatusEffect('Dodged This Round', {});
+        }
         state.MML.GM.currentAction.rolls.defenseRoll = result;
         MML[state.MML.GM.currentAction.callback]();
       }

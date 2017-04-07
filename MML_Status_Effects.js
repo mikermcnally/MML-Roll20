@@ -158,6 +158,11 @@ MML.statusEffects['Defensive Stance'] = function(effect, index) {
 };
 MML.statusEffects['Observe'] = function(effect, index) {
   if (state.MML.GM.inCombat === false ||
+    (state.MML.GM.currentRound === parseInt(effect.startingRound) && (
+      _.has(this.statusEffects, 'Damaged This Round') ||
+      _.has(this.statusEffects, 'Dodged This Round') ||
+      _.has(this.statusEffects, 'Melee This Round'))
+    ) ||
     state.MML.GM.currentRound - parseInt(effect.startingRound) > 1 ||
     this.situationalInitBonus === 'No Combat'
   ) {
@@ -171,7 +176,11 @@ MML.statusEffects['Observe'] = function(effect, index) {
   } else {
     //observed previous round
     this.situationalInitBonus += 5;
-    if (MML.isWieldingRangedWeapon(this)) {
+    if (MML.isWieldingRangedWeapon(this) &&
+      (!_.has(this.statusEffects, 'Damaged This Round') ||
+      !_.has(this.statusEffects, 'Dodged This Round') ||
+      !_.has(this.statusEffects, 'Melee This Round'))
+    ) {
       this.missileAttackMod += 15;
       this.statusEffects[index].description = 'Missile Attack Modifier: +15%. Initiative: +5';
     } else {
