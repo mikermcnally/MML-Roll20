@@ -162,8 +162,10 @@ MML.Character = function(charName, id) {
 
           //Wounds
           if (currentHP < Math.round(maxHP / 2) && currentHP >= 0) { //Major wound
-            if (initialHP >= Math.round(maxHP / 2) && !_.has(this.statusEffects, 'Major Wound, ' + bodyPart)) { //Fresh wound
+            if (initialHP >= Math.round(maxHP / 2)) { //Fresh wound
               duration = Math.round(maxHP / 2) - currentHP;
+            } else if (!_.has(this.statusEffects, 'Major Wound, ' + bodyPart)) {
+              duration = -hpAmount;
             } else { //Add damage to duration of effect
               duration = parseInt(this.statusEffects['Major Wound, ' + bodyPart].duration) - hpAmount;
             }
@@ -173,6 +175,8 @@ MML.Character = function(charName, id) {
           } else if (currentHP < 0 && currentHP > -maxHP) { //Disabling wound
             if (!_.has(this.statusEffects, 'Disabling Wound, ' + bodyPart)) { //Fresh wound
               duration = -currentHP;
+            } else if (!_.has(this.statusEffects, 'Disabling Wound, ' + bodyPart)) {
+              duration = -hpAmount;
             } else { //Add damage to duration of effect
               duration = parseInt(this.statusEffects['Disabling Wound, ' + bodyPart].duration) - hpAmount;
             }
@@ -478,7 +482,7 @@ MML.Character = function(charName, id) {
             // this.action.skill = this.weaponSkills.[this.inventory[this.leftHand._id].name].level or this.weaponSkills['Default Martial Skill'].level;
             //Dual Wielding
           } else {
-            initBonus = this.action.initiative;
+            initBonus = this.action.weapon.initiative;
             this.action.skill = MML.getWeaponSkill(this, this.action.weapon);
           }
         } else if (this.action.name === 'Cast') {
@@ -2071,7 +2075,7 @@ MML.Character = function(charName, id) {
     enumerable: true
   });
   Object.defineProperty(this, 'fomInitBonus', { get: function() { return MML.getCurrentAttributeAsFloat(this.name, 'fomInitBonus'); }, enumerable: true });
-  Object.defineProperty(this, 'firstActionInitBonus', { value: MML.getCurrentAttributeAsFloat(this.name, 'firstActionInitBonus'), enumerable: true });
+  Object.defineProperty(this, 'firstActionInitBonus', { value: MML.getCurrentAttributeAsFloat(this.name, 'firstActionInitBonus'), writable: true, enumerable: true });
   Object.defineProperty(this, 'spentInitiative', { value: MML.getCurrentAttributeAsFloat(this.name, 'spentInitiative'), writable: true, enumerable: true });
   Object.defineProperty(this, 'actionTempo', {
     get: function() {

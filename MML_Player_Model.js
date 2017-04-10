@@ -1561,6 +1561,9 @@ MML.Player = function(name, isGM) {
     nextMenu: 'charMenuPrepareAction',
     callback: function() {
       MML.characters[this.who].action = { modifiers: [] };
+      if (state.MML.GM.roundStarted === true) {
+        MML.characters[this.who].action.modifiers.push('Changed Action');
+      }
       this.displayMenu();
     }
   };
@@ -1598,7 +1601,7 @@ MML.Player = function(name, isGM) {
     callback: function() {
       var character = MML.characters[this.who];
       character.setReady(true);
-      character.spentInitiative = character.spentInitiative - 10;
+      // character.spentInitiative = character.spentInitiative - 10;
       character.setAction();
       MML.nextAction();
     }

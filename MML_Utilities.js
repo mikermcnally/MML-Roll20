@@ -450,7 +450,7 @@ MML.attributeCheckRoll = function(character, rollName, attribute, mods, callback
   var roll = {
     type: "attribute",
     name: rollName,
-    character: character,
+    character: character.name,
     callback: callback,
     value: MML.rollDice(1, 20),
     range: "1-20",

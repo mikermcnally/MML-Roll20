@@ -11,7 +11,7 @@ MML.statusEffects['Major Wound'] = function(effect, index) {
     if (this.situationalInitBonus !== 'No Combat') {
       this.situationalInitBonus += -5;
     }
-    if (state.MML.GM.currentRound - parseInt(effect.startingRound) > effect.duration) {
+    if (state.MML.GM.currentRound - parseInt(effect.startingRound) < effect.duration) {
       this.situationalMod += -10;
     }
     this.statusEffects[index].description = 'Situational Modifier: -10%. Initiative: -5';
@@ -354,7 +354,15 @@ MML.statusEffects['Ease Spell'] = function(effect, index) {
 };
 MML.statusEffects['Release Opponent'] = function(effect, index) {};
 MML.statusEffects['Ready Item'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false || state.MML.GM.roundStarted === false) {
+  if (state.MML.GM.inCombat === false || !_.contains(this.action.modifiers, 'Ready Item')) {
+    delete this.statusEffects[index];
+  } else {
+    this.situationalInitBonus += -10;
+    this.statusEffects[index].description = 'Initiative: -10';
+  }
+};
+MML.statusEffects['Changed Action'] = function(effect, index) {
+  if (state.MML.GM.inCombat === false) {
     delete this.statusEffects[index];
   } else {
     this.situationalInitBonus += -10;
