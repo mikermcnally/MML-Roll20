@@ -30,7 +30,7 @@ runTests();
 
 function runTests() {
   describe('Combat', function() {
-    this.timeout(15000);
+    this.timeout(150000);
     var player;
 
     beforeEach(function() {
@@ -170,13 +170,17 @@ function runTests() {
     it.only('Tested: Ready Item, Melee Attack, Melee Dodge', function() {
       var item = MML.items['Hand Axe'];
       item.quality = 'Standard';
-      MML.characters['test0'].inventory['item'] = item;
-      MML.characters['test1'].inventory['item'] = item;
+      item._id = 'axe';
+      MML.characters['test0'].inventory['axe'] = item;
+      MML.characters['test1'].inventory['axe'] = item;
       player.menuCommand(player.who, 'Ready Item');
       player.menuCommand(player.who, 'Hand Axe');
       player.menuCommand(player.who, 'Right');
       player.menuCommand(player.who, 'Next Menu');
       player.menuCommand(player.who, 'Attack');
+      expect(_.pluck(player.buttons, 'text'), 'Aim should not be an option for character without missile weapon').not.to.contain('Aim');
+      expect(_.pluck(player.buttons, 'text'), 'Shoot From Cover should not be an option for unarmed character').not.to.contain('Shoot From Cover');
+
       player.menuCommand(player.who, 'Standard');
       player.menuCommand(player.who, 'None');
       player.menuCommand(player.who, 'Neutral');
@@ -203,7 +207,7 @@ function runTests() {
 
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
-      expect(MML.characters['test0'].rightHand._id, 'ready item should only update selected hand').to.equal('item');
+      expect(MML.characters['test0'].rightHand._id, 'ready item should only update selected hand').to.equal('axe');
       expect(MML.characters['test0'].rightHand.grip, 'right hand grip should be "One Hand"').to.equal('One Hand');
       expect(MML.characters['test0'].leftHand._id, 'ready item should only update selected hand').to.equal('emptyHand');
 
@@ -231,7 +235,7 @@ function runTests() {
       expect(MML.characters['test1'].action.callback, 'dodging should prevent a character from doing anything but movement').to.equal('endAction');
 
       player.menuCommand(player.who, 'End Movement');
-      expect(MML.characters['test1'].rightHand._id, 'dodging should not prevent ready item').to.equal('item');
+      expect(MML.characters['test1'].rightHand._id, 'dodging should not prevent ready item').to.equal('axe');
 
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
@@ -243,33 +247,30 @@ function runTests() {
       player.menuCommand(player.who, 'Neutral');
       player.menuCommand(player.who, 'Roll');
       setTestRoll(player, 10);
-      player.menuCommand(player.who, 'Ready Item');
-      console.log(MML.characters['test1'].rightHand);
-
-      // player.menuCommand(player.who, 'Hand Axe');
-      // player.menuCommand(player.who, 'Right');
-      // player.menuCommand(player.who, 'Next Menu');
-      // player.menuCommand(player.who, 'Attack');
-      // player.menuCommand(player.who, 'Standard');
-      // player.menuCommand(player.who, 'None');
-      // player.menuCommand(player.who, 'Neutral');
-      // player.menuCommand(player.who, 'Roll');
-      // setTestRoll(player, 2);
-      // player.menuCommand(player.who, 'Observe');
-      // player.menuCommand(player.who, 'Roll');
-      // setTestRoll(player, 1);
-      // player.menuCommand(player.name, 'Start Round');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.setCurrentCharacterTargets({
-      //   "charName": "test0",
-      //   "target": "test2",
-      //   "callback": "setCurrentCharacterTargets"
-      // });
-      // setTestRoll(player, 5);
-      // player.menuCommand(player.who, 'Take it');
-      // setTestRoll(player, 8);
-      // setTestRoll(player, 9);
+      player.menuCommand(player.who, 'Attack');
+      player.menuCommand(player.who, 'Standard');
+      player.menuCommand(player.who, 'None');
+      player.menuCommand(player.who, 'Neutral');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 2);
+      player.menuCommand(player.who, 'Observe');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 1);
+      player.menuCommand(player.name, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test2",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 5);
+      player.menuCommand(player.who, 'Take it');
+      setTestRoll(player, 8);
+      setTestRoll(player, 9);
+      player.menuCommand(player.who, 'Roll Willpower');
+      setTestRoll(player, 10);
+      
     });
   });
 }

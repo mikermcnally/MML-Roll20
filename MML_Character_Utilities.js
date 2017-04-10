@@ -178,7 +178,7 @@ MML.isWieldingRangedWeapon = function(character) {
 };
 
 MML.isRangedWeapon = function(weapon) {
-  return ['MWD', 'MWM', 'TWH', 'TWK', 'TWS', 'SLI'].indexOf(weapon.family);
+  return ['MWD', 'MWM', 'TWH', 'TWK', 'TWS', 'SLI'].indexOf(weapon.family) > -1;
 };
 
 MML.isUnarmed = function(character) {

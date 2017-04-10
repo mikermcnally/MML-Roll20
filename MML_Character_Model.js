@@ -219,7 +219,7 @@ MML.Character = function(charName, id) {
     },
     'multiWoundRoll': {
       value: function() {
-        this.attributeCheckRoll('systemStrength', [0], 'multiWoundRollResult');
+        MML.attributeCheckRoll(this, 'Wound Fatigue Roll', 'systemStrength', [0], 'multiWoundRollResult');
       }
     },
     'multiWoundRollResult': {
@@ -239,7 +239,7 @@ MML.Character = function(charName, id) {
     },
     'majorWoundRoll': {
       value: function() {
-        this.attributeCheckRoll('Major Wound Willpower Roll', 'willpower', [0], 'majorWoundRollResult');
+        MML.attributeCheckRoll(this, 'Major Wound Willpower Roll', 'willpower', [0], 'majorWoundRollResult');
       }
     },
     'majorWoundRollResult': {
@@ -264,7 +264,7 @@ MML.Character = function(charName, id) {
     },
     'disablingWoundRoll': {
       value: function() {
-        this.attributeCheckRoll('Disabling Wound System Strength Roll', 'systemStrength', [0], 'disablingWoundRollResult');
+        MML.attributeCheckRoll(this, 'Disabling Wound System Strength Roll', 'systemStrength', [0], 'disablingWoundRollResult');
       }
     },
     'disablingWoundRollResult': {
@@ -300,7 +300,7 @@ MML.Character = function(charName, id) {
     },
     'knockdownRoll': {
       value: function() {
-        this.attributeCheckRoll('Knockdown System Strength Roll', 'systemStrength', [_.has(this.statusEffects, 'Stumbling') ? -5 : 0], 'getKnockdownRoll');
+        MML.attributeCheckRoll(this, 'Knockdown System Strength Roll', 'systemStrength', [_.has(this.statusEffects, 'Stumbling') ? -5 : 0], 'getKnockdownRoll');
       }
     },
     'knockdownRollResult': {
@@ -332,7 +332,7 @@ MML.Character = function(charName, id) {
     },
     'sensitiveAreaRoll': {
       value: function() {
-        this.attributeCheckRoll('Sensitive Area Willpower Roll', 'willpower', [0], 'sensitiveAreaRollResult');
+        MML.attributeCheckRoll(this, 'Sensitive Area Willpower Roll', 'willpower', [0], 'sensitiveAreaRollResult');
       }
     },
     'sensitiveAreaRollResult': {
@@ -362,7 +362,7 @@ MML.Character = function(charName, id) {
     },
     'fatigueCheckRoll': {
       value: function(modifier) {
-        this.attributeCheckRoll('Fatigue Check Fitness Roll', 'fitness', [modifier], 'fatigueCheckRollResult');
+        MML.attributeCheckRoll(this, 'Fatigue Check Fitness Roll', 'fitness', [modifier], 'fatigueCheckRollResult');
       }
     },
     'fatigueCheckRollResult': {
@@ -386,7 +386,7 @@ MML.Character = function(charName, id) {
     },
     'fatigueRecoveryRoll': {
       value: function(modifier) {
-        this.attributeCheckRoll('Fatigue Recovery Check Health Roll', 'health', [modifier], 'fatigueRecoveryRollResult');
+        MML.attributeCheckRoll(this, 'Fatigue Recovery Check Health Roll', 'health', [modifier], 'fatigueRecoveryRollResult');
       }
     },
     'fatigueRecoveryRollResult': {
@@ -1726,7 +1726,8 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'creativity', { get: function() { return MML.racialAttributeBonuses[this.race].creativity + MML.getCurrentAttributeAsFloat(this.name, 'creativityRoll'); }, enumerable: true });
   Object.defineProperty(this, 'presence', { get: function() { return MML.racialAttributeBonuses[this.race].presence + MML.getCurrentAttributeAsFloat(this.name, 'presenceRoll'); }, enumerable: true });
   this.updateCharacterSheet();
-  Object.defineProperty(this, 'willpower', { get: function() { return Math.round((2 * this.presence + this.health) / 3); }, enumerable: true });
+  Object.defineProperty(this, 'willpower', { get: function() {
+    return Math.round((2 * this.presence + this.health) / 3); }, enumerable: true });
   Object.defineProperty(this, 'evocation', { get: function() { return this.intellect + this.reason + this.creativity + this.health + this.willpower + MML.racialAttributeBonuses[this.race].evocation; }, enumerable: true });
   Object.defineProperty(this, 'perception', { get: function() { return Math.round((this.intellect + this.reason + this.creativity) / 3) + MML.racialAttributeBonuses[this.race].perception; }, enumerable: true });
   Object.defineProperty(this, 'systemStrength', { get: function() { return Math.round((this.presence + 2 * this.health) / 3); }, enumerable: true });

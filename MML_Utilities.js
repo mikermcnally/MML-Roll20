@@ -440,12 +440,8 @@ MML.universalRollResult = function(roll) {
   return roll;
 };
 
-MML.attributeCheckRoll = function(input) {
-  var attribute = input.attribute;
-  var mods = input.mods;
-  var callback = input.callback;
-  var target = this[attribute];
-
+MML.attributeCheckRoll = function(character, rollName, attribute, mods, callback) {
+  var target = character[attribute];
   var mod;
   for (mod in mods) {
     target += mods[mod];
@@ -453,8 +449,8 @@ MML.attributeCheckRoll = function(input) {
 
   var roll = {
     type: "attribute",
-    name: input.name,
-    character: this.name,
+    name: rollName,
+    character: character,
     callback: callback,
     value: MML.rollDice(1, 20),
     range: "1-20",
@@ -463,22 +459,8 @@ MML.attributeCheckRoll = function(input) {
   };
 
   roll = MML.attributeCheckResult(roll);
-
-  MML.processCommand({
-    type: "player",
-    who: this.player,
-    callback: "setApiPlayerAttribute",
-    input: {
-      attribute: "currentRoll",
-      value: roll
-    }
-  });
-  MML.processCommand({
-    type: "character",
-    who: this.name,
-    callback: callback,
-    input: {}
-  });
+  character.player.currentRoll = roll;
+  character[callback]();
 };
 
 MML.attributeCheckResult = function(roll) {
