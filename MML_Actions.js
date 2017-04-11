@@ -227,9 +227,9 @@ MML.observeAction = function() {
   var currentAction = state.MML.GM.currentAction;
   var character = currentAction.character;
 
-  character.addStatusEffect('Observe', {
+  character.addStatusEffect('Observing', {
     id: generateRowID(),
-    name: 'Observe',
+    name: 'Observing',
     startingRound: state.MML.GM.currentRound
   });
   character.player.charMenuObserveAction(character.name);

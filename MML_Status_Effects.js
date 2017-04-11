@@ -156,25 +156,24 @@ MML.statusEffects['Defensive Stance'] = function(effect, index) {
     this.statusEffects[index].description = 'Attack Modifier: -30%. Defense Modifier: +40%. Initiative: -5. Preception Modifier: -4';
   }
 };
-MML.statusEffects['Observe'] = function(effect, index) {
+MML.statusEffects['Observing'] = function(effect, index) {
   if (state.MML.GM.inCombat === false ||
-    (state.MML.GM.currentRound === parseInt(effect.startingRound) && (
-      _.has(this.statusEffects, 'Damaged This Round') ||
-      _.has(this.statusEffects, 'Dodged This Round') ||
-      _.has(this.statusEffects, 'Melee This Round'))
-    ) ||
-    state.MML.GM.currentRound - parseInt(effect.startingRound) > 1 ||
+    state.MML.GM.roundStarted === false ||
     this.situationalInitBonus === 'No Combat'
   ) {
     delete this.statusEffects[index];
-  } else if (state.MML.GM.currentRound === parseInt(effect.startingRound)) {
+  } else {
     // Observing this round
     this.perceptionCheckMod += 4;
     this.rangedDefenseMod += -10;
     this.meleeDefenseMod += -10;
     this.statusEffects[index].description = 'Defense Modifier: -10%. Preception Modifier: +4';
+  }
+};
+MML.statusEffects['Observed'] = function(effect, index) {
+  if (state.MML.GM.inCombat === false || state.MML.GM.currentRound !== parseInt(effect.startingRound)) {
+    delete this.statusEffects[index];
   } else {
-    //observed previous round
     this.situationalInitBonus += 5;
     if (MML.isWieldingRangedWeapon(this) &&
       (!_.has(this.statusEffects, 'Damaged This Round') ||

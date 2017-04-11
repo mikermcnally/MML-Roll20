@@ -76,6 +76,11 @@ MML.Character = function(charName, id) {
 
         this.previousAction = this.action;
         this.action = { modifiers: [] };
+        if (_.has(this.statusEffects, 'Observing')) {
+          this.addStatusEffect('Observed', {
+            startingRound: state.MML.GM.currentRound
+          });
+        }
         this.applyStatusEffects();
         this.setReady(false);
       }
@@ -93,7 +98,7 @@ MML.Character = function(charName, id) {
     'setCombatVision': {
       value: function() {
         var token = MML.getTokenFromChar(this.name);
-        if (state.MML.GM.inCombat || !_.has(this.statusEffects, 'Observe')) {
+        if (state.MML.GM.inCombat || !_.has(this.statusEffects, 'Observing')) {
           token.set('light_losangle', this.fov);
           token.set('light_hassight', true);
         } else {
@@ -282,7 +287,7 @@ MML.Character = function(charName, id) {
         state.MML.GM.currentAction.woundRoll = result;
         var bodyPart = state.MML.GM.currentAction.rolls.hitPositionRoll.bodyPart;
 
-        this.statusEffects('Disabling Wound, ' + bodyPart, { bodyPart: bodyPart });
+        this.addStatusEffect('Disabling Wound, ' + bodyPart, { bodyPart: bodyPart });
         if (result === 'Failure') {
           this.addStatusEffect('Stunned', {
             startingRound: state.MML.GM.currentRound,
@@ -639,7 +644,7 @@ MML.Character = function(charName, id) {
           if (_.has(this.statusEffects, 'Taking Aim')) {
             this.statusEffects['Taking Aim'].level++;
           } else {
-            this.addStatusEffects('Taking Aim', {
+            this.addStatusEffect('Taking Aim', {
               level: 1,
               target: target
             });
@@ -995,7 +1000,7 @@ MML.Character = function(charName, id) {
           blockChance += attackerWeapon.defenseMod;
         }
 
-        MML.removeAimAndObserve(this);
+        MML.removeAimAndObserving(this);
         this.player.charMenuMeleeDefenseRoll(this.name, dodgeChance, blockChance);
         this.player.displayMenu();
       }
@@ -1103,7 +1108,7 @@ MML.Character = function(charName, id) {
           defenseChance += rangeMod;
         }
 
-        MML.removeAimAndObserve(this);
+        MML.removeAimAndObserving(this);
         this.player.charMenuRangedDefenseRoll(this.name, defenseChance);
         this.player.displayMenu();
       }
