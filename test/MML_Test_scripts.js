@@ -39,13 +39,15 @@ function runTests() {
       startTestCombat(player, _.pluck(MML.characters, 'name'));
     });
 
-    it.only('Tested: Unarmed striking, observe without ranged weapon, basic combat flow, basic damage, multiple defenses', function() {
+    it('Tested: Unarmed striking, observe without ranged weapon, basic combat flow, basic damage, multiple defenses', function() {
       setActionPunchAttack(player);
+      player.menuCommand(player.who, 'Roll');
       setTestRoll(player, 10);
       player.menuCommand(player.who, 'Observe');
       player.menuCommand(player.who, 'Roll');
       setTestRoll(player, 2);
-      setActionPunchAttack(player);
+      player.menuCommand(player.who, 'Observe');
+      player.menuCommand(player.who, 'Roll');
       setTestRoll(player, 1);
       player.menuCommand(player.name, 'Start Round');
       player.menuCommand(player.who, 'Start Action');
@@ -68,96 +70,114 @@ function runTests() {
       expect(MML.characters['test1'].statusEffects, 'forgoing defense should not create "Number of Defenses" status effect for defender').not.to.have.property("Number of Defenses");
       expect(MML.characters['test1'].statusEffects, 'forgoing defense should create "Damaged This Round" status effect for defender').not.to.have.property("Damaged This Round");
 
+      setActionPunchAttack(player);
+      player.menuCommand(player.who, 'Accept');
+      executeObserve(player);
+      expect(MML.characters['test1'].statusEffects, 'observe action should create "Observing" status effect').to.have.property("Observing");
+      expect(MML.characters['test1'].perceptionCheckMod, '"Observing" status effect should add 4 to perceptionCheckMod').to.equal(4);
+      expect(MML.characters['test1'].rangedDefenseMod, '"Observing" status effect should add -10 to rangedDefenseMod').to.equal(-10);
+      expect(MML.characters['test1'].meleeDefenseMod, '"Observing" status effect should add -10 to meleeDefenseMod').to.equal(-10);
+      expect(MML.characters['test1'].statusEffects, 'observe action should not create "Melee This Round" status effect').not.to.have.property("Melee This Round");
+
+      executeObserve(player);
+      player.menuCommand(player.who, 'Observe');
+      player.menuCommand(player.who, 'Accept');
+      executeObserve(player);
+      player.menuCommand(player.who, 'Observe');
+      player.menuCommand(player.who, 'Accept');
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
-      expect(MML.characters['test1'].statusEffects, 'observe action should create "Observing" status effect').to.have.property("Observing");
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 5);
+      player.menuCommand(player.who, 'Take it');
+      setTestRoll(player, 1);
+      setTestRoll(player, 1);
+      expect(MML.characters['test1'].statusEffects, 'being attacked should remove "Observing" status effect').not.to.have.property("Observing");
+      expect(MML.characters['test1'].hp.Head, 'damage should accumlate').to.equal(MML.characters['test1'].hpMax.Head - 2);
+      expect(MML.characters['test1'].hp['Multiple Wounds'], 'damage should accumlate').to.equal(MML.characters['test1'].hpMax['Multiple Wounds'] - 2);
+      expect(MML.characters['test1'].knockdown, 'knockdown should accumlate damage taken this round').to.equal(MML.characters['test1'].knockdownMax - 2);
+      executeObserve(player);
+      executeObserve(player);
+      expect(MML.characters['test1'].statusEffects, 'observing previous round should add "Observed" status effect').to.have.property("Observed");
+      expect(state.MML.GM.currentRound, 'currentRound should be incremented').to.equal(2);
+      expect(MML.characters['test0'].roundsExertion, 'punch action should add to roundsExertion').to.equal(1);
+      expect(MML.characters['test1'].roundsExertion, 'forgoing defense should not add to roundsExertion').to.equal(0);
 
-      // player.menuCommand(player.who, 'End Action');
-      // expect(MML.characters['test1'].perceptionCheckMod, '"Observing" status effect should add 4 to perceptionCheckMod').to.equal(4);
-      // expect(MML.characters['test1'].rangedDefenseMod, '"Observing" status effect should add -10 to rangedDefenseMod').to.equal(-10);
-      // expect(MML.characters['test1'].meleeDefenseMod, '"Observing" status effect should add -10 to meleeDefenseMod').to.equal(-10);
-      // expect(MML.characters['test1'].statusEffects, 'observe action should not create "Melee This Round" status effect').not.to.have.property("Melee This Round");
-      //
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.setCurrentCharacterTargets({
-      //   "charName": "test0",
-      //   "target": "test1",
-      //   "callback": "setCurrentCharacterTargets"
-      // });
-      // setTestRoll(player, 94);
-      // expect(MML.characters['test1'].statusEffects, 'observing previous round should add "Observed" status effect').to.have.property("Observed");
-      // expect(state.MML.GM.currentRound, 'currentRound should be incremented').to.equal(2);
-      // expect(MML.characters['test0'].roundsExertion, 'punch action should add to roundsExertion').to.equal(1);
-      // expect(MML.characters['test1'].roundsExertion, 'forgoing defense should not add to roundsExertion').to.equal(0);
-      //
-      // player.menuCommand(player.who, 'Attack');
-      // player.menuCommand(player.who, 'Punch');
-      // player.menuCommand(player.who, 'None');
-      // player.menuCommand(player.who, 'Neutral');
-      // player.menuCommand(player.who, 'Roll');
-      // setTestRoll(player, 10);
-      // player.menuCommand(player.who, 'Observe');
-      // player.menuCommand(player.who, 'Roll');
-      // setTestRoll(player, 1);
-      // player.menuCommand(player.who, 'Attack');
-      // player.menuCommand(player.who, 'Punch');
-      // player.menuCommand(player.who, 'None');
-      // player.menuCommand(player.who, 'Neutral');
-      // player.menuCommand(player.who, 'Roll');
-      // setTestRoll(player, 9);
-      // expect(MML.characters['test1'].statusEffects, 'observer should still have "Observe" status effect').to.have.property("Observe");
-      // expect(MML.characters['test1'].situationalInitBonus, '"Observe" status effect should add 5 to situationalInitBonus').to.equal(5);
-      // expect(MML.characters['test1'].rangedDefenseMod, '"Observe" status effect should not add 10 to missileAttackMod when not wielding ranged weapon').to.equal(0);
-      //
-      // player.menuCommand(player.name, 'Start Round');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.setCurrentCharacterTargets({
-      //   "charName": "test0",
-      //   "target": "test1",
-      //   "callback": "setCurrentCharacterTargets"
-      // });
-      // setTestRoll(player, 5);
-      // expect(MML.characters['test1'].statusEffects, 'observer should not lose "Observe" status effect from previous round after being attacked').to.have.property("Observe");
-      // expect(MML.characters['test1'].situationalInitBonus, '"Observe" status effect should add 5 to situationalInitBonus').to.equal(5);
-      //
-      // player.menuCommand(player.who, 'Block: 16%');
-      // setTestRoll(player, 5);
-      // expect(MML.characters['test1'].statusEffects, 'blocking should create "Melee This Round" status effect for defender').to.have.property("Melee This Round");
-      // expect(MML.characters['test1'].statusEffects, 'blocking should create "Number of Defenses" status effect for defender').to.have.property("Number of Defenses");
-      // expect(MML.characters['test1'].statusEffects["Number of Defenses"].number, 'blocking should add 1 to "Number of Defenses" status effect for defender').to.equal(1);
-      // expect(MML.characters['test1'].rangedDefenseMod, '"Number of Defenses" status effect should add -20 to rangedDefenseMod').to.equal(-20);
-      // expect(MML.characters['test1'].meleeDefenseMod, '"Number of Defenses" status effect should add -20 to meleeDefenseMod').to.equal(-20);
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.setCurrentCharacterTargets({
-      //   "charName": "test2",
-      //   "target": "test1",
-      //   "callback": "setCurrentCharacterTargets"
-      // });
-      // setTestRoll(player, 5);
-      // player.menuCommand(player.who, 'Block: -4%');
-      // setTestRoll(player, 5);
-      // setTestRoll(player, 1);
-      // setTestRoll(player, 1);
-      // expect(MML.characters['test1'].statusEffects["Number of Defenses"].number, 'blocking should add 1 to "Number of Defenses" status effect for defender').to.equal(2);
-      // expect(MML.characters['test1'].rangedDefenseMod, '2 defenses should add -40 to rangedDefenseMod').to.equal(-40);
-      // expect(MML.characters['test1'].meleeDefenseMod, '2 defenses should add -40 to meleeDefenseMod').to.equal(-40);
-      // expect(MML.characters['test1'].hp.Head, 'damage should accumlate').to.equal(MML.characters['test1'].hpMax.Head - 2);
-      // expect(MML.characters['test1'].hp['Multiple Wounds'], 'damage should accumlate').to.equal(MML.characters['test1'].hpMax['Multiple Wounds'] - 2);
-      // expect(MML.characters['test1'].knockdown, 'knockdown should only consider damage from this round').to.equal(MML.characters['test1'].knockdownMax - 1);
-      // executeObserve(player);
-      // expect(MML.characters['test1'].statusEffects, 'new rounds should remove "Number of Defenses" status effect for defender').not.to.have.property("Number of Defenses");
-      // expect(MML.characters['test1'].rangedDefenseMod, 'new rounds should remove "Number of Defenses" status effect -40 penalty to rangedDefenseMod').to.equal(0);
-      // expect(MML.characters['test1'].meleeDefenseMod, 'new rounds should remove "Number of Defenses" status effect -40 penalty to meleeDefenseMod').to.equal(0);
-      // expect(MML.characters['test1'].hp.Head, 'damage should accumlate').to.equal(MML.characters['test1'].hpMax.Head - 2);
-      // expect(MML.characters['test1'].hp['Multiple Wounds'], 'damage should accumlate').to.equal(MML.characters['test1'].hpMax['Multiple Wounds'] - 2);
-      // expect(MML.characters['test1'].knockdown, 'knockdown should only consider damage from this round').to.equal(MML.characters['test1'].knockdownMax);
-      // expect(state.MML.GM.currentRound, 'currentRound should be incremented').to.equal(3);
+      setActionPunchAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      player.menuCommand(player.who, 'Observe');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 2);
+      player.menuCommand(player.who, 'Observe');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 1);
+      expect(MML.characters['test1'].statusEffects, 'observer should have "Observed" status effect').to.have.property("Observed");
+      expect(MML.characters['test1'].situationalInitBonus, '"Observed" status effect should add 5 to situationalInitBonus').to.equal(5);
+      expect(MML.characters['test1'].rangedDefenseMod, '"Observed" status effect should not add 10 to missileAttackMod when not wielding ranged weapon').to.equal(0);
+
+      player.menuCommand(player.name, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 5);
+      expect(MML.characters['test1'].statusEffects, 'observer should not lose "Observed" status effect from previous round after being attacked').to.have.property("Observed");
+      expect(MML.characters['test1'].situationalInitBonus, '"Observed" status effect should add 5 to situationalInitBonus').to.equal(5);
+
+      player.menuCommand(player.who, 'Block: 16%');
+      setTestRoll(player, 5);
+      expect(MML.characters['test1'].statusEffects, 'blocking should create "Melee This Round" status effect for defender').to.have.property("Melee This Round");
+      expect(MML.characters['test1'].statusEffects, 'blocking should create "Number of Defenses" status effect for defender').to.have.property("Number of Defenses");
+      expect(MML.characters['test1'].statusEffects["Number of Defenses"].number, 'blocking should add 1 to "Number of Defenses" status effect for defender').to.equal(1);
+      expect(MML.characters['test1'].rangedDefenseMod, '"Number of Defenses" status effect should add -20 to rangedDefenseMod').to.equal(-20);
+      expect(MML.characters['test1'].meleeDefenseMod, '"Number of Defenses" status effect should add -20 to meleeDefenseMod').to.equal(-20);
+      setActionPunchAttack(player);
+      player.menuCommand(player.who, 'Accept');
+      executeObserve(player);
+      player.menuCommand(player.who, 'Observe');
+      player.menuCommand(player.who, 'Accept');
+      executeObserve(player);
+      player.menuCommand(player.who, 'Observe');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 5);
+      player.menuCommand(player.who, 'Block: -14%');
+      setTestRoll(player, 5);
+      setTestRoll(player, 1);
+      setTestRoll(player, 1);
+      expect(MML.characters['test1'].statusEffects["Number of Defenses"].number, 'blocking should add 1 to "Number of Defenses" status effect for defender').to.equal(2);
+      expect(MML.characters['test1'].rangedDefenseMod, '2 defenses should add -40 to rangedDefenseMod').to.equal(-40);
+      expect(MML.characters['test1'].meleeDefenseMod, '2 defenses should add -40 to meleeDefenseMod').to.equal(-40);
+      expect(MML.characters['test1'].hp.Head, 'damage should accumlate').to.equal(MML.characters['test1'].hpMax.Head - 3);
+      expect(MML.characters['test1'].hp['Multiple Wounds'], 'damage should accumlate').to.equal(MML.characters['test1'].hpMax['Multiple Wounds'] - 3);
+      expect(MML.characters['test1'].knockdown, 'knockdown should only consider damage from this round').to.equal(MML.characters['test1'].knockdownMax - 1);
+      executeObserve(player);
+      executeObserve(player);
+      executeObserve(player);
+      expect(MML.characters['test1'].statusEffects, 'new rounds should remove "Number of Defenses" status effect for defender').not.to.have.property("Number of Defenses");
+      expect(MML.characters['test1'].rangedDefenseMod, 'new rounds should remove "Number of Defenses" status effect -40 penalty to rangedDefenseMod').to.equal(0);
+      expect(MML.characters['test1'].meleeDefenseMod, 'new rounds should remove "Number of Defenses" status effect -40 penalty to meleeDefenseMod').to.equal(0);
+      expect(MML.characters['test1'].hp.Head, 'damage should accumlate').to.equal(MML.characters['test1'].hpMax.Head - 3);
+      expect(MML.characters['test1'].hp['Multiple Wounds'], 'damage should accumlate').to.equal(MML.characters['test1'].hpMax['Multiple Wounds'] - 3);
+      expect(MML.characters['test1'].knockdown, 'knockdown should only consider damage from this round').to.equal(MML.characters['test1'].knockdownMax);
+      expect(state.MML.GM.currentRound, 'currentRound should be incremented').to.equal(3);
     });
 
-    it('Tested: Ready Item, Melee Attack, Melee Dodge', function() {
+    it.only('Tested: Ready Item, Melee Attack, Melee Dodge', function() {
       var item = MML.items['Hand Axe'];
       item.quality = 'Standard';
       item._id = 'axe';
@@ -181,6 +201,7 @@ function runTests() {
       player.menuCommand(player.who, 'Right');
       player.menuCommand(player.who, 'Next Menu');
       setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
       setTestRoll(player, 9);
       player.menuCommand(player.who, 'Observe');
       player.menuCommand(player.who, 'Roll');
@@ -241,8 +262,10 @@ function runTests() {
       executeObserve(player);
 
       setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
       setTestRoll(player, 9);
       setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
       setTestRoll(player, 8);
       player.menuCommand(player.who, 'Observe');
       player.menuCommand(player.who, 'Roll');
@@ -265,10 +288,7 @@ function runTests() {
       player.menuCommand(player.who, 'Roll Willpower');
       setTestRoll(player, 10);
       expect(MML.characters['test2'].statusEffects, 'successful willpower roll should not add "Major Wound" status effect').not.to.have.property("Major Wound, Right Arm");
-      player.menuCommand(player.who, 'Attack');
-      player.menuCommand(player.who, 'Standard');
-      player.menuCommand(player.who, 'None');
-      player.menuCommand(player.who, 'Neutral');
+      setActionStandardAttack(player);
       player.menuCommand(player.who, 'Accept');
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
@@ -283,15 +303,13 @@ function runTests() {
       setTestRoll(player, 2);
       player.menuCommand(player.who, 'Roll Willpower');
       setTestRoll(player, 11);
+      expect(MML.characters['test2'].statusEffects, 'observing previous round should add "Observed" status effect').to.have.property("Observed");
       expect(MML.characters['test2'].statusEffects, 'successful willpower roll should not add "Major Wound" status effect').to.have.property("Major Wound, Right Arm");
-      expect(MML.characters['test2'].situationalInitBonus, '"Major Wound" status effect should add -5 to situationalInitBonus').to.equal(-5);
+      expect(MML.characters['test2'].situationalInitBonus, '"Major Wound" status effect should add -5 to situationalInitBonus').to.equal(0);
       expect(MML.characters['test2'].situationalMod, '"Major Wound" status effect should add -10 to situationalMod').to.equal(-10);
       expect(MML.characters['test2'].statusEffects["Major Wound, Right Arm"].duration, '"Major Wound" status effect duration should equal damage taken beyond half HP').to.equal(2);
       expect(MML.characters['test2'].statusEffects["Major Wound, Right Arm"].startingRound, '"Major Wound" status effect starting round should equal current round').to.equal(2);
-      player.menuCommand(player.who, 'Attack');
-      player.menuCommand(player.who, 'Standard');
-      player.menuCommand(player.who, 'None');
-      player.menuCommand(player.who, 'Neutral');
+      setActionStandardAttack(player);
       player.menuCommand(player.who, 'Accept');
       executeObserve(player);
       player.menuCommand(player.who, 'Start Action');
@@ -324,8 +342,10 @@ function runTests() {
       setTestRoll(player, 11);
       expect(MML.characters['test2'].statusEffects["Major Wound, Right Arm"].duration, 'failing willpower save should add to duration of "Major Wound" status effect').to.equal(3);
       setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
       setTestRoll(player, 9);
       setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
       setTestRoll(player, 8);
       player.menuCommand(player.who, 'Observe');
       player.menuCommand(player.who, 'Roll');
@@ -347,11 +367,95 @@ function runTests() {
       setTestRoll(player, 5);
       player.menuCommand(player.who, 'Roll System Strength');
       setTestRoll(player, 10);
-      expect(MML.characters['test2'].statusEffects, 'successful systemStrength roll should not prevent adding "Disabling Wound" status effect').to.have.property("Disabling Wound, Right Arm");
-      expect(MML.characters['test2'].situationalInitBonus, '"Major Wound" status effect should add -10 to situationalInitBonus').to.equal(-10);
-      expect(MML.characters['test2'].situationalMod, '"Major Wound" status effect should add -25 to situationalMod').to.equal(-35);
-      expect(MML.characters['test2'].statusEffects, 'successful systemStrength roll should not add "Stunned" status effect').not.to.have.property("Stunned");
+      expect(MML.characters['test2'].statusEffects, 'being attacked while observing previous round should not add "Observed" status effect').not.to.have.property("Observed");
       expect(MML.characters['test2'].statusEffects, 'wounds to the same body part stack effects').to.have.property("Major Wound, Right Arm");
+      expect(MML.characters['test2'].statusEffects, 'successful systemStrength roll should not prevent adding "Disabling Wound" status effect').to.have.property("Disabling Wound, Right Arm");
+      expect(MML.characters['test2'].situationalInitBonus, '"Disabling Wound" status effect should add -10 to situationalInitBonus').to.equal(-15);
+      expect(MML.characters['test2'].situationalMod, '"Disabling Wound" status effect should add -25 to situationalMod').to.equal(-35);
+      expect(MML.characters['test2'].statusEffects, 'successful systemStrength roll should not add "Stunned" status effect').not.to.have.property("Stunned");
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test1",
+        "target": "test2",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 5);
+      player.menuCommand(player.who, 'Take it');
+      setTestRoll(player, 8);
+      setTestRoll(player, 1);
+      player.menuCommand(player.who, 'Roll System Strength');
+      setTestRoll(player, 11);
+      expect(MML.characters['test2'].statusEffects, 'wounds to the same body part stack effects').to.have.property("Major Wound, Right Arm");
+      expect(MML.characters['test2'].statusEffects, 'successful systemStrength roll should not prevent adding "Disabling Wound" status effect').to.have.property("Disabling Wound, Right Arm");
+      expect(MML.characters['test2'].situationalInitBonus, '"Disabling Wound" status effect should add -10 to situationalInitBonus').to.equal(-15);
+      expect(MML.characters['test2'].situationalMod, '"Disabling Wound" status effect should add -25 to situationalMod').to.equal(-35);
+      expect(MML.characters['test2'].statusEffects, 'failed systemStrength roll should add "Stunned" status effect').to.have.property("Stunned");
+      expect(MML.characters['test2'].statusEffects["Stunned"].duration, 'duration of "Stunned" status effect should equal damage taken in from wound').to.equal(1);
+      expect(MML.characters['test2'].action.name, '"Stunned" status effect should only allow movement during action').to.equal("Movement Only");
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test2",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 5);
+      player.menuCommand(player.who, 'Take it');
+      setTestRoll(player, 8);
+      setTestRoll(player, 1);
+      player.menuCommand(player.who, 'Roll System Strength');
+      setTestRoll(player, 10);
+      expect(MML.characters['test2'].statusEffects, 'wounds to the same body part stack effects').to.have.property("Major Wound, Right Arm");
+      expect(MML.characters['test2'].statusEffects, 'successful systemStrength roll should not prevent adding "Disabling Wound" status effect').to.have.property("Disabling Wound, Right Arm");
+      expect(MML.characters['test2'].situationalInitBonus, '"Disabling Wound" status effect should add -10 to situationalInitBonus').to.equal(-15);
+      expect(MML.characters['test2'].situationalMod, '"Disabling Wound" status effect should add -25 to situationalMod').to.equal(-35);
+      expect(MML.characters['test2'].statusEffects, 'Character should still have "Stunned" status effect').to.have.property("Stunned");
+      expect(MML.characters['test2'].statusEffects["Stunned"].duration, 'duration of "Stunned" status effect should not increase on successful systemStrength roll').to.equal(1);
+      expect(MML.characters['test2'].action.name, '"Stunned" status effect should only allow movement during action').to.equal("Movement Only");
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test1",
+        "target": "test2",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 5);
+      player.menuCommand(player.who, 'Take it');
+      setTestRoll(player, 8);
+      setTestRoll(player, 1);
+      player.menuCommand(player.who, 'Roll System Strength');
+      setTestRoll(player, 11);
+      expect(MML.characters['test2'].statusEffects, 'wounds to the same body part stack effects').to.have.property("Major Wound, Right Arm");
+      expect(MML.characters['test2'].statusEffects, 'successful systemStrength roll should not prevent adding "Disabling Wound" status effect').to.have.property("Disabling Wound, Right Arm");
+      expect(MML.characters['test2'].situationalInitBonus, '"Disabling Wound" status effect should add -10 to situationalInitBonus').to.equal(-15);
+      expect(MML.characters['test2'].situationalMod, '"Disabling Wound" status effect should add -25 to situationalMod').to.equal(-35);
+      expect(MML.characters['test2'].statusEffects, 'failed systemStrength roll should add "Stunned" status effect').to.have.property("Stunned");
+      expect(MML.characters['test2'].statusEffects["Stunned"].duration, 'duration of "Stunned" status effect should add damage taken in from wound').to.equal(2);
+      expect(MML.characters['test2'].action.name, '"Stunned" status effect should only allow movement during action').to.equal("Movement Only");
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 9);
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 8);
+      player.menuCommand(player.who, 'Observe');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      player.menuCommand(player.name, 'Start Round');
+      expect(MML.characters['test2'].statusEffects, 'wounds to the same body part stack effects').to.have.property("Major Wound, Right Arm");
+      expect(MML.characters['test2'].statusEffects, 'successful systemStrength roll should not prevent adding "Disabling Wound" status effect').to.have.property("Disabling Wound, Right Arm");
+      expect(MML.characters['test2'].situationalInitBonus, '"Disabling Wound" status effect should add -10 to situationalInitBonus').to.equal(-15);
+      expect(MML.characters['test2'].situationalMod, '"Disabling Wound" status effect should add -25 to situationalMod').to.equal(-35);
+      expect(MML.characters['test2'].statusEffects, 'failed systemStrength roll should add "Stunned" status effect').to.have.property("Stunned");
+      expect(MML.characters['test2'].action.name, '"Stunned" status effect should only allow movement during action').to.equal("Movement Only");
     });
   });
 }
@@ -450,7 +554,6 @@ function setActionStandardAttack(player) {
   player.menuCommand(player.who, 'Standard');
   player.menuCommand(player.who, 'None');
   player.menuCommand(player.who, 'Neutral');
-  player.menuCommand(player.who, 'Roll');
 }
 
 function setActionPunchAttack(player) {
@@ -458,7 +561,6 @@ function setActionPunchAttack(player) {
   player.menuCommand(player.who, 'Punch');
   player.menuCommand(player.who, 'None');
   player.menuCommand(player.who, 'Neutral');
-  player.menuCommand(player.who, 'Roll');
 }
 
 function executeObserve(player) {

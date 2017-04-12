@@ -180,10 +180,10 @@ MML.Character = function(charName, id) {
           } else if (currentHP < 0 && currentHP > -maxHP) { //Disabling wound
             if (!_.has(this.statusEffects, 'Disabling Wound, ' + bodyPart)) { //Fresh wound
               duration = -currentHP;
-            } else if (!_.has(this.statusEffects, 'Disabling Wound, ' + bodyPart)) {
+            } else if (_.has(this.statusEffects, 'Stunned')) { //Add damage to duration of effect
+              duration = parseInt(this.statusEffects['Stunned'].duration) - hpAmount;
+            } else {
               duration = -hpAmount;
-            } else { //Add damage to duration of effect
-              duration = parseInt(this.statusEffects['Disabling Wound, ' + bodyPart].duration) - hpAmount;
             }
             state.MML.GM.currentAction.woundDuration = duration;
             this.player.charMenuDisablingWoundRoll(this.name);
@@ -289,10 +289,14 @@ MML.Character = function(charName, id) {
 
         this.addStatusEffect('Disabling Wound, ' + bodyPart, { bodyPart: bodyPart });
         if (result === 'Failure') {
-          this.addStatusEffect('Stunned', {
-            startingRound: state.MML.GM.currentRound,
-            duration: state.MML.GM.currentAction.woundDuration
-          });
+          if (_.has(this.statusEffects, 'Stunned')) {
+            this.statusEffects['Stunned'].duration = state.MML.GM.currentAction.woundDuration;
+          } else {
+            this.addStatusEffect('Stunned', {
+              startingRound: state.MML.GM.currentRound,
+              duration: state.MML.GM.currentAction.woundDuration
+            });
+          }
         }
         MML[state.MML.GM.currentAction.callback]();
       }
