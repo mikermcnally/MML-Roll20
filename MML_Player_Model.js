@@ -69,7 +69,10 @@ MML.Player = function(name, isGM) {
     var character = MML.characters[this.who];
 
     if (this.combatants.length > 0) {
-      if (character.situationalInitBonus !== 'No Combat') {
+      if (_.has(character.statusEffects, 'Stunned')) {
+        character.applyStatusEffects();
+        this.charMenuFinalizeAction(this.who);
+      } else if (character.situationalInitBonus !== 'No Combat') {
         this.charMenuPrepareAction(this.who);
         this.displayMenu();
       } else {
@@ -83,14 +86,18 @@ MML.Player = function(name, isGM) {
   };
   this.prepareNextCharacter = function() {
     this.characterIndex++;
-    var charName = this.combatants[this.characterIndex];
+    var character = MML.characters[this.combatants[this.characterIndex]];
 
     if (this.characterIndex < this.combatants.length) {
-      if (MML.characters[charName].situationalInitBonus !== 'No Combat') {
-        this.charMenuPrepareAction(charName);
+      if (_.has(character.statusEffects, 'Stunned')) {
+        character.applyStatusEffects();
+        this.charMenuFinalizeAction(character.name);
+        this.displayMenu();
+      } else if (character.situationalInitBonus !== 'No Combat') {
+        this.charMenuPrepareAction(character.name);
         this.displayMenu();
       } else {
-        MML.characters[charName].setReady(true);
+        character.setReady(true);
         this.prepareNextCharacter();
       }
     } else if (this.name === state.MML.GM.name) {
@@ -1028,6 +1035,11 @@ MML.Player = function(name, isGM) {
       this.buttons = [
         this.menuButtons.acceptAction,
         this.menuButtons.changeAction
+      ];
+    } else if (_.has(MML.characters[this.who].statusEffects, 'Stunned')) {
+      this.message =  who + ' is stunned and can only move. Roll initiative';
+      this.buttons = [
+        this.menuButtons.initiativeRoll
       ];
     } else {
       this.message = 'Roll initiative or change action for ' + who;
