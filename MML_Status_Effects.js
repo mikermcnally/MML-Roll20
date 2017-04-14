@@ -11,7 +11,7 @@ MML.statusEffects['Major Wound'] = function(effect, index) {
     if (this.situationalInitBonus !== 'No Combat') {
       this.situationalInitBonus += -5;
     }
-    if (state.MML.GM.currentRound - parseInt(effect.startingRound) < effect.duration) {
+    if (state.MML.GM.currentRound - parseInt(effect.startingRound) <= effect.duration) {
       this.situationalMod += -10;
     }
     this.statusEffects[index].description = 'Situational Modifier: -10%. Initiative: -5';

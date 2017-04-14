@@ -383,7 +383,8 @@ MML.Player = function(name, isGM) {
     this.message = 'Prepare ' + who + '\'s action';
     var character = MML.characters[who];
     var buttons = [this.menuButtons.setActionAttack,
-      this.menuButtons.setActionObserve
+      this.menuButtons.setActionObserve,
+      this.menuButtons.setActionMovement
     ];
 
     if (!_.contains(character.action.modifiers, 'Ready Item')) {
@@ -1052,12 +1053,17 @@ MML.Player = function(name, isGM) {
 
   this.charMenuStartAction = function(who, validAction) {
     this.who = who;
-    this.message = 'Start or change ' + state.MML.GM.actor + '\'s action';
+    var character = MML.characters[who];
 
-    if (validAction) {
+    if (_.has(character.statusEffects, 'Stunned') || _.has(character.statusEffects, 'Dodged This Round')) {
+      this.message = 'Start ' + state.MML.GM.actor + '\'s action';
+      this.buttons = [this.menuButtons.startAction];
+    } else if (validAction) {
+      this.message = 'Start or change ' + state.MML.GM.actor + '\'s action';
       this.buttons = [this.menuButtons.startAction, this.menuButtons.changeAction];
     } else {
       sendChat('GM', '/w "' + this.name + '"' + who + '\'s action no longer valid.');
+      this.message = 'Change ' + state.MML.GM.actor + '\'s action';
       this.charMenuPrepareAction(who);
     }
   };
@@ -1564,6 +1570,17 @@ MML.Player = function(name, isGM) {
       _.extend(MML.characters[this.who].action, {
         name: 'Observe',
         callback: 'observeAction'
+      });
+      this.displayMenu();
+    }
+  };
+  this.menuButtons.setActionMovement = {
+    text: 'Movement Only',
+    nextMenu: 'charMenuFinalizeAction',
+    callback: function(input) {
+      _.extend(MML.characters[this.who].action, {
+        name: 'Movement Only',
+        callback: 'endAction'
       });
       this.displayMenu();
     }
