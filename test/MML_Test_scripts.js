@@ -515,9 +515,9 @@ function runTests() {
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
       expect(MML.characters['test2'].statusEffects, 'wounds to the same body part stack effects').to.have.property("Major Wound, Right Arm");
-      expect(MML.characters['test2'].situationalInitBonus, '"Major Wound" status effect -5 to situationalInitBonus should expire and "Disabling Wound" status effect should add -10').to.equal(-10);
+      expect(MML.characters['test2'].situationalInitBonus, '"Major Wound" status effect should add -5 and "Disabling Wound" status effect should add -10 to situationalInitBonus').to.equal(-15);
       expect(MML.characters['test2'].statusEffects, 'Only healing can remove "Disabling Wound" status effect').to.have.property("Disabling Wound, Right Arm");
-      expect(MML.characters['test2'].situationalMod, '"Disabling Wound" status effect should add -25 and "Major Wound" to status effect should add -10 situationalMod').to.equal(-35);
+      expect(MML.characters['test2'].situationalMod, '"Disabling Wound" status effect should add -25 and "Major Wound" to status effect should expire').to.equal(-25);
       expect(MML.characters['test2'].statusEffects, '"Stunned" status effect should expire').not.to.have.property("Stunned");
       setActionStandardAttack(player);
       player.menuCommand(player.who, 'Roll');
@@ -532,7 +532,7 @@ function runTests() {
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
       player.setCurrentCharacterTargets({
-        "charName": "test1",
+        "charName": "test0",
         "target": "test2",
         "callback": "setCurrentCharacterTargets"
       });
@@ -544,10 +544,444 @@ function runTests() {
       expect(MML.characters['test2'].statusEffects, 'Only healing can remove "Disabling Wound" status effect').to.have.property("Disabling Wound, Right Arm");
       expect(MML.characters['test2'].statusEffects, 'Taking over twice max HP should add "Mortal Wound" status effect').to.have.property("Mortal Wound, Right Arm");
       expect(MML.characters['test2'].situationalInitBonus, '"Mortal Wound" status effect should set situationalInitBonus to "No Combat"').to.equal("No Combat");
-      expect(MML.characters['test2'].situationalMod, '"Disabling Wound" status effect should add -25 and "Major Wound" to status effect should add -10 situationalMod').to.equal(-35);
-      // setActionStandardAttack(player);
-      // player.menuCommand(player.who, 'Accept');
-      // player.menuCommand(player.who, 'Start Action');
+      expect(MML.characters['test2'].situationalMod, '"Disabling Wound" status effect should add -25 and "Major Wound"').to.equal(-25);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test1",
+        "target": "test0",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 9);
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 8);
+      player.menuCommand(player.name, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test1",
+        "target": "test0",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 9);
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 8);
+      player.menuCommand(player.name, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test1",
+        "target": "test0",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 9);
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 8);
+      player.menuCommand(player.name, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test1",
+        "target": "test0",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 9);
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 8);
+      player.menuCommand(player.name, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test1",
+        "target": "test0",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 9);
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 8);
+      player.menuCommand(player.name, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test1",
+        "target": "test0",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 9);
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 8);
+      player.menuCommand(player.name, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test1",
+        "target": "test0",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 9);
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 8);
+      player.menuCommand(player.name, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test1",
+        "target": "test0",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Roll Fitness');
+      setTestRoll(player, 10);
+      expect(MML.characters['test0'].statusEffects, 'Successful fitness roll should not add "Fatigue" status effect').not.to.have.property("Fatigue");
+      expect(MML.characters['test1'].statusEffects, 'Successful fitness roll should not add "Fatigue" status effect').not.to.have.property("Fatigue");
+      player.menuCommand(player.who, 'Roll Fitness');
+      setTestRoll(player, 11);
+      expect(MML.characters['test0'].statusEffects, 'Failed fitness roll should add "Fatigue" status effect').to.have.property("Fatigue");
+      expect(MML.characters['test1'].statusEffects, 'Successful fitness roll should not add "Fatigue" status effect').not.to.have.property("Fatigue");
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 1);
+      player.menuCommand(player.name, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test1",
+        "target": "test0",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Roll Fitness');
+      setTestRoll(player, 11);
+      expect(MML.characters['test0'].statusEffects, 'Failed fitness roll should add "Fatigue" status effect').to.have.property("Fatigue");
+      expect(MML.characters['test1'].statusEffects, 'Failed fitness roll should add "Fatigue" status effect').to.have.property("Fatigue");
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 1);
+      player.menuCommand(player.name, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test1",
+        "target": "test0",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 1);
+      player.menuCommand(player.name, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test1",
+        "target": "test0",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 1);
+      player.menuCommand(player.name, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test1",
+        "target": "test0",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 1);
+      player.menuCommand(player.name, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test1",
+        "target": "test0",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      setActionStandardAttack(player);
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 1);
+      player.menuCommand(player.name, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test1",
+        "target": "test0",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 94);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      console.log("SHOW ME WHAT YOU GOT");
+      console.log(MML.characters['test0'].roundsExertion);
     });
   });
 }

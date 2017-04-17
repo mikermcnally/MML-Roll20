@@ -26,12 +26,20 @@ MML.newRound = function() {
   var gm = state.MML.GM;
   gm.currentRound++;
   gm.roundStarted = false;
+  gm.fatigueChecks = [];
   _.each(gm.combatants, function(charName) {
     MML.characters[charName].newRoundUpdateCharacter();
   });
-  _.each(MML.players, function(player) {
-    MML.players[player.name].newRoundUpdatePlayer();
-  });
+  console.log("SHOW ME WHAT YOU GOT");
+  console.log(gm.fatigueChecks.length > 0);
+  if (gm.fatigueChecks.length > 0) {
+    gm.fatigueCheckIndex = 0;
+    MML.nextFatigueCheck();
+  } else {
+    _.each(MML.players, function(player) {
+      player.newRoundUpdatePlayer();
+    });
+  }
 };
 
 MML.startRound = function() {
@@ -72,6 +80,18 @@ MML.nextAction = function() {
     } else {
       MML.newRound();
     }
+  }
+};
+
+MML.nextFatigueCheck = function() {
+  var gm = state.MML.GM;
+  if (gm.fatigueCheckIndex < gm.fatigueChecks.length) {
+    gm.fatigueChecks[gm.fatigueCheckIndex].player.charMenuFatigueCheckRoll(gm.fatigueChecks[gm.fatigueCheckIndex].name);
+    gm.fatigueCheckIndex++;
+  } else {
+    _.each(MML.players, function(player) {
+      player.newRoundUpdatePlayer();
+    });
   }
 };
 

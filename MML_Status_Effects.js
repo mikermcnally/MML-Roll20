@@ -228,7 +228,6 @@ MML.statusEffects['Dodged This Round'] = function(effect, index) {
 };
 MML.statusEffects['Melee This Round'] = function(effect, index) {
   if (state.MML.GM.inCombat === false || state.MML.GM.roundStarted === false) {
-    this.roundsExertion++;
     delete this.statusEffects[index];
   } else {
     this.statusEffects[index].description = 'Adds to rounds of exertion';

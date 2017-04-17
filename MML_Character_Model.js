@@ -55,16 +55,15 @@ MML.Character = function(charName, id) {
 
           if (!_.has(this.statusEffects, 'Fatigue')) {
             if (this.roundsExertion > this.fitness) {
-              this.fatigueCheckRoll(0);
+              state.MML.GM.fatigueChecks.push(this);
             }
           } else {
             if (this.roundsExertion > Math.round(this.fitness / 2)) {
-              this.fatigueCheckRoll(-4);
+              state.MML.GM.fatigueChecks.push(this);
             }
           }
-        } else if (_.has(this.statusEffects, 'Fatigue')) {
-          this.roundsRest = this.roundsRest + 1;
-
+        } else if (_.has(this.statusEffects, 'Fatigue') || this.roundsExertion > 0) {
+          this.roundsRest++;
           if (this.roundsRest >= 6) {
             this.fatigueRecoveryRoll(0);
           }
@@ -374,8 +373,13 @@ MML.Character = function(charName, id) {
       }
     },
     'fatigueCheckRoll': {
-      value: function(modifier) {
-        MML.attributeCheckRoll(this, 'Fatigue Check Fitness Roll', 'fitness', [modifier], 'fatigueCheckRollResult');
+      value: function() {
+        console.log('dafuq mate?');
+        if (!_.has(this.statusEffects, 'Fatigue')) {
+          MML.attributeCheckRoll(this, 'Fatigue Check Fitness Roll', 'fitness', [0], 'fatigueCheckRollResult');
+        } else {
+          MML.attributeCheckRoll(this, 'Fatigue Check Fitness Roll', 'fitness', [-4], 'fatigueCheckRollResult');
+        }
       }
     },
     'fatigueCheckRollResult': {
@@ -394,7 +398,7 @@ MML.Character = function(charName, id) {
           }
           this.roundsExertion = 0;
         }
-        MML[state.MML.GM.currentAction.callback]();
+        MML.nextFatigueCheck();
       }
     },
     'fatigueRecoveryRoll': {
@@ -1609,8 +1613,7 @@ MML.Character = function(charName, id) {
           'missileAttackMod',
           'meleeAttackMod',
           'castingMod',
-          'perceptionCheckMod',
-          'roundsExertion'
+          'perceptionCheckMod'
         ];
         _.each(dependents, function(dependent) {
           this[dependent] = 0;

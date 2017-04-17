@@ -1327,7 +1327,7 @@ MML.Player = function(name, isGM) {
       }
     }];
   };
-  this.charMenuFatigueRoll = function(who) {
+  this.charMenuFatigueCheckRoll = function(who) {
     this.who = who;
     this.message = 'Fatigue Roll.';
     this.buttons = [{
@@ -1582,6 +1582,7 @@ MML.Player = function(name, isGM) {
         name: 'Movement Only',
         callback: 'endAction'
       });
+      delete MML.characters[this.who].action.getTargets;
       this.displayMenu();
     }
   };
