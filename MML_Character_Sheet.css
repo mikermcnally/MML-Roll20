@@ -3,7 +3,7 @@
     padding: 2px;
     background:url(http://i.imgur.com/BLb0XMU.jpg) top left repeat;
 }
- 
+
 .sheet-rolltemplate-universal th {
     color: rgb(233, 223, 151);
     background-color: rgb(63, 32, 33);
@@ -14,22 +14,22 @@
     font-family: "Arial", Helvetica, sans-serif;
     text-transform: uppercase;
 }
- 
+
 .sheet-rolltemplate-universal .sheet-arrow-right {
     border-top: 3px solid transparent;
     border-bottom: 3px solid transparent;
     border-left: 180px solid rgb(126, 45, 64);
 }
- 
+
 .sheet-rolltemplate-universal .sheet-tcat {
     font-weight: bold;
 }
- 
+
 .sheet-rolltemplate-universal td {
     padding-left: 5px;
     font-size: 0.9em;
 }
- 
+
 .sheet-rolltemplate-universal .inlinerollresult  {
     background-color: transparent;
     border: none;
@@ -40,7 +40,7 @@
     padding: 2px;
     background:url(http://i.imgur.com/BLb0XMU.jpg) top left repeat;
 }
- 
+
 .sheet-rolltemplate-rollMenu th {
     color: rgb(233, 223, 151);
     background-color: rgb(63, 32, 33);
@@ -51,23 +51,60 @@
     font-family: "Arial", Helvetica, sans-serif;
     text-transform: uppercase;
 }
- 
+
 .sheet-rolltemplate-rollMenu .sheet-arrow-right {
     border-top: 3px solid transparent;
     border-bottom: 3px solid transparent;
     border-left: 180px solid rgb(126, 45, 64);
 }
- 
+
 .sheet-rolltemplate-rollMenu .sheet-tcat {
     font-weight: bold;
 }
- 
+
 .sheet-rolltemplate-rollMenu td {
     padding-left: 5px;
     font-size: 0.9em;
 }
- 
+
 .sheet-rolltemplate-rollMenu .inlinerollresult  {
+    background-color: transparent;
+    border: none;
+}
+
+.sheet-rolltemplate-rollMenuGM table {
+    width: 100%;
+    padding: 2px;
+    background:url(http://i.imgur.com/BLb0XMU.jpg) top left repeat;
+}
+
+.sheet-rolltemplate-rollMenuGM th {
+    color: rgb(233, 223, 151);
+    background-color: rgb(63, 32, 33);
+    padding-left: 5px;
+    line-height: 1.1em;
+    font-size: 1em;
+    text-align: left;
+    font-family: "Arial", Helvetica, sans-serif;
+    text-transform: uppercase;
+}
+
+.sheet-rolltemplate-rollMenuGM .sheet-arrow-right {
+    border-top: 3px solid transparent;
+    border-bottom: 3px solid transparent;
+    border-left: 180px solid rgb(126, 45, 64);
+}
+
+.sheet-rolltemplate-rollMenuGM .sheet-tcat {
+    font-weight: bold;
+}
+
+.sheet-rolltemplate-rollMenuGM td {
+    padding-left: 5px;
+    font-size: 0.9em;
+}
+
+.sheet-rolltemplate-rollMenuGM .inlinerollresult  {
     background-color: transparent;
     border: none;
 }
@@ -77,7 +114,7 @@
     padding: 2px;
     background:url(http://i.imgur.com/BLb0XMU.jpg) top left repeat;
 }
- 
+
 .sheet-rolltemplate-damage th {
     color: rgb(233, 223, 151);
     background-color: rgb(63, 32, 33);
@@ -88,22 +125,22 @@
     font-family: "Arial", Helvetica, sans-serif;
     text-transform: uppercase;
 }
- 
+
 .sheet-rolltemplate-damage .sheet-arrow-right {
     border-top: 3px solid transparent;
     border-bottom: 3px solid transparent;
     border-left: 180px solid rgb(126, 45, 64);
 }
- 
+
 .sheet-rolltemplate-damage .sheet-tcat {
     font-weight: bold;
 }
- 
+
 .sheet-rolltemplate-damage td {
     padding-left: 5px;
     font-size: 0.9em;
 }
- 
+
 .sheet-rolltemplate-damage .inlinerollresult  {
     background-color: transparent;
     border: none;
@@ -114,7 +151,7 @@
     padding: 2px;
     background:url(http://i.imgur.com/BLb0XMU.jpg) top left repeat;
 }
- 
+
 .sheet-rolltemplate-hitPosition th {
     color: rgb(233, 223, 151);
     background-color: rgb(63, 32, 33);
@@ -125,22 +162,22 @@
     font-family: "Arial", Helvetica, sans-serif;
     text-transform: uppercase;
 }
- 
+
 .sheet-rolltemplate-hitPosition .sheet-arrow-right {
     border-top: 3px solid transparent;
     border-bottom: 3px solid transparent;
     border-left: 180px solid rgb(126, 45, 64);
 }
- 
+
 .sheet-rolltemplate-hitPosition .sheet-tcat {
     font-weight: bold;
 }
- 
+
 .sheet-rolltemplate-hitPosition td {
     padding-left: 5px;
     font-size: 0.9em;
 }
- 
+
 .sheet-rolltemplate-hitPosition .inlinerollresult  {
     background-color: transparent;
     border: none;
@@ -151,7 +188,7 @@
     padding: 2px;
     background:url(http://i.imgur.com/BLb0XMU.jpg) top left repeat;
 }
- 
+
 .sheet-rolltemplate-charMenu th {
     color: rgb(233, 223, 151);
     background-color: rgb(63, 32, 33);
@@ -162,22 +199,22 @@
     font-family: "Arial", Helvetica, sans-serif;
     text-transform: uppercase;
 }
- 
+
 .sheet-rolltemplate-charMenu .sheet-arrow-right {
     border-top: 3px solid transparent;
     border-bottom: 3px solid transparent;
     border-left: 180px solid rgb(126, 45, 64);
 }
- 
+
 .sheet-rolltemplate-charMenu .sheet-tcat {
     font-weight: bold;
 }
- 
+
 .sheet-rolltemplate-charMenu td {
     padding-left: 5px;
     font-size: 0.9em;
 }
- 
+
 .sheet-rolltemplate-charMenu .inlinerollresult  {
     background-color: transparent;
     border: none;
@@ -188,7 +225,7 @@
     padding: 2px;
     background:url(http://i.imgur.com/BLb0XMU.jpg) top left repeat;
 }
- 
+
 .sheet-rolltemplate-selectTarget th {
     color: rgb(233, 223, 151);
     background-color: rgb(63, 32, 33);
@@ -199,22 +236,22 @@
     font-family: "Arial", Helvetica, sans-serif;
     text-transform: uppercase;
 }
- 
+
 .sheet-rolltemplate-selectTarget .sheet-arrow-right {
     border-top: 3px solid transparent;
     border-bottom: 3px solid transparent;
     border-left: 180px solid rgb(126, 45, 64);
 }
- 
+
 .sheet-rolltemplate-selectTarget .sheet-tcat {
     font-weight: bold;
 }
- 
+
 .sheet-rolltemplate-selectTarget td {
     padding-left: 5px;
     font-size: 0.9em;
 }
- 
+
 .sheet-rolltemplate-selectTarget .inlinerollresult  {
     background-color: transparent;
     border: none;
@@ -305,7 +342,7 @@ input.sheet-tab {
     width: calc(20% - 4px);
     max-width: 150px;
     height: 20px;
-    
+
     outline: none !important;
     position: relative;
     cursor: pointer;
@@ -328,7 +365,7 @@ input.sheet-tab::before {
     font-size: 14px;
     font-weight: bold;
     text-align: center;
-    
+
     width: 100%;
     height: 20px;
 }
@@ -368,7 +405,7 @@ input.sheet-tab:checked::before {
 .sheet-box button.sheet-roll-tracker:before {
     font-family: "Pictos" !important;
     content: "t" !important;
-} 
+}
 
 /* ===== INPUTS ===== */
 .sheet-box input[type=number]::-webkit-inner-spin-button,
@@ -463,11 +500,11 @@ input.sheet-tab:checked::before {
     font-size: 18px;
     font-family: "Pictos";
     content: "";
-    
+
     -moz-box-shadow: 0 0 2px #ccc;
     -webkit-box-shadow: 0 0 2px #ccc;
     box-shadow: 0 0 2px #ccc;
-    
+
     -moz-border-radius: 3px;
     -webkit-border-radius: 3px;
     border-radius: 3px;
@@ -555,7 +592,7 @@ input.sheet-tab:checked::before {
 
 
 /* -- Combat -- */
- 
+
 
 /* -- Spells -- */
 
