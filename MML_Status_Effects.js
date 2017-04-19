@@ -30,10 +30,10 @@ MML.statusEffects['Disabling Wound'] = function(effect, index) {
       this.statusEffects[index].description = 'Situational Modifier: -25%. Unconscious';
     } else if (effect.bodyPart === 'Left Arm') {
       this.statusEffects[index].description = 'Situational Modifier: -25%. Initiative: -10. Left Arm Limp';
-      this.leftHand = { _id: 'emptyHand' };
+      this.leftHand = { _id: 'emptyHand', grip: 'unarmed' };
     } else if (effect.bodyPart === 'Right Arm') {
       this.statusEffects[index].description = 'Situational Modifier: -25%. Initiative: -10. Right Arm Limp';
-      this.rightHand = { _id: 'emptyHand' };
+      this.rightHand = { _id: 'emptyHand', grip: 'unarmed' };
     } // TODO: else if legs limit movement
   }
 };
@@ -68,12 +68,13 @@ MML.statusEffects['Number of Defenses'] = function(effect, index) {
 MML.statusEffects['Fatigue'] = function(effect, index) {
   if (effect.level < 1) {
     delete this.statusEffects[index];
+  } else {
+    if (this.situationalInitBonus !== 'No Combat') {
+      this.situationalInitBonus += -5 * effect.level;
+    }
+    this.situationalMod += -10 * effect.level;
+    this.statusEffects[index].description = 'Situational Modifier: ' + -10 * effect.level + '%. Initiative: ' + -5 * effect.level;
   }
-  if (this.situationalInitBonus !== 'No Combat') {
-    this.situationalInitBonus += -5 * effect.level;
-  }
-  this.situationalMod += -10 * effect.level;
-  this.statusEffects[index].description = 'Situational Modifier: -10' + -10 * effect.level + '%. Initiative: ' + -5 * effect.level;
 };
 MML.statusEffects['Sensitive Area'] = function(effect, index) {
   if (state.MML.GM.inCombat === false || state.MML.GM.currentRound - parseInt(effect.startingRound) > 1) {

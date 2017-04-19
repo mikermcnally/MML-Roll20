@@ -422,11 +422,12 @@ MML.Player = function(name, isGM) {
     if (character.spells.length > 0) {
       buttons.push(this.menuButtons.setActionCast);
     }
-    if (!_.isUndefined(character.previousAction.spell) && character.previousAction.spell.actions > 1) {
+    if (!_.isUndefined(character.previousAction.spell) && character.previousAction.spell.actions > 0) {
       buttons.push({
         text: 'Continue Casting',
         nextMenu: 'charMenuFinalizeAction',
         callback: function(input) {
+          character.action = MML.clone(character.previousAction);
           this.displayMenu();
         }
       });
@@ -745,7 +746,8 @@ MML.Player = function(name, isGM) {
           if (_.contains(character.action.modifiers, 'Called Shot')) {
             character.action.modifiers = _.without(character.action.modifiers, 'Called Shot');
           } else {
-            character.action.modifiers = _.without(character.action.modifiers, 'Called Shot Specific').push('Called Shot');
+            character.action.modifiers = _.without(character.action.modifiers, 'Called Shot Specific');
+            character.action.modifiers.push('Called Shot');
           }
           this.charMenuMetaMagicInitiative(who);
           this.displayMenu();
@@ -758,7 +760,8 @@ MML.Player = function(name, isGM) {
           if (_.contains(character.action.modifiers, 'Called Shot Specific')) {
             character.action.modifiers = _.without(character.action.modifiers, 'Called Shot Specific');
           } else {
-            character.action.modifiers = _.without(character.action.modifiers, 'Called Shot').push('Called Shot Specific');
+            character.action.modifiers = _.without(character.action.modifiers, 'Called Shot');
+            character.action.modifiers.push('Called Shot Specific');
           }
           this.charMenuMetaMagicInitiative(who);
           this.displayMenu();
@@ -772,7 +775,8 @@ MML.Player = function(name, isGM) {
         if (_.contains(character.action.modifiers, 'Ease Spell')) {
           character.action.modifiers = _.without(character.action.modifiers, 'Ease Spell');
         } else {
-          character.action.modifiers = _.without(character.action.modifiers, 'Hasten Spell').push('Ease Spell');
+          character.action.modifiers = _.without(character.action.modifiers, 'Hasten Spell');
+          character.action.modifiers.push('Ease Spell');
         }
         this.charMenuMetaMagicInitiative(who);
         this.displayMenu();
@@ -785,7 +789,8 @@ MML.Player = function(name, isGM) {
         if (_.contains(character.action.modifiers, 'Hasten Spell')) {
           character.action.modifiers = _.without(character.action.modifiers, 'Hasten Spell');
         } else {
-          character.action.modifiers = _.without(character.action.modifiers, 'Ease Spell').push('Hasten Spell');
+          character.action.modifiers = _.without(character.action.modifiers, 'Ease Spell');
+          character.action.modifiers.push('Hasten Spell');
         }
         this.charMenuMetaMagicInitiative(who);
         this.displayMenu();
@@ -949,7 +954,7 @@ MML.Player = function(name, isGM) {
     this.buttons = [];
     var character = MML.characters[who];
 
-    if (['spellComponent', 'shield', 'potion', 'misc'].indexOf(item.type) ||
+    if (['spellComponent', 'shield', 'potion', 'misc'].indexOf(item.type) > -1 ||
       (item.type === 'weapon' && _.has(item.grips, 'One Hand'))
     ) {
       this.buttons.push({

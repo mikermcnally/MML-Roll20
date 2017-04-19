@@ -65,7 +65,7 @@ MML.Character = function(charName, id) {
         } else if (_.has(this.statusEffects, 'Fatigue') || this.roundsExertion > 0) {
           this.roundsRest++;
           if (this.roundsRest >= 6) {
-            this.fatigueRecoveryRoll(0);
+            state.MML.GM.fatigueChecks.push(this);
           }
         }
 
@@ -393,6 +393,7 @@ MML.Character = function(charName, id) {
         if (result === 'Critical Failure' || result === 'Failure') {
           if (_.has(this.statusEffects, 'Fatigue')) {
             this.statusEffects['Fatigue'].level += 1;
+            this.applyStatusEffects();
           } else {
             this.addStatusEffect('Fatigue', { level: 1 });
           }
@@ -403,7 +404,7 @@ MML.Character = function(charName, id) {
     },
     'fatigueRecoveryRoll': {
       value: function(modifier) {
-        MML.attributeCheckRoll(this, 'Fatigue Recovery Check Health Roll', 'health', [modifier], 'fatigueRecoveryRollResult');
+        MML.attributeCheckRoll(this, 'Fatigue Recovery Check Health Roll', 'health', [0], 'fatigueRecoveryRollResult');
       }
     },
     'fatigueRecoveryRollResult': {
@@ -418,8 +419,9 @@ MML.Character = function(charName, id) {
           this.roundsRest = 0;
           this.roundsExertion = 0;
           this.statusEffects['Fatigue'].level--;
+          this.applyStatusEffects();
         }
-        MML[state.MML.GM.currentAction.callback]();
+        MML.nextFatigueCheck();
       }
     },
     'armorDamageReduction': {
@@ -591,8 +593,10 @@ MML.Character = function(charName, id) {
           state.MML.GM.currentAction.parameters = { target: MML.characters[targetName] };
           this.releaseOpponentAction();
         } else if (this.action.name === 'Cast') {
-          if (!_.isUndefined(this.previousAction) && !_.isUndefined(this.previousAction.spell) && this.previousAction.spell.actions > 1) {
-            this.action.spell.actions = this.previousAction.spell.actions - 1;
+          if (this.action.spell.actions > 1) {
+            this.action.spell.actions = this.action.spell.actions - 1;
+            sendChat('GM', '/w "' + this.player.name + '"' + this.name + '\' starts casting a spell.');
+            MML.endAction();
           } else {
             var currentAction = {
               callback: 'castAction',
