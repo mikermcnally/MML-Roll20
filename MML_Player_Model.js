@@ -405,6 +405,21 @@ MML.Player = function(name, isGM) {
       }
     }
 
+    if (!_.isUndefined(character.action.weapon) && MML.isRangedWeapon(character.action.weapon)) {
+      buttons.push({
+        text: 'Aim',
+        nextMenu: 'charMenuFinalizeAction',
+        callback: function(input) {
+          _.extend(MML.characters[this.who].action, {
+            name: 'Aim',
+            getTargets: 'getSingleTarget',
+            callback: 'aimAction'
+          });
+          this.displayMenu();
+        }
+      });
+    }
+
     if ((_.has(character.statusEffects, 'Holding') ||
         (_.has(character.statusEffects, 'Grappled') && character.statusEffects['Grappled'].targets.length === 1)) &&
       !_.has(character.statusEffects, 'Held') &&
@@ -439,7 +454,6 @@ MML.Player = function(name, isGM) {
     var buttons = [];
     var character = MML.characters[who];
     var weapon = character.action.weapon;
-
     if (weapon !== 'unarmed' &&
       ((!_.has(character.statusEffects, 'Grappled') &&
           !_.has(character.statusEffects, 'Holding') &&
@@ -462,14 +476,6 @@ MML.Player = function(name, isGM) {
           nextMenu: 'charMenuAttackCalledShot',
           callback: function(input) {
             character.action.modifiers.push('Shoot From Cover');
-            this.displayMenu();
-          }
-        });
-        buttons.push({
-          text: 'Aim',
-          nextMenu: 'charMenuPrepareAction',
-          callback: function(input) {
-            character.action.modifiers.push('Aim');
             this.displayMenu();
           }
         });
@@ -946,13 +952,13 @@ MML.Player = function(name, isGM) {
   this.charMenuChooseHands = function(who, item, itemId) {
     this.who = who;
     this.message = 'Choose item or items for' + who;
-    this.buttons = [];
+    var buttons = [];
     var character = MML.characters[who];
 
     if (['spellComponent', 'shield', 'potion', 'misc'].indexOf(item.type) ||
       (item.type === 'weapon' && _.has(item.grips, 'One Hand'))
     ) {
-      this.buttons.push({
+      buttons.push({
         text: 'Left',
         nextMenu: 'charMenuReadyAdditionalItem',
         callback: function() {
@@ -964,7 +970,7 @@ MML.Player = function(name, isGM) {
           this.displayMenu();
         }
       });
-      this.buttons.push({
+      buttons.push({
         text: 'Right',
         nextMenu: 'charMenuReadyAdditionalItem',
         callback: function() {
@@ -980,20 +986,22 @@ MML.Player = function(name, isGM) {
     if (item.type === 'weapon') {
       _.each(item.grips, function(grip, name) {
         if (name !== 'One Hand') {
-          this.buttons.push({
+         buttons.push({
             text: name,
-            nextMenu: 'charMenuPrepareAction',
+            nextMenu: 'menuIdle',
             callback: function() {
               character.action.items = [{
                 itemId: itemId,
                 grip: name
               }];
+              this.charMenuPrepareAction(who);
               this.displayMenu();
             }
           });
         }
       });
     }
+    this.buttons = buttons;
   };
   this.charMenuReadyAdditionalItem = function(who, hand, previousItemId) {
     this.who = who;
@@ -1009,9 +1017,10 @@ MML.Player = function(name, isGM) {
       ) {
         buttons.push({
           text: item.name,
-          nextMenu: 'charMenuPrepareAction',
+          nextMenu: 'menuIdle',
           callback: function() {
             character.action.items.push({ itemId: _id, grip: hand });
+            this.charMenuPrepareAction(who);
             this.displayMenu();
           }
         });
@@ -1363,6 +1372,11 @@ MML.Player = function(name, isGM) {
   this.charMenuObserveAction = function(who) {
     this.who = who;
     this.message = this.who + ' observes the situation.';
+    this.buttons = [this.menuButtons.endAction];
+  };
+  this.charMenuObserveAction = function(who) {
+    this.who = who;
+    this.message = this.who + ' aims at ' + state.MML.GM.currentAction.targetArray[state.MML.GM.currentAction.targetIndex] + '.';
     this.buttons = [this.menuButtons.endAction];
   };
 

@@ -374,7 +374,6 @@ MML.Character = function(charName, id) {
     },
     'fatigueCheckRoll': {
       value: function() {
-        console.log('dafuq mate?');
         if (!_.has(this.statusEffects, 'Fatigue')) {
           MML.attributeCheckRoll(this, 'Fatigue Check Fitness Roll', 'fitness', [0], 'fatigueCheckRollResult');
         } else {

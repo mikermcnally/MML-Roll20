@@ -30,8 +30,6 @@ MML.newRound = function() {
   _.each(gm.combatants, function(charName) {
     MML.characters[charName].newRoundUpdateCharacter();
   });
-  console.log("SHOW ME WHAT YOU GOT");
-  console.log(gm.fatigueChecks.length > 0);
   if (gm.fatigueChecks.length > 0) {
     gm.fatigueCheckIndex = 0;
     MML.nextFatigueCheck();

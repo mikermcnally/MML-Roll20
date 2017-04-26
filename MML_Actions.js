@@ -236,6 +236,23 @@ MML.observeAction = function() {
   character.player.displayMenu();
 };
 
+MML.aimAction = function() {
+  var currentAction = state.MML.GM.currentAction;
+  var character = currentAction.character;
+
+  if (_.has(character.statusEffects, 'Taking Aim')) {
+    character.statusEffects['Taking Aim'].level++;
+  } else {
+    character.addStatusEffect('Taking Aim', {
+      id: generateRowID(),
+      name: 'Taking Aim',
+      level: 1
+    });
+  }
+  character.player.charMenuAimAction(character.name);
+  character.player.displayMenu();
+};
+
 MML.readyItemAction = function() {};
 
 MML.nextTarget = function() {

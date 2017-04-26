@@ -177,7 +177,7 @@ function runTests() {
       expect(state.MML.GM.currentRound, 'currentRound should be incremented').to.equal(3);
     });
 
-    it.only('Tested: Ready Item, Melee Attack, Melee Dodge', function() {
+    it('Tested: Ready Item, Melee Attack, Melee Dodge', function() {
       var item = MML.items['Hand Axe'];
       item.quality = 'Standard';
       item._id = 'axe';
@@ -980,8 +980,46 @@ function runTests() {
       player.menuCommand(player.who, 'End Movement');
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
-      console.log("SHOW ME WHAT YOU GOT");
-      console.log(MML.characters['test0'].roundsExertion);
+    });
+
+    it.only('Tested: Ranged Attack, Ranged Defense, ', function () {
+      var bow = MML.items['Short Bow'];
+      bow.quality = 'Standard';
+      bow._id = 'bow';
+      var crossbow = MML.items['Light Cross Bow'];
+      crossbow.quality = 'Standard';
+      crossbow._id = 'crossbow';
+      MML.characters['test0'].inventory['bow'] = bow;
+      MML.characters['test1'].inventory['crossbow'] = crossbow;
+      player.menuCommand(player.who, 'Ready Item');
+      player.menuCommand(player.who, 'Short Bow');
+      player.menuCommand(player.who, 'Two Hands');
+      player.menuCommand(player.who, 'Next Menu');
+      player.menuCommand(player.who, 'Aim');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      player.menuCommand(player.who, 'Ready Item');
+      player.menuCommand(player.who, 'Light Cross Bow');
+      player.menuCommand(player.who, 'Two Hands');
+      player.menuCommand(player.who, 'Next Menu');
+      player.menuCommand(player.who, 'Aim');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 9);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      player.menuCommand(player.who, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "setCurrentCharacterTargets"
+      });
     });
   });
 }
@@ -1054,7 +1092,9 @@ function createTestCharacters(amount) {
       _type: "graphic",
       _subtype: "token",
       represents: character.id,
-      tint_color: 'transparent'
+      tint_color: 'transparent',
+      left: i*10,
+      top: i*10
     });
   }
 }
