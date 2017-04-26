@@ -273,7 +273,7 @@ MML.endAction = function() {
     spentInitiative += -5;
   }
   character.spentInitiative = spentInitiative;
-  character.previousAction = character.action;
+  character.previousAction = MML.clone(character.action);
   character.updateCharacter();
   _.each(currentAction.targetArray, function (target) {
     MML.characters[target].updateCharacter();

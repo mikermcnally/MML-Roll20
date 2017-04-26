@@ -352,6 +352,16 @@ var generateUUID = (function() {
     return generateUUID().replace(/_/g, "Z");
   };
 
+MML.clone = function(obj) {
+  if (obj === null || typeof obj !== 'object')
+    return obj;
+  var target = obj instanceof Array ? [] : {};
+  for (var i in obj) {
+    target[i] = this.clone(obj[i]);
+  }
+  return target;
+};
+
 MML.hexify = function(stringIn) {
   var stringOut = "";
   var i;

@@ -27,9 +27,6 @@ MML.newRound = function() {
   gm.currentRound++;
   gm.roundStarted = false;
   gm.fatigueChecks = [];
-  _.each(gm.combatants, function(charName) {
-    MML.characters[charName].newRoundUpdateCharacter();
-  });
   if (gm.fatigueChecks.length > 0) {
     gm.fatigueCheckIndex = 0;
     MML.nextFatigueCheck();
@@ -84,7 +81,14 @@ MML.nextAction = function() {
 MML.nextFatigueCheck = function() {
   var gm = state.MML.GM;
   if (gm.fatigueCheckIndex < gm.fatigueChecks.length) {
-    gm.fatigueChecks[gm.fatigueCheckIndex].player.charMenuFatigueCheckRoll(gm.fatigueChecks[gm.fatigueCheckIndex].name);
+    var character = gm.fatigueChecks[gm.fatigueCheckIndex];
+    var player = character.player;
+    if (character.roundsRest >= 6) {
+      player.charMenuFatigueRecoveryRoll(character.name);
+    } else {
+      player.charMenuFatigueCheckRoll(character.name);
+    }
+    player.displayMenu();
     gm.fatigueCheckIndex++;
   } else {
     _.each(MML.players, function(player) {
