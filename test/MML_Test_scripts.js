@@ -30,13 +30,33 @@ runTests();
 
 function runTests() {
   describe('Combat', function() {
-    this.timeout(150000);
+    this.timeout(1500000);
     var player;
 
-    beforeEach(function() {
-      player = resetEnvironment();
-      createTestCharacters(3);
-      startTestCombat(player, _.pluck(MML.characters, 'name'));
+    // beforeEach(function() {
+    //   player = resetEnvironment();
+    //   createTestCharacters(3);
+    //   startTestCombat(player, _.pluck(MML.characters, 'name'));
+    // });
+    //
+    // afterEach(function () {
+    //   var characters = findObjs({
+    //     _type: "character"
+    //   });
+    //   _.each(characters, function (character) {
+    //     character.remove();
+    //   });
+    // });
+
+    it.only('proxy', function () {
+      var p = new Proxy({}, {
+  set: function(target, prop, value, receiver) {
+    console.log('called: ' + prop + ' = ' + value);
+    return true;
+  }
+});
+
+p.a = 10;
     });
 
     it('Tested: Unarmed striking, observe without ranged weapon, basic combat flow, basic damage, multiple defenses', function() {
@@ -1252,7 +1272,7 @@ function runTests() {
       player.menuCommand(player.who, 'End Movement');
     });
 
-    it.only('Tested: Ranged Attack, Ranged Defense, ', function () {
+    it('Tested: Ranged Attack, Ranged Defense, ', function () {
       var bow = MML.items['Short Bow'];
       bow.quality = 'Standard';
       bow._id = 'bow';
@@ -1283,7 +1303,7 @@ function runTests() {
       player.menuCommand(player.who, 'End Movement');
     });
 
-    it.only('Tested: Spell Casting', function() {
+    it.skip('Tested: Spell Casting', function() {
       MML.setCurrentAttribute('test1', 'spells', JSON.stringify(['Hail of Stones', 'Dart']));
       var item = MML.items['Dart'];
       item._id = 'dart';

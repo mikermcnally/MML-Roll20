@@ -1379,7 +1379,7 @@ MML.Player = function(name, isGM) {
     this.message = this.who + ' observes the situation.';
     this.buttons = [this.menuButtons.endAction];
   };
-  this.charMenuObserveAction = function(who) {
+  this.charMenuAimAction = function(who) {
     this.who = who;
     this.message = this.who + ' aims at ' + state.MML.GM.currentAction.targetArray[state.MML.GM.currentAction.targetIndex] + '.';
     this.buttons = [this.menuButtons.endAction];

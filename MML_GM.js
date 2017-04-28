@@ -27,6 +27,9 @@ MML.newRound = function() {
   gm.currentRound++;
   gm.roundStarted = false;
   gm.fatigueChecks = [];
+  _.each(gm.combatants, function(charName) {
+    MML.characters[charName].newRoundUpdateCharacter();
+  });
   if (gm.fatigueChecks.length > 0) {
     gm.fatigueCheckIndex = 0;
     MML.nextFatigueCheck();

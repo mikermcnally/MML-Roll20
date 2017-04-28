@@ -217,6 +217,10 @@ MML.getHitPosition = function(character, rollValue) {
 
 MML.getHitTable = function(character) {
   var table;
+  console.log("SHOW ME WHAT YOU GOT");
+  console.log(character.inventory);
+  console.log(character.rightHand);
+  console.log(character.leftHand);
   switch (character.bodyType) {
     case 'humanoid':
       if (character.inventory[character.rightHand._id].type === 'shield' || character.inventory[character.leftHand._id].type === 'shield') {
