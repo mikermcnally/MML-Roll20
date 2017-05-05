@@ -81,7 +81,7 @@ MML.getMaxAttributeAsFloat = function(charName, attribute) {
 
 MML.getCurrentAttributeAsBool = function(charName, attribute) {
   var result = MML.getCurrentAttribute(charName, attribute);
-  if (result === "true") {
+  if (result.toString() === "true") {
     return true;
   } else {
     return false;

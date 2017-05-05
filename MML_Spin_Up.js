@@ -25,7 +25,7 @@ on('ready', function() {
     }), '', character);
 
     setTimeout(function () {
-      MML.characters[charName] = new MML.Character(charName, character.id);
+      MML.characters[charName] = MML.createCharacter(charName, character.id);
       MML.characters[charName].updateCharacterSheet();
     }, 2000);
   });

@@ -70,6 +70,9 @@ MML.buildWeaponObject = function(item, grip) {
 
   if (['MWD', 'MWM', 'TWH', 'TWK', 'TWS', 'SLI'].indexOf(weapon.family)) {
     _.extend(weapon, item.grips[grip]);
+    if (weapon.family === 'MWM') {
+      weapon.loaded = item.loaded;
+    }
   } else {
     _.extend(weapon, {
       defense: item.grips[grip].defense,
@@ -98,26 +101,18 @@ MML.getCharacterWeaponAndSkill = function(character) {
     grip = character.leftHand.grip;
   }
   var item = character.inventory[itemId];
-  var characterWeapon = {
-    _id: itemId,
-    name: item.name,
-    type: 'weapon',
-    weight: item.weight,
-    family: item.grips[grip].family,
-    hands: item.grips[grip].hands,
-    defense: item.grips[grip].defense,
-    initiative: item.grips[grip].initiative,
-    rank: item.grips[grip].rank
-  };
+  var characterWeapon = MML.buildWeaponObject(item, grip);
 
-  if (character.action.weaponType === 'secondary') {
-    characterWeapon.damageType = item.grips[grip].secondaryType;
-    characterWeapon.task = item.grips[grip].secondaryTask;
-    characterWeapon.damage = item.grips[grip].secondaryDamage;
-  } else {
-    characterWeapon.damageType = item.grips[grip].primaryType;
-    characterWeapon.task = item.grips[grip].primaryTask;
-    characterWeapon.damage = item.grips[grip].primaryDamage;
+  if (!MML.isRangedWeapon(characterWeapon)) {
+    if (character.action.weaponType === 'secondary') {
+      characterWeapon.damageType = item.grips[grip].secondaryType;
+      characterWeapon.task = item.grips[grip].secondaryTask;
+      characterWeapon.damage = item.grips[grip].secondaryDamage;
+    } else {
+      characterWeapon.damageType = item.grips[grip].primaryType;
+      characterWeapon.task = item.grips[grip].primaryTask;
+      characterWeapon.damage = item.grips[grip].primaryDamage;
+    }
   }
 
   return {
@@ -217,10 +212,6 @@ MML.getHitPosition = function(character, rollValue) {
 
 MML.getHitTable = function(character) {
   var table;
-  console.log("SHOW ME WHAT YOU GOT");
-  console.log(character.inventory);
-  console.log(character.rightHand);
-  console.log(character.leftHand);
   switch (character.bodyType) {
     case 'humanoid':
       if (character.inventory[character.rightHand._id].type === 'shield' || character.inventory[character.leftHand._id].type === 'shield') {

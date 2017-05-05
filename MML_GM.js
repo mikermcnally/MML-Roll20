@@ -42,6 +42,7 @@ MML.newRound = function() {
 
 MML.startRound = function() {
   var gm = state.MML.GM;
+
   if (MML.checkReady()) {
     gm.roundStarted = true;
 

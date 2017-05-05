@@ -179,7 +179,7 @@ MML.releaseOpponentAction = function() {
   } else if (parameters.targetAgreed) {
     character.releaseGrapple(target);
   } else {
-    character.name.action ={
+    character.action = {
       name: 'Attack',
       callback: 'startAttackAction',
       weaponType: 'Break Grapple',
@@ -191,7 +191,7 @@ MML.releaseOpponentAction = function() {
       targetIndex: 0,
       resistRelease: true
     };
-    character[MML.characters[character.name].action.callback]();
+    character[character.action.callback]();
   }
 };
 
@@ -239,21 +239,47 @@ MML.observeAction = function() {
 MML.aimAction = function() {
   var currentAction = state.MML.GM.currentAction;
   var character = currentAction.character;
+  var parameters = currentAction.parameters;
+  var target = parameters.target;
+  var attackerWeapon = parameters.attackerWeapon;
+  var rolls = currentAction.rolls;
 
-  if (_.has(character.statusEffects, 'Taking Aim')) {
-    character.statusEffects['Taking Aim'].level++;
-  } else {
+  if (!_.has(character.statusEffects, 'Taking Aim')) {
     character.addStatusEffect('Taking Aim', {
       id: generateRowID(),
       name: 'Taking Aim',
-      level: 1
+      level: 1,
+      target: target,
+      startingRound: state.MML.GM.currentRound
     });
+    character.player.charMenuAimAction(character.name);
+    character.player.displayMenu();
+  } else if (character.statusEffects['Taking Aim'].startingRound !== state.MML.GM.currentRound && attackerWeapon.family === 'MWD' && _.isUndefined(rolls.strengthRoll)) {
+    character.player.charMenuholdAimRoll(character.name);
+    character.player.displayMenu();
+  } else if (!_.isUndefined(rolls.strengthRoll) && rolls.strengthRoll !== 'Critical Success' && rolls.strengthRoll !== 'Success') {
+    character.action = {
+      name: 'Attack',
+      callback: 'startAttackAction',
+      modifiers: []
+    };
+    character[character.action.callback]();
+  } else {
+    if (target.name === character.statusEffects['Taking Aim'].target.name) {
+      character.statusEffects['Taking Aim'].level = 2;
+    } else {
+      character.statusEffects['Taking Aim'].target = target;
+      character.statusEffects['Taking Aim'].level = 1;
+      character.statusEffects['Taking Aim'].startingRound = state.MML.GM.currentRound;
+    }
+    character.player.charMenuAimAction(character.name, '');
+    character.player.displayMenu();
   }
-  character.player.charMenuAimAction(character.name);
-  character.player.displayMenu();
 };
 
-MML.readyItemAction = function() {};
+MML.reloadAction = function() {
+  state.MML.GM.currentAction.character.reloadWeapon();
+};
 
 MML.nextTarget = function() {
   state.MML.GM.currentAction.targetIndex += 1;
@@ -268,6 +294,11 @@ MML.endAction = function() {
   var spentInitiative = character.spentInitiative + character.actionTempo;
   var currentInitiative = character.initiative + spentInitiative;
 
+  if (character.action.name === 'Attack') {
+    character.addStatusEffect('Melee This Round', {
+      name: 'Melee This Round'
+    });
+  }
   // Prevents character from gaining initiative when these status effects are removed
   if (_.has(character.statusEffects, 'Called Shot') || _.has(character.statusEffects, 'Called Shot Specific')) {
     spentInitiative += -5;

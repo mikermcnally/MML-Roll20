@@ -406,18 +406,32 @@ MML.Player = function(name, isGM) {
     }
 
     if (!_.isUndefined(character.action.weapon) && MML.isRangedWeapon(character.action.weapon)) {
-      buttons.push({
-        text: 'Aim',
-        nextMenu: 'charMenuFinalizeAction',
-        callback: function(input) {
-          _.extend(MML.characters[this.who].action, {
-            name: 'Aim',
-            getTargets: 'getSingleTarget',
-            callback: 'aimAction'
-          });
-          this.displayMenu();
-        }
-      });
+      if (character.action.weapon.family !== 'MWM' || character.action.weapon.loaded === character.action.weapon.reload) {
+        buttons.push({
+          text: 'Aim',
+          nextMenu: 'charMenuFinalizeAction',
+          callback: function(input) {
+            _.extend(MML.characters[this.who].action, {
+              name: 'Aim',
+              getTargets: 'getSingleTarget',
+              callback: 'startAimAction'
+            });
+            this.displayMenu();
+          }
+        });
+      } else {
+        buttons.push({
+          text: 'Reload',
+          nextMenu: 'charMenuFinalizeAction',
+          callback: function(input) {
+            _.extend(MML.characters[this.who].action, {
+              name: 'Reload',
+              callback: 'reloadAction'
+            });
+            this.displayMenu();
+          }
+        });
+      }
     }
 
     if ((_.has(character.statusEffects, 'Holding') ||
@@ -456,6 +470,7 @@ MML.Player = function(name, isGM) {
     var character = MML.characters[who];
     var weapon = character.action.weapon;
     if (weapon !== 'unarmed' &&
+      (weapon.family !== 'MWM' || weapon.loaded === character.action.weapon.reload) &&
       ((!_.has(character.statusEffects, 'Grappled') &&
           !_.has(character.statusEffects, 'Holding') &&
           !_.has(character.statusEffects, 'Held') &&
@@ -1049,7 +1064,7 @@ MML.Player = function(name, isGM) {
       this.message = 'Accept or change action for ' + who;
       this.buttons = [
         this.menuButtons.acceptAction,
-        this.menuButtons.changeAction
+        this.menuButtons.editAction
       ];
     } else if (_.has(MML.characters[this.who].statusEffects, 'Stunned')) {
       this.message =  who + ' is stunned and can only move. Roll initiative';
@@ -1060,7 +1075,7 @@ MML.Player = function(name, isGM) {
       this.message = 'Roll initiative or change action for ' + who;
       this.buttons = [
         this.menuButtons.initiativeRoll,
-        this.menuButtons.changeAction
+        this.menuButtons.editAction
       ];
     }
   };
@@ -1230,7 +1245,7 @@ MML.Player = function(name, isGM) {
       text: 'Take it',
       nextMenu: 'menuIdle',
       callback: function() {
-        character.forgoDefense(defenseRoll);
+        character.forgoDefense('defenseRoll');
       }
     }];
   };
@@ -1363,6 +1378,17 @@ MML.Player = function(name, isGM) {
       }
     }];
   };
+  this.charMenuholdAimRoll = function(who) {
+    this.who = who;
+    this.message = 'Aim Hold Roll.';
+    this.buttons = [{
+      text: 'Roll Strength',
+      nextMenu: 'menuIdle',
+      callback: function() {
+        MML.characters[who].holdAimRoll();
+      }
+    }];
+  };
   this.charMenuGenericRoll = function(who, message, dice, name, callback) {
     this.who = who;
     this.message = message;
@@ -1382,6 +1408,11 @@ MML.Player = function(name, isGM) {
   this.charMenuAimAction = function(who) {
     this.who = who;
     this.message = this.who + ' aims at ' + state.MML.GM.currentAction.targetArray[state.MML.GM.currentAction.targetIndex] + '.';
+    this.buttons = [this.menuButtons.endAction];
+  };
+  this.charMenuReloadAction = function(who) {
+    this.who = who;
+    this.message = this.who + ' reloads. ' + state.MML.GM.currentAction.parameters.attackerWeapon.loaded + '/' + state.MML.GM.currentAction.parameters.attackerWeapon.reload + ' done.';
     this.buttons = [this.menuButtons.endAction];
   };
 
@@ -1569,7 +1600,7 @@ MML.Player = function(name, isGM) {
       _.extend(MML.characters[this.who].action, {
         name: text,
         getTargets: 'getSingleTarget',
-        callback: 'startAttackAction'
+        callback: 'startCastAction'
       });
       this.displayMenu();
     }
@@ -1610,9 +1641,23 @@ MML.Player = function(name, isGM) {
     nextMenu: 'charMenuPrepareAction',
     callback: function() {
       MML.characters[this.who].action = { modifiers: [] };
-      if (state.MML.GM.roundStarted === true) {
-        MML.characters[this.who].action.modifiers.push('Changed Action');
+      if (_.has(character.statusEffects, 'Changed Action')) {
+        character.statusEffects['Changed Action'].level++;
+      } else {
+        character.addStatusEffect('Changed Action', {
+          id: generateRowID(),
+          name: 'Changed Action',
+          level: 1
+        });
       }
+      this.displayMenu();
+    }
+  };
+  this.menuButtons.editAction = {
+    text: 'Edit Action',
+    nextMenu: 'charMenuPrepareAction',
+    callback: function() {
+      MML.characters[this.who].action = { modifiers: [] };
       this.displayMenu();
     }
   };

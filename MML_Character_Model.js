@@ -1,4 +1,26 @@
 // Character Creation
+MML.createCharacter = function (charName, id) {
+  var characterProxy = new Proxy(new MML.Character(charName, id), {
+    get: function (target, prop) {
+      if (prop === 'player') {
+        MML.setCurrentAttribute(target.name, prop, target.player.name);
+      } else {
+        MML.setCurrentAttribute(target.name, prop, target[prop]);
+      }
+      return target[prop];
+    },
+    set: function(target, prop, value) {
+      target[prop] = value;
+      if (typeof(value) === 'object') {
+        value = JSON.stringify(value);
+      }
+      MML.setCurrentAttribute(target.name, prop, value);
+      return true;
+    }
+  });
+  return characterProxy;
+};
+
 MML.Character = function(charName, id) {
   Object.defineProperties(this, {
     //Combat Functions
@@ -250,7 +272,7 @@ MML.Character = function(charName, id) {
         var result = this.player.currentRoll.result;
         state.MML.GM.currentAction.multiWoundRoll = result;
         if (result === 'Failure') {
-          this.addStatusEffect('Wound Fatiuge', {});
+          this.addStatusEffect('Wound Fatigue', {});
         }
         MML[state.MML.GM.currentAction.callback]();
       }
@@ -497,7 +519,7 @@ MML.Character = function(charName, id) {
       value: function() {
         var initBonus = 10;
 
-        if (this.action.name === 'Attack') {
+        if (this.action.name === 'Attack' || this.action.name === 'Aim') {
           if (['Punch', 'Kick', 'Head Butt', 'Bite', 'Grapple', 'Takedown', 'Place a Hold', 'Break a Hold', 'Break Grapple'].indexOf(this.action.weaponType) > -1 ||
             this.action.weapon === 'unarmed'
           ) {
@@ -577,7 +599,8 @@ MML.Character = function(charName, id) {
     'startAction': {
       value: function() {
         state.MML.GM.currentAction = {
-          character: this
+          character: this,
+          rolls: {}
         };
 
         if (_.contains(this.action.modifiers, 'Ready Item')) {
@@ -659,27 +682,21 @@ MML.Character = function(charName, id) {
     'startCastAction': {
       value: function() {
         state.MML.GM.currentAction.parameters.target = MML.characters[state.MML.GM.currentAction.targetArray[0]];
+        this.applyStatusEffects();
         MML[state.MML.GM.currentAction.callback]();
       }
     },
 
     'startAttackAction': {
       value: function(target) {
+        state.MML.GM.currentAction.parameters = { target: MML.characters[state.MML.GM.currentAction.targetArray[0]] };
+        this.applyStatusEffects();
         if (_.has(this.statusEffects, 'Called Shot') || this.action.weaponType === 'Place a Hold' || this.action.weaponType === 'Head Butt') {
           this.player.charMenuSelectBodyPart(this.name);
           this.player.displayMenu();
         } else if (_.has(this.statusEffects, 'Called Shot Specific')) {
           this.player.charMenuSelectHitPosition(this.name);
           this.player.displayMenu();
-        } else if (_.contains(this.action.modifiers, 'Aim')) {
-          if (_.has(this.statusEffects, 'Taking Aim')) {
-            this.statusEffects['Taking Aim'].level++;
-          } else {
-            this.addStatusEffect('Taking Aim', {
-              level: 1,
-              target: target
-            });
-          }
         } else {
           this.processAttack();
         }
@@ -687,9 +704,6 @@ MML.Character = function(charName, id) {
     },
     'processAttack': {
       value: function() {
-        this.addStatusEffect('Melee This Round', {
-          name: 'Melee This Round'
-        });
         if (['Punch', 'Kick', 'Head Butt', 'Bite'].indexOf(this.action.weaponType) > -1) {
           this.unarmedAttack();
         } else if (['Grapple', 'Place a Hold', 'Break a Hold', 'Break Grapple', 'Takedown', 'Regain Feet'].indexOf(this.action.weaponType) > -1) {
@@ -715,20 +729,10 @@ MML.Character = function(charName, id) {
     'meleeAttack': {
       value: function() {
         var characterWeaponInfo = MML.getCharacterWeaponAndSkill(this);
-
-        var currentAction = {
-          character: this,
-          callback: 'meleeAttackAction',
-          parameters: {
-            attackerWeapon: characterWeaponInfo.characterWeapon,
-            attackerSkill: characterWeaponInfo.skill,
-            target: MML.characters[state.MML.GM.currentAction.targetArray[0]]
-          },
-          rolls: {}
-        };
-
-        state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, currentAction);
-        MML[currentAction.callback]();
+        state.MML.GM.currentAction.callback = 'meleeAttackAction';
+        state.MML.GM.currentAction.parameters.attackerWeapon = characterWeaponInfo.characterWeapon;
+        state.MML.GM.currentAction.parameters.attackerSkill = characterWeaponInfo.skill;
+        MML.meleeAttackAction();
       }
     },
     'meleeAttackRoll': {
@@ -738,8 +742,7 @@ MML.Character = function(charName, id) {
     },
     'missileAttack': {
       value: function() {
-        var target = MML.characters[state.MML.GM.currentAction.targetArray[0]];
-        var range = MML.getDistanceBetweenChars(this.name, target.name);
+        var range = MML.getDistanceBetweenChars(this.name, state.MML.GM.currentAction.parameters.target.name);
         var task;
         var itemId;
         var grip;
@@ -780,27 +783,21 @@ MML.Character = function(charName, id) {
           attackerWeapon.damage = item.grips[grip].range.extreme.damage;
         }
 
-        var currentAction = {
-          character: this,
-          callback: 'missileAttackAction',
-          parameters: {
-            attackerWeapon: attackerWeapon,
-            attackerSkill: MML.getWeaponSkill(this, item),
-            target: target,
-            range: range
-          },
-          rolls: {}
-        };
-
-        state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, currentAction);
-        MML[currentAction.callback]();
+        state.MML.GM.currentAction.callback = 'missileAttackAction';
+        state.MML.GM.currentAction.parameters.range = range;
+        state.MML.GM.currentAction.parameters.attackerWeapon = attackerWeapon;
+        state.MML.GM.currentAction.parameters.attackerSkill = MML.getWeaponSkill(this, item);
+        MML.missileAttackAction();
       }
     },
     'missileAttackRoll': {
       value: function(rollName, task, skill, target) {
         var mods = [task, skill, this.situationalMod, this.missileAttackMod, this.attributeMissileAttackMod];
-        if (_.has((target.statusEffects, 'Shoot From Cover'))) {
+        if (_.has(target.statusEffects, 'Shoot From Cover')) {
           mods.push(-20);
+        }
+        if (state.MML.GM.currentAction.parameters.attackerWeapon.family === 'MWM') {
+          this.inventory[state.MML.GM.currentAction.parameters.attackerWeapon._id].loaded = 0;
         }
         MML.universalRoll(this, rollName, mods, 'attackRollResult');
       }
@@ -823,18 +820,11 @@ MML.Character = function(charName, id) {
             break;
           default:
         }
-        var currentAction = {
-          character: this,
-          callback: 'unarmedAttackAction',
-          parameters: {
-            attackType: attackType,
-            attackerSkill: this.action.skill,
-            target: MML.characters[state.MML.GM.currentAction.targetArray[0]]
-          },
-          rolls: {}
-        };
-        state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, currentAction);
-        MML[currentAction.callback]();
+
+        state.MML.GM.currentAction.callback = 'unarmedAttackAction';
+        state.MML.GM.currentAction.parameters.attackType = attackType;
+        state.MML.GM.currentAction.parameters.attackerSkill = this.action.skill;
+        MML.unarmedAttackAction();
       }
     },
     'grappleAttack': {
@@ -866,18 +856,11 @@ MML.Character = function(charName, id) {
           default:
             break;
         }
-        var currentAction = {
-          character: this,
-          callback: 'grappleAttackAction',
-          parameters: {
-            attackType: attackType,
-            attackerSkill: this.action.skill,
-            target: MML.characters[state.MML.GM.currentAction.targetArray[0]]
-          },
-          rolls: {}
-        };
-        state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, currentAction);
-        MML[currentAction.callback]();
+
+        state.MML.GM.currentAction.callback = 'grappleAttackAction';
+        state.MML.GM.currentAction.parameters.attackType = attackType;
+        state.MML.GM.currentAction.parameters.attackerSkill = this.action.skill;
+        MML.grappleAttackAction();
       }
     },
     'attackRollResult': {
@@ -1155,7 +1138,7 @@ MML.Character = function(charName, id) {
     },
     'rangedDefenseRoll': {
       value: function(defenseChance) {
-        MML.universalRoll(this, 'rangedDefenseRoll', [input.defenseChance], 'rangedDefenseRollResult');
+        MML.universalRoll(this, 'rangedDefenseRoll', [defenseChance], 'rangedDefenseRollResult');
       }
     },
     'rangedDefenseRollResult': {
@@ -1599,7 +1582,7 @@ MML.Character = function(charName, id) {
       value: function(attackerWeapon, crit, bonusDamage) {
         bonusDamage = 0;
         state.MML.GM.currentAction.parameters.damageType = attackerWeapon.damageType;
-        this.rollDamage('missileDamageResult', crit, attackerWeapon.damage, [bonusDamage]);
+        this.rollDamage(attackerWeapon.damage, [bonusDamage], crit, 'missileDamageResult');
       }
     },
     'missileDamageResult': {
@@ -1648,6 +1631,63 @@ MML.Character = function(charName, id) {
       value: function() {
         state.MML.GM.currentAction.rolls.castingRoll = this.player.currentRoll.result;
         MML[state.MML.GM.currentAction.callback]();
+      }
+    },
+    'startAimAction': {
+      value: function() {
+        var characterWeaponInfo = MML.getCharacterWeaponAndSkill(this);
+
+        var currentAction = {
+          character: this,
+          callback: 'aimAction',
+          parameters: {
+            attackerWeapon: characterWeaponInfo.characterWeapon,
+            attackerSkill: characterWeaponInfo.skill,
+            target: MML.characters[state.MML.GM.currentAction.targetArray[0]]
+          },
+          rolls: {}
+        };
+
+        state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, currentAction);
+        this.applyStatusEffects();
+        MML[currentAction.callback]();
+      }
+    },
+    'holdAimRoll': {
+      value: function() {
+        MML.attributeCheckRoll(this, 'Strength Check Required to Maintain Aim', 'strength', [0], 'holdAimRollResult');
+      }
+    },
+    'holdAimRollResult': {
+      value: function() {
+        this.displayRoll('holdAimRollApply');
+      }
+    },
+    'holdAimRollApply': {
+      value: function() {
+        var result = this.player.currentRoll.result;
+        state.MML.GM.currentAction.rolls.strengthRoll = result;
+        MML[state.MML.GM.currentAction.callback]();
+      }
+    },
+    'reloadWeapon': {
+      value: function() {
+        var characterWeaponInfo = MML.getCharacterWeaponAndSkill(this);
+        var attackerWeapon = characterWeaponInfo.characterWeapon;
+        attackerWeapon.loaded++;
+        this.inventory[attackerWeapon._id].loaded = attackerWeapon.loaded;
+        state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, {
+          character: this,
+          callback: 'reloadAction',
+          parameters: {
+            attackerWeapon: attackerWeapon,
+            attackerSkill: characterWeaponInfo.skill
+          },
+          rolls: {}
+        });
+        this.applyStatusEffects();
+        this.player.charMenuReloadAction(this.name, '');
+        this.player.displayMenu();
       }
     },
     'applyStatusEffects': {
@@ -1792,7 +1832,6 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'bodyType', {
     get: function() {
       var value = MML.bodyTypes[this.race];
-      MML.setCurrentAttribute(this.name, 'bodyType', value);
       return value;
     },
     enumerable: false
@@ -1806,7 +1845,6 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'height', {
     get: function() {
       var value = MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'statureRoll')].height;
-      MML.setCurrentAttribute(this.name, 'height', value);
       return value;
     },
     enumerable: false
@@ -1814,7 +1852,6 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'weight', {
     get: function() {
       var value = MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'statureRoll')].weight;
-      MML.setCurrentAttribute(this.name, 'weight', value);
       return value;
     },
     enumerable: false
@@ -1828,7 +1865,6 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'stature', {
     get: function() {
       var value = MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'statureRoll')].stature;
-      MML.setCurrentAttribute(this.name, 'stature', value);
       return value;
     },
     enumerable: false
@@ -1836,7 +1872,6 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'strength', {
     get: function() {
       var value = MML.racialAttributeBonuses[this.race].strength + MML.getCurrentAttributeAsFloat(this.name, 'strengthRoll');
-      MML.setCurrentAttribute(this.name, 'strength', value);
       return value;
     },
     enumerable: false
@@ -1844,7 +1879,6 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'coordination', {
     get: function() {
       var value = MML.racialAttributeBonuses[this.race].coordination + MML.getCurrentAttributeAsFloat(this.name, 'coordinationRoll');
-      MML.setCurrentAttribute(this.name, 'coordination', value);
       return value;
     },
     enumerable: false
@@ -1852,7 +1886,6 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'health', {
     get: function() {
       var value = MML.racialAttributeBonuses[this.race].health + MML.getCurrentAttributeAsFloat(this.name, 'healthRoll');
-      MML.setCurrentAttribute(this.name, 'health', value);
       return value;
     },
     enumerable: false
@@ -1860,7 +1893,6 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'beauty', {
     get: function() {
       var value = MML.racialAttributeBonuses[this.race].beauty + MML.getCurrentAttributeAsFloat(this.name, 'beautyRoll');
-      MML.setCurrentAttribute(this.name, 'beauty', value);
       return value;
     },
     enumerable: false
@@ -1868,7 +1900,6 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'intellect', {
     get: function() {
       var value = MML.racialAttributeBonuses[this.race].intellect + MML.getCurrentAttributeAsFloat(this.name, 'intellectRoll');
-      MML.setCurrentAttribute(this.name, 'intellect', value);
       return value;
     },
     enumerable: false
@@ -1876,7 +1907,6 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'reason', {
     get: function() {
       var value = MML.racialAttributeBonuses[this.race].reason + MML.getCurrentAttributeAsFloat(this.name, 'reasonRoll');
-      MML.setCurrentAttribute(this.name, 'reason', value);
       return value;
     },
     enumerable: false
@@ -1884,7 +1914,6 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'creativity', {
     get: function() {
       var value = MML.racialAttributeBonuses[this.race].creativity + MML.getCurrentAttributeAsFloat(this.name, 'creativityRoll');
-      MML.setCurrentAttribute(this.name, 'creativity', value);
       return value;
     },
     enumerable: false
@@ -1892,7 +1921,6 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'presence', {
     get: function() {
       var value = MML.racialAttributeBonuses[this.race].presence + MML.getCurrentAttributeAsFloat(this.name, 'presenceRoll');
-      MML.setCurrentAttribute(this.name, 'presence', value);
       return value;
     },
     enumerable: false
@@ -1900,7 +1928,6 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'willpower', {
     get: function() {
       var value = Math.round((2 * this.presence + this.health) / 3);
-      MML.setCurrentAttribute(this.name, 'willpower', value);
       return value;
     },
     enumerable: false
@@ -1908,7 +1935,6 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'evocation', {
     get: function() {
       var value = this.intellect + this.reason + this.creativity + this.health + this.willpower + MML.racialAttributeBonuses[this.race].evocation;
-      MML.setCurrentAttribute(this.name, 'evocation', value);
       return value;
     },
     enumerable: true
@@ -1916,7 +1942,6 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'perception', {
     get: function() {
       var value = Math.round((this.intellect + this.reason + this.creativity) / 3) + MML.racialAttributeBonuses[this.race].perception;
-      MML.setCurrentAttribute(this.name, 'perception', value);
       return value;
     },
     enumerable: true
@@ -1924,58 +1949,49 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'systemStrength', {
     get: function() {
       var value = Math.round((this.presence + 2 * this.health) / 3);
-      MML.setCurrentAttribute(this.name, 'systemStrength', value);
       return value;
     },
     enumerable: true
   });
   Object.defineProperty(this, 'fitness', {
     get: function() {
-  var value = Math.round((this.health + this.strength) / 2) + MML.racialAttributeBonuses[this.race].fitness;
-  MML.setCurrentAttribute(this.name, 'fitness', value);
-  return value;
+      var value = Math.round((this.health + this.strength) / 2) + MML.racialAttributeBonuses[this.race].fitness;
+      return value;
     },
     enumerable: true
   });
   Object.defineProperty(this, 'fitnessMod', {
     get: function() {
-  var value = MML.fitnessModLookup[this.fitness];
-  MML.setCurrentAttribute(this.name, 'fitnessMod', value);
-  return value;
+      var value = MML.fitnessModLookup[this.fitness];
+      return value;
     },
     enumerable: true
   });
   Object.defineProperty(this, 'load', {
     get: function() {
-  var value = Math.round(this.stature * this.fitnessMod) + MML.racialAttributeBonuses[this.race].load;
-  MML.setCurrentAttribute(this.name, 'load', value);
-  return value;
+      var value = Math.round(this.stature * this.fitnessMod) + MML.racialAttributeBonuses[this.race].load;
+      return value;
     },
     enumerable: true
   });
   Object.defineProperty(this, 'overhead', {
     get: function() {
-  var value = this.load * 2;
-  MML.setCurrentAttribute(this.name, 'overhead', value);
-  return value;
+      var value = this.load * 2;
+      return value;
     },
     enumerable: true
   });
   Object.defineProperty(this, 'deadLift', {
     get: function() {
-  var value = this.load * 4;
-  MML.setCurrentAttribute(this.name, 'deadLift', value);
-  return value;
-      return this.load * 4;
+      var value = this.load * 4;
+      return value;
     },
     enumerable: true
   });
-  this.updateCharacterSheet();
   Object.defineProperty(this, 'hpMax', {
     get: function() {
-  var value = MML.buildHpAttribute(this);
-  MML.setCurrentAttribute(this.name, 'hpMax', value);
-  return value;
+      var value = MML.buildHpAttribute(this);
+      return value;
     },
     enumerable: true
   });
@@ -1986,9 +2002,8 @@ MML.Character = function(charName, id) {
   });
   Object.defineProperty(this, 'epMax', {
     get: function() {
-  var value = this.evocation;
-  MML.setCurrentAttribute(this.name, 'epMax', value);
-  return value;
+      var value = this.evocation;
+      return value;
     },
     enumerable: true
   });
@@ -1999,9 +2014,8 @@ MML.Character = function(charName, id) {
   });
   Object.defineProperty(this, 'fatigueMax', {
     get: function() {
-  var value = this.fitness;
-  MML.setCurrentAttribute(this.name, 'fatigueMax', value);
-  return value;
+      var value = this.fitness;
+      return value;
     },
     enumerable: true
   });
@@ -2012,17 +2026,15 @@ MML.Character = function(charName, id) {
   });
   Object.defineProperty(this, 'hpRecovery', {
     get: function() {
-  var value = MML.recoveryMods[this.health].hp;
-  MML.setCurrentAttribute(this.name, 'hpRecovery', value);
-  return value;
+      var value = MML.recoveryMods[this.health].hp;
+      return value;
     },
     enumerable: true
   });
   Object.defineProperty(this, 'epRecovery', {
     get: function() {
-  var value = MML.recoveryMods[this.health].ep;
-  MML.setCurrentAttribute(this.name, 'epRecovery', value);
-  return value;
+      var value = MML.recoveryMods[this.health].ep;
+      return value;
     },
     enumerable: true
   });
@@ -2038,19 +2050,17 @@ MML.Character = function(charName, id) {
   });
   Object.defineProperty(this, 'totalWeightCarried', {
     get: function() {
-  var value = _.reduce(_.pluck(this.inventory, 'weight'), function(total, weight) {
-    return total + weight;
-  }, 0);
-  MML.setCurrentAttribute(this.name, 'totalWeightCarried', value);
-  return value;
+      var value = _.reduce(_.pluck(this.inventory, 'weight'), function(total, weight) {
+        return total + weight;
+      }, 0);
+      return value;
     },
     enumerable: true
   });
   Object.defineProperty(this, 'knockdownMax', {
     get: function() {
-  var value = Math.round(this.stature + (this.totalWeightCarried / 10));
-  MML.setCurrentAttribute(this.name, 'knockdownMax', value);
-  return value;
+      var value = Math.round(this.stature + (this.totalWeightCarried / 10));
+      return value;
     },
     enumerable: true
   });
@@ -2190,7 +2200,6 @@ MML.Character = function(charName, id) {
           apvMatrix[positionName][type] = apvFinalArray;
         });
       });
-      MML.setCurrentAttribute(this.name, 'apv', apvMatrix);
       return apvMatrix;
     },
     enumerable: true
@@ -2213,9 +2222,8 @@ MML.Character = function(charName, id) {
   });
   Object.defineProperty(this, 'hitTable', {
     get: function() {
-  var value = MML.getHitTable(this);
-  MML.setCurrentAttribute(this.name, 'hitTable', value);
-  return value;
+      var value = MML.getHitTable(this);
+      return value;
     },
     enumerable: true
   });
@@ -2232,7 +2240,6 @@ MML.Character = function(charName, id) {
       if (movementRatio > 4.0) {
         movementRatio = 4.0;
       }
-      MML.setCurrentAttribute(this.name, 'movementRatio', movementRatio);
       return movementRatio;
     },
     enumerable: true
@@ -2259,9 +2266,8 @@ MML.Character = function(charName, id) {
   });
   Object.defineProperty(this, 'attributeDefenseMod', {
     get: function() {
-  var value = MML.attributeMods.strength[this.strength] + MML.attributeMods.coordination[this.coordination];
-  MML.setCurrentAttribute(this.name, 'attributeDefenseMod', value);
-  return value;
+      var value = MML.attributeMods.strength[this.strength] + MML.attributeMods.coordination[this.coordination];
+      return value;
     },
     enumerable: true
   });
@@ -2282,19 +2288,17 @@ MML.Character = function(charName, id) {
   });
   Object.defineProperty(this, 'attributeMeleeAttackMod', {
     get: function() {
-  var value = MML.attributeMods.strength[this.strength] + MML.attributeMods.coordination[this.coordination];
-  MML.setCurrentAttribute(this.name, 'attributeMeleeAttackMod', value);
-  return value;
+      var value = MML.attributeMods.strength[this.strength] + MML.attributeMods.coordination[this.coordination];
+      return value;
     },
     enumerable: true
   });
   Object.defineProperty(this, 'meleeDamageMod', {
     get: function() {
-  var value = _.find(MML.meleeDamageMods, function(mod) {
-    return this.load >= mod.low && this.load <= mod.high;
-  }, this).value;
-  MML.setCurrentAttribute(this.name, 'meleeDamageMod', value);
-  return value;
+      var value = _.find(MML.meleeDamageMods, function(mod) {
+        return this.load >= mod.low && this.load <= mod.high;
+      }, this).value;
+      return value;
     },
     enumerable: true
   });
@@ -2305,9 +2309,8 @@ MML.Character = function(charName, id) {
   });
   Object.defineProperty(this, 'attributeMissileAttackMod', {
     get: function() {
-  var value = MML.attributeMods.perception[this.perception] + MML.attributeMods.coordination[this.coordination] + MML.attributeMods.strength[this.strength];
-  MML.setCurrentAttribute(this.name, 'attributeMissileAttackMod', value);
-  return value;
+      var value = MML.attributeMods.perception[this.perception] + MML.attributeMods.coordination[this.coordination] + MML.attributeMods.strength[this.strength];
+      return value;
     },
     enumerable: true
   });
@@ -2339,16 +2342,14 @@ MML.Character = function(charName, id) {
       } else if (this.fomInitBonus === -2) {
         attributeCastingMod -= 30;
       }
-      MML.setCurrentAttribute(this.name, 'attributeCastingMod', attributeCastingMod);
       return attributeCastingMod;
     },
     enumerable: true
   });
   Object.defineProperty(this, 'spellLearningMod', {
     get: function() {
-  var value = MML.attributeMods.intellect[this.intellect];
-  MML.setCurrentAttribute(this.name, 'spellLearningMod', value);
-  return value;
+      var value = MML.attributeMods.intellect[this.intellect];
+      return value;
     },
     enumerable: true
   });
@@ -2429,7 +2430,7 @@ MML.Character = function(charName, id) {
   });
   Object.defineProperty(this, 'initiative', {
     get: function() {
-  var value ;
+      var value;
       var initiative = this.initiativeRollValue +
         this.situationalInitBonus +
         this.movementRatioInitBonus +
@@ -2443,7 +2444,6 @@ MML.Character = function(charName, id) {
       } else {
         value = initiative;
       }
-      MML.setCurrentAttribute(this.name, 'initiative', value);
       return value;
     },
     enumerable: true
@@ -2460,7 +2460,7 @@ MML.Character = function(charName, id) {
   });
   Object.defineProperty(this, 'movementRatioInitBonus', {
     get: function() {
-  var value;
+      var value;
 
       if (this.movementRatio < 0.6) {
         value = 'No Combat';
@@ -2485,14 +2485,13 @@ MML.Character = function(charName, id) {
       } else if (this.movementRatio > 3.2) {
         value = 5;
       }
-      MML.setCurrentAttribute(this.name, 'movementRatioInitBonus', value);
       return value;
     },
     enumerable: true
   });
   Object.defineProperty(this, 'attributeInitBonus', {
     get: function() {
-  var value;
+      var value;
       var attributeArray = [this.strength, this.coordination, this.reason, this.perception];
       var rankingAttribute = attributeArray.sort(function(a, b) {
         return a - b;
@@ -2513,14 +2512,13 @@ MML.Character = function(charName, id) {
       } else if (rankingAttribute >= 20) {
         value = 5;
       }
-      MML.setCurrentAttribute(this.name, 'attributeInitBonus', value);
       return value;
     },
     enumerable: true
   });
   Object.defineProperty(this, 'senseInitBonus', {
     get: function() {
-  var value;
+      var value;
       var armorList = _.where(this.inventory, {
         type: 'armor'
       });
@@ -2596,7 +2594,6 @@ MML.Character = function(charName, id) {
           });
         }
       }
-      MML.setCurrentAttribute(this.name, 'senseInitBonus', value);
       return value;
     },
     enumerable: true
@@ -2651,7 +2648,6 @@ MML.Character = function(charName, id) {
         }
       }
       var value = MML.attackTempoTable[tempo];
-      MML.setCurrentAttribute(this.name, 'actionTempo', value);
       return value;
     },
     enumerable: true
@@ -2719,33 +2715,39 @@ MML.Character = function(charName, id) {
   });
   Object.defineProperty(this, 'fov', {
     get: function() {
-  var value;
+      var value;
       switch (this.senseInitBonus) {
         case 4:
           value = 180;
+          break;
         case 3:
           value = 170;
+          break;
         case 2:
           value = 160;
+          break;
         case 1:
           value = 150;
+          break;
         case 0:
           value = 140;
+          break;
         case -1:
           value = 130;
+          break;
         case -2:
           value = 120;
+          break;
         default:
           value = 180;
+          break;
       }
+      return value;
     }
-    MML.setCurrentAttribute(this.name, 'fov', value);
-    return value;
   });
   Object.defineProperty(this, 'spells', {
     get: function() {
       return MML.getCurrentAttributeAsArray(this.name, 'spells');
     }
   });
-  this.updateCharacterSheet();
 };

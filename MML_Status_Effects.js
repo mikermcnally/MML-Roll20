@@ -46,7 +46,7 @@ MML.statusEffects['Mortal Wound'] = function(effect, index) {
   }
 };
 MML.statusEffects['Wound Fatigue'] = function(effect, index) {
-  if (currentHP['Multiple Wounds'] > -1) {
+  if (this.hp['Multiple Wounds'] > -1) {
     delete this.statusEffects[index];
   } else {
     if (this.situationalInitBonus !== 'No Combat') {
@@ -189,7 +189,19 @@ MML.statusEffects['Observed'] = function(effect, index) {
   }
 };
 MML.statusEffects['Taking Aim'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false || this.action.targets[0] !== effect.target
+  if (state.MML.GM.inCombat === false ||
+    (state.MML.GM.roundStarted === true &&
+    _.isObject(state.MML.GM.currentAction) &&
+    _.isObject(state.MML.GM.currentAction.character) &&
+    state.MML.GM.currentAction.character.name === this.name &&
+    state.MML.GM.currentAction.callback !== 'missileAttackAction' &&
+    state.MML.GM.currentAction.callback !== 'aimAction' &&
+    _.isObject(state.MML.GM.currentAction.parameters) &&
+    _.isObject(state.MML.GM.currentAction.parameters.target) &&
+    state.MML.GM.currentAction.parameters.target.name !== effect.target.name) ||
+    _.has(this.statusEffects, 'Damaged This Round') ||
+    _.has(this.statusEffects, 'Dodged This Round') ||
+    _.has(this.statusEffects, 'Melee This Round')
   ) {
     delete this.statusEffects[index];
   } else {
@@ -361,10 +373,10 @@ MML.statusEffects['Ready Item'] = function(effect, index) {
   }
 };
 MML.statusEffects['Changed Action'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false) {
+  if (state.MML.GM.inCombat === false || state.MML.GM.roundStarted === false) {
     delete this.statusEffects[index];
   } else {
-    this.situationalInitBonus += -10;
-    this.statusEffects[index].description = 'Initiative: -10';
+    this.situationalInitBonus += -10 * effect.level;
+    this.statusEffects[index].description = 'Initiative: ' + (-10 * effect.level);
   }
 };
