@@ -293,7 +293,7 @@ MML.endAction = function() {
   var character = currentAction.character;
   var spentInitiative = character.spentInitiative + character.actionTempo;
   var currentInitiative = character.initiative + spentInitiative;
-
+  
   if (character.action.name === 'Attack') {
     character.addStatusEffect('Melee This Round', {
       name: 'Melee This Round'

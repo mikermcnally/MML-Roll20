@@ -1261,7 +1261,7 @@ function runTests() {
       player.menuCommand(player.who, 'End Movement');
     });
 
-    it('Tested: Ranged Attack, Ranged Defense, ', function () {
+    it.skip('Tested: Ranged Attack, Ranged Defense, Reloading, Shooting From Cover, Aiming, Wound Fatigue, ', function () {
       var bow = MML.items['Short Bow'];
       bow.quality = 'Standard';
       bow._id = 'bow';
@@ -1592,15 +1592,12 @@ function runTests() {
       player.menuCommand(player.who, 'End Action');
     });
 
-    it.skip('Tested: Spell Casting', function() {
-      MML.setCurrentAttribute('test1', 'spells', JSON.stringify(['Hail of Stones', 'Dart']));
+    it('Tested: Spell Casting', function() {
+      MML.setCurrentAttribute('test0', 'spells', JSON.stringify(['Hail of Stones', 'Dart']));
       var item = MML.items['Dart'];
       item._id = 'dart';
-      MML.characters['test1'].inventory['dart'] = item;
+      MML.characters['test0'].inventory['dart'] = item;
 
-      player.menuCommand(player.who, 'Movement Only');
-      player.menuCommand(player.who, 'Roll');
-      setTestRoll(player, 2);
       player.menuCommand(player.who, 'Ready Item');
       player.menuCommand(player.who, 'Dart');
       player.menuCommand(player.who, 'Right');
@@ -1608,23 +1605,35 @@ function runTests() {
       player.menuCommand(player.who, 'Cast');
       player.menuCommand(player.who, 'Dart');
       player.menuCommand(player.who, 'Ease Spell');
+      // player.menuCommand(player.who, 'Hail of Stones');
       player.menuCommand(player.who, 'Next Menu');
       player.menuCommand(player.who, 'Roll');
       setTestRoll(player, 3);
+      expect(MML.characters['test0'].statusEffects, 'Choosing Ease Spell Meta Magic should add "Ease Spell" status effect').to.have.property("Ease Spell");
+      expect(MML.characters['test0'].action.spell.actions, 'Ease Spell should add one action to base action cost of spell').to.equal(2);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 2);
       player.menuCommand(player.who, 'Movement Only');
       player.menuCommand(player.who, 'Roll');
       setTestRoll(player, 1);
       player.menuCommand(player.name, 'Start Round');
-      expect(MML.characters['test1'].statusEffects, 'Choosing Ease Spell Meta Magic should add "Ease Spell" status effect').to.have.property("Ease Spell");
-      expect(MML.characters['test1'].action.spell.actions, 'Ease Spell should add one action to base action cost of spell').to.equal(2);
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'End Action');
       player.menuCommand(player.who, 'Continue Casting');
       player.menuCommand(player.who, 'Accept');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-
-      expect(MML.characters['test1'].action.spell.actions, 'Ease Spell should add one action to base action cost of spell').to.equal(1);
+      expect(MML.characters['test0'].action.spell.actions, 'Ease Spell should add one action to base action cost of spell').to.equal(1);
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
     });
   });
 }

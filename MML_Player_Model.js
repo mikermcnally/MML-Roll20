@@ -1415,6 +1415,11 @@ MML.Player = function(name, isGM) {
     this.message = this.who + ' reloads. ' + state.MML.GM.currentAction.parameters.attackerWeapon.loaded + '/' + state.MML.GM.currentAction.parameters.attackerWeapon.reload + ' done.';
     this.buttons = [this.menuButtons.endAction];
   };
+  this.charMenuContinueCasting = function(who) {
+    this.who = who;
+    this.message = this.who + '\' starts casting a spell.';
+    this.buttons = [this.menuButtons.endAction];
+  };
 
   this.setCurrentCharacterTargets = function(input) {
     var targetArray;
@@ -1695,8 +1700,10 @@ MML.Player = function(name, isGM) {
     callback: function() {
       var character = MML.characters[this.who];
       character.setReady(true);
-      // character.spentInitiative = character.spentInitiative - 10;
+      console.log("SHOW ME WHAT YOU GOT");
+      console.log(character.action);
       character.setAction();
+      console.log(character.action);
       MML.nextAction();
     }
   };
