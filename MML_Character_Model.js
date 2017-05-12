@@ -4,6 +4,8 @@ MML.createCharacter = function (charName, id) {
     get: function (target, prop) {
       if (prop === 'player') {
         MML.setCurrentAttribute(target.name, prop, target.player.name);
+      } else if (typeof(target[prop]) === 'object') {
+        MML.setCurrentAttribute(target.name, prop, JSON.stringify(target[prop]));
       } else {
         MML.setCurrentAttribute(target.name, prop, target[prop]);
       }
@@ -95,8 +97,8 @@ MML.Character = function(charName, id) {
         this.knockdown = this.knockdownMax;
         this.spentInitiative = 0;
 
-        this.previousAction = this.action;
         this.action = {
+          ts: Date.now(),
           modifiers: []
         };
         if (_.has(this.statusEffects, 'Observing')) {
@@ -371,6 +373,10 @@ MML.Character = function(charName, id) {
     },
     'sensitiveAreaCheck': {
       value: function(hitPosition) {
+        console.log("SHOW ME WHAT YOU GOT");
+        console.log(MML.sensitiveAreas[this.bodyType]);
+        console.log(hitPosition);
+        console.log(MML.sensitiveAreas[this.bodyType].indexOf(hitPosition) > -1);
         if (MML.sensitiveAreas[this.bodyType].indexOf(hitPosition) > -1) {
           this.sensitiveAreaRoll();
         } else {
@@ -548,9 +554,11 @@ MML.Character = function(charName, id) {
           this.firstActionInitBonus = initBonus;
         }
 
-        _.each(this.action.modifiers, function(modifier) {
-          this.addStatusEffect(modifier, {});
-        }, this);
+        if (_.isUndefined(this.previousAction) || this.previousAction.ts !== this.action.ts) {
+          _.each(this.action.modifiers, function(modifier) {
+            this.addStatusEffect(modifier, { ts: this.action.ts });
+          }, this);
+        }
       }
     },
     'initiativeRoll': {
@@ -636,9 +644,9 @@ MML.Character = function(charName, id) {
           this.releaseOpponentAction();
         } else if (this.action.name === 'Cast') {
           if (this.action.spell.actions > 1) {
-            this.action.spell.actions = this.action.spell.actions - 1;
-            sendChat('GM', '/w "' + this.player.name + '"' + this.name + '\' starts casting a spell.');
-            MML.endAction();
+            this.action.spell.actions--;
+            this.player.charMenuContinueCasting(this.name);
+            this.player.displayMenu();
           } else {
             var currentAction = {
               callback: 'castAction',

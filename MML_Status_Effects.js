@@ -109,9 +109,13 @@ MML.statusEffects['Called Shot'] = function(effect, index) {
     this.meleeDefenseMod += -10;
     this.missileAttackMod += -10;
     this.meleeAttackMod += -10;
-    if (this.situationalInitBonus !== 'No Combat') {
-      this.situationalInitBonus += -5;
+    this.castingMod += -10;
+
+    if (this.situationalInitBonus !== 'No Combat' && !effect.applied) {
+      this.spentInitiative += -5;
+      effect.applied = true;
     }
+
     this.statusEffects[index].description = 'Attack Modifier: -10%. Defense Modifier: -10%. Initiative: -5';
   }
 };
@@ -123,8 +127,11 @@ MML.statusEffects['Called Shot Specific'] = function(effect, index) {
     this.meleeDefenseMod += -30;
     this.meleeAttackMod += -30;
     this.missileAttackMod += -30;
-    if (this.situationalInitBonus !== 'No Combat') {
-      this.situationalInitBonus += -5;
+    this.castingMod += -30;
+
+    if (this.situationalInitBonus !== 'No Combat' && !effect.applied) {
+      this.spentInitiative += -5;
+      effect.applied = true;
     }
     this.statusEffects[index].description = 'Attack Modifier: -30%. Defense Modifier: -30%. Initiative: -5';
   }

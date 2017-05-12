@@ -740,12 +740,11 @@ MML.Player = function(name, isGM) {
           text: spellName,
           nextMenu: 'menuPause',
           callback: function() {
-            character.action = {
+            _.extend(character.action, {
               name: 'Cast',
               spell: MML.spells[spellName],
               callback: 'startCastAction',
-              modifiers: []
-            };
+            });
             this.charMenuMetaMagicInitiative(who);
             this.displayMenu();
           }
@@ -1700,10 +1699,7 @@ MML.Player = function(name, isGM) {
     callback: function() {
       var character = MML.characters[this.who];
       character.setReady(true);
-      console.log("SHOW ME WHAT YOU GOT");
-      console.log(character.action);
       character.setAction();
-      console.log(character.action);
       MML.nextAction();
     }
   };

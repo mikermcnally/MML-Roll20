@@ -180,6 +180,7 @@ MML.releaseOpponentAction = function() {
     character.releaseGrapple(target);
   } else {
     character.action = {
+      ts: Date.now(),
       name: 'Attack',
       callback: 'startAttackAction',
       weaponType: 'Break Grapple',
@@ -213,6 +214,8 @@ MML.damageTargetAction = function(callback) {
     state.MML.GM.currentAction.parameters.multiWound = 'complete';
     target.setMultiWound();
   } else if (_.isUndefined(parameters.sensitiveArea)) {
+    console.log("SHOW ME WHAT YOU GOT");
+    console.log(rolls.hitPositionRoll);
     state.MML.GM.currentAction.parameters.sensitiveArea = 'complete';
     target.sensitiveAreaCheck(rolls.hitPositionRoll.name);
   } else if (_.isUndefined(parameters.knockdown)) {
@@ -259,6 +262,7 @@ MML.aimAction = function() {
     character.player.displayMenu();
   } else if (!_.isUndefined(rolls.strengthRoll) && rolls.strengthRoll !== 'Critical Success' && rolls.strengthRoll !== 'Success') {
     character.action = {
+      ts: Date.now(),
       name: 'Attack',
       callback: 'startAttackAction',
       modifiers: []
@@ -293,7 +297,7 @@ MML.endAction = function() {
   var character = currentAction.character;
   var spentInitiative = character.spentInitiative + character.actionTempo;
   var currentInitiative = character.initiative + spentInitiative;
-  
+
   if (character.action.name === 'Attack') {
     character.addStatusEffect('Melee This Round', {
       name: 'Melee This Round'
