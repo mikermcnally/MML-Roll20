@@ -2044,6 +2044,37 @@ MML.items["Pitch Fork"] = {
             rank: 1}
        }
     };
+MML.items["Wind Sword"] = {
+    name: "Wind Sword",
+    type: "weapon",
+    weight: 3,
+    grips: {
+        "One Hand":{
+            family: "Swords",
+            hands: 1,
+            primaryType: "Cut",
+            primaryTask: 45,
+            primaryDamage: "3d10",
+            secondaryType: "Thrust",
+            secondaryTask: 45,
+            secondaryDamage: "2d4",
+            defense: 25,
+            initiative: 6,
+            rank: 1},
+        "Two Hands":{
+            family: "Swords",
+            hands: 2,
+            primaryType: "Cut",
+            primaryTask: 45,
+            primaryDamage: "4d10",
+            secondaryType: "Thrust",
+            secondaryTask: 45,
+            secondaryDamage: "3d8",
+            defense: 35,
+            initiative: 8,
+            rank: 1}
+       }
+    };    
 MML.items["Short Bow"] = {
     name: "Short Bow",
     type: "weapon",
