@@ -2717,7 +2717,54 @@ MML.Character = function(charName, id) {
   });
   Object.defineProperty(this, 'weaponSkills', {
     get: function() {
-      return MML.getSkillAttributes(this.name, 'weaponskills');
+      var characterSkills = MML.getSkillAttributes(this.name, "weaponskills");
+      var highestSkill;
+
+      _.each(
+        characterSkills,
+        function(characterSkill, skillName) {
+          var level = characterSkill.input;
+
+          // This may need to include other modifiers
+          if (_.isUndefined(MML.weaponSkillMods[this.race]) === false && _.isUndefined(MML.weaponSkillMods[this.race][skillName]) === false) {
+            level += MML.weaponSkillMods[this.race][skillName];
+          }
+          characterSkill.level = level;
+        },
+        this
+      );
+
+      highestSkill = _.max(characterSkills, function(skill) {
+        return skill.level;
+      }).level;
+      if (isNaN(highestSkill)) {
+        highestSkill = 0;
+      }
+
+      if (_.isUndefined(characterSkills["Default Martial"])) {
+        characterSkills["Default Martial"] = {
+          input: 0,
+          level: 0,
+          _id: generateRowID()
+        };
+      }
+
+      if (highestSkill < 20) {
+        characterSkills["Default Martial"].level = 1;
+      } else {
+        characterSkills["Default Martial"].level = Math.round(highestSkill / 2);
+      }
+
+      _.each(
+        characterSkills,
+        function(characterSkill, skillName) {
+          MML.setCurrentAttribute(this.name, "repeating_weaponskills_" + characterSkill._id + "_name", skillName);
+          MML.setCurrentAttribute(this.name, "repeating_weaponskills_" + characterSkill._id + "_input", characterSkill.input);
+          MML.setCurrentAttribute(this.name, "repeating_weaponskills_" + characterSkill._id + "_level", characterSkill.level);
+        },
+        this
+      );
+      return characterSkills;
     },
     enumerable: true
   });
