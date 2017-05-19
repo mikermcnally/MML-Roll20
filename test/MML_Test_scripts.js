@@ -1548,7 +1548,7 @@ function runTests() {
       });
       setTestRoll(player, 16);
       player.menuCommand(player.who, 'Take it');
-      setTestRoll(player, 21);
+      setTestRoll(player, 46);
       setTestRoll(player, 8);
       player.menuCommand(player.who, 'Roll System Strength');
       setTestRoll(player, 10);
