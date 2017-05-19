@@ -260,7 +260,6 @@ MML.getAvailableHitPositions = function(character, bodyPart) {
 
 MML.getCalledShotHitPosition = function(character, rollValue, bodyPart) {
   var availableHitPositions = MML.getAvailableHitPositions(character, bodyPart);
-
   if (isNaN(rollValue)) {
     return 'Error: Value is not a number';
   } else if (availableHitPositions === 'Error: No hit positions found') {

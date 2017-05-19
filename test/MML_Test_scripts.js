@@ -1316,280 +1316,280 @@ function runTests() {
       expect(MML.characters['test1'].statusEffects["Taking Aim"].target.name, 'target of "Taking Aim" status effect should match selected target').to.equal('test2');
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
-      // player.menuCommand(player.who, 'Aim');
-      // player.menuCommand(player.who, 'Roll');
-      // setTestRoll(player, 10);
-      // player.menuCommand(player.who, 'Aim');
-      // player.menuCommand(player.who, 'Roll');
-      // setTestRoll(player, 7);
-      // player.menuCommand(player.who, 'Movement Only');
-      // player.menuCommand(player.who, 'Roll');
-      // setTestRoll(player, 10);
-      // player.menuCommand(player.who, 'Start Round');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.menuCommand(player.who, 'Movement Only');
-      // player.menuCommand(player.who, 'Accept');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.setCurrentCharacterTargets({
-      //   "charName": "test0",
-      //   "target": "test2",
-      //   "callback": "setCurrentCharacterTargets"
-      // });
-      // player.menuCommand(player.who, 'Roll Strength');
-      // setTestRoll(player, 10);
-      // player.menuCommand(player.who, 'End Action');
-      // expect(MML.characters['test0'].statusEffects, 'aim action should add "Taking Aim" status effect').to.have.property("Taking Aim");
-      // expect(MML.characters['test0'].statusEffects["Taking Aim"].level, 'aiming 2 rounds in a row should increment level of "Taking Aim" status effect').to.equal(2);
-      // expect(MML.characters['test0'].statusEffects["Taking Aim"].target.name, 'target of "Taking Aim" status effect should match selected target').to.equal('test2');
-      // expect(MML.characters['test0'].missileAttackMod, '"Taking Aim" status effect level 2 should add 40 to missileAttackMod').to.equal(40);
-      // player.menuCommand(player.who, 'Aim');
-      // player.menuCommand(player.who, 'Accept');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.setCurrentCharacterTargets({
-      //   "charName": "test1",
-      //   "target": "test0",
-      //   "callback": "setCurrentCharacterTargets"
-      // });
-      // player.menuCommand(player.who, 'End Action');
-      // expect(MML.characters['test1'].statusEffects, 'aim action should add "Taking Aim" status effect').to.have.property("Taking Aim");
-      // expect(MML.characters['test1'].statusEffects["Taking Aim"].level, 'changing targets should reset level of "Taking Aim" status effect').to.equal(1);
-      // expect(MML.characters['test1'].statusEffects["Taking Aim"].target.name, 'target of "Taking Aim" status effect should match selected target').to.equal('test0');
-      // expect(MML.characters['test1'].missileAttackMod, '"Taking Aim" status effect level 1 should add 30 to missileAttackMod').to.equal(30);
-      // player.menuCommand(player.who, 'Aim');
-      // player.menuCommand(player.who, 'Accept');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.setCurrentCharacterTargets({
-      //   "charName": "test0",
-      //   "target": "test2",
-      //   "callback": "setCurrentCharacterTargets"
-      // });
-      // player.menuCommand(player.who, 'Roll Strength');
-      // setTestRoll(player, 11);
-      // expect(MML.characters['test0'].statusEffects, 'aim action should add "Taking Aim" status effect').to.have.property("Taking Aim");
-      // expect(MML.characters['test0'].statusEffects["Taking Aim"].level, 'aiming 2 rounds in a row should increment level of "Taking Aim" status effect').to.equal(2);
-      // expect(MML.characters['test0'].statusEffects["Taking Aim"].target.name, 'target of "Taking Aim" status effect should match selected target').to.equal('test2');
-      // expect(MML.characters['test0'].missileAttackMod, '"Taking Aim" status effect level 2 should add 40 to missileAttackMod').to.equal(40);
-      // setTestRoll(player, 56);
-      // player.menuCommand(player.who, 'Defend: 1%');
-      // setTestRoll(player, 5);
-      // setTestRoll(player, 8);
-      // setTestRoll(player, 3);
-      // expect(MML.characters['test0'].statusEffects, 'shooting should remove "Taking Aim" status effect').not.to.have.property("Taking Aim");
-      // expect(MML.characters['test2'].hp['Multiple Wounds'], 'Minor wounds should subtract from Multple Wounds').to.equal(MML.characters['test2'].hpMax['Multiple Wounds'] - 3);
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.setCurrentCharacterTargets({
-      //   "charName": "test1",
-      //   "target": "test0",
-      //   "callback": "setCurrentCharacterTargets"
-      // });
-      // player.menuCommand(player.who, 'End Action');
-      // expect(MML.characters['test1'].statusEffects, 'aim action should add "Taking Aim" status effect').to.have.property("Taking Aim");
-      // expect(MML.characters['test1'].statusEffects["Taking Aim"].level, 'aiming 2 rounds in a row should increment level of "Taking Aim" status effect').to.equal(2);
-      // expect(MML.characters['test1'].statusEffects["Taking Aim"].target.name, 'target of "Taking Aim" status effect should match selected target').to.equal('test0');
-      // expect(MML.characters['test1'].missileAttackMod, '"Taking Aim" status effect level 2 should add 40 to missileAttackMod').to.equal(40);
-      // player.menuCommand(player.who, 'Attack');
-      // player.menuCommand(player.who, 'Shoot From Cover');
-      // player.menuCommand(player.who, 'None');
-      // player.menuCommand(player.who, 'Roll');
-      // setTestRoll(player, 10);
-      // player.menuCommand(player.who, 'Attack');
-      // player.menuCommand(player.who, 'Standard');
-      // player.menuCommand(player.who, 'None');
-      // player.menuCommand(player.who, 'Roll');
-      // setTestRoll(player, 7);
-      // player.menuCommand(player.who, 'Movement Only');
-      // player.menuCommand(player.who, 'Roll');
-      // setTestRoll(player, 10);
-      // player.menuCommand(player.who, 'Start Round');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.menuCommand(player.who, 'Movement Only');
-      // player.menuCommand(player.who, 'Accept');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.setCurrentCharacterTargets({
-      //   "charName": "test0",
-      //   "target": "test1",
-      //   "callback": "setCurrentCharacterTargets"
-      // });
-      // expect(MML.characters['test0'].statusEffects, 'shooting from cover should add "Shoot From Cover" status effect').to.have.property("Shoot From Cover");
-      // expect(MML.characters['test0'].missileAttackMod, '"Shoot From Cover" status effect should add -10 to missileAttackMod').to.equal(-10);
-      // setTestRoll(player, 5);
-      // player.menuCommand(player.who, 'Take it');
-      // setTestRoll(player, 8);
-      // setTestRoll(player, 3);
-      // expect(MML.characters['test0'].statusEffects, 'shooting from cover should add "Shoot From Cover" status effect').to.have.property("Shoot From Cover");
-      // expect(MML.characters['test1'].statusEffects, 'taking damage should remove "Taking Aim" status effect').not.to.have.property("Taking Aim");
-      // expect(MML.characters['test1'].missileAttackMod, 'Removing "Taking Aim" status effect should set to missileAttackMod to 0').to.equal(0);
-      // player.menuCommand(player.who, 'Attack');
-      // player.menuCommand(player.who, 'Shoot From Cover');
-      // player.menuCommand(player.who, 'None');
-      // player.menuCommand(player.who, 'Accept');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.setCurrentCharacterTargets({
-      //   "charName": "test1",
-      //   "target": "test0",
-      //   "callback": "setCurrentCharacterTargets"
-      // });
-      // setTestRoll(player, 5);
-      // expect(MML.characters['test1'].inventory['crossbow'].loaded, 'Firing a MWM family weapon should set loaded to 0').to.equal(0);
-      // expect(_.pluck(player.buttons, 'text'), 'Aim should not be an option for unloaded MWM weapon').not.to.contain('Aim');
-      // player.menuCommand(player.who, 'Attack');
-      // expect(_.pluck(player.buttons, 'text'), 'Shoot From Cover should not be an option for unloaded MWM weapon').not.to.contain('Shoot From Cover');
-      // expect(_.pluck(player.buttons, 'text'), 'Standard attack should not be an option for unloaded MWM weapon').not.to.contain('Standard');
-      // player.menuCommand(player.who, 'Punch');
-      // player.menuCommand(player.who, 'None');
-      // player.menuCommand(player.who, 'Neutral');
-      // player.menuCommand(player.who, 'Edit Action');
-      // player.menuCommand(player.who, 'Reload');
-      // player.menuCommand(player.who, 'Accept');
-      // expect(MML.characters['test1'].statusEffects, 'changing action before it is finalized should not add "Changed Action" status effect').not.to.have.property("Changed Action");
-      // expect(MML.characters['test1'].action.name, 'Changing action should actually change the action').to.equal('Reload');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.setCurrentCharacterTargets({
-      //   "charName": "test0",
-      //   "target": "test2",
-      //   "callback": "setCurrentCharacterTargets"
-      // });
-      // expect(MML.characters['test0'].statusEffects, 'shooting from cover should add "Shoot From Cover" status effect').to.have.property("Shoot From Cover");
-      // expect(MML.characters['test0'].missileAttackMod, '"Shoot From Cover" status effect should add -10 to missileAttackMod').to.equal(-10);
-      // setTestRoll(player, 5);
-      // player.menuCommand(player.who, 'Take it');
-      // setTestRoll(player, 8);
-      // setTestRoll(player, 10);
-      // player.menuCommand(player.who, 'Roll Willpower');
-      // setTestRoll(player, 10);
-      // expect(MML.characters['test2'].hp['Multiple Wounds'], 'Damage beyond minor wounds should not subtract from Multple Wounds').to.equal(MML.characters['test2'].hpMax['Multiple Wounds'] - 8);
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.menuCommand(player.who, 'End Action');
-      // expect(MML.characters['test1'].inventory['crossbow'].loaded, 'Reload action should increment loaded').to.equal(1);
-      // player.menuCommand(player.who, 'Aim');
-      // player.menuCommand(player.who, 'Roll');
-      // setTestRoll(player, 10);
-      // player.menuCommand(player.who, 'Reload');
-      // player.menuCommand(player.who, 'Roll');
-      // setTestRoll(player, 7);
-      // player.menuCommand(player.who, 'Movement Only');
-      // player.menuCommand(player.who, 'Roll');
-      // setTestRoll(player, 10);
-      // player.menuCommand(player.who, 'Start Round');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.menuCommand(player.who, 'Movement Only');
-      // player.menuCommand(player.who, 'Accept');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.setCurrentCharacterTargets({
-      //   "charName": "test0",
-      //   "target": "test1",
-      //   "callback": "setCurrentCharacterTargets"
-      // });
-      // player.menuCommand(player.who, 'End Action');
-      // player.menuCommand(player.who, 'Attack');
-      // player.menuCommand(player.who, 'Standard');
-      // player.menuCommand(player.who, 'None');
-      // player.menuCommand(player.who, 'Accept');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.menuCommand(player.who, 'End Action');
-      // player.menuCommand(player.who, 'Reload');
-      // player.menuCommand(player.who, 'Accept');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.setCurrentCharacterTargets({
-      //   "charName": "test0",
-      //   "target": "test2",
-      //   "callback": "setCurrentCharacterTargets"
-      // });
-      // expect(MML.characters['test0'].missileAttackMod, 'Shooting at a target other than the one aimed at should not grant bonus of "Taking Aim" status effect').to.equal(0);
-      // setTestRoll(player, 16);
-      // player.menuCommand(player.who, 'Take it');
-      // setTestRoll(player, 31);
-      // setTestRoll(player, 8);
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.menuCommand(player.who, 'End Action');
-      // player.menuCommand(player.who, 'Attack');
-      // player.menuCommand(player.who, 'Standard');
-      // player.menuCommand(player.who, 'None');
-      // player.menuCommand(player.who, 'Roll');
-      // setTestRoll(player, 10);
-      // player.menuCommand(player.who, 'Reload');
-      // player.menuCommand(player.who, 'Roll');
-      // setTestRoll(player, 7);
-      // player.menuCommand(player.who, 'Movement Only');
-      // player.menuCommand(player.who, 'Roll');
-      // setTestRoll(player, 10);
-      // player.menuCommand(player.who, 'Start Round');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.menuCommand(player.who, 'Movement Only');
-      // player.menuCommand(player.who, 'Accept');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.setCurrentCharacterTargets({
-      //   "charName": "test0",
-      //   "target": "test2",
-      //   "callback": "setCurrentCharacterTargets"
-      // });
-      // setTestRoll(player, 16);
-      // player.menuCommand(player.who, 'Take it');
-      // setTestRoll(player, 21);
-      // setTestRoll(player, 8);
-      // player.menuCommand(player.who, 'Roll System Strength');
-      // setTestRoll(player, 10);
-      // expect(MML.characters['test2'].statusEffects, 'successful System Strength roll should not add "Wound Fatigue" status effect').not.to.have.property("Wound Fatigue");
-      // player.menuCommand(player.who, 'Attack');
-      // player.menuCommand(player.who, 'Standard');
-      // player.menuCommand(player.who, 'None');
-      // player.menuCommand(player.who, 'Accept');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.menuCommand(player.who, 'End Action');
-      // expect(MML.characters['test1'].inventory['crossbow'].loaded, 'Reload action should increment loaded').to.equal(4);
-      // expect(_.pluck(player.buttons, 'text'), 'Reload should not be an option for loaded MWM weapon').not.to.contain('Reload');
-      // player.menuCommand(player.who, 'Aim');
-      // player.menuCommand(player.who, 'Accept');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.setCurrentCharacterTargets({
-      //   "charName": "test0",
-      //   "target": "test2",
-      //   "callback": "setCurrentCharacterTargets"
-      // });
-      // setTestRoll(player, 16);
-      // player.menuCommand(player.who, 'Take it');
-      // setTestRoll(player, 45);
-      // setTestRoll(player, 3);
-      // player.menuCommand(player.who, 'Roll System Strength');
-      // setTestRoll(player, 11);
-      // expect(MML.characters['test2'].statusEffects, 'failed System Strength roll should not add "Wound Fatigue" status effect').to.have.property("Wound Fatigue");
-      // expect(MML.characters['test2'].situationalInitBonus, '"Wound Fatigue" status effect should add -5 to situationalInitBonus').to.equal(-5);
-      // expect(MML.characters['test2'].situationalMod, '"Wound Fatigue" status effect should add -10 to situationalMod').to.equal(-10);
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-      // player.setCurrentCharacterTargets({
-      //   "charName": "test0",
-      //   "target": "test2",
-      //   "callback": "setCurrentCharacterTargets"
-      // });
-      // player.menuCommand(player.who, 'End Action');
+      player.menuCommand(player.who, 'Aim');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      player.menuCommand(player.who, 'Aim');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 7);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      player.menuCommand(player.who, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test2",
+        "callback": "setCurrentCharacterTargets"
+      });
+      player.menuCommand(player.who, 'Roll Strength');
+      setTestRoll(player, 10);
+      player.menuCommand(player.who, 'End Action');
+      expect(MML.characters['test0'].statusEffects, 'aim action should add "Taking Aim" status effect').to.have.property("Taking Aim");
+      expect(MML.characters['test0'].statusEffects["Taking Aim"].level, 'aiming 2 rounds in a row should increment level of "Taking Aim" status effect').to.equal(2);
+      expect(MML.characters['test0'].statusEffects["Taking Aim"].target.name, 'target of "Taking Aim" status effect should match selected target').to.equal('test2');
+      expect(MML.characters['test0'].missileAttackMod, '"Taking Aim" status effect level 2 should add 40 to missileAttackMod').to.equal(40);
+      player.menuCommand(player.who, 'Aim');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test1",
+        "target": "test0",
+        "callback": "setCurrentCharacterTargets"
+      });
+      player.menuCommand(player.who, 'End Action');
+      expect(MML.characters['test1'].statusEffects, 'aim action should add "Taking Aim" status effect').to.have.property("Taking Aim");
+      expect(MML.characters['test1'].statusEffects["Taking Aim"].level, 'changing targets should reset level of "Taking Aim" status effect').to.equal(1);
+      expect(MML.characters['test1'].statusEffects["Taking Aim"].target.name, 'target of "Taking Aim" status effect should match selected target').to.equal('test0');
+      expect(MML.characters['test1'].missileAttackMod, '"Taking Aim" status effect level 1 should add 30 to missileAttackMod').to.equal(30);
+      player.menuCommand(player.who, 'Aim');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test2",
+        "callback": "setCurrentCharacterTargets"
+      });
+      player.menuCommand(player.who, 'Roll Strength');
+      setTestRoll(player, 11);
+      expect(MML.characters['test0'].statusEffects, 'aim action should add "Taking Aim" status effect').to.have.property("Taking Aim");
+      expect(MML.characters['test0'].statusEffects["Taking Aim"].level, 'aiming 2 rounds in a row should increment level of "Taking Aim" status effect').to.equal(2);
+      expect(MML.characters['test0'].statusEffects["Taking Aim"].target.name, 'target of "Taking Aim" status effect should match selected target').to.equal('test2');
+      expect(MML.characters['test0'].missileAttackMod, '"Taking Aim" status effect level 2 should add 40 to missileAttackMod').to.equal(40);
+      setTestRoll(player, 56);
+      player.menuCommand(player.who, 'Defend: 1%');
+      setTestRoll(player, 5);
+      setTestRoll(player, 8);
+      setTestRoll(player, 3);
+      expect(MML.characters['test0'].statusEffects, 'shooting should remove "Taking Aim" status effect').not.to.have.property("Taking Aim");
+      expect(MML.characters['test2'].hp['Multiple Wounds'], 'Minor wounds should subtract from Multple Wounds').to.equal(MML.characters['test2'].hpMax['Multiple Wounds'] - 3);
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test1",
+        "target": "test0",
+        "callback": "setCurrentCharacterTargets"
+      });
+      player.menuCommand(player.who, 'End Action');
+      expect(MML.characters['test1'].statusEffects, 'aim action should add "Taking Aim" status effect').to.have.property("Taking Aim");
+      expect(MML.characters['test1'].statusEffects["Taking Aim"].level, 'aiming 2 rounds in a row should increment level of "Taking Aim" status effect').to.equal(2);
+      expect(MML.characters['test1'].statusEffects["Taking Aim"].target.name, 'target of "Taking Aim" status effect should match selected target').to.equal('test0');
+      expect(MML.characters['test1'].missileAttackMod, '"Taking Aim" status effect level 2 should add 40 to missileAttackMod').to.equal(40);
+      player.menuCommand(player.who, 'Attack');
+      player.menuCommand(player.who, 'Shoot From Cover');
+      player.menuCommand(player.who, 'None');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      player.menuCommand(player.who, 'Attack');
+      player.menuCommand(player.who, 'Standard');
+      player.menuCommand(player.who, 'None');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 7);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      player.menuCommand(player.who, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "setCurrentCharacterTargets"
+      });
+      expect(MML.characters['test0'].statusEffects, 'shooting from cover should add "Shoot From Cover" status effect').to.have.property("Shoot From Cover");
+      expect(MML.characters['test0'].missileAttackMod, '"Shoot From Cover" status effect should add -10 to missileAttackMod').to.equal(-10);
+      setTestRoll(player, 5);
+      player.menuCommand(player.who, 'Take it');
+      setTestRoll(player, 8);
+      setTestRoll(player, 3);
+      expect(MML.characters['test0'].statusEffects, 'shooting from cover should add "Shoot From Cover" status effect').to.have.property("Shoot From Cover");
+      expect(MML.characters['test1'].statusEffects, 'taking damage should remove "Taking Aim" status effect').not.to.have.property("Taking Aim");
+      expect(MML.characters['test1'].missileAttackMod, 'Removing "Taking Aim" status effect should set to missileAttackMod to 0').to.equal(0);
+      player.menuCommand(player.who, 'Attack');
+      player.menuCommand(player.who, 'Shoot From Cover');
+      player.menuCommand(player.who, 'None');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test1",
+        "target": "test0",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 5);
+      expect(MML.characters['test1'].inventory['crossbow'].loaded, 'Firing a MWM family weapon should set loaded to 0').to.equal(0);
+      expect(_.pluck(player.buttons, 'text'), 'Aim should not be an option for unloaded MWM weapon').not.to.contain('Aim');
+      player.menuCommand(player.who, 'Attack');
+      expect(_.pluck(player.buttons, 'text'), 'Shoot From Cover should not be an option for unloaded MWM weapon').not.to.contain('Shoot From Cover');
+      expect(_.pluck(player.buttons, 'text'), 'Standard attack should not be an option for unloaded MWM weapon').not.to.contain('Standard');
+      player.menuCommand(player.who, 'Punch');
+      player.menuCommand(player.who, 'None');
+      player.menuCommand(player.who, 'Neutral');
+      player.menuCommand(player.who, 'Edit Action');
+      player.menuCommand(player.who, 'Reload');
+      player.menuCommand(player.who, 'Accept');
+      expect(MML.characters['test1'].statusEffects, 'changing action before it is finalized should not add "Changed Action" status effect').not.to.have.property("Changed Action");
+      expect(MML.characters['test1'].action.name, 'Changing action should actually change the action').to.equal('Reload');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test2",
+        "callback": "setCurrentCharacterTargets"
+      });
+      expect(MML.characters['test0'].statusEffects, 'shooting from cover should add "Shoot From Cover" status effect').to.have.property("Shoot From Cover");
+      expect(MML.characters['test0'].missileAttackMod, '"Shoot From Cover" status effect should add -10 to missileAttackMod').to.equal(-10);
+      setTestRoll(player, 5);
+      player.menuCommand(player.who, 'Take it');
+      setTestRoll(player, 8);
+      setTestRoll(player, 10);
+      player.menuCommand(player.who, 'Roll Willpower');
+      setTestRoll(player, 10);
+      expect(MML.characters['test2'].hp['Multiple Wounds'], 'Damage beyond minor wounds should not subtract from Multple Wounds').to.equal(MML.characters['test2'].hpMax['Multiple Wounds'] - 8);
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'End Action');
+      expect(MML.characters['test1'].inventory['crossbow'].loaded, 'Reload action should increment loaded').to.equal(1);
+      player.menuCommand(player.who, 'Aim');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      player.menuCommand(player.who, 'Reload');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 7);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      player.menuCommand(player.who, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "setCurrentCharacterTargets"
+      });
+      player.menuCommand(player.who, 'End Action');
+      player.menuCommand(player.who, 'Attack');
+      player.menuCommand(player.who, 'Standard');
+      player.menuCommand(player.who, 'None');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'End Action');
+      player.menuCommand(player.who, 'Reload');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test2",
+        "callback": "setCurrentCharacterTargets"
+      });
+      expect(MML.characters['test0'].missileAttackMod, 'Shooting at a target other than the one aimed at should not grant bonus of "Taking Aim" status effect').to.equal(0);
+      setTestRoll(player, 16);
+      player.menuCommand(player.who, 'Take it');
+      setTestRoll(player, 31);
+      setTestRoll(player, 8);
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'End Action');
+      player.menuCommand(player.who, 'Attack');
+      player.menuCommand(player.who, 'Standard');
+      player.menuCommand(player.who, 'None');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      player.menuCommand(player.who, 'Reload');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 7);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      player.menuCommand(player.who, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test2",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 16);
+      player.menuCommand(player.who, 'Take it');
+      setTestRoll(player, 21);
+      setTestRoll(player, 8);
+      player.menuCommand(player.who, 'Roll System Strength');
+      setTestRoll(player, 10);
+      expect(MML.characters['test2'].statusEffects, 'successful System Strength roll should not add "Wound Fatigue" status effect').not.to.have.property("Wound Fatigue");
+      player.menuCommand(player.who, 'Attack');
+      player.menuCommand(player.who, 'Standard');
+      player.menuCommand(player.who, 'None');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'End Action');
+      expect(MML.characters['test1'].inventory['crossbow'].loaded, 'Reload action should increment loaded').to.equal(4);
+      expect(_.pluck(player.buttons, 'text'), 'Reload should not be an option for loaded MWM weapon').not.to.contain('Reload');
+      player.menuCommand(player.who, 'Aim');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test2",
+        "callback": "setCurrentCharacterTargets"
+      });
+      setTestRoll(player, 16);
+      player.menuCommand(player.who, 'Take it');
+      setTestRoll(player, 45);
+      setTestRoll(player, 3);
+      player.menuCommand(player.who, 'Roll System Strength');
+      setTestRoll(player, 11);
+      expect(MML.characters['test2'].statusEffects, 'failed System Strength roll should not add "Wound Fatigue" status effect').to.have.property("Wound Fatigue");
+      expect(MML.characters['test2'].situationalInitBonus, '"Wound Fatigue" status effect should add -5 to situationalInitBonus').to.equal(-5);
+      expect(MML.characters['test2'].situationalMod, '"Wound Fatigue" status effect should add -10 to situationalMod').to.equal(-10);
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test2",
+        "callback": "setCurrentCharacterTargets"
+      });
+      player.menuCommand(player.who, 'End Action');
       player.menuCommand(player.who, 'Attack');
       player.menuCommand(player.who, 'Standard');
       player.menuCommand(player.who, 'Body Part');
@@ -1604,18 +1604,18 @@ function runTests() {
       player.menuCommand(player.who, 'Roll');
       setTestRoll(player, 10);
       player.menuCommand(player.who, 'Start Round');
-      // expect(MML.characters['test0'].statusEffects, 'Choosing "Called Shot" modifier should add "Called Shot" status effect').to.have.property("Called Shot");
-      // expect(MML.characters['test0'].spentInitiative, '"Called Shot" status effect should add -5 to spentInitiative').to.equal(-5);
-      // expect(MML.characters['test0'].missileAttackMod, '"Called Shot" status effect should add -10 to missileAttackMod').to.equal(-10);
-      // expect(MML.characters['test0'].rangedDefenseMod, '"Called Shot" status effect should add -10 to rangedDefenseMod').to.equal(-10);
-      // expect(MML.characters['test0'].meleeAttackMod, '"Called Shot" status effect should add -10 to meleeAttackMod').to.equal(-10);
-      // expect(MML.characters['test0'].meleeDefenseMod, '"Called Shot" status effect should add -10 to missileAttackMod').to.equal(-10);
-      // expect(MML.characters['test1'].statusEffects, 'Choosing "Called Shot Specific" modifier should add "Called Shot Specific" status effect').to.have.property("Called Shot Specific");
-      // expect(MML.characters['test1'].spentInitiative, '"Called Shot Specific" status effect should add -5 to spentInitiative').to.equal(-5);
-      // expect(MML.characters['test1'].missileAttackMod, '"Called Shot Specific" status effect should add -30 and "Taking Aim" status effect level 1 should add 30 to missileAttackMod').to.equal(0);
-      // expect(MML.characters['test1'].rangedDefenseMod, '"Called Shot Specific" status effect should add -30 to rangedDefenseMod').to.equal(-30);
-      // expect(MML.characters['test1'].meleeAttackMod, '"Called Shot Specific" status effect should add -30 to meleeAttackMod').to.equal(-30);
-      // expect(MML.characters['test1'].meleeDefenseMod, '"Called Shot Specific" status effect should add -30 to missileAttackMod').to.equal(-30);
+      expect(MML.characters['test0'].statusEffects, 'Choosing "Called Shot" modifier should add "Called Shot" status effect').to.have.property("Called Shot");
+      expect(MML.characters['test0'].spentInitiative, '"Called Shot" status effect should add -5 to spentInitiative').to.equal(-5);
+      expect(MML.characters['test0'].missileAttackMod, '"Called Shot" status effect should add -10 to missileAttackMod').to.equal(-10);
+      expect(MML.characters['test0'].rangedDefenseMod, '"Called Shot" status effect should add -10 to rangedDefenseMod').to.equal(-10);
+      expect(MML.characters['test0'].meleeAttackMod, '"Called Shot" status effect should add -10 to meleeAttackMod').to.equal(-10);
+      expect(MML.characters['test0'].meleeDefenseMod, '"Called Shot" status effect should add -10 to missileAttackMod').to.equal(-10);
+      expect(MML.characters['test1'].statusEffects, 'Choosing "Called Shot Specific" modifier should add "Called Shot Specific" status effect').to.have.property("Called Shot Specific");
+      expect(MML.characters['test1'].spentInitiative, '"Called Shot Specific" status effect should add -5 to spentInitiative').to.equal(-5);
+      expect(MML.characters['test1'].missileAttackMod, '"Called Shot Specific" status effect should add -30 and "Taking Aim" status effect level 1 should add 30 to missileAttackMod').to.equal(0);
+      expect(MML.characters['test1'].rangedDefenseMod, '"Called Shot Specific" status effect should add -30 to rangedDefenseMod').to.equal(-30);
+      expect(MML.characters['test1'].meleeAttackMod, '"Called Shot Specific" status effect should add -30 to meleeAttackMod').to.equal(-30);
+      expect(MML.characters['test1'].meleeDefenseMod, '"Called Shot Specific" status effect should add -30 to missileAttackMod').to.equal(-30);
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
       player.menuCommand(player.who, 'Movement Only');
@@ -1653,7 +1653,8 @@ function runTests() {
       player.menuCommand(player.who, 'Roll Willpower');
       setTestRoll(player, 11);
       expect(MML.characters['test2'].statusEffects, 'Failed Willpower roll should add "Sensitive Area" status effect').to.have.property("Sensitive Area");
-
+      expect(MML.characters['test2'].situationalInitBonus, '"Sensitive Area" status effect should add -5 to situationalInitBonus').to.equal(-10);
+      expect(MML.characters['test2'].situationalMod, '"Sensitive Area" status effect should add -10 to situationalMod').to.equal(-20);
     });
 
     it.skip('Tested: Spell Casting', function() {
@@ -1709,7 +1710,7 @@ function runTests() {
 function setTestRoll(player, value) {
   player.changeRoll(value);
   player.currentRoll.accepted = true;
-  MML.characters[player.who][player.currentRoll.callback]();
+  MML.characters[player.currentRoll.character][player.currentRoll.callback]();
 }
 
 function resetEnvironment() {

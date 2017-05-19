@@ -276,7 +276,7 @@ MML.parseCommand = function(msg) {
 
         command = {
           type: 'character',
-          who: player.who,
+          who: player.currentRoll.character,
           callback: player.currentRoll.callback,
           input: []
         };

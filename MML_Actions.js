@@ -214,8 +214,6 @@ MML.damageTargetAction = function(callback) {
     state.MML.GM.currentAction.parameters.multiWound = 'complete';
     target.setMultiWound();
   } else if (_.isUndefined(parameters.sensitiveArea)) {
-    console.log("SHOW ME WHAT YOU GOT");
-    console.log(rolls.hitPositionRoll);
     state.MML.GM.currentAction.parameters.sensitiveArea = 'complete';
     target.sensitiveAreaCheck(rolls.hitPositionRoll.name);
   } else if (_.isUndefined(parameters.knockdown)) {

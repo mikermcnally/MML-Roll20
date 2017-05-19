@@ -373,10 +373,6 @@ MML.Character = function(charName, id) {
     },
     'sensitiveAreaCheck': {
       value: function(hitPosition) {
-        console.log("SHOW ME WHAT YOU GOT");
-        console.log(MML.sensitiveAreas[this.bodyType]);
-        console.log(hitPosition);
-        console.log(MML.sensitiveAreas[this.bodyType].indexOf(hitPosition) > -1);
         if (MML.sensitiveAreas[this.bodyType].indexOf(hitPosition) > -1) {
           this.sensitiveAreaRoll();
         } else {
@@ -874,12 +870,11 @@ MML.Character = function(charName, id) {
     'attackRollResult': {
       value: function() {
         var currentRoll = this.player.currentRoll;
-
         if (this.player.name === state.MML.GM.name) {
           if (currentRoll.accepted === false) {
             this.player.displayGmRoll(currentRoll);
           } else {
-            if (_.contains(this.action.modifiers, 'Called Shot Specific') && currentRoll.value - currentRoll.target < 11) {
+            if (_.contains(this.action.modifiers, 'Called Shot Specific') && currentRoll.target - currentRoll.value > 10) {
               this.action.modifiers = _.without(this.action.modifiers, 'Called Shot Specific');
               this.action.modifiers.push('Called Shot');
               currentRoll.result = 'Success';
@@ -908,6 +903,7 @@ MML.Character = function(charName, id) {
         var rollValue;
         var range;
         var result;
+        var accepted;
         var action = state.MML.GM.currentAction;
         var target = MML.characters[action.targetArray[action.targetIndex]];
 
@@ -916,18 +912,21 @@ MML.Character = function(charName, id) {
             return hitPosition.name === action.calledShot;
           }));
           range = rollValue + '-' + rollValue;
-          result = MML.hitPositions[target.bodyType][rollValue];
+          result = MML.getHitPosition(target, rollValue);
+          accepted = true;
         } else if (_.contains(this.action.modifiers, 'Called Shot')) {
           var rangeUpper = MML.getAvailableHitPositions(target, action.calledShot).length;
           rollValue = MML.rollDice(1, rangeUpper);
           range = '1-' + rangeUpper;
           result = MML.getCalledShotHitPosition(target, rollValue, action.calledShot);
+          accepted = false;
         } else {
           range = '1-' + _.keys(MML.hitPositions[target.bodyType]).length;
           result = MML.getHitPosition(target, MML.rollDice(1, 100));
           rollValue = parseInt(_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
             return hitPosition.name === result.name;
           }));
+          accepted = false;
         }
         this.player.currentRoll = {
           type: 'hitPosition',
@@ -937,7 +936,7 @@ MML.Character = function(charName, id) {
           range: range,
           result: result,
           value: rollValue,
-          accepted: false
+          accepted: accepted
         };
         this.hitPositionRollResult();
       }
@@ -957,7 +956,7 @@ MML.Character = function(charName, id) {
         currentRoll.message = 'Roll: ' + currentRoll.value +
           '\nResult: ' + currentRoll.result.name +
           '\nRange: ' + currentRoll.range;
-
+          
         this.player.currentRoll = currentRoll;
         this.displayRoll('hitPositionRollApply');
       }
