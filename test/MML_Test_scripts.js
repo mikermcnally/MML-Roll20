@@ -1261,7 +1261,7 @@ function runTests() {
       player.menuCommand(player.who, 'End Movement');
     });
 
-    it('Tested: Ranged Attack, Ranged Defense, Reloading, Shooting From Cover, Aiming, Wound Fatigue, ', function () {
+    it.skip('Tested: Ranged Attack, Ranged Defense, Reloading, Shooting From Cover, Aiming, Wound Fatigue, ', function () {
       var bow = MML.items['Short Bow'];
       bow.quality = 'Standard';
       bow._id = 'bow';
@@ -1702,6 +1702,56 @@ function runTests() {
       player.menuCommand(player.who, 'Roll');
       // player.menuCommand(player.who, 'Start Action');
       // player.menuCommand(player.who, 'End Movement');
+    });
+
+    it('Tested: Offhand Fighting, Default Martial Skill', function () {
+      var item = MML.items['Hand Axe'];
+      item.quality = 'Standard';
+      item._id = 'axe';
+      var character = MML.characters['test0'];
+      character.inventory['axe'] = item;
+      MML.createAttribute('repeating_weaponskills_2_name', 'Hand Axe', "", character);
+      MML.createAttribute('repeating_weaponskills_2_input', '20', "", character);
+      MML.createAttribute('repeating_weaponskills_2_level', '20', "", character);
+
+      player.menuCommand(player.who, 'Ready Item');
+      player.menuCommand(player.who, 'Hand Axe');
+      player.menuCommand(player.who, 'Left');
+      player.menuCommand(player.who, 'Next Menu');
+      player.menuCommand(player.who, 'Attack');
+      player.menuCommand(player.who, 'Standard');
+      player.menuCommand(player.who, 'None');
+      player.menuCommand(player.who, 'Neutral');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 1);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      player.menuCommand(player.name, 'Start Round');
+      console.log(MML.characters['test0'].weaponSkills);
+      expect(MML.characters['test0'].weaponSkills['Default Martial'].level, 'Having a combat skill with level of 20 should give Default Martial skill level of 10').to.equal(10);
+      expect(MML.characters['test0'].statusEffects, 'Equipping weapon to off hand should add "Fighting Off-Handed" status effect').to.have.property("Fighting Off-Handed");
+
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "setCurrentCharacterTargets"
+      });
+
     });
   });
 }
