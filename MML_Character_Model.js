@@ -373,10 +373,6 @@ MML.Character = function(charName, id) {
     },
     'sensitiveAreaCheck': {
       value: function(hitPosition) {
-        console.log("SHOW ME WHAT YOU GOT");
-        console.log(MML.sensitiveAreas[this.bodyType]);
-        console.log(hitPosition);
-        console.log(MML.sensitiveAreas[this.bodyType].indexOf(hitPosition) > -1);
         if (MML.sensitiveAreas[this.bodyType].indexOf(hitPosition) > -1) {
           this.sensitiveAreaRoll();
         } else {
@@ -874,12 +870,11 @@ MML.Character = function(charName, id) {
     'attackRollResult': {
       value: function() {
         var currentRoll = this.player.currentRoll;
-
         if (this.player.name === state.MML.GM.name) {
           if (currentRoll.accepted === false) {
             this.player.displayGmRoll(currentRoll);
           } else {
-            if (_.contains(this.action.modifiers, 'Called Shot Specific') && currentRoll.value - currentRoll.target < 11) {
+            if (_.contains(this.action.modifiers, 'Called Shot Specific') && currentRoll.target - currentRoll.value > 10) {
               this.action.modifiers = _.without(this.action.modifiers, 'Called Shot Specific');
               this.action.modifiers.push('Called Shot');
               currentRoll.result = 'Success';
@@ -908,6 +903,7 @@ MML.Character = function(charName, id) {
         var rollValue;
         var range;
         var result;
+        var accepted;
         var action = state.MML.GM.currentAction;
         var target = MML.characters[action.targetArray[action.targetIndex]];
 
@@ -916,18 +912,21 @@ MML.Character = function(charName, id) {
             return hitPosition.name === action.calledShot;
           }));
           range = rollValue + '-' + rollValue;
-          result = MML.hitPositions[target.bodyType][rollValue];
+          result = MML.getHitPosition(target, rollValue);
+          accepted = true;
         } else if (_.contains(this.action.modifiers, 'Called Shot')) {
           var rangeUpper = MML.getAvailableHitPositions(target, action.calledShot).length;
           rollValue = MML.rollDice(1, rangeUpper);
           range = '1-' + rangeUpper;
           result = MML.getCalledShotHitPosition(target, rollValue, action.calledShot);
+          accepted = false;
         } else {
           range = '1-' + _.keys(MML.hitPositions[target.bodyType]).length;
           result = MML.getHitPosition(target, MML.rollDice(1, 100));
           rollValue = parseInt(_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
             return hitPosition.name === result.name;
           }));
+          accepted = false;
         }
         this.player.currentRoll = {
           type: 'hitPosition',
@@ -937,7 +936,7 @@ MML.Character = function(charName, id) {
           range: range,
           result: result,
           value: rollValue,
-          accepted: false
+          accepted: accepted
         };
         this.hitPositionRollResult();
       }
@@ -957,7 +956,7 @@ MML.Character = function(charName, id) {
         currentRoll.message = 'Roll: ' + currentRoll.value +
           '\nResult: ' + currentRoll.result.name +
           '\nRange: ' + currentRoll.range;
-
+          
         this.player.currentRoll = currentRoll;
         this.displayRoll('hitPositionRollApply');
       }
@@ -2717,7 +2716,54 @@ MML.Character = function(charName, id) {
   });
   Object.defineProperty(this, 'weaponSkills', {
     get: function() {
-      return MML.getSkillAttributes(this.name, 'weaponskills');
+      var characterSkills = MML.getSkillAttributes(this.name, "weaponskills");
+      var highestSkill;
+
+      _.each(
+        characterSkills,
+        function(characterSkill, skillName) {
+          var level = characterSkill.input;
+
+          // This may need to include other modifiers
+          if (_.isUndefined(MML.weaponSkillMods[this.race]) === false && _.isUndefined(MML.weaponSkillMods[this.race][skillName]) === false) {
+            level += MML.weaponSkillMods[this.race][skillName];
+          }
+          characterSkill.level = level;
+        },
+        this
+      );
+
+      highestSkill = _.max(characterSkills, function(skill) {
+        return skill.level;
+      }).level;
+      if (isNaN(highestSkill)) {
+        highestSkill = 0;
+      }
+
+      if (_.isUndefined(characterSkills["Default Martial"])) {
+        characterSkills["Default Martial"] = {
+          input: 0,
+          level: 0,
+          _id: generateRowID()
+        };
+      }
+
+      if (highestSkill < 20) {
+        characterSkills["Default Martial"].level = 1;
+      } else {
+        characterSkills["Default Martial"].level = Math.round(highestSkill / 2);
+      }
+
+      _.each(
+        characterSkills,
+        function(characterSkill, skillName) {
+          MML.setCurrentAttribute(this.name, "repeating_weaponskills_" + characterSkill._id + "_name", skillName);
+          MML.setCurrentAttribute(this.name, "repeating_weaponskills_" + characterSkill._id + "_input", characterSkill.input);
+          MML.setCurrentAttribute(this.name, "repeating_weaponskills_" + characterSkill._id + "_level", characterSkill.level);
+        },
+        this
+      );
+      return characterSkills;
     },
     enumerable: true
   });

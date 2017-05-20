@@ -1156,15 +1156,9 @@ MML.Player = function(name, isGM) {
       this.buttons.push({
         text: position,
         nextMenu: 'menuIdle',
-        callback: function(input) {
-          state.MML.GM.currentAction.calledShot = input.text;
-
-          MML.processCommand({
-            type: 'character',
-            who: this.who,
-            callback: 'processAttack',
-            input: {}
-          });
+        callback: function(text) {
+          state.MML.GM.currentAction.calledShot = text;
+          MML.characters[this.who].processAttack();
         }
       });
     }, this);
@@ -1722,14 +1716,6 @@ MML.Player = function(name, isGM) {
     nextMenu: 'menuIdle',
     callback: function() {
       MML.characters[this.who].initiativeRoll();
-    }
-  };
-
-  this.menuButtons.acceptRoll = {
-    text: 'Accept',
-    nextMenu: 'menuIdle',
-    callback: function() {
-      this[this.currentRoll.applyResult]();
     }
   };
 
