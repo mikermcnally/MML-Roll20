@@ -412,6 +412,7 @@ MML.Player = function(name, isGM) {
           nextMenu: 'charMenuFinalizeAction',
           callback: function(input) {
             _.extend(MML.characters[this.who].action, {
+              ts: Date.now(),
               name: 'Aim',
               getTargets: 'getSingleTarget',
               callback: 'startAimAction'
@@ -425,6 +426,7 @@ MML.Player = function(name, isGM) {
           nextMenu: 'charMenuFinalizeAction',
           callback: function(input) {
             _.extend(MML.characters[this.who].action, {
+              ts: Date.now(),
               name: 'Reload',
               callback: 'reloadAction'
             });
@@ -741,9 +743,7 @@ MML.Player = function(name, isGM) {
           nextMenu: 'menuPause',
           callback: function() {
             _.extend(character.action, {
-              name: 'Cast',
               spell: MML.spells[spellName],
-              callback: 'startCastAction',
             });
             this.charMenuMetaMagicInitiative(who);
             this.displayMenu();
@@ -1584,6 +1584,7 @@ MML.Player = function(name, isGM) {
     callback: function() {
       var character = MML.characters[this.who];
       _.extend(character.action, {
+        ts: Date.now(),
         name: 'Attack',
         getTargets: 'getSingleTarget',
         callback: 'startAttackAction'
@@ -1596,8 +1597,8 @@ MML.Player = function(name, isGM) {
     nextMenu: 'charMenuCast',
     callback: function(text) {
       _.extend(MML.characters[this.who].action, {
-        name: text,
-        getTargets: 'getSingleTarget',
+        ts: Date.now(),
+        name: 'Cast',
         callback: 'startCastAction'
       });
       this.displayMenu();
@@ -1616,6 +1617,7 @@ MML.Player = function(name, isGM) {
     nextMenu: 'charMenuFinalizeAction',
     callback: function(input) {
       _.extend(MML.characters[this.who].action, {
+        ts: Date.now(),
         name: 'Observe',
         callback: 'observeAction'
       });
@@ -1627,6 +1629,7 @@ MML.Player = function(name, isGM) {
     nextMenu: 'charMenuFinalizeAction',
     callback: function(input) {
       _.extend(MML.characters[this.who].action, {
+        ts: Date.now(),
         name: 'Movement Only',
         callback: 'endAction'
       });

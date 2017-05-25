@@ -99,9 +99,9 @@ MML.statusEffects['Stumbling'] = function(effect, index) {
 };
 MML.statusEffects['Called Shot'] = function(effect, index) {
   if (state.MML.GM.inCombat === false ||
-    (!_.contains(this.action.modifiers, 'Called Shot') &&
-      this.action.weaponType !== 'Place a Hold' &&
-      _.has(this.statusEffects, 'Holding'))
+    !_.contains(this.action.modifiers, 'Called Shot') ||
+    (this.action.weaponType !== 'Place a Hold' &&
+    _.has(this.statusEffects, 'Holding'))
   ) {
     delete this.statusEffects[index];
   } else {
