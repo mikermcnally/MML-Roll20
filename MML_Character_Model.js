@@ -1,16 +1,6 @@
 // Character Creation
 MML.createCharacter = function (charName, id) {
   var characterProxy = new Proxy(new MML.Character(charName, id), {
-    get: function (target, prop) {
-      if (prop === 'player') {
-        MML.setCurrentAttribute(target.name, prop, target.player.name);
-      } else if (typeof(target[prop]) === 'object') {
-        MML.setCurrentAttribute(target.name, prop, JSON.stringify(target[prop]));
-      } else {
-        MML.setCurrentAttribute(target.name, prop, target[prop]);
-      }
-      return target[prop];
-    },
     set: function(target, prop, value) {
       target[prop] = value;
       if (typeof(value) === 'object') {
@@ -98,7 +88,6 @@ MML.Character = function(charName, id) {
         this.spentInitiative = 0;
 
         this.action = {
-          ts: Date.now(),
           modifiers: []
         };
         if (_.has(this.statusEffects, 'Observing')) {
@@ -106,7 +95,7 @@ MML.Character = function(charName, id) {
             startingRound: state.MML.GM.currentRound
           });
         }
-        this.applyStatusEffects();
+        this.updateCharacter();
         this.setReady(false);
       }
     },
@@ -708,9 +697,10 @@ MML.Character = function(charName, id) {
     },
     'processAttack': {
       value: function() {
-        if (['Punch', 'Kick', 'Head Butt', 'Bite'].indexOf(this.action.weaponType) > -1) {
+        var weaponType = this.action.weaponType;
+        if (['Punch', 'Kick', 'Head Butt', 'Bite'].indexOf(weaponType) > -1) {
           this.unarmedAttack();
-        } else if (['Grapple', 'Place a Hold', 'Break a Hold', 'Break Grapple', 'Takedown', 'Regain Feet'].indexOf(this.action.weaponType) > -1) {
+        } else if (['Grapple', 'Place a Hold', 'Break a Hold', 'Break Grapple', 'Takedown', 'Regain Feet'].indexOf(weaponType) > -1) {
           this.grappleAttack();
         } else if (MML.isDualWielding(this)) {
           this.dualWieldAttack();
@@ -956,7 +946,7 @@ MML.Character = function(charName, id) {
         currentRoll.message = 'Roll: ' + currentRoll.value +
           '\nResult: ' + currentRoll.result.name +
           '\nRange: ' + currentRoll.range;
-          
+
         this.player.currentRoll = currentRoll;
         this.displayRoll('hitPositionRollApply');
       }
@@ -976,13 +966,14 @@ MML.Character = function(charName, id) {
         var blockChance;
         var dodgeSkill;
         var blockSkill;
-        var defaultMartialSkill = this.weaponSkills['Default Martial'].level;
+        var weaponSkills = this.weaponSkills;
+        var defaultMartialSkill = weaponSkills['Default Martial'].level;
         var shieldMod = MML.getShieldDefenseBonus(this);
         var defenseMod = this.meleeDefenseMod + this.attributeDefenseMod;
         var sitMod = this.situationalMod;
 
-        if (!_.isUndefined(this.weaponSkills['Dodge']) && defaultMartialSkill < this.weaponSkills['Dodge'].level) {
-          dodgeChance = this.weaponSkills['Dodge'].level + defenseMod + sitMod;
+        if (!_.isUndefined(weaponSkills['Dodge']) && defaultMartialSkill < weaponSkills['Dodge'].level) {
+          dodgeChance = weaponSkills['Dodge'].level + defenseMod + sitMod;
         } else {
           dodgeChance = defaultMartialSkill + defenseMod + sitMod;
         }
@@ -1794,7 +1785,7 @@ MML.Character = function(charName, id) {
       value: function() {
         this.applyStatusEffects();
         this.updateInventory();
-        this.updateCharacterSheet();
+        // this.updateCharacterSheet();
       }
     },
     'setPlayer': {
@@ -2709,10 +2700,9 @@ MML.Character = function(charName, id) {
         this
       );
 
-      this.skills = characterSkills;
       return characterSkills;
     },
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'weaponSkills', {
     get: function() {
@@ -2765,7 +2755,7 @@ MML.Character = function(charName, id) {
       );
       return characterSkills;
     },
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'fov', {
     get: function() {
