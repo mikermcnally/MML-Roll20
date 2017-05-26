@@ -186,7 +186,7 @@ function runTests() {
       expect(state.MML.GM.currentRound, 'currentRound should be incremented').to.equal(3);
     });
 
-    it.skip('Tested: Ready Item, Melee Attack, Melee Dodge, Major Wounds, Disabling Wounds, Mortal Wounds, Fatigue, Fatigue Recovery, Stun, Disarming from Disabling Wound', function() {
+    it('Tested: Ready Item, Melee Attack, Melee Dodge, Major Wounds, Disabling Wounds, Mortal Wounds, Fatigue, Fatigue Recovery, Stun, Disarming from Disabling Wound', function() {
       var item = MML.items['Hand Axe'];
       item.quality = 'Standard';
       item._id = 'axe';
@@ -1261,7 +1261,7 @@ function runTests() {
       player.menuCommand(player.who, 'End Movement');
     });
 
-    it('Tested: Ranged Attack, Ranged Defense, Reloading, Shooting From Cover, Aiming, Wound Fatigue, ', function () {
+    it.skip('Tested: Ranged Attack, Ranged Defense, Reloading, Shooting From Cover, Aiming, Wound Fatigue, Called Shots', function () {
       var bow = MML.items['Short Bow'];
       bow.quality = 'Standard';
       bow._id = 'bow';
@@ -1665,6 +1665,7 @@ function runTests() {
       player.menuCommand(player.who, 'Roll');
       setTestRoll(player, 10);
       player.menuCommand(player.who, 'Start Round');
+      expect(MML.characters['test2'].statusEffects, '"Sensitive Area" status effect should last for 1 round').to.have.property("Sensitive Area");
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
       player.menuCommand(player.who, 'Movement Only');
@@ -1692,10 +1693,14 @@ function runTests() {
         "target": "test2",
         "callback": "setCurrentCharacterTargets"
       });
-      console.log(MML.characters['test0'].action.modifiers);
-      console.log(MML.characters['test0'].statusEffects);
       player.menuCommand(player.who, 'Groin');
       setTestRoll(player, 26);
+      player.menuCommand(player.who, 'Take it');
+      setTestRoll(player, 1);
+      setTestRoll(player, 3);
+      player.menuCommand(player.who, 'Roll Willpower');
+      setTestRoll(player, 10);
+      expect(MML.characters['test2'].statusEffects, '"Sensitive Area" status effect should be removed after 1 round').not.to.have.property("Sensitive Area");
     });
 
     it.skip('Tested: Spell Casting', function() {
@@ -1711,7 +1716,6 @@ function runTests() {
       player.menuCommand(player.who, 'Cast');
       player.menuCommand(player.who, 'Dart');
       player.menuCommand(player.who, 'Ease Spell');
-      // player.menuCommand(player.who, 'Hail of Stones');
       player.menuCommand(player.who, 'Next Menu');
       player.menuCommand(player.who, 'Roll');
       setTestRoll(player, 10);
@@ -1742,6 +1746,22 @@ function runTests() {
       player.menuCommand(player.who, 'End Movement');
       player.menuCommand(player.who, 'Continue Casting');
       player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 2);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 1);
+      player.menuCommand(player.name, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Cast Spell');
+      player.getAdditionalTarget({
+        "charName": "test0",
+        "target": "test2",
+        "callback": "getAdditionalTarget"
+      });
       // player.menuCommand(player.who, 'Start Action');
       // player.menuCommand(player.who, 'End Movement');
     });

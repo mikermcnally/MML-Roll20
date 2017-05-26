@@ -139,6 +139,7 @@ MML.Character = function(charName, id) {
     },
     'getAdditionalTarget': {
       value: function(target) {
+        console.log("SHOW ME WHAT YOU GOT");
         var targetArray;
 
         if (_.isUndefined(state.MML.GM.currentAction.targetArray)) {
@@ -550,7 +551,8 @@ MML.Character = function(charName, id) {
       value: function() {
         var rollValue = MML.rollDice(1, 10);
         this.setAction();
-
+        console.log("SHOW ME WHAT YOU GOT");
+        console.log(this.name);
         this.player.currentRoll = {
           character: this.name,
           name: 'initiative',
@@ -864,18 +866,16 @@ MML.Character = function(charName, id) {
           if (currentRoll.accepted === false) {
             this.player.displayGmRoll(currentRoll);
           } else {
-            if (_.contains(this.action.modifiers, 'Called Shot Specific') && currentRoll.target - currentRoll.value > 10) {
-              this.action.modifiers = _.without(this.action.modifiers, 'Called Shot Specific');
-              this.action.modifiers.push('Called Shot');
+            if (_.has(this.statusEffects, 'Called Shot Specific') && currentRoll.value > currentRoll.target && currentRoll.value - currentRoll.target < 11) {
+              this.statusEffects['Called Shot Specific'].nearMiss = true;
               currentRoll.result = 'Success';
             }
             this.attackRollApply();
           }
         } else {
           this.player.displayPlayerRoll(currentRoll);
-          if (_.contains(this.action.modifiers, 'Called Shot Specific') && currentRoll.value - currentRoll.target < 11) {
-            this.action.modifiers = _.without(this.action.modifiers, 'Called Shot Specific');
-            this.action.modifiers.push('Called Shot');
+          if (_.has(this.statusEffects, 'Called Shot Specific') && currentRoll.value > currentRoll.target && currentRoll.value - currentRoll.target < 11) {
+            this.statusEffects['Called Shot Specific'].nearMiss = true;
             currentRoll.result = 'Success';
           }
           this.attackRollApply();
@@ -892,25 +892,36 @@ MML.Character = function(charName, id) {
       value: function() {
         var rollValue;
         var range;
+        var rangeUpper;
         var result;
         var accepted;
         var action = state.MML.GM.currentAction;
         var target = MML.characters[action.targetArray[action.targetIndex]];
 
-        if (_.contains(this.action.modifiers, 'Called Shot Specific')) {
-          rollValue = parseInt(_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
-            return hitPosition.name === action.calledShot;
-          }));
+      if (_.has(this.statusEffects, 'Called Shot Specific')) {
+        var hitPositionIndex = parseInt(_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
+          return hitPosition.name === action.calledShot;
+        }));
+        if (this.statusEffects['Called Shot Specific'].nearMiss) {
+          var bodyPart = MML.hitPositions[target.bodyType][hitPositionIndex].bodyPart;
+          rangeUpper = MML.getAvailableHitPositions(target, bodyPart).length;
+          rollValue = MML.rollDice(1, rangeUpper);
+          range = '1-' + rangeUpper;
+          result = MML.getCalledShotHitPosition(target, rollValue, bodyPart);
+          accepted = false;
+        } else {
+          rollValue = hitPositionIndex;
           range = rollValue + '-' + rollValue;
           result = MML.getHitPosition(target, rollValue);
           accepted = true;
-        } else if (_.contains(this.action.modifiers, 'Called Shot')) {
-          var rangeUpper = MML.getAvailableHitPositions(target, action.calledShot).length;
-          rollValue = MML.rollDice(1, rangeUpper);
-          range = '1-' + rangeUpper;
-          result = MML.getCalledShotHitPosition(target, rollValue, action.calledShot);
-          accepted = false;
-        } else {
+        }
+      } else if (_.has(this.statusEffects, 'Called Shot')) {
+        rangeUpper = MML.getAvailableHitPositions(target, action.calledShot).length;
+        rollValue = MML.rollDice(1, rangeUpper);
+        range = '1-' + rangeUpper;
+        result = MML.getCalledShotHitPosition(target, rollValue, action.calledShot);
+        accepted = false;
+      } else {
           range = '1-' + _.keys(MML.hitPositions[target.bodyType]).length;
           result = MML.getHitPosition(target, MML.rollDice(1, 100));
           rollValue = parseInt(_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
@@ -939,6 +950,11 @@ MML.Character = function(charName, id) {
 
         if (_.has(this.statusEffects, 'Called Shot')) {
           currentRoll.result = MML.getCalledShotHitPosition(target, currentRoll.value, action.calledShot);
+        } else if (_.has(this.statusEffects, 'Called Shot Specific') && this.statusEffects['Called Shot Specific'].nearMiss) {
+          var hitPositionIndex = parseInt(_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
+            return hitPosition.name === action.calledShot;
+          }));
+          currentRoll.result = MML.getCalledShotHitPosition(target, currentRoll.value, MML.hitPositions[target.bodyType][hitPositionIndex].bodyPart);
         } else {
           currentRoll.result = MML.hitPositions[target.bodyType][currentRoll.value];
         }
@@ -1785,7 +1801,7 @@ MML.Character = function(charName, id) {
       value: function() {
         this.applyStatusEffects();
         this.updateInventory();
-        // this.updateCharacterSheet();
+        this.updateCharacterSheet();
       }
     },
     'setPlayer': {
@@ -1811,15 +1827,19 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'name', {
     value: charName,
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'id', {
-    value: id
+    get: function() {
+      return id;
+    },
+    enumerable: false
   });
   Object.defineProperty(this, 'player', {
     get: function() {
       return MML.players[MML.getCurrentAttribute(this.name, 'player')];
-    }
+    },
+    enumerable: false
   });
   Object.defineProperty(this, 'race', {
     get: function() {
@@ -1832,7 +1852,7 @@ MML.Character = function(charName, id) {
       var value = MML.bodyTypes[this.race];
       return value;
     },
-    enumerable: false
+    enumerable: true
   });
   Object.defineProperty(this, 'gender', {
     get: function() {
@@ -1845,14 +1865,14 @@ MML.Character = function(charName, id) {
       var value = MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'statureRoll')].height;
       return value;
     },
-    enumerable: false
+    enumerable: true
   });
   Object.defineProperty(this, 'weight', {
     get: function() {
       var value = MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'statureRoll')].weight;
       return value;
     },
-    enumerable: false
+    enumerable: true
   });
   Object.defineProperty(this, 'handedness', {
     get: function() {
@@ -1865,70 +1885,70 @@ MML.Character = function(charName, id) {
       var value = MML.statureTables[this.race][this.gender][MML.getCurrentAttributeAsFloat(this.name, 'statureRoll')].stature;
       return value;
     },
-    enumerable: false
+    enumerable: true
   });
   Object.defineProperty(this, 'strength', {
     get: function() {
       var value = MML.racialAttributeBonuses[this.race].strength + MML.getCurrentAttributeAsFloat(this.name, 'strengthRoll');
       return value;
     },
-    enumerable: false
+    enumerable: true
   });
   Object.defineProperty(this, 'coordination', {
     get: function() {
       var value = MML.racialAttributeBonuses[this.race].coordination + MML.getCurrentAttributeAsFloat(this.name, 'coordinationRoll');
       return value;
     },
-    enumerable: false
+    enumerable: true
   });
   Object.defineProperty(this, 'health', {
     get: function() {
       var value = MML.racialAttributeBonuses[this.race].health + MML.getCurrentAttributeAsFloat(this.name, 'healthRoll');
       return value;
     },
-    enumerable: false
+    enumerable: true
   });
   Object.defineProperty(this, 'beauty', {
     get: function() {
       var value = MML.racialAttributeBonuses[this.race].beauty + MML.getCurrentAttributeAsFloat(this.name, 'beautyRoll');
       return value;
     },
-    enumerable: false
+    enumerable: true
   });
   Object.defineProperty(this, 'intellect', {
     get: function() {
       var value = MML.racialAttributeBonuses[this.race].intellect + MML.getCurrentAttributeAsFloat(this.name, 'intellectRoll');
       return value;
     },
-    enumerable: false
+    enumerable: true
   });
   Object.defineProperty(this, 'reason', {
     get: function() {
       var value = MML.racialAttributeBonuses[this.race].reason + MML.getCurrentAttributeAsFloat(this.name, 'reasonRoll');
       return value;
     },
-    enumerable: false
+    enumerable: true
   });
   Object.defineProperty(this, 'creativity', {
     get: function() {
       var value = MML.racialAttributeBonuses[this.race].creativity + MML.getCurrentAttributeAsFloat(this.name, 'creativityRoll');
       return value;
     },
-    enumerable: false
+    enumerable: true
   });
   Object.defineProperty(this, 'presence', {
     get: function() {
       var value = MML.racialAttributeBonuses[this.race].presence + MML.getCurrentAttributeAsFloat(this.name, 'presenceRoll');
       return value;
     },
-    enumerable: false
+    enumerable: true
   });
   Object.defineProperty(this, 'willpower', {
     get: function() {
       var value = Math.round((2 * this.presence + this.health) / 3);
       return value;
     },
-    enumerable: false
+    enumerable: true
   });
   Object.defineProperty(this, 'evocation', {
     get: function() {
@@ -1996,7 +2016,7 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'hp', {
     value: _.isUndefined(getAttrByName(this.id, 'hp', 'current')) ? MML.buildHpAttribute(this) : MML.getCurrentAttributeJSON(this.name, 'hp'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'epMax', {
     get: function() {
@@ -2008,7 +2028,7 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'ep', {
     value: _.isUndefined(getAttrByName(this.id, 'ep', 'current')) ? this.evocation : MML.getCurrentAttributeAsFloat(this.name, 'ep'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'fatigueMax', {
     get: function() {
@@ -2020,7 +2040,7 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'fatigue', {
     value: isNaN(parseFloat(MML.getCurrentAttribute(this.name, 'fatigue'))) ? this.fitness : MML.getCurrentAttributeAsFloat(this.name, 'fatigue'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'hpRecovery', {
     get: function() {
@@ -2044,7 +2064,7 @@ MML.Character = function(charName, id) {
       }
     } : MML.getCurrentAttributeJSON(this.name, 'inventory'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'totalWeightCarried', {
     get: function() {
@@ -2065,7 +2085,7 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'knockdown', {
     value: isNaN(parseFloat(MML.getCurrentAttribute(this.name, 'knockdown'))) ? this.knockdownMax : MML.getCurrentAttributeAsFloat(this.name, 'knockdown'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'apv', {
     get: function() {
@@ -2200,7 +2220,7 @@ MML.Character = function(charName, id) {
       });
       return apvMatrix;
     },
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'leftHand', {
     value: _.isEmpty(MML.getCurrentAttributeJSON(this.name, 'leftHand')) ? JSON.stringify({
@@ -2208,7 +2228,7 @@ MML.Character = function(charName, id) {
       grip: 'unarmed'
     }) : MML.getCurrentAttributeJSON(this.name, 'leftHand'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'rightHand', {
     value: _.isEmpty(MML.getCurrentAttributeJSON(this.name, 'rightHand')) ? JSON.stringify({
@@ -2216,14 +2236,14 @@ MML.Character = function(charName, id) {
       grip: 'unarmed'
     }) : MML.getCurrentAttributeJSON(this.name, 'rightHand'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'hitTable', {
     get: function() {
       var value = MML.getHitTable(this);
       return value;
     },
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'movementRatio', {
     get: function() {
@@ -2245,12 +2265,12 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'movementAvailable', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'movementAvailable'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'movementPosition', {
     value: MML.getCurrentAttribute(this.name, 'movementPosition'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'pathID', {
     get: function() {
@@ -2260,29 +2280,29 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'situationalMod', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'situationalMod'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'attributeDefenseMod', {
     get: function() {
       var value = MML.attributeMods.strength[this.strength] + MML.attributeMods.coordination[this.coordination];
       return value;
     },
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'meleeDefenseMod', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'meleeDefenseMod'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'rangedDefenseMod', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'rangedDefenseMod'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'meleeAttackMod', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'meleeAttackMod'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'attributeMeleeAttackMod', {
     get: function() {
@@ -2303,7 +2323,7 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'missileAttackMod', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'missileAttackMod'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'attributeMissileAttackMod', {
     get: function() {
@@ -2315,7 +2335,7 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'castingMod', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'castingMod'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'attributeCastingMod', {
     get: function() {
@@ -2354,77 +2374,77 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'statureCheckMod', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'statureCheckMod'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'strengthCheckMod', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'strengthCheckMod'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'coordinationCheckMod', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'coordinationCheckMod'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'healthCheckMod', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'healthCheckMod'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'beautyCheckMod', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'beautyCheckMod'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'intellectCheckMod', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'intellectCheckMod'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'reasonCheckMod', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'reasonCheckMod'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'creativityCheckMod', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'creativityCheckMod'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'presenceCheckMod', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'presenceCheckMod'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'willpowerCheckMod', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'willpowerCheckMod'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'evocationCheckMod', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'evocationCheckMod'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'perceptionCheckMod', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'perceptionCheckMod'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'systemStrengthCheckMod', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'systemStrengthCheckMod'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'fitnessCheckMod', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'fitnessCheckMod'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'statusEffects', {
     value: MML.getCurrentAttributeJSON(this.name, 'statusEffects'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'initiative', {
     get: function() {
@@ -2449,12 +2469,12 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'initiativeRollValue', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'initiativeRollValue'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'situationalInitBonus', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'situationalInitBonus'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'movementRatioInitBonus', {
     get: function() {
@@ -2605,12 +2625,12 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'firstActionInitBonus', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'firstActionInitBonus'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'spentInitiative', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'spentInitiative'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'actionTempo', {
     get: function() {
@@ -2653,27 +2673,27 @@ MML.Character = function(charName, id) {
   Object.defineProperty(this, 'ready', {
     value: MML.getCurrentAttributeAsBool(this.name, 'ready'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'action', {
     value: MML.getCurrentAttributeJSON(this.name, 'action'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'previousAction', {
     value: MML.getCurrentAttributeJSON(this.name, 'previousAction'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'roundsRest', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'roundsRest'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'roundsExertion', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'roundsExertion'),
     writable: true,
-    enumerable: true
+    enumerable: false
   });
   Object.defineProperty(this, 'skills', {
     get: function() {
