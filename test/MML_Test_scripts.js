@@ -1548,7 +1548,7 @@ function runTests() {
       });
       setTestRoll(player, 16);
       player.menuCommand(player.who, 'Take it');
-      setTestRoll(player, 21);
+      setTestRoll(player, 46);
       setTestRoll(player, 8);
       player.menuCommand(player.who, 'Roll System Strength');
       setTestRoll(player, 10);
@@ -1655,6 +1655,47 @@ function runTests() {
       expect(MML.characters['test2'].statusEffects, 'Failed Willpower roll should add "Sensitive Area" status effect').to.have.property("Sensitive Area");
       expect(MML.characters['test2'].situationalInitBonus, '"Sensitive Area" status effect should add -5 to situationalInitBonus').to.equal(-10);
       expect(MML.characters['test2'].situationalMod, '"Sensitive Area" status effect should add -10 to situationalMod').to.equal(-20);
+      player.menuCommand(player.who, 'Aim');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 10);
+      player.menuCommand(player.who, 'Start Round');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test2",
+        "callback": "setCurrentCharacterTargets"
+      });
+      player.menuCommand(player.who, 'End Action');
+      player.menuCommand(player.who, 'Attack');
+      player.menuCommand(player.who, 'Standard');
+      player.menuCommand(player.who, 'Specific Hit Position');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.setCurrentCharacterTargets({
+        "charName": "test0",
+        "target": "test2",
+        "callback": "setCurrentCharacterTargets"
+      });
+      console.log(MML.characters['test0'].action.modifiers);
+      console.log(MML.characters['test0'].statusEffects);
+      player.menuCommand(player.who, 'Groin');
+      setTestRoll(player, 26);
     });
 
     it.skip('Tested: Spell Casting', function() {
