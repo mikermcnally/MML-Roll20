@@ -1711,11 +1711,27 @@ function runTests() {
       item._id = 'axe';
       var character = MML.characters['test0'];
       character.inventory['axe'] = item;
+      MML.createAttribute('Handedness', 'Right', "", character);
       MML.createAttribute('repeating_weaponskills_2_name', 'Hand Axe', "", character);
       MML.createAttribute('repeating_weaponskills_2_input', '20', "", character);
       MML.createAttribute('repeating_weaponskills_2_level', '20', "", character);
+      MML.characters['test1'].inventory['axe'] = item;
+      MML.createAttribute('Handedness', 'Ambidextrous', "", MML.characters['test1']);
+      MML.createAttribute('repeating_weaponskills_2_name', 'Hand Axe', "", MML.characters['test1']);
+      MML.createAttribute('repeating_weaponskills_2_input', '20', "", MML.characters['test1']);
+      MML.createAttribute('repeating_weaponskills_2_level', '20', "", MML.characters['test1']);
+
 
       player.menuCommand(player.who, 'Ready Item');
+      player.menuCommand(player.who, 'Hand Axe');
+      player.menuCommand(player.who, 'Left');
+      player.menuCommand(player.who, 'Next Menu');
+      player.menuCommand(player.who, 'Attack');
+      player.menuCommand(player.who, 'Standard');
+      player.menuCommand(player.who, 'None');
+      player.menuCommand(player.who, 'Neutral');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 2);
       player.menuCommand(player.who, 'Hand Axe');
       player.menuCommand(player.who, 'Left');
       player.menuCommand(player.who, 'Next Menu');
@@ -1728,30 +1744,28 @@ function runTests() {
       player.menuCommand(player.who, 'Movement Only');
       player.menuCommand(player.who, 'Roll');
       setTestRoll(player, 10);
-      player.menuCommand(player.who, 'Movement Only');
-      player.menuCommand(player.who, 'Roll');
-      setTestRoll(player, 10);
       player.menuCommand(player.name, 'Start Round');
-      console.log(MML.characters['test0'].weaponSkills);
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
       expect(MML.characters['test0'].weaponSkills['Default Martial'].level, 'Having a combat skill with level of 20 should give Default Martial skill level of 10').to.equal(10);
       expect(MML.characters['test0'].statusEffects, 'Equipping weapon to off hand should add "Fighting Off-Handed" status effect').to.have.property("Fighting Off-Handed");
+      expect(MML.characters['test0'].action.skill, '"Fighting Off-Handed" status effect should use Default Martial Skill instead of weapon skill').to.equal(MML.characters['test0'].weaponSkills['Default Martial'].level);
+      expect(MML.characters['test0'].action.skill, '"Fighting Off-Handed" status effect should not use weapon skill').to.not.equal(MML.characters['test0'].weaponSkills['Hand Axe'].level);
 
       player.menuCommand(player.who, 'Start Action');
-      player.menuCommand(player.who, 'End Movement');
-      player.menuCommand(player.who, 'Movement Only');
-      player.menuCommand(player.who, 'Accept');
-      player.menuCommand(player.who, 'Start Action');
-      player.menuCommand(player.who, 'End Movement');
-      player.menuCommand(player.who, 'Movement Only');
-      player.menuCommand(player.who, 'Accept');
-      player.menuCommand(player.who, 'Start Action');
-      player.menuCommand(player.who, 'End Movement');
 
       player.setCurrentCharacterTargets({
         "charName": "test0",
         "target": "test1",
         "callback": "setCurrentCharacterTargets"
       });
+
+      expect(MML.characters['test1'].weaponSkills['Default Martial'].level, 'Having a combat skill with level of 20 should give Default Martial skill level of 10').to.equal(10);
+      expect(MML.characters['test1'].statusEffects, 'Equipping weapon to ambidextrous characters should not add "Fighting Off-Handed" status effect').not.to.have.property("Fighting Off-Handed");
+      expect(MML.characters['test1'].action.skill, 'Ambidextrous characters should not use Default Martial Skill').to.not.equal(MML.characters['test1'].weaponSkills['Default Martial'].level);
+      expect(MML.characters['test1'].action.skill, 'Ambidextrous characters should use weapon skill').to.equal(MML.characters['test1'].weaponSkills['Hand Axe'].level);
 
     });
   });
