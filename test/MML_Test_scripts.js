@@ -186,7 +186,7 @@ function runTests() {
       expect(state.MML.GM.currentRound, 'currentRound should be incremented').to.equal(3);
     });
 
-    it('Tested: Ready Item, Melee Attack, Melee Dodge, Major Wounds, Disabling Wounds, Mortal Wounds, Fatigue, Fatigue Recovery, Stun, Disarming from Disabling Wound', function() {
+    it.skip('Tested: Ready Item, Melee Attack, Melee Dodge, Major Wounds, Disabling Wounds, Mortal Wounds, Fatigue, Fatigue Recovery, Stun, Disarming from Disabling Wound', function() {
       var item = MML.items['Hand Axe'];
       item.quality = 'Standard';
       item._id = 'axe';
@@ -1703,7 +1703,7 @@ function runTests() {
       expect(MML.characters['test2'].statusEffects, '"Sensitive Area" status effect should be removed after 1 round').not.to.have.property("Sensitive Area");
     });
 
-    it.skip('Tested: Spell Casting', function() {
+    it('Tested: Spell Casting', function() {
       MML.setCurrentAttribute('test0', 'spells', JSON.stringify(['Hail of Stones', 'Dart']));
       var item = MML.items['Dart'];
       item._id = 'dart';
@@ -1739,7 +1739,10 @@ function runTests() {
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
       player.menuCommand(player.who, 'End Action');
+      expect(MML.characters['test0'].statusEffects, '"Ease Spell" status effect should last until spell is cast').to.have.property("Ease Spell");
       expect(MML.characters['test0'].action.spell.actions, 'Ease Spell should add one action to base action cost of spell').to.equal(1);
+      console.log("SHOW ME WHAT YOU GOT");
+      console.log(MML.characters['test0'].action);
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
       player.menuCommand(player.who, 'Start Action');
@@ -1757,11 +1760,21 @@ function runTests() {
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
       player.menuCommand(player.who, 'Cast Spell');
-      player.getAdditionalTarget({
+      MML.characters['test0'].getAdditionalTarget({
         "charName": "test0",
         "target": "test2",
         "callback": "getAdditionalTarget"
       });
+      player.menuCommand(player.who, 'Add Target');
+      MML.characters['test0'].getAdditionalTarget({
+        "charName": "test0",
+        "target": "test1",
+        "callback": "getAdditionalTarget"
+      });
+      console.log("SHOW ME WHAT YOU GOT");
+      console.log(MML.characters['test0'].action);
+      expect(MML.characters['test0'].statusEffects, '"Ease Spell" status effect should last until spell is cast').to.have.property("Ease Spell");
+      player.menuCommand(player.who, 'Cast Spell');
       // player.menuCommand(player.who, 'Start Action');
       // player.menuCommand(player.who, 'End Movement');
     });

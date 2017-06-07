@@ -43,7 +43,7 @@ MML.spells['Dart'] = {
 
     if (_.isUndefined(rolls.castingRoll)) {
       _.findWhere(character.inventory, { name: 'Dart' }).quantity -= targetArray.length;
-      character.castingRoll('castingRoll', character, spell.task, casterSkill, _.reduce(_.pluck(metaMagic, 'castingMod'), function(memo, num) { return memo + num; }));
+      character.castingRoll('castingRoll', spell.task, casterSkill, _.reduce(_.pluck(metaMagic, 'castingMod'), function(memo, num) { return memo + num; }));
     } else if (_.isUndefined(rolls.defenseRoll)) {
       if (rolls.castingRoll === 'Critical Success' || rolls.castingRoll === 'Success') {
         target.rangedDefense({ family: 'MWM' }, MML.getDistanceBetweenChars(character.name, target.name));

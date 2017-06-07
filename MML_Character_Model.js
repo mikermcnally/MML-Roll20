@@ -139,7 +139,6 @@ MML.Character = function(charName, id) {
     },
     'getAdditionalTarget': {
       value: function(target) {
-        console.log("SHOW ME WHAT YOU GOT");
         var targetArray;
 
         if (_.isUndefined(state.MML.GM.currentAction.targetArray)) {
@@ -551,8 +550,6 @@ MML.Character = function(charName, id) {
       value: function() {
         var rollValue = MML.rollDice(1, 10);
         this.setAction();
-        console.log("SHOW ME WHAT YOU GOT");
-        console.log(this.name);
         this.player.currentRoll = {
           character: this.name,
           name: 'initiative',
@@ -1612,6 +1609,13 @@ MML.Character = function(charName, id) {
     },
     'castingRoll': {
       value: function(rollName, task, skill, metaMagicMod) {
+        console.log("SHOW ME WHAT YOU GOT");
+        console.log(task);
+        console.log(skill);
+        console.log(this.situationalMod);
+        console.log(this.castingMod);
+        console.log(this.attributeCastingMod);
+        console.log(metaMagicMod);
         MML.universalRoll(this, rollName, [task, skill, this.situationalMod, this.castingMod, this.attributeCastingMod, metaMagicMod], 'castingRollResult');
       }
     },
