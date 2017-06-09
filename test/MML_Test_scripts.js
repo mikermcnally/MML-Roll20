@@ -1634,7 +1634,10 @@ function runTests() {
       setTestRoll(player, 3);
       player.menuCommand(player.who, 'Roll Willpower');
       setTestRoll(player, 10);
+      expect(MML.characters['test0'].spentInitiative, '"Called Shot" status effect should add -5 to spentInitiative').to.equal(-30);
       expect(MML.characters['test2'].statusEffects, 'Successful Willpower roll should not add "Sensitive Area" status effect').not.to.have.property("Sensitive Area");
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
       player.menuCommand(player.who, 'Movement Only');
@@ -1655,6 +1658,12 @@ function runTests() {
       expect(MML.characters['test2'].statusEffects, 'Failed Willpower roll should add "Sensitive Area" status effect').to.have.property("Sensitive Area");
       expect(MML.characters['test2'].situationalInitBonus, '"Sensitive Area" status effect should add -5 to situationalInitBonus').to.equal(-10);
       expect(MML.characters['test2'].situationalMod, '"Sensitive Area" status effect should add -10 to situationalMod').to.equal(-20);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
       player.menuCommand(player.who, 'Aim');
       player.menuCommand(player.who, 'Roll');
       setTestRoll(player, 10);
@@ -1741,8 +1750,6 @@ function runTests() {
       player.menuCommand(player.who, 'End Action');
       expect(MML.characters['test0'].statusEffects, '"Ease Spell" status effect should last until spell is cast').to.have.property("Ease Spell");
       expect(MML.characters['test0'].action.spell.actions, 'Ease Spell should add one action to base action cost of spell').to.equal(1);
-      console.log("SHOW ME WHAT YOU GOT");
-      console.log(MML.characters['test0'].action);
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
       player.menuCommand(player.who, 'Start Action');
@@ -1760,21 +1767,15 @@ function runTests() {
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
       player.menuCommand(player.who, 'Cast Spell');
-      MML.characters['test0'].getAdditionalTarget({
-        "charName": "test0",
-        "target": "test2",
-        "callback": "getAdditionalTarget"
-      });
+      MML.characters['test0'].getAdditionalTarget('test1');
       player.menuCommand(player.who, 'Add Target');
-      MML.characters['test0'].getAdditionalTarget({
-        "charName": "test0",
-        "target": "test1",
-        "callback": "getAdditionalTarget"
-      });
-      console.log("SHOW ME WHAT YOU GOT");
-      console.log(MML.characters['test0'].action);
+      MML.characters['test0'].getAdditionalTarget('test2');
       expect(MML.characters['test0'].statusEffects, '"Ease Spell" status effect should last until spell is cast').to.have.property("Ease Spell");
       player.menuCommand(player.who, 'Cast Spell');
+      setTestRoll(player, 45);
+      player.menuCommand(player.name, 'Take it');
+      setTestRoll(player, 45);
+      setTestRoll(player, 3);
       // player.menuCommand(player.who, 'Start Action');
       // player.menuCommand(player.who, 'End Movement');
     });

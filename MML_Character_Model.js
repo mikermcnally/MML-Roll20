@@ -88,6 +88,7 @@ MML.Character = function(charName, id) {
         this.spentInitiative = 0;
 
         this.action = {
+          ts: _.isUndefined(this.previousAction) ? Date.now() : this.previousAction.ts,
           modifiers: []
         };
         if (_.has(this.statusEffects, 'Observing')) {
@@ -541,7 +542,10 @@ MML.Character = function(charName, id) {
 
         if (_.isUndefined(this.previousAction) || this.previousAction.ts !== this.action.ts) {
           _.each(this.action.modifiers, function(modifier) {
-            this.addStatusEffect(modifier, { ts: this.action.ts });
+            this.addStatusEffect(modifier, {
+              ts: this.action.ts,
+              startingRound: state.MML.GM.currentRound
+            });
           }, this);
         }
       }
@@ -1609,13 +1613,6 @@ MML.Character = function(charName, id) {
     },
     'castingRoll': {
       value: function(rollName, task, skill, metaMagicMod) {
-        console.log("SHOW ME WHAT YOU GOT");
-        console.log(task);
-        console.log(skill);
-        console.log(this.situationalMod);
-        console.log(this.castingMod);
-        console.log(this.attributeCastingMod);
-        console.log(metaMagicMod);
         MML.universalRoll(this, rollName, [task, skill, this.situationalMod, this.castingMod, this.attributeCastingMod, metaMagicMod], 'castingRollResult');
       }
     },

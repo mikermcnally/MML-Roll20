@@ -46,6 +46,8 @@ MML.spells['Dart'] = {
       character.castingRoll('castingRoll', spell.task, casterSkill, _.reduce(_.pluck(metaMagic, 'castingMod'), function(memo, num) { return memo + num; }));
     } else if (_.isUndefined(rolls.defenseRoll)) {
       if (rolls.castingRoll === 'Critical Success' || rolls.castingRoll === 'Success') {
+        console.log("SHOW ME WHAT YOU GOT");
+        console.log(state.MML.GM.currentAction.targetArray);
         target.rangedDefense({ family: 'MWM' }, MML.getDistanceBetweenChars(character.name, target.name));
       } else if (rolls.castingRoll === 'Critical Failure') {
         MML.endAction();

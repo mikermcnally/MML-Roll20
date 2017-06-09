@@ -293,25 +293,21 @@ MML.nextTarget = function() {
 MML.endAction = function() {
   var currentAction = state.MML.GM.currentAction;
   var character = currentAction.character;
-  var spentInitiative = character.spentInitiative + character.actionTempo;
-  var currentInitiative = character.initiative + spentInitiative;
 
   if (character.action.name === 'Attack') {
     character.addStatusEffect('Melee This Round', {
       name: 'Melee This Round'
     });
   }
-  // Prevents character from gaining initiative when these status effects are removed
-  if (_.has(character.statusEffects, 'Called Shot') || _.has(character.statusEffects, 'Called Shot Specific')) {
-    spentInitiative += -5;
-  }
-  character.spentInitiative = spentInitiative;
+
+  character.spentInitiative = character.spentInitiative + character.actionTempo;
   character.previousAction = MML.clone(character.action);
   character.updateCharacter();
   _.each(currentAction.targetArray, function (target) {
     MML.characters[target].updateCharacter();
   });
-  if (currentInitiative > 0) {
+
+  if (character.initiative > 0) {
     character.player.charMenuPrepareAction(character.name);
     character.player.displayMenu();
   } else {
