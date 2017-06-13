@@ -186,7 +186,7 @@ function runTests() {
       expect(state.MML.GM.currentRound, 'currentRound should be incremented').to.equal(3);
     });
 
-    it.skip('Tested: Ready Item, Melee Attack, Melee Dodge, Major Wounds, Disabling Wounds, Mortal Wounds, Fatigue, Fatigue Recovery, Stun, Disarming from Disabling Wound', function() {
+    it('Tested: Ready Item, Melee Attack, Melee Dodge, Major Wounds, Disabling Wounds, Mortal Wounds, Fatigue, Fatigue Recovery, Stun, Disarming from Disabling Wound', function() {
       var item = MML.items['Hand Axe'];
       item.quality = 'Standard';
       item._id = 'axe';
@@ -1261,7 +1261,7 @@ function runTests() {
       player.menuCommand(player.who, 'End Movement');
     });
 
-    it.skip('Tested: Ranged Attack, Ranged Defense, Reloading, Shooting From Cover, Aiming, Wound Fatigue, ', function () {
+    it.skip('Tested: Ranged Attack, Ranged Defense, Reloading, Shooting From Cover, Aiming, Wound Fatigue, Called Shots', function () {
       var bow = MML.items['Short Bow'];
       bow.quality = 'Standard';
       bow._id = 'bow';
@@ -1665,6 +1665,7 @@ function runTests() {
       player.menuCommand(player.who, 'Roll');
       setTestRoll(player, 10);
       player.menuCommand(player.who, 'Start Round');
+      expect(MML.characters['test2'].statusEffects, '"Sensitive Area" status effect should last for 1 round').to.have.property("Sensitive Area");
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
       player.menuCommand(player.who, 'Movement Only');
@@ -1692,10 +1693,14 @@ function runTests() {
         "target": "test2",
         "callback": "setCurrentCharacterTargets"
       });
-      console.log(MML.characters['test0'].action.modifiers);
-      console.log(MML.characters['test0'].statusEffects);
       player.menuCommand(player.who, 'Groin');
       setTestRoll(player, 26);
+      player.menuCommand(player.who, 'Take it');
+      setTestRoll(player, 1);
+      setTestRoll(player, 3);
+      player.menuCommand(player.who, 'Roll Willpower');
+      setTestRoll(player, 10);
+      expect(MML.characters['test2'].statusEffects, '"Sensitive Area" status effect should be removed after 1 round').not.to.have.property("Sensitive Area");
     });
 
     it.skip('Tested: Spell Casting', function() {
@@ -1711,7 +1716,6 @@ function runTests() {
       player.menuCommand(player.who, 'Cast');
       player.menuCommand(player.who, 'Dart');
       player.menuCommand(player.who, 'Ease Spell');
-      // player.menuCommand(player.who, 'Hail of Stones');
       player.menuCommand(player.who, 'Next Menu');
       player.menuCommand(player.who, 'Roll');
       setTestRoll(player, 10);
@@ -1742,72 +1746,24 @@ function runTests() {
       player.menuCommand(player.who, 'End Movement');
       player.menuCommand(player.who, 'Continue Casting');
       player.menuCommand(player.who, 'Roll');
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
-    });
-
-    it('Tested: Offhand Fighting, Default Martial Skill', function () {
-      var item = MML.items['Hand Axe'];
-      item.quality = 'Standard';
-      item._id = 'axe';
-      var character = MML.characters['test0'];
-      character.inventory['axe'] = item;
-      MML.createAttribute('Handedness', 'Right', "", character);
-      MML.createAttribute('repeating_weaponskills_2_name', 'Hand Axe', "", character);
-      MML.createAttribute('repeating_weaponskills_2_input', '20', "", character);
-      MML.createAttribute('repeating_weaponskills_2_level', '20', "", character);
-      MML.characters['test1'].inventory['axe'] = item;
-      MML.createAttribute('Handedness', 'Ambidextrous', "", MML.characters['test1']);
-      MML.createAttribute('repeating_weaponskills_2_name', 'Hand Axe', "", MML.characters['test1']);
-      MML.createAttribute('repeating_weaponskills_2_input', '20', "", MML.characters['test1']);
-      MML.createAttribute('repeating_weaponskills_2_level', '20', "", MML.characters['test1']);
-
-
-      player.menuCommand(player.who, 'Ready Item');
-      player.menuCommand(player.who, 'Hand Axe');
-      player.menuCommand(player.who, 'Left');
-      player.menuCommand(player.who, 'Next Menu');
-      player.menuCommand(player.who, 'Attack');
-      player.menuCommand(player.who, 'Standard');
-      player.menuCommand(player.who, 'None');
-      player.menuCommand(player.who, 'Neutral');
-      player.menuCommand(player.who, 'Roll');
-      setTestRoll(player, 2);
-      player.menuCommand(player.who, 'Hand Axe');
-      player.menuCommand(player.who, 'Left');
-      player.menuCommand(player.who, 'Next Menu');
-      player.menuCommand(player.who, 'Attack');
-      player.menuCommand(player.who, 'Standard');
-      player.menuCommand(player.who, 'None');
-      player.menuCommand(player.who, 'Neutral');
-      player.menuCommand(player.who, 'Roll');
-      setTestRoll(player, 1);
+      setTestRoll(player, 10);
       player.menuCommand(player.who, 'Movement Only');
       player.menuCommand(player.who, 'Roll');
-      setTestRoll(player, 10);
+      setTestRoll(player, 2);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Roll');
+      setTestRoll(player, 1);
       player.menuCommand(player.name, 'Start Round');
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
-      player.menuCommand(player.who, 'Movement Only');
-      player.menuCommand(player.who, 'Accept');
-      expect(MML.characters['test0'].weaponSkills['Default Martial'].level, 'Having a combat skill with level of 20 should give Default Martial skill level of 10').to.equal(10);
-      expect(MML.characters['test0'].statusEffects, 'Equipping weapon to off hand should add "Fighting Off-Handed" status effect').to.have.property("Fighting Off-Handed");
-      expect(MML.characters['test0'].action.skill, '"Fighting Off-Handed" status effect should use Default Martial Skill instead of weapon skill').to.equal(MML.characters['test0'].weaponSkills['Default Martial'].level);
-      expect(MML.characters['test0'].action.skill, '"Fighting Off-Handed" status effect should not use weapon skill').to.not.equal(MML.characters['test0'].weaponSkills['Hand Axe'].level);
-
-      player.menuCommand(player.who, 'Start Action');
-
-      player.setCurrentCharacterTargets({
+      player.menuCommand(player.who, 'Cast Spell');
+      player.getAdditionalTarget({
         "charName": "test0",
-        "target": "test1",
-        "callback": "setCurrentCharacterTargets"
+        "target": "test2",
+        "callback": "getAdditionalTarget"
       });
-
-      expect(MML.characters['test1'].weaponSkills['Default Martial'].level, 'Having a combat skill with level of 20 should give Default Martial skill level of 10').to.equal(10);
-      expect(MML.characters['test1'].statusEffects, 'Equipping weapon to ambidextrous characters should not add "Fighting Off-Handed" status effect').not.to.have.property("Fighting Off-Handed");
-      expect(MML.characters['test1'].action.skill, 'Ambidextrous characters should not use Default Martial Skill').to.not.equal(MML.characters['test1'].weaponSkills['Default Martial'].level);
-      expect(MML.characters['test1'].action.skill, 'Ambidextrous characters should use weapon skill').to.equal(MML.characters['test1'].weaponSkills['Hand Axe'].level);
-
+      // player.menuCommand(player.who, 'Start Action');
+      // player.menuCommand(player.who, 'End Movement');
     });
   });
 }
