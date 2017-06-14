@@ -1718,6 +1718,7 @@ function runTests() {
       item._id = 'dart';
       MML.characters['test0'].inventory['dart'] = item;
 
+      expect(_.pluck(player.buttons, 'text'), 'Cast should not be an option if character is not holding required spell component').not.to.contain('Cast');
       player.menuCommand(player.who, 'Ready Item');
       player.menuCommand(player.who, 'Dart');
       player.menuCommand(player.who, 'Right');
@@ -1776,8 +1777,11 @@ function runTests() {
       player.menuCommand(player.name, 'Take it');
       setTestRoll(player, 45);
       setTestRoll(player, 3);
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.name, 'Take it');
+      setTestRoll(player, 45);
+      setTestRoll(player, 3);
+      expect(MML.characters['test0'].ep, 'Casting a spell should reduce EP').to.equal(24);
+      expect(_.pluck(player.buttons, 'text'), 'Continue Casting should not be an option after spell is cast').not.to.contain('Continue Casting');
     });
   });
 }

@@ -315,7 +315,7 @@ MML.getCharactersWithinRadius = function(left, top, radius) {
   var targets = [];
   _.each(MML.characters, function(character) {
     var charToken = MML.getTokenFromChar(character.name);
-    if (MML.getDistanceFeet(charToken.get('left'), left, charToken.get('top'), top) < MML.raceSizes[character.race].radius + MML.pixelsToFeet(radius)) {
+    if (!_.isUndefined(charToken) && MML.getDistanceFeet(charToken.get('left'), left, charToken.get('top'), top) < MML.raceSizes[character.race].radius + MML.pixelsToFeet(radius)) {
       targets.push(character.name);
     }
   });
@@ -330,7 +330,8 @@ MML.getCharactersWithinRectangle = function(leftOriginal, topOriginal, width, he
     var tokenCoordinates = MML.rotateAxes(charToken.get('left') - leftOriginal, charToken.get('top') - topOriginal, rotation);
     var tokenRadius = MML.feetToPixels(MML.raceSizes[character.race].radius);
 
-    if (tokenCoordinates[0] + tokenRadius > width / -2 &&
+    if (!_.isUndefined(charToken) &&
+      tokenCoordinates[0] + tokenRadius > width / -2 &&
       tokenCoordinates[0] - tokenRadius < width / 2 &&
       tokenCoordinates[1] - tokenRadius < height / 2 &&
       tokenCoordinates[1] + tokenRadius > height / -2
@@ -357,7 +358,8 @@ MML.getCharactersWithinTriangle = function(leftOriginal, topOriginal, width, hei
     var dx = tokenCoordinates[0];
     var dy = ((2 * height * tokenCoordinates[0]) / width) + (height / 2);
 
-    if (tokenCoordinates[1] - tokenRadius < height / 2 &&
+    if (!_.isUndefined(charToken) &&
+      tokenCoordinates[1] - tokenRadius < height / 2 &&
       tokenCoordinates[1] + tokenRadius > height / -2 &&
       ((MML.getDistance(ax, tokenCoordinates[0], ay, tokenCoordinates[1]) * MML.getDistance(bx, tokenCoordinates[0], by, tokenCoordinates[1])) / MML.getDistance(ax, bx, ay, by) < tokenRadius ||
         (MML.getDistance(cx, tokenCoordinates[0], cy, tokenCoordinates[1]) * MML.getDistance(dx, tokenCoordinates[0], dy, tokenCoordinates[1])) / MML.getDistance(cx, dx, cy, dy) < tokenRadius ||

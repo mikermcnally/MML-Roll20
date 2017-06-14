@@ -72,10 +72,13 @@ on('ready', function() {
     } else if (obj.get('name').indexOf('spellMarker') > -1) {
       var targets = MML.getAoESpellTargets(obj);
       _.each(MML.characters, function (character) {
-        if (targets.indexOf(character.name) > -1) {
-          MML.getTokenFromChar(character.name).set('tint_color', '#00FF00');
-        } else {
-          MML.getTokenFromChar(character.name).set('tint_color', 'transparent');
+        var token = MML.getTokenFromChar(character.name);
+        if (!_.isUndefined(token)) {
+          if (targets.indexOf(character.name) > -1) {
+            token.set('tint_color', '#00FF00');
+          } else {
+            token.set('tint_color', 'transparent');
+          }
         }
       });
       state.MML.GM.currentAction.parameters.metaMagic['Modified AoE'] = MML.getAoESpellModifier(obj, state.MML.GM.currentAction.parameters.spell);

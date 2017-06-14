@@ -393,10 +393,14 @@ MML.Character = function(charName, id) {
     },
     'alterEP': {
       value: function(epAmount) {
+        console.log("SHOW ME WHAT YOU GOT");
+        console.log(epAmount);
+        console.log(this.ep);
         this.ep += epAmount;
+        console.log(this.ep);
 
-        if (this.ep < Math.round(0.75 * this.epMax)) {
-          this.fatigueCheckRoll(0);
+        if (this.ep < Math.round(0.25 * this.epMax)) {
+          this.fatigueCheckRoll();
         } else {
           MML[state.MML.GM.currentAction.callback]();
         }
@@ -631,8 +635,8 @@ MML.Character = function(charName, id) {
           };
           this.releaseOpponentAction();
         } else if (this.action.name === 'Cast') {
-          if (this.action.spell.actions > 1) {
-            this.action.spell.actions--;
+          this.action.spell.actions--;
+          if (this.action.spell.actions > 0) {
             this.player.charMenuContinueCasting(this.name);
             this.player.displayMenu();
           } else {

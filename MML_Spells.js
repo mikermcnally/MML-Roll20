@@ -46,8 +46,6 @@ MML.spells['Dart'] = {
       character.castingRoll('castingRoll', spell.task, casterSkill, _.reduce(_.pluck(metaMagic, 'castingMod'), function(memo, num) { return memo + num; }));
     } else if (_.isUndefined(rolls.defenseRoll)) {
       if (rolls.castingRoll === 'Critical Success' || rolls.castingRoll === 'Success') {
-        console.log("SHOW ME WHAT YOU GOT");
-        console.log(state.MML.GM.currentAction.targetArray);
         target.rangedDefense({ family: 'MWM' }, MML.getDistanceBetweenChars(character.name, target.name));
       } else if (rolls.castingRoll === 'Critical Failure') {
         MML.endAction();
@@ -111,7 +109,7 @@ MML.spells['Hail of Stones'] = {
       character.castingRoll('castingRoll', spell.task, casterSkill, _.reduce(_.pluck(metaMagic, 'castingMod'), function(memo, num) { return memo + num; }));
     } else if (_.isUndefined(rolls.numberOfStonesRoll)) {
       if (rolls.castingRoll === 'Critical Success' || rolls.castingRoll === 'Success') {
-        this.player.charMenuGenericRoll(character.name, 'numberOfStonesRoll', '1d3', 'Number of stones cast at ' + target.name, 'genericRollResult');
+        character.player.charMenuGenericRoll(character.name, 'numberOfStonesRoll', '1d3', 'Number of stones cast at ' + target.name, 'genericRollResult');
       } else if (rolls.castingRoll === 'Critical Failure') {
         MML.endAction();
       } else {
