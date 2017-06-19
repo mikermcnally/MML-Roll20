@@ -359,7 +359,7 @@ MML.statusEffects['Hasten Spell'] = function(effect, index) {
   }
 };
 MML.statusEffects['Ease Spell'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false || !_.contains(this.action.modifiers, 'Ease Spell')) {
+  if (state.MML.GM.inCombat === false || this.action.ts !== effect.ts) {
     delete this.statusEffects[index];
   } else {
     this.castingMod += 10;
@@ -372,7 +372,7 @@ MML.statusEffects['Ease Spell'] = function(effect, index) {
 };
 MML.statusEffects['Release Opponent'] = function(effect, index) {};
 MML.statusEffects['Ready Item'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false || !_.contains(this.action.modifiers, 'Ready Item')) {
+  if (state.MML.GM.inCombat === false || state.MML.GM.currentRound !== parseInt(effect.startingRound)) {
     delete this.statusEffects[index];
   } else {
     this.situationalInitBonus += -10;

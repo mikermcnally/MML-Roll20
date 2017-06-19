@@ -904,7 +904,8 @@ MML.Player = function(name, isGM) {
       text: 'Back',
       nextMenu: 'menuPause',
       callback: function() {
-        character.charMenuMetaMagic();
+        this.charMenuMetaMagic(who);
+        this.displayMenu();
       }
     });
   };
@@ -933,7 +934,8 @@ MML.Player = function(name, isGM) {
       text: 'Back',
       nextMenu: 'menuPause',
       callback: function() {
-        character.charMenuMetaMagic();
+        this.charMenuMetaMagic(who);
+        this.displayMenu();
       }
     });
   };
@@ -1118,11 +1120,15 @@ MML.Player = function(name, isGM) {
       callback: function() {
         var spellMarker = MML.getTokenFromName(state.MML.GM.currentAction.parameters.spellMarker);
         var targets = MML.getAoESpellTargets(spellMarker);
+        var character = MML.characters[who];
         _.each(MML.characters, function (character) {
-          MML.getTokenFromChar(character.name).set('tint_color', 'transparent');
+          var token = MML.getTokenFromChar(character.name);
+          if (!_.isUndefined(token)) {
+            token.set('tint_color', 'transparent');
+          }
         });
         spellMarker.remove();
-        this.setCurrentCharacterTargets(targets);
+        this.setCurrentCharacterTargets({targets: targets});
         character[character.action.callback]();
       }
     }];
@@ -1386,10 +1392,10 @@ MML.Player = function(name, isGM) {
     this.who = who;
     this.message = message;
     this.buttons = [{
-      text: 'Roll ' + rollDice,
+      text: 'Roll ' + dice,
       nextMenu: 'menuIdle',
       callback: function() {
-        MML.characters[this.who].genericRoll(name, dice, callback);
+        MML.genericRoll(MML.characters[who], name, dice, callback);
       }
     }];
   };

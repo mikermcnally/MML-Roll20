@@ -186,7 +186,7 @@ function runTests() {
       expect(state.MML.GM.currentRound, 'currentRound should be incremented').to.equal(3);
     });
 
-    it('Tested: Ready Item, Melee Attack, Melee Dodge, Major Wounds, Disabling Wounds, Mortal Wounds, Fatigue, Fatigue Recovery, Stun, Disarming from Disabling Wound', function() {
+    it.skip('Tested: Ready Item, Melee Attack, Melee Dodge, Major Wounds, Disabling Wounds, Mortal Wounds, Fatigue, Fatigue Recovery, Stun, Disarming from Disabling Wound', function() {
       var item = MML.items['Hand Axe'];
       item.quality = 'Standard';
       item._id = 'axe';
@@ -1634,7 +1634,10 @@ function runTests() {
       setTestRoll(player, 3);
       player.menuCommand(player.who, 'Roll Willpower');
       setTestRoll(player, 10);
+      expect(MML.characters['test0'].spentInitiative, '"Called Shot" status effect should add -5 to spentInitiative').to.equal(-30);
       expect(MML.characters['test2'].statusEffects, 'Successful Willpower roll should not add "Sensitive Area" status effect').not.to.have.property("Sensitive Area");
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
       player.menuCommand(player.who, 'Movement Only');
@@ -1655,6 +1658,12 @@ function runTests() {
       expect(MML.characters['test2'].statusEffects, 'Failed Willpower roll should add "Sensitive Area" status effect').to.have.property("Sensitive Area");
       expect(MML.characters['test2'].situationalInitBonus, '"Sensitive Area" status effect should add -5 to situationalInitBonus').to.equal(-10);
       expect(MML.characters['test2'].situationalMod, '"Sensitive Area" status effect should add -10 to situationalMod').to.equal(-20);
+      player.menuCommand(player.who, 'Movement Only');
+      player.menuCommand(player.who, 'Accept');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
+      player.menuCommand(player.who, 'Start Action');
+      player.menuCommand(player.who, 'End Movement');
       player.menuCommand(player.who, 'Aim');
       player.menuCommand(player.who, 'Roll');
       setTestRoll(player, 10);
@@ -1703,12 +1712,13 @@ function runTests() {
       expect(MML.characters['test2'].statusEffects, '"Sensitive Area" status effect should be removed after 1 round').not.to.have.property("Sensitive Area");
     });
 
-    it.skip('Tested: Spell Casting', function() {
+    it('Tested: Spell Casting', function() {
       MML.setCurrentAttribute('test0', 'spells', JSON.stringify(['Hail of Stones', 'Dart']));
       var item = MML.items['Dart'];
       item._id = 'dart';
       MML.characters['test0'].inventory['dart'] = item;
 
+      expect(_.pluck(player.buttons, 'text'), 'Cast should not be an option if character is not holding required spell component').not.to.contain('Cast');
       player.menuCommand(player.who, 'Ready Item');
       player.menuCommand(player.who, 'Dart');
       player.menuCommand(player.who, 'Right');
@@ -1739,6 +1749,7 @@ function runTests() {
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
       player.menuCommand(player.who, 'End Action');
+      expect(MML.characters['test0'].statusEffects, '"Ease Spell" status effect should last until spell is cast').to.have.property("Ease Spell");
       expect(MML.characters['test0'].action.spell.actions, 'Ease Spell should add one action to base action cost of spell').to.equal(1);
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
@@ -1757,13 +1768,20 @@ function runTests() {
       player.menuCommand(player.who, 'Start Action');
       player.menuCommand(player.who, 'End Movement');
       player.menuCommand(player.who, 'Cast Spell');
-      player.getAdditionalTarget({
-        "charName": "test0",
-        "target": "test2",
-        "callback": "getAdditionalTarget"
-      });
-      // player.menuCommand(player.who, 'Start Action');
-      // player.menuCommand(player.who, 'End Movement');
+      MML.characters['test0'].getAdditionalTarget('test1');
+      player.menuCommand(player.who, 'Add Target');
+      MML.characters['test0'].getAdditionalTarget('test2');
+      expect(MML.characters['test0'].statusEffects, '"Ease Spell" status effect should last until spell is cast').to.have.property("Ease Spell");
+      player.menuCommand(player.who, 'Cast Spell');
+      setTestRoll(player, 45);
+      player.menuCommand(player.name, 'Take it');
+      setTestRoll(player, 45);
+      setTestRoll(player, 3);
+      player.menuCommand(player.name, 'Take it');
+      setTestRoll(player, 45);
+      setTestRoll(player, 3);
+      expect(MML.characters['test0'].ep, 'Casting a spell should reduce EP').to.equal(24);
+      expect(_.pluck(player.buttons, 'text'), 'Continue Casting should not be an option after spell is cast').not.to.contain('Continue Casting');
     });
   });
 }

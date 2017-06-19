@@ -43,7 +43,7 @@ MML.spells['Dart'] = {
 
     if (_.isUndefined(rolls.castingRoll)) {
       _.findWhere(character.inventory, { name: 'Dart' }).quantity -= targetArray.length;
-      character.castingRoll('castingRoll', character, spell.task, casterSkill, _.reduce(_.pluck(metaMagic, 'castingMod'), function(memo, num) { return memo + num; }));
+      character.castingRoll('castingRoll', spell.task, casterSkill, _.reduce(_.pluck(metaMagic, 'castingMod'), function(memo, num) { return memo + num; }));
     } else if (_.isUndefined(rolls.defenseRoll)) {
       if (rolls.castingRoll === 'Critical Success' || rolls.castingRoll === 'Success') {
         target.rangedDefense({ family: 'MWM' }, MML.getDistanceBetweenChars(character.name, target.name));
@@ -109,7 +109,7 @@ MML.spells['Hail of Stones'] = {
       character.castingRoll('castingRoll', spell.task, casterSkill, _.reduce(_.pluck(metaMagic, 'castingMod'), function(memo, num) { return memo + num; }));
     } else if (_.isUndefined(rolls.numberOfStonesRoll)) {
       if (rolls.castingRoll === 'Critical Success' || rolls.castingRoll === 'Success') {
-        this.player.charMenuGenericRoll(character.name, 'numberOfStonesRoll', '1d3', 'Number of stones cast at ' + target.name, 'genericRollResult');
+        character.player.charMenuGenericRoll(character.name, 'numberOfStonesRoll', '1d3', 'Number of stones cast at ' + target.name, 'genericRollResult');
       } else if (rolls.castingRoll === 'Critical Failure') {
         MML.endAction();
       } else {

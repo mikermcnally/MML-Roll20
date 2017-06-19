@@ -88,6 +88,7 @@ MML.Character = function(charName, id) {
         this.spentInitiative = 0;
 
         this.action = {
+          ts: _.isUndefined(this.previousAction) ? Date.now() : this.previousAction.ts,
           modifiers: []
         };
         if (_.has(this.statusEffects, 'Observing')) {
@@ -139,7 +140,6 @@ MML.Character = function(charName, id) {
     },
     'getAdditionalTarget': {
       value: function(target) {
-        console.log("SHOW ME WHAT YOU GOT");
         var targetArray;
 
         if (_.isUndefined(state.MML.GM.currentAction.targetArray)) {
@@ -393,10 +393,14 @@ MML.Character = function(charName, id) {
     },
     'alterEP': {
       value: function(epAmount) {
+        console.log("SHOW ME WHAT YOU GOT");
+        console.log(epAmount);
+        console.log(this.ep);
         this.ep += epAmount;
+        console.log(this.ep);
 
-        if (this.ep < Math.round(0.75 * this.epMax)) {
-          this.fatigueCheckRoll(0);
+        if (this.ep < Math.round(0.25 * this.epMax)) {
+          this.fatigueCheckRoll();
         } else {
           MML[state.MML.GM.currentAction.callback]();
         }
@@ -542,7 +546,10 @@ MML.Character = function(charName, id) {
 
         if (_.isUndefined(this.previousAction) || this.previousAction.ts !== this.action.ts) {
           _.each(this.action.modifiers, function(modifier) {
-            this.addStatusEffect(modifier, { ts: this.action.ts });
+            this.addStatusEffect(modifier, {
+              ts: this.action.ts,
+              startingRound: state.MML.GM.currentRound
+            });
           }, this);
         }
       }
@@ -551,8 +558,6 @@ MML.Character = function(charName, id) {
       value: function() {
         var rollValue = MML.rollDice(1, 10);
         this.setAction();
-        console.log("SHOW ME WHAT YOU GOT");
-        console.log(this.name);
         this.player.currentRoll = {
           character: this.name,
           name: 'initiative',
@@ -630,8 +635,8 @@ MML.Character = function(charName, id) {
           };
           this.releaseOpponentAction();
         } else if (this.action.name === 'Cast') {
-          if (this.action.spell.actions > 1) {
-            this.action.spell.actions--;
+          this.action.spell.actions--;
+          if (this.action.spell.actions > 0) {
             this.player.charMenuContinueCasting(this.name);
             this.player.displayMenu();
           } else {

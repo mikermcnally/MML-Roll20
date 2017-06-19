@@ -201,7 +201,6 @@ MML.getTokenFromChar = function(charName) {
     _subtype: "token",
     represents: character.get("_id")
   });
-
   return tokens[0];
 };
 
@@ -488,19 +487,18 @@ MML.attributeCheckResult = function(roll) {
   return roll;
 };
 
-MML.genericRoll = function(input) {
+MML.genericRoll = function(character, rollName, dice, callback) {
   // log("genericRoll");
   // log(input.callback);
   // log(input.mods);
   // "numberOfStonesRoll", "1d3", "Number of stones cast at " + target.name
-  var dice = MML.parseDice(input.dice);
   var roll = {
     type: "generic",
-    name: input.name,
-    character: this.name,
-    callback: input.callback,
+    name: rollName,
+    character: character.name,
+    callback: callback,
     value: MML.rollDice(dice.amount, dice.size),
-    range: input.dice,
+    range: dice,
     accepted: false
   };
 
