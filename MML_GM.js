@@ -292,6 +292,14 @@ MML.parseCommand = function(msg) {
         callback: 'displayItemOptions',
         input: [charName, itemId]
       };
+    } else if (content.indexOf('enterNumberOfDice') !== -1) {
+      // var value = parseInt(content.replace('enterNumberOfDice ', ''));
+
+      // if (!isNaN(value)) {
+      //   MML.players[who].customRoll(value);
+      // } else {
+      //   sendChat('Error', 'Please enter a numerical value.');
+      // }
     } else {
       command = MML.dehexify(content);
       try {
@@ -302,11 +310,8 @@ MML.parseCommand = function(msg) {
         sendChat('Game', 'JSON parse failed');
       }
 
-      command.input.push(MML.getSelectedCharNames(msg.selected));
+      // command.input.push(MML.getSelectedCharNames(msg.selected));
     }
-    if (state.MML.commandRecorder) {
-      state.MML.commandArray.push(command);
-    }
-    MML.processCommand(command);
+    return command;
   }
 };

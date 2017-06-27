@@ -11,22 +11,37 @@ MML.Player = function(name, isGM) {
   };
 
   this.displayMenu = function() {
-    var toChat = '/w "' + this.name + '" &{template:charMenu} {{name=' + this.message + '}} ';
-
-    _.each(this.buttons, function(button) {
+    var player = this;
+    var playerName = this.name;
+    var buttons = this.buttons;
+    var toChat = '/w "' + playerName + '" &{template:charMenu} {{name=' + this.message + '}} ';
+    // TODO: recursify this
+    _.each(buttons, function(button) {
       var noSpace = button.text.replace(/\s+/g, '');
-      var command = JSON.stringify({
-        type: "player",
-        who: this.name,
-        input: [this.who, button.text],
-        callback: "menuCommand"
+      toChat = toChat + '{{' + noSpace + '=[' + button.text + '](!MML|' + MML.hexify(JSON.stringify({
+          type: "player",
+          who: playerName,
+          input: [this.who, button.text],
+          callback: "menuCommand"
+        })) + ')}} ';
+    }, this);
+
+    var command = new Promise(function (resolve, reject) {
+      on('chat:message', function(msg) {
+        var parsedCommand = MML.parseCommand(msg);
+        log('fuck');
+        if (parsedCommand) {
+          log(msg);
+          log(parsedCommand);
+          player.menuCommand(parsedCommand.input[0], parsedCommand.input[1], MML.getSelectedCharNames(msg.selected));
+        }
+        resolve();
       });
 
-      toChat = toChat + '{{' + noSpace + '=[' + button.text + '](!MML|' + MML.hexify(command) + ')}} ';
-    }, this);
-    sendChat(this.name, toChat, null, {
-      noarchive: false
-    }); //Change to true this when they fix the bug
+      sendChat(playerName, toChat, null, {
+        noarchive: false
+      }); //Change to true this when they fix the bug
+    });
   };
   this.displayGmRoll = function() {
     sendChat(this.name, '/w "' + this.name + '" &{template:rollMenuGM} {{title=' + this.currentRoll.message + "}}");
@@ -58,6 +73,9 @@ MML.Player = function(name, isGM) {
       sendChat('Error', 'New roll value out of range.');
     }
     MML.characters[this.currentRoll.character][this.currentRoll.callback]();
+  };
+  this.enterNumberOfDice = function() {
+    sendChat(this.name, '/w "' + this.name + '" &{template:enterNumberOfDiceMenu} {{title=Enter Number of Dice}}');
   };
   this.setApiPlayerAttribute = function(attribute, value) {
     this[attribute] = value;
@@ -126,6 +144,13 @@ MML.Player = function(name, isGM) {
       this.menuButtons.worldMenu,
       this.menuButtons.utilitiesMenu
     ];
+    this.buttons.push({
+      text: 'Roll Dice',
+      nextMenu: 'selectDieSizeMenu',
+      callback: function() {
+        this.displayMenu();
+      }
+    });
   };
   this.GmMenuAssignStatusEffect = function(who) {
     this.who = who;
@@ -142,6 +167,84 @@ MML.Player = function(name, isGM) {
         }
       });
     });
+  };
+
+  this.selectDieSizeMenu = function(who) {
+    this.who = who;
+    this.message = 'Choose a Status Effect: ';
+    this.buttons = [];
+
+    this.buttons.push({
+      text: '2',
+      nextMenu: 'selectDieNumberMenu',
+      callback: function() {
+        this.dice = '2';
+        this.displayMenu();
+      }
+    });
+    this.buttons.push({
+      text: '3',
+      nextMenu: 'selectDieNumberMenu',
+      callback: function() {
+        this.displayMenu();
+      }
+    });
+    this.buttons.push({
+      text: '4',
+      nextMenu: 'selectDieNumberMenu',
+      callback: function() {
+        this.displayMenu();
+      }
+    });
+    this.buttons.push({
+      text: '6',
+      nextMenu: 'selectDieNumberMenu',
+      callback: function() {
+        this.dice = '6';
+        this.displayMenu();
+      }
+    });
+    this.buttons.push({
+      text: '8',
+      nextMenu: 'selectDieNumberMenu',
+      callback: function() {
+        this.displayMenu();
+      }
+    });
+    this.buttons.push({
+      text: '10',
+      nextMenu: 'selectDieNumberMenu',
+      callback: function() {
+        this.displayMenu();
+      }
+    });
+    this.buttons.push({
+      text: '12',
+      nextMenu: 'selectDieNumberMenu',
+      callback: function() {
+        this.displayMenu();
+      }
+    });
+    this.buttons.push({
+      text: '20',
+      nextMenu: 'selectDieNumberMenu',
+      callback: function() {
+        this.displayMenu();
+      }
+    });
+    this.buttons.push({
+      text: '100',
+      nextMenu: 'selectDieNumberMenu',
+      callback: function() {
+        this.displayMenu();
+      }
+    });
+  };
+  this.selectDieSizeMenu = function() {
+    this.enterNumberOfDice();
+  };
+  this.customRoll = function (numberOfDice) {
+    sendChat(this.name, '/w "' + this.name + 'Result: ' + rollDice(this.dice, numberOfDice));
   };
 
   this.GmMenuCombat = function(who) {

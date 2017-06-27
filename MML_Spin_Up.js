@@ -1,5 +1,7 @@
 on('ready', function() {
   MML.init();
+  state.MML.GM.player.GmMenuMain();
+  state.MML.GM.player.displayMenu();
 
   on('add:character', function(character) {
     var charName = character.get('name');
@@ -40,9 +42,10 @@ on('ready', function() {
     }
   });
 
-  on('chat:message', function(msg) {
-    MML.parseCommand(msg);
-  });
+  // on('chat:message', function(msg) {
+  //   var parsedCommand = MML.parseCommand(msg);
+  //   MML.players[msg.who.replace(' (GM)', '')].menuCommand(parsedCommand.input[0], parsedCommand.input[1], MML.getSelectedCharNames(msg.selected));
+  // });
 
   on('change:token', function(obj, prev) {
     if (obj.get('name').indexOf('spellMarker') === -1 && obj.get('left') !== prev['left'] && obj.get('top') !== prev['top'] && state.MML.GM.inCombat === true) {
