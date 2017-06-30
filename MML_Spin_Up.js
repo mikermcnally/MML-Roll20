@@ -1,7 +1,5 @@
 on('ready', function() {
   MML.init();
-  state.MML.GM.player.GmMenuMain();
-  state.MML.GM.player.displayMenu();
 
   on('add:character', function(character) {
     var charName = character.get('name');
@@ -43,8 +41,10 @@ on('ready', function() {
   });
 
   // on('chat:message', function(msg) {
-  //   var parsedCommand = MML.parseCommand(msg);
-  //   MML.players[msg.who.replace(' (GM)', '')].menuCommand(parsedCommand.input[0], parsedCommand.input[1], MML.getSelectedCharNames(msg.selected));
+  //   var command = MML.parseCommand(msg);
+  //   if (command) {
+  //     MML.players[msg.who.replace(' (GM)', '')].displayMenu(command);
+  //   }
   // });
 
   on('change:token', function(obj, prev) {

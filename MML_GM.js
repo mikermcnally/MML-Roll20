@@ -302,13 +302,13 @@ MML.parseCommand = function(msg) {
       // }
     } else {
       command = MML.dehexify(content);
-      try {
-        command = JSON.parse(command);
-      } catch (e) {
-        log(command);
-        log(content);
-        sendChat('Game', 'JSON parse failed');
-      }
+      // try {
+      //   command = JSON.parse(command);
+      // } catch (e) {
+      //   log(command);
+      //   log(content);
+      //   sendChat('Game', 'JSON parse failed');
+      // }
 
       // command.input.push(MML.getSelectedCharNames(msg.selected));
     }

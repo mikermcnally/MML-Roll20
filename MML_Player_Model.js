@@ -1,4 +1,41 @@
 MML.Player = function(name, isGM) {
+  this.initializeMenu = function (menu) {
+    var player = this;
+    if (menu === 'GmMenuMain') {
+      player.nextMenu('GmMenuMain')
+      .then(function (command) {
+        log('yay-yuh');
+        log(command);
+        log('dafuq?');
+        switch (command) {
+          case 'Combat':
+            log('well...');
+            log(player);
+            return player.nextMenu('GmMenuCombat');
+          case 'Back':
+            return player.nextMenu('GmMenuMain');
+          default:
+
+        }
+      })
+      .then(log)
+      .catch(log);
+    }
+  };
+  this.nextMenu = function (menuName) {
+    var player = this;
+    return new Promise(function (resolve, reject) {
+      log('huh');
+      player.displayMenu(player, player[menuName]);
+      log('weird...');
+      on('chat:message', function(msg) {
+        if (msg.who.replace(' (GM)', '') === name && msg.type === 'api' && msg.content.indexOf('!MML|') !== -1) {
+          resolve(MML.parseCommand(msg));
+        }
+      });
+    });
+  };
+
   this.menuCommand = function(who, buttonText, selectedCharNames) {
     var button = _.findWhere(this.buttons, {
       text: buttonText
@@ -10,38 +47,41 @@ MML.Player = function(name, isGM) {
     }
   };
 
-  this.displayMenu = function() {
-    var player = this;
-    var playerName = this.name;
-    var buttons = this.buttons;
-    var toChat = '/w "' + playerName + '" &{template:charMenu} {{name=' + this.message + '}} ';
-    // TODO: recursify this
-    _.each(buttons, function(button) {
-      var noSpace = button.text.replace(/\s+/g, '');
-      toChat = toChat + '{{' + noSpace + '=[' + button.text + '](!MML|' + MML.hexify(JSON.stringify({
-          type: "player",
-          who: playerName,
-          input: [this.who, button.text],
-          callback: "menuCommand"
-        })) + ')}} ';
-    }, this);
+  this.displayMenu = function (player, menu) {
+    // return function(command) {
+      // var player = this;
+      // var playerName = this.name;
+      log('show me ya moves');
+      log(menu);
+      log(player);
+      // var menu = player[menuName](playerName);
+      var buttons = menu.buttons;
+      var toChat = '/w "' + player.name + '" &{template:charMenu} {{name=' + menu.message + '}} ';
 
-    var command = new Promise(function (resolve, reject) {
-      on('chat:message', function(msg) {
-        var parsedCommand = MML.parseCommand(msg);
-        log('fuck');
-        if (parsedCommand) {
-          log(msg);
-          log(parsedCommand);
-          player.menuCommand(parsedCommand.input[0], parsedCommand.input[1], MML.getSelectedCharNames(msg.selected));
-        }
-        resolve();
+      // TODO: recursify this
+      _.each(buttons, function(button) {
+        var noSpace = button.replace(/\s+/g, '');
+        toChat = toChat + '{{' + noSpace + '=[' + button + '](!MML|' + MML.hexify(button) + ')}} ';
       });
-
-      sendChat(playerName, toChat, null, {
-        noarchive: false
-      }); //Change to true this when they fix the bug
-    });
+      sendChat(player.name, toChat, null, { noarchive: false }); //Change to true this when they fix the bug
+      // return function (input) {
+      //   log(input);
+      // };
+      //
+      // var command = new Promise(function (resolve, reject) {
+      //   on('chat:message', function(msg) {
+      //     var parsedCommand = MML.parseCommand(msg);
+      //     log('fuck');
+      //     if (parsedCommand) {
+      //       log(msg);
+      //       log(parsedCommand);
+      //       player.menuCommand(parsedCommand.input[0], parsedCommand.input[1], MML.getSelectedCharNames(msg.selected));
+      //     }
+      //     resolve();
+      //   });
+      //
+      // });
+    // };
   };
   this.displayGmRoll = function() {
     sendChat(this.name, '/w "' + this.name + '" &{template:rollMenuGM} {{title=' + this.currentRoll.message + "}}");
@@ -136,21 +176,10 @@ MML.Player = function(name, isGM) {
     }
   };
   this.menuPause = function() {};
-  this.GmMenuMain = function(who) {
-    this.who = who;
-    this.message = 'Main Menu: ';
-    this.buttons = [this.menuButtons.combatMenu,
-      this.menuButtons.newItemMenu,
-      this.menuButtons.worldMenu,
-      this.menuButtons.utilitiesMenu
-    ];
-    this.buttons.push({
-      text: 'Roll Dice',
-      nextMenu: 'selectDieSizeMenu',
-      callback: function() {
-        this.displayMenu();
-      }
-    });
+  this.GmMenuMain = {
+    message: 'Main Menu: ',
+    buttons: ['Combat',
+      'Roll Dice']
   };
   this.GmMenuAssignStatusEffect = function(who) {
     this.who = who;
@@ -247,12 +276,10 @@ MML.Player = function(name, isGM) {
     sendChat(this.name, '/w "' + this.name + 'Result: ' + rollDice(this.dice, numberOfDice));
   };
 
-  this.GmMenuCombat = function(who) {
-    this.who = who;
-    this.message = 'Select tokens and begin.';
-    this.buttons = [this.menuButtons.startCombat,
-      this.menuButtons.toMainGmMenu,
-    ];
+  this.GmMenuCombat = {
+    message: 'Select tokens and begin.',
+    buttons: ['Start Combat',
+      'Back']
   };
   this.GmMenuNewItem = function(who) {
     this.who = who;
@@ -1901,8 +1928,9 @@ MML.Player = function(name, isGM) {
   };
   this.name = name;
   this.who = name;
-  this.menu = isGM ? 'GmMenuMain' : 'menuPause';
   this.buttons = isGM ? [this.menuButtons.GmMenuMain] : [];
   this.characters = [];
   this.characterIndex = 0;
+  this.menu = isGM ? 'GmMenuMain' : 'menuPause';
+  this.initializeMenu(isGM ? 'GmMenuMain' : 'menuPause');
 };
