@@ -8,6 +8,8 @@ var filenames = fs.readdirSync('../r20').filter(function(filename) {
 _.each(filenames, function(filename, index) {
   roll20String += fs.readFileSync('../r20/' + filename, 'utf-8');
 });
+
+pbcopy(roll20String);
 roll20String += 'module.exports = { MML: MML };';
 fs.writeFileSync('../r20/MML_Test.js', roll20String, 'utf8');
 
@@ -22,7 +24,12 @@ filterObjs = roll20.filterObjs;
 getAttrByName = roll20.getAttrByName;
 randomInteger = roll20.randomInteger;
 Campaign = roll20.Campaign;
-on = function(event) {};
+var eventEmitter = require('events');
+var emitter = new eventEmitter();
+
+on = function (eventName, listener) {
+  emitter.on(eventName, listener);
+};
 var expect = require('chai').expect;
 var MML = require('../MML_Test.js').MML;
 
@@ -38,7 +45,24 @@ function runTests() {
     });
 
     it('Checks that the menu initializes properly', function () {
-      player.menuCommand(player.name, 'GmMenuMain');      
+      emitter.emit('chat:message', {
+        who: player.name,
+        content: '!MML|' + MML.hexify('GmMenuMain'),
+        type: 'api',
+        selected: []
+      });
+      emitter.emit('chat:message', {
+        who: player.name,
+        content: '!MML|' + MML.hexify('Combat'),
+        type: 'api',
+        selected: []
+      });
+      emitter.emit('chat:message', {
+        who: player.name,
+        content: '!MML|' + MML.hexify('Back'),
+        type: 'api',
+        selected: []
+      });
     });
   });
 }
@@ -152,4 +176,8 @@ function executeObserve(player) {
   player.menuCommand(player.who, 'Start Action');
   player.menuCommand(player.who, 'End Movement');
   player.menuCommand(player.who, 'End Action');
+}
+
+function pbcopy(data) {
+    require('child_process').spawn('clip').stdin.end(data);
 }

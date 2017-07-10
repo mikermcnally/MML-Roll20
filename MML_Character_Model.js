@@ -393,11 +393,7 @@ MML.Character = function(charName, id) {
     },
     'alterEP': {
       value: function(epAmount) {
-        console.log("SHOW ME WHAT YOU GOT");
-        console.log(epAmount);
-        console.log(this.ep);
         this.ep += epAmount;
-        console.log(this.ep);
 
         if (this.ep < Math.round(0.25 * this.epMax)) {
           this.fatigueCheckRoll();
