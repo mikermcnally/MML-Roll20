@@ -1,41 +1,63 @@
 MML.displayMenu = function (player, menu) {
-  return new Promise(function (resolve, reject) {
-    var buttons = menu.buttons;
-    var toChat = '/w "' + player.name + '" &{template:charMenu} {{name=' + menu.message + '}} ';
+  var buttons = menu.buttons;
+  var toChat = '/w "' + player.name + '" &{template:charMenu} {{name=' + menu.message + '}} ';
 
-    // TODO: recursify this
-    _.each(buttons, function(button) {
-      var noSpace = button.replace(/\s+/g, '');
-      toChat = toChat + '{{' + noSpace + '=[' + button + '](!MML|' + MML.hexify(button) + ')}} ';
-    });
-    sendChat(player.name, toChat, null, { noarchive: true }); //Change to true this when they fix the bug
-    on('chat:message', function(msg) {
-      if (msg.who.replace(' (GM)', '') === player.name && msg.type === 'api' && msg.content.indexOf('!MML|') !== -1) {
-        resolve(MML.parseCommand(msg));
+  // TODO: recursify this
+  _.each(buttons, function(button) {
+    var noSpace = button.replace(/\s+/g, '');
+    toChat = toChat + '{{' + noSpace + '=[' + button + '](!MML|' + MML.hexify(button) + ')}} ';
+  });
+  sendChat(player.name, toChat, null, { noarchive: true }); //Change to true this when they fix the bug
+};
+
+MML.menuCommand = function (player, buttons) {
+  return new Promise(function (resolve, reject) {
+    player.buttonPressed = function (button) {
+      console.log("GRASS TASTES BAD");
+      console.log(buttons);
+      console.log(button);
+      if (_.contains(buttons, button)) {
+        resolve(button);
       }
-    });
+    };
   });
 };
 
+MML.initializeMenu = function (player) {
+  return MML.menuCommand(player, ['initializeMenu'])
+  .then(function () {
+    if (player.name === state.MML.GM.name) {
+      return MML.mainMenuGM(player);
+    }
+  });
+};
+
+MML.nextMenu = function (player, menu) {
+  MML.displayMenu(player, menu);
+  return MML.menuCommand(player, menu.buttons);
+};
+
 MML.mainMenuGM = function (player) {
-  return function (command) {
+  console.log("SHOW ME WHAT YOU GOT");
+  return MML.nextMenu(player, player.GmMenuMain)
+  .then(function (command) {
     switch (command) {
       case 'Combat':
         return MML.combatMenu(player);
       case 'Back':
-        return MML.displayMenu(player, player.GmMenuMain);
+        return MML.nextMenu(player, player.GmMenuMain);
     }
-  };
+  });
 };
 
 MML.combatMenu = function (player) {
-  return MML.displayMenu(player, player.GmMenuCombat)
+  return MML.nextMenu(player, player.GmMenuCombat)
   .then(function (command) {
     switch (command) {
       case 'Start Combat':
-        return MML.displayMenu(player, player.GmMenuCombat);
+        return MML.nextMenu(player, player.GmMenuCombat);
       case 'Back':
-        return MML.displayMenu(player, player.GmMenuMain);
+        return MML.nextMenu(player, player.GmMenuMain);
     }
   });
 };
@@ -1924,5 +1946,5 @@ MML.Player = function(name, isGM) {
   this.characters = [];
   this.characterIndex = 0;
   this.menu = isGM ? 'GmMenuMain' : 'menuPause';
-  this.initializeMenu(isGM ? 'GmMenuMain' : 'menuPause');
+  MML.initializeMenu(this);
 };

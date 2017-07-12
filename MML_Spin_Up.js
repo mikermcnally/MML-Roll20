@@ -40,12 +40,10 @@ on('ready', function() {
     }
   });
 
-  // on('chat:message', function(msg) {
-  //   var command = MML.parseCommand(msg);
-  //   if (command) {
-  //     MML.players[msg.who.replace(' (GM)', '')].displayMenu(command);
-  //   }
-  // });
+  on('chat:message', function(msg) {
+    console.log("SHOW ME WHAT YOU GOT");
+    MML.parseCommand(msg);
+  });
 
   on('change:token', function(obj, prev) {
     if (obj.get('name').indexOf('spellMarker') === -1 && obj.get('left') !== prev['left'] && obj.get('top') !== prev['top'] && state.MML.GM.inCombat === true) {

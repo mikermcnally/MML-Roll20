@@ -45,24 +45,8 @@ function runTests() {
     });
 
     it('Checks that the menu initializes properly', function () {
-      emitter.emit('chat:message', {
-        who: player.name,
-        content: '!MML|' + MML.hexify('GmMenuMain'),
-        type: 'api',
-        selected: []
-      });
-      emitter.emit('chat:message', {
-        who: player.name,
-        content: '!MML|' + MML.hexify('Combat'),
-        type: 'api',
-        selected: []
-      });
-      emitter.emit('chat:message', {
-        who: player.name,
-        content: '!MML|' + MML.hexify('Back'),
-        type: 'api',
-        selected: []
-      });
+      player.buttonPressed('initializeMenu');
+      player.buttonPressed('Combat');
     });
   });
 }
@@ -179,5 +163,5 @@ function executeObserve(player) {
 }
 
 function pbcopy(data) {
-    require('child_process').spawn('clip').stdin.end(data);
+    // require('child_process').spawn('clip').stdin.end(data);
 }

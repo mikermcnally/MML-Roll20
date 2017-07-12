@@ -302,6 +302,8 @@ MML.parseCommand = function(msg) {
       // }
     } else {
       command = MML.dehexify(content);
+      console.log("SHOW ME WHAT YOU GOT");
+      MML.players[who].buttonPressed(command);
       // try {
       //   command = JSON.parse(command);
       // } catch (e) {
@@ -312,6 +314,6 @@ MML.parseCommand = function(msg) {
 
       // command.input.push(MML.getSelectedCharNames(msg.selected));
     }
-    return command;
+    // return command;
   }
 };
