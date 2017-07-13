@@ -36,7 +36,7 @@ var MML = require('../MML_Test.js').MML;
 runTests();
 
 function runTests() {
-  describe('Combat', function() {
+  describe('Menu Tests', function() {
     this.timeout(1500000);
     var player;
 
@@ -45,8 +45,13 @@ function runTests() {
     });
 
     it('Checks that the menu initializes properly', function () {
-      player.buttonPressed('initializeMenu');
-      player.buttonPressed('Combat');
+      player.buttonPressed(_.extend(player, { pressedButton: 'initializeMenu' }))
+      .then(player.buttonPressed(_.extend(player, { pressedButton: 'Combat' })));
+      expect(true, 'it should work').to.equal(true);
+      setTimeout(function () {
+        console.log('fuck');
+
+      }, 1000);
     });
   });
 }

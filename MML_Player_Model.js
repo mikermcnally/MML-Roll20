@@ -10,78 +10,78 @@ MML.displayMenu = function (player, menu) {
   sendChat(player.name, toChat, null, { noarchive: true }); //Change to true this when they fix the bug
 };
 
-MML.menuCommand = function (player, buttons) {
+MML.setMenuButtons = function (player, buttons) {
   return new Promise(function (resolve, reject) {
-    player.buttonPressed = function (button) {
-      console.log("GRASS TASTES BAD");
+    player.buttonPressed = function (player) {
       console.log(buttons);
-      console.log(button);
-      if (_.contains(buttons, button)) {
-        resolve(button);
+      console.log(player.pressedButton);
+      if (_.contains(buttons, player.pressedButton)) {
+        console.log("GRASS TASTES BAD");
+        resolve(player);
       }
     };
   });
 };
 
 MML.initializeMenu = function (player) {
-  return MML.menuCommand(player, ['initializeMenu'])
-  .then(function () {
+  return MML.setMenuButtons(player, ['initializeMenu'])
+  .then(function (player) {
     if (player.name === state.MML.GM.name) {
-      return MML.mainMenuGM(player);
+      return MML.goToMenu(player, player.GmMenuMain);
     }
   });
 };
 
-MML.nextMenu = function (player, menu) {
+MML.goToMenu = function (player, menu) {
   MML.displayMenu(player, menu);
-  return MML.menuCommand(player, menu.buttons);
+  console.log('giggidy');
+  console.log(menu);
+  return MML.setMenuButtons(player, menu.buttons);
 };
 
 MML.mainMenuGM = function (player) {
-  console.log("SHOW ME WHAT YOU GOT");
-  return MML.nextMenu(player, player.GmMenuMain)
-  .then(function (command) {
-    switch (command) {
+  return function (player) {
+    switch (player.pressedButton) {
       case 'Combat':
         return MML.combatMenu(player);
       case 'Back':
-        return MML.nextMenu(player, player.GmMenuMain);
-    }
-  });
+        return MML.goToMenu(player, player.GmMenuMain);
+      }
+    };
 };
 
 MML.combatMenu = function (player) {
-  return MML.nextMenu(player, player.GmMenuCombat)
+  return MML.goToMenu(player, player.GmMenuCombat)
   .then(function (command) {
     switch (command) {
       case 'Start Combat':
-        return MML.nextMenu(player, player.GmMenuCombat);
+        return MML.goToMenu(player, player.GmMenuCombat);
       case 'Back':
-        return MML.nextMenu(player, player.GmMenuMain);
+        return MML.goToMenu(player, player.GmMenuMain);
     }
   });
 };
 
 MML.Player = function(name, isGM) {
-  this.initializeMenu = function (menu) {
-    var player = this;
-    if (menu === 'GmMenuMain') {
-      MML.displayMenu(player, player.GmMenuMain)
-      .then(MML.mainMenuGM(player))
-      .catch(log);
-    }
-  };
-  this.nextMenu = function (menuName) {
-    var player = this;
-    return new Promise(function (resolve, reject) {
-      player.displayMenu(player, player[menuName]);
-      on('chat:message', function(msg) {
-        if (msg.who.replace(' (GM)', '') === name && msg.type === 'api' && msg.content.indexOf('!MML|') !== -1) {
-          resolve(MML.parseCommand(msg));
-        }
-      });
-    });
-  };
+  // this.initializeMenu = function (menu) {
+  //   var player = this;
+  //   if (menu === 'GmMenuMain') {
+  //     MML.displayMenu(player, player.GmMenuMain)
+  //     .then(MML.mainMenuGM(player))
+  //     .catch(log);
+  //   }
+  // };
+  // this.nextMenu = function (menuName) {
+  //   var player = this;
+  //   return new Promise(function (resolve, reject) {
+  //     player.displayMenu(player, player[menuName]);
+  //     on('chat:message', function(msg) {
+  //       if (msg.who.replace(' (GM)', '') === name && msg.type === 'api' && msg.content.indexOf('!MML|') !== -1) {
+  //         resolve(MML.parseCommand(msg));
+  //       }
+  //     });
+  //   });
+  // };
 
   this.menuCommand = function(who, buttonText, selectedCharNames) {
     var button = _.findWhere(this.buttons, {

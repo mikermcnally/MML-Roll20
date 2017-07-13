@@ -303,7 +303,9 @@ MML.parseCommand = function(msg) {
     } else {
       command = MML.dehexify(content);
       console.log("SHOW ME WHAT YOU GOT");
-      MML.players[who].buttonPressed(command);
+      // MML.players[who].buttonPressed(command);
+
+      MML.players[who].buttonPressed(_.extend(MML.players[who], { pressedButton: command }));
       // try {
       //   command = JSON.parse(command);
       // } catch (e) {
