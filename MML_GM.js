@@ -2,7 +2,7 @@ MML.startCombat = function(selectedCharNames) {
   var gm = state.MML.GM;
   gm.currentRound = 0;
   gm.combatants = selectedCharNames;
-
+  console.log('guff');
   if (gm.combatants.length > 0) {
     gm.inCombat = true;
     _.each(MML.players, function(player) { player.combatants = []; });

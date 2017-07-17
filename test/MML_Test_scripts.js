@@ -45,15 +45,23 @@ function runTests() {
     });
 
     it('Checks that the menu initializes properly', function () {
-      player.buttonPressed(_.extend(player, { pressedButton: 'initializeMenu' }))
-      .then(player.buttonPressed(_.extend(player, { pressedButton: 'Combat' })));
-      expect(true, 'it should work').to.equal(true);
-      setTimeout(function () {
-        console.log('fuck');
-
-      }, 1000);
+      clickButton('initializeMenu' )(player)
+      .then(clickButton('Combat'))
+      .then(clickButton('Back'))
+      .then(clickButton('Combat'))
+      .then(clickButton('Start Combat'));
     });
   });
+}
+
+function clickButton(button) {
+  return function (player) {
+    return new Promise(function (resolve, reject) {
+      console.log('here');
+      player.buttonPressed(_.extend(player, { pressedButton: button }));
+      resolve(player);
+    });
+  };
 }
 
 function setTestRoll(player, value) {
