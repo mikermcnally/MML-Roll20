@@ -35,18 +35,6 @@ MML.initializeMenu = function (player) {
   });
 };
 
-MML.combatMenu = function (player) {
-  return MML.goToMenu(player, player.GmMenuCombat())
-  .then(function (command) {
-    switch (command) {
-      case 'Start Combat':
-        return MML.goToMenu(player, player.GmMenuCombat());
-      case 'Back':
-        return MML.goToMenu(player, player.GmMenuMain());
-    }
-  });
-};
-
 MML.Player = function(name, isGM) {
   this.menuCommand = function(who, buttonText, selectedCharNames) {
     var button = _.findWhere(this.buttons, {
@@ -278,7 +266,7 @@ MML.Player = function(name, isGM) {
           case 'Start Combat':
             return MML.startCombat(player.selectedCharNames);
           case 'Back':
-            return MML.goToMenu(player, player.GmMenuMain);
+            return MML.goToMenu(player, player.GmMenuMain());
         }
       }
     };
