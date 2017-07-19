@@ -41,7 +41,6 @@ on('ready', function() {
   });
 
   on('chat:message', function(msg) {
-    console.log("SHOW ME WHAT YOU GOT");
     MML.parseCommand(msg);
   });
 

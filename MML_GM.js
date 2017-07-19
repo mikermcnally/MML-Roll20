@@ -2,8 +2,7 @@ MML.startCombat = function(player) {
   var gm = state.MML.GM;
   gm.currentRound = 0;
   gm.combatants = player.selectedCharNames;
-  console.log('guff');
-  if (gm.combatants.length > 0) {
+  if (player.selectedCharNames.length > 0) {
     gm.inCombat = true;
     _.each(MML.players, function(player) { player.combatants = []; });
     _.each(gm.combatants, function(charName) {
@@ -18,7 +17,7 @@ MML.startCombat = function(player) {
     return MML.combatMenu(player);
   } else {
     sendChat('', '&{template:charMenu} {{name=Error}} {{message=No tokens selected}}');
-    return MML.combatMenu(player);
+    return player.GmMenuCombat();
   }
 };
 
@@ -301,11 +300,11 @@ MML.parseCommand = function(msg) {
       //   sendChat('Error', 'Please enter a numerical value.');
       // }
     } else {
-      command = MML.dehexify(content);
-      console.log("SHOW ME WHAT YOU GOT");
+      command = content; //MML.dehexify(content);
       // MML.players[who].buttonPressed(command);
-
-      MML.players[who].buttonPressed(_.extend(MML.players[who], { pressedButton: command }));
+      log('here');
+      log(command);
+      MML.players[who].buttonPressed(_.extend(MML.players[who], { pressedButton: command, selectedCharNames: MML.getSelectedCharNames(msg.selected) }));
       // try {
       //   command = JSON.parse(command);
       // } catch (e) {

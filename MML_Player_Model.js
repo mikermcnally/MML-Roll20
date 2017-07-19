@@ -5,7 +5,7 @@ MML.displayMenu = function (player, menu) {
   // TODO: recursify this
   _.each(buttons, function(button) {
     var noSpace = button.replace(/\s+/g, '');
-    toChat = toChat + '{{' + noSpace + '=[' + button + '](!MML|' + MML.hexify(button) + ')}} ';
+    toChat = toChat + '{{' + noSpace + '=[' + button + '](!MML|' + button + ')}} ';
   });
   sendChat(player.name, toChat, null, { noarchive: true }); //Change to true this when they fix the bug
 };
@@ -264,7 +264,7 @@ MML.Player = function(name, isGM) {
       command: function (player) {
         switch (player.pressedButton) {
           case 'Start Combat':
-            return MML.startCombat(player.selectedCharNames);
+            return MML.goToMenu(player, MML.startCombat(player));
           case 'Back':
             return MML.goToMenu(player, player.GmMenuMain());
         }

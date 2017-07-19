@@ -57,7 +57,7 @@ function runTests() {
 function clickButton(button, selectedCharNames) {
   return function (player) {
     return new Promise(function (resolve, reject) {
-      player.buttonPressed(_.extend(player, { pressedButton: button, selectedCharNames: selectedCharNames }));
+      player.buttonPressed(_.extend(player, { pressedButton: button, selectedCharNames: selectedCharNames ? selectedCharNames : [] }));
       resolve(player);
     });
   };
