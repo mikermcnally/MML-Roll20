@@ -21,6 +21,7 @@ MML.setMenuButtons = function (player, buttons) {
 };
 
 MML.goToMenu = function (player, menu) {
+  console.log(menu);
   MML.displayMenu(player, menu);
   return MML.setMenuButtons(player, menu.buttons)
   .then(menu.command);
@@ -37,10 +38,11 @@ MML.initializeMenu = function (player) {
 
 MML.combatMenu = function (player) {
   return MML.goToMenu(player, player.GmMenuCombat())
-  .then(function (command) {
-    switch (command) {
+  .then(function (player) {
+    console.log('huhuhuh');
+    switch (player.pressedButton) {
       case 'Start Combat':
-        return MML.goToMenu(player, player.GmMenuCombat());
+        return MML.goToMenu(player, MML.startCombat(player)());
       case 'Back':
         return MML.goToMenu(player, player.GmMenuMain());
     }
@@ -160,6 +162,7 @@ MML.Player = function(name, isGM) {
         'Roll Dice'
       ],
       command: function (player) {
+        console.log('shit');
         switch (player.pressedButton) {
           case 'Combat':
             return MML.goToMenu(player, player.GmMenuCombat());
@@ -274,6 +277,24 @@ MML.Player = function(name, isGM) {
         'Back'
       ],
       command: function (player) {
+        console.log('fuck');
+        switch (player.pressedButton) {
+          case 'Start Combat':
+            return MML.goToMenu(player, MML.startCombat(player)());
+          case 'Back':
+            return MML.goToMenu(player, player.GmMenuMain());
+        }
+      }
+    };
+  };
+  this.GmMenuCombat = function () {
+    return {
+      message: 'Select tokens and begin.',
+      buttons: [
+        'Start Combat',
+        'Back'
+      ],
+      command: function (player) {
         switch (player.pressedButton) {
           case 'Start Combat':
             return MML.startCombat(player.selectedCharNames);
@@ -283,6 +304,7 @@ MML.Player = function(name, isGM) {
       }
     };
   };
+
   this.GmMenuNewItem = function(who) {
     this.who = who;
     this.message = 'Select item type:';

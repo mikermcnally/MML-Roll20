@@ -54,11 +54,10 @@ function runTests() {
   });
 }
 
-function clickButton(button) {
+function clickButton(button, selectedCharNames) {
   return function (player) {
     return new Promise(function (resolve, reject) {
-      console.log('here');
-      player.buttonPressed(_.extend(player, { pressedButton: button }));
+      player.buttonPressed(_.extend(player, { pressedButton: button, selectedCharNames: selectedCharNames }));
       resolve(player);
     });
   };

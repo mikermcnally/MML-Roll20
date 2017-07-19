@@ -1,7 +1,7 @@
-MML.startCombat = function(selectedCharNames) {
+MML.startCombat = function(player) {
   var gm = state.MML.GM;
   gm.currentRound = 0;
-  gm.combatants = selectedCharNames;
+  gm.combatants = player.selectedCharNames;
   console.log('guff');
   if (gm.combatants.length > 0) {
     gm.inCombat = true;
@@ -15,10 +15,10 @@ MML.startCombat = function(selectedCharNames) {
     MML.setTurnOrder();
     Campaign().set('initiativepage', 'true');
     MML.newRound();
+    return MML.combatMenu(player);
   } else {
     sendChat('', '&{template:charMenu} {{name=Error}} {{message=No tokens selected}}');
-    gm.player.buttons = [gm.player.menuButtons.combatMenu];
-    gm.player.menuCommand(gm.player.name, 'Combat');
+    return MML.combatMenu(player);
   }
 };
 
