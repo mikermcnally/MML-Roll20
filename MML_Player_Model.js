@@ -18,12 +18,14 @@ MML.setMenuButtons = function (player, buttons) {
       }
     };
   });
+
 };
 
 MML.goToMenu = function (player, menu) {
   MML.displayMenu(player, menu);
   return MML.setMenuButtons(player, menu.buttons)
-  .then(menu.command);
+  .then(menu.command)
+  .catch(log);
 };
 
 MML.initializeMenu = function (player) {
@@ -84,26 +86,26 @@ MML.Player = function(name, isGM) {
   this.setApiPlayerAttribute = function(attribute, value) {
     this[attribute] = value;
   };
-  this.newRoundUpdatePlayer = function() {
-    this.characterIndex = 0;
-    this.who = this.combatants[0];
-    this.menu = 'charMenuPrepareAction';
-    var character = MML.characters[this.who];
+  this.newRoundUpdatePlayer = function(player) {
+    player.characterIndex = 0;
+    player.who = this.combatants[0];
+    player.menu = 'charMenuPrepareAction';
+    var character = MML.characters[player.who];
 
-    if (this.combatants.length > 0) {
+    if (player.combatants.length > 0) {
       if (_.has(character.statusEffects, 'Stunned')) {
         character.applyStatusEffects();
-        this.charMenuFinalizeAction(this.who);
+        player.charMenuFinalizeAction(player.who);
       } else if (character.situationalInitBonus !== 'No Combat') {
-        this.charMenuPrepareAction(this.who);
-        this.displayMenu();
+        player.charMenuPrepareAction(player.who);
+        player.displayMenu();
       } else {
         character.setReady(true);
-        this.prepareNextCharacter();
+        player.prepareNextCharacter();
       }
-    } else if (this.name === state.MML.GM.name) {
-      this.GmMenuStartRound('GM');
-      this.displayMenu();
+    } else if (player.name === state.MML.GM.name) {
+      player.GmMenuStartRound('GM');
+      player.displayMenu();
     }
   };
   this.prepareNextCharacter = function() {
