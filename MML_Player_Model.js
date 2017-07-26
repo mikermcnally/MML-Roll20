@@ -89,23 +89,20 @@ MML.Player = function(name, isGM) {
   this.newRoundUpdatePlayer = function(player) {
     player.characterIndex = 0;
     player.who = this.combatants[0];
-    player.menu = 'charMenuPrepareAction';
     var character = MML.characters[player.who];
 
     if (player.combatants.length > 0) {
       if (_.has(character.statusEffects, 'Stunned')) {
         character.applyStatusEffects();
-        player.charMenuFinalizeAction(player.who);
+        MML.goToMenu(player, player.charMenuFinalizeAction(character));
       } else if (character.situationalInitBonus !== 'No Combat') {
-        player.charMenuPrepareAction(player.who);
-        player.displayMenu();
+        MML.goToMenu(player, player.charMenuPrepareAction(character));
       } else {
         character.setReady(true);
         player.prepareNextCharacter();
       }
     } else if (player.name === state.MML.GM.name) {
-      player.GmMenuStartRound('GM');
-      player.displayMenu();
+      MML.goToMenu(player, player.GmMenuStartRound('GM'));
     }
   };
   this.prepareNextCharacter = function() {
@@ -266,7 +263,7 @@ MML.Player = function(name, isGM) {
       command: function (player) {
         switch (player.pressedButton) {
           case 'Start Combat':
-            return MML.goToMenu(player, MML.startCombat(player));
+            return MML.startCombat(player);
           case 'Back':
             return MML.goToMenu(player, player.GmMenuMain());
         }
@@ -501,92 +498,116 @@ MML.Player = function(name, isGM) {
     ];
   };
 
-  this.charMenuPrepareAction = function(who) {
-    this.who = who;
-    this.message = 'Prepare ' + who + '\'s action';
-    var character = MML.characters[who];
-    var buttons = [this.menuButtons.setActionAttack,
-      this.menuButtons.setActionObserve,
-      this.menuButtons.setActionMovement
-    ];
-
-    if (!_.contains(character.action.modifiers, 'Ready Item')) {
-      buttons.push(this.menuButtons.setActionReadyItem);
-      character.action.weapon = MML.getEquippedWeapon(character);
-    } else {
-      var weapon = _.find(character.action.items, function (item) {
-        return this.inventory[item.itemId].type === 'weapon';
-      }, character);
-      if (_.isUndefined(weapon)) {
-        character.action.weapon = 'unarmed';
-      } else {
-        if (weapon.grip === 'Right' || weapon.grip === 'Left') {
-          character.action.weapon = MML.buildWeaponObject(character.inventory[weapon.itemId], 'One Hand');
+  this.charMenuPrepareAction = function (character) {
+    return {
+      message: 'Prepare ' + character.name + '\'s action',
+      buttons: function () {
+        var buttons = [
+          'Attack',
+          'Observe',
+          'Movement Only'
+        ];
+        if (!_.contains(character.action.modifiers, 'Ready Item')) {
+          buttons.push('Ready Item');
+          character.action.weapon = MML.getEquippedWeapon(character);
         } else {
-          character.action.weapon = MML.buildWeaponObject(character.inventory[weapon.itemId], weapon.grip);
+          var weapon = _.find(character.action.items, function (item) {
+            return this.inventory[item.itemId].type === 'weapon';
+          }, character);
+          if (_.isUndefined(weapon)) {
+            character.action.weapon = 'unarmed';
+          } else {
+            if (weapon.grip === 'Right' || weapon.grip === 'Left') {
+              character.action.weapon = MML.buildWeaponObject(character.inventory[weapon.itemId], 'One Hand');
+            } else {
+              character.action.weapon = MML.buildWeaponObject(character.inventory[weapon.itemId], weapon.grip);
+            }
+          }
+        }
+
+        if (!_.isUndefined(character.action.weapon) && MML.isRangedWeapon(character.action.weapon)) {
+          if (character.action.weapon.family !== 'MWM' || character.action.weapon.loaded === character.action.weapon.reload) {
+            buttons.push('Aim');
+            //   {
+            //   text: 'Aim',
+            //   nextMenu: 'charMenuFinalizeAction',
+            //   callback: function(input) {
+            //     _.extend(MML.characters[this.who].action, {
+            //       ts: Date.now(),
+            //       name: 'Aim',
+            //       getTargets: 'getSingleTarget',
+            //       callback: 'startAimAction'
+            //     });
+            //     this.displayMenu();
+            //   }
+            // });
+          } else {
+            buttons.push('Reload');
+            // {
+            //   text: 'Reload',
+            //   nextMenu: 'charMenuFinalizeAction',
+            //   callback: function(input) {
+            //     _.extend(MML.characters[this.who].action, {
+            //       ts: Date.now(),
+            //       name: 'Reload',
+            //       callback: 'reloadAction'
+            //     });
+            //     this.displayMenu();
+            //   }
+            // });
+          }
+        }
+
+        if ((_.has(character.statusEffects, 'Holding') ||
+            (_.has(character.statusEffects, 'Grappled') && character.statusEffects['Grappled'].targets.length === 1)) &&
+          !_.has(character.statusEffects, 'Held') &&
+          !_.contains(character.action.modifiers, 'Release Opponent')
+        ) {
+          buttons.push('Release Opponent');
+          // {
+          //   text: 'Release Opponent',
+          //   nextMenu: 'charMenuPrepareAction',
+          //   callback: function(input) {
+          //     character.action.modifiers.push('Release Opponent');
+          //     this.displayMenu();
+          //   }
+          // });
+        }
+        if (character.spells.length > 0) {
+          buttons.push('Cast');
+        }
+        if (!_.isUndefined(character.previousAction.spell) && character.previousAction.spell.actions > 0) {
+          buttons.push('Continue Casting');
+          //   {
+          //   text: 'Continue Casting',
+          //   nextMenu: 'charMenuFinalizeAction',
+          //   callback: function(input) {
+          //     character.action = MML.clone(character.previousAction);
+          //     this.displayMenu();
+          //   }
+          // });
+        }
+        return buttons;
+      }(),
+      command: function (player) {
+        switch (player.pressedButton) {
+          case 'Attack':
+            return MML.goToMenu(player, player.charMenuAttack(character));
+          case 'Ready Item':
+            return MML.goToMenu(player, player.charMenuReadyItem(character));
+          case 'Aim':
+            return MML.goToMenu(player, player.charMenuAimAction(character));
+          case 'Reload':
+            return MML.goToMenu(player, player.charMenuReloadAction(character));
+          case 'Release Opponent':
+            return MML.goToMenu(player, player.charMenuPrepareAction(character));
+          case 'Cast':
+            return MML.goToMenu(player, player.charMenuCast(character));
+          case 'Continue Casting':
+            return MML.goToMenu(player, player.charMenuFinalizeAction(character));
         }
       }
-    }
-
-    if (!_.isUndefined(character.action.weapon) && MML.isRangedWeapon(character.action.weapon)) {
-      if (character.action.weapon.family !== 'MWM' || character.action.weapon.loaded === character.action.weapon.reload) {
-        buttons.push({
-          text: 'Aim',
-          nextMenu: 'charMenuFinalizeAction',
-          callback: function(input) {
-            _.extend(MML.characters[this.who].action, {
-              ts: Date.now(),
-              name: 'Aim',
-              getTargets: 'getSingleTarget',
-              callback: 'startAimAction'
-            });
-            this.displayMenu();
-          }
-        });
-      } else {
-        buttons.push({
-          text: 'Reload',
-          nextMenu: 'charMenuFinalizeAction',
-          callback: function(input) {
-            _.extend(MML.characters[this.who].action, {
-              ts: Date.now(),
-              name: 'Reload',
-              callback: 'reloadAction'
-            });
-            this.displayMenu();
-          }
-        });
-      }
-    }
-
-    if ((_.has(character.statusEffects, 'Holding') ||
-        (_.has(character.statusEffects, 'Grappled') && character.statusEffects['Grappled'].targets.length === 1)) &&
-      !_.has(character.statusEffects, 'Held') &&
-      !_.contains(character.action.modifiers, 'Release Opponent')
-    ) {
-      buttons.push({
-        text: 'Release Opponent',
-        nextMenu: 'charMenuPrepareAction',
-        callback: function(input) {
-          character.action.modifiers.push('Release Opponent');
-          this.displayMenu();
-        }
-      });
-    }
-    if (character.spells.length > 0) {
-      buttons.push(this.menuButtons.setActionCast);
-    }
-    if (!_.isUndefined(character.previousAction.spell) && character.previousAction.spell.actions > 0) {
-      buttons.push({
-        text: 'Continue Casting',
-        nextMenu: 'charMenuFinalizeAction',
-        callback: function(input) {
-          character.action = MML.clone(character.previousAction);
-          this.displayMenu();
-        }
-      });
-    }
-    this.buttons = buttons;
+    };
   };
   this.charMenuAttack = function(who) {
     this.who = who;

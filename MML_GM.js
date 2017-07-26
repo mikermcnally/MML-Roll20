@@ -14,10 +14,10 @@ MML.startCombat = function(player) {
     MML.setTurnOrder();
     Campaign().set('initiativepage', 'true');
     MML.newRound();
-    return MML.combatMenu(player);
+    // return MML.combatMenu(player);
   } else {
     sendChat('', '&{template:charMenu} {{name=Error}} {{message=No tokens selected}}');
-    return player.GmMenuCombat();
+    return MML.goToMenu(player, player.GmMenuCombat());
   }
 };
 
@@ -34,7 +34,7 @@ MML.newRound = function() {
     MML.nextFatigueCheck();
   } else {
     _.each(MML.players, function(player) {
-      player.newRoundUpdatePlayer();
+      player.newRoundUpdatePlayer(player);
     });
   }
 };

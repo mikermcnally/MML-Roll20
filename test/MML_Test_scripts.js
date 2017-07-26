@@ -53,7 +53,7 @@ function runTests() {
       });
     });
 
-    it.skip('Checks that the menu initializes properly', function () {
+    it('Checks that the menu initializes properly', function () {
       clickButton('initializeMenu' )(player)
       .then(clickButton('Combat'))
       .then(clickButton('Back'))
