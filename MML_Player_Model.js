@@ -37,6 +37,25 @@ MML.initializeMenu = function (player) {
   });
 };
 
+MML.charMenuPrepareActionCommand = function charMenuPrepareActionCommand(player) {
+  switch (player.pressedButton) {
+    case 'Attack':
+      return MML.goToMenu(player, player.charMenuAttack(character));
+    case 'Ready Item':
+      return MML.goToMenu(player, player.charMenuReadyItem(character));
+    case 'Aim':
+      return MML.goToMenu(player, player.charMenuAimAction(character));
+    case 'Reload':
+      return MML.goToMenu(player, player.charMenuReloadAction(character));
+    case 'Release Opponent':
+      return MML.goToMenu(player, player.charMenuPrepareAction(character));
+    case 'Cast':
+      return MML.goToMenu(player, player.charMenuCast(character));
+    case 'Continue Casting':
+      return MML.goToMenu(player, player.charMenuFinalizeAction(character));
+  }
+};
+
 MML.Player = function(name, isGM) {
   this.menuCommand = function(who, buttonText, selectedCharNames) {
     var button = _.findWhere(this.buttons, {
@@ -589,27 +608,10 @@ MML.Player = function(name, isGM) {
         }
         return buttons;
       }(),
-      command: function (player) {
-        switch (player.pressedButton) {
-          case 'Attack':
-            return MML.goToMenu(player, player.charMenuAttack(character));
-          case 'Ready Item':
-            return MML.goToMenu(player, player.charMenuReadyItem(character));
-          case 'Aim':
-            return MML.goToMenu(player, player.charMenuAimAction(character));
-          case 'Reload':
-            return MML.goToMenu(player, player.charMenuReloadAction(character));
-          case 'Release Opponent':
-            return MML.goToMenu(player, player.charMenuPrepareAction(character));
-          case 'Cast':
-            return MML.goToMenu(player, player.charMenuCast(character));
-          case 'Continue Casting':
-            return MML.goToMenu(player, player.charMenuFinalizeAction(character));
-        }
-      }
+      command: MML.charMenuPrepareActionCommand
     };
   };
-  this.charMenuAttack = function(who) {
+  this.charMenuAttack = function charMenuAttack(who) {
     this.who = who;
     this.message = 'Attack Menu';
     var buttons = [];
