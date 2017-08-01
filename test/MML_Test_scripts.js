@@ -54,7 +54,7 @@ function runTests() {
     });
 
     it('Checks that the menu initializes properly', function () {
-      clickButton('initializeMenu' )(player)
+      clickButton('initializeMenu')(player)
       .then(clickButton('Combat'))
       .then(clickButton('Back'))
       .then(clickButton('Combat'))
@@ -67,8 +67,8 @@ function runTests() {
       .catch(console.log);
     });
 
-    it.only('Checks that prepare action menu works', function () {
-      var result = player.charMenuPrepareAction(createCharacter('test'));
+    it.only('Checks that prepare action menu works with default character', function () {
+      var result = MML.charMenuPrepareAction(player, createCharacter('test'));
       expect(result.message).to.equal('Prepare test\'s action');
       expect(result.buttons).to.contain('Attack');
       expect(result.buttons).to.contain('Observe');
@@ -78,7 +78,131 @@ function runTests() {
       expect(result.command.name).to.equal('charMenuPrepareActionCommand');
     });
 
+    it.only('Checks that prepare action menu works with missile weapons', function () {
+      var character = createCharacter('test');
+      createTestToken(character.name, character.id);
+      var crossbow = MML.items['Light Cross Bow'];
+      crossbow.quality = 'Standard';
+      crossbow._id = 'crossbow';
+      crossbow.loaded = crossbow.grips['Two Hands'].reload;
+      character.inventory['crossbow'] = crossbow;
+      MML.equipItem(character, 'crossbow', 'Two Hands');
+      character.newRoundUpdateCharacter();
+      var result = MML.charMenuPrepareAction(player, character);
+      expect(result.message).to.equal('Prepare test\'s action');
+      expect(result.buttons).to.contain('Attack');
+      expect(result.buttons).to.contain('Observe');
+      expect(result.buttons).to.contain('Movement Only');
+      expect(result.buttons).to.contain('Ready Item');
+      expect(result.buttons).to.contain('Aim');
+      expect(result.buttons.length).to.equal(5);
+      expect(result.command.name).to.equal('charMenuPrepareActionCommand');
+    });
 
+    it.only('Checks that prepare action menu works with unloaded missile weapons', function () {
+      var character = createCharacter('test');
+      createTestToken(character.name, character.id);
+      var crossbow = MML.items['Light Cross Bow'];
+      crossbow.quality = 'Standard';
+      crossbow._id = 'crossbow';
+      crossbow.loaded = crossbow.grips['Two Hands'].reload - 1;
+      character.inventory['crossbow'] = crossbow;
+      MML.equipItem(character, 'crossbow', 'Two Hands');
+      character.newRoundUpdateCharacter();
+      var result = MML.charMenuPrepareAction(player, character);
+      expect(result.message).to.equal('Prepare test\'s action');
+      expect(result.buttons).to.contain('Attack');
+      expect(result.buttons).to.contain('Observe');
+      expect(result.buttons).to.contain('Movement Only');
+      expect(result.buttons).to.contain('Ready Item');
+      expect(result.buttons).to.contain('Reload');
+      expect(result.buttons.length).to.equal(5);
+      expect(result.command.name).to.equal('charMenuPrepareActionCommand');
+    });
+
+    it.only('Checks that prepare action menu works with holding status effect', function () {
+      var character = createCharacter('test');
+      createTestToken(character.name, character.id);
+      character.statusEffects['Holding'] = {};
+      state.MML.GM.inCombat = true;
+      character.newRoundUpdateCharacter();
+      var result = MML.charMenuPrepareAction(player, character);
+      expect(result.message).to.equal('Prepare test\'s action');
+      expect(result.buttons).to.contain('Attack');
+      expect(result.buttons).to.contain('Observe');
+      expect(result.buttons).to.contain('Movement Only');
+      expect(result.buttons).to.contain('Ready Item');
+      expect(result.buttons).to.contain('Release Opponent');
+      expect(result.buttons.length).to.equal(5);
+      expect(result.command.name).to.equal('charMenuPrepareActionCommand');
+    });
+
+    it.only('Checks that prepare action menu works with grappling status effect with one target', function () {
+      var character = createCharacter('test');
+      createTestToken(character.name, character.id);
+      character.statusEffects['Grappled'] = { targets: ['1'] };
+      state.MML.GM.inCombat = true;
+      character.newRoundUpdateCharacter();
+      var result = MML.charMenuPrepareAction(player, character);
+      expect(result.message).to.equal('Prepare test\'s action');
+      expect(result.buttons).to.contain('Attack');
+      expect(result.buttons).to.contain('Observe');
+      expect(result.buttons).to.contain('Movement Only');
+      expect(result.buttons).to.contain('Ready Item');
+      expect(result.buttons).to.contain('Release Opponent');
+      expect(result.buttons.length).to.equal(5);
+      expect(result.command.name).to.equal('charMenuPrepareActionCommand');
+    });
+
+    it.only('Checks that prepare action menu works with grappling status effect with two targets', function () {
+      var character = createCharacter('test');
+      createTestToken(character.name, character.id);
+      character.statusEffects['Grappled'] = { targets: ['1', '2'] };
+      state.MML.GM.inCombat = true;
+      character.newRoundUpdateCharacter();
+      var result = MML.charMenuPrepareAction(player, character);
+      expect(result.message).to.equal('Prepare test\'s action');
+      expect(result.buttons).to.contain('Attack');
+      expect(result.buttons).to.contain('Observe');
+      expect(result.buttons).to.contain('Movement Only');
+      expect(result.buttons).to.contain('Ready Item');
+      expect(result.buttons.length).to.equal(4);
+      expect(result.command.name).to.equal('charMenuPrepareActionCommand');
+    });
+
+    it.only('Checks that prepare action menu works with held status effect', function () {
+      var character = createCharacter('test');
+      createTestToken(character.name, character.id);
+      character.statusEffects['Grappled'] = { targets: ['1'] };
+      character.statusEffects['Held'] = { targets: ['2'] };
+      state.MML.GM.inCombat = true;
+      character.newRoundUpdateCharacter();
+      var result = MML.charMenuPrepareAction(player, character);
+      expect(result.message).to.equal('Prepare test\'s action');
+      expect(result.buttons).to.contain('Attack');
+      expect(result.buttons).to.contain('Observe');
+      expect(result.buttons).to.contain('Movement Only');
+      expect(result.buttons).to.contain('Ready Item');
+      expect(result.buttons.length).to.equal(4);
+      expect(result.command.name).to.equal('charMenuPrepareActionCommand');
+    });
+
+    it.only('Checks that prepare action menu works with release opponent action modifier', function () {
+      var character = createCharacter('test');
+      createTestToken(character.name, character.id);
+      character.statusEffects['Grappled'] = { targets: ['1'] };
+      state.MML.GM.inCombat = true;
+      character.newRoundUpdateCharacter();
+      character.action.modifiers = ['Release Opponent'];
+      var result = MML.charMenuPrepareAction(player, character);
+      expect(result.message).to.equal('Prepare test\'s action');
+      expect(result.buttons).to.contain('Attack');
+      expect(result.buttons).to.contain('Observe');
+      expect(result.buttons).to.contain('Movement Only');
+      expect(result.buttons).to.contain('Ready Item');
+      expect(result.buttons.length).to.equal(4);
+      expect(result.command.name).to.equal('charMenuPrepareActionCommand');
+    });
   });
 }
 
@@ -118,41 +242,58 @@ function resetEnvironment() {
 }
 
 function createCharacter(name) {
-  character = createObj("character", {
-    name: name,
-    "bio": "",
-    "gmnotes": "",
-    "_defaulttoken": "",
-    "archived": false,
-    "inplayerjournals": "",
-    "controlledby": "",
-    "avatar": ""
-  });
-  MML.createAttribute("player", 'Robot', "", character);
-  MML.createAttribute("name", name, "", character);
-  MML.createAttribute("race", "Human", "", character);
-  MML.createAttribute("gender", "Male", "", character);
-  MML.createAttribute("statureRoll", 10, "", character);
-  MML.createAttribute("strengthRoll", 10, "", character);
-  MML.createAttribute("coordinationRoll", 10, "", character);
-  MML.createAttribute("healthRoll", 10, "", character);
-  MML.createAttribute("beautyRoll", 10, "", character);
-  MML.createAttribute("intellectRoll", 10, "", character);
-  MML.createAttribute("reasonRoll", 10, "", character);
-  MML.createAttribute("creativityRoll", 10, "", character);
-  MML.createAttribute("presenceRoll", 10, "", character);
-  MML.createAttribute("fomInitBonus", 6, "", character);
-  MML.createAttribute("rightHand", JSON.stringify({
-    _id: "emptyHand"
-  }), "", character);
-  MML.createAttribute("leftHand", JSON.stringify({
-    _id: "emptyHand"
-  }), "", character);
-  MML.createAttribute('repeating_weaponskills_1_name', 'Default Martial', "", character);
-  MML.createAttribute('repeating_weaponskills_1_input', '1', "", character);
-  MML.createAttribute('repeating_weaponskills_1_level', '1', "", character);
+  try {
+    character = createObj("character", {
+      name: name,
+      "bio": "",
+      "gmnotes": "",
+      "_defaulttoken": "",
+      "archived": false,
+      "inplayerjournals": "",
+      "controlledby": "",
+      "avatar": ""
+    });
+    MML.createAttribute("player", 'Robot', "", character);
+    MML.createAttribute("name", name, "", character);
+    MML.createAttribute("race", "Human", "", character);
+    MML.createAttribute("gender", "Male", "", character);
+    MML.createAttribute("statureRoll", 10, "", character);
+    MML.createAttribute("strengthRoll", 10, "", character);
+    MML.createAttribute("coordinationRoll", 10, "", character);
+    MML.createAttribute("healthRoll", 10, "", character);
+    MML.createAttribute("beautyRoll", 10, "", character);
+    MML.createAttribute("intellectRoll", 10, "", character);
+    MML.createAttribute("reasonRoll", 10, "", character);
+    MML.createAttribute("creativityRoll", 10, "", character);
+    MML.createAttribute("presenceRoll", 10, "", character);
+    MML.createAttribute("fomInitBonus", 6, "", character);
+    MML.createAttribute("rightHand", JSON.stringify({
+      _id: "emptyHand"
+    }), "", character);
+    MML.createAttribute("leftHand", JSON.stringify({
+      _id: "emptyHand"
+    }), "", character);
+    MML.createAttribute('repeating_weaponskills_1_name', 'Default Martial', "", character);
+    MML.createAttribute('repeating_weaponskills_1_input', '1', "", character);
+    MML.createAttribute('repeating_weaponskills_1_level', '1', "", character);
 
-  return MML.createCharacter(name, character.id);
+    return MML.createCharacter(name, character.id);
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+function createTestToken(name, id) {
+  return createObj("graphic", {
+    name: name,
+    _pageid: Campaign().get("playerpageid"),
+    _type: "graphic",
+    _subtype: "token",
+    represents: id,
+    tint_color: 'transparent',
+    left: 10,
+    top: 10
+  });
 }
 
 function createTestCharacters(amount) {
@@ -160,16 +301,7 @@ function createTestCharacters(amount) {
   for (var i = 0; i < amount; i++) {
     character = createCharacter('test' + i);
     MML.characters['test' + i] = character;
-    createObj("graphic", {
-      name: 'test' + i,
-      _pageid: Campaign().get("playerpageid"),
-      _type: "graphic",
-      _subtype: "token",
-      represents: character.id,
-      tint_color: 'transparent',
-      left: i*10,
-      top: i*10
-    });
+    createTestToken('test' + i, character.id);
   }
 }
 
@@ -184,7 +316,7 @@ function clone(obj) {
 }
 
 function startTestCombat(player, characters) {
-  return clickButton('initializeMenu' )(player)
+  return clickButton('initializeMenu')(player)
   .then(clickButton('Combat'))
   .then(clickButton('Back'))
   .then(clickButton('Combat'))

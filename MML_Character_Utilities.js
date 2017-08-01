@@ -8,11 +8,33 @@ MML.isSensitiveArea = function(position) {
 
 MML.getWeaponFamily = function(character, hand) {
   var item = character.inventory[character[hand]._id];
-
   if (!_.isUndefined(item) && item.type === 'weapon') {
     return item.grips[character[hand].grip].family;
   } else {
     return 'unarmed';
+  }
+};
+
+MML.equipItem = function equipItem(character, itemId, grip) {
+  if (grip === 'Left') {
+    character.leftHand._id = itemId;
+    if (character.inventory[itemId].type === 'weapon') {
+      character.leftHand.grip = 'One Hand';
+    } else {
+      character.leftHand.grip = 'unarmed';
+    }
+  } else if (grip === 'Right') {
+    character.rightHand._id = itemId;
+    if (character.inventory[itemId].type === 'weapon') {
+      character.rightHand.grip = 'One Hand';
+    } else {
+      character.rightHand.grip = 'unarmed';
+    }
+  } else {
+    character.leftHand._id = itemId;
+    character.leftHand.grip = grip;
+    character.rightHand._id = itemId;
+    character.rightHand.grip = grip;
   }
 };
 

@@ -17,7 +17,7 @@ MML.startCombat = function(player) {
     // return MML.combatMenu(player);
   } else {
     sendChat('', '&{template:charMenu} {{name=Error}} {{message=No tokens selected}}');
-    return MML.goToMenu(player, player.GmMenuCombat());
+    return MML.goToMenu(player, MML.GmMenuCombat(player));
   }
 };
 
@@ -34,7 +34,7 @@ MML.newRound = function() {
     MML.nextFatigueCheck();
   } else {
     _.each(MML.players, function(player) {
-      player.newRoundUpdatePlayer(player);
+      MML.newRoundUpdatePlayer(player);
     });
   }
 };
@@ -95,7 +95,7 @@ MML.nextFatigueCheck = function() {
     gm.fatigueCheckIndex++;
   } else {
     _.each(MML.players, function(player) {
-      player.newRoundUpdatePlayer();
+      MML.newRoundUpdatePlayer(player);
     });
   }
 };
