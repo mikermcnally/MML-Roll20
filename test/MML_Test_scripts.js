@@ -67,7 +67,7 @@ function runTests() {
       .catch(console.log);
     });
 
-    it.only('Checks that prepare action menu works with default character', function () {
+    it('Checks that prepare action menu works with default character', function () {
       var result = MML.charMenuPrepareAction(player, createCharacter('test'));
       expect(result.message).to.equal('Prepare test\'s action');
       expect(result.buttons).to.contain('Attack');
@@ -78,7 +78,7 @@ function runTests() {
       expect(result.command.name).to.equal('charMenuPrepareActionCommand');
     });
 
-    it.only('Checks that prepare action menu works with missile weapons', function () {
+    it('Checks that prepare action menu works with missile weapons', function () {
       var character = createCharacter('test');
       createTestToken(character.name, character.id);
       var crossbow = MML.items['Light Cross Bow'];
@@ -99,7 +99,7 @@ function runTests() {
       expect(result.command.name).to.equal('charMenuPrepareActionCommand');
     });
 
-    it.only('Checks that prepare action menu works with unloaded missile weapons', function () {
+    it('Checks that prepare action menu works with unloaded missile weapons', function () {
       var character = createCharacter('test');
       createTestToken(character.name, character.id);
       var crossbow = MML.items['Light Cross Bow'];
@@ -120,7 +120,7 @@ function runTests() {
       expect(result.command.name).to.equal('charMenuPrepareActionCommand');
     });
 
-    it.only('Checks that prepare action menu works with holding status effect', function () {
+    it('Checks that prepare action menu works with holding status effect', function () {
       var character = createCharacter('test');
       createTestToken(character.name, character.id);
       character.statusEffects['Holding'] = {};
@@ -137,7 +137,7 @@ function runTests() {
       expect(result.command.name).to.equal('charMenuPrepareActionCommand');
     });
 
-    it.only('Checks that prepare action menu works with grappling status effect with one target', function () {
+    it('Checks that prepare action menu works with grappling status effect with one target', function () {
       var character = createCharacter('test');
       createTestToken(character.name, character.id);
       character.statusEffects['Grappled'] = { targets: ['1'] };
@@ -154,7 +154,7 @@ function runTests() {
       expect(result.command.name).to.equal('charMenuPrepareActionCommand');
     });
 
-    it.only('Checks that prepare action menu works with grappling status effect with two targets', function () {
+    it('Checks that prepare action menu works with grappling status effect with two targets', function () {
       var character = createCharacter('test');
       createTestToken(character.name, character.id);
       character.statusEffects['Grappled'] = { targets: ['1', '2'] };
@@ -170,7 +170,7 @@ function runTests() {
       expect(result.command.name).to.equal('charMenuPrepareActionCommand');
     });
 
-    it.only('Checks that prepare action menu works with held status effect', function () {
+    it('Checks that prepare action menu works with held status effect', function () {
       var character = createCharacter('test');
       createTestToken(character.name, character.id);
       character.statusEffects['Grappled'] = { targets: ['1'] };
@@ -187,7 +187,7 @@ function runTests() {
       expect(result.command.name).to.equal('charMenuPrepareActionCommand');
     });
 
-    it.only('Checks that prepare action menu works with release opponent action modifier', function () {
+    it('Checks that prepare action menu works with release opponent action modifier', function () {
       var character = createCharacter('test');
       createTestToken(character.name, character.id);
       character.statusEffects['Grappled'] = { targets: ['1'] };
@@ -201,6 +201,49 @@ function runTests() {
       expect(result.buttons).to.contain('Movement Only');
       expect(result.buttons).to.contain('Ready Item');
       expect(result.buttons.length).to.equal(4);
+      expect(result.command.name).to.equal('charMenuPrepareActionCommand');
+    });
+
+    it.only('Checks that prepare action menu works with spells', function () {
+      var character = createCharacter('test');
+      createTestToken(character.name, character.id);
+      MML.setCurrentAttribute('test', 'spells', JSON.stringify(['Dart']));
+      state.MML.GM.inCombat = true;
+      character.newRoundUpdateCharacter();
+      var result = MML.charMenuPrepareAction(player, character);
+      expect(result.message).to.equal('Prepare test\'s action');
+      expect(result.buttons).to.contain('Attack');
+      expect(result.buttons).to.contain('Observe');
+      expect(result.buttons).to.contain('Movement Only');
+      expect(result.buttons).to.contain('Ready Item');
+      expect(result.buttons).to.contain('Cast');
+      expect(result.buttons.length).to.equal(5);
+      expect(result.command.name).to.equal('charMenuPrepareActionCommand');
+    });
+
+    it.only('Checks that prepare action menu works with multi-action spells', function () {
+      var character = createCharacter('test');
+      createTestToken(character.name, character.id);
+      MML.setCurrentAttribute('test', 'spells', JSON.stringify(['Dart']));
+      character.previousAction = {
+        ts: Date.now() ,
+        modifiers: [],
+        weapon: MML.getEquippedWeapon(character),
+        spell: {
+          actions: 1
+        }
+      };
+      state.MML.GM.inCombat = true;
+      character.newRoundUpdateCharacter();
+      var result = MML.charMenuPrepareAction(player, character);
+      expect(result.message).to.equal('Prepare test\'s action');
+      expect(result.buttons).to.contain('Attack');
+      expect(result.buttons).to.contain('Observe');
+      expect(result.buttons).to.contain('Movement Only');
+      expect(result.buttons).to.contain('Ready Item');
+      expect(result.buttons).to.contain('Cast');
+      expect(result.buttons).to.contain('Continue Casting');
+      expect(result.buttons.length).to.equal(6);
       expect(result.command.name).to.equal('charMenuPrepareActionCommand');
     });
   });
