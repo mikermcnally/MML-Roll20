@@ -1,3 +1,24 @@
+MML.buildAction = function buildAction(player, character, action) {
+  MML.prepareActionMenu(player, character, action)
+  .then(function (pressedButton) {
+    switch (pressedButton) {
+      case 'Attack':
+        prepareAttackActionMenu
+        break;
+      case 'Ready Item':
+        readyItemMenu(player, character, action)
+        .then(the other ones)
+        .then(buildAction)
+        break;
+      default:
+
+    }
+  })
+  .then(finalizeActionMenu);
+};
+
+
+
 MML.meleeAttackAction = function() {
   var currentAction = state.MML.GM.currentAction;
   var character = currentAction.character;
@@ -308,7 +329,7 @@ MML.endAction = function() {
   });
 
   if (character.initiative > 0) {
-    character.player.charMenuPrepareAction(character.name);
+    character.player.prepareActionMenu(character.name);
     character.player.displayMenu();
   } else {
     MML.nextAction();
