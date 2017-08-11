@@ -1,4 +1,5 @@
 {
     "-W069": false,
-    "-W083": false
+    "-W083": false,
+    "-W104": false
 }

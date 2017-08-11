@@ -38,4 +38,6 @@ MML.init = function() {
     character.setPlayer();
     MML.characters[character.name] = character;
   });
+  
+  MML.initializeMenu(state.MML.GM.player);
 };

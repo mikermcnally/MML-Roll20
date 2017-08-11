@@ -1,20 +1,25 @@
-MML.buildAction = function buildAction(player, character, action) {
-  MML.prepareActionMenu(player, character, action)
-  .then(function (pressedButton) {
-    switch (pressedButton) {
+MML.buildAction = function buildAction([player, character, action]) {
+  MML.prepareAction([player, character, action])
+  .then(function ([player, character, action]) {
+    switch (player.pressedButton) {
       case 'Attack':
-        prepareAttackActionMenu
-        break;
+        return MML.prepareAttackAction([player, character, action]);
       case 'Ready Item':
-        readyItemMenu(player, character, action)
-        .then(the other ones)
-        .then(buildAction)
-        break;
+        return MML.readyItemAction([player, character, action])
+        .then(function ([player, character, action]) {
+          if (player.pressedButton === 'Back') {
+            return buildAction([player, character, action]);
+          } else {
+            // item shit
+          }
+        })
+        // .then(the other ones)
+        .then(buildAction);
       default:
 
     }
   })
-  .then(finalizeActionMenu);
+  .then(MML.finalizeActionMenu);
 };
 
 

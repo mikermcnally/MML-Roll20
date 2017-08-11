@@ -22,22 +22,43 @@ MML.setMenuButtons = function setMenuButtons(player, buttons) {
 
 MML.goToMenu = function goToMenu(player, menu) {
   MML.displayMenu(player, menu);
-  return MML.setMenuButtons(player, menu.buttons)
-    .then(menu.command)
-    .catch(log);
+  return MML.setMenuButtons(player, menu.buttons);
 };
 
 MML.initializeMenu = function initializeMenu(player) {
   return MML.setMenuButtons(player, ['initializeMenu'])
-    .then(function(player) {
-      if (player.name === state.MML.GM.name) {
-        return MML.goToMenu(player, MML.GmMenuMain(player));
-      }
-    })
-    .catch(log);
+  .then(function(player) {
+    if (player.name === state.MML.GM.name) {
+      return MML.GmMenuMain(player);
+    }
+  })
+  .catch(log);
 };
 
-MML.prepareActionMenu = function prepareActionMenu(player, character) {
+MML.GmMenuMain = function GmMenuMain(player) {
+  var menu = {
+    message: 'Main Menu: ',
+    buttons: [
+      'Combat',
+      'Roll Dice'
+    ]};
+
+  return MML.goToMenu(player, menu)
+  .then(function(player) {
+    switch (player.pressedButton) {
+      case 'Combat':
+        return MML.GmMenuCombat(player);
+      case 'Roll Dice':
+        return MML.selectDieSizeMenu(player);
+    }
+  });
+};
+
+MML.prepareAction = function prepareAction([player, character, action]) {
+  return MML.goToMenu(player, MML.prepareActionMenu(player, character, action));
+};
+
+MML.prepareActionMenu = function prepareActionMenu(player, character, action) {
   return {
     message: 'Prepare ' + character.name + '\'s action',
     buttons: function() {
@@ -48,8 +69,8 @@ MML.prepareActionMenu = function prepareActionMenu(player, character) {
         'Attack'
       ];
 
-      if (!_.isUndefined(character.action.weapon) && MML.isRangedWeapon(character.action.weapon)) {
-        if (character.action.weapon.family !== 'MWM' || character.action.weapon.loaded === character.action.weapon.reload) {
+      if (!_.isUndefined(action.weapon) && MML.isRangedWeapon(action.weapon)) {
+        if (action.weapon.family !== 'MWM' || action.weapon.loaded === action.weapon.reload) {
           buttons.push('Aim');
         } else {
           buttons.push('Reload');
@@ -72,8 +93,7 @@ MML.prepareActionMenu = function prepareActionMenu(player, character) {
         buttons.push('Continue Casting');
       }
       return buttons;
-    }(),
-    command: MML.prepareActionCommand
+    }()
   };
 };
 
@@ -106,7 +126,7 @@ MML.prepareActionCommand = function prepareActionCommand(player, character) {
       return MML.goToMenu(player, MML.charMenuCast(player, character));
     case 'Continue Casting':
       character.action = MML.clone(character.previousAction);
-      return MML.goToMenu(player, MML.charMenuFinalizeAction(player, character));
+      return MML.goToMenu(player, MML.finalizeActionMenu(player, character));
   }
 };
 
@@ -358,9 +378,14 @@ MML.newRoundUpdatePlayer = function newRoundUpdatePlayer(player) {
   if (player.combatants.length > 0) {
     if (_.has(character.statusEffects, 'Stunned')) {
       character.applyStatusEffects();
-      MML.goToMenu(player, MML.charMenuFinalizeAction(player, character));
+      MML.goToMenu(player, MML.finalizeActionMenu(player, character));
     } else if (character.situationalInitBonus !== 'No Combat') {
-      MML.goToMenu(player, MML.prepareActionMenu(player, character));
+      MML.buildAction([player, character, {
+        ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
+        modifiers: [],
+        weapon: MML.getEquippedWeapon(character)
+      }]);
+      // MML.goToMenu(player, MML.prepareActionMenu(player, character));
     } else {
       character.setReady(true);
       MML.prepareNextCharacter(player);
@@ -377,7 +402,7 @@ MML.prepareNextCharacter = function prepareNextCharacter(player) {
   if (player.characterIndex < player.combatants.length) {
     if (_.has(character.statusEffects, 'Stunned')) {
       character.applyStatusEffects();
-      MML.charMenuFinalizeAction(player, character.name);
+      MML.finalizeActionMenu(player, character.name);
       MML.displayMenu(player);
     } else if (character.situationalInitBonus !== 'No Combat') {
       MML.prepareActionMenu(player, character.name);
@@ -406,24 +431,6 @@ MML.menuIdle = function menuIdle(player, who) {
 };
 
 MML.menuPause = function menuPause(player) {};
-
-MML.GmMenuMain = function GmMenuMain(player) {
-  return {
-    message: 'Main Menu: ',
-    buttons: [
-      'Combat',
-      'Roll Dice'
-    ],
-    command: function(player) {
-      switch (player.pressedButton) {
-        case 'Combat':
-          return MML.goToMenu(player, MML.GmMenuCombat(player));
-        case 'Roll Dice':
-          return MML.goToMenu(player, MML.selectDieSizeMenu(player));
-      }
-    }
-  };
-};
 
 MML.GmMenuAssignStatusEffect = function GmMenuAssignStatusEffect(player, who) {
   player.who = who;
@@ -522,22 +529,24 @@ MML.customRoll = function customRoll(numberOfDice) {
   sendChat(player.name, '/w "' + player.name + 'Result: ' + rollDice(player.dice, numberOfDice));
 };
 
-MML.GmMenuCombat = function GmMenuCombat() {
-  return {
+MML.GmMenuCombat = function GmMenuCombat(player) {
+  var menu = {
     message: 'Select tokens and begin.',
     buttons: [
       'Start Combat',
       'Back'
-    ],
-    command: function(player) {
-      switch (player.pressedButton) {
-        case 'Start Combat':
-          return MML.startCombat(player);
-        case 'Back':
-          return MML.goToMenu(player, MML.GmMenuMain(player));
-      }
+    ]};
+
+  return MML.goToMenu(player, menu)
+  .then(function(player) {
+    console.log("SHOW ME WHAT YOU GOT");
+    switch (player.pressedButton) {
+      case 'Start Combat':
+        return MML.startCombat(player);
+      case 'Back':
+        return MML.GmMenuMain(player);
     }
-  };
+  });
 };
 
 MML.GmMenuNewItem = function GmMenuNewItem(player, who) {
@@ -792,7 +801,7 @@ MML.charMenuAttackCalledShot = function charMenuAttackCalledShot(player, who) {
 
   if (MML.isWieldingRangedWeapon(character)) {
     _.each(buttons, function(button) {
-      button.nextMenu = 'charMenuFinalizeAction';
+      button.nextMenu = 'finalizeActionMenu';
     });
   } else {
     _.each(buttons, function(button) {
@@ -826,7 +835,7 @@ MML.charMenuAttackStance = function charMenuAttackStance(player, who) {
 
   if (['Punch', 'Kick', 'Head Butt', 'Bite', 'Grapple', 'Place a Hold', 'Break a Hold', 'Break Grapple', 'Takedown', 'Regain Feet'].indexOf(character.action.weaponType) > -1) {
     _.each(buttons, function(button) {
-      button.nextMenu = 'charMenuFinalizeAction';
+      button.nextMenu = 'finalizeActionMenu';
     });
   } else if (!MML.isUnarmed(character) && character.action.weapon.secondaryType !== '') {
     _.each(buttons, function(button) {
@@ -835,7 +844,7 @@ MML.charMenuAttackStance = function charMenuAttackStance(player, who) {
   } else {
     character.action.weaponType = 'primary';
     _.each(buttons, function(button) {
-      button.nextMenu = 'charMenuFinalizeAction';
+      button.nextMenu = 'finalizeActionMenu';
     });
   }
   player.buttons = buttons;
@@ -933,7 +942,7 @@ MML.charMenuMetaMagicInitiative = function charMenuMetaMagicInitiative(player, w
   });
   player.buttons.push({
     text: 'Next Menu',
-    nextMenu: 'charMenuFinalizeAction',
+    nextMenu: 'finalizeActionMenu',
     callback: function() {
       MML.displayMenu(player);
     }
@@ -1184,7 +1193,7 @@ MML.charMenuReadyAdditionalItem = function charMenuReadyAdditionalItem(player, w
   player.buttons = buttons;
 };
 
-MML.charMenuFinalizeAction = function charMenuFinalizeAction(player, who) {
+MML.finalizeActionMenu = function finalizeActionMenu(player, who) {
   player.who = who;
 
   if (state.MML.GM.roundStarted === true) {
@@ -1303,7 +1312,7 @@ MML.charMenuSelectDamageType = function charMenuSelectDamageType(player, who) {
 
   player.buttons.push({
     text: 'Primary',
-    nextMenu: 'charMenuFinalizeAction',
+    nextMenu: 'finalizeActionMenu',
     callback: function() {
       character.action.weaponType = 'primary';
       MML.displayMenu(player);
@@ -1312,7 +1321,7 @@ MML.charMenuSelectDamageType = function charMenuSelectDamageType(player, who) {
 
   player.buttons.push({
     text: 'Secondary',
-    nextMenu: 'charMenuFinalizeAction',
+    nextMenu: 'finalizeActionMenu',
     callback: function(input) {
       character.action.weaponType = 'secondary';
       MML.displayMenu(player);
@@ -1746,7 +1755,7 @@ MML.menuButtons.setActionReadyItem = {
 };
 MML.menuButtons.setActionObserve = {
   text: 'Observe',
-  nextMenu: 'charMenuFinalizeAction',
+  nextMenu: 'finalizeActionMenu',
   callback: function(input) {
     _.extend(MML.characters[player.who].action, {
       ts: Date.now(),
@@ -1758,7 +1767,7 @@ MML.menuButtons.setActionObserve = {
 };
 MML.menuButtons.setActionMovement = {
   text: 'Movement Only',
-  nextMenu: 'charMenuFinalizeAction',
+  nextMenu: 'finalizeActionMenu',
   callback: function(input) {
     _.extend(MML.characters[player.who].action, {
       ts: Date.now(),
@@ -1931,5 +1940,4 @@ MML.Player = function Player(name, isGM) {
   this.characters = [];
   this.characterIndex = 0;
   this.menu = isGM ? 'GmMenuMain' : 'menuPause';
-  MML.initializeMenu(this);
 };
