@@ -1,12 +1,57 @@
 MML.buildAction = function buildAction([player, character, action]) {
-  MML.prepareAction([player, character, action])
-  .then(function ([player, character, action]) {
+  return MML.prepareAction([player, character, action])
+  .then(function([player, character, action]) {
+    console.log("SHOW ME WHAT YOU GOT");
+    console.log(player.pressedButton);
     switch (player.pressedButton) {
       case 'Attack':
-        return MML.prepareAttackAction([player, character, action]);
+        return MML.prepareAttackAction([player, character, action])
+          .then(function([player, character, action]) {
+            if (player.pressedButton === 'Shoot From Cover') {
+              action.modifiers.push('Shoot From Cover');
+            } else if (player.pressedButton !== 'Standard') {
+              action.weaponType = player.pressedButton;
+            }
+
+            if (['Head Butt',
+              'Takedown',
+              'Grapple',
+              'Regain Feet',
+              'Place a Hold',
+              'Break a Hold',
+              'Break Grapple'].indexOf(player.pressedButton)
+            ) {
+              return MML.chooseAttackStance([player, character, action]).then(MML.setAttackStance);
+            } else {
+              return MML.chooseCalledShot([player, character, action])
+              .then(MML.setCalledShot)
+              .then(MML.chooseAttackStance)
+              .then(MML.setAttackStance);
+            }
+          })
+          .then(function([player, character, action]) {
+            if (!MML.isWieldingRangedWeapon(character)) {
+              if (!MML.isUnarmed(character) && action.weapon.secondaryType !== '') {
+                return MML.chooseDamageType([player, character, action]).then(MML.setDamageType);
+              } else if (['Punch',
+                'Kick',
+                'Head Butt',
+                'Bite',
+                'Grapple',
+                'Place a Hold',
+                'Break a Hold',
+                'Break Grapple',
+                'Takedown',
+                'Regain Feet'].indexOf(action.weaponType) > -1
+              ) {
+                action.weaponType = 'primary';
+                return [player, character, action];
+              }
+            }
+          });
       case 'Ready Item':
         return MML.readyItemAction([player, character, action])
-        .then(function ([player, character, action]) {
+        .then(function([player, character, action]) {
           if (player.pressedButton === 'Back') {
             return buildAction([player, character, action]);
           } else {
@@ -14,12 +59,35 @@ MML.buildAction = function buildAction([player, character, action]) {
           }
         })
         // .then(the other ones)
-        .then(buildAction);
+        .then(MML.buildAction);
+      case 'Aim':
+        _.extend(action, {
+          ts: Date.now(),
+          name: 'Aim',
+          getTargets: 'getSingleTarget',
+          callback: 'startAimAction'
+        });
+        return MML.prepareAimAction([player, character, action]);
+      case 'Reload':
+        _.extend(action, {
+          ts: Date.now(),
+          name: 'Reload',
+          callback: 'reloadAction'
+        });
+        return MML.prepareReloadAction([player, character, action]);
+      case 'Release Opponent':
+        action.modifiers.push('Release Opponent');
+        return buildAction([player, character, action]);
+      case 'Cast':
+        return MML.prepareCastAction([player, character, action]);
+      case 'Continue Casting':
+        action = MML.clone(character.previousAction);
+        return [player, character, action];
       default:
 
     }
-  })
-  .then(MML.finalizeActionMenu);
+  });
+  // .then(MML.finalizeActionMenu);
 };
 
 
@@ -329,7 +397,7 @@ MML.endAction = function() {
   character.spentInitiative = character.spentInitiative + character.actionTempo;
   character.previousAction = MML.clone(character.action);
   character.updateCharacter();
-  _.each(currentAction.targetArray, function (target) {
+  _.each(currentAction.targetArray, function(target) {
     MML.characters[target].updateCharacter();
   });
 

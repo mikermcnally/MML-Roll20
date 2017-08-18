@@ -52,18 +52,19 @@ function runTests() {
         character.remove();
       });
     });
-    describe.skip('Main Menu', function () {
+    describe.only('Main Menu', function () {
       it('Checks that the menu initializes properly', function () {
-        clickButton('initializeMenu')(player)
+        initializeMenu(player)
         .then(clickButton('Combat'))
         .then(clickButton('Back'))
         .then(clickButton('Combat'))
         .then(clickButton('Start Combat'));
       });
 
-      it('Checks that start combat works', function() {
+      it.only('Checks that start combat works', function() {
         createTestCharacters(3);
         startTestCombat(player, _.pluck(MML.characters, 'name'))
+        .then(setActionPunchAttack)
         .catch(console.log);
       });
     });
@@ -385,21 +386,31 @@ function startTestCombat(player, characters) {
 }
 
 function setActionStandardAttack(player) {
-  return clickButton('Attack')
+  return IAmAHack(player)
+  .then(clickButton('Attack'))
   .then(clickButton('Standard'))
   .then(clickButton('None'))
   .then(clickButton('Neutral'));
 }
 
+function IAmAHack(player) {
+  return new Promise(function (resolve, reject) {
+    resolve(player);
+    reject();
+  });
+}
+
 function setActionPunchAttack(player) {
-  return clickButton('Attack')
+  return IAmAHack(player)
+  .then(clickButton('Attack'))
   .then(clickButton('Punch'))
   .then(clickButton('None'))
   .then(clickButton('Neutral'));
 }
 
 function executeObserve(player) {
-  return clickButton('Start Action')
+  return clickButton('initializeMenu')(player)
+  .then(clickButton('Start Action'))
   .then(clickButton('End Movement'))
   .then(clickButton('End Action'));
 }
