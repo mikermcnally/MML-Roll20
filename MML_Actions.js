@@ -1,8 +1,6 @@
 MML.buildAction = function buildAction([player, character, action]) {
   return MML.prepareAction([player, character, action])
   .then(function([player, character, action]) {
-    console.log("SHOW ME WHAT YOU GOT");
-    console.log(player.pressedButton);
     switch (player.pressedButton) {
       case 'Attack':
         return MML.prepareAttackAction([player, character, action])
@@ -13,14 +11,7 @@ MML.buildAction = function buildAction([player, character, action]) {
               action.weaponType = player.pressedButton;
             }
 
-            if (['Head Butt',
-              'Takedown',
-              'Grapple',
-              'Regain Feet',
-              'Place a Hold',
-              'Break a Hold',
-              'Break Grapple'].indexOf(player.pressedButton)
-            ) {
+            if (['Head Butt', 'Takedown', 'Grapple', 'Regain Feet', 'Place a Hold', 'Break a Hold', 'Break Grapple'].indexOf(player.pressedButton) !== -1) {
               return MML.chooseAttackStance([player, character, action]).then(MML.setAttackStance);
             } else {
               return MML.chooseCalledShot([player, character, action])
@@ -30,6 +21,8 @@ MML.buildAction = function buildAction([player, character, action]) {
             }
           })
           .then(function([player, character, action]) {
+            console.log("SHOW ME WHAT YOU GOT");
+            console.log(player.pressedButton);
             if (!MML.isWieldingRangedWeapon(character)) {
               if (!MML.isUnarmed(character) && action.weapon.secondaryType !== '') {
                 return MML.chooseDamageType([player, character, action]).then(MML.setDamageType);
@@ -86,8 +79,8 @@ MML.buildAction = function buildAction([player, character, action]) {
       default:
 
     }
-  });
-  // .then(MML.finalizeActionMenu);
+  })
+  .then(MML.finalizeActionMenu);
 };
 
 

@@ -204,7 +204,10 @@ MML.prepareAttackActionMenu = function prepareAttackActionMenu(player, character
   };
 };
 MML.chooseCalledShot = function chooseCalledShot([player, character, action]) {
-  return [MML.goToMenu(player, { message: 'Choose Called Shot', buttons: ['None', 'Body Part', 'Specific Hit Position'] }), character, action];
+  return MML.goToMenu(player, { message: 'Choose Called Shot', buttons: ['None', 'Body Part', 'Specific Hit Position'] })
+  .then(function (player) {
+    return [player, character, action];
+  });
 };
 MML.setCalledShot = function setCalledShot([player, character, action]) {
   switch (player.pressedButton) {
@@ -214,12 +217,16 @@ MML.setCalledShot = function setCalledShot([player, character, action]) {
     case 'Called Shot Specific':
       action.modifiers.push('Called Shot Specific');
       break;
+    default:
+      break;
   }
-
   return [player, character, action];
 };
 MML.chooseAttackStance = function chooseAttackStance([player, character, action]) {
-  return [MML.goToMenu(player, { message: 'Choose Attack Stance', buttons: ['Neutral', 'Defensive', 'Aggressive'] }), character, action];
+  return MML.goToMenu(player, { message: 'Choose Attack Stance', buttons: ['Neutral', 'Defensive', 'Aggressive'] })
+  .then(function (player) {
+    return [player, character, action];
+  });
 };
 MML.setAttackStance = function setAttackStance([player, character, action]) {
   switch (player.pressedButton) {
@@ -1048,27 +1055,35 @@ MML.charMenuReadyAdditionalItem = function charMenuReadyAdditionalItem(player, w
   player.buttons = buttons;
 };
 
-MML.finalizeActionMenu = function finalizeActionMenu([player, character, action]) {
-  console.log("GRASS TASTES BAD");
-  // if (state.MML.GM.roundStarted === true) {
-  //   player.message = 'Accept or change action for ' + who;
-  //   player.buttons = [
-  //     player.menuButtons.acceptAction,
-  //     player.menuButtons.editAction
-  //   ];
-  // } else if (_.has(MML.characters[player.who].statusEffects, 'Stunned')) {
-  //   player.message = who + ' is stunned and can only move. Roll initiative';
-  //   player.buttons = [
-  //     player.menuButtons.initiativeRoll
-  //   ];
-  // } else {
-  //   player.message = 'Roll initiative or change action for ' + who;
-  //   player.buttons = [
-  //     player.menuButtons.initiativeRoll,
-  //     player.menuButtons.editAction
-  //   ];
-  // }
-  return [player, character, action];
+MML.finalizeAction = function finalizeAction([player, character, action]) {
+  return MML.goToMenu(player, MML.finalizeActionMenu(player, character, action))
+  .then(function (player) {
+    return [player, character, action];
+  });
+};
+
+MML.finalizeActionMenu = function finalizeActionMenu(player, character, action) {
+  var message;
+  var buttons;
+  if (state.MML.GM.roundStarted === true) {
+    message = 'Accept or change action for ' + character.name;
+    buttons = [
+      'Accept',
+      'Edit Action'
+    ];
+  } else if (_.has(character.statusEffects, 'Stunned')) {
+    message = character.name + ' is stunned and can only move. Roll initiative';
+    buttons = [
+      'Roll'
+    ];
+  } else {
+    message = 'Roll initiative or change action for ' + character.name;
+    buttons = [
+      'Roll',
+      'Edit Action'
+    ];
+  }
+  return { message: message, buttons: buttons };
 };
 
 MML.charMenuStartAction = function charMenuStartAction(player, who, validAction) {
