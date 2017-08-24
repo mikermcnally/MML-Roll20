@@ -321,8 +321,9 @@ MML.newRoundUpdatePlayer = function newRoundUpdatePlayer(player) {
         ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
         modifiers: [],
         weapon: MML.getEquippedWeapon(character)
-      }]).catch(log);
-      // MML.goToMenu(player, MML.prepareActionMenu(player, character));
+      }])
+      .then(MML.rollInitiative)
+      .catch(log);
     } else {
       character.setReady(true);
       MML.prepareNextCharacter(player);

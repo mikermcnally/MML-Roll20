@@ -1,3 +1,34 @@
+MML.rollInitiative = function rollInitiative(player, character, action) {
+  character.setAction(action);
+  var range = '1-10';
+  var rollValue = MML.rollDice(1, 10);
+  var rollResult = rollValue +
+    character.situationalInitBonus +
+    character.movementRatioInitBonus +
+    character.attributeInitBonus +
+    character.senseInitBonus +
+    character.fomInitBonus +
+    character.firstActionInitBonus +
+    character.spentInitiative;
+  var roll = {
+    character: character.name,
+    name: 'initiative',
+    value: rollValue,
+    range: range,
+    accepted: false,
+    rollResult: rollResult,
+    message: 'Roll: ' + rollValue +
+      '\nResult: ' + rollResult +
+      '\nRange: ' + range
+  };
+  return MML.displayRoll(player, roll)
+  .then(function ([player, roll]) {
+    character.initiativeRollValue = roll.value;
+    character.setReady(true);
+    MML.prepareNextCharacter(player);
+  });
+};
+
 // Character Creation
 MML.createCharacter = function(charName, id) {
   var characterProxy = new Proxy(new MML.Character(charName, id), {
@@ -16,21 +47,6 @@ MML.createCharacter = function(charName, id) {
 MML.Character = function(charName, id) {
   Object.defineProperties(this, {
     //Combat Functions
-    'displayRoll': {
-      value: function displayRoll(callback) {
-        var currentRoll = this.player.currentRoll;
-        if (this.player.name === state.MML.GM.name) {
-          if (currentRoll.accepted === false) {
-            this.player.displayGmRoll();
-          } else {
-            this[callback](currentRoll);
-          }
-        } else {
-          this.player.displayPlayerRoll();
-          this[callback](currentRoll);
-        }
-      }
-    },
     'displayMovement': {
       value: function displayMovement() {
         var token = MML.getTokenFromChar(this.name);
@@ -509,46 +525,47 @@ MML.Character = function(charName, id) {
     },
 
     'setAction': {
-      value: function setAction() {
+      value: function setAction(action) {
         var initBonus = 10;
 
-        if (this.action.name === 'Attack' || this.action.name === 'Aim') {
-          if (['Punch', 'Kick', 'Head Butt', 'Bite', 'Grapple', 'Takedown', 'Place a Hold', 'Break a Hold', 'Break Grapple'].indexOf(this.action.weaponType) > -1 ||
-            this.action.weapon === 'unarmed'
+        if (action.name === 'Attack' || action.name === 'Aim') {
+          if (['Punch', 'Kick', 'Head Butt', 'Bite', 'Grapple', 'Takedown', 'Place a Hold', 'Break a Hold', 'Break Grapple'].indexOf(action.weaponType) > -1 ||
+            action.weapon === 'unarmed'
           ) {
             if (!_.isUndefined(this.weaponSkills['Brawling']) && this.weaponSkills['Brawling'].level > this.weaponSkills['Default Martial'].level) {
-              this.action.skill = this.weaponSkills['Brawling'].level;
+              action.skill = this.weaponSkills['Brawling'].level;
             } else {
-              this.action.skill = this.weaponSkills['Default Martial'].level;
+              action.skill = this.weaponSkills['Default Martial'].level;
             }
             // } else if (leftHand !== 'unarmed' && rightHand !== 'unarmed') {
             //   var weaponInits = [this.inventory[this.leftHand._id].grips[this.leftHand.grip].initiative,
             //     this.inventory[this.rightHand._id].grips[this.rightHand.grip].initiative
             //   ];
             //   initBonus = _.min(weaponInits);
-            // this.action.skill = this.weaponSkills.[this.inventory[this.leftHand._id].name].level or this.weaponSkills['Default Martial Skill'].level;
+            // action.skill = this.weaponSkills.[this.inventory[this.leftHand._id].name].level or this.weaponSkills['Default Martial Skill'].level;
             //Dual Wielding
           } else {
-            initBonus = this.action.weapon.initiative;
-            this.action.skill = MML.getWeaponSkill(this, this.action.weapon);
+            initBonus = action.weapon.initiative;
+            action.skill = MML.getWeaponSkill(this, action.weapon);
           }
-        } else if (this.action.name === 'Cast') {
-          var skillInfo = MML.getMagicSkill(this, this.action.spell);
-          this.action.skill = skillInfo.level;
-          this.action.skillName = skillInfo.name;
+        } else if (action.name === 'Cast') {
+          var skillInfo = MML.getMagicSkill(this, action.spell);
+          action.skill = skillInfo.level;
+          action.skillName = skillInfo.name;
         }
         if (state.MML.GM.roundStarted === false) {
           this.firstActionInitBonus = initBonus;
         }
 
-        if (_.isUndefined(this.previousAction) || this.previousAction.ts !== this.action.ts) {
-          _.each(this.action.modifiers, function(modifier) {
+        if (_.isUndefined(this.previousAction) || this.previousAction.ts !== action.ts) {
+          _.each(action.modifiers, function(modifier) {
             this.addStatusEffect(modifier, {
-              ts: this.action.ts,
+              ts: action.ts,
               startingRound: state.MML.GM.currentRound
             });
           }, this);
         }
+        this.action = action;
       }
     },
     'initiativeRoll': {
