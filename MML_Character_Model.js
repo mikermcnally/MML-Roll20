@@ -1,15 +1,15 @@
 MML.rollInitiative = function rollInitiative(player, character, action) {
   character.setAction(action);
-  var range = '1-10';
   var rollValue = MML.rollDice(1, 10);
-  var rollResult = rollValue +
-    character.situationalInitBonus +
+  var modifier = character.situationalInitBonus +
     character.movementRatioInitBonus +
     character.attributeInitBonus +
     character.senseInitBonus +
     character.fomInitBonus +
     character.firstActionInitBonus +
     character.spentInitiative;
+  var range = (1 + modifier).toString() + '-' + (10 + modifier).toString();
+  var rollResult = rollValue + modifier;
   var roll = {
     character: character.name,
     name: 'initiative',
