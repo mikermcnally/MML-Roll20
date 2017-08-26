@@ -39,20 +39,6 @@ MML.newRound = function() {
   }
 };
 
-MML.startRound = function() {
-  var gm = state.MML.GM;
-
-  if (MML.checkReady()) {
-    gm.roundStarted = true;
-
-    _.each(gm.combatants, function(charName) {
-      MML.characters[charName].movementAvailable = MML.characters[charName].movementRatio;
-    });
-
-    MML.nextAction();
-  }
-};
-
 MML.endCombat = function() {
   var gm = state.MML.GM;
   if (gm.combatants.length > 0) {

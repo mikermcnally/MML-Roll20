@@ -370,7 +370,7 @@ MML.newRoundUpdatePlayer = function newRoundUpdatePlayer(player) {
   if (player.combatants.length > 0) {
     MML.buildAction(player, character).catch(log);
   } else if (player.name === state.MML.GM.name) {
-    MML.goToMenu(player, MML.GmMenuStartRound(player, 'GM'));
+    MML.startRound(player);
   }
 };
 
@@ -380,8 +380,7 @@ MML.prepareNextCharacter = function prepareNextCharacter(player) {
   if (player.characterIndex < player.combatants.length) {
     MML.buildAction(player, character).catch(log);
   } else if (player.name === state.MML.GM.name) {
-    MML.GmMenuStartRound(player, 'GM');
-    MML.displayMenu(player);
+    MML.startRound(player);
   } else {
     player.nextMenu = 'menuIdle';
     MML.displayMenu(player);
@@ -735,12 +734,20 @@ MML.displayItemOptions = function displayItemOptions(player, who, itemId) {
   MML.displayMenu(player);
 };
 
-MML.GmMenuStartRound = function GmMenuStartRound(player, who) {
-  player.who = who;
-  player.message = 'Start round when all characters are ready.';
-  player.buttons = [player.menuButtons.startRound,
-    player.menuButtons.endCombat
-  ];
+MML.startRound = function startRound(player) {
+  return MML.goToMenu(player, { message: 'Start round when all characters are ready.', buttons: ['Start Round', 'End Combat'] })
+  .then(function() {
+    var gm = state.MML.GM;
+
+    if (MML.checkReady()) {
+      gm.roundStarted = true;
+
+      _.each(gm.combatants, function(charName) {
+        MML.characters[charName].movementAvailable = MML.characters[charName].movementRatio;
+      });
+      MML.nextAction();
+    }
+  });
 };
 
 MML.charMenuCast = function charMenuCast(player, who) {

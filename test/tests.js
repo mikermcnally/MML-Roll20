@@ -83,6 +83,7 @@ function runTests() {
           .then(clickButton('Movement Only'))
           .then(clickButton('Roll'))
           .then(clickButton('acceptRoll'))
+          .then(clickButton('Start Round'))
           .catch(console.log);
       });
     });
