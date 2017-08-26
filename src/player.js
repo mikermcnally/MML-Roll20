@@ -111,9 +111,35 @@ MML.prepareActionMenu = function prepareActionMenu(player, character, action) {
 };
 
 MML.prepareAttackAction = function prepareAttackAction([player, character, action]) {
+  action.ts = Date.now();
   return MML.goToMenu(player, MML.prepareAttackActionMenu(player, character, action))
   .then(function (player) {
     return [player, character, action];
+  })
+  .then(function([player, character, action]) {
+    if (player.pressedButton === 'Shoot From Cover') {
+      action.modifiers.push('Shoot From Cover');
+    } else if (player.pressedButton !== 'Standard') {
+      action.weaponType = player.pressedButton;
+    }
+    if (['Head Butt', 'Takedown', 'Grapple', 'Regain Feet', 'Place a Hold', 'Break a Hold', 'Break Grapple'].indexOf(player.pressedButton) !== -1) {
+      return MML.chooseAttackStance([player, character, action]).then(MML.setAttackStance);
+    } else {
+      return MML.chooseCalledShot([player, character, action])
+        .then(MML.setCalledShot)
+        .then(MML.chooseAttackStance)
+        .then(MML.setAttackStance);
+    }
+  })
+  .then(function([player, character, action]) {
+    if (!MML.isWieldingRangedWeapon(character)) {
+      if (!MML.isUnarmed(character) && action.weapon.secondaryType !== '') {
+        return MML.chooseDamageType([player, character, action]).then(MML.setDamageType);
+      } else if (MML.isUnarmedAction(action)) {
+        action.weaponType = 'primary';
+        return [player, character, action];
+      }
+    }
   });
 };
 
