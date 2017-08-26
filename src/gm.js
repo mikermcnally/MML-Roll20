@@ -260,38 +260,38 @@ MML.parseCommand = function(msg) {
         callback: input.callback,
         input: [input]
       };
-    } else if (content.indexOf('changeRoll') !== -1) {
-      var value = parseInt(content.replace('changeRoll ', ''));
-
-      if (!isNaN(value)) {
-        MML.players[who].changeRoll(value);
-      } else {
-        sendChat('Error', 'Please enter a numerical value.');
-      }
-    } else if (content.indexOf('acceptRoll') !== -1) {
-      if (MML.players[who].currentRoll.accepted === false) {
-        var player = MML.players[who];
-        MML.players[player.name].currentRoll.accepted = true;
-
-        command = {
-          type: 'character',
-          who: player.currentRoll.character,
-          callback: player.currentRoll.callback,
-          input: []
-        };
-      }
-    } else if (content.indexOf('displayItemOptions') !== -1) {
-      input = content.replace('displayItemOptions ', '').split('|');
-      var charName = input[0];
-      var itemId = input[1];
-
-      command = {
-        type: 'player',
-        who: who,
-        callback: 'displayItemOptions',
-        input: [charName, itemId]
-      };
-    } else if (content.indexOf('enterNumberOfDice') !== -1) {
+    // } else if (content.indexOf('changeRoll') !== -1) {
+    //   var value = parseInt(content.replace('changeRoll ', ''));
+    //
+    //   if (!isNaN(value)) {
+    //     MML.players[who].changeRoll(value);
+    //   } else {
+    //     sendChat('Error', 'Please enter a numerical value.');
+    //   }
+    // } else if (content.indexOf('acceptRoll') !== -1) {
+    //   if (MML.players[who].currentRoll.accepted === false) {
+    //     var player = MML.players[who];
+    //     MML.players[player.name].currentRoll.accepted = true;
+    //
+    //     command = {
+    //       type: 'character',
+    //       who: player.currentRoll.character,
+    //       callback: player.currentRoll.callback,
+    //       input: []
+    //     };
+    //   }
+    // } else if (content.indexOf('displayItemOptions') !== -1) {
+    //   input = content.replace('displayItemOptions ', '').split('|');
+    //   var charName = input[0];
+    //   var itemId = input[1];
+    //
+    //   command = {
+    //     type: 'player',
+    //     who: who,
+    //     callback: 'displayItemOptions',
+    //     input: [charName, itemId]
+    //   };
+    // } else if (content.indexOf('enterNumberOfDice') !== -1) {
       // var value = parseInt(content.replace('enterNumberOfDice ', ''));
 
       // if (!isNaN(value)) {

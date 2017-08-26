@@ -46,7 +46,7 @@ MML.buildAction = function buildAction([player, character, action]) {
         return MML.readyItemAction([player, character, action])
         .then(function([player, character, action]) {
           if (player.pressedButton === 'Back') {
-            return buildAction([player, character, action]);
+            return MML.buildAction([player, character, action]);
           } else {
             // item shit
           }
@@ -80,7 +80,22 @@ MML.buildAction = function buildAction([player, character, action]) {
 
     }
   })
-  .then(MML.finalizeActionMenu);
+  .then(MML.finalizeAction)
+  .then(function ([player, character, action]) {
+    switch (player.pressedButton) {
+      case 'Roll':
+        return MML.rollInitiative([player, character, action]);
+      case 'Edit Action':
+        return MML.buildAction([player, character, {
+          ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
+          modifiers: [],
+          weapon: MML.getEquippedWeapon(character)
+        }]);
+      case 'Accept':
+        character.setAction(action);
+        return [player, character, action];
+    }
+  });
 };
 
 

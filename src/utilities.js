@@ -401,7 +401,7 @@ MML.parseDice = function parseDice(dice) {
   };
 };
 
-MML.universalRoll = function universalRoll(character, rollName, mods, callback) {
+MML.universalRoll = function universalRoll(character, rollName, mods) {
   // log("universalRoll");
   // log(input.callback);
   // log(input.mods);
@@ -452,7 +452,7 @@ MML.universalRollResult = function universalRollResult(roll) {
   return roll;
 };
 
-MML.attributeCheckRoll = function attributeCheckRoll(character, rollName, attribute, mods, callback) {
+MML.attributeCheckRoll = function attributeCheckRoll(character, rollName, attribute, mods) {
   var target = character[attribute];
   var mod;
   for (mod in mods) {
@@ -490,11 +490,7 @@ MML.attributeCheckResult = function attributeCheckResult(roll) {
   return roll;
 };
 
-MML.genericRoll = function genericRoll(character, rollName, dice, callback) {
-  // log("genericRoll");
-  // log(input.callback);
-  // log(input.mods);
-  // "numberOfStonesRoll", "1d3", "Number of stones cast at " + target.name
+MML.genericRoll = function genericRoll(character, rollName, dice) {
   var roll = {
     type: "generic",
     name: rollName,
@@ -506,22 +502,6 @@ MML.genericRoll = function genericRoll(character, rollName, dice, callback) {
   };
 
   roll = MML.genericRollResult(roll);
-
-  MML.processCommand({
-    type: "player",
-    who: this.player,
-    callback: "setApiPlayerAttribute",
-    input: {
-      attribute: "currentRoll",
-      value: roll
-    }
-  });
-  MML.processCommand({
-    type: "character",
-    who: this.name,
-    callback: input.callback,
-    input: {}
-  });
 };
 
 MML.genericRollResult = function genericRollResult(roll) {

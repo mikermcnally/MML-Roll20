@@ -20,6 +20,16 @@ MML.setMenuButtons = function setMenuButtons(player, buttons) {
   });
 };
 
+MML.setRollButtons = function setRollButtons(player) {
+  return new Promise(function(resolve, reject) {
+    player.buttonPressed = function(player) {
+      if (player.pressedButton === 'acceptRoll' || (player.pressedButton.indexOf('changeRoll') > -1 && player.name === state.MML.GM.name)) {
+        resolve(player);
+      }
+    };
+  });
+};
+
 MML.goToMenu = function goToMenu(player, menu) {
   MML.displayMenu(player, menu);
   return MML.setMenuButtons(player, menu.buttons);
@@ -265,36 +275,57 @@ MML.menuCommand = function menuCommand(player, who, buttonText, selectedCharName
   }
 };
 
+MML.displayRoll = function displayRoll(player, roll) {
+  if (player.name === state.MML.GM.name) {
+    MML.displayGmRoll(player, roll);
+  } else {
+    MML.displayPlayerRoll(player, roll);
+  }
+  return MML.setRollButtons(player)
+  .then(function (player) {
+    if (player.pressedButton === 'acceptRoll') {
+      return [player, roll];
+    } else {
+      return MML.displayRoll(player, MML.changeRoll(player, roll, parseInt(player.pressedButton.replace('changeRoll ', ''))));
+    }
+  });
+};
+
 MML.displayGmRoll = function displayGmRoll(player, roll) {
-  sendChat(player.name, '/w "' + player.name + '" &{template:rollMenuGM} {{title=' + player.currentRoll.message + "}}");
+  sendChat(player.name, '/w "' + player.name + '" &{template:rollMenuGM} {{title=' + roll.message + "}}");
 };
 
 MML.displayPlayerRoll = function displayPlayerRoll(player) {
-  sendChat(player.name, '/w "' + player.name + '" &{template:rollMenu} {{title=' + player.currentRoll.message + "}}");
+  sendChat(player.name, '/w "' + player.name + '" &{template:rollMenu} {{title=' + roll.message + "}}");
 };
 
 MML.changeRoll = function changeRoll(player, roll, value) {
-  var range = player.currentRoll.range.split('-');
+  var range = roll.range.split('-');
   var low = parseInt(range[0]);
   var high = parseInt(range[1]);
 
-  if (value >= low && value <= high) {
-    if (player.currentRoll.type === 'damage') {
-      player.currentRoll.value = -value;
-      player.currentRoll.result = -value;
-      player.currentRoll.message = 'Roll: ' + value + '\nRange: ' + player.currentRoll.range;
+  if (!isNaN(value)) {
+    sendChat('Error', 'Roll value must be numerical.');
+    return MML.displayRoll(player, roll);
+  } else if (value >= low && value <= high) {
+    roll.value = value;
+    if (roll.type === 'damage') {
+      roll.value = -value;
+      roll.result = -value;
+      roll.message = 'Roll: ' + value + '\nRange: ' + roll.range;
+    } else if (roll.type === 'universal') {
+      roll = MML.universalRollResult(roll);
+    } else if (roll.type === 'attribute') {
+      roll = MML.attributeCheckResult(roll);
+    } else if (roll.type === 'generic') {
+      roll = MML.genericRollResult(roll);
     } else {
-      player.currentRoll.value = value;
-      if (player.currentRoll.type === 'universal') {
-        player.currentRoll = MML.universalRollResult(player.currentRoll);
-      } else if (player.currentRoll.type === 'attribute') {
-        player.currentRoll = MML.attributeCheckResult(player.currentRoll);
-      } else if (player.currentRoll.type === 'generic') {
-        player.currentRoll = MML.genericRollResult(player.currentRoll);
-      }
+      roll.result = value;
     }
+    return roll;
   } else {
     sendChat('Error', 'New roll value out of range.');
+    return MML.displayRoll(player, roll);
   }
   MML.characters[player.currentRoll.character][player.currentRoll.callback]();
 };
@@ -321,8 +352,9 @@ MML.newRoundUpdatePlayer = function newRoundUpdatePlayer(player) {
         ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
         modifiers: [],
         weapon: MML.getEquippedWeapon(character)
-      }]).catch(log);
-      // MML.goToMenu(player, MML.prepareActionMenu(player, character));
+      }])
+      .then(MML.rollInitiative)
+      .catch(log);
     } else {
       character.setReady(true);
       MML.prepareNextCharacter(player);
