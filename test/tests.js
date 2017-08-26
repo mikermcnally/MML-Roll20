@@ -7,7 +7,6 @@ var filenames = fs.readdirSync(source_path).filter(function(filename) {
   return filename.search(/\.js$/) !== -1;
 });
 _.each(filenames, function(filename, index) {
-  console.log(filename);
   if (filename === 'init.js') {
     roll20String = fs.readFileSync(source_path + filename, 'utf-8') + roll20String;
   }
@@ -32,7 +31,7 @@ Campaign = roll20.Campaign;
 var eventEmitter = require('events');
 var emitter = new eventEmitter();
 
-on = function (eventName, listener) {
+on = function(eventName, listener) {
   emitter.on(eventName, listener);
 };
 var expect = require('chai').expect;
@@ -41,7 +40,7 @@ var MML = require('../MML_Test.js').MML;
 runTests();
 
 function runTests() {
-  describe('Menu Tests', function() {
+  describe('Menu Flow Tests', function() {
     this.timeout(1500000);
     var player;
 
@@ -49,33 +48,47 @@ function runTests() {
       player = resetEnvironment();
     });
 
-    afterEach(function () {
+    afterEach(function() {
       var characters = findObjs({
         _type: "character"
       });
-      _.each(characters, function (character) {
+      _.each(characters, function(character) {
         character.remove();
       });
     });
-    describe.only('Main Menu', function () {
-      it('Checks that the menu initializes properly', function () {
+    describe.only('Main Menu', function() {
+      it('Checks that the menu initializes properly', function() {
         initializeMenu(player)
-        .then(clickButton('Combat'))
-        .then(clickButton('Back'))
-        .then(clickButton('Combat'))
-        .then(clickButton('Start Combat'));
+          .then(clickButton('Combat'))
+          .then(clickButton('Back'))
+          .then(clickButton('Combat'))
+          .then(clickButton('Start Combat'));
       });
 
       it.only('Checks that start combat works', function() {
         createTestCharacters(3);
         startTestCombat(player, _.pluck(MML.characters, 'name'))
-        .then(setActionPunchAttack)
-        .catch(console.log);
+          .then(setActionPunchAttack)
+          .then(clickButton('Roll'))
+          .then(clickButton('changeRoll eleventy'))
+          .then(clickButton('changeRoll 11'))
+          .then(clickButton('changeRoll 10'))
+          .then(clickButton('changeRoll 10'))
+          .then(clickButton('acceptRoll'))
+          .then(IAmAHack)
+          .then(clickButton('Observe'))
+          .then(clickButton('Roll'))
+          .then(clickButton('acceptRoll'))
+          .then(IAmAHack)
+          .then(clickButton('Movement Only'))
+          .then(clickButton('Roll'))
+          .then(clickButton('acceptRoll'))
+          .catch(console.log);
       });
     });
 
-    describe('Prepare Action Menu', function () {
-      it('Works with default character', function () {
+    describe('Prepare Action Menu', function() {
+      it('Works with default character', function() {
         var character = createCharacter('test');
         var result = MML.prepareActionMenu(player, character, createTestAction(character));
         expect(result.message).to.equal('Prepare test\'s action');
@@ -86,7 +99,7 @@ function runTests() {
         expect(result.buttons.length).to.equal(4);
       });
 
-      it('Works with missile weapons', function () {
+      it('Works with missile weapons', function() {
         var character = createCharacter('test');
         createTestToken(character.name, character.id);
         var crossbow = MML.items['Light Cross Bow'];
@@ -106,7 +119,7 @@ function runTests() {
         expect(result.buttons.length).to.equal(5);
       });
 
-      it('Works with unloaded missile weapons', function () {
+      it('Works with unloaded missile weapons', function() {
         var character = createCharacter('test');
         createTestToken(character.name, character.id);
         var crossbow = MML.items['Light Cross Bow'];
@@ -126,7 +139,7 @@ function runTests() {
         expect(result.buttons.length).to.equal(5);
       });
 
-      it('Works with holding status effect', function () {
+      it('Works with holding status effect', function() {
         var character = createCharacter('test');
         createTestToken(character.name, character.id);
         character.statusEffects['Holding'] = {};
@@ -142,7 +155,7 @@ function runTests() {
         expect(result.buttons.length).to.equal(5);
       });
 
-      it('Works with grappling status effect with one target', function () {
+      it('Works with grappling status effect with one target', function() {
         var character = createCharacter('test');
         createTestToken(character.name, character.id);
         character.statusEffects['Grappled'] = { targets: ['1'] };
@@ -158,7 +171,7 @@ function runTests() {
         expect(result.buttons.length).to.equal(5);
       });
 
-      it('Works with grappling status effect with two targets', function () {
+      it('Works with grappling status effect with two targets', function() {
         var character = createCharacter('test');
         createTestToken(character.name, character.id);
         character.statusEffects['Grappled'] = { targets: ['1', '2'] };
@@ -173,7 +186,7 @@ function runTests() {
         expect(result.buttons.length).to.equal(4);
       });
 
-      it('Works with held status effect', function () {
+      it('Works with held status effect', function() {
         var character = createCharacter('test');
         createTestToken(character.name, character.id);
         character.statusEffects['Grappled'] = { targets: ['1'] };
@@ -189,7 +202,7 @@ function runTests() {
         expect(result.buttons.length).to.equal(4);
       });
 
-      it('Works with release opponent action modifier', function () {
+      it('Works with release opponent action modifier', function() {
         var character = createCharacter('test');
         createTestToken(character.name, character.id);
         character.statusEffects['Grappled'] = { targets: ['1'] };
@@ -205,7 +218,7 @@ function runTests() {
         expect(result.buttons.length).to.equal(4);
       });
 
-      it('Works with spells', function () {
+      it('Works with spells', function() {
         var character = createCharacter('test');
         createTestToken(character.name, character.id);
         MML.setCurrentAttribute('test', 'spells', JSON.stringify(['Dart']));
@@ -221,12 +234,12 @@ function runTests() {
         expect(result.buttons.length).to.equal(5);
       });
 
-      it('Works with multi-action spells', function () {
+      it('Works with multi-action spells', function() {
         var character = createCharacter('test');
         createTestToken(character.name, character.id);
         MML.setCurrentAttribute('test', 'spells', JSON.stringify(['Dart']));
         character.previousAction = {
-          ts: Date.now() ,
+          ts: Date.now(),
           modifiers: [],
           weapon: MML.getEquippedWeapon(character),
           spell: {
@@ -247,8 +260,8 @@ function runTests() {
       });
     });
 
-    describe.skip('Prepare Character Action Buttons', function () {
-      it('Attack button works with default character', function () {
+    describe.skip('Prepare Character Action Buttons', function() {
+      it('Attack button works with default character', function() {
         var result = MML.prepareActionCommand(setPressedButton(player, 'Attack'), createCharacter('test'));
         console.log(result);
         // expect(result.command.name).to.equal('prepareActionCommand');
@@ -263,11 +276,14 @@ function setPressedButton(player, button, selectedCharNames) {
 }
 
 function clickButton(button, selectedCharNames) {
-  return function (player) {
-    return new Promise(function (resolve, reject) {
-      resolve(setPressedButton(player, button, selectedCharNames));
-      reject();
-    });
+  return function(player) {
+    return IAmAHack(player)
+      .then(function(player) {
+        return new Promise(function(resolve, reject) {
+          resolve(setPressedButton(player, button, selectedCharNames));
+          reject();
+        });
+      });
   };
 }
 
@@ -382,60 +398,65 @@ function clone(obj) {
   return target;
 }
 
-function startTestCombat(player, characters) {
-  return clickButton('initializeMenu')(player)
-  .then(clickButton('Combat'))
-  .then(clickButton('Back'))
-  .then(clickButton('Combat'))
-  .then(clickButton('Start Combat', characters));
-}
-
-function setActionStandardAttack(player) {
-  return IAmAHack(player)
-  .then(clickButton('Attack'))
-  .then(clickButton('Standard'))
-  .then(clickButton('None'))
-  .then(clickButton('Neutral'));
+function initializeMenu(player) {
+  return clickButton('initializeMenu')(player);
 }
 
 function IAmAHack(player) {
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     resolve(player);
     reject();
   });
 }
 
+function startTestCombat(player, characters) {
+  return initializeMenu(player)
+    .then(clickButton('Combat'))
+    .then(clickButton('Back'))
+    .then(clickButton('Combat'))
+    .then(clickButton('Start Combat', characters))
+    .then(IAmAHack(player));
+}
+
+function setActionStandardAttack(player) {
+  return clickButton('Attack')(player)
+    .then(clickButton('Standard'))
+    .then(clickButton('None'))
+    .then(clickButton('Neutral'))
+    .then(IAmAHack(player));
+}
+
 function setActionPunchAttack(player) {
-  return IAmAHack(player)
-  .then(clickButton('Attack'))
-  .then(clickButton('Punch'))
-  .then(clickButton('None'))
-  .then(clickButton('Neutral'));
+  return clickButton('Attack')(player)
+    .then(clickButton('Punch'))
+    .then(clickButton('None'))
+    .then(clickButton('Neutral'))
+    .then(IAmAHack(player));
 }
 
 function executeObserve(player) {
   return clickButton('initializeMenu')(player)
-  .then(clickButton('Start Action'))
-  .then(clickButton('End Movement'))
-  .then(clickButton('End Action'));
+    .then(clickButton('Start Action'))
+    .then(clickButton('End Movement'))
+    .then(clickButton('End Action'));
 }
 
 function pbcopy(data) {
-    // require('child_process').spawn('clip').stdin.end(data);
+  // require('child_process').spawn('clip').stdin.end(data);
 }
 
 // it('Tested: Unarmed striking, observe without ranged weapon, basic combat flow, basic damage, multiple defenses', function() {
-  // .then(setActionPunchAttack(player))
-  // .then(clickButton('Roll'))
-  // .then(setTestRoll(player, 10))
-  // .then(clickButton('Observe'))
-  // .then(clickButton('Roll'))
-  // .then(setTestRoll(player, 2))
-  // .then(clickButton('Observe'))
-  // .then(clickButton('Roll'))
-  // .then(setTestRoll(player, 1))
-  // .then(clickButton('Start Round'))
-  // .then(clickButton('Start Action'));
+// .then(setActionPunchAttack(player))
+// .then(clickButton('Roll'))
+// .then(setTestRoll(player, 10))
+// .then(clickButton('Observe'))
+// .then(clickButton('Roll'))
+// .then(setTestRoll(player, 2))
+// .then(clickButton('Observe'))
+// .then(clickButton('Roll'))
+// .then(setTestRoll(player, 1))
+// .then(clickButton('Start Round'))
+// .then(clickButton('Start Action'));
 //   .then(clickButton('End Movement'))
 //   player.setCurrentCharacterTargets({
 //     "charName": "test0",
