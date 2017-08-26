@@ -2,11 +2,16 @@ var fs = require('fs');
 _ = require('underscore');
 
 var roll20String = '';
-var filenames = fs.readdirSync('../r20').filter(function(filename) {
-  return filename.search(/MML_(?!Test|Roll20).*\.js/) !== -1;
+var source_path = '../r20/src/';
+var filenames = fs.readdirSync(source_path).filter(function(filename) {
+  return filename.search(/\.js$/) !== -1;
 });
 _.each(filenames, function(filename, index) {
-  roll20String += fs.readFileSync('../r20/' + filename, 'utf-8');
+  console.log(filename);
+  if (filename === 'init.js') {
+    roll20String = fs.readFileSync(source_path + filename, 'utf-8') + roll20String;
+  }
+  roll20String += fs.readFileSync(source_path + filename, 'utf-8');
 });
 
 pbcopy(roll20String);

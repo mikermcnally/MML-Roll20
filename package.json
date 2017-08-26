@@ -1,8 +1,8 @@
 {
-  "name": "MML_Roll20",
+  "name": "mml_roll20",
   "version": "1.0.0",
   "scripts": {
-    "start": "node ./MML_Test.js",
+    "start": "node ./tests.js",
     "test": "mocha"
   }
 }
