@@ -1,8 +1,48 @@
-MML.buildAction = function buildAction([player, character, action]) {
+MML.buildAction = function buildAction(player, character) {
+  if (_.has(character.statusEffects, 'Stunned')) {
+    character.applyStatusEffects();
+    return MML.finalizeAction([player, character, {
+      ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
+      modifiers: [],
+      weapon: MML.getEquippedWeapon(character),
+      name: 'Movement Only'
+    }]);
+  } else if (character.situationalInitBonus !== 'No Combat') {
+    return MML.actionBuildMenu([player, character, {
+      ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
+      modifiers: [],
+      weapon: MML.getEquippedWeapon(character)
+    }])
+    .catch(log);
+  } else {
+    character.setReady(true);
+    return [player, character, {
+      ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
+      modifiers: [],
+      weapon: MML.getEquippedWeapon(character),
+      name: 'No Combat'
+    }];
+  }
+};
+
+MML.actionBuildMenu = function actionBuildMenu([player, character, action]) {
   return MML.prepareAction([player, character, action])
   .then(function([player, character, action]) {
     switch (player.pressedButton) {
+      case 'Observe':
+         _.extend(action, {
+          ts: Date.now(),
+          name: 'Observe'
+        });
+        return [player, character, action];
+      case 'Movement Only':
+         _.extend(action, {
+          ts: Date.now(),
+          name: 'Movement Only'
+        });
+        return [player, character, action];
       case 'Attack':
+        action.ts = Date.now();
         return MML.prepareAttackAction([player, character, action])
           .then(function([player, character, action]) {
             if (player.pressedButton === 'Shoot From Cover') {
@@ -10,7 +50,6 @@ MML.buildAction = function buildAction([player, character, action]) {
             } else if (player.pressedButton !== 'Standard') {
               action.weaponType = player.pressedButton;
             }
-
             if (['Head Butt', 'Takedown', 'Grapple', 'Regain Feet', 'Place a Hold', 'Break a Hold', 'Break Grapple'].indexOf(player.pressedButton) !== -1) {
               return MML.chooseAttackStance([player, character, action]).then(MML.setAttackStance);
             } else {
@@ -21,22 +60,10 @@ MML.buildAction = function buildAction([player, character, action]) {
             }
           })
           .then(function([player, character, action]) {
-            console.log("SHOW ME WHAT YOU GOT");
-            console.log(player.pressedButton);
             if (!MML.isWieldingRangedWeapon(character)) {
               if (!MML.isUnarmed(character) && action.weapon.secondaryType !== '') {
                 return MML.chooseDamageType([player, character, action]).then(MML.setDamageType);
-              } else if (['Punch',
-                'Kick',
-                'Head Butt',
-                'Bite',
-                'Grapple',
-                'Place a Hold',
-                'Break a Hold',
-                'Break Grapple',
-                'Takedown',
-                'Regain Feet'].indexOf(action.weaponType) > -1
-              ) {
+              } else if (MML.isUnarmedAction(action)) {
                 action.weaponType = 'primary';
                 return [player, character, action];
               }
@@ -46,31 +73,29 @@ MML.buildAction = function buildAction([player, character, action]) {
         return MML.readyItemAction([player, character, action])
         .then(function([player, character, action]) {
           if (player.pressedButton === 'Back') {
-            return MML.buildAction([player, character, action]);
+            return MML.actionBuildMenu([player, character, action]);
           } else {
             // item shit
           }
         })
         // .then(the other ones)
-        .then(MML.buildAction);
+        .then(MML.actionBuildMenu);
       case 'Aim':
         _.extend(action, {
           ts: Date.now(),
           name: 'Aim',
-          getTargets: 'getSingleTarget',
-          callback: 'startAimAction'
+          getTargets: 'getSingleTarget'
         });
-        return MML.prepareAimAction([player, character, action]);
+        return [player, character, action];
       case 'Reload':
         _.extend(action, {
           ts: Date.now(),
-          name: 'Reload',
-          callback: 'reloadAction'
+          name: 'Reload'
         });
-        return MML.prepareReloadAction([player, character, action]);
+        return [player, character, action];
       case 'Release Opponent':
         action.modifiers.push('Release Opponent');
-        return buildAction([player, character, action]);
+        return MML.actionBuildMenu([player, character, action]);
       case 'Cast':
         return MML.prepareCastAction([player, character, action]);
       case 'Continue Casting':
@@ -86,7 +111,7 @@ MML.buildAction = function buildAction([player, character, action]) {
       case 'Roll':
         return MML.rollInitiative([player, character, action]);
       case 'Edit Action':
-        return MML.buildAction([player, character, {
+        return MML.actionBuildMenu([player, character, {
           ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
           modifiers: [],
           weapon: MML.getEquippedWeapon(character)
@@ -98,7 +123,18 @@ MML.buildAction = function buildAction([player, character, action]) {
   });
 };
 
-
+MML.isUnarmedAction = function isUnarmedAction(action) {
+  return ['Punch',
+    'Kick',
+    'Head Butt',
+    'Bite',
+    'Grapple',
+    'Place a Hold',
+    'Break a Hold',
+    'Break Grapple',
+    'Takedown',
+    'Regain Feet'].indexOf(action.weaponType) > -1;
+};
 
 MML.meleeAttackAction = function() {
   var currentAction = state.MML.GM.currentAction;

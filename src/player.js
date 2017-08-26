@@ -116,6 +116,7 @@ MML.prepareAttackAction = function prepareAttackAction([player, character, actio
     return [player, character, action];
   });
 };
+
 MML.prepareAttackActionMenu = function prepareAttackActionMenu(player, character, action) {
   return {
     message: 'Attack Menu',
@@ -244,7 +245,6 @@ MML.setAttackStance = function setAttackStance([player, character, action]) {
       action.modifiers.push('Defensive Stance');
       break;
     case 'Neutral':
-      action.modifiers.push('Neutral Stance');
       break;
     case 'Aggressive':
       action.modifiers.push('Aggressive Stance');
@@ -286,7 +286,7 @@ MML.displayRoll = function displayRoll(player, roll) {
     if (player.pressedButton === 'acceptRoll') {
       return [player, roll];
     } else {
-      return MML.displayRoll(player, MML.changeRoll(player, roll, parseInt(player.pressedButton.replace('changeRoll ', ''))));
+      return MML.displayRoll(player, MML.changeRoll(player, roll, player.pressedButton.replace('changeRoll ', '')));
     }
   });
 };
@@ -299,20 +299,23 @@ MML.displayPlayerRoll = function displayPlayerRoll(player) {
   sendChat(player.name, '/w "' + player.name + '" &{template:rollMenu} {{title=' + roll.message + "}}");
 };
 
-MML.changeRoll = function changeRoll(player, roll, value) {
+MML.changeRoll = function changeRoll(player, roll, valueString) {
+  var value = parseInt(valueString);
   var range = roll.range.split('-');
   var low = parseInt(range[0]);
   var high = parseInt(range[1]);
 
-  if (!isNaN(value)) {
+  if (isNaN(value)) {
     sendChat('Error', 'Roll value must be numerical.');
-    return MML.displayRoll(player, roll);
-  } else if (value >= low && value <= high) {
-    roll.value = value;
+    return roll;
+  } else {
+    if (value + roll.modifier >= low && value + roll.modifier <= high) {
+      roll.value = value;
+    } else {
+      sendChat('Error', 'New roll value out of range.');
+    }
     if (roll.type === 'damage') {
-      roll.value = -value;
-      roll.result = -value;
-      roll.message = 'Roll: ' + value + '\nRange: ' + roll.range;
+      roll = MML.damageRollResult(roll);
     } else if (roll.type === 'universal') {
       roll = MML.universalRollResult(roll);
     } else if (roll.type === 'attribute') {
@@ -323,11 +326,7 @@ MML.changeRoll = function changeRoll(player, roll, value) {
       roll.result = value;
     }
     return roll;
-  } else {
-    sendChat('Error', 'New roll value out of range.');
-    return MML.displayRoll(player, roll);
   }
-  MML.characters[player.currentRoll.character][player.currentRoll.callback]();
 };
 
 MML.enterNumberOfDice = function enterNumberOfDice(player) {
@@ -340,25 +339,10 @@ MML.setApiPlayerAttribute = function setApiPlayerAttribute(player, attribute, va
 
 MML.newRoundUpdatePlayer = function newRoundUpdatePlayer(player) {
   player.characterIndex = 0;
-  player.who = player.combatants[0];
-  var character = MML.characters[player.who];
+  var character = MML.characters[player.combatants[0]];
 
   if (player.combatants.length > 0) {
-    if (_.has(character.statusEffects, 'Stunned')) {
-      character.applyStatusEffects();
-      return MML.finalizeAction([player, character, action]);
-    } else if (character.situationalInitBonus !== 'No Combat') {
-      MML.buildAction([player, character, {
-        ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
-        modifiers: [],
-        weapon: MML.getEquippedWeapon(character)
-      }])
-      .then(MML.rollInitiative)
-      .catch(log);
-    } else {
-      character.setReady(true);
-      MML.prepareNextCharacter(player);
-    }
+    MML.buildAction(player, character).catch(log);
   } else if (player.name === state.MML.GM.name) {
     MML.goToMenu(player, MML.GmMenuStartRound(player, 'GM'));
   }
@@ -367,19 +351,8 @@ MML.newRoundUpdatePlayer = function newRoundUpdatePlayer(player) {
 MML.prepareNextCharacter = function prepareNextCharacter(player) {
   player.characterIndex++;
   var character = MML.characters[player.combatants[player.characterIndex]];
-
   if (player.characterIndex < player.combatants.length) {
-    if (_.has(character.statusEffects, 'Stunned')) {
-      character.applyStatusEffects();
-      MML.finalizeActionMenu([player, character, action]);
-      MML.displayMenu(player);
-    } else if (character.situationalInitBonus !== 'No Combat') {
-      MML.prepareActionMenu(player, character.name);
-      MML.displayMenu(player);
-    } else {
-      character.setReady(true);
-      MML.prepareNextCharacter(player);
-    }
+    MML.buildAction(player, character).catch(log);
   } else if (player.name === state.MML.GM.name) {
     MML.GmMenuStartRound(player, 'GM');
     MML.displayMenu(player);

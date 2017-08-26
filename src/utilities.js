@@ -1,7 +1,7 @@
 // Character Functions
 MML.getCharFromName = function getCharFromName(charName) {
   var character = findObjs({
-    _type: "character",
+    _type: 'character',
     archived: false,
     name: charName
   }, {
@@ -13,7 +13,7 @@ MML.getCharFromName = function getCharFromName(charName) {
 
 // Attribute and Ability Functions
 MML.createAttribute = function createAttribute(name, current, max, character) {
-  return createObj("attribute", {
+  return createObj('attribute', {
     name: name,
     current: current,
     max: max,
@@ -28,7 +28,7 @@ MML.createAttributesFromArray = function createAttributesFromArray(inputArray, c
 };
 
 MML.createAbility = function createAbility(name, action, istokenaction, character) {
-  createObj("ability", {
+  createObj('ability', {
     name: name,
     action: action,
     istokenaction: istokenaction,
@@ -39,22 +39,22 @@ MML.createAbility = function createAbility(name, action, istokenaction, characte
 MML.getCharAttribute = function getCharAttribute(charName, attribute) {
   var character = MML.getCharFromName(charName);
   var charAttribute = findObjs({
-    _type: "attribute",
-    _characterid: character.get("_id"),
+    _type: 'attribute',
+    _characterid: character.get('_id'),
     name: attribute
   }, {
     caseInsensitive: false
   })[0];
 
-  if (typeof(charAttribute) === "undefined") {
-    charAttribute = MML.createAttribute(attribute, "", "", MML.getCharFromName(charName));
+  if (typeof(charAttribute) === 'undefined') {
+    charAttribute = MML.createAttribute(attribute, '', '', MML.getCharFromName(charName));
   }
 
   return charAttribute;
 };
 
 MML.getCurrentAttribute = function getCurrentAttribute(charName, attribute) {
-  return MML.getCharAttribute(charName, attribute).get("current");
+  return MML.getCharAttribute(charName, attribute).get('current');
 };
 
 MML.getCurrentAttributeAsFloat = function getCurrentAttributeAsFloat(charName, attribute) {
@@ -69,7 +69,7 @@ MML.getCurrentAttributeAsFloat = function getCurrentAttributeAsFloat(charName, a
 };
 
 MML.getMaxAttributeAsFloat = function getMaxAttributeAsFloat(charName, attribute) {
-  var result = parseFloat(MML.getCharAttribute(charName, attribute).get("max"));
+  var result = parseFloat(MML.getCharAttribute(charName, attribute).get('max'));
 
   if (isNaN(result)) {
     MML.setMaxAttribute(charName, attribute, 0);
@@ -81,7 +81,7 @@ MML.getMaxAttributeAsFloat = function getMaxAttributeAsFloat(charName, attribute
 
 MML.getCurrentAttributeAsBool = function getCurrentAttributeAsBool(charName, attribute) {
   var result = MML.getCurrentAttribute(charName, attribute);
-  if (result.toString() === "true") {
+  if (result.toString() === 'true') {
     return true;
   } else {
     return false;
@@ -94,7 +94,7 @@ MML.getCurrentAttributeAsArray = function getCurrentAttributeAsArray(charName, a
   try {
     result = JSON.parse(result);
   } catch (e) {
-    MML.setCurrentAttribute(charName, attribute, "[]");
+    MML.setCurrentAttribute(charName, attribute, '[]');
     result = [];
   }
   return result;
@@ -106,7 +106,7 @@ MML.getCurrentAttributeJSON = function getCurrentAttributeJSON(charName, attribu
   try {
     result = JSON.parse(result);
   } catch (e) {
-    MML.setCurrentAttribute(charName, attribute, "{}");
+    MML.setCurrentAttribute(charName, attribute, '{}');
     result = {};
   }
   return result;
@@ -115,8 +115,8 @@ MML.getCurrentAttributeJSON = function getCurrentAttributeJSON(charName, attribu
 MML.getSkillAttributes = function getSkillAttributes(charName, skillType) {
   var character = MML.getCharFromName(charName);
   var attributes = findObjs({
-    _type: "attribute",
-    _characterid: character.get("_id")
+    _type: 'attribute',
+    _characterid: character.get('_id')
   }, {
     caseInsensitive: false
   });
@@ -124,13 +124,13 @@ MML.getSkillAttributes = function getSkillAttributes(charName, skillType) {
   var skill_data = {};
 
   _.each(attributes, function(attribute) {
-    var attributeName = attribute.get("name");
+    var attributeName = attribute.get('name');
 
-    if (attributeName.indexOf("repeating_" + skillType) !== -1) {
-      var attributeString = attributeName.split("_");
+    if (attributeName.indexOf('repeating_' + skillType) !== -1) {
+      var attributeString = attributeName.split('_');
       var _id = attributeString[2];
       var property = attributeString[3];
-      var value = attribute.get("current");
+      var value = attribute.get('current');
       _.each(skills, function(skill, key) {
         if (key.toLowerCase() === _id) {
           _id = key;
@@ -138,12 +138,12 @@ MML.getSkillAttributes = function getSkillAttributes(charName, skillType) {
       });
       if (_.isUndefined(skill_data[_id])) {
         skill_data[_id] = {
-          name: "",
+          name: '',
           input: 0,
           level: 0
         };
       }
-      if (property === "name") {
+      if (property === 'name') {
         skill_data[_id][property] = value;
       } else if (isNaN(parseFloat(value))) {
         skill_data[_id][property] = 0;
@@ -153,7 +153,7 @@ MML.getSkillAttributes = function getSkillAttributes(charName, skillType) {
     }
   });
   _.each(skill_data, function(skill, _id) {
-    if (skill.name !== "") {
+    if (skill.name !== '') {
       skills[skill.name] = {
         level: skill.level,
         input: skill.input,
@@ -165,11 +165,11 @@ MML.getSkillAttributes = function getSkillAttributes(charName, skillType) {
 };
 
 MML.setCurrentAttribute = function setCurrentAttribute(charName, attribute, value) {
-  MML.getCharAttribute(charName, attribute).set("current", value);
+  MML.getCharAttribute(charName, attribute).set('current', value);
 };
 
 MML.setMaxAttribute = function setMaxAttribute(charName, attribute, value) {
-  MML.getCharAttribute(charName, attribute).set("max", value);
+  MML.getCharAttribute(charName, attribute).set('max', value);
 };
 
 MML.getAttributeTableValue = function getAttributeTableValue(attribute, inputValue, table) {
@@ -178,16 +178,16 @@ MML.getAttributeTableValue = function getAttributeTableValue(attribute, inputVal
 
 // Token Functions
 MML.getCharFromToken = function getCharFromToken(token) {
-  var tokenObject = getObj("graphic", token.id);
-  var charName = getObj("character", tokenObject.get("represents"));
+  var tokenObject = getObj('graphic', token.id);
+  var charName = getObj('character', tokenObject.get('represents'));
 
-  if (tokenObject.get("name").indexOf("spellMarker") > -1) {
+  if (tokenObject.get('name').indexOf('spellMarker') > -1) {
     // Do nothing
   } else if (_.isUndefined(charName)) {
-    tokenObject.set("tint_color", "#FFFF00");
-    sendChat("Error", "Selected Token(s) not associated to a character.");
+    tokenObject.set('tint_color', '#FFFF00');
+    sendChat('Error', 'Selected Token(s) not associated to a character.');
   } else {
-    charName = charName.get("name");
+    charName = charName.get('name');
     return charName;
   }
 };
@@ -196,19 +196,19 @@ MML.getTokenFromChar = function getTokenFromChar(charName) {
   var character = MML.getCharFromName(charName);
 
   var tokens = findObjs({
-    _pageid: Campaign().get("playerpageid"),
-    _type: "graphic",
-    _subtype: "token",
-    represents: character.get("_id")
+    _pageid: Campaign().get('playerpageid'),
+    _type: 'graphic',
+    _subtype: 'token',
+    represents: character.get('_id')
   });
   return tokens[0];
 };
 
 MML.getTokenFromName = function getTokenFromName(name) {
   var tokens = findObjs({
-    _pageid: Campaign().get("playerpageid"),
-    _type: "graphic",
-    _subtype: "token",
+    _pageid: Campaign().get('playerpageid'),
+    _type: 'graphic',
+    _subtype: 'token',
     name: name
   });
 
@@ -220,7 +220,7 @@ MML.getSelectedTokens = function getSelectedTokens(selected) {
 
   var index;
   for (index in selected) {
-    tokens.push(getObj("graphic", selected[index]._id));
+    tokens.push(getObj('graphic', selected[index]._id));
   }
   return tokens;
 };
@@ -230,8 +230,8 @@ MML.getSelectedCharNames = function getSelectedCharNames(selected) {
 
   var index;
   _.each(selected, function(object) {
-    if (object._type === "graphic") {
-      characters.push(MML.getCharFromToken(getObj("graphic", object._id)));
+    if (object._type === 'graphic') {
+      characters.push(MML.getCharFromToken(getObj('graphic', object._id)));
     }
   });
   return characters;
@@ -241,11 +241,11 @@ MML.displayAura = function displayAura(token, radius, auraNumber, color) {
   var auraRadius;
   var auraColor;
   if (auraNumber === 2) {
-    auraRadius = "aura2_radius";
-    auraColor = "aura2_color";
+    auraRadius = 'aura2_radius';
+    auraColor = 'aura2_color';
   } else {
-    auraRadius = "aura1_radius";
-    auraColor = "aura1_color";
+    auraRadius = 'aura1_radius';
+    auraColor = 'aura1_color';
   }
   token.set(auraRadius, radius);
   token.set(auraColor, color);
@@ -274,17 +274,17 @@ MML.drawCirclePath = function drawCirclePath(left, top, radius) {
   var pixelPerFoot = 14;
   radius *= pixelPerFoot;
   var pathArray = [
-    ["M", left - radius, top],
-    ["C", left - radius, top - (radius / 2), left - (radius / 2), top - radius, left, top - radius],
-    ["C", left + (radius / 2), top - radius, left + radius, top - (radius / 2), left + radius, top],
-    ["C", left + radius, top + (radius / 2), left + (radius / 2), top + radius, left, top + radius],
-    ["C", left - (radius / 2), top + radius, left - radius, top + (radius / 2), left - radius, top]
+    ['M', left - radius, top],
+    ['C', left - radius, top - (radius / 2), left - (radius / 2), top - radius, left, top - radius],
+    ['C', left + (radius / 2), top - radius, left + radius, top - (radius / 2), left + radius, top],
+    ['C', left + radius, top + (radius / 2), left + (radius / 2), top + radius, left, top + radius],
+    ['C', left - (radius / 2), top + radius, left - radius, top + (radius / 2), left - radius, top]
   ];
-  var path = createObj("path", {
+  var path = createObj('path', {
     _path: JSON.stringify(pathArray),
-    _pageid: Campaign().get("playerpageid"),
-    layer: "map",
-    stroke: "#FFFF00",
+    _pageid: Campaign().get('playerpageid'),
+    layer: 'map',
+    stroke: '#FFFF00',
     width: radius * 2,
     height: radius * 2,
     top: top,
@@ -304,7 +304,7 @@ MML.rotateAxes = function rotateAxes(left, top, angle) {
 // Player Functions
 MML.getPlayerFromName = function getPlayerFromName(playerName) {
   var player = findObjs({
-    _type: "player",
+    _type: 'player',
     online: true,
     _displayname: playerName
   }, {
@@ -316,7 +316,7 @@ MML.getPlayerFromName = function getPlayerFromName(playerName) {
 
 // Code borrowed from The Aaron from roll20.net forums
 var generateUUID = (function() {
-    "use strict";
+    'use strict';
 
     var a = 0,
       b = [];
@@ -325,10 +325,10 @@ var generateUUID = (function() {
         d = c === a;
       a = c;
       for (var e = new Array(8), f = 7; 0 <= f; f--) {
-        e[f] = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz".charAt(c % 64);
+        e[f] = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz'.charAt(c % 64);
         c = Math.floor(c / 64);
       }
-      c = e.join("");
+      c = e.join('');
       if (d) {
         for (f = 11; 0 <= f && 63 === b[f]; f--) {
           b[f] = 0;
@@ -340,15 +340,15 @@ var generateUUID = (function() {
         }
       }
       for (f = 0; 12 > f; f++) {
-        c += "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz".charAt(b[f]);
+        c += '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz'.charAt(b[f]);
       }
       return c;
     };
   }()),
 
   generateRowID = function() {
-    "use strict";
-    return generateUUID().replace(/_/g, "Z");
+    'use strict';
+    return generateUUID().replace(/_/g, 'Z');
   };
 
 MML.clone = function clone(obj) {
@@ -362,10 +362,10 @@ MML.clone = function clone(obj) {
 };
 
 MML.hexify = function hexify(stringIn) {
-  var stringOut = "";
+  var stringOut = '';
   var i;
   for (i = 0; i < stringIn.length; i++) {
-    stringOut += ("000" + stringIn.charCodeAt(i).toString(16)).slice(-4);
+    stringOut += ('000' + stringIn.charCodeAt(i).toString(16)).slice(-4);
   }
   return stringOut;
 };
@@ -373,7 +373,7 @@ MML.hexify = function hexify(stringIn) {
 MML.dehexify = function dehexify(hexIn) {
   var i;
   var hexes = hexIn.match(/.{1,4}/g) || [];
-  var dehexed = "";
+  var dehexed = '';
   for (i = 0; i < hexes.length; i++) {
     dehexed += String.fromCharCode(parseInt(hexes[i], 16));
   }
@@ -392,7 +392,7 @@ MML.rollDice = function rollDice(amount, size) {
 };
 
 MML.parseDice = function parseDice(dice) {
-  var diceArray = dice.split("d");
+  var diceArray = dice.split('d');
   var amount = diceArray[0] * 1;
   var size = diceArray[1] * 1;
   return {
@@ -401,119 +401,130 @@ MML.parseDice = function parseDice(dice) {
   };
 };
 
-MML.universalRoll = function universalRoll(character, rollName, mods) {
-  // log("universalRoll");
-  // log(input.callback);
-  // log(input.mods);
-  var target = 0;
+MML.sumModifiers = function sumModifiers(modifiers) {
+  return _.reduce(modifiers, function(sum, mod){ return sum + mod; }, 0);
+};
 
-  var mod;
-  _.each(mods, function(mod) {
-    target += mod;
-  });
-
+MML.universalRoll = function universalRoll(name, modifiers) {
   var roll = {
-    type: "universal",
-    name: rollName,
-    character: character.name,
-    callback: callback,
+    type: 'universal',
+    name: name,
+    range: '1-100',
     value: MML.rollDice(1, 100),
-    range: "1-100",
-    target: target,
-    accepted: false
+    target: MML.sumModifiers(modifiers),
+    modifiers: modifiers
   };
 
-  roll = MML.universalRollResult(roll);
-
-  character.player.currentRoll = roll;
-  character[callback]();
+  return MML.universalRollResult(roll);
 };
 
 MML.universalRollResult = function universalRollResult(roll) {
   if (roll.value > 94) {
-    roll.result = "Critical Failure";
+    roll.result = 'Critical Failure';
   } else {
     if (roll.value <= roll.target) {
       if (roll.value <= Math.round(roll.target / 10)) {
-        roll.result = "Critical Success";
+        roll.result = 'Critical Success';
       } else {
-        roll.result = "Success";
+        roll.result = 'Success';
       }
     } else {
-      roll.result = "Failure";
+      roll.result = 'Failure';
     }
   }
 
-  roll.message = "Roll: " + roll.value +
-    "\nTarget: " + roll.target +
-    "\nResult: " + roll.result +
-    "\nRange: " + roll.range;
+  roll.message = 'Roll: ' + roll.value +
+    '\nTarget: ' + roll.target +
+    '\nResult: ' + roll.result +
+    '\nRange: ' + roll.range;
 
   return roll;
 };
 
-MML.attributeCheckRoll = function attributeCheckRoll(character, rollName, attribute, mods) {
-  var target = character[attribute];
-  var mod;
-  for (mod in mods) {
-    target += mods[mod];
-  }
-
+MML.attributeCheckRoll = function attributeCheckRoll(name, character, attribute, mods) {
   var roll = {
-    type: "attribute",
-    name: rollName,
-    character: character.name,
-    callback: callback,
+    type: 'attribute',
+    name: name,
+    range: '1-20',
     value: MML.rollDice(1, 20),
-    range: "1-20",
-    target: target,
-    accepted: false
+    target: character[attribute] + MML.sumModifiers(modifiers),
+    modifiers: modifiers
   };
 
-  roll = MML.attributeCheckResult(roll);
-  character.player.currentRoll = roll;
-  character[callback]();
+  return MML.attributeCheckResult(roll);
 };
 
 MML.attributeCheckResult = function attributeCheckResult(roll) {
   if ((roll.value <= roll.target || roll.value === 1) && (roll.value !== 20)) {
-    roll.result = "Success";
+    roll.result = 'Success';
   } else {
-    roll.result = "Failure";
+    roll.result = 'Failure';
   }
 
-  roll.message = "Roll: " + roll.value +
-    "\nTarget: " + roll.target +
-    "\nResult: " + roll.result +
-    "\nRange: " + roll.range;
+  roll.message = 'Roll: ' + roll.value +
+    '\nResult: ' + roll.result +
+    '\nTarget: ' + roll.target +
+    '\nRange: ' + roll.range;
 
   return roll;
 };
 
-MML.genericRoll = function genericRoll(character, rollName, dice) {
+MML.damageRoll = function damageRoll(name, diceString, modifiers, crit) {
+  var dice = MML.parseDice(damageDice);
+  var amount = dice.amount;
+  var size = dice.size;
+  var modifier = MML.sumModifiers(modifiers);
+  var value;
+
+  if (crit) {
+    value = MML.rollDice(amount, size) + amount * size + modifier;
+    range = (amount * size + amount + modifier) + "-" + (2 * amount * size + modifier);
+  } else {
+    value = MML.rollDice(amount, size) + modifier;
+    range = (amount + modifier) + "-" + (amount * size + modifier);
+  }
+
   var roll = {
-    type: "generic",
-    name: rollName,
-    character: character.name,
-    callback: callback,
+    type: "damage",
+    range: range,
+    value: value,
+    modifiers: modifiers
+  };
+  return MML.damageRollResult(roll);
+};
+
+MML.damageRollResult = function damageRollResult(roll) {
+  roll.result = -roll.value;
+  roll.message = 'Roll: ' + roll.value + '\nRange: ' + roll.range;
+  return roll;
+};
+
+MML.genericRoll = function genericRoll(name, diceString, modifiers) {
+  var dice = MML.parseDice(diceString);
+  var modifier = MML.sumModifiers(modifiers);
+  var range = (dice.amount + modifier).toString() + '-' + ((dice.amount * dice.size) + modifier).toString();
+  var roll = {
+    type: 'generic',
+    name: name,
+    range: range,
     value: MML.rollDice(dice.amount, dice.size),
-    range: dice,
-    accepted: false
+    modifier: modifier,
+    modifiers: modifiers
   };
 
-  roll = MML.genericRollResult(roll);
+  return MML.genericRollResult(roll);
 };
 
 MML.genericRollResult = function genericRollResult(roll) {
-  roll.result = roll.value;
-  roll.message = "Roll: " + roll.value +
-    "\nResult: " + roll.result +
-    "\nRange: " + roll.range;
-
+  roll.result = roll.value + roll.modifier;
+  roll.message = 'Roll: ' + roll.value +
+    '\nModifier: ' + roll.modifier +
+    '\nResult: ' + roll.result +
+    '\nRange: ' + roll.range;
   return roll;
 };
 
 //Menu Functions
 MML.displayTargetSelection = function displayTargetSelection(input) {
-  sendChat("", "&{template:selectTarget} {{charName=" + input.charName + "}} {{input=" + MML.hexify(JSON.stringify(input)) + "}}");
+  sendChat('', '&{template:selectTarget} {{charName=' + input.charName + '}} {{input=' + MML.hexify(JSON.stringify(input)) + '}}');
 };

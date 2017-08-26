@@ -1,27 +1,14 @@
-MML.rollInitiative = function rollInitiative(player, character, action) {
+MML.rollInitiative = function rollInitiative([player, character, action]) {
   character.setAction(action);
-  var rollValue = MML.rollDice(1, 10);
-  var modifier = character.situationalInitBonus +
-    character.movementRatioInitBonus +
-    character.attributeInitBonus +
-    character.senseInitBonus +
-    character.fomInitBonus +
-    character.firstActionInitBonus +
-    character.spentInitiative;
-  var range = (1 + modifier).toString() + '-' + (10 + modifier).toString();
-  var rollResult = rollValue + modifier;
-  var roll = {
-    character: character.name,
-    name: 'initiative',
-    value: rollValue,
-    range: range,
-    accepted: false,
-    rollResult: rollResult,
-    message: 'Roll: ' + rollValue +
-      '\nResult: ' + rollResult +
-      '\nRange: ' + range
-  };
-  return MML.displayRoll(player, roll)
+  var modifiers = [character.situationalInitBonus,
+    character.movementRatioInitBonus,
+    character.attributeInitBonus,
+    character.senseInitBonus,
+    character.fomInitBonus,
+    character.firstActionInitBonus,
+    character.spentInitiative];
+
+  return MML.displayRoll(player, MML.genericRoll('initiative', '1d10', modifiers))
   .then(function ([player, roll]) {
     character.initiativeRollValue = roll.value;
     character.setReady(true);
@@ -529,8 +516,7 @@ MML.Character = function(charName, id) {
         var initBonus = 10;
 
         if (action.name === 'Attack' || action.name === 'Aim') {
-          if (['Punch', 'Kick', 'Head Butt', 'Bite', 'Grapple', 'Takedown', 'Place a Hold', 'Break a Hold', 'Break Grapple'].indexOf(action.weaponType) > -1 ||
-            action.weapon === 'unarmed'
+          if (MML.isUnarmedAction(action) || action.weapon === 'unarmed'
           ) {
             if (!_.isUndefined(this.weaponSkills['Brawling']) && this.weaponSkills['Brawling'].level > this.weaponSkills['Default Martial'].level) {
               action.skill = this.weaponSkills['Brawling'].level;
@@ -1536,42 +1522,6 @@ MML.Character = function(charName, id) {
     'equipmentFailure': {
       value: function equipmentFailure() {
         log('equipmentFailure');
-      }
-    },
-    'rollDamage': {
-      value: function rollDamage(damageDice, mods, crit, callback) {
-        var dice = MML.parseDice(damageDice);
-        var amount = dice.amount;
-        var size = dice.size;
-        var damageMod = 0;
-        var value;
-
-        var mod;
-        _.each(mods, function(mod) {
-          damageMod += mod;
-        });
-
-        if (crit) {
-          value = MML.rollDice(amount, size) + amount * size + damageMod;
-          range = (amount * size + amount + damageMod) + "-" + (2 * amount * size + damageMod);
-        } else {
-          value = MML.rollDice(amount, size) + damageMod;
-          range = (amount + damageMod) + "-" + (amount * size + damageMod);
-        }
-
-        var roll = {
-          type: "damage",
-          character: this.name,
-          accepted: false,
-          value: value,
-          result: -value,
-          range: range,
-          message: "Roll: " + value + "\nRange: " + range,
-          callback: callback
-        };
-
-        this.player.currentRoll = roll;
-        this[callback]();
       }
     },
     'meleeDamageRoll': {
