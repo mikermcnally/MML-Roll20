@@ -177,34 +177,31 @@ MML.getAttributeTableValue = function getAttributeTableValue(attribute, inputVal
 };
 
 // Token Functions
-MML.getCharFromToken = function getCharFromToken(token) {
+MML.getTokenCharacter = function getTokenCharacter(token) {
   var tokenObject = getObj('graphic', token.id);
-  var charName = getObj('character', tokenObject.get('represents'));
+  var characterObject = getObj('character', tokenObject.get('represents'));
 
   if (tokenObject.get('name').indexOf('spellMarker') > -1) {
     // Do nothing
-  } else if (_.isUndefined(charName)) {
+  } else if (_.isUndefined(characterObject)) {
     tokenObject.set('tint_color', '#FFFF00');
     sendChat('Error', 'Selected Token(s) not associated to a character.');
   } else {
-    charName = charName.get('name');
-    return charName;
+    return characterObject.get('name');
   }
 };
 
-MML.getTokenFromChar = function getTokenFromChar(charName) {
-  var character = MML.getCharFromName(charName);
-
+MML.getCharacterToken = function getCharacterToken(character) {
   var tokens = findObjs({
     _pageid: Campaign().get('playerpageid'),
     _type: 'graphic',
     _subtype: 'token',
-    represents: character.get('_id')
+    represents: character.id
   });
   return tokens[0];
 };
 
-MML.getTokenFromName = function getTokenFromName(name) {
+MML.getSpellMarkerToken = function getSpellMarkerToken(spell) {
   var tokens = findObjs({
     _pageid: Campaign().get('playerpageid'),
     _type: 'graphic',
@@ -231,7 +228,7 @@ MML.getSelectedCharNames = function getSelectedCharNames(selected) {
   var index;
   _.each(selected, function(object) {
     if (object._type === 'graphic') {
-      characters.push(MML.getCharFromToken(getObj('graphic', object._id)));
+      characters.push(MML.getTokenCharacter(getObj('graphic', object._id)));
     }
   });
   return characters;
@@ -249,6 +246,10 @@ MML.displayAura = function displayAura(token, radius, auraNumber, color) {
   }
   token.set(auraRadius, radius);
   token.set(auraColor, color);
+};
+
+MML.getDistanceBetweenTokens = function getDistanceBetweenTokens(a, b) {
+  return MML.getDistance(a.get('left'), b.get('left'), a.get('top'), b.get('top'));
 };
 
 // Geometry Functions
@@ -402,7 +403,7 @@ MML.parseDice = function parseDice(dice) {
 };
 
 MML.sumModifiers = function sumModifiers(modifiers) {
-  return _.reduce(modifiers, function(sum, mod){ return sum + mod; }, 0);
+  return _.reduce(modifiers, function(sum, mod) { return sum + mod; }, 0);
 };
 
 MML.universalRoll = function universalRoll(name, modifiers) {

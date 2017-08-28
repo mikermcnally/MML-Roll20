@@ -14,6 +14,7 @@ _.each(filenames, function(filename, index) {
 });
 
 pbcopy(roll20String);
+fs.writeFileSync('../r20/MML.txt', roll20String, 'utf8');
 roll20String += 'module.exports = { MML: MML };';
 fs.writeFileSync('../r20/MML_Test.js', roll20String, 'utf8');
 
@@ -72,18 +73,22 @@ function runTests() {
           .then(clickButton('Roll'))
           .then(clickButton('changeRoll eleventy'))
           .then(clickButton('changeRoll 11'))
-          .then(clickButton('changeRoll 10'))
+          .then(clickButton('changeRoll 1'))
           .then(clickButton('changeRoll 10'))
           .then(clickButton('acceptRoll'))
-          .then(IAmAHack)
+          .then(clickButton('acceptRoll'))
           .then(clickButton('Observe'))
           .then(clickButton('Roll'))
           .then(clickButton('acceptRoll'))
-          .then(IAmAHack)
+          .then(clickButton('acceptRoll'))
           .then(clickButton('Movement Only'))
           .then(clickButton('Roll'))
           .then(clickButton('acceptRoll'))
+          .then(clickButton('acceptRoll'))
           .then(clickButton('Start Round'))
+          .then(clickButton('Start Action'))
+          // .then(function (input) { console.log(input); return player; })
+          // .then(idkWhatImDoing)
           .catch(console.log);
       });
     });
@@ -109,7 +114,7 @@ function runTests() {
         crossbow.loaded = crossbow.grips['Two Hands'].reload;
         character.inventory['crossbow'] = crossbow;
         MML.equipItem(character, 'crossbow', 'Two Hands');
-        character.newRoundUpdateCharacter();
+        MML.newRoundUpdate(character);
         var result = MML.prepareActionMenu(player, character, createTestAction(character));
         expect(result.message).to.equal('Prepare test\'s action');
         expect(result.buttons).to.contain('Attack');
@@ -129,7 +134,7 @@ function runTests() {
         crossbow.loaded = crossbow.grips['Two Hands'].reload - 1;
         character.inventory['crossbow'] = crossbow;
         MML.equipItem(character, 'crossbow', 'Two Hands');
-        character.newRoundUpdateCharacter();
+        MML.newRoundUpdate(character);
         var result = MML.prepareActionMenu(player, character, createTestAction(character));
         expect(result.message).to.equal('Prepare test\'s action');
         expect(result.buttons).to.contain('Attack');
@@ -145,7 +150,7 @@ function runTests() {
         createTestToken(character.name, character.id);
         character.statusEffects['Holding'] = {};
         state.MML.GM.inCombat = true;
-        character.newRoundUpdateCharacter();
+        MML.newRoundUpdate(character);
         var result = MML.prepareActionMenu(player, character, createTestAction(character));
         expect(result.message).to.equal('Prepare test\'s action');
         expect(result.buttons).to.contain('Attack');
@@ -161,7 +166,7 @@ function runTests() {
         createTestToken(character.name, character.id);
         character.statusEffects['Grappled'] = { targets: ['1'] };
         state.MML.GM.inCombat = true;
-        character.newRoundUpdateCharacter();
+        MML.newRoundUpdate(character);
         var result = MML.prepareActionMenu(player, character, createTestAction(character));
         expect(result.message).to.equal('Prepare test\'s action');
         expect(result.buttons).to.contain('Attack');
@@ -177,7 +182,7 @@ function runTests() {
         createTestToken(character.name, character.id);
         character.statusEffects['Grappled'] = { targets: ['1', '2'] };
         state.MML.GM.inCombat = true;
-        character.newRoundUpdateCharacter();
+        MML.newRoundUpdate(character);
         var result = MML.prepareActionMenu(player, character, createTestAction(character));
         expect(result.message).to.equal('Prepare test\'s action');
         expect(result.buttons).to.contain('Attack');
@@ -193,7 +198,7 @@ function runTests() {
         character.statusEffects['Grappled'] = { targets: ['1'] };
         character.statusEffects['Held'] = { targets: ['2'] };
         state.MML.GM.inCombat = true;
-        character.newRoundUpdateCharacter();
+        MML.newRoundUpdate(character);
         var result = MML.prepareActionMenu(player, character, createTestAction(character));
         expect(result.message).to.equal('Prepare test\'s action');
         expect(result.buttons).to.contain('Attack');
@@ -208,7 +213,7 @@ function runTests() {
         createTestToken(character.name, character.id);
         character.statusEffects['Grappled'] = { targets: ['1'] };
         state.MML.GM.inCombat = true;
-        character.newRoundUpdateCharacter();
+        MML.newRoundUpdate(character);
         character.action.modifiers = ['Release Opponent'];
         var result = MML.prepareActionMenu(player, character, createTestAction(character));
         expect(result.message).to.equal('Prepare test\'s action');
@@ -224,7 +229,7 @@ function runTests() {
         createTestToken(character.name, character.id);
         MML.setCurrentAttribute('test', 'spells', JSON.stringify(['Dart']));
         state.MML.GM.inCombat = true;
-        character.newRoundUpdateCharacter();
+        MML.newRoundUpdate(character);
         var result = MML.prepareActionMenu(player, character, createTestAction(character));
         expect(result.message).to.equal('Prepare test\'s action');
         expect(result.buttons).to.contain('Attack');
@@ -248,7 +253,7 @@ function runTests() {
           }
         };
         state.MML.GM.inCombat = true;
-        character.newRoundUpdateCharacter();
+        MML.newRoundUpdate(character);
         var result = MML.prepareActionMenu(player, character, createTestAction(character));
         expect(result.message).to.equal('Prepare test\'s action');
         expect(result.buttons).to.contain('Attack');
@@ -278,7 +283,7 @@ function setPressedButton(player, button, selectedCharNames) {
 
 function clickButton(button, selectedCharNames) {
   return function(player) {
-    return IAmAHack(player)
+    return idkWhatImDoing(player)
       .then(function(player) {
         return new Promise(function(resolve, reject) {
           resolve(setPressedButton(player, button, selectedCharNames));
@@ -311,6 +316,7 @@ function resetEnvironment() {
   // };
   // MML.characters = {};
   // return player;
+  delete state.MML;
   MML.init();
   return state.MML.GM.player;
 }
@@ -403,7 +409,7 @@ function initializeMenu(player) {
   return clickButton('initializeMenu')(player);
 }
 
-function IAmAHack(player) {
+function idkWhatImDoing(player) {
   return new Promise(function(resolve, reject) {
     resolve(player);
     reject();
@@ -416,7 +422,7 @@ function startTestCombat(player, characters) {
     .then(clickButton('Back'))
     .then(clickButton('Combat'))
     .then(clickButton('Start Combat', characters))
-    .then(IAmAHack(player));
+    .then(idkWhatImDoing(player));
 }
 
 function setActionStandardAttack(player) {
@@ -424,7 +430,7 @@ function setActionStandardAttack(player) {
     .then(clickButton('Standard'))
     .then(clickButton('None'))
     .then(clickButton('Neutral'))
-    .then(IAmAHack(player));
+    .then(idkWhatImDoing(player));
 }
 
 function setActionPunchAttack(player) {
@@ -432,7 +438,7 @@ function setActionPunchAttack(player) {
     .then(clickButton('Punch'))
     .then(clickButton('None'))
     .then(clickButton('Neutral'))
-    .then(IAmAHack(player));
+    .then(idkWhatImDoing(player));
 }
 
 function executeObserve(player) {

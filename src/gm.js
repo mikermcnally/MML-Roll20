@@ -1,17 +1,18 @@
-MML.startCombat = function(player) {
+MML.startCombat = function startCombat(player) {
   var gm = state.MML.GM;
   gm.currentRound = 0;
-  gm.combatants = player.selectedCharNames;
+  gm.combatants = [];
   if (player.selectedCharNames.length > 0) {
     gm.inCombat = true;
     _.each(MML.players, function(player) { player.combatants = []; });
-    _.each(gm.combatants, function(charName) {
+    _.each(player.selectedCharNames, function(charName) {
       var character = MML.characters[charName];
-      character.player.combatants.push(charName);
+      gm.combatants.push(character);
+      character.player.combatants.push(character);
       character.setReady(false);
       character.setCombatVision();
     });
-    MML.setTurnOrder();
+    MML.setTurnOrder(gm.combatants);
     Campaign().set('initiativepage', 'true');
     MML.newRound();
     // return MML.combatMenu(player);
@@ -21,25 +22,25 @@ MML.startCombat = function(player) {
   }
 };
 
-MML.newRound = function() {
+MML.newRound = function newRound() {
   var gm = state.MML.GM;
   gm.currentRound++;
   gm.roundStarted = false;
   gm.fatigueChecks = [];
-  _.each(gm.combatants, function(charName) {
-    MML.characters[charName].newRoundUpdateCharacter();
+  _.each(gm.combatants, function(character) {
+    MML.newRoundUpdate(character);
   });
   if (gm.fatigueChecks.length > 0) {
     gm.fatigueCheckIndex = 0;
     MML.nextFatigueCheck();
   } else {
     _.each(MML.players, function(player) {
-      MML.newRoundUpdatePlayer(player);
+      MML.prepareCharacters(player);
     });
   }
 };
 
-MML.endCombat = function() {
+MML.endCombat = function endCombat() {
   var gm = state.MML.GM;
   if (gm.combatants.length > 0) {
     _.each(gm.combatants, function(charName) {
@@ -52,22 +53,21 @@ MML.endCombat = function() {
   }
 };
 
-MML.nextAction = function() {
+MML.nextAction = function nextAction() {
   var gm = state.MML.GM;
-  MML.setTurnOrder();
+  MML.setTurnOrder(gm.combatants);
   if (MML.checkReady()) {
-    if (MML.characters[gm.combatants[0]].initiative > 0) {
-      gm.actor = gm.combatants[0];
-      var player = MML.characters[gm.actor].player;
-      player.charMenuStartAction(gm.actor, MML.validateAction(MML.characters[gm.actor]));
-      player.displayMenu();
+    var character = gm.combatants[0];
+    if (character.initiative > 0) {
+      gm.actor = character.name;
+      MML.startAction(character.player, character, MML.validateAction(character));
     } else {
       MML.newRound();
     }
   }
 };
 
-MML.nextFatigueCheck = function() {
+MML.nextFatigueCheck = function nextFatigueCheck() {
   var gm = state.MML.GM;
   if (gm.fatigueCheckIndex < gm.fatigueChecks.length) {
     var character = gm.fatigueChecks[gm.fatigueCheckIndex];
@@ -81,33 +81,26 @@ MML.nextFatigueCheck = function() {
     gm.fatigueCheckIndex++;
   } else {
     _.each(MML.players, function(player) {
-      MML.newRoundUpdatePlayer(player);
+      MML.prepareCharacters(player);
     });
   }
 };
 
-MML.setTargets = function() {
+MML.setTargets = function setTargets() {
   this.targets = this.characters[this.actor].action.targets;
   this.targetIndex = 0;
   this.currentTarget = this.targets[0];
 };
 
-MML.checkReady = function() {
-  var everyoneReady = true;
-
-  _.each(state.MML.GM.combatants, function(charName) {
-    if (MML.characters[charName].ready === false) {
-      everyoneReady = false;
-    }
+MML.checkReady = function checkReady() {
+  return _.every(state.MML.GM.combatants, function (character) {
+    return character.ready;
   });
-
-  return everyoneReady;
 };
 
-MML.displayThreatZones = function(toggle) {
-  _.each(state.MML.GM.combatants, function(combatant) {
-    var character = MML.characters[combatant];
-    var token = MML.getTokenFromChar(combatant);
+MML.displayThreatZones = function displayThreatZones(toggle) {
+  _.each(state.MML.GM.combatants, function(character) {
+    var token = MML.getCharacterToken(character);
     var radius1 = '';
     var radius2 = '';
     var color1 = '#FF0000';
@@ -123,41 +116,21 @@ MML.displayThreatZones = function(toggle) {
 };
 
 // Turn Order Functions
-MML.setTurnOrder = function() {
-  var gm = state.MML.GM;
+MML.setTurnOrder = function setTurnOrder(combatants) {
+  combatants.sort(function(a, b) { return b.initiative - a.initiative; });
+  state.MML.GM.combatants = combatants;
   var turnorder = [];
-
-  var index;
-  for (index in gm.combatants) {
+  _.each(combatants, function (character) {
     turnorder.push({
-      id: MML.getTokenFromChar(gm.combatants[index]).id,
-      pr: MML.characters[gm.combatants[index]].initiative,
+      id: MML.getCharacterToken(character).id,
+      pr: character.initiative,
       custom: ''
     });
-  }
-
-  turnorder.sort(function(a, b) {
-    if (parseFloat(b.pr) === parseFloat(a.pr)) {
-      if (a.custom !== '' && b.custom !== '') {
-        return parseFloat(b.custom) - parseFloat(a.custom);
-      } else {
-        return 0;
-      }
-    } else {
-      return parseFloat(b.pr) - parseFloat(a.pr);
-    }
   });
-
-  index = 0;
-  for (index in gm.combatants) {
-    //Orders the tokens based on initiative
-    gm.combatants[index] = MML.getCharFromToken(getObj('graphic', turnorder[index].id));
-  }
-
   Campaign().set('turnorder', JSON.stringify(turnorder));
 };
 
-MML.assignNewItem = function(input) {
+MML.assignNewItem = function assignNewItem(input) {
   MML.processCommand({
     type: 'character',
     who: input.target,
@@ -246,61 +219,13 @@ MML.parseCommand = function(msg) {
         callback: input.callback,
         input: [input]
       };
-    // } else if (content.indexOf('changeRoll') !== -1) {
-    //   var value = parseInt(content.replace('changeRoll ', ''));
-    //
-    //   if (!isNaN(value)) {
-    //     MML.players[who].changeRoll(value);
-    //   } else {
-    //     sendChat('Error', 'Please enter a numerical value.');
-    //   }
-    // } else if (content.indexOf('acceptRoll') !== -1) {
-    //   if (MML.players[who].currentRoll.accepted === false) {
-    //     var player = MML.players[who];
-    //     MML.players[player.name].currentRoll.accepted = true;
-    //
-    //     command = {
-    //       type: 'character',
-    //       who: player.currentRoll.character,
-    //       callback: player.currentRoll.callback,
-    //       input: []
-    //     };
-    //   }
-    // } else if (content.indexOf('displayItemOptions') !== -1) {
-    //   input = content.replace('displayItemOptions ', '').split('|');
-    //   var charName = input[0];
-    //   var itemId = input[1];
-    //
-    //   command = {
-    //     type: 'player',
-    //     who: who,
-    //     callback: 'displayItemOptions',
-    //     input: [charName, itemId]
-    //   };
-    // } else if (content.indexOf('enterNumberOfDice') !== -1) {
-      // var value = parseInt(content.replace('enterNumberOfDice ', ''));
-
-      // if (!isNaN(value)) {
-      //   MML.players[who].customRoll(value);
-      // } else {
-      //   sendChat('Error', 'Please enter a numerical value.');
-      // }
     } else {
-      command = content; //MML.dehexify(content);
-      // MML.players[who].buttonPressed(command);
-      log('here');
-      log(command);
-      MML.players[who].buttonPressed(_.extend(MML.players[who], { pressedButton: command, selectedCharNames: MML.getSelectedCharNames(msg.selected) }));
-      // try {
-      //   command = JSON.parse(command);
-      // } catch (e) {
-      //   log(command);
-      //   log(content);
-      //   sendChat('Game', 'JSON parse failed');
-      // }
-
-      // command.input.push(MML.getSelectedCharNames(msg.selected));
+      command = content;
+      var player = MML.players[who];
+      player.buttonPressed(_.extend(player, {
+        pressedButton: command,
+        selectedCharNames: MML.getSelectedCharNames(msg.selected)
+      }));
     }
-    // return command;
   }
 };

@@ -92,7 +92,7 @@ MML.actionBuildMenu = function actionBuildMenu([player, character, action]) {
         }]);
       case 'Accept':
         character.setAction(action);
-        return [player, character, action];
+        return player;
     }
   });
 };
@@ -109,6 +109,51 @@ MML.isUnarmedAction = function isUnarmedAction(action) {
     'Takedown',
     'Regain Feet'].indexOf(action.weaponType) > -1;
 };
+
+MML.processAction = function processAction(player, character, action) {
+  if (_.contains(action.modifiers, 'Ready Item')) {
+    _.each(action.items, function(item) {
+      MML.equipItem(character, item.itemId, item.grip);
+    });
+  }
+
+  if (_.contains(action.modifiers, 'Release Opponent')) {
+    var targetName = _.has(character.statusEffects, 'Holding') ? character.statusEffects['Holding'].targets[0] : character.statusEffects['Grappled'].targets[0];
+    state.MML.GM.currentAction.parameters = {
+      target: MML.characters[targetName]
+    };
+    MML.releaseOpponentAction(player, character, action);
+  } else if (action.name === 'Cast') {
+    action.spell.actions--;
+    if (action.spell.actions > 0) {
+      character.player.charMenuContinueCasting(character.name);
+      character.player.displayMenu();
+    } else {
+      var currentAction = {
+        callback: 'castAction',
+        parameters: {
+          spell: action.spell,
+          casterSkill: action.skill,
+          epCost: MML.getEpCost(action.skillName, action.skill, action.spell.ep),
+          metaMagic: {
+            base: {
+              epMod: 1,
+              castingMod: 0
+            }
+          }
+        },
+        rolls: {}
+      };
+
+      state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, currentAction);
+      character.player.charMenuMetaMagic(character.name);
+      character.player.displayMenu();
+    }
+  } else if (!_.isUndefined(action.getTargets)) {
+    character[action.getTargets]();
+  } else {
+    MML[action.callback]();
+  }};
 
 MML.meleeAttackAction = function() {
   var currentAction = state.MML.GM.currentAction;

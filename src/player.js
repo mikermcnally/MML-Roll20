@@ -363,27 +363,18 @@ MML.setApiPlayerAttribute = function setApiPlayerAttribute(player, attribute, va
   player[attribute] = value;
 };
 
-MML.newRoundUpdatePlayer = function newRoundUpdatePlayer(player) {
-  player.characterIndex = 0;
-  var character = MML.characters[player.combatants[0]];
-
-  if (player.combatants.length > 0) {
-    MML.buildAction(player, character).catch(log);
-  } else if (player.name === state.MML.GM.name) {
-    MML.startRound(player);
-  }
+MML.prepareCharacters = function prepareCharacters(player) {
+  MML.prepareNextCharacter(player, 0);
 };
 
-MML.prepareNextCharacter = function prepareNextCharacter(player) {
-  player.characterIndex++;
-  var character = MML.characters[player.combatants[player.characterIndex]];
-  if (player.characterIndex < player.combatants.length) {
-    MML.buildAction(player, character).catch(log);
+MML.prepareNextCharacter = function prepareNextCharacter(player, index) {
+  if (index < player.combatants.length) {
+    MML.buildAction(player, player.combatants[index])
+    .then(function (player) {
+      MML.prepareNextCharacter(player, index + 1);
+    }).catch(log);
   } else if (player.name === state.MML.GM.name) {
     MML.startRound(player);
-  } else {
-    player.nextMenu = 'menuIdle';
-    MML.displayMenu(player);
   }
 };
 
@@ -741,9 +732,8 @@ MML.startRound = function startRound(player) {
 
     if (MML.checkReady()) {
       gm.roundStarted = true;
-
-      _.each(gm.combatants, function(charName) {
-        MML.characters[charName].movementAvailable = MML.characters[charName].movementRatio;
+      _.each(gm.combatants, function(character) {
+        character.movementAvailable = character.movementRatio;
       });
       MML.nextAction();
     }
@@ -1124,22 +1114,37 @@ MML.finalizeActionMenu = function finalizeActionMenu(player, character, action) 
   return { message: message, buttons: buttons };
 };
 
-MML.charMenuStartAction = function charMenuStartAction(player, who, validAction) {
-  player.who = who;
-  var character = MML.characters[who];
-
-  if (_.has(character.statusEffects, 'Stunned') || _.has(character.statusEffects, 'Dodged player Round')) {
-    player.message = 'Start ' + state.MML.GM.actor + '\'s action';
-    player.buttons = [player.menuButtons.startAction];
-  } else if (validAction) {
-    player.message = 'Start or change ' + state.MML.GM.actor + '\'s action';
-    player.buttons = [player.menuButtons.startAction, player.menuButtons.changeAction];
-  } else {
-    sendChat('GM', '/w "' + player.name + '"' + who + '\'s action no longer valid.');
-    player.message = 'Change ' + state.MML.GM.actor + '\'s action';
-    MML.prepareActionMenu(player, who);
-  }
+MML.startAction = function startAction(player, character, validAction) {
+  return MML.goToMenu(player, MML.startActionMenu(player, character, validAction))
+  .then(function (player) {
+    switch (player.pressedButton) {
+      case 'Start Action':
+        return MML.processAction(player, character, character.action);
+      case 'Change Action':
+        return MML.buildAction(player, character)
+          .then(function (player) {
+            return MML.processAction(player, character, action);
+          });
+    }
+  });
 };
+
+MML.startActionMenu = function startActionMenu(player, character, validAction) {
+  var message;
+  var buttons;
+  if (_.has(character.statusEffects, 'Stunned') || _.has(character.statusEffects, 'Dodged player Round')) {
+    message = 'Start ' + character.name + '\'s action';
+    buttons = ['Start Action'];
+  } else if (validAction) {
+    message = 'Start or change ' + character.name + '\'s action';
+    buttons = ['Start Action', 'Change Action'];
+  } else {
+    message = character.name + '\'s action no longer valid.';
+    buttons = ['Change Action'];
+  }
+  return { message: message, buttons: buttons };
+};
+
 MML.menuCombatMovement = function menuCombatMovement(player, who) {
   player.who = who;
   player.message = 'Move ' + who + '.';
@@ -1161,11 +1166,11 @@ MML.charMenuPlaceSpellMarker = function charMenuPlaceSpellMarker(player, who) {
     text: 'Accept',
     nextMenu: 'menuPause',
     callback: function() {
-      var spellMarker = MML.getTokenFromName(state.MML.GM.currentAction.parameters.spellMarker);
+      var spellMarker = MML.getSpellMarkerToken(state.MML.GM.currentAction.parameters.spellMarker);
       var targets = MML.getAoESpellTargets(spellMarker);
       var character = MML.characters[who];
       _.each(MML.characters, function(character) {
-        var token = MML.getTokenFromChar(character.name);
+        var token = MML.getCharacterToken(character.name);
         if (!_.isUndefined(token)) {
           token.set('tint_color', 'transparent');
         }
@@ -1688,26 +1693,6 @@ MML.menuButtons.editAction = {
     MML.displayMenu(player);
   }
 };
-MML.menuButtons.actionPrepared = {
-  text: 'Ready',
-  nextMenu: 'prepareActionMenu',
-  callback: function() {
-    var character = MML.characters[player.who];
-    character.setReady(true);
-    character.setAction();
-    player.characterIndex++;
-    if (player.characterIndex < player.combatants.length) {
-      MML.prepareActionMenu(player, player.combatants[player.characterIndex]);
-      MML.displayMenu(player);
-    } else if (player.name === state.MML.GM.name) {
-      MML.GmMenuStartRound(player, 'GM');
-      MML.displayMenu(player);
-    } else {
-      player.menu = 'menuIdle';
-      MML.displayMenu(player);
-    }
-  }
-};
 
 MML.menuButtons.chooseTargets = {
   text: 'Choose Targets',
@@ -1820,9 +1805,5 @@ MML.GmMenuUtilities = function GmMenuUtilities(player, input) {
 
 MML.Player = function Player(name, isGM) {
   this.name = name;
-  this.who = name;
-  this.buttons = isGM ? [MML.menuButtons.GmMenuMain] : [];
   this.characters = [];
-  this.characterIndex = 0;
-  this.menu = isGM ? 'GmMenuMain' : 'menuPause';
 };

@@ -1,3 +1,46 @@
+MML.newRoundUpdate = function newRoundUpdate(character) {
+  if (_.has(character.statusEffects, 'Melee character Round')) {
+    var fatigueRate = 1;
+    if (_.has(character.statusEffects, 'Pinned')) {
+      fatigueRate = 2;
+    }
+    character.roundsExertion += fatigueRate;
+    character.roundsRest = 0;
+
+    if (!_.has(character.statusEffects, 'Fatigue')) {
+      if (character.roundsExertion > character.fitness) {
+        state.MML.GM.fatigueChecks.push(character);
+      }
+    } else {
+      if (character.roundsExertion > Math.round(character.fitness / 2)) {
+        state.MML.GM.fatigueChecks.push(character);
+      }
+    }
+  } else if (_.has(character.statusEffects, 'Fatigue') || character.roundsExertion > 0) {
+    character.roundsRest++;
+    if (character.roundsRest >= 6) {
+      state.MML.GM.fatigueChecks.push(character);
+    }
+  }
+
+  // Reset knockdown number
+  character.knockdown = character.knockdownMax;
+  character.spentInitiative = 0;
+
+  character.action = {
+    ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
+    modifiers: [],
+    weapon: MML.getEquippedWeapon(character)
+  };
+  if (_.has(character.statusEffects, 'Observing')) {
+    character.addStatusEffect('Observed', {
+      startingRound: state.MML.GM.currentRound
+    });
+  }
+  character.updateCharacter();
+  character.setReady(false);
+};
+
 MML.rollInitiative = function rollInitiative([player, character, action]) {
   character.setAction(action);
   var modifiers = [character.situationalInitBonus,
@@ -12,7 +55,7 @@ MML.rollInitiative = function rollInitiative([player, character, action]) {
   .then(function ([player, roll]) {
     character.initiativeRollValue = roll.value;
     character.setReady(true);
-    MML.prepareNextCharacter(player);
+    return player;
   });
 };
 
@@ -36,7 +79,7 @@ MML.Character = function(charName, id) {
     //Combat Functions
     'displayMovement': {
       value: function displayMovement() {
-        var token = MML.getTokenFromChar(this.name);
+        var token = MML.getCharacterToken(this);
         var path = getObj('path', this.pathID);
 
         if (!_.isUndefined(path)) {
@@ -60,63 +103,19 @@ MML.Character = function(charName, id) {
         }
       }
     },
-    'newRoundUpdateCharacter': {
-      value: function newRoundUpdateCharacter() {
-        if (_.has(this.statusEffects, 'Melee This Round')) {
-          var fatigueRate = 1;
-          if (_.has(this.statusEffects, 'Pinned')) {
-            fatigueRate = 2;
-          }
-          this.roundsExertion += fatigueRate;
-          this.roundsRest = 0;
-
-          if (!_.has(this.statusEffects, 'Fatigue')) {
-            if (this.roundsExertion > this.fitness) {
-              state.MML.GM.fatigueChecks.push(this);
-            }
-          } else {
-            if (this.roundsExertion > Math.round(this.fitness / 2)) {
-              state.MML.GM.fatigueChecks.push(this);
-            }
-          }
-        } else if (_.has(this.statusEffects, 'Fatigue') || this.roundsExertion > 0) {
-          this.roundsRest++;
-          if (this.roundsRest >= 6) {
-            state.MML.GM.fatigueChecks.push(this);
-          }
-        }
-
-        // Reset knockdown number
-        this.knockdown = this.knockdownMax;
-        this.spentInitiative = 0;
-
-        this.action = {
-          ts: _.isUndefined(this.previousAction) ? Date.now() : this.previousAction.ts,
-          modifiers: [],
-          weapon: MML.getEquippedWeapon(this)
-        };
-        if (_.has(this.statusEffects, 'Observing')) {
-          this.addStatusEffect('Observed', {
-            startingRound: state.MML.GM.currentRound
-          });
-        }
-        this.updateCharacter();
-        this.setReady(false);
-      }
-    },
     'setReady': {
       value: function setReady(ready) {
         if (state.MML.GM.inCombat === true && ready === false) {
-          MML.getTokenFromChar(this.name).set('tint_color', '#FF0000');
+          MML.getCharacterToken(this).set('tint_color', '#FF0000');
         } else {
-          MML.getTokenFromChar(this.name).set('tint_color', 'transparent');
+          MML.getCharacterToken(this).set('tint_color', 'transparent');
         }
         this.ready = ready;
       }
     },
     'setCombatVision': {
       value: function setCombatVision() {
-        var token = MML.getTokenFromChar(this.name);
+        var token = MML.getCharacterToken(this);
         if (state.MML.GM.inCombat || !_.has(this.statusEffects, 'Observing')) {
           token.set('light_losangle', this.fov);
           token.set('light_hassight', true);
@@ -160,7 +159,7 @@ MML.Character = function(charName, id) {
     'getRadiusSpellTargets': {
       value: function getRadiusSpellTargets(radius) {
         state.MML.GM.currentAction.parameters.spellMarker = 'spellMarkerCircle';
-        var token = MML.getTokenFromChar(this.name);
+        var token = MML.getCharacterToken(this);
         var graphic = createObj('graphic', {
           name: 'spellMarkerCircle',
           _pageid: token.get('_pageid'),
@@ -596,58 +595,6 @@ MML.Character = function(charName, id) {
         this.player.prepareNextCharacter();
       }
     },
-    'startAction': {
-      value: function startAction() {
-        state.MML.GM.currentAction = {
-          character: this,
-          rolls: {}
-        };
-
-        if (_.contains(this.action.modifiers, 'Ready Item')) {
-          _.each(this.action.items, function(item) {
-            MML.equipItem(this, item.itemId, item.grip);
-          }, this);
-        }
-
-        if (_.contains(this.action.modifiers, 'Release Opponent')) {
-          var targetName = _.has(this.statusEffects, 'Holding') ? this.statusEffects['Holding'].targets[0] : this.statusEffects['Grappled'].targets[0];
-          state.MML.GM.currentAction.parameters = {
-            target: MML.characters[targetName]
-          };
-          this.releaseOpponentAction();
-        } else if (this.action.name === 'Cast') {
-          this.action.spell.actions--;
-          if (this.action.spell.actions > 0) {
-            this.player.charMenuContinueCasting(this.name);
-            this.player.displayMenu();
-          } else {
-            var currentAction = {
-              callback: 'castAction',
-              parameters: {
-                spell: this.action.spell,
-                casterSkill: this.action.skill,
-                epCost: MML.getEpCost(this.action.skillName, this.action.skill, this.action.spell.ep),
-                metaMagic: {
-                  base: {
-                    epMod: 1,
-                    castingMod: 0
-                  }
-                }
-              },
-              rolls: {}
-            };
-
-            state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, currentAction);
-            this.player.charMenuMetaMagic(this.name);
-            this.player.displayMenu();
-          }
-        } else if (!_.isUndefined(this.action.getTargets)) {
-          this[this.action.getTargets]();
-        } else {
-          MML[this.action.callback]();
-        }
-      }
-    },
 
     'chooseSpellTargets': {
       value: function chooseSpellTargets() {
@@ -724,7 +671,7 @@ MML.Character = function(charName, id) {
     },
     'missileAttack': {
       value: function missileAttack() {
-        var range = MML.getDistanceBetweenChars(this.name, state.MML.GM.currentAction.parameters.target.name);
+        var range = MML.getDistanceBetweenCharacters(this, state.MML.GM.currentAction.parameters.target);
         var task;
         var itemId;
         var grip;
@@ -3082,11 +3029,11 @@ MML.buildHpAttribute = function(character) {
   return hpAttribute;
 };
 
-MML.getDistanceBetweenChars = function(charName, targetName) {
-  var charToken = MML.getTokenFromChar(charName);
-  var targetToken = MML.getTokenFromChar(targetName);
+MML.getDistanceBetweenCharacters = function(character, target) {
+  var charToken = MML.getCharacterToken(character);
+  var targetToken = MML.getCharacterToken(target);
 
-  return MML.getDistanceFeet(charToken.get('left'), targetToken.get('left'), charToken.get('top'), targetToken.get('top'));
+  return MML.pixelsToFeet(MML.getDistanceBetweenTokens);
 };
 
 MML.getAoESpellTargets = function(spellMarker) {
@@ -3104,7 +3051,7 @@ MML.getAoESpellTargets = function(spellMarker) {
 MML.getCharactersWithinRadius = function(left, top, radius) {
   var targets = [];
   _.each(MML.characters, function(character) {
-    var charToken = MML.getTokenFromChar(character.name);
+    var charToken = MML.getCharacterToken(character.name);
     if (!_.isUndefined(charToken) && MML.getDistanceFeet(charToken.get('left'), left, charToken.get('top'), top) < MML.raceSizes[character.race].radius + MML.pixelsToFeet(radius)) {
       targets.push(character.name);
     }
@@ -3116,7 +3063,7 @@ MML.getCharactersWithinRectangle = function(leftOriginal, topOriginal, width, he
   var targets = [];
 
   _.each(MML.characters, function(character) {
-    var charToken = MML.getTokenFromChar(character.name);
+    var charToken = MML.getCharacterToken(character.name);
     var tokenCoordinates = MML.rotateAxes(charToken.get('left') - leftOriginal, charToken.get('top') - topOriginal, rotation);
     var tokenRadius = MML.feetToPixels(MML.raceSizes[character.race].radius);
 
@@ -3136,7 +3083,7 @@ MML.getCharactersWithinTriangle = function(leftOriginal, topOriginal, width, hei
   var targets = [];
 
   _.each(MML.characters, function(character) {
-    var charToken = MML.getTokenFromChar(character.name);
+    var charToken = MML.getCharacterToken(character.name);
     var tokenCoordinates = MML.rotateAxes(charToken.get('left') - leftOriginal, charToken.get('top') - topOriginal, rotation);
     var tokenRadius = MML.feetToPixels(MML.raceSizes[character.race].radius);
     var ax = (-width * (tokenCoordinates[1] - (height / 2))) / (2 * height);
@@ -3366,13 +3313,13 @@ MML.getAoESpellModifier = function(spellMarker, spell) {
 MML.getRangeCastingModifier = function(caster, targets, spell) {
   var mod = 0;
   if (['Caster', 'Touch', 'Single'].indexOf(spell.target) === -1) {
-    var distance = MML.getDistanceBetweenChars(caster.name, spell.name);
+    var distance = MML.getDistanceBetweenTokens(MML.getCharacterToken(caster), MML.getSpellMarkerToken(spell.name));
     if (distance > spell.range) {
       mod += Math.round(((spell.range - distance) / distance) * 10);
     }
   } else {
     _.each(targets, function(target) {
-      var distance = MML.getDistanceBetweenChars(caster.name, target.name);
+      var distance = MML.getDistanceBetweenCharacters(caster, target);
       if (spell.range === 'Caster' && target.name !== caster.name) {
         mod += -10;
       }
