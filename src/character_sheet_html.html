@@ -1,58 +1,3 @@
-
-<!-- <rolltemplate class="sheet-rolltemplate-universal">
-    <table>
-        <tr><th>{{title}}</th></tr>
-        <tr>
-            <td><span class="tcat">Result: </span>{{result}}</td>
-        </tr>
-        <tr>
-            <td><span class="tcat">Range: </span>{{range}}</td>
-        </tr>
-        <tr>
-            <td><span class="tcat">Target: </span>{{target}}</td>
-        </tr>
-        <tr>
-            <td><span class="tcat">Roll: </span>{{value}}</td>
-        </tr>
-        <tr>
-            <td><span class="tcat"> </span>[Change](!changeRoll {{charName}}|{{menuInput}}|?{value})</a></td><td><span class="tcat"> </span>[Accept](!acceptRoll {{charName}}|{{menuInput}})</a></td>
-        </tr>
-    </table>
-</rolltemplate>
-
-<rolltemplate class="sheet-rolltemplate-damage">
-    <table>
-        <tr><th>{{title}}</th></tr>
-        <tr>
-            <td><span class="tcat">Range: </span>{{range}}</td>
-        </tr>
-        <tr>
-            <td><span class="tcat">Damage: </span>{{value}} {{type}}</td>
-        </tr>
-         <tr>
-            <td><span class="tcat"></span>[Change](!changeRoll {{charName}}|{{menuInput}}|?{value})</a></td><td><span class="tcat"> </span>[Accept](!acceptRoll {{charName}}|{{menuInput}})</a></td>
-        </tr>
-    </table>
-</rolltemplate>
-
-<rolltemplate class="sheet-rolltemplate-hitPosition">
-    <table>
-        <tr><th>{{title}}</th></tr>
-        <tr>
-            <td><span class="tcat">Position: </span>{{result}}</td>
-        </tr>
-        <tr>
-            <td><span class="tcat">Range: </span>{{range}}</td>
-        </tr>
-        <tr>
-            <td><span class="tcat">Roll: </span>{{value}}</td>
-        </tr>
-         <tr>
-            <td><span class="tcat"> </span>[Change](!changeRoll {{charName}}|{{menuInput}}|?{value})</a></td><td><span class="tcat"> </span>[Accept](!acceptRoll {{charName}}|{{menuInput}})</a></td>
-        </tr>
-    </table>
-</rolltemplate> -->
-
 <rolltemplate class="sheet-rolltemplate-rollMenuGM">
     <table>
         <tr><th>{{title}}</th></tr>
@@ -75,7 +20,7 @@
     <table>
         <tr><th>Select a Token</th></tr>
         <tr>
-            <td><span class="tcat"></span>[Select](!!MML|selectTarget {{charName}}|@{target|character_name}|{{input}})</td>
+            <td><span class="tcat"></span>[Select](!!MML|selectTarget @{target|character_name})</td>
         </tr>
         <tr>
             <td><span class="tcat"></span>{{back}} </a></td><td><span class="tcat"> </span>{{accept}}</a></td>

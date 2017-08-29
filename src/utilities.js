@@ -524,8 +524,3 @@ MML.genericRollResult = function genericRollResult(roll) {
     '\nRange: ' + roll.range;
   return roll;
 };
-
-//Menu Functions
-MML.displayTargetSelection = function displayTargetSelection(input) {
-  sendChat('', '&{template:selectTarget} {{charName=' + input.charName + '}} {{input=' + MML.hexify(JSON.stringify(input)) + '}}');
-};

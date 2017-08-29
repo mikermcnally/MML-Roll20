@@ -115,7 +115,6 @@ MML.displayThreatZones = function displayThreatZones(toggle) {
   });
 };
 
-// Turn Order Functions
 MML.setTurnOrder = function setTurnOrder(combatants) {
   combatants.sort(function(a, b) { return b.initiative - a.initiative; });
   state.MML.GM.combatants = combatants;
@@ -149,83 +148,12 @@ MML.assignNewItem = function assignNewItem(input) {
   });
 };
 
-// var exampleCommand = {
-//   type: 'player',
-//   who: MML.players[playerName],
-//   callback:'menuCommand',
-//   input: {
-//     rollResult: 'Success'
-//   }
-// };
-
-MML.processCommand = function(command) {
-  try {
-    switch (command.type) {
-      case 'character':
-        var character = MML.characters[command.who];
-        character[command.callback].apply(character, command.input);
-        break;
-      case 'player':
-        var player = MML.players[command.who];
-        player[command.callback].apply(player, command.input);
-        break;
-      case 'GM':
-        MML[command.callback].apply(state.MML.GM, command.input);
-        break;
-      default:
-        break;
-    }
-  } catch (error) {
-    sendChat('', 'processCommand failed');
-    // log(state.MML.GM);
-    // log(MML.players);
-    // log(MML.characters);
-    log(command);
-    log(error.message);
-    log(error.stack);
-  }
-};
-
 MML.parseCommand = function(msg) {
-  var who;
   if (msg.type === 'api' && msg.content.indexOf('!MML|') !== -1) {
-    var command = 'parse failed';
-    var content = msg.content.replace('!MML|', '');
-    who = msg.who.replace(' (GM)', '');
-    var input;
-
-    if (content.indexOf('selectTarget') !== -1) {
-      var stringIn = content.replace('selectTarget ', '').split('|');
-      var character = stringIn[0];
-      var target = stringIn[1];
-      var hexedInput = stringIn[2];
-
-      input = MML.dehexify(hexedInput);
-
-      try {
-        input = JSON.parse(input);
-      } catch (e) {
-        command = 'selectTarget parse failed';
-        sendChat('', command);
-        log(stringIn);
-        log(input);
-        MML.error();
-      }
-      input.target = target;
-
-      command = {
-        type: 'player',
-        who: who,
-        callback: input.callback,
-        input: [input]
-      };
-    } else {
-      command = content;
-      var player = MML.players[who];
-      player.buttonPressed(_.extend(player, {
-        pressedButton: command,
-        selectedCharNames: MML.getSelectedCharNames(msg.selected)
-      }));
-    }
+    var player = MML.players[msg.who.replace(' (GM)', '')];
+    player.buttonPressed(_.extend(player, {
+      pressedButton: msg.content.replace('!MML|', ''),
+      selectedCharNames: MML.getSelectedCharNames(msg.selected)
+    }));
   }
 };

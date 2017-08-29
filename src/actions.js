@@ -162,9 +162,13 @@ MML.processAction = function processAction(player, character, action) {
 };
 
 MML.processAttack = function processAttack(player, character, action) {
+  character.addStatusEffect('Melee This Round', {
+    name: 'Melee This Round'
+  });
+
   var weaponType = action.weaponType;
   if (['Punch', 'Kick', 'Head Butt', 'Bite'].indexOf(weaponType) > -1) {
-    return MML.unarmedAttack(player, character, action);
+    return MML.unarmedAttackAction(player, character, action);
   } else if (['Grapple', 'Place a Hold', 'Break a Hold', 'Break Grapple', 'Takedown', 'Regain Feet'].indexOf(weaponType) > -1) {
     return MML.grappleAttack(player, character, action);
   } else if (MML.isDualWielding(character)) {
@@ -187,32 +191,32 @@ MML.meleeAttackAction = function(player, character, action) {
   // var target = parameters.target;
   // var rolls = currentAction.rolls;
 
-  MML.meleeAttackRoll(action.weapon.task, action.skill);
-  } else if (_.isUndefined(rolls.defenseRoll)) {
-    if (rolls.attackRoll === 'Critical Success' || rolls.attackRoll === 'Success') {
-      target.meleeDefense(attackerWeapon);
-    } else if (rolls.attackRoll === 'Critical Failure') {
-      MML.endAction();
-    } else {
-      MML.endAction();
-    }
-  } else if (_.isUndefined(rolls.hitPositionRoll)) {
-    if (rolls.defenseRoll === 'Critical Success') {
-      target.criticalDefense();
-    } else if (rolls.defenseRoll === 'Success') {
-      MML.endAction();
-    } else {
-      character.hitPositionRoll();
-    }
-  } else if (_.isUndefined(rolls.damageRoll)) {
-    if (rolls.attackRoll === 'Critical Success') {
-      character.meleeDamageRoll(attackerWeapon, true);
-    } else {
-      character.meleeDamageRoll(attackerWeapon, false);
-    }
-  } else {
-    MML.damageTargetAction('endAction');
-  }
+  // MML.meleeAttackRoll(action.weapon.task, action.skill);
+  // } else if (_.isUndefined(rolls.defenseRoll)) {
+  //   if (rolls.attackRoll === 'Critical Success' || rolls.attackRoll === 'Success') {
+  //     target.meleeDefense(attackerWeapon);
+  //   } else if (rolls.attackRoll === 'Critical Failure') {
+  //     MML.endAction();
+  //   } else {
+  //     MML.endAction();
+  //   }
+  // } else if (_.isUndefined(rolls.hitPositionRoll)) {
+  //   if (rolls.defenseRoll === 'Critical Success') {
+  //     target.criticalDefense();
+  //   } else if (rolls.defenseRoll === 'Success') {
+  //     MML.endAction();
+  //   } else {
+  //     character.hitPositionRoll();
+  //   }
+  // } else if (_.isUndefined(rolls.damageRoll)) {
+  //   if (rolls.attackRoll === 'Critical Success') {
+  //     character.meleeDamageRoll(attackerWeapon, true);
+  //   } else {
+  //     character.meleeDamageRoll(attackerWeapon, false);
+  //   }
+  // } else {
+  //   MML.damageTargetAction('endAction');
+  // }
 };
 
 MML.missileAttackAction = function() {
@@ -255,38 +259,40 @@ MML.missileAttackAction = function() {
 };
 
 MML.unarmedAttackAction = function unarmedAttackAction(player, character, action) {
-  var weaponType = action.weaponType;
-  var target = action.target;
+  var weapon = action.weapon;
 
-  return MML.meleeAttackRoll(player, weaponType.task, action.skill)
-  .then(function (attackRoll) {
-    switch (attackRoll) {
-      case 'Critical Success':
-      case 'Success':
-        return MML.meleeDefense(target.player, target, weaponType)
-        .then(function (defenseRoll) {
-          switch (defenseRoll) {
+  return MML.selectTarget(player)
+  .then(function (target) {
+    return MML.meleeAttackRoll(player, character, weapon.task, action.skill)
+    .then(function ([player, attackRoll]) {
+      switch (attackRoll.result) {
+        case 'Critical Success':
+        case 'Success':
+        return MML.meleeDefense(target.player, target, weapon)
+        .then(function ([player, defenseRoll]) {
+          switch (defenseRoll.result) {
             case 'Critical Success':
-              return MML.criticalDefense(target.player, target)
-              .then(MML.endAction(player, character, action));
+            return MML.criticalDefense(target.player, target)
+            .then(MML.endAction(player, character, action));
             case 'Success':
-              return MML.endAction(player, character, action);
+            return MML.endAction(player, character, action);
             case 'Critical Failure':
             case 'Failure':
-              return MML.hitPositionRoll(character)
-              .then(function (hitPosition) {
-                return MML.meleeDamageRoll(character, weaponType, attackRoll)
-                .then(function (damageRoll) {
-                  return MML.damageTargetAction(hitPosition, damageRoll)
-                  .then(MML.endAction(player, character, action));
-                });
+            return MML.hitPositionRoll(character)
+            .then(function ([player, hitPosition]) {
+              return MML.meleeDamageRoll(character, weapon, attackRoll)
+              .then(function ([player, damageRoll]) {
+                return MML.damageTargetAction(hitPosition.result, damageRoll.result)
+                .then(MML.endAction(player, character, action));
               });
+            });
           }
         });
-      case 'Critical Failure':
-      case 'Failure':
-      return MML.endAction(player, character, action);
-    }
+        case 'Critical Failure':
+        case 'Failure':
+        return MML.endAction(player, character, action);
+      }
+    });
   });
 };
 
@@ -466,20 +472,11 @@ MML.nextTarget = function() {
   MML[state.MML.GM.currentAction.callback]();
 };
 
-MML.endAction = function() {
-  var currentAction = state.MML.GM.currentAction;
-  var character = currentAction.character;
-
-  if (character.action.name === 'Attack') {
-    character.addStatusEffect('Melee This Round', {
-      name: 'Melee This Round'
-    });
-  }
-
+MML.endAction = function(player, character, action) {
   character.spentInitiative = character.spentInitiative + character.actionTempo;
   character.previousAction = MML.clone(character.action);
   character.updateCharacter();
-  _.each(currentAction.targetArray, function(target) {
+  _.each(action.targetArray, function(target) {
     MML.characters[target].updateCharacter();
   });
 
