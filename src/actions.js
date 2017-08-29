@@ -91,7 +91,7 @@ MML.actionBuildMenu = function actionBuildMenu([player, character, action]) {
           weapon: MML.getEquippedWeapon(character)
         }]);
       case 'Accept':
-        character.setAction(action);
+        MML.setAction(character, action);
         return player;
     }
   });
@@ -116,56 +116,78 @@ MML.processAction = function processAction(player, character, action) {
       MML.equipItem(character, item.itemId, item.grip);
     });
   }
+  switch (action.name) {
+    case 'Attack':
+      return MML.processAttack(player, character, action);
+    default:
 
-  if (_.contains(action.modifiers, 'Release Opponent')) {
-    var targetName = _.has(character.statusEffects, 'Holding') ? character.statusEffects['Holding'].targets[0] : character.statusEffects['Grappled'].targets[0];
-    state.MML.GM.currentAction.parameters = {
-      target: MML.characters[targetName]
-    };
-    MML.releaseOpponentAction(player, character, action);
-  } else if (action.name === 'Cast') {
-    action.spell.actions--;
-    if (action.spell.actions > 0) {
-      character.player.charMenuContinueCasting(character.name);
-      character.player.displayMenu();
-    } else {
-      var currentAction = {
-        callback: 'castAction',
-        parameters: {
-          spell: action.spell,
-          casterSkill: action.skill,
-          epCost: MML.getEpCost(action.skillName, action.skill, action.spell.ep),
-          metaMagic: {
-            base: {
-              epMod: 1,
-              castingMod: 0
-            }
-          }
-        },
-        rolls: {}
-      };
+  }
+  // if (_.contains(action.modifiers, 'Release Opponent')) {
+  //   var targetName = _.has(character.statusEffects, 'Holding') ? character.statusEffects['Holding'].targets[0] : character.statusEffects['Grappled'].targets[0];
+  //   state.MML.GM.currentAction.parameters = {
+  //     target: MML.characters[targetName]
+  //   };
+  //   MML.releaseOpponentAction(player, character, action);
+  // } else if (action.name === 'Cast') {
+  //   action.spell.actions--;
+  //   if (action.spell.actions > 0) {
+  //     character.player.charMenuContinueCasting(character.name);
+  //     character.player.displayMenu();
+  //   } else {
+  //     var currentAction = {
+  //       callback: 'castAction',
+  //       parameters: {
+  //         spell: action.spell,
+  //         casterSkill: action.skill,
+  //         epCost: MML.getEpCost(action.skillName, action.skill, action.spell.ep),
+  //         metaMagic: {
+  //           base: {
+  //             epMod: 1,
+  //             castingMod: 0
+  //           }
+  //         }
+  //       },
+  //       rolls: {}
+  //     };
+  //
+  //     state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, currentAction);
+  //     character.player.charMenuMetaMagic(character.name);
+  //     character.player.displayMenu();
+  //   }
+  // } else if (!_.isUndefined(action.getTargets)) {
+  //   character[action.getTargets]();
+  // } else {
+  //   MML[action.callback]();
+  // }
+};
 
-      state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, currentAction);
-      character.player.charMenuMetaMagic(character.name);
-      character.player.displayMenu();
-    }
-  } else if (!_.isUndefined(action.getTargets)) {
-    character[action.getTargets]();
+MML.processAttack = function processAttack(player, character, action) {
+  var weaponType = action.weaponType;
+  if (['Punch', 'Kick', 'Head Butt', 'Bite'].indexOf(weaponType) > -1) {
+    return MML.unarmedAttack(player, character, action);
+  } else if (['Grapple', 'Place a Hold', 'Break a Hold', 'Break Grapple', 'Takedown', 'Regain Feet'].indexOf(weaponType) > -1) {
+    return MML.grappleAttack(player, character, action);
+  } else if (MML.isDualWielding(character)) {
+    return MML.dualWieldAttack(player, character, action);
+  } else if (MML.isWieldingMissileWeapon(character)) {
+    return MML.missileAttack(player, character, action);
+  } else if (MML.isWieldingThrowingWeapon(character)) {
+    return MML.throwingAttack(player, character, action);
   } else {
-    MML[action.callback]();
-  }};
+    return MML.meleeAttack(player, character, action);
+  }
+};
 
-MML.meleeAttackAction = function() {
-  var currentAction = state.MML.GM.currentAction;
-  var character = currentAction.character;
-  var parameters = currentAction.parameters;
-  var attackerSkill = parameters.attackerSkill;
-  var attackerWeapon = parameters.attackerWeapon;
-  var target = parameters.target;
-  var rolls = currentAction.rolls;
+MML.meleeAttackAction = function(player, character, action) {
+  // var currentAction = state.MML.GM.currentAction;
+  // var character = currentAction.character;
+  // var parameters = currentAction.parameters;
+  // var attackerSkill = parameters.attackerSkill;
+  // var attackerWeapon = parameters.attackerWeapon;
+  // var target = parameters.target;
+  // var rolls = currentAction.rolls;
 
-  if (_.isUndefined(rolls.attackRoll)) {
-    character.meleeAttackRoll('attackRoll', attackerWeapon.task, attackerSkill);
+  MML.meleeAttackRoll(action.weapon.task, action.skill);
   } else if (_.isUndefined(rolls.defenseRoll)) {
     if (rolls.attackRoll === 'Critical Success' || rolls.attackRoll === 'Success') {
       target.meleeDefense(attackerWeapon);

@@ -42,7 +42,7 @@ MML.newRoundUpdate = function newRoundUpdate(character) {
 };
 
 MML.rollInitiative = function rollInitiative([player, character, action]) {
-  character.setAction(action);
+  MML.setAction(character, action);
   var modifiers = [character.situationalInitBonus,
     character.movementRatioInitBonus,
     character.attributeInitBonus,
@@ -57,6 +57,48 @@ MML.rollInitiative = function rollInitiative([player, character, action]) {
     character.setReady(true);
     return player;
   });
+};
+
+MML.setAction = function setAction(character, action) {
+  var initBonus = 10;
+
+  if (action.name === 'Attack' || action.name === 'Aim') {
+    if (MML.isUnarmedAction(action) || action.weapon === 'unarmed'
+    ) {
+      if (!_.isUndefined(character.weaponSkills['Brawling']) && character.weaponSkills['Brawling'].level > character.weaponSkills['Default Martial'].level) {
+        action.skill = character.weaponSkills['Brawling'].level;
+      } else {
+        action.skill = character.weaponSkills['Default Martial'].level;
+      }
+      // } else if (leftHand !== 'unarmed' && rightHand !== 'unarmed') {
+      //   var weaponInits = [character.inventory[character.leftHand._id].grips[character.leftHand.grip].initiative,
+      //     character.inventory[character.rightHand._id].grips[character.rightHand.grip].initiative
+      //   ];
+      //   initBonus = _.min(weaponInits);
+      // action.skill = character.weaponSkills.[character.inventory[character.leftHand._id].name].level or character.weaponSkills['Default Martial Skill'].level;
+      //Dual Wielding
+    } else {
+      initBonus = action.weapon.initiative;
+      action.skill = MML.getWeaponSkill(character, action.weapon);
+    }
+  } else if (action.name === 'Cast') {
+    var skillInfo = MML.getMagicSkill(character, action.spell);
+    action.skill = skillInfo.level;
+    action.skillName = skillInfo.name;
+  }
+  if (state.MML.GM.roundStarted === false) {
+    character.firstActionInitBonus = initBonus;
+  }
+
+  if (_.isUndefined(character.previousAction) || character.previousAction.ts !== action.ts) {
+    _.each(action.modifiers, function(modifier) {
+      character.addStatusEffect(modifier, {
+        ts: action.ts,
+        startingRound: state.MML.GM.currentRound
+      });
+    });
+  }
+  character.action = action;
 };
 
 // Character Creation
@@ -510,92 +552,6 @@ MML.Character = function(charName, id) {
       }
     },
 
-    'setAction': {
-      value: function setAction(action) {
-        var initBonus = 10;
-
-        if (action.name === 'Attack' || action.name === 'Aim') {
-          if (MML.isUnarmedAction(action) || action.weapon === 'unarmed'
-          ) {
-            if (!_.isUndefined(this.weaponSkills['Brawling']) && this.weaponSkills['Brawling'].level > this.weaponSkills['Default Martial'].level) {
-              action.skill = this.weaponSkills['Brawling'].level;
-            } else {
-              action.skill = this.weaponSkills['Default Martial'].level;
-            }
-            // } else if (leftHand !== 'unarmed' && rightHand !== 'unarmed') {
-            //   var weaponInits = [this.inventory[this.leftHand._id].grips[this.leftHand.grip].initiative,
-            //     this.inventory[this.rightHand._id].grips[this.rightHand.grip].initiative
-            //   ];
-            //   initBonus = _.min(weaponInits);
-            // action.skill = this.weaponSkills.[this.inventory[this.leftHand._id].name].level or this.weaponSkills['Default Martial Skill'].level;
-            //Dual Wielding
-          } else {
-            initBonus = action.weapon.initiative;
-            action.skill = MML.getWeaponSkill(this, action.weapon);
-          }
-        } else if (action.name === 'Cast') {
-          var skillInfo = MML.getMagicSkill(this, action.spell);
-          action.skill = skillInfo.level;
-          action.skillName = skillInfo.name;
-        }
-        if (state.MML.GM.roundStarted === false) {
-          this.firstActionInitBonus = initBonus;
-        }
-
-        if (_.isUndefined(this.previousAction) || this.previousAction.ts !== action.ts) {
-          _.each(action.modifiers, function(modifier) {
-            this.addStatusEffect(modifier, {
-              ts: action.ts,
-              startingRound: state.MML.GM.currentRound
-            });
-          }, this);
-        }
-        this.action = action;
-      }
-    },
-    'initiativeRoll': {
-      value: function initiativeRoll() {
-        var rollValue = MML.rollDice(1, 10);
-        this.setAction();
-        this.player.currentRoll = {
-          character: this.name,
-          name: 'initiative',
-          value: rollValue,
-          callback: 'initiativeResult',
-          range: '1-10',
-          accepted: false
-        };
-        this.initiativeResult();
-      }
-    },
-    'initiativeResult': {
-      value: function initiativeResult() {
-        this.player.currentRoll.rollResult =
-          this.player.currentRoll.value +
-          this.situationalInitBonus +
-          this.movementRatioInitBonus +
-          this.attributeInitBonus +
-          this.senseInitBonus +
-          this.fomInitBonus +
-          this.firstActionInitBonus +
-          this.spentInitiative;
-
-        this.player.currentRoll.message =
-          'Roll: ' + this.player.currentRoll.value +
-          '\nResult: ' + this.player.currentRoll.rollResult +
-          '\nRange: ' + this.player.currentRoll.range;
-
-        this.displayRoll('initiativeApply');
-      }
-    },
-    'initiativeApply': {
-      value: function initiativeApply() {
-        this.initiativeRollValue = this.player.currentRoll.value;
-        this.setReady(true);
-        this.player.prepareNextCharacter();
-      }
-    },
-
     'chooseSpellTargets': {
       value: function chooseSpellTargets() {
         if (['Caster', 'Touch', 'Single'].indexOf(this.action.spell.target) > -1) {
@@ -630,31 +586,6 @@ MML.Character = function(charName, id) {
         }
       }
     },
-    'processAttack': {
-      value: function processAttack() {
-        var weaponType = this.action.weaponType;
-        if (['Punch', 'Kick', 'Head Butt', 'Bite'].indexOf(weaponType) > -1) {
-          this.unarmedAttack();
-        } else if (['Grapple', 'Place a Hold', 'Break a Hold', 'Break Grapple', 'Takedown', 'Regain Feet'].indexOf(weaponType) > -1) {
-          this.grappleAttack();
-        } else if (MML.isDualWielding(this)) {
-          this.dualWieldAttack();
-        } else if (MML.getWeaponFamily(this, 'leftHand') === 'MWD' || MML.getWeaponFamily(this, 'leftHand') === 'MWM') {
-          this.missileAttack();
-        } else if (MML.getWeaponFamily(this, 'leftHand') === 'TWH' ||
-          MML.getWeaponFamily(this, 'rightHand') === 'TWH' ||
-          MML.getWeaponFamily(this, 'leftHand') === 'TWK' ||
-          MML.getWeaponFamily(this, 'rightHand') === 'TWK' ||
-          MML.getWeaponFamily(this, 'leftHand') === 'TWS' ||
-          MML.getWeaponFamily(this, 'rightHand') === 'TWS' ||
-          MML.getWeaponFamily(this, 'leftHand') === 'SLI' ||
-          MML.getWeaponFamily(this, 'rightHand') === 'SLI') {
-          this.throwingAttack();
-        } else {
-          this.meleeAttack();
-        }
-      }
-    },
     'meleeAttack': {
       value: function meleeAttack() {
         var characterWeaponInfo = MML.getCharacterWeaponAndSkill(this);
@@ -665,8 +596,8 @@ MML.Character = function(charName, id) {
       }
     },
     'meleeAttackRoll': {
-      value: function meleeAttackRoll(rollName, task, skill) {
-        MML.universalRoll(this, rollName, [task, skill, this.situationalMod, this.meleeAttackMod, this.attributeMeleeAttackMod], 'attackRollResult');
+      value: function meleeAttackRoll(character, task, skill) {
+        MML.universalRoll(rollName, [this.situationalMod, this.meleeAttackMod, this.attributeMeleeAttackMod, task, skill], 'attackRollResult');
       }
     },
     'missileAttack': {
@@ -2903,9 +2834,20 @@ MML.getWeaponSkill = function(character, weapon) {
 };
 
 MML.isWieldingRangedWeapon = function(character) {
+  return MML.isWieldingMissileWeapon(character) || MML.isWieldingThrowingWeapon(character);
+};
+
+MML.isWieldingMissileWeapon = function isWieldingMissileWeapon(character) {
   var leftFamily = MML.getWeaponFamily(character, 'leftHand');
   var rightFamily = MML.getWeaponFamily(character, 'rightHand');
-  var rangedFamilies = ['MWD', 'MWM', 'TWH', 'TWK', 'TWS', 'SLI'];
+  var rangedFamilies = ['MWD', 'MWM'];
+  return (rangedFamilies.indexOf(leftFamily) > -1 || rangedFamilies.indexOf(rightFamily) > -1);
+};
+
+MML.isWieldingThrowingWeapon = function isWieldingThrowingWeapon(character) {
+  var leftFamily = MML.getWeaponFamily(character, 'leftHand');
+  var rightFamily = MML.getWeaponFamily(character, 'rightHand');
+  var rangedFamilies = ['TWH', 'TWK', 'TWS', 'SLI'];
   return (rangedFamilies.indexOf(leftFamily) > -1 || rangedFamilies.indexOf(rightFamily) > -1);
 };
 
