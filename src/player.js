@@ -135,8 +135,10 @@ MML.prepareAttackAction = function prepareAttackAction([player, character, actio
     if (!MML.isWieldingRangedWeapon(character)) {
       if (!MML.isUnarmed(character) && action.weapon.secondaryType !== '') {
         return MML.chooseDamageType([player, character, action]).then(MML.setDamageType);
-      } else if (MML.isUnarmedAction(action)) {
-        action.weaponType = 'primary';
+      } else {
+        if (!MML.isUnarmedAction(action)) {
+          action.weaponType = 'primary';
+        }
         return [player, character, action];
       }
     }
