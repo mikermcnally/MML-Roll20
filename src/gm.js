@@ -9,7 +9,7 @@ MML.startCombat = function startCombat(player) {
       var character = MML.characters[charName];
       gm.combatants.push(character);
       character.player.combatants.push(character);
-      character.setReady(false);
+      MML.setReady(character, false);
       character.setCombatVision();
     });
     MML.setTurnOrder(gm.combatants);

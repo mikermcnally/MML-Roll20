@@ -15,7 +15,7 @@ MML.buildAction = function buildAction(player, character) {
     }])
     .catch(log);
   } else {
-    character.setReady(true);
+    MML.setReady(character, true);
     return [player, character, {
       ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
       modifiers: [],
@@ -162,7 +162,7 @@ MML.processAction = function processAction(player, character, action) {
 };
 
 MML.processAttack = function processAttack(player, character, action) {
-  character.addStatusEffect('Melee This Round', {
+  MML.addStatusEffect(character, 'Melee This Round', {
     name: 'Melee This Round'
   });
 
@@ -219,10 +219,7 @@ MML.meleeAttackAction = function(player, character, action) {
   // }
 };
 
-MML.missileAttackAction = function() {
-  var currentAction = state.MML.GM.currentAction;
-  var character = currentAction.character;
-  var parameters = currentAction.parameters;
+MML.missileAttackAction = function(player, character, action) {
   var attackerSkill = parameters.attackerSkill;
   var attackerWeapon = parameters.attackerWeapon;
   var target = parameters.target;
@@ -230,10 +227,10 @@ MML.missileAttackAction = function() {
   var rolls = currentAction.rolls;
 
   if (_.isUndefined(rolls.attackRoll)) {
-    character.missileAttackRoll('attackRoll', attackerWeapon.task, attackerSkill, target);
+    MML.missileAttackRoll(character, 'attackRoll', attackerWeapon.task, attackerSkill, target);
   } else if (_.isUndefined(rolls.defenseRoll)) {
     if (rolls.attackRoll === 'Critical Success' || rolls.attackRoll === 'Success') {
-      target.rangedDefense(attackerWeapon, range);
+      MML.rangedDefense(target, attackerWeapon, range);
     } else if (rolls.attackRoll === 'Critical Failure') {
       MML.endAction();
     } else {
@@ -241,17 +238,17 @@ MML.missileAttackAction = function() {
     }
   } else if (_.isUndefined(rolls.hitPositionRoll)) {
     if (rolls.defenseRoll === 'Critical Success') {
-      target.criticalDefense();
+      MML.criticalDefense(target, character);
     } else if (rolls.defenseRoll === 'Success') {
       MML.endAction();
     } else {
-      character.hitPositionRoll();
+      MML.hitPositionRoll(player, target, action);
     }
   } else if (_.isUndefined(rolls.damageRoll)) {
     if (rolls.attackRoll === 'Critical Success') {
-      character.missileDamageRoll(attackerWeapon, true);
+      MML.missileDamageRoll(character, attackerWeapon, true);
     } else {
-      character.missileDamageRoll(attackerWeapon, false);
+      MML.missileDamageRoll(character, attackerWeapon, false);
     }
   } else {
     MML.damageTargetAction('endAction');
@@ -261,7 +258,7 @@ MML.missileAttackAction = function() {
 MML.unarmedAttackAction = function unarmedAttackAction(player, character, action) {
   var weapon = action.weapon;
 
-  return MML.selectTarget(player)
+  return MML.getSingleTarget(player)
   .then(function (target) {
     return MML.meleeAttackRoll(player, character, weapon.task, action.skill)
     .then(function ([player, attackRoll]) {
@@ -296,10 +293,7 @@ MML.unarmedAttackAction = function unarmedAttackAction(player, character, action
   });
 };
 
-MML.grappleAttackAction = function() {
-  var currentAction = state.MML.GM.currentAction;
-  var character = currentAction.character;
-  var parameters = currentAction.parameters;
+MML.grappleAttackAction = function(player, character, action) {
   var attackerSkill = parameters.attackerSkill;
   var weaponType = parameters.weaponType;
   var target = parameters.target;
@@ -308,7 +302,7 @@ MML.grappleAttackAction = function() {
   var rolls = currentAction.rolls;
 
   if (_.isUndefined(rolls.attackRoll)) {
-    character.meleeAttackRoll('attackRoll', weaponType.task, attackerSkill);
+    MML.meleeAttackRoll(character, 'attackRoll', weaponType.task, attackerSkill);
   } else if (_.isUndefined(rolls.brawlDefenseRoll) && _.isUndefined(rolls.weaponDefenseRoll)) {
     if (rolls.attackRoll === 'Critical Success' || rolls.attackRoll === 'Success') {
       target.grappleDefense(weaponType);
@@ -323,7 +317,7 @@ MML.grappleAttackAction = function() {
     } else if (rolls.brawlDefenseRoll === 'Success') {
       MML.endAction();
     } else {
-      character.grappleHandler(target, weaponType.name);
+      MML.grappleHandler(character, target, weaponType.name);
     }
   } else if (!_.isUndefined(rolls.weaponDefenseRoll) && _.isUndefined(rolls.hitPositionRoll)) {
     if (rolls.weaponDefenseRoll === 'Critical Success' || rolls.weaponDefenseRoll === 'Success') {
@@ -331,7 +325,7 @@ MML.grappleAttackAction = function() {
       state.MML.GM.currentAction.parameters.defender = target;
       target.hitPositionRoll();
     } else {
-      character.grappleHandler(target, weaponType.name);
+      MML.grappleHandler(character, target, weaponType.name);
     }
   } else if (!_.isUndefined(rolls.hitPositionRoll) && _.isUndefined(rolls.damageRoll)) {
     if (rolls.weaponDefenseRoll === 'Critical Success') {
@@ -344,22 +338,19 @@ MML.grappleAttackAction = function() {
   }
 };
 
-MML.releaseOpponentAction = function() {
-  var currentAction = state.MML.GM.currentAction;
-  var character = currentAction.character;
-  var parameters = currentAction.parameters;
+MML.releaseOpponentAction = function(player, character, action) {
   var target = parameters.target;
   var rolls = currentAction.rolls;
 
   if (_.isUndefined(parameters.targetAgreed)) {
     if (_.has(character.statusEffects, 'Holding')) {
-      character.releaseHold(target);
+      MML.releaseHold(character, target);
     } else {
       target.player.charMenuResistRelease(target.name, character, target);
       target.player.displayMenu();
     }
   } else if (parameters.targetAgreed) {
-    character.releaseGrapple(target);
+    MML.releaseGrapple(character, target);
   } else {
     character.action = {
       ts: Date.now(),
@@ -378,11 +369,11 @@ MML.releaseOpponentAction = function() {
   }
 };
 
-MML.castAction = function() {
-  MML.spells[state.MML.GM.currentAction.parameters.spell.name].process();
+MML.castAction = function(player, character, action) {
+  MML.spells[action.spell.name].process(player, character, action);
 };
 
-MML.damageTargetAction = function(callback) {
+MML.damageTargetAction = function() {
   var currentAction = state.MML.GM.currentAction;
   var parameters = currentAction.parameters;
   var target = parameters.target;
@@ -410,7 +401,7 @@ MML.observeAction = function() {
   var currentAction = state.MML.GM.currentAction;
   var character = currentAction.character;
 
-  character.addStatusEffect('Observing', {
+  MML.addStatusEffect(character, 'Observing', {
     id: generateRowID(),
     name: 'Observing',
     startingRound: state.MML.GM.currentRound
@@ -428,7 +419,7 @@ MML.aimAction = function() {
   var rolls = currentAction.rolls;
 
   if (!_.has(character.statusEffects, 'Taking Aim')) {
-    character.addStatusEffect('Taking Aim', {
+    MML.addStatusEffect(character, 'Taking Aim', {
       id: generateRowID(),
       name: 'Taking Aim',
       level: 1,
@@ -462,7 +453,7 @@ MML.aimAction = function() {
 };
 
 MML.reloadAction = function() {
-  state.MML.GM.currentAction.character.reloadWeapon();
+  MML.reloadWeapon(character, );
 };
 
 MML.nextTarget = function() {
@@ -475,7 +466,7 @@ MML.nextTarget = function() {
 MML.endAction = function(player, character, action) {
   character.spentInitiative = character.spentInitiative + character.actionTempo;
   character.previousAction = MML.clone(character.action);
-  character.updateCharacter();
+  MML.updateCharacter(character, );
   _.each(action.targetArray, function(target) {
     MML.characters[target].updateCharacter();
   });
