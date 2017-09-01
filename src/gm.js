@@ -10,7 +10,7 @@ MML.startCombat = function startCombat(player) {
       gm.combatants.push(character);
       character.player.combatants.push(character);
       MML.setReady(character, false);
-      character.setCombatVision();
+      MML.setCombatVision(character);
     });
     MML.setTurnOrder(gm.combatants);
     Campaign().set('initiativepage', 'true');

@@ -72,9 +72,9 @@ MML.spells['Dart'] = {
       character.alterEP(-1 * epCost * _.reduce(_.pluck(metaMagic, 'epMod'), function(memo, num) { return memo * num; }));
     } else {
       if (_.isUndefined(targetArray[state.MML.GM.currentAction.targetIndex + 1])) {
-        MML.damageTargetAction('endAction');
+        MML.damageCharacter('endAction');
       } else {
-        MML.damageTargetAction('nextTarget');
+        MML.damageCharacter('nextTarget');
       }
     }
   }
@@ -148,9 +148,9 @@ MML.spells['Hail of Stones'] = {
       character.alterEP(-1 * epCost * _.reduce(_.pluck(metaMagic, 'epMod'), function(memo, num) { return memo * num; }));
     } else {
       if (_.isUndefined(state.MML.GM.currentAction.targetArray[state.MML.GM.currentAction.targetIndex + 1])) {
-        MML.damageTargetAction('endAction');
+        MML.damageCharacter('endAction');
       } else {
-        MML.damageTargetAction('nextTarget');
+        MML.damageCharacter('nextTarget');
       }
     }
   }

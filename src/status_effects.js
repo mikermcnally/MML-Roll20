@@ -46,7 +46,7 @@ MML.statusEffects['Mortal Wound'] = function(effect, index) {
   }
 };
 MML.statusEffects['Wound Fatigue'] = function(effect, index) {
-  if (this.hp['Multiple Wounds'] > -1) {
+  if (this.hp['Wound Fatigue'] > -1) {
     delete this.statusEffects[index];
   } else {
     if (this.situationalInitBonus !== 'No Combat') {

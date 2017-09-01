@@ -181,11 +181,11 @@ on('ready', function() {
         roll = 20;
       }
       MML.setCurrentAttribute(character.name, attrName, roll);
-      character.updateCharacterSheet();
+      MML.updateCharacterSheet(character);
     } else if (attrName === 'player') {
       character.setPlayer();
     } else if (attrName != 'tab') {
-      character.updateCharacterSheet();
+      MML.updateCharacterSheet(character);
     }
   });
 });

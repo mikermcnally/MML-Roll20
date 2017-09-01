@@ -442,13 +442,13 @@ MML.universalRollResult = function universalRollResult(roll) {
   return roll;
 };
 
-MML.attributeCheckRoll = function attributeCheckRoll(name, character, attribute, mods) {
+MML.attributeCheckRoll = function attributeCheckRoll(name, attribute, mods) {
   var roll = {
     type: 'attribute',
     name: name,
     range: '1-20',
     value: MML.rollDice(1, 20),
-    target: character[attribute] + MML.sumModifiers(modifiers),
+    target: attribute + MML.sumModifiers(modifiers),
     modifiers: modifiers
   };
 

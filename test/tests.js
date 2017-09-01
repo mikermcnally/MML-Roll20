@@ -71,6 +71,7 @@ function runTests() {
         startTestCombat(player, _.pluck(MML.characters, 'name'))
           .then(setActionPunchAttack)
           .then(clickButton('Roll'))
+          .then(clickButton('Roll'))
           .then(clickButton('changeRoll eleventy'))
           .then(clickButton('changeRoll 11'))
           .then(clickButton('changeRoll 1'))
@@ -78,17 +79,34 @@ function runTests() {
           .then(clickButton('acceptRoll'))
           .then(clickButton('acceptRoll'))
           .then(clickButton('Observe'))
+          .then(clickButton('Observe'))
           .then(clickButton('Roll'))
           .then(clickButton('acceptRoll'))
           .then(clickButton('acceptRoll'))
           .then(clickButton('Movement Only'))
           .then(clickButton('Roll'))
+          // .then(clickButton('Roll'))
           .then(clickButton('acceptRoll'))
           .then(clickButton('acceptRoll'))
           .then(clickButton('Start Round'))
           .then(clickButton('Start Action'))
-          // .then(function (input) { console.log(input); return player; })
+          .then(clickButton('changeRoll 80'))
+          .then(clickButton('acceptRoll'))
+          .then(clickButton('acceptRoll'))
+          .then(clickButton('End Movement'))
+          .then(clickButton('selectTarget test1'))
+          .then(clickButton('Roll'))
+          .then(clickButton('changeRoll 10'))
+          .then(clickButton('acceptRoll'))
+          .then(clickButton('acceptRoll'))
+          .then(clickButton('Block: 15%'))
+          .then(clickButton('changeRoll 16'))
+          .then(clickButton('acceptRoll'))
+          .then(clickButton('acceptRoll'))
           // .then(idkWhatImDoing)
+          // .then(console.log)
+          // .then(clickButton('Start Action'))
+          // .then(function (input) { console.log(input); return player; })
           .catch(console.log);
       });
     });
@@ -475,7 +493,7 @@ function pbcopy(data) {
 //   .then(setTestRoll(player, 1))
 //   .then(setTestRoll(player, 1))
 //   expect(MML.characters['test1'].hp.Head, 'punch action should do 1 damage').to.equal(MML.characters['test1'].hpMax.Head - 1);
-//   expect(MML.characters['test1'].hp['Multiple Wounds'], 'punch action should do 1 damage').to.equal(MML.characters['test1'].hpMax['Multiple Wounds'] - 1);
+//   expect(MML.characters['test1'].hp['Wound Fatigue'], 'punch action should do 1 damage').to.equal(MML.characters['test1'].hpMax['Wound Fatigue'] - 1);
 //   expect(MML.characters['test1'].knockdown, 'punch action should do 1 knockdown').to.equal(MML.characters['test1'].knockdownMax - 1);
 //   expect(MML.characters['test0'].spentInitiative, 'punch action should cost 25 initiative').to.equal(-25);
 //   expect(MML.characters['test0'].statusEffects, 'punch action should create "Melee This Round" status effect for attacker').to.have.property("Melee This Round");
@@ -511,7 +529,7 @@ function pbcopy(data) {
 //   .then(setTestRoll(player, 1);
 //   expect(MML.characters['test1'].statusEffects, 'being attacked should remove "Observing" status effect').not.to.have.property("Observing");
 //   expect(MML.characters['test1'].hp.Head, 'damage should accumlate').to.equal(MML.characters['test1'].hpMax.Head - 2);
-//   expect(MML.characters['test1'].hp['Multiple Wounds'], 'damage should accumlate').to.equal(MML.characters['test1'].hpMax['Multiple Wounds'] - 2);
+//   expect(MML.characters['test1'].hp['Wound Fatigue'], 'damage should accumlate').to.equal(MML.characters['test1'].hpMax['Wound Fatigue'] - 2);
 //   expect(MML.characters['test1'].knockdown, 'knockdown should accumlate damage taken this round').to.equal(MML.characters['test1'].knockdownMax - 2);
 //   .then(executeObserve(player))
 //   .then(executeObserve(player))
@@ -576,7 +594,7 @@ function pbcopy(data) {
 //   expect(MML.characters['test1'].rangedDefenseMod, '2 defenses should add -40 to rangedDefenseMod').to.equal(-40);
 //   expect(MML.characters['test1'].meleeDefenseMod, '2 defenses should add -40 to meleeDefenseMod').to.equal(-40);
 //   expect(MML.characters['test1'].hp.Head, 'damage should accumlate').to.equal(MML.characters['test1'].hpMax.Head - 3);
-//   expect(MML.characters['test1'].hp['Multiple Wounds'], 'damage should accumlate').to.equal(MML.characters['test1'].hpMax['Multiple Wounds'] - 3);
+//   expect(MML.characters['test1'].hp['Wound Fatigue'], 'damage should accumlate').to.equal(MML.characters['test1'].hpMax['Wound Fatigue'] - 3);
 //   expect(MML.characters['test1'].knockdown, 'knockdown should only consider damage from this round').to.equal(MML.characters['test1'].knockdownMax - 1);
 //   .then(executeObserve(player))
 //   .then(executeObserve(player))
@@ -585,7 +603,7 @@ function pbcopy(data) {
 //   expect(MML.characters['test1'].rangedDefenseMod, 'new rounds should remove "Number of Defenses" status effect -40 penalty to rangedDefenseMod').to.equal(0);
 //   expect(MML.characters['test1'].meleeDefenseMod, 'new rounds should remove "Number of Defenses" status effect -40 penalty to meleeDefenseMod').to.equal(0);
 //   expect(MML.characters['test1'].hp.Head, 'damage should accumlate').to.equal(MML.characters['test1'].hpMax.Head - 3);
-//   expect(MML.characters['test1'].hp['Multiple Wounds'], 'damage should accumlate').to.equal(MML.characters['test1'].hpMax['Multiple Wounds'] - 3);
+//   expect(MML.characters['test1'].hp['Wound Fatigue'], 'damage should accumlate').to.equal(MML.characters['test1'].hpMax['Wound Fatigue'] - 3);
 //   expect(MML.characters['test1'].knockdown, 'knockdown should only consider damage from this round').to.equal(MML.characters['test1'].knockdownMax);
 //   expect(state.MML.GM.currentRound, 'currentRound should be incremented').to.equal(3);
 // .catch(console.log);
@@ -1786,7 +1804,7 @@ function pbcopy(data) {
 //   .then(setTestRoll(player, 8);
 //   .then(setTestRoll(player, 3);
 //   expect(MML.characters['test0'].statusEffects, 'shooting should remove "Taking Aim" status effect').not.to.have.property("Taking Aim");
-//   expect(MML.characters['test2'].hp['Multiple Wounds'], 'Minor wounds should subtract from Multple Wounds').to.equal(MML.characters['test2'].hpMax['Multiple Wounds'] - 3);
+//   expect(MML.characters['test2'].hp['Wound Fatigue'], 'Minor wounds should subtract from Multple Wounds').to.equal(MML.characters['test2'].hpMax['Wound Fatigue'] - 3);
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
 //   player.setCurrentCharacterTargets({
@@ -1875,7 +1893,7 @@ function pbcopy(data) {
 //   .then(setTestRoll(player, 10);
 //   .then(clickButton('Roll Willpower');
 //   .then(setTestRoll(player, 10);
-//   expect(MML.characters['test2'].hp['Multiple Wounds'], 'Damage beyond minor wounds should not subtract from Multple Wounds').to.equal(MML.characters['test2'].hpMax['Multiple Wounds'] - 8);
+//   expect(MML.characters['test2'].hp['Wound Fatigue'], 'Damage beyond minor wounds should not subtract from Multple Wounds').to.equal(MML.characters['test2'].hpMax['Wound Fatigue'] - 8);
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
 //   .then(clickButton('End Action');
