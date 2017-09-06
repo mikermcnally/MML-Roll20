@@ -143,7 +143,7 @@ MML.getAdditionalTarget = function getAdditionalTarget(target) {
   this.player.displayMenu();
 };
 
-MML.getRadiusSpellTargets = function getRadiusSpellTargets(radius) {
+MML.getRadiusSpellTargets = function getRadiusSpellTargets(player, radius) {
   state.MML.GM.currentAction.parameters.spellMarker = 'spellMarkerCircle';
   var token = MML.getCharacterToken(this);
   var graphic = createObj('graphic', {
@@ -159,8 +159,17 @@ MML.getRadiusSpellTargets = function getRadiusSpellTargets(radius) {
   });
   toBack(graphic);
 
-  this.player.charMenuPlaceSpellMarker(this.name);
-  this.player.displayMenu();
+  MML.displaySpellMarker(player);
+};
+
+MML.chooseSpellTargets = function chooseSpellTargets(player, character, action) {
+  if (['Caster', 'Touch', 'Single'].indexOf(action.spell.target) > -1) {
+    MML.getSpellTargets();
+  } else if (action.spell.target.indexOf('\' Radius') > -1) {
+    MML.getRadiusSpellTargets(parseInt(action.spell.target.replace('\' Radius', '')));
+  } else {
+    return [];
+  }
 };
 
 MML.initializeMenu = function initializeMenu(player) {
@@ -307,7 +316,7 @@ MML.prepareAttackActionMenu = function prepareAttackActionMenu(player, character
         //     text: 'Sweep Attack',
         //     nextMenu: 'chooseCalledShot',
         //     callback: function() {
-        //       character.action.modifiers.push('Sweep Attack');
+        //       action.modifiers.push('Sweep Attack');
         //       MML.displayMenu(player);
         //     }
         //   });
@@ -316,7 +325,7 @@ MML.prepareAttackActionMenu = function prepareAttackActionMenu(player, character
 
       buttons.push('Punch');
       buttons.push('Kick');
-      if (!_.contains(character.action.modifiers, 'Release Opponent')) {
+      if (!_.contains(action.modifiers, 'Release Opponent')) {
         if (!_.has(character.statusEffects, 'Grappled') &&
           !_.has(character.statusEffects, 'Holding') &&
           !_.has(character.statusEffects, 'Held') &&
@@ -325,7 +334,7 @@ MML.prepareAttackActionMenu = function prepareAttackActionMenu(player, character
           !_.has(character.statusEffects, 'Overborne')
         ) {
           buttons.push('Grapple');
-          // character.action.weaponType = 'Grapple';
+          // action.weaponType = 'Grapple';
         }
         if (((_.has(character.statusEffects, 'Grappled') || _.has(character.statusEffects, 'Held') || _.has(character.statusEffects, 'Holding')) &&
             character.movementPosition === 'Prone') ||
@@ -428,7 +437,7 @@ MML.setAttackStance = function setAttackStance([player, character, action]) {
 MML.chooseDamageType = function chooseDamageType([player, character, action]) {
   return [MML.goToMenu(player, {
     message: 'Choose a Damage Type',
-    buttons: ['Neutral', 'Defensive', 'Aggressive']
+    buttons: ['Primary', 'Secondary']
   }), character, action];
 };
 
@@ -481,10 +490,6 @@ MML.enterNumberOfDice = function enterNumberOfDice(player) {
   sendChat(player.name, '/w "' + player.name + '" &{template:enterNumberOfDiceMenu} {{title=Enter Number of Dice}}');
 };
 
-MML.setApiPlayerAttribute = function setApiPlayerAttribute(player, attribute, value) {
-  player[attribute] = value;
-};
-
 MML.prepareCharacters = function prepareCharacters(player) {
   MML.prepareNextCharacter(player, 0);
 };
@@ -500,33 +505,21 @@ MML.prepareNextCharacter = function prepareNextCharacter(player, index) {
   }
 };
 
-MML.menuIdle = function menuIdle(player, who) {
-  player.who = who;
-  player.message = 'Menu Closed';
-  player.buttons = [];
-  if (state.MML.GM.name === player.name && !state.MML.GM.inCombat) {
-    player.menu = 'GmMenuMain';
-    player.buttons = [player.menuButtons.GmMenuMain];
-  }
+MML.assignStatusEffect = function assignStatusEffect(player, character) {
+  return MML.goToMenu(player, MML.assignStatusEffectMenu(player, character))
+    .then(function(player) {
+      return player, character;
+    });
 };
 
-MML.menuPause = function menuPause(player) {};
-
-MML.GmMenuAssignStatusEffect = function GmMenuAssignStatusEffect(player, who) {
-  player.who = who;
-  player.message = 'Choose a Status Effect: ';
-  player.buttons = [];
+MML.assignStatusEffectMenu = function assignStatusEffectMenu(player, character) {
+  var message = 'Choose a Status Effect: ';
+  var buttons = [];
 
   _.each(MML.statusEffects, function(effect, effectName) {
-    player.buttons.push({
-      text: effectName,
-      nextMenu: 'GmMenuItemQuality',
-      callback: function(text) {
-        state.MML.GM.newItem = MML.items[text];
-        MML.displayMenu(player);
-      }
-    });
+    buttons.push(effectName);
   });
+  return {message: message, buttons: buttons};
 };
 
 MML.selectDieSizeMenu = function selectDieSizeMenu(player, who) {
@@ -903,122 +896,118 @@ MML.startRound = function startRound(player) {
     });
 };
 
-MML.charMenuCast = function charMenuCast(player, who) {
-  player.who = who;
-  player.message = 'Choose a spell';
-  player.buttons = [];
-  var character = MML.characters[who];
+MML.chooseSpell = function chooseSpell([player, character, action]) {
+  return MML.goToMenu(player, MML.chooseSpellMenu(player, character, action))
+    .then(function(player) {
+      return [player, character, action];
+    });
+};
+
+MML.chooseSpellMenu = function chooseSpellMenu(player, character, action) {
+  var message = 'Choose a spell';
+  var buttons = [];
   _.each(character.spells, function(spellName) {
     if (_.isUndefined(MML.spells[spellName].requiredItem) ||
-      (_.isUndefined(character.action.items) &&
+      (_.isUndefined(action.items) &&
         (character.inventory[character.rightHand._id].name === MML.spells[spellName].requiredItem || character.inventory[character.leftHand._id].name === MML.spells[spellName].requiredItem)) ||
-      (!_.isUndefined(character.action.items) &&
-        _.filter(character.action.items, function(item) {
+      (!_.isUndefined(action.items) &&
+        _.filter(action.items, function(item) {
           return character.inventory[item.itemId].name === MML.spells[spellName].requiredItem;
         }, character).length > 0)
     ) {
-      player.buttons.push({
-        text: spellName,
-        nextMenu: 'menuPause',
-        callback: function() {
-          _.extend(character.action, {
-            spell: MML.spells[spellName],
-          });
-          MML.charMenuMetaMagicInitiative(player, who);
-          MML.displayMenu(player);
-        }
-      });
+      buttons.push(spellName);
     }
-  }, player);
+  });
+  return {message: message, buttons: buttons};
 };
 
-MML.charMenuMetaMagicInitiative = function charMenuMetaMagicInitiative(player, who) {
-  player.who = who;
-  player.message = 'Choose meta magic';
-  player.buttons = [];
-  var character = MML.characters[who];
+MML.chooseMetaMagicInitiative = function chooseMetaMagicInitiative([player, character, action]) {
+  return MML.goToMenu(player, MML.chooseMetaMagicInitiativeMenu(player, character, action))
+    .then(function(player) {
+      switch (player.pressedButton) {
+        case 'Called Shot':
+        case 'Called Shot Specific':
+        case 'Ease Spell':
+        case 'Hasten Spell':
+          action.modifiers.push(player.pressedButton);
+          return MML.chooseMetaMagicInitiative([player, character, action]);
+        case 'Remove Called Shot':
+        case 'Remove Called Shot Specific':
+        case 'Remove Ease Spell':
+        case 'Remove Hasten Spell':
+          action.modifiers = _.without(action.modifiers, player.pressedButton.replace('Remove ', ''));
+          return MML.chooseMetaMagicInitiative([player, character, action]);
+        case 'Next Menu':
+          return [player, character, action];
+      }
+    });
+};
 
-  if (_.contains(character.action.spell.metaMagic, 'Called Shot')) {
-    player.buttons.push({
-      text: 'Called Shot',
-      nextMenu: 'menuPause',
-      callback: function() {
-        if (_.contains(character.action.modifiers, 'Called Shot')) {
-          character.action.modifiers = _.without(character.action.modifiers, 'Called Shot');
-        } else {
-          character.action.modifiers = _.without(character.action.modifiers, 'Called Shot Specific');
-          character.action.modifiers.push('Called Shot');
-        }
-        MML.charMenuMetaMagicInitiative(player, who);
-        MML.displayMenu(player);
-      }
-    });
-    player.buttons.push({
-      text: 'Called Shot Specific',
-      nextMenu: 'menuPause',
-      callback: function() {
-        if (_.contains(character.action.modifiers, 'Called Shot Specific')) {
-          character.action.modifiers = _.without(character.action.modifiers, 'Called Shot Specific');
-        } else {
-          character.action.modifiers = _.without(character.action.modifiers, 'Called Shot');
-          character.action.modifiers.push('Called Shot Specific');
-        }
-        MML.charMenuMetaMagicInitiative(player, who);
-        MML.displayMenu(player);
-      }
-    });
+MML.chooseMetaMagicInitiativeMenu = function chooseMetaMagicInitiativeMenu(player, character, action) {
+  var message = 'Choose meta magic';
+  var buttons = ['Next Menu'];
+
+  if (_.contains(action.spell.metaMagic, 'Called Shot')) {
+    if (_.contains(action.modifiers, 'Called Shot')) {
+      buttons.push('Remove Called Shot');
+    } else {
+      buttons.push('Called Shot');
+    }
+
+    if (_.contains(action.modifiers, 'Called Shot Specific')) {
+      buttons.push('Remove Called Shot Specific');
+    } else {
+      buttons.push('Called Shot Specific');
+    }
   }
-  player.buttons.push({
-    text: 'Ease Spell',
-    nextMenu: 'menuPause',
-    callback: function() {
-      if (_.contains(character.action.modifiers, 'Ease Spell')) {
-        character.action.modifiers = _.without(character.action.modifiers, 'Ease Spell');
-      } else {
-        character.action.modifiers = _.without(character.action.modifiers, 'Hasten Spell');
-        character.action.modifiers.push('Ease Spell');
-      }
-      MML.charMenuMetaMagicInitiative(player, who);
-      MML.displayMenu(player);
-    }
-  });
-  player.buttons.push({
-    text: 'Hasten Spell',
-    nextMenu: 'menuPause',
-    callback: function() {
-      if (_.contains(character.action.modifiers, 'Hasten Spell')) {
-        character.action.modifiers = _.without(character.action.modifiers, 'Hasten Spell');
-      } else {
-        character.action.modifiers = _.without(character.action.modifiers, 'Ease Spell');
-        character.action.modifiers.push('Hasten Spell');
-      }
-      MML.charMenuMetaMagicInitiative(player, who);
-      MML.displayMenu(player);
-    }
-  });
-  player.buttons.push({
-    text: 'Next Menu',
-    nextMenu: 'finalizeActionMenu',
-    callback: function() {
-      MML.displayMenu(player);
-    }
-  });
+
+  if (_.contains(action.modifiers, 'Ease Spell')) {
+    buttons.push('Remove Ease Spell');
+  } else {
+    buttons.push('Ease Spell');
+  }
+
+  if (_.contains(action.modifiers, 'Ease Spell')) {
+    buttons.push('Remove Hasten Spell');
+  } else {
+    buttons.push('Hasten Spell');
+  }
+  return {message: message, buttons: buttons};
 };
 
-MML.charMenuMetaMagic = function charMenuMetaMagic(player, who) {
-  player.who = who;
-  player.message = 'Choose meta magic';
+return MML.goToMenu(player, MML.chooseMetaMagicInitiativeMenu(player, character, action))
+  .then(function(player) {
+    switch (player.pressedButton) {
+      case 'Called Shot':
+      case 'Called Shot Specific':
+      case 'Ease Spell':
+      case 'Hasten Spell':
+        action.modifiers.push(player.pressedButton);
+        return MML.chooseMetaMagicInitiative([player, character, action]);
+      case 'Remove Called Shot':
+      case 'Remove Called Shot Specific':
+      case 'Remove Ease Spell':
+      case 'Remove Hasten Spell':
+        action.modifiers = _.without(action.modifiers, player.pressedButton.replace('Remove ', ''));
+        return MML.chooseMetaMagicInitiative([player, character, action]);
+      case 'Next Menu':
+        return [player, character, action];
+    }
+  });
+
+MML.chooseMetaMagicMenu = function chooseMetaMagicMenu(player, who) {
+  var message = 'Choose meta magic';
   player.buttons = [];
   var character = MML.characters[who];
 
-  _.each(_.without(character.action.spell.metaMagic, 'Called Shot', 'Called Shot Specific'), function(metaMagicName) {
+  _.each(_.without(action.spell.metaMagic, 'Called Shot', 'Called Shot Specific'), function(metaMagicName) {
     player.buttons.push({
       text: metaMagicName,
       nextMenu: 'menuPause',
       callback: function(input) {
-        if (_.contains(character.action.modifiers, metaMagicName)) {
+        if (_.contains(action.modifiers, metaMagicName)) {
           delete state.MML.GM.currentAction.metaMagic[metaMagicName];
-          MML.charMenuMetaMagic(player, who);
+          MML.chooseMetaMagic(player, who);
         } else {
           player['charMenu' + metaMagicName.replace(/\s/g, '')](who);
         }
@@ -1088,7 +1077,7 @@ MML.charMenuIncreasePotency = function charMenuIncreasePotency(player, who) {
           castingMod: -10,
           level: i
         };
-        MML.charMenuMetaMagic(player, who);
+        MML.chooseMetaMagic(player, who);
         MML.displayMenu(player);
       }
     });
@@ -1098,7 +1087,7 @@ MML.charMenuIncreasePotency = function charMenuIncreasePotency(player, who) {
     text: 'Back',
     nextMenu: 'menuPause',
     callback: function() {
-      MML.charMenuMetaMagic(player, who);
+      MML.chooseMetaMagic(player, who);
       MML.displayMenu(player);
     }
   });
@@ -1125,7 +1114,7 @@ MML.charMenuIncreaseDuration = function charMenuIncreaseDuration(player, who) {
           castingMod: 0,
           level: i
         };
-        MML.charMenuMetaMagic(player, who);
+        MML.chooseMetaMagic(player, who);
         MML.displayMenu(player);
       }
     });
@@ -1135,7 +1124,7 @@ MML.charMenuIncreaseDuration = function charMenuIncreaseDuration(player, who) {
     text: 'Back',
     nextMenu: 'menuPause',
     callback: function() {
-      MML.charMenuMetaMagic(player, who);
+      MML.chooseMetaMagic(player, who);
       MML.displayMenu(player);
     }
   });
@@ -1169,16 +1158,16 @@ MML.charMenuReadyItem = function charMenuReadyItem(player, character) {
   });
   player.buttons = buttons;
 
-  var weapon = _.find(character.action.items, function(item) {
+  var weapon = _.find(action.items, function(item) {
     return character.inventory[item.itemId].type === 'weapon';
   });
   if (_.isUndefined(weapon)) {
-    character.action.weapon = 'unarmed';
+    action.weapon = 'unarmed';
   } else {
     if (weapon.grip === 'Right' || weapon.grip === 'Left') {
-      character.action.weapon = MML.buildWeaponObject(character.inventory[weapon.itemId], 'One Hand');
+      action.weapon = MML.buildWeaponObject(character.inventory[weapon.itemId], 'One Hand');
     } else {
-      character.action.weapon = MML.buildWeaponObject(character.inventory[weapon.itemId], weapon.grip);
+      action.weapon = MML.buildWeaponObject(character.inventory[weapon.itemId], weapon.grip);
     }
   }
 };
@@ -1196,7 +1185,7 @@ MML.charMenuChooseHands = function charMenuChooseHands(player, who, item, itemId
       text: 'Left',
       nextMenu: 'charMenuReadyAdditionalItem',
       callback: function() {
-        character.action.items = [{
+        action.items = [{
           itemId: itemId,
           grip: 'Left'
         }];
@@ -1208,7 +1197,7 @@ MML.charMenuChooseHands = function charMenuChooseHands(player, who, item, itemId
       text: 'Right',
       nextMenu: 'charMenuReadyAdditionalItem',
       callback: function() {
-        character.action.items = [{
+        action.items = [{
           itemId: itemId,
           grip: 'Right'
         }];
@@ -1224,7 +1213,7 @@ MML.charMenuChooseHands = function charMenuChooseHands(player, who, item, itemId
           text: name,
           nextMenu: 'menuIdle',
           callback: function() {
-            character.action.items = [{
+            action.items = [{
               itemId: itemId,
               grip: name
             }];
@@ -1254,7 +1243,7 @@ MML.charMenuReadyAdditionalItem = function charMenuReadyAdditionalItem(player, w
         text: item.name,
         nextMenu: 'menuIdle',
         callback: function() {
-          character.action.items.push({
+          action.items.push({
             itemId: _id,
             grip: hand
           });
@@ -1374,13 +1363,9 @@ MML.combatMovementMenu = function combatMovementMenu(player, character) {
   };
 };
 
-MML.charMenuPlaceSpellMarker = function charMenuPlaceSpellMarker(player, who) {
-  player.who = who;
-  player.message = 'Move and resize spell marker.';
-  player.buttons = [{
-    text: 'Accept',
-    nextMenu: 'menuPause',
-    callback: function() {
+MML.displaySpellMarker = function displaySpellMarker(player) {
+  return MML.goToMenu(player, { message: 'Move and resize spell marker.', buttons: ['Accept'] })
+    .then(function (player) {
       var spellMarker = MML.getSpellMarkerToken(state.MML.GM.currentAction.parameters.spellMarker);
       var targets = MML.getAoESpellTargets(spellMarker);
       var character = MML.characters[who];
@@ -1394,9 +1379,7 @@ MML.charMenuPlaceSpellMarker = function charMenuPlaceSpellMarker(player, who) {
       MML.setCurrentCharacterTargets(player, {
         targets: targets
       });
-      character[character.action.callback]();
-    }
-  }];
+    });
 };
 
 MML.charMenuSelectBodyPart = function charMenuSelectBodyPart(player, who) {
@@ -1662,7 +1645,6 @@ MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(player, inp
   }
   state.MML.GM.currentAction.targetArray = targetArray;
   state.MML.GM.currentAction.targetIndex = 0;
-  state.MML.GM.currentAction.character[state.MML.GM.currentAction.character.action.callback]();
 };
 
 MML.menuButtons = {};
