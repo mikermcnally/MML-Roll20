@@ -975,53 +975,33 @@ MML.chooseMetaMagicInitiativeMenu = function chooseMetaMagicInitiativeMenu(playe
   return {message: message, buttons: buttons};
 };
 
-return MML.goToMenu(player, MML.chooseMetaMagicInitiativeMenu(player, character, action))
-  .then(function(player) {
-    switch (player.pressedButton) {
-      case 'Called Shot':
-      case 'Called Shot Specific':
-      case 'Ease Spell':
-      case 'Hasten Spell':
-        action.modifiers.push(player.pressedButton);
-        return MML.chooseMetaMagicInitiative([player, character, action]);
-      case 'Remove Called Shot':
-      case 'Remove Called Shot Specific':
-      case 'Remove Ease Spell':
-      case 'Remove Hasten Spell':
+MML.chooseMetaMagic = function chooseMetaMagic([player, character, action]){
+  return MML.goToMenu(player, MML.chooseMetaMagicInitiativeMenu(player, character, action))
+    .then(function(player) {
+      if (player.pressedButton.indexOf('Remove ') === 0) {
         action.modifiers = _.without(action.modifiers, player.pressedButton.replace('Remove ', ''));
         return MML.chooseMetaMagicInitiative([player, character, action]);
-      case 'Next Menu':
+      } else if (pressedButton !== 'Cast Spell') {
+        action.modifiers.push(player.pressedButton);
+        return MML.chooseMetaMagicInitiative([player, character, action]);
+      } else {
         return [player, character, action];
-    }
-  });
-
-MML.chooseMetaMagicMenu = function chooseMetaMagicMenu(player, who) {
-  var message = 'Choose meta magic';
-  player.buttons = [];
-  var character = MML.characters[who];
-
-  _.each(_.without(action.spell.metaMagic, 'Called Shot', 'Called Shot Specific'), function(metaMagicName) {
-    player.buttons.push({
-      text: metaMagicName,
-      nextMenu: 'menuPause',
-      callback: function(input) {
-        if (_.contains(action.modifiers, metaMagicName)) {
-          delete state.MML.GM.currentAction.metaMagic[metaMagicName];
-          MML.chooseMetaMagic(player, who);
-        } else {
-          player['charMenu' + metaMagicName.replace(/\s/g, '')](who);
-        }
-        MML.displayMenu(player);
       }
     });
-  }, player);
-  player.buttons.push({
-    text: 'Cast Spell',
-    nextMenu: 'menuPause',
-    callback: function() {
-      character.chooseSpellTargets();
+};
+
+MML.chooseMetaMagicMenu = function chooseMetaMagicMenu(action) {
+  var message = 'Choose meta magic';
+  var buttons = ['Cast Spell'];
+
+  _.each(_.without(action.spell.metaMagic, 'Called Shot', 'Called Shot Specific'), function(metaMagicName) {
+    if (_.contains(action.modifiers, metaMagicName)) {
+      buttons.push('Remove ' + metaMagicName);
+    } else {
+      buttons.push(metaMagicName);
     }
   });
+  return {message: message, buttons: buttons};
 };
 
 MML.charMenuAddTarget = function charMenuAddTarget(player, who) {
