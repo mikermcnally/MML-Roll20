@@ -51,45 +51,6 @@ MML.displayPlayerRoll = function displayPlayerRoll(player) {
   sendChat(player.name, '/w "' + player.name + '" &{template:rollMenu} {{title=' + roll.message + "}}");
 };
 
-MML.changeRoll = function changeRoll(player, roll, valueString) {
-  var value = parseInt(valueString);
-  var range = roll.range.split('-');
-  var low = parseInt(range[0]);
-  var high = parseInt(range[1]);
-
-  if (isNaN(value)) {
-    sendChat('Error', 'Roll value must be numerical.');
-    return roll;
-  } else {
-    if (roll.type === 'universal' || roll.type === 'attribute') {
-      if (value >= low && value <= high) {
-        roll.value = value;
-        if (roll.type === 'universal') {
-          roll = MML.universalRollResult(roll);
-        } else {
-          roll = MML.attributeCheckResult(roll);
-        }
-      } else {
-        sendChat('Error', 'New roll value out of range.');
-      }
-    } else {
-      if (value + roll.modifier >= low && value + roll.modifier <= high) {
-        roll.value = value;
-        if (roll.type === 'damage') {
-          roll = MML.damageRollResult(roll);
-        } else if (roll.type === 'generic') {
-          roll = MML.genericRollResult(roll);
-        } else {
-          roll.result = value;
-        }
-      } else {
-        sendChat('Error', 'New roll value out of range.');
-      }
-    }
-    return roll;
-  }
-};
-
 MML.setRollButtons = function setRollButtons(player) {
   return new Promise(function(resolve, reject) {
     player.buttonPressed = function(player) {
@@ -455,21 +416,37 @@ MML.chooseMeleeDefense = function chooseMeleeDefense(player, character, dodgeCha
     .then(function(player) {
       switch (player.pressedButton) {
         case 'Block: ' + blockChance + '%':
-          character.statusEffects['Melee this Round'] = {
+          character.statusEffects['Melee This Round'] = {
             id: generateRowID(),
-            name: 'Melee this Round'
+            name: 'Melee This Round'
           };
+          if (_.has(character.statusEffects, 'Number of Defenses')) {
+            character.statusEffects['Number of Defenses'].number++;
+          } else {
+            MML.addStatusEffect(character, 'Number of Defenses', {
+              number: 1
+            });
+          }
           return MML.processRoll(player, MML.universalRoll('meleeBlock', [blockChance]));
         case 'Dodge: ' + dodgeChance + '%':
-          character.statusEffects['Melee this Round'] = {
+          character.statusEffects['Melee This Round'] = {
             id: generateRowID(),
-            name: 'Melee this Round'
+            name: 'Melee This Round'
           };
-          return MML.processRoll(player, MML.universalRoll('meleeBlock', [dodgeChance]));
+          character.statusEffects['Dodged This Round'] = {
+            id: generateRowID(),
+            name: 'Dodged This Round'
+          };
+          if (_.has(character.statusEffects, 'Number of Defenses')) {
+            character.statusEffects['Number of Defenses'].number++;
+          } else {
+            MML.addStatusEffect(character, 'Number of Defenses', {
+              number: 1
+            });
+          }
+          return MML.processRoll(player, MML.universalRoll('meleeDodge', [dodgeChance]));
         case 'Take it':
-          return [player, {
-            result: 'Failure'
-          }];
+          return [player, {result: 'Failure'}];
       }
     });
 };

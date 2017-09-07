@@ -239,10 +239,10 @@ MML.meleeAttackAction = function meleeAttackAction(player, character, action) {
                     case 'Critical Failure':
                     case 'Failure':
                       return MML.hitPositionRoll(player, target, action)
-                        .then(function([player, hitPosition]) {
+                        .then(function([player, hitPositionRoll]) {
                           return MML.meleeDamageRoll(player, character, weapon, attackRoll)
                             .then(function([player, damageRoll]) {
-                              return MML.damageCharacter(target.player, target, hitPosition.result, damageRoll.result, damageRoll.damageType)
+                              return MML.damageCharacter(target.player, target, hitPositionRoll.result, damageRoll.result, damageRoll.damageType)
                                 .then(MML.endAction(player, character, action));
                             });
                         });
@@ -316,7 +316,6 @@ MML.releaseOpponentAction = function releaseOpponentAction(player, character, ac
     character.action = {
       ts: Date.now(),
       name: 'Attack',
-      callback: 'startAttackAction',
       weaponType: 'Break Grapple',
       modifiers: []
     };
