@@ -684,38 +684,32 @@ MML.hitPositionRoll = function hitPositionRoll(player, target, action) {
     }));
     calledShot = false;
   }
-  return MML.hitPositionRollResult({
+  return MML.processRoll(player, MML.hitPositionRollResult(target, {
     type: 'hitPosition',
     calledShot: calledShot,
     range: range,
     result: result,
     value: rollValue
-  });
+  }));
 };
 
-MML.hitPositionRollResult = function hitPositionRollResult(roll) {
+MML.hitPositionRollResult = function hitPositionRollResult(target, roll) {
   if (_.has(character.statusEffects, 'Called Shot')) {
-    currentRoll.result = MML.getCalledShotHitPosition(target, currentRoll.value, action.calledShot);
+    roll.result = MML.getCalledShotHitPosition(target, roll.value, action.calledShot);
   } else if (_.has(character.statusEffects, 'Called Shot Specific') && character.statusEffects['Called Shot Specific'].nearMiss) {
     var hitPositionIndex = parseInt(_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
       return hitPosition.name === action.calledShot;
     }));
-    currentRoll.result = MML.getCalledShotHitPosition(target, currentRoll.value, MML.hitPositions[target.bodyType][hitPositionIndex].bodyPart);
+    roll.result = MML.getCalledShotHitPosition(target, roll.value, MML.hitPositions[target.bodyType][hitPositionIndex].bodyPart);
   } else {
-    currentRoll.result = MML.hitPositions[target.bodyType][currentRoll.value];
+    roll.result = MML.hitPositions[target.bodyType][roll.value];
   }
 
-  currentRoll.message = 'Roll: ' + currentRoll.value +
-    '\nResult: ' + currentRoll.result.name +
-    '\nRange: ' + currentRoll.range;
+  roll.message = 'Roll: ' + roll.value +
+    '\nResult: ' + roll.result.name +
+    '\nRange: ' + roll.range;
 
-  character.player.currentRoll = currentRoll;
-  character.processRoll('hitPositionRollApply');
-};
-
-MML.hitPositionRollApply = function hitPositionRollApply(character, currentRoll) {
-  state.MML.GM.currentAction.rolls.hitPositionRoll = currentRoll.result;
-  MML[state.MML.GM.currentAction.callback]();
+  return roll;
 };
 
 MML.meleeBlockRoll = function meleeBlockRoll(character, blockChance) {

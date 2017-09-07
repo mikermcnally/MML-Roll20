@@ -9,7 +9,7 @@ MML.displayMenu = function displayMenu(player, menu) {
   });
   sendChat(player.name, toChat, null, {
     noarchive: true
-  }); //Change to true this when they fix the bug
+  });
 };
 
 MML.setMenuButtons = function setMenuButtons(player, buttons) {

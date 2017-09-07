@@ -60,7 +60,7 @@ MML.nextAction = function nextAction() {
     var character = gm.combatants[0];
     if (character.initiative > 0) {
       gm.actor = character.name;
-      MML.startAction(character.player, character, MML.validateAction(character));
+      MML.startAction(character.player, character, MML.validateAction(character)).catch(log);
     } else {
       MML.newRound();
     }
