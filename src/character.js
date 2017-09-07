@@ -244,16 +244,16 @@ MML.alterHP = function alterHP(player, character, bodyPart, hpAmount) {
       MML.addStatusEffect(character, 'Mortal Wound, ' + bodyPart, {
         bodyPart: bodyPart
       });
-      return player;
+      return MML.promiseMeNed(player);
     } else {
-      return player;
+      return MML.promiseMeNed(player);
     }
   } else { //if healing
     character.hp[bodyPart] += hpAmount;
     if (character.hp[bodyPart] > maxHP) {
       character.hp[bodyPart] = maxHP;
     }
-    return player;
+    return MML.promiseMeNed(player);
   }
 };
 
@@ -274,7 +274,7 @@ MML.setWoundFatigue = function setWoundFatigue(player, character) {
   if (currentHP['Wound Fatigue'] < 0 && !_.has(character.statusEffects, 'Wound Fatigue')) {
     return MML.woundFatigueRoll(player, character);
   } else {
-    return player;
+    return MML.promiseMeNed(player);
   }
 };
 
@@ -327,7 +327,7 @@ MML.knockdownCheck = function knockdownCheck(player, character, damage) {
   if (character.movementPosition !== 'Prone' && character.knockdown < 1) {
     MML.knockdownRoll(player, character);
   } else {
-    return player;
+    return MML.promiseMeNed(player);
   }
 };
 
@@ -349,7 +349,7 @@ MML.sensitiveAreaCheck = function sensitiveAreaCheck(player, character, hitPosit
   if (MML.sensitiveAreas[character.bodyType].indexOf(hitPosition) > -1) {
     return MML.sensitiveAreaRoll(player, character);
   } else {
-    return player;
+    return MML.promiseMeNed(player);
   }
 };
 
@@ -365,12 +365,20 @@ MML.sensitiveAreaRoll = function sensitiveAreaRoll(player, character) {
   });
 };
 
-MML.damageCharacter = function damageCharacter(player, target, hitPosition, damage) {
-  return MML.armorDamageReduction(player, target, hitPosition.name, damage.amount, damage.type)
-    .then(MML.alterHP(hitPosition.bodyPart, damageAfterArmor))
-    .then(MML.setWoundFatigue(target))
-    .then(MML.sensitiveAreaCheck(target))
-    .then(MML.knockdownCheck(target));
+MML.damageCharacter = function damageCharacter(player, character, hitPosition, damage, type) {
+  var damageAfterArmor = MML.armorDamageReduction(player, character, hitPosition.name, damage, type);
+    // .then(function (damageAfterArmor) {
+      return MML.alterHP(player, character, hitPosition.bodyPart, damageAfterArmor)
+    // })
+    .then(function (player) {
+      return MML.setWoundFatigue(player, character);
+    })
+    .then(function (player) {
+      return MML.sensitiveAreaCheck(player, character, hitPosition.name);
+    })
+    .then(function (player) {
+      return MML.knockdownCheck(player, character, damage);
+    });
 };
 
 MML.alterEP = function alterEP(player, character, epAmount) {
@@ -419,7 +427,8 @@ MML.fatigueRecoveryRollApply = function fatigueRecoveryRollApply(character) {
   MML.nextFatigueCheck();
 };
 
-MML.armorDamageReduction = function armorDamageReduction(character, position, damage, type, coverageRoll) {
+MML.armorDamageReduction = function armorDamageReduction(player, character, position, damage, type, coverageRoll) {
+  coverageRoll = MML.rollDice(1, 100);
   var damageApplied = false; //Accounts for partial coverage, once true the loop stops
   var damageDeflected = 0;
   // Iterates over apv values at given position (accounting for partial coverage)
@@ -1176,38 +1185,16 @@ MML.equipmentFailure = function equipmentFailure(character) {
   log('equipmentFailure');
 };
 
-MML.meleeDamageRoll = function meleeDamageRoll(character, attackerWeapon, crit, bonusDamage) {
-  bonusDamage = 0;
-  state.MML.GM.currentAction.parameters.damageType = attackerWeapon.damageType;
-  character.rollDamage(attackerWeapon.damage, [character.meleeDamageMod, bonusDamage], crit, 'meleeDamageResult');
+MML.meleeDamageRoll = function meleeDamageRoll(player, character, weapon, attackRoll, bonusDamage) {
+  return MML.processRoll(player, MML.damageRoll('Melee Damage Roll', weapon.damage, weapon.damageType, [character.meleeDamageMod, bonusDamage || 0], attackRoll.result));
 };
 
-MML.meleeDamageResult = function meleeDamageResult(character) {
-  character.processRoll('meleeDamageRollApply');
+MML.missileDamageRoll = function missileDamageRoll(player, character, weapon, attackRoll, bonusDamage) {
+  return MML.processRoll(player, MML.damageRoll('Missile Damage Roll', weapon.damage, weapon.damageType, [bonusDamage || 0], attackRoll.result));
 };
 
-MML.meleeDamageRollApply = function meleeDamageRollApply(character) {
-  state.MML.GM.currentAction.rolls.damageRoll = character.player.currentRoll.result;
-  MML[state.MML.GM.currentAction.callback]();
-};
-
-MML.missileDamageRoll = function missileDamageRoll(character, attackerWeapon, crit, bonusDamage) {
-  bonusDamage = 0;
-  state.MML.GM.currentAction.parameters.damageType = attackerWeapon.damageType;
-  character.rollDamage(attackerWeapon.damage, [bonusDamage], crit, 'missileDamageResult');
-};
-
-MML.missileDamageResult = function missileDamageResult(character) {
-  character.processRoll('missileDamageRollApply');
-};
-
-MML.missileDamageRollApply = function missileDamageRollApply(character) {
-  state.MML.GM.currentAction.rolls.damageRoll = character.player.currentRoll.result;
-  MML[state.MML.GM.currentAction.callback]();
-};
-
-MML.castingRoll = function castingRoll(character, rollName, task, skill, metaMagicMod) {
-  MML.universalRoll(character, rollName, [task, skill, character.situationalMod, character.castingMod, character.attributeCastingMod, metaMagicMod], 'castingRollResult');
+MML.castingRoll = function castingRoll(player, character, rollName, task, skill, metaMagicMod) {
+  return MML.processRoll(MML.universalRoll(rollName, [task, skill, character.situationalMod, character.castingMod, character.attributeCastingMod, metaMagicMod]));
 };
 
 MML.castingRollResult = function castingRollResult(character) {

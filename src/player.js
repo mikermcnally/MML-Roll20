@@ -1764,6 +1764,14 @@ MML.GmMenuUtilities = function GmMenuUtilities(player, input) {
   //edit states and other api stuff
 };
 
+MML.promiseMeNed = function promiseMeNed(bastard) {
+  var prince = bastard;
+  return new Promise(function(resolve, reject) {
+    resolve(prince);
+    reject();
+  });
+};
+
 MML.Player = function Player(name, isGM) {
   this.name = name;
   this.characters = [];

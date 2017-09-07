@@ -103,6 +103,9 @@ function runTests() {
           .then(clickButton('changeRoll 16'))
           .then(clickButton('acceptRoll'))
           .then(clickButton('acceptRoll'))
+          .then(clickButton('changeRoll 4'))
+          .then(clickButton('acceptRoll'))
+          .then(clickButton('acceptRoll'))
           // .then(idkWhatImDoing)
           // .then(console.log)
           // .then(clickButton('Start Action'))
@@ -471,23 +474,19 @@ function pbcopy(data) {
 }
 
 // it('Tested: Unarmed striking, observe without ranged weapon, basic combat flow, basic damage, multiple defenses', function() {
-// .then(setActionPunchAttack(player))
-// .then(clickButton('Roll'))
-// .then(setTestRoll(player, 10))
-// .then(clickButton('Observe'))
-// .then(clickButton('Roll'))
-// .then(setTestRoll(player, 2))
-// .then(clickButton('Observe'))
-// .then(clickButton('Roll'))
-// .then(setTestRoll(player, 1))
-// .then(clickButton('Start Round'))
-// .then(clickButton('Start Action'));
+//   setActionPunchAttack(player)
+//   .then(clickButton('Roll'))
+//   .then(setTestRoll(player, 10))
+//   .then(clickButton('Observe'))
+//   .then(clickButton('Roll'))
+//   .then(setTestRoll(player, 2))
+//   .then(clickButton('Observe'))
+//   .then(clickButton('Roll'))
+//   .then(setTestRoll(player, 1))
+//   .then(clickButton('Start Round'))
+//   .then(clickButton('Start Action'))
 //   .then(clickButton('End Movement'))
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 5))
 //   .then(clickButton('Take it'))
 //   .then(setTestRoll(player, 1))
@@ -518,11 +517,7 @@ function pbcopy(data) {
 //   .then(clickButton('Accept'))
 //   .then(clickButton('Start Action'))
 //   .then(clickButton('End Movement'))
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 5);
 //   .then(clickButton('Take it');
 //   .then(setTestRoll(player, 1);
@@ -554,11 +549,7 @@ function pbcopy(data) {
 //   .then(clickButton('Start Round');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 5);
 //   expect(MML.characters['test1'].statusEffects, 'observer should not lose "Observed" status effect from previous round after being attacked').to.have.property("Observed");
 //   expect(MML.characters['test1'].situationalInitBonus, '"Observed" status effect should add 5 to situationalInitBonus').to.equal(5);
@@ -580,11 +571,7 @@ function pbcopy(data) {
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 5);
 //   .then(clickButton('Block: -14%');
 //   .then(setTestRoll(player, 5);
@@ -666,11 +653,7 @@ function pbcopy(data) {
 //   expect(MML.characters['test0'].rightHand.grip, 'right hand grip should be "One Hand"').to.equal('One Hand');
 //   expect(MML.characters['test0'].leftHand._id, 'ready item should only update selected hand').to.equal('emptyHand');
 //
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 5);
 //   expect(MML.characters['test1'].rightHand._id, 'ready item should not take effect until action starts').to.equal('emptyHand');
 //   expect(MML.characters['test1'].leftHand._id, 'ready item should not take effect until action starts').to.equal('emptyHand');
@@ -711,11 +694,7 @@ function pbcopy(data) {
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   .then(setTestRoll(player, 5);
 //   .then(clickButton('Take it');
 //   .then(setTestRoll(player, 8);
@@ -727,11 +706,7 @@ function pbcopy(data) {
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   .then(setTestRoll(player, 5);
 //   .then(clickButton('Take it');
 //   .then(setTestRoll(player, 8);
@@ -749,11 +724,7 @@ function pbcopy(data) {
 //   .then(clickButton('End Movement');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   .then(setTestRoll(player, 5);
 //   .then(clickButton('Take it');
 //   .then(setTestRoll(player, 8);
@@ -765,11 +736,7 @@ function pbcopy(data) {
 //   .then(clickButton('End Movement');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   .then(setTestRoll(player, 5);
 //   .then(clickButton('Take it');
 //   .then(setTestRoll(player, 8);
@@ -793,11 +760,7 @@ function pbcopy(data) {
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   .then(setTestRoll(player, 5);
 //   .then(clickButton('Take it');
 //   .then(setTestRoll(player, 8);
@@ -813,11 +776,7 @@ function pbcopy(data) {
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   .then(setTestRoll(player, 5);
 //   .then(clickButton('Take it');
 //   .then(setTestRoll(player, 8);
@@ -838,11 +797,7 @@ function pbcopy(data) {
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   .then(setTestRoll(player, 5);
 //   .then(clickButton('Take it');
 //   .then(setTestRoll(player, 8);
@@ -858,11 +813,7 @@ function pbcopy(data) {
 //   expect(MML.characters['test2'].action.name, '"Stunned" status effect should only allow movement during action').to.equal("Movement Only");
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   .then(setTestRoll(player, 5);
 //   .then(clickButton('Take it');
 //   .then(setTestRoll(player, 8);
@@ -963,11 +914,7 @@ function pbcopy(data) {
 //   .then(clickButton('Start Round');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   .then(setTestRoll(player, 5);
 //   .then(clickButton('Take it');
 //   .then(setTestRoll(player, 8);
@@ -982,11 +929,7 @@ function pbcopy(data) {
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test0",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test0'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
@@ -1004,21 +947,13 @@ function pbcopy(data) {
 //   .then(clickButton('Start Round');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test0",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test0'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
@@ -1036,21 +971,13 @@ function pbcopy(data) {
 //   .then(clickButton('Start Round');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test0",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test0'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
@@ -1068,21 +995,13 @@ function pbcopy(data) {
 //   .then(clickButton('Start Round');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test0",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test0'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
@@ -1099,21 +1018,13 @@ function pbcopy(data) {
 //   .then(clickButton('Start Round');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test0",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test0'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
@@ -1130,21 +1041,13 @@ function pbcopy(data) {
 //   .then(clickButton('Start Round');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test0",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test0'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
@@ -1161,21 +1064,13 @@ function pbcopy(data) {
 //   .then(clickButton('Start Round');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test0",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test0'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
@@ -1192,21 +1087,13 @@ function pbcopy(data) {
 //   .then(clickButton('Start Round');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test0",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test0'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
@@ -1231,21 +1118,13 @@ function pbcopy(data) {
 //   .then(clickButton('Start Round');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test0",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test0'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
@@ -1272,21 +1151,13 @@ function pbcopy(data) {
 //   .then(clickButton('Start Round');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test0",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test0'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
@@ -1303,21 +1174,13 @@ function pbcopy(data) {
 //   .then(clickButton('Start Round');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test0",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test0'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
@@ -1334,21 +1197,13 @@ function pbcopy(data) {
 //   .then(clickButton('Start Round');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test0",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test0'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
@@ -1365,21 +1220,13 @@ function pbcopy(data) {
 //   .then(clickButton('Start Round');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test0",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test0'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
@@ -1396,21 +1243,13 @@ function pbcopy(data) {
 //   .then(clickButton('Start Round');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test0",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test0'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
@@ -1431,21 +1270,13 @@ function pbcopy(data) {
 //   .then(clickButton('Start Round');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test0",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test0'))
 //   .then(setTestRoll(player, 94);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
@@ -1631,11 +1462,7 @@ function pbcopy(data) {
 //   .then(clickButton('Start Round');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 5);
 //   .then(clickButton('Block: -9%');
 //   .then(setTestRoll(player, 94);
@@ -1663,11 +1490,7 @@ function pbcopy(data) {
 //   .then(clickButton('Start Round');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 5);
 //   .then(clickButton('Take it');
 //   .then(setTestRoll(player, 1);
@@ -1718,11 +1541,7 @@ function pbcopy(data) {
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   .then(clickButton('End Action');
 //   expect(MML.characters['test0'].statusEffects, 'aim action should add "Taking Aim" status effect').to.have.property("Taking Aim");
 //   expect(MML.characters['test0'].statusEffects["Taking Aim"].level, 'level of "Taking Aim" status effect should initialize to 1').to.equal(1);
@@ -1730,11 +1549,7 @@ function pbcopy(data) {
 //   expect(MML.characters['test0'].missileAttackMod, '"Taking Aim" status effect level 1 should add 30 to missileAttackMod').to.equal(30);
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   .then(clickButton('End Action');
 //   expect(MML.characters['test1'].statusEffects["Taking Aim"].target.name, 'target of "Taking Aim" status effect should match selected target').to.equal('test2');
 //   .then(clickButton('Start Action');
@@ -1755,11 +1570,7 @@ function pbcopy(data) {
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   .then(clickButton('Roll Strength');
 //   .then(setTestRoll(player, 10);
 //   .then(clickButton('End Action');
@@ -1771,11 +1582,7 @@ function pbcopy(data) {
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test0",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test0'))
 //   .then(clickButton('End Action');
 //   expect(MML.characters['test1'].statusEffects, 'aim action should add "Taking Aim" status effect').to.have.property("Taking Aim");
 //   expect(MML.characters['test1'].statusEffects["Taking Aim"].level, 'changing targets should reset level of "Taking Aim" status effect').to.equal(1);
@@ -1787,11 +1594,7 @@ function pbcopy(data) {
 //   .then(clickButton('End Movement');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   .then(clickButton('Roll Strength');
 //   .then(setTestRoll(player, 11);
 //   expect(MML.characters['test0'].statusEffects, 'aim action should add "Taking Aim" status effect').to.have.property("Taking Aim");
@@ -1807,11 +1610,7 @@ function pbcopy(data) {
 //   expect(MML.characters['test2'].hp['Wound Fatigue'], 'Minor wounds should subtract from Multple Wounds').to.equal(MML.characters['test2'].hpMax['Wound Fatigue'] - 3);
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test0",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test0'))
 //   .then(clickButton('End Action');
 //   expect(MML.characters['test1'].statusEffects, 'aim action should add "Taking Aim" status effect').to.have.property("Taking Aim");
 //   expect(MML.characters['test1'].statusEffects["Taking Aim"].level, 'aiming 2 rounds in a row should increment level of "Taking Aim" status effect').to.equal(2);
@@ -1837,11 +1636,7 @@ function pbcopy(data) {
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   expect(MML.characters['test0'].statusEffects, 'shooting from cover should add "Shoot From Cover" status effect').to.have.property("Shoot From Cover");
 //   expect(MML.characters['test0'].missileAttackMod, '"Shoot From Cover" status effect should add -10 to missileAttackMod').to.equal(-10);
 //   .then(setTestRoll(player, 5);
@@ -1857,11 +1652,7 @@ function pbcopy(data) {
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test0",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test0'))
 //   .then(setTestRoll(player, 5);
 //   expect(MML.characters['test1'].inventory['crossbow'].loaded, 'Firing a MWM family weapon should set loaded to 0').to.equal(0);
 //   expect(_.pluck(player.buttons, 'text'), 'Aim should not be an option for unloaded MWM weapon').not.to.contain('Aim');
@@ -1880,11 +1671,7 @@ function pbcopy(data) {
 //   .then(clickButton('End Movement');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   expect(MML.characters['test0'].statusEffects, 'shooting from cover should add "Shoot From Cover" status effect').to.have.property("Shoot From Cover");
 //   expect(MML.characters['test0'].missileAttackMod, '"Shoot From Cover" status effect should add -10 to missileAttackMod').to.equal(-10);
 //   .then(setTestRoll(player, 5);
@@ -1914,11 +1701,7 @@ function pbcopy(data) {
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test1",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test1'))
 //   .then(clickButton('End Action');
 //   .then(clickButton('Attack');
 //   .then(clickButton('Standard');
@@ -1933,11 +1716,7 @@ function pbcopy(data) {
 //   .then(clickButton('End Movement');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   expect(MML.characters['test0'].missileAttackMod, 'Shooting at a target other than the one aimed at should not grant bonus of "Taking Aim" status effect').to.equal(0);
 //   .then(setTestRoll(player, 16);
 //   .then(clickButton('Take it');
@@ -1964,11 +1743,7 @@ function pbcopy(data) {
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   .then(setTestRoll(player, 16);
 //   .then(clickButton('Take it');
 //   .then(setTestRoll(player, 46);
@@ -1991,11 +1766,7 @@ function pbcopy(data) {
 //   .then(clickButton('End Movement');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   .then(setTestRoll(player, 16);
 //   .then(clickButton('Take it');
 //   .then(setTestRoll(player, 45);
@@ -2007,11 +1778,7 @@ function pbcopy(data) {
 //   expect(MML.characters['test2'].situationalMod, '"Wound Fatigue" status effect should add -10 to situationalMod').to.equal(-10);
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   .then(clickButton('End Action');
 //   .then(clickButton('Attack');
 //   .then(clickButton('Standard');
@@ -2045,11 +1812,7 @@ function pbcopy(data) {
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   .then(clickButton('Abdomen');
 //   .then(setTestRoll(player, 6);
 //   .then(clickButton('Take it');
@@ -2067,11 +1830,7 @@ function pbcopy(data) {
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test1",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   .then(clickButton('Groin');
 //   .then(setTestRoll(player, 6);
 //   .then(clickButton('Take it');
@@ -2104,11 +1863,7 @@ function pbcopy(data) {
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   .then(clickButton('End Action');
 //   .then(clickButton('Attack');
 //   .then(clickButton('Standard');
@@ -2120,11 +1875,7 @@ function pbcopy(data) {
 //   .then(clickButton('End Movement');
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
-//   player.setCurrentCharacterTargets({
-//     "charName": "test0",
-//     "target": "test2",
-//     "callback": "setCurrentCharacterTargets"
-//   });
+//   .then(clickButton('selectTarget test2'))
 //   .then(clickButton('Groin');
 //   .then(setTestRoll(player, 26);
 //   .then(clickButton('Take it');

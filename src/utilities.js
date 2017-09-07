@@ -467,14 +467,14 @@ MML.attributeCheckResult = function attributeCheckResult(roll) {
   return roll;
 };
 
-MML.damageRoll = function damageRoll(name, diceString, modifiers, crit) {
-  var dice = MML.parseDice(damageDice);
+MML.damageRoll = function damageRoll(name, diceString, damageType, modifiers, crit) {
+  var dice = MML.parseDice(diceString);
   var amount = dice.amount;
   var size = dice.size;
   var modifier = MML.sumModifiers(modifiers);
   var value;
 
-  if (crit) {
+  if (crit === 'Critical Success') {
     value = MML.rollDice(amount, size) + amount * size + modifier;
     range = (amount * size + amount + modifier) + "-" + (2 * amount * size + modifier);
   } else {
@@ -484,16 +484,18 @@ MML.damageRoll = function damageRoll(name, diceString, modifiers, crit) {
 
   var roll = {
     type: "damage",
+    name: name,
     range: range,
     value: value,
-    modifiers: modifiers
+    modifiers: modifiers,
+    damageType: damageType
   };
   return MML.damageRollResult(roll);
 };
 
 MML.damageRollResult = function damageRollResult(roll) {
   roll.result = -roll.value;
-  roll.message = 'Roll: ' + roll.value + '\nRange: ' + roll.range;
+  roll.message = 'Damage Type: ' + roll.damageType + '\nRoll: ' + roll.value + '\nRange: ' + roll.range;
   return roll;
 };
 
