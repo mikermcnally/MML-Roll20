@@ -469,16 +469,6 @@ MML.armorDamageReduction = function armorDamageReduction(character, position, da
   return damage;
 };
 
-MML.chooseSpellTargets = function chooseSpellTargets(character) {
-  if (['Caster', 'Touch', 'Single'].indexOf(character.action.spell.target) > -1) {
-    character.getSpellTargets();
-  } else if (character.action.spell.target.indexOf('\' Radius') > -1) {
-    character.getRadiusSpellTargets(parseInt(character.action.spell.target.replace('\' Radius', '')));
-  } else {
-    character.action.callback();
-  }
-};
-
 MML.startCastAction = function startCastAction(character) {
   state.MML.GM.currentAction.parameters.target = MML.characters[state.MML.GM.currentAction.targetArray[0]];
   MML.applyStatusEffects(character);

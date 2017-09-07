@@ -151,7 +151,7 @@ MML.processAction = function processAction(player, character, action) {
   //     };
   //
   //     state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, currentAction);
-  //     character.player.charMenuMetaMagic(character.name);
+  //     character.player.chooseMetaMagic(character.name);
   //     character.player.displayMenu();
   //   }
   // } else if (!_.isUndefined(action.getTargets)) {
