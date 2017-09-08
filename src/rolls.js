@@ -440,15 +440,18 @@ MML.knockdownRoll = function knockdownRoll(player, character) {
 };
 
 MML.sensitiveAreaRoll = function sensitiveAreaRoll(player, character) {
-  return MML.processRoll(player, MML.attributeCheckRoll('Sensitive Area Willpower Roll', character.willpower))
-  .then(function (roll) {
-    if (roll.result === 'Failure') {
-      MML.addStatusEffect(character, 'Sensitive Area', {
-        startingRound: state.MML.GM.currentRound
-      });
-    }
-    return player;
-  });
+  return MML.goToMenu(player, {message: character.name + '\'s Sensitive Area Roll', buttons: ['Roll']})
+    .then(function (player) {
+      return MML.processRoll(player, MML.attributeCheckRoll('Sensitive Area Willpower Roll', character.willpower));
+    })
+    .then(function (roll) {
+      if (roll.result === 'Failure') {
+        MML.addStatusEffect(character, 'Sensitive Area', {
+          startingRound: state.MML.GM.currentRound
+        });
+      }
+      return player;
+    });
 };
 
 MML.fatigueCheckRoll = function fatigueCheckRoll(player, character) {

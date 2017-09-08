@@ -243,7 +243,9 @@ MML.meleeAttackAction = function meleeAttackAction(player, character, action) {
                           return MML.meleeDamageRoll(player, character, weapon, attackRoll)
                             .then(function([player, damageRoll]) {
                               return MML.damageCharacter(target.player, target, hitPositionRoll.result, damageRoll.result, damageRoll.damageType)
-                                .then(MML.endAction(player, character, action));
+                                .then(function (player) {
+                                  return MML.endAction(player, character, action);
+                                });
                             });
                         });
                   }
