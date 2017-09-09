@@ -119,6 +119,14 @@ MML.processAction = function processAction(player, character, action) {
   switch (action.name) {
     case 'Attack':
       return MML.processAttack(player, character, action);
+    case 'Observe':
+      return MML.observeAction(player, character, action);
+    case 'Movement Only':
+      return MML.endAction(player, character, action);
+    case 'Attack':
+      return MML.processAttack(player, character, action);
+    case 'Attack':
+      return MML.processAttack(player, character, action);
     default:
 
   }
@@ -341,7 +349,10 @@ MML.observeAction = function observeAction(player, character, action) {
     name: 'Observing',
     startingRound: state.MML.GM.currentRound
   });
-  return MML.charMenuObserveAction(player, character);
+  return MML.charMenuObserveAction(player, character)
+    .then(function ([player, character, action]) {
+      MML.endAction(player, character, action);
+    });
 };
 
 MML.aimAction = function aimAction(player, character, action) {
@@ -384,12 +395,15 @@ MML.endAction = function endAction(player, character, action) {
   character.spentInitiative = character.spentInitiative + character.actionTempo;
   character.previousAction = MML.clone(character.action);
   MML.updateCharacter(character);
-  _.each(action.targetArray, function(target) {
+  _.each(action.targetArray || [], function(target) {
     MML.updateCharacter(characters[target]);
   });
 
   if (character.initiative > 0) {
-    return MML.buildAction(player, character);
+    return MML.buildAction(player, character)
+      .then(function () {
+        MML.nextAction();
+      });
   } else {
     MML.nextAction();
   }

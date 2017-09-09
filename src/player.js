@@ -1568,10 +1568,11 @@ MML.charMenuGenericRoll = function charMenuGenericRoll(player, who, message, dic
   }];
 };
 
-MML.charMenuObserveAction = function charMenuObserveAction(player, who) {
-  player.who = who;
-  player.message = player.who + ' observes the situation.';
-  player.buttons = [player.menuButtons.endAction];
+MML.charMenuObserveAction = function charMenuObserveAction(player, character, action) {
+  return MML.goToMenu(player, {message: character.name + ' observes the situation.', buttons: ['End Action']})
+    .then(function(player) {
+      return [player, character, action];
+    });
 };
 
 MML.charMenuAimAction = function charMenuAimAction(player, who) {
