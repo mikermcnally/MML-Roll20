@@ -796,25 +796,6 @@ MML.startAimAction = function startAimAction(character) {
   MML[currentAction.callback]();
 };
 
-MML.reloadWeapon = function reloadWeapon(player, character, action) {
-  var characterWeaponInfo = MML.getCharacterWeaponAndSkill(character);
-  var attackerWeapon = characterWeaponInfo.characterWeapon;
-  attackerWeapon.loaded++;
-  character.inventory[attackerWeapon._id].loaded = attackerWeapon.loaded;
-  state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, {
-    character: character,
-    callback: 'reloadAction',
-    parameters: {
-      attackerWeapon: attackerWeapon,
-      attackerSkill: characterWeaponInfo.skill
-    },
-    rolls: {}
-  });
-  MML.applyStatusEffects(character);
-  character.player.charMenuReloadAction(character.name, '');
-  character.player.displayMenu();
-};
-
 MML.applyStatusEffects = function applyStatusEffects(character) {
   var dependents = [
     'situationalInitBonus',

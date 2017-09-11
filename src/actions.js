@@ -362,14 +362,32 @@ MML.aimAction = function aimAction(player, character, action) {
             character.statusEffects['Taking Aim'].level = 1;
             character.statusEffects['Taking Aim'].startingRound = state.MML.GM.currentRound;
           }
-          return MML.charMenuAimAction(player, character, target);
+          return MML.goToMenu(player, {message: character.name + ' aims at ' + target.name, buttons: ['End Action']})
+          .then(function (player) {
+            return MML.endAction(player, character, action);
+          });
         }
       });
   }
 };
 
 MML.reloadAction = function reloadAction(player, character, action) {
-  MML.reloadWeapon(player, character, action);
+  var characterWeaponInfo = MML.getCharacterWeaponAndSkill(character);
+  var attackerWeapon = characterWeaponInfo.characterWeapon;
+  attackerWeapon.loaded++;
+  character.inventory[attackerWeapon._id].loaded = attackerWeapon.loaded;
+  state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, {
+    character: character,
+    callback: 'reloadAction',
+    parameters: {
+      attackerWeapon: attackerWeapon,
+      attackerSkill: characterWeaponInfo.skill
+    },
+    rolls: {}
+  });
+  MML.applyStatusEffects(character);
+  character.player.charMenuReloadAction(character.name, '');
+  character.player.displayMenu();
 };
 
 MML.endAction = function endAction(player, character, action) {
