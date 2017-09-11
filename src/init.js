@@ -97,7 +97,7 @@ on('ready', function() {
       var top1 = prev['top'];
       var top2 = obj.get('top');
       var distance = MML.getDistanceFeet(left1, left2, top1, top2);
-      var distanceAvailable = MML.movementRates[character.race][character.movementPosition] * character.movementAvailable;
+      var distanceAvailable = MML.movementRates[character.race][character.movementType] * character.movementAvailable;
 
       if (state.MML.GM.actor === charName && distanceAvailable > 0) {
         // If they move too far, move the maxium distance in the same direction
