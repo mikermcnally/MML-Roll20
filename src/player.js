@@ -843,28 +843,31 @@ MML.charMenuIncreaseDuration = function charMenuIncreaseDuration(player, who) {
 };
 
 MML.readyItem = function readyItem(player, character, action) {
+  var items = _.pick(character.inventory, function (item) {
+    return ['weapon', 'spellComponent', 'shield', 'potion', 'misc'].indexOf(item.type) > -1 &&
+      character.rightHand._id !== item._id &&
+      character.leftHand._id !== item._id;
+  });
+  return MML.goToMenu(player, MML.readyItemMenu(player, character, items))
+    .then(function(player) {
+      return MML.chooseHand(player, character, action);
+    });
+};
+
+MML.readyItemMenu = function readyItemMenu(player, character, items) {
+  var message = 'Choose item or items for ' + character.name;
+  var buttons = items.map(function (item) { return item.name;}).push('Back');
+  return {message: message, buttons: buttons};
+};
+
+MML.chooseHand = function chooseHand(player, character, action) {
   return MML.goToMenu(player, MML.readyItemMenu(player, character, action))
     .then(function(player) {
       return MML.chooseHand(player, character, action);
     });
 };
 
-MML.readyItemMenu = function readyItemMenu(player, character, action) {
-  var message = 'Choose item or items for ' + character.name;
-  var buttons = ['Back'];
-
-  _.each(character.inventory, function(item, _id) {
-    if (['weapon', 'spellComponent', 'shield', 'potion', 'misc'].indexOf(item.type) > -1 &&
-      character.rightHand._id !== _id &&
-      character.leftHand._id !== _id
-    ) {
-      buttons.unshift(item.name);
-    }
-  });
-  return {message: message, buttons: buttons};
-};
-
-MML.charMenuChooseHands = function charMenuChooseHands(player, who, item, itemId) {
+MML.chooseHandMenu = function chooseHandMenu(player, who, item, itemId) {
   player.who = who;
   player.message = 'Choose item or items for' + who;
   var buttons = [];
