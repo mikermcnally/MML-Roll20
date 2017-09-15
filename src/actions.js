@@ -55,7 +55,7 @@ MML.prepareActionFlow = function prepareActionFlow([player, character, action]) 
         case 'Attack':
           return MML.prepareAttackAction([player, character, action]);
         case 'Ready Item':
-          return MML.readyItem([player, character, action]).then(MML.prepareActionFlow);
+          return MML.readyItem(player, character, action).then(MML.prepareActionFlow);
         case 'Aim':
           _.extend(action, {ts: Date.now(), name: 'Aim'});
           return [player, character, action];
@@ -372,26 +372,17 @@ MML.aimAction = function aimAction(player, character, action) {
 };
 
 MML.reloadAction = function reloadAction(player, character, action) {
-  var characterWeaponInfo = MML.getCharacterWeaponAndSkill(character);
-  var attackerWeapon = characterWeaponInfo.characterWeapon;
-  attackerWeapon.loaded++;
-  character.inventory[attackerWeapon._id].loaded = attackerWeapon.loaded;
-  state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, {
-    character: character,
-    callback: 'reloadAction',
-    parameters: {
-      attackerWeapon: attackerWeapon,
-      attackerSkill: characterWeaponInfo.skill
-    },
-    rolls: {}
+  var weapon = character.inventory[action.weapon._id];
+  weapon.loaded++;
+  return MML.goToMenu(player, {message: character.name + ' reloads their ' + weapon.name + ' (' + weapon.loaded + '/' + weapon.reload +')', buttons: ['End Action']})
+  .then(function (player) {
+    return MML.endAction(player, character, action);
   });
-  MML.applyStatusEffects(character);
-  character.player.charMenuReloadAction(character.name, '');
-  character.player.displayMenu();
 };
 
 MML.endAction = function endAction(player, character, action) {
-  character.spentInitiative = character.spentInitiative + character.actionTempo;
+  character.spentInitiative = character.spentInitiative +
+    (character.actionTempo + character.actionInitCostMod > -1 ? - 1 : character.actionTempo + character.actionInitCostMod);
   character.previousAction = MML.clone(character.action);
   MML.updateCharacter(character);
   _.each(action.targetArray || [], function(target) {

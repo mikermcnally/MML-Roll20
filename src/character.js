@@ -777,25 +777,6 @@ MML.equipmentFailure = function equipmentFailure(character) {
   log('equipmentFailure');
 };
 
-MML.startAimAction = function startAimAction(character) {
-  var characterWeaponInfo = MML.getCharacterWeaponAndSkill(character);
-
-  var currentAction = {
-    character: character,
-    callback: 'aimAction',
-    parameters: {
-      attackerWeapon: characterWeaponInfo.characterWeapon,
-      attackerSkill: characterWeaponInfo.skill,
-      target: MML.characters[state.MML.GM.currentAction.targetArray[0]]
-    },
-    rolls: {}
-  };
-
-  state.MML.GM.currentAction = _.extend(state.MML.GM.currentAction, currentAction);
-  MML.applyStatusEffects(character);
-  MML[currentAction.callback]();
-};
-
 MML.applyStatusEffects = function applyStatusEffects(character) {
   var dependents = [
     'situationalInitBonus',
@@ -1627,8 +1608,8 @@ MML.validateAction = function validateAction(character) {
 };
 
 // Character Creation
-MML.createCharacter = function (charName, id) {
-  var characterProxy = new Proxy(new MML.Character(charName, id), {
+MML.createCharacter = function (name, id) {
+  var characterProxy = new Proxy(new MML.Character(name, id), {
     set: function(target, prop, value) {
       target[prop] = value;
       if (typeof(value) === 'object') {
@@ -1641,9 +1622,9 @@ MML.createCharacter = function (charName, id) {
   return characterProxy;
 };
 
-MML.Character = function (charName, id) {
+MML.Character = function (name, id) {
   Object.defineProperty(this, 'name', {
-    value: charName,
+    value: name,
     writable: true,
     enumerable: false
   });
@@ -2291,6 +2272,11 @@ MML.Character = function (charName, id) {
   });
   Object.defineProperty(this, 'situationalInitBonus', {
     value: MML.getCurrentAttributeAsFloat(this.name, 'situationalInitBonus'),
+    writable: true,
+    enumerable: false
+  });
+  Object.defineProperty(this, 'actionInitCostMod', {
+    value: MML.getCurrentAttributeAsFloat(this.name, 'actionInitCostMod'),
     writable: true,
     enumerable: false
   });

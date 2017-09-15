@@ -842,7 +842,7 @@ MML.charMenuIncreaseDuration = function charMenuIncreaseDuration(player, who) {
   });
 };
 
-MML.readyItem = function readyItem([player, character, action]) {
+MML.readyItem = function readyItem(player, character, action) {
   return MML.goToMenu(player, MML.readyItemMenu(player, character, action))
     .then(function(player) {
       return MML.chooseHand(player, character, action);
@@ -851,17 +851,17 @@ MML.readyItem = function readyItem([player, character, action]) {
 
 MML.readyItemMenu = function readyItemMenu(player, character, action) {
   var message = 'Choose item or items for ' + character.name;
-  var buttons = [];
+  var buttons = ['Back'];
 
   _.each(character.inventory, function(item, _id) {
     if (['weapon', 'spellComponent', 'shield', 'potion', 'misc'].indexOf(item.type) > -1 &&
       character.rightHand._id !== _id &&
       character.leftHand._id !== _id
     ) {
-      buttons.push(item.name);
+      buttons.unshift(item.name);
     }
   });
-  buttons.push('Back');
+  return {message: message, buttons: buttons};
 };
 
 MML.charMenuChooseHands = function charMenuChooseHands(player, who, item, itemId) {

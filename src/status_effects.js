@@ -112,7 +112,7 @@ MML.statusEffects['Called Shot'] = function(effect, index) {
     this.castingMod += -10;
 
     if (this.situationalInitBonus !== 'No Combat' && !effect.applied) {
-      this.spentInitiative += -5;
+      this.actionInitCostMod += -5;
       effect.applied = true;
     }
 
@@ -129,8 +129,8 @@ MML.statusEffects['Called Shot Specific'] = function(effect, index) {
     this.missileAttackMod += -30;
     this.castingMod += -30;
 
-    if (this.situationalInitBonus !== 'No Combat' && !effect.applied) {
-      this.spentInitiative += -5;
+    if (this.situationalInitBonus !== 'No Combat') {
+      this.actionInitCostMod += -5;
       effect.applied = true;
     }
     this.statusEffects[index].description = 'Attack Modifier: -30%. Defense Modifier: -30%. Initiative: -5';
@@ -145,7 +145,7 @@ MML.statusEffects['Aggressive Stance'] = function(effect, index) {
     this.meleeAttackMod += 10;
     this.perceptionCheckMod += -4;
     if (this.situationalInitBonus !== 'No Combat') {
-      this.situationalInitBonus += 5;
+      this.actionInitCostMod += 5;
     }
     this.statusEffects[index].description = 'Attack Modifier: +10%. Defense Modifier: -40%. Initiative: +5. Preception Modifier: -4';
   }
@@ -159,7 +159,7 @@ MML.statusEffects['Defensive Stance'] = function(effect, index) {
     this.meleeAttackMod += -30;
     this.perceptionCheckMod += -4;
     if (this.situationalInitBonus !== 'No Combat') {
-      this.situationalInitBonus += -5;
+      this.actionInitCostMod += -5;
     }
     this.statusEffects[index].description = 'Attack Modifier: -30%. Defense Modifier: +40%. Initiative: -5. Preception Modifier: -4';
   }
@@ -347,7 +347,7 @@ MML.statusEffects['Hasten Spell'] = function(effect, index) {
     this.castingMod += -10;
     this.statusEffects[index].description = 'Casting Modifier: -10%';
     if (this.situationalInitBonus !== 'No Combat' && this.action.spell.actions === 1) {
-      this.situationalInitBonus += 5;
+      this.actionInitCostMod += 5;
       this.statusEffects[index].description += '. Initiative: +5';
     } else {
       if (!effect.applied) {
@@ -375,7 +375,7 @@ MML.statusEffects['Ready Item'] = function(effect, index) {
   if (state.MML.GM.inCombat === false || state.MML.GM.currentRound !== parseInt(effect.startingRound)) {
     delete this.statusEffects[index];
   } else {
-    this.situationalInitBonus += -10;
+    this.actionInitCostMod += -10;
     this.statusEffects[index].description = 'Initiative: -10';
   }
 };

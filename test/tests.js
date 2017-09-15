@@ -67,6 +67,17 @@ function runTests() {
       });
 
       it.only('Checks that start combat works', function() {
+        createTestCharacters(1);
+        var item = MML.items['Hand Axe'];
+        item.quality = 'Standard';
+        item._id = 'axe';
+        MML.characters['test0'].inventory['axe'] = item;
+        startTestCombat(player, _.pluck(MML.characters, 'name'))
+          .then(clickButton('Ready Item'))
+          .then(clickButton('Hand Axe'));
+      });
+
+      it('Checks that start combat works', function() {
         createTestCharacters(3);
         startTestCombat(player, _.pluck(MML.characters, 'name'))
           .then(setActionPunchAttack)

@@ -35,7 +35,7 @@ MML.init = function() {
   MML.characters = {};
   _.each(characterObjects, function(characterObject) {
     var character = MML.createCharacter(characterObject.get('name'), characterObject.id);
-    character.setPlayer();
+    MML.setPlayer(character);
     MML.characters[character.name] = character;
   });
 
