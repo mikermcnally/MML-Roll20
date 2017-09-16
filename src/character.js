@@ -907,14 +907,14 @@ MML.getWeaponFamily = function getWeaponFamily(character, hand) {
 };
 
 MML.equipItem = function equipItem(character, itemId, grip) {
-  if (grip === 'Left') {
+  if (grip === 'Left Hand') {
     character.leftHand._id = itemId;
     if (character.inventory[itemId].type === 'weapon') {
       character.leftHand.grip = 'One Hand';
     } else {
       character.leftHand.grip = 'unarmed';
     }
-  } else if (grip === 'Right') {
+  } else if (grip === 'Right Hand') {
     character.rightHand._id = itemId;
     if (character.inventory[itemId].type === 'weapon') {
       character.rightHand.grip = 'One Hand';

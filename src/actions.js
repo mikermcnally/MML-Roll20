@@ -29,22 +29,21 @@ MML.prepareActionFlow = function prepareActionFlow([player, character, action]) 
   return MML.prepareAction([player, character, action])
     .then(function([player, character, action]) {
       if (_.contains(action.modifiers, 'Ready Item')) {
-        var weapon = _.find(action.items, function(item) {
-          return character.inventory[item.itemId].type === 'weapon';
+        var weaponWithGrip = _.find(action.items, function(itemWithGrip) {
+          return itemWithGrip.item.type === 'weapon';
         });
-        if (_.isUndefined(weapon)) {
+        if (_.isUndefined(weaponWithGrip)) {
           action.weapon = 'unarmed';
         } else {
-          if (weapon.grip === 'Right' || weapon.grip === 'Left') {
-            action.weapon = MML.buildWeaponObject(character.inventory[weapon.itemId], 'One Hand');
+          if (weaponWithGrip.grip === 'Right Hand' || weaponWithGrip.grip === 'Left Hand') {
+            action.weapon = MML.buildWeaponObject(weaponWithGrip.item, 'One Hand');
           } else {
-            action.weapon = MML.buildWeaponObject(character.inventory[weapon.itemId], weapon.grip);
+            action.weapon = MML.buildWeaponObject(weaponWithGrip.item, weaponWithGrip.grip);
           }
         }
       } else {
         action.weapon = MML.getEquippedWeapon(character);
       }
-
       switch (player.pressedButton) {
         case 'Observe':
           _.extend(action, {ts: Date.now(), name: 'Observe'});
@@ -55,7 +54,13 @@ MML.prepareActionFlow = function prepareActionFlow([player, character, action]) 
         case 'Attack':
           return MML.prepareAttackAction([player, character, action]);
         case 'Ready Item':
-          return MML.readyItem(player, character, action).then(MML.prepareActionFlow);
+          return MML.readyItem(player, character, action)
+            .then(function (itemArray) {
+              action.items = itemArray;
+              action.modifiers.push('Ready Item');
+              return [player, character, action];
+            })
+            .then(MML.prepareActionFlow); // TODO: This recursion causes issues. returns undefined instead of player after finalizeAction
         case 'Aim':
           _.extend(action, {ts: Date.now(), name: 'Aim'});
           return [player, character, action];
@@ -76,7 +81,8 @@ MML.prepareActionFlow = function prepareActionFlow([player, character, action]) 
     .then(function([player, character, action]) {
       switch (player.pressedButton) {
         case 'Roll':
-          return MML.rollInitiative([player, character, action]);
+          MML.setAction(character, action);
+          return MML.initiativeRoll([player, character, action]);
         case 'Edit Action':
           return MML.prepareActionFlow([player, character, {
             ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,

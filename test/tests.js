@@ -29,6 +29,7 @@ filterObjs = roll20.filterObjs;
 getAttrByName = roll20.getAttrByName;
 randomInteger = roll20.randomInteger;
 Campaign = roll20.Campaign;
+generateRowID = roll20.generateRowID;
 var eventEmitter = require('events');
 var emitter = new eventEmitter();
 
@@ -66,15 +67,58 @@ function runTests() {
           .then(clickButton('Start Combat'));
       });
 
-      it.only('Checks that start combat works', function() {
-        createTestCharacters(1);
-        var item = MML.items['Hand Axe'];
-        item.quality = 'Standard';
-        item._id = 'axe';
-        MML.characters['test0'].inventory['axe'] = item;
+      it('Basic Weapon Attack', function() {
+        var character = createCharacter('test');
+        var itemId = addItemToInventory(character, 'Hand Axe');
+        MML.equipItem(character, itemId, 'Right Hand');
+        startTestCombat(player, _.pluck(MML.characters, 'name'))
+          .then(clickButton('Attack'))
+          .then(clickButton('Standard'))
+          .then(clickButton('None'))
+          .then(clickButton('Neutral'))
+          .then(clickButton('Roll'))
+          .then(clickButton('Roll'))
+          .then(clickButton('acceptRoll'))
+          // .then(clickButton('Start Round'))
+          ;
+      });
+
+      it.only ('Basic Weapon Attack', function() {
+        var character = createCharacter('test');
+        character.statusEffects['Holding'] = {};
+        startTestCombat(player, _.pluck(MML.characters, 'name'))
+          .then(clickButton('Release Opponent'))
+          .then(clickButton('Attack'))
+          .then(clickButton('Punch'))
+          .then(clickButton('None'))
+          .then(clickButton('Neutral'))
+          .then(clickButton('Roll'))
+          .then(clickButton('Roll'))
+          .then(clickButton('acceptRoll'))
+          // .then(clickButton('Start Round'))
+          ;
+      });
+
+      it('Ready Item', function() {
+        var character = createCharacter('test');
+        addItemToInventory(character, 'Hand Axe');
+        addItemToInventory(character, 'Hand Axe', 'Excellent');
+        addItemToInventory(character, 'Hand Axe', 'Poor');
+        var wut = createCharacter('the fuck');
         startTestCombat(player, _.pluck(MML.characters, 'name'))
           .then(clickButton('Ready Item'))
-          .then(clickButton('Hand Axe'));
+          .then(clickButton('Hand Axe'))
+          .then(clickButton('Right Hand'))
+          .then(clickButton('Hand Axe_2'))
+          .then(clickButton('Attack'))
+          .then(clickButton('Standard'))
+          .then(clickButton('None'))
+          .then(clickButton('Neutral'))
+          .then(clickButton('Roll'))
+          .then(clickButton('Roll'))
+          .then(clickButton('acceptRoll'))
+          // .then(clickButton('Start Round'))
+          ;
       });
 
       it('Checks that start combat works', function() {
@@ -213,7 +257,6 @@ function runTests() {
 
       it('Works with holding status effect', function() {
         var character = createCharacter('test');
-        createTestToken(character.name, character.id);
         character.statusEffects['Holding'] = {};
         state.MML.GM.inCombat = true;
         MML.newRoundUpdate(character);
@@ -423,7 +466,9 @@ function createCharacter(name) {
     MML.createAttribute('repeating_weaponskills_1_input', '1', "", character);
     MML.createAttribute('repeating_weaponskills_1_level', '1', "", character);
 
+    createTestToken(name, character.id);
     var mml_character = MML.createCharacter(name, character.id);
+    MML.characters[name] = mml_character;
 
     return mml_character;
   } catch (e) {
@@ -445,12 +490,10 @@ function createTestToken(name, id) {
 }
 
 function createTestCharacters(amount) {
-  var character;
   for (var i = 0; i < amount; i++) {
-    character = createCharacter('test' + i);
-    MML.characters['test' + i] = character;
-    createTestToken('test' + i, character.id);
+    createCharacter('test' + i);
   }
+  return MML.characters;
 }
 
 function createTestAction(character) {
@@ -459,6 +502,15 @@ function createTestAction(character) {
     modifiers: [],
     weapon: MML.getEquippedWeapon(character)
   };
+}
+
+function addItemToInventory(character, itemName, quality = 'Standard') {
+  var id = generateRowID();
+  var item = MML.items[itemName];
+  item.quality = quality;
+  item._id = id;
+  character.inventory[id] = item;
+  return id;
 }
 
 function clone(obj) {

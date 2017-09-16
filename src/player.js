@@ -304,6 +304,8 @@ MML.prepareNextCharacter = function prepareNextCharacter(player, index) {
   if (index < player.combatants.length) {
     MML.buildAction(player, player.combatants[index])
       .then(function(player) {
+        console.log("SHOW ME WHAT YOU GOT");
+        console.log(player);
         MML.prepareNextCharacter(player, index + 1);
       }).catch(log);
   } else if (player.name === state.MML.GM.name) {
@@ -843,120 +845,71 @@ MML.charMenuIncreaseDuration = function charMenuIncreaseDuration(player, who) {
 };
 
 MML.readyItem = function readyItem(player, character, action) {
-  var items = _.pick(character.inventory, function (item) {
-    return ['weapon', 'spellComponent', 'shield', 'potion', 'misc'].indexOf(item.type) > -1 &&
-      character.rightHand._id !== item._id &&
-      character.leftHand._id !== item._id;
-  });
-  return MML.goToMenu(player, MML.readyItemMenu(player, character, items))
+  function createUniqueItemName(itemMap, originalName, name, iteration = 2) {
+    if (_.isUndefined(itemMap[name])) {
+      return name;
+    }
+    return createUniqueItemName(itemMap, originalName, originalName + '_' + iteration, iteration + 1);
+  }
+
+  var itemMap = {};
+  _.chain(character.inventory)
+    .pick(function (item) {
+      return ['weapon', 'spellComponent', 'shield', 'potion', 'misc'].indexOf(item.type) > -1 &&
+        character.rightHand._id !== item._id &&
+        character.leftHand._id !== item._id;
+    })
+    .each(function (item) {
+      itemMap[createUniqueItemName(itemMap, item.name, item.name)] = item._id;
+    });
+
+  return MML.goToMenu(player, MML.readyItemMenu(player, character, itemMap))
     .then(function(player) {
-      return MML.chooseHand(player, character, action);
+      return MML.chooseGrip(player, character, itemMap, player.pressedButton);
     });
 };
 
-MML.readyItemMenu = function readyItemMenu(player, character, items) {
+MML.readyItemMenu = function readyItemMenu(player, character, itemMap) {
   var message = 'Choose item or items for ' + character.name;
-  var buttons = items.map(function (item) { return item.name;}).push('Back');
+  var buttons = _.keys(itemMap).concat('Back');
   return {message: message, buttons: buttons};
 };
 
-MML.chooseHand = function chooseHand(player, character, action) {
-  return MML.goToMenu(player, MML.readyItemMenu(player, character, action))
+MML.chooseGrip = function chooseGrip(player, character, itemMap, selectedItem) {
+  var item = character.inventory[itemMap[selectedItem]];
+  return MML.goToMenu(player, MML.chooseGripMenu(player, character, item))
     .then(function(player) {
-      return MML.chooseHand(player, character, action);
+      var itemWithGrip = { item: item, grip: player.pressedButton };
+      if (player.pressedButton === 'Left Hand' || player.pressedButton === 'Right Hand') {
+        return MML.readyAdditionalItem(player, character, _.omit(itemMap, selectedItem), itemWithGrip);
+      }
+      return [itemWithGrip];
     });
 };
 
-MML.chooseHandMenu = function chooseHandMenu(player, who, item, itemId) {
-  player.who = who;
-  player.message = 'Choose item or items for' + who;
+MML.chooseGripMenu = function chooseGripMenu(player, character, item) {
+  var message = 'How will ' + character.name + ' hold their ' + item.name + '?';
   var buttons = [];
-  var character = MML.characters[who];
 
   if (['spellComponent', 'shield', 'potion', 'misc'].indexOf(item.type) > -1 ||
     (item.type === 'weapon' && _.has(item.grips, 'One Hand'))
   ) {
-    buttons.push({
-      text: 'Left',
-      nextMenu: 'charMenuReadyAdditionalItem',
-      callback: function() {
-        action.items = [{
-          itemId: itemId,
-          grip: 'Left'
-        }];
-        MML.charMenuReadyAdditionalItem(player, who, 'Right', itemId);
-        MML.displayMenu(player);
-      }
-    });
-    buttons.push({
-      text: 'Right',
-      nextMenu: 'charMenuReadyAdditionalItem',
-      callback: function() {
-        action.items = [{
-          itemId: itemId,
-          grip: 'Right'
-        }];
-        MML.charMenuReadyAdditionalItem(player, who, 'Left', itemId);
-        MML.displayMenu(player);
-      }
-    });
+    buttons = buttons.concat(['Left Hand', 'Right Hand']);
   }
   if (item.type === 'weapon') {
-    _.each(item.grips, function(grip, name) {
-      if (name !== 'One Hand') {
-        buttons.push({
-          text: name,
-          nextMenu: 'menuIdle',
-          callback: function() {
-            action.items = [{
-              itemId: itemId,
-              grip: name
-            }];
-            MML.prepareActionMenu(player, who);
-            MML.displayMenu(player);
-          }
-        });
-      }
-    });
+    buttons = buttons.concat(_.keys(item.grips).filter(function(grip) { return grip !== 'One Hand'; }));
   }
-  player.buttons = buttons;
+  return {message: message, buttons: buttons};
 };
 
-MML.charMenuReadyAdditionalItem = function charMenuReadyAdditionalItem(player, who, hand, previousItemId) {
-  player.who = who;
-  player.message = 'Choose another item or finalize action for ' + player.who;
-  var buttons = [];
-  var character = MML.characters[who];
-
-  _.each(character.inventory, function(item, _id) {
-    if (['weapon', 'spellComponent', 'shield', 'potion', 'misc'].indexOf(item.type) > -1 &&
-      character.rightHand._id !== _id &&
-      character.leftHand._id !== _id &&
-      previousItemId !== _id
-    ) {
-      buttons.push({
-        text: item.name,
-        nextMenu: 'menuIdle',
-        callback: function() {
-          action.items.push({
-            itemId: _id,
-            grip: hand
-          });
-          MML.prepareActionMenu(player, who);
-          MML.displayMenu(player);
-        }
-      });
-    }
-  });
-
-  buttons.push({
-    text: 'Next Menu',
-    nextMenu: 'prepareActionMenu',
-    callback: function() {
-      MML.displayMenu(player);
-    }
-  });
-  player.buttons = buttons;
+MML.readyAdditionalItem = function readyAdditionalItem(player, character, itemMap, previousItem) {
+  var message = 'Choose another item or continue';
+  var buttons = _.keys(itemMap).concat('Continue');
+  return MML.goToMenu(player, {message: message, buttons: buttons})
+    .then(function(player) {
+      var item = character.inventory[itemMap[player.pressedButton]];
+      return [previousItem, { item: item, grip: previousItem.grip === 'Right Hand' ? 'Left Hand' : 'Right Hand' }];
+    });
 };
 
 MML.finalizeAction = function finalizeAction([player, character, action]) {

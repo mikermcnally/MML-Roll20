@@ -184,20 +184,22 @@ MML.changeRoll = function changeRoll(player, roll, valueString) {
   }
 };
 
-MML.rollInitiative = function rollInitiative([player, character, action]) {
-  MML.setAction(character, action);
+MML.initiativeRoll = function initiativeRoll([player, character, action]) {
   var modifiers = [character.situationalInitBonus,
     character.movementRatioInitBonus,
     character.attributeInitBonus,
     character.senseInitBonus,
     character.fomInitBonus,
     character.firstActionInitBonus,
+    character.actionInitCostMod,
     character.spentInitiative];
 
   return MML.processRoll(player, MML.genericRoll('initiative', '1d10', modifiers))
     .then(function([player, roll]) {
       character.initiativeRollValue = roll.value;
       MML.setReady(character, true);
+      // console.log('COME DOWN LATER FOR MOOSE SOUP');
+      // console.log(player);
       return player;
     });
 };
