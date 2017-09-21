@@ -83,7 +83,7 @@ function runTests() {
           ;
       });
 
-      it.only ('Basic Weapon Attack', function() {
+      it.only('Release Opponent', function() {
         var character = createCharacter('test');
         character.statusEffects['Holding'] = {};
         startTestCombat(player, _.pluck(MML.characters, 'name'))
@@ -104,20 +104,30 @@ function runTests() {
         addItemToInventory(character, 'Hand Axe');
         addItemToInventory(character, 'Hand Axe', 'Excellent');
         addItemToInventory(character, 'Hand Axe', 'Poor');
-        var wut = createCharacter('the fuck');
         startTestCombat(player, _.pluck(MML.characters, 'name'))
           .then(clickButton('Ready Item'))
           .then(clickButton('Hand Axe'))
           .then(clickButton('Right Hand'))
           .then(clickButton('Hand Axe_2'))
           .then(clickButton('Attack'))
+          .then(clickButton('Attack'))
+          .then(clickButton('Attack'))
           .then(clickButton('Standard'))
           .then(clickButton('None'))
           .then(clickButton('Neutral'))
           .then(clickButton('Roll'))
           .then(clickButton('Roll'))
+          .then(clickButton('Roll'))
           .then(clickButton('acceptRoll'))
-          // .then(clickButton('Start Round'))
+          .then(clickButton('Start Round'))
+          .then(clickButton('Start Round'))
+          .then(clickButton('Start Round'))
+          .then(clickButton('Start Action'))
+          .then(clickButton('End Movement'))
+          .then(function () {
+            console.log(character.rightHand);
+            console.log(character.inventory);
+          })
           ;
       });
 
