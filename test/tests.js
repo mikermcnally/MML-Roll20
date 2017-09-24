@@ -18,7 +18,7 @@ fs.writeFileSync('../r20/MML.txt', roll20String, 'utf8');
 roll20String += 'module.exports = { MML: MML };';
 fs.writeFileSync('../r20/MML_Test.js', roll20String, 'utf8');
 
-var roll20 = require('../Roll20 Emulation/Roll20');
+var roll20 = require('../Roll20-Emulation/Roll20');
 state = roll20.state;
 log = roll20.log;
 sendChat = roll20.sendChat;
@@ -83,7 +83,7 @@ function runTests() {
           ;
       });
 
-      it.only('Release Opponent', function() {
+      it('Release Opponent', function() {
         var character = createCharacter('test');
         character.statusEffects['Holding'] = {};
         startTestCombat(player, _.pluck(MML.characters, 'name'))
@@ -131,7 +131,7 @@ function runTests() {
           ;
       });
 
-      it('Checks that start combat works', function() {
+      it.only('Checks that start combat works', function() {
         createTestCharacters(3);
         startTestCombat(player, _.pluck(MML.characters, 'name'))
           .then(setActionPunchAttack)
@@ -155,6 +155,7 @@ function runTests() {
           // .then(clickButton('Roll'))
           .then(clickButton('acceptRoll'))
           .then(clickButton('acceptRoll'))
+          .then(clickButton('Start Round'))
           .then(clickButton('Start Round'))
           .then(clickButton('Start Action'))
           .then(clickButton('changeRoll 80'))
@@ -202,6 +203,7 @@ function runTests() {
           .then(clickButton('End Movement'))
           .then(clickButton('Start Action'))
           .then(clickButton('End Movement'))
+          .then(clickButton('End Action'))
           // .then(clickButton('Observe'))
           // .then(clickButton('Accept'))
           // .then(clickButton('acceptRoll'))

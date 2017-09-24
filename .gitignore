@@ -3,5 +3,5 @@ MML_Test.js
 .gitignore
 .jshintrc
 /node_modules
-/Roll20 Emulation
+/Roll20-Emulation
 .remote-sync.json

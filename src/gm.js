@@ -14,7 +14,7 @@ MML.startCombat = function startCombat(player) {
     });
     MML.setTurnOrder(gm.combatants);
     Campaign().set('initiativepage', 'true');
-    MML.newRound();
+    return MML.newRound();
     // return MML.combatMenu(player);
   } else {
     sendChat('', '&{template:charMenu} {{name=Error}} {{message=No tokens selected}}');
@@ -34,9 +34,12 @@ MML.newRound = function newRound() {
     gm.fatigueCheckIndex = 0;
     MML.nextFatigueCheck();
   } else {
-    _.each(MML.players, function(player) {
-      MML.prepareCharacters(player);
-    });
+    return Promise.all(_.values(MML.players).map(function (player) {
+        return MML.prepareCharacters(player);
+      }))
+      .then(function (players) {
+        return MML.startRound(gm.player);
+      });
   }
 };
 
@@ -60,9 +63,11 @@ MML.nextAction = function nextAction() {
     var character = gm.combatants[0];
     if (character.initiative > 0) {
       gm.actor = character.name;
-      MML.startAction(character.player, character, MML.validateAction(character)).catch(log);
+      return MML.startAction(character.player, character, MML.validateAction(character))
+        .then(MML.nextAction)
+        .catch(log);
     } else {
-      MML.newRound();
+      return MML.newRound();
     }
   }
 };

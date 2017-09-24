@@ -297,19 +297,17 @@ MML.enterNumberOfDice = function enterNumberOfDice(player) {
 };
 
 MML.prepareCharacters = function prepareCharacters(player) {
-  MML.prepareNextCharacter(player, 0);
+  return MML.prepareNextCharacter(player, 0);
 };
 
 MML.prepareNextCharacter = function prepareNextCharacter(player, index) {
   if (index < player.combatants.length) {
-    MML.buildAction(player, player.combatants[index])
+    return MML.buildAction(player, player.combatants[index])
       .then(function(player) {
-        console.log("SHOW ME WHAT YOU GOT");
-        console.log(player);
-        MML.prepareNextCharacter(player, index + 1);
+        return MML.prepareNextCharacter(player, index + 1);
       }).catch(log);
-  } else if (player.name === state.MML.GM.name) {
-    MML.startRound(player);
+  } else {
+    return player;
   }
 };
 
@@ -689,7 +687,7 @@ MML.startRound = function startRound(player) {
         _.each(gm.combatants, function(character) {
           character.movementAvailable = character.movementRatio;
         });
-        MML.nextAction();
+        return MML.nextAction();
       }
     });
 };
@@ -938,8 +936,7 @@ MML.startAction = function startAction(player, character, validAction) {
               level: 1
             });
           }
-          return MML.buildAction(player, character)
-            .then(MML.nextAction);
+          return MML.buildAction(player, character);
         case 'Movement Only':
           return MML.combatMovement(player, character)
             .then(function ([player, character]) {

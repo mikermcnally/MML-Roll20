@@ -402,11 +402,8 @@ MML.endAction = function endAction(player, character, action) {
   });
 
   if (character.initiative > 0) {
-    return MML.buildAction(player, character)
-      .then(function() {
-        MML.nextAction();
-      });
+    return MML.buildAction(player, character);
   } else {
-    MML.nextAction();
+    return player;
   }
 };
