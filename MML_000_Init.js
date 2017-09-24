@@ -9,7 +9,7 @@ MML.init = function() {
     inCombat: false,
     currentRound: 0,
     roundStarted: false
-  };
+  };rgwergergh
   var playerObjects = findObjs({
     _type: 'player',
     online: true
