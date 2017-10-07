@@ -1,12 +1,10 @@
 MML.displayMenu = function displayMenu(player, menu) {
-  var buttons = menu.buttons;
-  var toChat = '/w "' + player.name + '" &{template:charMenu} {{name=' + menu.message + '}} ';
+  var toChat = '/w "' + player.name + '" &{template:charMenu} {{name=' + menu.message + '}} ' +
+    menu.buttons.map(function(button) {
+      var noSpace = button.replace(/\s+/g, '');
+      return '{{' + noSpace + '=[' + button + '](!MML|' + button + ')}}';
+    }).join(' ');
 
-  // TODO: recursify this
-  _.each(buttons, function(button) {
-    var noSpace = button.replace(/\s+/g, '');
-    toChat = toChat + '{{' + noSpace + '=[' + button + '](!MML|' + button + ')}} ';
-  });
   sendChat(player.name, toChat, null, {
     noarchive: true
   });
@@ -36,7 +34,7 @@ MML.processRoll = function processRoll(player, roll) {
   return MML.setRollButtons(player)
     .then(function(player) {
       if (player.pressedButton === 'acceptRoll') {
-        return [player, roll];
+        return roll.result;
       } else {
         return MML.processRoll(player, MML.changeRoll(player, roll, player.pressedButton.replace('changeRoll ', '')));
       }
@@ -155,37 +153,19 @@ MML.prepareAttackAction = function prepareAttackAction([player, character, actio
   action.name = 'Attack';
   return MML.goToMenu(player, MML.prepareAttackActionMenu(player, character, action))
     .then(function(player) {
-      return [player, character, action];
-    })
-    .then(function([player, character, action]) {
       if (player.pressedButton === 'Shoot From Cover') {
         action.modifiers.push('Shoot From Cover');
       } else if (player.pressedButton !== 'Standard') {
         action.weaponType = player.pressedButton;
       }
       if (['Head Butt', 'Takedown', 'Grapple', 'Regain Feet', 'Place a Hold', 'Break a Hold', 'Break Grapple'].indexOf(player.pressedButton) !== -1) {
-        return MML.chooseAttackStance([player, character, action]).then(MML.setAttackStance);
+        return MML.chooseAttackStance([player, character, action]);
       } else {
         return MML.chooseCalledShot([player, character, action])
-          .then(MML.setCalledShot)
-          .then(MML.chooseAttackStance)
-          .then(MML.setAttackStance);
+          .then(MML.chooseAttackStance);
       }
     })
-    .then(function([player, character, action]) {
-      if (!MML.isWieldingRangedWeapon(character)) {
-        if (!MML.isUnarmed(character) && action.weapon.secondaryType !== '') {
-          return MML.chooseDamageType([player, character, action]).then(MML.setDamageType);
-        } else {
-          if (!MML.isUnarmedAction(action)) {
-            action.weaponType = 'primary';
-          } else {
-            action.weapon = MML.unarmedAttacks[action.weaponType];
-          }
-          return [player, character, action];
-        }
-      }
-    });
+    .then(MML.chooseDamageType([player, character, action]));
 };
 
 MML.chooseCalledShot = function chooseCalledShot([player, character, action]) {
@@ -194,22 +174,18 @@ MML.chooseCalledShot = function chooseCalledShot([player, character, action]) {
       buttons: ['None', 'Body Part', 'Specific Hit Position']
     })
     .then(function(player) {
+      switch (player.pressedButton) {
+        case 'Called Shot':
+          action.modifiers.push('Called Shot');
+          break;
+        case 'Called Shot Specific':
+          action.modifiers.push('Called Shot Specific');
+          break;
+        default:
+          break;
+      }
       return [player, character, action];
     });
-};
-
-MML.setCalledShot = function setCalledShot([player, character, action]) {
-  switch (player.pressedButton) {
-    case 'Called Shot':
-      action.modifiers.push('Called Shot');
-      break;
-    case 'Called Shot Specific':
-      action.modifiers.push('Called Shot Specific');
-      break;
-    default:
-      break;
-  }
-  return [player, character, action];
 };
 
 MML.chooseAttackStance = function chooseAttackStance([player, character, action]) {
@@ -218,38 +194,45 @@ MML.chooseAttackStance = function chooseAttackStance([player, character, action]
       buttons: ['Neutral', 'Defensive', 'Aggressive']
     })
     .then(function(player) {
+      switch (player.pressedButton) {
+        case 'Defensive':
+          action.modifiers.push('Defensive Stance');
+          break;
+        case 'Neutral':
+          break;
+        case 'Aggressive':
+          action.modifiers.push('Aggressive Stance');
+          break;
+      }
       return [player, character, action];
     });
 };
 
-MML.setAttackStance = function setAttackStance([player, character, action]) {
-  switch (player.pressedButton) {
-    case 'Defensive':
-      action.modifiers.push('Defensive Stance');
-      break;
-    case 'Neutral':
-      break;
-    case 'Aggressive':
-      action.modifiers.push('Aggressive Stance');
-      break;
-  }
-  return [player, character, action];
-};
-
 MML.chooseDamageType = function chooseDamageType([player, character, action]) {
-  return [MML.goToMenu(player, {
-    message: 'Choose a Damage Type',
-    buttons: ['Primary', 'Secondary']
-  }), character, action];
-};
-
-MML.setDamageType = function setDamageType([player, character, action]) {
-  if (player.pressedButton === 'Secondary') {
-    action.weaponType = 'secondary';
-  } else {
-    action.weaponType = 'primary';
-  }
-  return [player, character, action];
+  var weapon = action.weapon;
+  return MML.goToMenu(player, {
+      message: 'Choose a Damage Type',
+      buttons: ['Primary', 'Secondary']
+    })
+    .then(function (player) {
+      if (!MML.isWieldingRangedWeapon(character)) {
+        if (!MML.isUnarmed(character) && weapon.secondaryType !== '') {
+          if (player.pressedButton === 'Secondary') {
+            weapon.weaponType = 'secondary';
+          } else {
+            weapon.weaponType = 'primary';
+          }
+          return [player, character, action];
+        } else {
+          if (!MML.isUnarmedAction(action)) {
+            weapon.weaponType = 'primary';
+          } else {
+            weapon = MML.unarmedAttacks[action.weaponType];
+          }
+          return [player, character, action];
+        }
+      }
+  });
 };
 
 MML.chooseMeleeDefense = function chooseMeleeDefense(player, character, dodgeChance, blockChance, attackerWeapon) {
@@ -268,7 +251,7 @@ MML.chooseMeleeDefense = function chooseMeleeDefense(player, character, dodgeCha
               number: 1
             });
           }
-          return MML.processRoll(player, MML.universalRoll('meleeBlock', [blockChance]));
+          return MML.defenseRoll(player, 'meleeBlock', blockChance);
         case 'Dodge: ' + dodgeChance + '%':
           character.statusEffects['Melee This Round'] = {
             id: generateRowID(),
@@ -285,9 +268,9 @@ MML.chooseMeleeDefense = function chooseMeleeDefense(player, character, dodgeCha
               number: 1
             });
           }
-          return MML.processRoll(player, MML.universalRoll('meleeDodge', [dodgeChance]));
+          return MML.defenseRoll(player, 'meleeDodge', dodgeChance);
         case 'Take it':
-          return [player, {result: 'Failure'}];
+          return 'Failure';
       }
     });
 };
@@ -392,10 +375,6 @@ MML.selectDieSizeMenu = function selectDieSizeMenu(player, who) {
 
 MML.selectDieSizeMenu = function selectDieSizeMenu(player) {
   MML.enterNumberOfDice(player);
-};
-
-MML.customRoll = function customRoll(numberOfDice) {
-  sendChat(player.name, '/w "' + player.name + 'Result: ' + rollDice(player.dice, numberOfDice));
 };
 
 MML.GmMenuCombat = function GmMenuCombat(player) {
@@ -1022,12 +1001,6 @@ MML.charMenuSelectHitPosition = function charMenuSelectHitPosition(player, who) 
   }, player);
 };
 
-MML.charMenuAttackRoll = function charMenuAttackRoll(player, who) {
-  player.who = who;
-  player.message = 'Roll Attack.';
-  player.buttons = [player.menuButtons.rollDice];
-};
-
 MML.charMenuRangedDefenseRoll = function charMenuRangedDefenseRoll(player, who, defenseChance) {
   var character = MML.characters[who];
   player.who = who;
@@ -1083,7 +1056,7 @@ MML.charMenuGrappleDefenseRoll = function charMenuGrappleDefenseRoll(player, who
   player.buttons = buttons;
 };
 
-MML.charMenuResistRelease = function charMenuResistRelease(player, who, attacker) {
+MML.resistRelease = function resistRelease(player, who, attacker) {
   player.who = who;
   player.message = 'Allow ' + attacker.name + ' to release grapple?';
 
@@ -1251,14 +1224,6 @@ MML.GmMenuWorld = function GmMenuWorld(player, input) {
 
 MML.GmMenuUtilities = function GmMenuUtilities(player, input) {
   //edit states and other api stuff
-};
-
-MML.promiseMeNed = function promiseMeNed(bastard) {
-  var prince = bastard;
-  return new Promise(function(resolve, reject) {
-    resolve(prince);
-    reject();
-  });
 };
 
 MML.Player = function Player(name, isGM) {

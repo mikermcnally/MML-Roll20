@@ -1,10 +1,19 @@
 MML.rollDice = function rollDice(amount, size) {
-  var value = 0;
-
-  for (i = 0; i < amount; i++) {
-    value += randomInteger(size);
+  switch (state.MML.rollStyle) {
+    case 'physicalDice':
+      break;
+    case '3d':
+      break;
+    default:
+      return Promise.resolve(
+        Array(value)
+          .map(function () {
+            return randomInteger(size);
+          })
+          .reduce(function(sum, value) {
+            return sum + value;
+          }, 0));
   }
-  return value;
 };
 
 MML.parseDice = function parseDice(dice) {
@@ -22,16 +31,17 @@ MML.sumModifiers = function sumModifiers(modifiers) {
 };
 
 MML.universalRoll = function universalRoll(name, modifiers) {
-  var roll = {
-    type: 'universal',
-    name: name,
-    range: '1-100',
-    value: MML.rollDice(1, 100),
-    target: MML.sumModifiers(modifiers),
-    modifiers: modifiers
-  };
-
-  return MML.universalRollResult(roll);
+  return MML.rollDice(1, 100)
+    .then(function (value) {
+      return MML.universalRollResult({
+        type: 'universal',
+        name: name,
+        range: '1-100',
+        value: value,
+        target: MML.sumModifiers(modifiers),
+        modifiers: modifiers
+      });
+    });
 };
 
 MML.universalRollResult = function universalRollResult(roll) {
@@ -58,16 +68,17 @@ MML.universalRollResult = function universalRollResult(roll) {
 };
 
 MML.attributeCheckRoll = function attributeCheckRoll(name, attribute, modifiers) {
-  var roll = {
-    type: 'attribute',
-    name: name,
-    range: '1-20',
-    value: MML.rollDice(1, 20),
-    target: attribute + MML.sumModifiers(modifiers),
-    modifiers: modifiers
-  };
-
-  return MML.attributeCheckResult(roll);
+  return MML.rollDice(1, 20)
+    .then(function (value) {
+      return MML.attributeCheckResult({
+        type: 'attribute',
+        name: name,
+        range: '1-20',
+        value: value,
+        target: attribute + MML.sumModifiers(modifiers),
+        modifiers: modifiers
+      });
+    });
 };
 
 MML.attributeCheckResult = function attributeCheckResult(roll) {
@@ -195,121 +206,145 @@ MML.initiativeRoll = function initiativeRoll([player, character, action]) {
     character.spentInitiative];
 
   return MML.processRoll(player, MML.genericRoll('initiative', '1d10', modifiers))
-    .then(function([player, roll]) {
-      character.initiativeRollValue = roll.value;
+    .then(function(value) {
+      character.initiativeRollValue = value;
       MML.setReady(character, true);
-      // console.log('COME DOWN LATER FOR MOOSE SOUP');
-      // console.log(player);
       return player;
     });
 };
 
 MML.meleeAttackRoll = function meleeAttackRoll(player, character, task, skill) {
-  return MML.goToMenu(player, { message: character.name + '\'s Attack Roll', buttons: ['Roll'] })
-    .then(function(player) {
-      return MML.processRoll(player, MML.universalRoll('meleeAttack', [character.situationalMod, character.meleeAttackMod, character.attributeMeleeAttackMod, task, skill]));
-    });
+  return function (rolls) {
+    return MML.goToMenu(player, { message: character.name + '\'s Attack Roll', buttons: ['Roll'] })
+      .then(function(player) {
+        return MML.processRoll(player, MML.universalRoll('meleeAttack', [character.situationalMod, character.meleeAttackMod, character.attributeMeleeAttackMod, task, skill]));
+      })
+      .then(function (result) {
+        rolls.meleeAttackRoll = result;
+        if (result === 'Failure' || 'Critical Failure') {
+          throw rolls;
+        }
+        return rolls;
+      });
+  };
 };
 
-MML.attackRollResult = function attackRollResult(character) {
-  var currentRoll = character.player.currentRoll;
-  if (character.player.name === state.MML.GM.name) {
-    if (currentRoll.accepted === false) {
-      character.player.displayGmRoll(currentRoll);
-    } else {
-      if (_.has(character.statusEffects, 'Called Shot Specific') && currentRoll.value > currentRoll.target && currentRoll.value - currentRoll.target < 11) {
-        character.statusEffects['Called Shot Specific'].nearMiss = true;
-        currentRoll.result = 'Success';
-      }
-      character.attackRollApply();
-    }
-  } else {
-    character.player.displayPlayerRoll(currentRoll);
-    if (_.has(character.statusEffects, 'Called Shot Specific') && currentRoll.value > currentRoll.target && currentRoll.value - currentRoll.target < 11) {
-      character.statusEffects['Called Shot Specific'].nearMiss = true;
-      currentRoll.result = 'Success';
-    }
-    character.attackRollApply();
-  }
+MML.defenseRoll = function defenseRoll(player, name, chance) {
+  return function (rolls) {
+    return MML.processRoll(player, MML.universalRoll(name, chance))
+      .then(function (result) {
+        rolls.meleeDefenseRoll = result;
+        if (result === 'Success' || 'Critical Success') {
+          throw rolls;
+        }
+        return rolls;
+      });
+  };
 };
 
 MML.meleeDamageRoll = function meleeDamageRoll(player, character, weapon, attackRoll, bonusDamage) {
-  return MML.goToMenu(player, { message: character.name + '\'s Damage Roll', buttons: ['Roll'] })
-    .then(function(player) {
-      return MML.processRoll(player, MML.damageRoll('Melee Damage Roll', weapon.damage, weapon.damageType, [character.meleeDamageMod, bonusDamage || 0], attackRoll.result));
-    });
+  return function (rolls) {
+    return MML.goToMenu(player, { message: character.name + '\'s Damage Roll', buttons: ['Roll'] })
+      .then(function(player) {
+        return MML.processRoll(player, MML.damageRoll('Melee Damage Roll', weapon.damage, weapon.damageType, [character.meleeDamageMod, bonusDamage || 0], attackRoll));
+      })
+      .then(function (result) {
+        rolls.meleeDamageRoll = result;
+        return rolls;
+      });
+  };
 };
 
 MML.missileAttackRoll = function missileAttackRoll(player, character, target, weapon, skill) {
-  var mods = [skill, character.situationalMod, character.missileAttackMod, character.attributeMissileAttackMod];
-  if (_.has(target.statusEffects, 'Shoot From Cover')) {
-    mods.push(-20);
-  }
-  if (weapon.family === 'MWM') {
-    character.inventory[weapon._id].loaded = 0;
-  }
-  var range = MML.getDistanceBetweenCharacters(character, target);
-  var task;
-  var itemId;
-  var grip;
+  return function (rolls) {
+    var mods = [skill, character.situationalMod, character.missileAttackMod, character.attributeMissileAttackMod];
+    if (_.has(target.statusEffects, 'Shoot From Cover')) {
+      mods.push(-20);
+    }
+    if (weapon.family === 'MWM') {
+      character.inventory[weapon._id].loaded = 0;
+    }
+    var range = MML.getDistanceBetweenCharacters(character, target);
+    var task;
+    var itemId;
+    var grip;
 
-  if (MML.getWeaponFamily(character, 'rightHand') !== 'unarmed') {
-    itemId = character.rightHand._id;
-    grip = character.rightHand.grip;
-  } else {
-    itemId = character.leftHand._id;
-    grip = character.leftHand.grip;
-  }
+    if (MML.getWeaponFamily(character, 'rightHand') !== 'unarmed') {
+      itemId = character.rightHand._id;
+      grip = character.rightHand.grip;
+    } else {
+      itemId = character.leftHand._id;
+      grip = character.leftHand.grip;
+    }
 
-  var item = character.inventory[itemId];
+    var item = character.inventory[itemId];
 
-  var attackerWeapon = {
-    _id: itemId,
-    name: item.name,
-    type: 'weapon',
-    weight: item.weight,
-    family: item.grips[grip].family,
-    hands: item.grips[grip].hands,
-    initiative: item.grips[grip].initiative,
-    reload: item.grips[grip].reload,
-    damageType: item.grips[grip].primaryType
+    var attackerWeapon = {
+      _id: itemId,
+      name: item.name,
+      type: 'weapon',
+      weight: item.weight,
+      family: item.grips[grip].family,
+      hands: item.grips[grip].hands,
+      initiative: item.grips[grip].initiative,
+      reload: item.grips[grip].reload,
+      damageType: item.grips[grip].primaryType
+    };
+
+    if (range <= item.grips[grip].range.pointBlank.range) {
+      attackerWeapon.task = item.grips[grip].range.pointBlank.task;
+      attackerWeapon.damage = item.grips[grip].range.pointBlank.damage;
+    } else if (range <= item.grips[grip].range.effective.range) {
+      attackerWeapon.task = item.grips[grip].range.effective.task;
+      attackerWeapon.damage = item.grips[grip].range.effective.damage;
+    } else if (range <= item.grips[grip].range.long.range) {
+      attackerWeapon.task = item.grips[grip].range.long.task;
+      attackerWeapon.damage = item.grips[grip].range.long.damage;
+    } else {
+      attackerWeapon.task = item.grips[grip].range.extreme.task;
+      attackerWeapon.damage = item.grips[grip].range.extreme.damage;
+    }
+
+    state.MML.GM.currentAction.callback = 'missileAttackAction';
+    state.MML.GM.currentAction.parameters.range = range;
+    state.MML.GM.currentAction.parameters.attackerWeapon = attackerWeapon;
+    state.MML.GM.currentAction.parameters.attackerSkill = MML.getWeaponSkill(character, item);
+
+    return function (rolls) {
+      return MML.goToMenu(player, { message: character.name + '\'s Attack Roll', buttons: ['Roll'] })
+        .then(function(player) {
+          return MML.missileAttackRoll(player, MML.universalRoll('missileAttack', mods));
+        })
+        .then(function (result) {
+          rolls.missileAttackRoll = result;
+          if (result === 'Failure' || 'Critical Failure') {
+            throw rolls;
+          }
+          return rolls;
+        });
+    };
   };
-
-  if (range <= item.grips[grip].range.pointBlank.range) {
-    attackerWeapon.task = item.grips[grip].range.pointBlank.task;
-    attackerWeapon.damage = item.grips[grip].range.pointBlank.damage;
-  } else if (range <= item.grips[grip].range.effective.range) {
-    attackerWeapon.task = item.grips[grip].range.effective.task;
-    attackerWeapon.damage = item.grips[grip].range.effective.damage;
-  } else if (range <= item.grips[grip].range.long.range) {
-    attackerWeapon.task = item.grips[grip].range.long.task;
-    attackerWeapon.damage = item.grips[grip].range.long.damage;
-  } else {
-    attackerWeapon.task = item.grips[grip].range.extreme.task;
-    attackerWeapon.damage = item.grips[grip].range.extreme.damage;
-  }
-
-  state.MML.GM.currentAction.callback = 'missileAttackAction';
-  state.MML.GM.currentAction.parameters.range = range;
-  state.MML.GM.currentAction.parameters.attackerWeapon = attackerWeapon;
-  state.MML.GM.currentAction.parameters.attackerSkill = MML.getWeaponSkill(character, item);
-
-  MML.universalRoll(character, rollName, mods, 'attackRollResult');
 };
 
 MML.missileDamageRoll = function missileDamageRoll(player, character, weapon, attackRoll, bonusDamage) {
-  return MML.goToMenu(player, { message: character.name + '\'s Damage Roll', buttons: ['Roll'] })
-    .then(function(player) {
-      return MML.processRoll(player, MML.damageRoll('Missile Damage Roll', weapon.damage, weapon.damageType, [bonusDamage || 0], attackRoll.result));
-    });
+  return function (rolls) {
+    return MML.goToMenu(player, { message: character.name + '\'s Damage Roll', buttons: ['Roll'] })
+      .then(function(player) {
+        return MML.processRoll(player, MML.damageRoll('Missile Damage Roll', weapon.damage, weapon.damageType, [bonusDamage || 0], rolls.attackRoll));
+      })
+      .then(function (result) {
+        rolls.missileDamageRoll = result;
+        return rolls;
+      });
+  };
+};
+
+MML.armorCoverageRoll = function armorCoverageRoll() {
+  return MML.rollDice(1, 100);
 };
 
 MML.rangedDefenseRoll = function rangedDefenseRoll(character, defenseChance) {
   MML.universalRoll(character, 'rangedDefenseRoll', [defenseChance], 'rangedDefenseRollResult');
-};
-
-MML.rangedDefenseRollResult = function rangedDefenseRollResult(character) {
-  character.processRoll('rangedDefenseRollApply');
 };
 
 MML.rangedDefenseRollApply = function rangedDefenseRollApply(character) {
@@ -335,10 +370,6 @@ MML.grappleDefenseWeaponRoll = function grappleDefenseWeaponRoll(character, atta
   MML.universalRoll(character, 'Weapon Defense Roll', [attackChance], 'grappleDefenseWeaponRollResult');
 };
 
-MML.grappleDefenseWeaponRollResult = function grappleDefenseWeaponRollResult(character) {
-  character.processRoll('grappleDefenseWeaponRollApply');
-};
-
 MML.grappleDefenseWeaponRollApply = function grappleDefenseWeaponRollApply(character) {
   var result = character.player.currentRoll.result;
 
@@ -358,10 +389,6 @@ MML.grappleDefenseWeaponRollApply = function grappleDefenseWeaponRollApply(chara
 
 MML.grappleDefenseBrawlRoll = function grappleDefenseBrawlRoll(character, brawlChance) {
   MML.universalRoll(character, 'Brawl Defense Roll', [brawlChance], 'grappleDefenseBrawlRollResult');
-};
-
-MML.grappleDefenseBrawlRollResult = function grappleDefenseBrawlRollResult(character) {
-  character.processRoll('grappleDefenseBrawlRollApply');
 };
 
 MML.grappleDefenseBrawlRollApply = function grappleDefenseBrawlRollApply(character) {
@@ -384,7 +411,8 @@ MML.holdAimRoll = function holdAimRoll(character) {
   return MML.goToMenu(player, { message: 'Strength Check Required to Maintain' + character.name + '\'s Aim', buttons: ['Roll'] })
     .then(function(player) {
       return MML.processRoll(player, MML.attributeCheckRoll('Hold Aim Strength Roll', character.strength));
-    });
+    })
+    // TODO: finish wrapping these in rolls functions
 };
 
 MML.castingRoll = function castingRoll(player, character, rollName, task, skill, metaMagicMod) {
@@ -392,7 +420,7 @@ MML.castingRoll = function castingRoll(player, character, rollName, task, skill,
     .then(function(player) {
       return MML.processRoll(MML.universalRoll(rollName, [task, skill, character.situationalMod, character.castingMod, character.attributeCastingMod, metaMagicMod]));
     })
-    .then(function([player, roll]) {
+    .then(function(roll) {
 
     });
 };
@@ -423,94 +451,112 @@ MML.castingRollResult = function castingRollResult(character) {
 };
 
 MML.woundFatigueRoll = function woundFatigueRoll(player, character) {
-  return MML.processRoll(player, MML.attributeCheckRoll('Wound Fatigue Roll', character.systemStrength))
-    .then(function(roll) {
-      if (roll.result === 'Failure') {
-        MML.addStatusEffect(character, 'Wound Fatigue', {});
-      }
-      return player;
-    });
+  return function (rolls) {
+    return MML.processRoll(player, MML.attributeCheckRoll('Wound Fatigue Roll', character.systemStrength))
+      .then(function(result) {
+        if (result === 'Failure') {
+          MML.addStatusEffect(character, 'Wound Fatigue', {});
+        }
+        rolls.woundFatigueRoll = result;
+        return rolls;
+      });
+    };
 };
 
 MML.majorWoundRoll = function majorWoundRoll(player, character, bodyPart, duration) {
-  return MML.processRoll(player, MML.attributeCheckRoll('Major Wound Willpower Roll', character.willpower))
-    .then(function(roll) {
-      if (roll.result === 'Failure') {
-        MML.addStatusEffect(character, 'Major Wound, ' + bodyPart, {
-          duration: duration,
-          startingRound: state.MML.GM.currentRound,
-          bodyPart: bodyPart
-        });
-      }
-      return player;
-    });
+  return function (rolls) {
+    return MML.processRoll(player, MML.attributeCheckRoll('Major Wound Willpower Roll', character.willpower))
+      .then(function(result) {
+        if (result === 'Failure') {
+          MML.addStatusEffect(character, 'Major Wound, ' + bodyPart, {
+            duration: duration,
+            startingRound: state.MML.GM.currentRound,
+            bodyPart: bodyPart
+          });
+        }
+        rolls.majorWoundRoll = result;
+        return rolls;
+      });
+    };
 };
 
 MML.disablingWoundRoll = function disablingWoundRoll(player, character, bodyPart, duration) {
-  return MML.processRoll(player, MML.attributeCheckRoll('Disabling Wound System Strength Roll', character.systemStrength))
-    .then(function(roll) {
-      MML.addStatusEffect(character, 'Disabling Wound, ' + bodyPart, {
-        bodyPart: bodyPart
-      });
-      if (roll.result === 'Failure') {
-        if (_.has(character.statusEffects, 'Stunned')) {
-          character.statusEffects['Stunned'].duration = duration;
-        } else {
-          MML.addStatusEffect(character, 'Stunned', {
-            startingRound: state.MML.GM.currentRound,
-            duration: duration
-          });
+  return function (rolls) {
+    return MML.processRoll(player, MML.attributeCheckRoll('Disabling Wound System Strength Roll', character.systemStrength))
+      .then(function(result) {
+        MML.addStatusEffect(character, 'Disabling Wound, ' + bodyPart, {
+          bodyPart: bodyPart
+        });
+        if (result === 'Failure') {
+          if (_.has(character.statusEffects, 'Stunned')) {
+            character.statusEffects['Stunned'].duration = duration;
+          } else {
+            MML.addStatusEffect(character, 'Stunned', {
+              startingRound: state.MML.GM.currentRound,
+              duration: duration
+            });
+          }
         }
-      }
-      return player;
-    });
+        rolls.disablingWoundRoll = result;
+        return rolls;
+      });
+  };
 };
 
 MML.knockdownRoll = function knockdownRoll(player, character) {
-  return MML.processRoll(player, MML.attributeCheckRoll('Knockdown System Strength Roll', character.systemStrength, [_.has(character.statusEffects, 'Stumbling') ? -5 : 0]))
-    .then(function(roll) {
-      if (roll.result === 'Failure') {
-        character.movementType = 'Prone';
-      } else {
-        MML.addStatusEffect(character, 'Stumbling', {
-          startingRound: state.MML.GM.currentRound
-        });
-      }
-      return player;
-    });
+  return function (rolls) {
+    return MML.processRoll(player, MML.attributeCheckRoll('Knockdown System Strength Roll', character.systemStrength, [_.has(character.statusEffects, 'Stumbling') ? -5 : 0]))
+      .then(function(result) {
+        if (result === 'Failure') {
+          character.movementType = 'Prone';
+        } else {
+          MML.addStatusEffect(character, 'Stumbling', {
+            startingRound: state.MML.GM.currentRound
+          });
+        }
+        rolls.knockdownRoll = result;
+        return rolls;
+      });
+  };
 };
 
 MML.sensitiveAreaRoll = function sensitiveAreaRoll(player, character) {
-  return MML.goToMenu(player, { message: character.name + '\'s Sensitive Area Roll', buttons: ['Roll'] })
-    .then(function(player) {
-      return MML.processRoll(player, MML.attributeCheckRoll('Sensitive Area Willpower Roll', character.willpower));
-    })
-    .then(function(roll) {
-      if (roll.result === 'Failure') {
-        MML.addStatusEffect(character, 'Sensitive Area', {
-          startingRound: state.MML.GM.currentRound
-        });
-      }
-      return player;
-    });
+  return function (rolls) {
+    return MML.goToMenu(player, { message: character.name + '\'s Sensitive Area Roll', buttons: ['Roll'] })
+      .then(function(player) {
+        return MML.processRoll(player, MML.attributeCheckRoll('Sensitive Area Willpower Roll', character.willpower));
+      })
+      .then(function(result) {
+        if (result === 'Failure') {
+          MML.addStatusEffect(character, 'Sensitive Area', {
+            startingRound: state.MML.GM.currentRound
+          });
+        }
+        rolls.sensitiveAreaRoll = result;
+        return rolls;
+      });
+    };
 };
 
 MML.fatigueCheckRoll = function fatigueCheckRoll(player, character) {
-  return MML.processRoll(player, MML.attributeCheckRoll('Knockdown System Strength Roll', character.systemStrength, [_.has(character.statusEffects, 'Fatigue') ? -4 : 0]))
-    .then(function(roll) {
-      if (roll.result === 'Failure') {
-        if (_.has(character.statusEffects, 'Fatigue')) {
-          character.statusEffects['Fatigue'].level += 1;
-          MML.applyStatusEffects(character);
-        } else {
-          MML.addStatusEffect(character, 'Fatigue', {
-            level: 1
-          });
+  return function (rolls) {
+    return MML.processRoll(player, MML.attributeCheckRoll('Knockdown System Strength Roll', character.systemStrength, [_.has(character.statusEffects, 'Fatigue') ? -4 : 0]))
+      .then(function(roll) {
+        if (roll.result === 'Failure') {
+          if (_.has(character.statusEffects, 'Fatigue')) {
+            character.statusEffects['Fatigue'].level += 1;
+            MML.applyStatusEffects(character);
+          } else {
+            MML.addStatusEffect(character, 'Fatigue', {
+              level: 1
+            });
+          }
+          character.roundsExertion = 0;
         }
-        character.roundsExertion = 0;
-      }
-      return player;
-    });
+        rolls.fatigueCheckRoll = result;
+        return rolls;
+      });
+  };
 };
 
 MML.fatigueRecoveryRoll = function fatigueRecoveryRoll(character, modifier) {

@@ -218,16 +218,16 @@ MML.alterHP = function alterHP(player, character, bodyPart, hpAmount) {
       MML.addStatusEffect(character, 'Mortal Wound, ' + bodyPart, {
         bodyPart: bodyPart
       });
-      return MML.promiseMeNed(player);
+      return Promise.resolve(player);
     } else {
-      return MML.promiseMeNed(player);
+      return Promise.resolve(player);
     }
   } else { //if healing
     character.hp[bodyPart] += hpAmount;
     if (character.hp[bodyPart] > maxHP) {
       character.hp[bodyPart] = maxHP;
     }
-    return MML.promiseMeNed(player);
+    return Promise.resolve(player);
   }
 };
 
@@ -248,7 +248,7 @@ MML.setWoundFatigue = function setWoundFatigue(player, character) {
   if (currentHP['Wound Fatigue'] < 0 && !_.has(character.statusEffects, 'Wound Fatigue')) {
     return MML.woundFatigueRoll(player, character);
   } else {
-    return MML.promiseMeNed(player);
+    return Promise.resolve(player);
   }
 };
 
@@ -257,7 +257,7 @@ MML.knockdownCheck = function knockdownCheck(player, character, damage) {
   if (character.movementType !== 'Prone' && character.knockdown < 1) {
     MML.knockdownRoll(player, character);
   } else {
-    return MML.promiseMeNed(player);
+    return Promise.resolve(player);
   }
 };
 
@@ -265,24 +265,21 @@ MML.sensitiveAreaCheck = function sensitiveAreaCheck(player, character, hitPosit
   if (MML.sensitiveAreas[character.bodyType].indexOf(hitPosition) > -1) {
     return MML.sensitiveAreaRoll(player, character);
   } else {
-    return MML.promiseMeNed(player);
+    return Promise.resolve(player);
   }
 };
 
-MML.damageCharacter = function damageCharacter(player, character, hitPosition, damage, type) {
-  var damageAfterArmor = MML.armorDamageReduction(player, character, hitPosition.name, damage, type);
-    // .then(function (damageAfterArmor) {
-      return MML.alterHP(player, character, hitPosition.bodyPart, damageAfterArmor)
-    // })
-    .then(function (player) {
-      return MML.setWoundFatigue(player, character);
-    })
-    .then(function (player) {
-      return MML.sensitiveAreaCheck(player, character, hitPosition.name);
-    })
-    .then(function (player) {
-      return MML.knockdownCheck(player, character, damage);
-    });
+MML.damageCharacter = function damageCharacter(player, character, type) {
+  return function (rolls) {
+    var hitPosition = rolls.hitPosition;
+    return MML.armorDamageReduction(player, character, hitPosition.name, damage, type)
+      .then(function (damageAfterArmor) {
+        return MML.alterHP(player, character, hitPosition.bodyPart, damageAfterArmor)
+          .then(MML.setWoundFatigue(player, character))
+          .then(MML.sensitiveAreaCheck(player, character, hitPosition.name))
+          .then(MML.knockdownCheck(player, character, damage));
+      });
+    };
 };
 
 MML.alterEP = function alterEP(player, character, epAmount) {
@@ -295,54 +292,34 @@ MML.alterEP = function alterEP(player, character, epAmount) {
 };
 
 MML.armorDamageReduction = function armorDamageReduction(player, character, position, damage, type, coverageRoll) {
-  coverageRoll = MML.rollDice(1, 100);
-  var damageApplied = false; //Accounts for partial coverage, once true the loop stops
-  var damageDeflected = 0;
-  // Iterates over apv values at given position (accounting for partial coverage)
-  var apv;
-  for (apv in character.apv[position][type]) {
-    if (damageApplied === false) {
-      if (coverageRoll <= character.apv[position][type][apv].coverage) { //if coverage roll is less than apv coverage
-        damageDeflected = character.apv[position][type][apv].value;
+  var positionApvs = character.armorProtectionValues[position];
+  return MML.armorCoverageRoll(positionApvs[type].coverage)
+    .then(function (coverageRoll) {
+      var apvBase = _.find(positionApvs[type], function (apv) {
+        return coverageRoll <= apv.coverage;
+      }).value;
+      var apvImpact = _.find(positionApvs.Impact, function (apv) {
+        return coverageRoll <= apv.coverage;
+      }).value;
 
-        //If all damage is deflected, do blunt trauma. Modifies damage variable for next if statement
-        if (damage + damageDeflected >= 0) {
-          //If surface, cut, or pierce, cut in half and apply as impact
-          if (type === 'Surface' || type === 'Cut' || type === 'Pierce') {
-            damage = Math.ceil(damage / 2);
-            damageDeflected = character.apv[position].Impact[apv].value;
-
-            if (damage + damageDeflected >= 0) {
-              damageDeflected = -damage;
-              damage = 0;
-            }
-          }
-          //If chop, or thrust, apply 3/4 as impact
-          else if (type === 'Chop' || type === 'Thrust') {
-            damage = Math.ceil(damage * 0.75);
-            damageDeflected = character.apv[position].Impact[apv].value;
-
-            if (damage + damageDeflected >= 0) {
-              damageDeflected = -damage;
-              damage = 0;
-            }
-          }
-          //If impact or flanged, no damage
-          else {
-            damageDeflected = -damage;
-            damage = 0;
-          }
+      if (damage + apvBase >= 0) {
+        var impactDamage;
+        if (type === 'Surface' || type === 'Cut' || type === 'Pierce') {
+          impactDamage = Math.ceil(damage / 2);
+        } else if (type === 'Chop' || type === 'Thrust') {
+          impactDamage = Math.ceil(damage * 0.75);
+        } else {
+          return 0;
         }
-
-        // if damage gets through, subtract amount deflected by armor
-        if (damage < 0) {
-          damage += damageDeflected;
+        if (impactDamage + apvImpact >= 0) {
+          return 0;
+        } else {
+          return impactDamage + apvImpact;
         }
-        damageApplied = true;
+      } else {
+        return damage + apvBase;
       }
-    }
-  }
-  return damage;
+    });
 };
 
 MML.startCastAction = function startCastAction(character) {
@@ -1886,7 +1863,7 @@ MML.Character = function (name, id) {
     writable: true,
     enumerable: false
   });
-  Object.defineProperty(this, 'apv', {
+  Object.defineProperty(this, 'armorProtectionValues', {
     get: function() {
       var bodyType = this.bodyType;
       var armor = [];
@@ -1979,9 +1956,9 @@ MML.Character = function (name, id) {
           var coverageArray = [];
 
           //Creates an array of armor coverage in ascending order.
-          _.each(rawAPVArray, function(apv) {
-            if (coverageArray.indexOf(apv.coverage) === -1) {
-              coverageArray.push(apv.coverage);
+          _.each(rawAPVArray, function(armorProtectionValues) {
+            if (coverageArray.indexOf(armorProtectionValues.coverage) === -1) {
+              coverageArray.push(armorProtectionValues.coverage);
             }
           });
           coverageArray = coverageArray.sort(function(a, b) {
@@ -1994,9 +1971,9 @@ MML.Character = function (name, id) {
             var apvValue = 0;
 
             //Builds an array of APVs that meet or exceed the coverage value
-            _.each(rawAPVArray, function(apv) {
-              if (apv.coverage >= apvCoverage) {
-                apvToLayerArray.push(apv.value);
+            _.each(rawAPVArray, function(armorProtectionValues) {
+              if (armorProtectionValues.coverage >= apvCoverage) {
+                apvToLayerArray.push(armorProtectionValues.value);
               }
             });
             apvToLayerArray = apvToLayerArray.sort(function(a, b) {
