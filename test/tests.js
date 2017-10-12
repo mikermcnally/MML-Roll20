@@ -13,6 +13,14 @@ _.each(filenames, function(filename, index) {
   roll20String += fs.readFileSync(source_path + filename, 'utf-8');
 });
 
+var lib_path = '../r20/src/lib/';
+var lib_files = fs.readdirSync(lib_path).filter(function(filename) {
+  return filename.search(/\.js$/) !== -1;
+});
+_.each(lib_files, function(filename, index) {
+  roll20String += fs.readFileSync(lib_path + filename, 'utf-8');
+});
+
 pbcopy(roll20String);
 fs.writeFileSync('../r20/MML.txt', roll20String, 'utf8');
 roll20String += 'module.exports = { MML: MML };';
@@ -58,7 +66,7 @@ function runTests() {
         character.remove();
       });
     });
-    describe.only('Main Menu', function() {
+    describe('Main Menu', function() {
       it('Checks that the menu initializes properly', function() {
         initializeMenu(player)
           .then(clickButton('Combat'))
@@ -215,7 +223,7 @@ function runTests() {
       });
     });
 
-    describe('Prepare Action Menu', function() {
+    describe.only('Prepare Action Menu', function() {
       it('Works with default character', function() {
         var character = createCharacter('test');
         var result = MML.prepareActionMenu(player, character, createTestAction(character));
@@ -337,6 +345,7 @@ function runTests() {
         MML.newRoundUpdate(character);
         character.action.modifiers = ['Release Opponent'];
         var result = MML.prepareActionMenu(player, character, createTestAction(character));
+        console.log(result.buttons);
         expect(result.message).to.equal('Prepare test\'s action');
         expect(result.buttons).to.contain('Attack');
         expect(result.buttons).to.contain('Observe');

@@ -333,7 +333,7 @@ MML.startAttackAction = function startAttackAction(character, target) {
     target: MML.characters[state.MML.GM.currentAction.targetArray[0]]
   };
   MML.applyStatusEffects(character);
-  if (_.has(character.statusEffects, 'Called Shot') || character.action.weaponType === 'Place a Hold' || character.action.weaponType === 'Head Butt') {
+  if (_.has(character.statusEffects, 'Called Shot') || character.action.attackType === 'Place a Hold' || character.action.attackType === 'Head Butt') {
     character.player.charMenuSelectBodyPart(character.name);
     character.player.displayMenu();
   } else if (_.has(character.statusEffects, 'Called Shot Specific')) {
@@ -346,7 +346,7 @@ MML.startAttackAction = function startAttackAction(character, target) {
 
 MML.unarmedAttack = function unarmedAttack(character) {
   var attackType;
-  switch (character.action.weaponType) {
+  switch (character.action.attackType) {
     case 'Punch':
       attackType = MML.unarmedAttacks['Punch'];
       break;
@@ -370,7 +370,7 @@ MML.unarmedAttack = function unarmedAttack(character) {
 
 MML.grappleAttack = function grappleAttack(character) {
   var attackType;
-  switch (character.action.weaponType) {
+  switch (character.action.attackType) {
     case 'Grapple':
       attackType = MML.unarmedAttacks['Grapple'];
       break;
@@ -994,7 +994,7 @@ MML.getCharacterWeaponAndSkill = function getCharacterWeaponAndSkill(character) 
   var characterWeapon = MML.buildWeaponObject(item, grip);
 
   if (!MML.isRangedWeapon(characterWeapon)) {
-    if (character.action.weaponType === 'secondary') {
+    if (character.action.attackType === 'secondary') {
       characterWeapon.damageType = item.grips[grip].secondaryType;
       characterWeapon.task = item.grips[grip].secondaryTask;
       characterWeapon.damage = item.grips[grip].secondaryDamage;
@@ -1099,6 +1099,10 @@ MML.isDualWielding = function isDualWielding(character) {
   } else {
     return false;
   }
+};
+
+MML.hasStatusEffects = function hasStatusEffects(character, effects) {
+  return !_.isEmpty(_.intersection(_.keys(character.statusEffects), effects));
 };
 
 MML.getHitPosition = function getHitPosition(character, rollValue) {
@@ -1515,7 +1519,7 @@ MML.validateAction = function validateAction(character) {
 
   switch (character.action.name) {
     case 'Attack':
-      switch (character.action.weaponType) {
+      switch (character.action.attackType) {
         case 'Grapple':
           if (_.has(character.statusEffects, 'Grappled') &&
             _.has(character.statusEffects, 'Held') &&

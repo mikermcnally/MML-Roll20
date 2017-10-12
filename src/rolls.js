@@ -6,13 +6,13 @@ MML.rollDice = function rollDice(amount, size) {
       break;
     default:
       return Promise.resolve(
-        Array(value)
-          .map(function () {
-            return randomInteger(size);
-          })
-          .reduce(function(sum, value) {
-            return sum + value;
-          }, 0));
+        Array(amount)
+        .map(function() {
+          return randomInteger(size);
+        })
+        .reduce(function(sum, value) {
+          return sum + value;
+        }, 0));
   }
 };
 
@@ -100,27 +100,25 @@ MML.damageRoll = function damageRoll(name, diceString, damageType, modifiers, cr
   var dice = MML.parseDice(diceString);
   var amount = dice.amount;
   var size = dice.size;
-  var modifier = MML.sumModifiers(modifiers);
-  var value;
-
+  var modifier = MML.sumModifiers(modifiers) + (crit === 'Critical Success' ? amount * size : 0);
+  var range;
   if (crit === 'Critical Success') {
-    value = MML.rollDice(amount, size) + amount * size + modifier;
     range = (amount * size + amount + modifier) + "-" + (2 * amount * size + modifier);
   } else {
-    value = MML.rollDice(amount, size) + modifier;
     range = (amount + modifier) + "-" + (amount * size + modifier);
   }
-
-  var roll = {
-    type: "damage",
-    name: name,
-    range: range,
-    value: value,
-    modifier: modifier,
-    modifiers: modifiers,
-    damageType: damageType
-  };
-  return MML.damageRollResult(roll);
+  return MML.rollDice(amount, size)
+    .then(function (value) {
+      return MML.damageRollResult({
+        type: "damage",
+        name: name,
+        range: range,
+        value: value + modifier,
+        modifier: modifier,
+        modifiers: modifiers,
+        damageType: damageType
+      });
+    });
 };
 
 MML.damageRollResult = function damageRollResult(roll) {
@@ -131,18 +129,21 @@ MML.damageRollResult = function damageRollResult(roll) {
 
 MML.genericRoll = function genericRoll(name, diceString, modifiers) {
   var dice = MML.parseDice(diceString);
+  var amount = dice.amount;
+  var size = dice.size;
   var modifier = MML.sumModifiers(modifiers);
-  var range = (dice.amount + modifier).toString() + '-' + ((dice.amount * dice.size) + modifier).toString();
-  var roll = {
-    type: 'generic',
-    name: name,
-    range: range,
-    value: MML.rollDice(dice.amount, dice.size),
-    modifier: modifier,
-    modifiers: modifiers
-  };
-
-  return MML.genericRollResult(roll);
+  var range = (amount + modifier).toString() + '-' + ((amount * size) + modifier).toString();
+  return MML.rollDice(amount, size)
+    .then(function (value) {
+      return MML.genericRollResult({
+        type: 'generic',
+        name: name,
+        range: range,
+        value: value + modifier,
+        modifier: modifier,
+        modifiers: modifiers
+      });
+    });
 };
 
 MML.genericRollResult = function genericRollResult(roll) {
@@ -155,6 +156,7 @@ MML.genericRollResult = function genericRollResult(roll) {
 };
 
 MML.changeRoll = function changeRoll(player, roll, valueString) {
+  console.log(roll);
   var value = parseInt(valueString);
   var range = roll.range.split('-');
   var low = parseInt(range[0]);
@@ -195,7 +197,7 @@ MML.changeRoll = function changeRoll(player, roll, valueString) {
   }
 };
 
-MML.initiativeRoll = function initiativeRoll([player, character, action]) {
+MML.initiativeRoll = function initiativeRoll(player, character, action) {
   var modifiers = [character.situationalInitBonus,
     character.movementRatioInitBonus,
     character.attributeInitBonus,

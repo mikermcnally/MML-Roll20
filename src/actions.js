@@ -1,18 +1,18 @@
 MML.buildAction = function buildAction(player, character) {
   if (_.has(character.statusEffects, 'Stunned')) {
     MML.applyStatusEffects(character);
-    return MML.finalizeAction([player, character, {
+    return MML.finalizeAction(player, character)({
       ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
       modifiers: [],
       weapon: MML.getEquippedWeapon(character),
       name: 'Movement Only'
-    }]);
+    });
   } else if (character.situationalInitBonus !== 'No Combat') {
-    return MML.prepareActionFlow([player, character, {
+    return MML.prepareActionFlow(player, character, {
         ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
         modifiers: [],
         weapon: MML.getEquippedWeapon(character)
-      }])
+      })
       .catch(log);
   } else {
     MML.setReady(character, true);
@@ -25,8 +25,8 @@ MML.buildAction = function buildAction(player, character) {
   }
 };
 
-MML.prepareActionFlow = function prepareActionFlow([player, character, action]) {
-  return MML.prepareAction([player, character, action])
+MML.prepareActionFlow = function prepareActionFlow(player, character, action) {
+  return MML.prepareAction(player, character, action)
     .then(function([player, character, action]) {
       if (_.contains(action.modifiers, 'Ready Item')) {
         var weaponWithGrip = _.find(action.items, function(itemWithGrip) {
@@ -47,10 +47,10 @@ MML.prepareActionFlow = function prepareActionFlow([player, character, action]) 
       switch (player.pressedButton) {
         case 'Observe':
           _.extend(action, { ts: Date.now(), name: 'Observe' });
-          return [player, character, action];
+          return action;
         case 'Movement Only':
           _.extend(action, { ts: Date.now(), name: 'Movement Only' });
-          return [player, character, action];
+          return action;
         case 'Attack':
           return MML.prepareAttackAction([player, character, action]);
         case 'Ready Item':
@@ -58,52 +58,53 @@ MML.prepareActionFlow = function prepareActionFlow([player, character, action]) 
             .then(function(itemArray) {
               action.items = itemArray;
               action.modifiers.push('Ready Item');
-              throw [player, character, action];
-            }); // TODO: This recursion causes issues. returns undefined instead of player after finalizeAction
+              throw action;
+            });
         case 'Aim':
           _.extend(action, { ts: Date.now(), name: 'Aim' });
-          return [player, character, action];
+          return action;
         case 'Reload':
           _.extend(action, { ts: Date.now(), name: 'Reload' });
-          return [player, character, action];
+          return action;
         case 'Release Opponent':
           action.modifiers.push('Release Opponent');
-          throw [player, character, action];
+          throw action;
         case 'Cast':
           return MML.prepareCastAction([player, character, action]);
         case 'Continue Casting':
           action = MML.clone(character.previousAction);
-          return [player, character, action];
+          return action;
       }
     })
-    .then(MML.finalizeAction)
-    .then(function([player, character, action]) {
+    .then(MML.finalizeAction(player, character))
+    .then(function(action) {
       switch (player.pressedButton) {
         case 'Roll':
           MML.setAction(character, action);
-          return MML.initiativeRoll([player, character, action]);
+          return MML.initiativeRoll(player, character, action);
         case 'Edit Action':
-          return MML.prepareActionFlow([player, character, {
+          return MML.prepareActionFlow(player, character, {
             ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
             modifiers: [],
             weapon: MML.getEquippedWeapon(character)
-          }]);
+          });
         case 'Accept':
           MML.setAction(character, action);
           return player;
       }
     })
-    .catch(function(err) {
-      if (err instanceof Error) {
-        throw err;
+    .catch(function(input) {
+      if (input instanceof Error) {
+        throw input;
       } else {
-        return MML.prepareActionFlow(err);
+        return MML.prepareActionFlow(player, character, input);
       }
     });
 };
 
 MML.isUnarmedAction = function isUnarmedAction(action) {
-  return _.contains(['Punch',
+  return _.contains([
+    'Punch',
     'Kick',
     'Head Butt',
     'Bite',
@@ -112,7 +113,8 @@ MML.isUnarmedAction = function isUnarmedAction(action) {
     'Break a Hold',
     'Break Grapple',
     'Takedown',
-    'Regain Feet'], action.weaponType);
+    'Regain Feet'],
+    action.attackType);
 };
 
 MML.processAction = function processAction(player, character, action) {
@@ -161,8 +163,8 @@ MML.processAttack = function processAttack(player, character, action) {
     name: 'Melee This Round'
   });
 
-  var weaponType = action.weaponType;
-  if (['Grapple', 'Place a Hold', 'Break a Hold', 'Break Grapple', 'Takedown', 'Regain Feet'].indexOf(weaponType) > -1) {
+  var attackType = action.attackType;
+  if (['Grapple', 'Place a Hold', 'Break a Hold', 'Break Grapple', 'Takedown', 'Regain Feet'].indexOf(attackType) > -1) {
     return MML.grappleAttackAction(player, character, action);
   } else if (MML.isDualWielding(character)) {
     return MML.dualWieldAttackAction(player, character, action);
@@ -209,17 +211,17 @@ MML.meleeAttackAction = function meleeAttackAction(player, character, action) {
 
 MML.grappleAttackAction = function grappleAttackAction(player, character, action) {
   var attackerSkill = parameters.attackerSkill;
-  var weaponType = parameters.weaponType;
+  var attackType = parameters.attackType;
   var target = parameters.target;
   var defender = parameters.defender;
   var defenderWeapon = parameters.defenderWeapon;
   var rolls = currentAction.rolls;
 
   if (_.isUndefined(rolls.attackRoll)) {
-    MML.meleeAttackRoll(character, 'attackRoll', weaponType.task, attackerSkill);
+    MML.meleeAttackRoll(character, 'attackRoll', attackType.task, attackerSkill);
   } else if (_.isUndefined(rolls.brawlDefenseRoll) && _.isUndefined(rolls.weaponDefenseRoll)) {
     if (rolls.attackRoll === 'Critical Success' || rolls.attackRoll === 'Success') {
-      target.grappleDefense(weaponType);
+      target.grappleDefense(attackType);
     } else if (rolls.attackRoll === 'Critical Failure') {
       MML.endAction();
     } else {
@@ -231,7 +233,7 @@ MML.grappleAttackAction = function grappleAttackAction(player, character, action
     } else if (rolls.brawlDefenseRoll === 'Success') {
       MML.endAction();
     } else {
-      MML.grappleHandler(character, target, weaponType.name);
+      MML.grappleHandler(character, target, attackType.name);
     }
   } else if (!_.isUndefined(rolls.weaponDefenseRoll) && _.isUndefined(rolls.hitPositionRoll)) {
     if (rolls.weaponDefenseRoll === 'Critical Success' || rolls.weaponDefenseRoll === 'Success') {
@@ -239,7 +241,7 @@ MML.grappleAttackAction = function grappleAttackAction(player, character, action
       state.MML.GM.currentAction.parameters.defender = target;
       target.hitPositionRoll();
     } else {
-      MML.grappleHandler(character, target, weaponType.name);
+      MML.grappleHandler(character, target, attackType.name);
     }
   } else if (!_.isUndefined(rolls.hitPositionRoll) && _.isUndefined(rolls.damageRoll)) {
     if (rolls.weaponDefenseRoll === 'Critical Success') {
@@ -269,7 +271,7 @@ MML.releaseOpponentAction = function releaseOpponentAction(player, character, ac
     character.action = {
       ts: Date.now(),
       name: 'Attack',
-      weaponType: 'Break Grapple',
+      attackType: 'Break Grapple',
       modifiers: []
     };
     state.MML.GM.currentAction = {

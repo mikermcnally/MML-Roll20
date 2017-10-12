@@ -44,76 +44,51 @@ MML.prepareActionMenu = function prepareActionMenu(player, character, action) {
   };
 };
 
-MML.prepareAttackActionMenu = function prepareAttackActionMenu(player, character, action) {
+MML.chooseAttackTypeMenu = function chooseAttackTypeMenu(player, character, action) {
   return {
     message: 'Attack Menu',
     buttons: function() {
       var buttons = [];
       var weapon = action.weapon;
+      var notSomeKindOGrappled = _.isEmpty(_.intersection(_.keys(character.statusEffects),
+        ['Grappled',
+        'Held',
+        'Taken Down',
+        'Pinned',
+        'Overborne']));
+
       if (weapon !== 'unarmed' &&
         (weapon.family !== 'MWM' || weapon.loaded === weapon.reload) &&
-        ((!_.has(character.statusEffects, 'Grappled') &&
-            !_.has(character.statusEffects, 'Holding') &&
-            !_.has(character.statusEffects, 'Held') &&
-            !_.has(character.statusEffects, 'Taken Down') &&
-            !_.has(character.statusEffects, 'Pinned') &&
-            !_.has(character.statusEffects, 'Overborne')) ||
-          (!MML.isRangedWeapon(weapon) && weapon.rank < 2))
+        (notSomeKindOfGrappled || (!MML.isRangedWeapon(weapon) && weapon.rank < 2))
       ) {
         buttons.push('Standard');
         if (MML.isRangedWeapon(weapon)) {
           buttons.push('Shoot From Cover');
-        } //else if (!_.has(character.statusEffects, 'Grappled') &&
-        //   !_.has(character.statusEffects, 'Holding') &&
-        //   !_.has(character.statusEffects, 'Held') &&
-        //   !_.has(character.statusEffects, 'Taken Down') &&
-        //   !_.has(character.statusEffects, 'Pinned') &&
-        //   !_.has(character.statusEffects, 'Overborne')
-        // ) {
-        //   buttons.push({
-        //     text: 'Sweep Attack',
-        //     nextMenu: 'chooseCalledShot',
-        //     callback: function() {
-        //       action.modifiers.push('Sweep Attack');
-        //       MML.displayMenu(player);
-        //     }
-        //   });
-        // }
+        // } else {
+        //   buttons.push('Sweep Attack');
+        }
       }
 
       buttons.push('Punch');
       buttons.push('Kick');
       if (!_.contains(action.modifiers, 'Release Opponent')) {
-        if (!_.has(character.statusEffects, 'Grappled') &&
-          !_.has(character.statusEffects, 'Holding') &&
-          !_.has(character.statusEffects, 'Held') &&
-          !_.has(character.statusEffects, 'Taken Down') &&
-          !_.has(character.statusEffects, 'Pinned') &&
-          !_.has(character.statusEffects, 'Overborne')
-        ) {
+        if (!MML.hasStatusEffects(character, ['Grappled', 'Holding', 'Held', 'Taken Down', 'Pinned', 'Overborne'])) {
           buttons.push('Grapple');
-          // action.weaponType = 'Grapple';
         }
-        if (((_.has(character.statusEffects, 'Grappled') || _.has(character.statusEffects, 'Held') || _.has(character.statusEffects, 'Holding')) &&
-            character.movementType === 'Prone') ||
-          ((_.has(character.statusEffects, 'Taken Down') || _.has(character.statusEffects, 'Overborne')) && !_.has(character.statusEffects, 'Pinned'))
+        if ((MML.hasStatusEffects(character, ['Grappled', 'Holding', 'Held']) && character.movementType === 'Prone') ||
+          (MML.hasStatusEffects(character, ['Taken Down', 'Overborne']) && !_.has(character.statusEffects, 'Pinned'))
         ) {
           buttons.push('Regain Feet');
         }
-        if (!_.has(character.statusEffects, 'Holding') &&
-          !_.has(character.statusEffects, 'Held') &&
-          !_.has(character.statusEffects, 'Pinned') &&
+        if (!MML.hasStatusEffects(character, ['Holding', 'Held', 'Pinned']) &&
           (!_.has(character.statusEffects, 'Grappled') || character.statusEffects['Grappled'].targets.length === 1)
         ) {
           buttons.push('Place a Hold');
         }
-        if (_.has(character.statusEffects, 'Held') || _.has(character.statusEffects, 'Pinned')) {
+        if (MML.hasStatusEffects(character, ['Held', 'Pinned'])) {
           buttons.push('Break a Hold');
         }
-        if ((_.has(character.statusEffects, 'Grappled')) &&
-          !_.has(character.statusEffects, 'Pinned') &&
-          !_.has(character.statusEffects, 'Held')
-        ) {
+        if ((_.has(character.statusEffects, 'Grappled')) && !MML.hasStatusEffects(character, ['Held', 'Pinned'])) {
           buttons.push('Break Grapple');
         }
         if ((_.has(character.statusEffects, 'Holding') ||
@@ -124,13 +99,7 @@ MML.prepareAttackActionMenu = function prepareAttackActionMenu(player, character
         ) {
           buttons.push('Takedown');
         }
-        if (_.has(character.statusEffects, 'Held') ||
-          _.has(character.statusEffects, 'Grappled') ||
-          _.has(character.statusEffects, 'Holding') ||
-          _.has(character.statusEffects, 'Taken Down') ||
-          _.has(character.statusEffects, 'Pinned') ||
-          _.has(character.statusEffects, 'Overborne')
-        ) {
+        if (MML.hasStatusEffects(character, ['Grappled', 'Holding', 'Held', 'Taken Down', 'Pinned', 'Overborne'])) {
           if (_.has(character.statusEffects, 'Held') && _.filter(character.statusEffects['Held'].targets, function(target) {
               return target.bodyPart === 'Head';
             }).length === 0) {
