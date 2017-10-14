@@ -343,8 +343,9 @@ function runTests() {
         character.statusEffects['Grappled'] = { targets: ['1'] };
         state.MML.GM.inCombat = true;
         MML.newRoundUpdate(character);
-        character.action.modifiers = ['Release Opponent'];
-        var result = MML.prepareActionMenu(player, character, createTestAction(character));
+        var action = createTestAction(character);
+        action.modifiers = ['Release Opponent'];
+        var result = MML.prepareActionMenu(player, character, action);
         console.log(result.buttons);
         expect(result.message).to.equal('Prepare test\'s action');
         expect(result.buttons).to.contain('Attack');
@@ -519,7 +520,7 @@ function createTestCharacters(amount) {
 
 function createTestAction(character) {
   return {
-    ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
+    ts: Date.now(),
     modifiers: [],
     weapon: MML.getEquippedWeapon(character)
   };
