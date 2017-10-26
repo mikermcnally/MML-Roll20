@@ -1,3 +1,6 @@
+var _ = require('underscore');
+var MML = MML || {};
+
 MML.statusEffects = {};
 
 MML.statusEffects['Major Wound'] = function(effect, index) {
@@ -387,3 +390,5 @@ MML.statusEffects['Changed Action'] = function(effect, index) {
     this.statusEffects[index].description = 'Initiative: ' + (-10 * effect.level);
   }
 };
+
+module.exports = MML;

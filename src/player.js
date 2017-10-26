@@ -1,3 +1,6 @@
+var _ = require('underscore');
+var MML = MML || {};
+
 MML.displayMenu = function displayMenu(player, menu) {
   var toChat = '/w "' + player.name + '" &{template:charMenu} {{name=' + menu.message + '}} ' +
     menu.buttons.map(function(button) {
@@ -1239,3 +1242,5 @@ MML.Player = function Player(name, isGM) {
   this.name = name;
   this.characters = [];
 };
+
+module.exports = MML;

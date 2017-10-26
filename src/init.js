@@ -1,6 +1,8 @@
+var _ = require('underscore');
 var MML = MML || {};
 
 MML.init = function() {
+  console.log(MML);
   state.MML = state.MML || {};
   state.MML.GM = state.MML.GM || {
     player: new MML.Player('Robot', true),
@@ -189,3 +191,5 @@ on('ready', function() {
     }
   });
 });
+
+module.exports = MML;

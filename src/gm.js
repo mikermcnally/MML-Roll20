@@ -1,3 +1,6 @@
+var _ = require('underscore');
+var MML = MML || {};
+
 MML.startCombat = function startCombat(player) {
   var gm = state.MML.GM;
   gm.currentRound = 0;
@@ -162,3 +165,5 @@ MML.parseCommand = function(msg) {
     }));
   }
 };
+
+module.exports = MML;

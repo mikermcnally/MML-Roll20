@@ -1,0 +1,15 @@
+var _ = require('underscore');
+var test = {};
+_.extend(test, require('../src/actions.js'));
+_.extend(test, require('../src/character.js'));
+_.extend(test, require('../src/gm.js'));
+_.extend(test, require('../src/init.js'));
+_.extend(test, require('../src/menus.js'));
+_.extend(test, require('../src/player.js'));
+_.extend(test, require('../src/rolls.js'));
+_.extend(test, require('../src/spells.js'));
+_.extend(test, require('../src/status_effects.js'));
+_.extend(test, require('../src/utilities.js'));
+_.extend(test, require('../src/lib/lib.js'));
+_.extend(test, require('../src/lib/skills.js'));
+module.exports = test;

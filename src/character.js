@@ -1,3 +1,6 @@
+var _ = require('underscore');
+var MML = MML || {};
+
 MML.newRoundUpdate = function newRoundUpdate(character) {
   if (_.has(character.statusEffects, 'Melee This Round')) {
     var fatigueRate = 1;
@@ -2600,3 +2603,5 @@ MML.Character = function (name, id) {
     }
   });
 };
+
+module.exports = MML;
