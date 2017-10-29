@@ -25,20 +25,22 @@ MML.goToMenu = function goToMenu(player, menu) {
   return MML.setMenuButtons(player, menu.buttons);
 };
 
-MML.processRoll = function processRoll(player, roll) {
-  if (player.name === state.MML.GM.name) {
-    MML.displayGmRoll(player, roll);
-  } else {
-    MML.displayPlayerRoll(player, roll);
-  }
-  return MML.setRollButtons(player)
+MML.processRoll = function processRoll(player) {
+  return function (roll) {
+    if (player.name === state.MML.GM.name) {
+      MML.displayGmRoll(player, roll);
+    } else {
+      MML.displayPlayerRoll(player, roll);
+    }
+    return MML.setRollButtons(player)
     .then(function(player) {
       if (player.pressedButton === 'acceptRoll') {
         return roll.result;
       } else {
-        return MML.processRoll(player, MML.changeRoll(player, roll, player.pressedButton.replace('changeRoll ', '')));
+        return MML.processRoll(player)(MML.changeRoll(player, roll, player.pressedButton.replace('changeRoll ', '')));
       }
     });
+  };
 };
 
 MML.displayGmRoll = function displayGmRoll(player, roll) {
