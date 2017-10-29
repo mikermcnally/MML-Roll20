@@ -1,5 +1,4 @@
-var _ = require('underscore');
-var MML = MML || {};
+
 
 MML.attributeMods = {};
 MML.attributeMods.strength = [];
@@ -3149,25 +3148,3 @@ MML.epModifiers["Target Size"]["Huge"] = 5;
 MML.epModifiers["Target Size"]["Massive"] = 8;
 
 MML.metaMagic = {};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-module.exports = MML;

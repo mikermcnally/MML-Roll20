@@ -1,6 +1,3 @@
-var _ = require('underscore');
-var MML = MML || {};
-
 MML.spells = {};
 MML.spells['Flame Bolt'] = {
   name: 'Flame Bolt',
@@ -158,5 +155,3 @@ MML.spells['Hail of Stones'] = {
     }
   }
 };
-
-module.exports = MML;

@@ -1,6 +1,3 @@
-var _ = require('underscore');
-var MML = MML || {};
-
 MML.skills = {};
 MML.skills["Acrobatics"] = {attribute: "coordination"};
 MML.skills["Acting"] = {attribute: "presence"};
@@ -85,25 +82,3 @@ MML.skills["Veterinary"] = {attribute: "reason"};
 MML.skills["Weapon Smith"] = {attribute: "coordination"};
 MML.skills["Sword Smith"] = {attribute: "coordination"};
 MML.skills["Wizardry"] = {attribute: "intellect"};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-module.exports = MML;

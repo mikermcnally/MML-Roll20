@@ -1,6 +1,3 @@
-var _ = require('underscore');
-var MML = MML || {};
-
 MML.buildAction = function buildAction(player, character) {
   if (_.has(character.statusEffects, 'Stunned')) {
     MML.applyStatusEffects(character);
@@ -366,5 +363,3 @@ MML.endAction = function endAction(player, character, action, targets) {
     return player;
   }
 };
-
-module.exports = MML;

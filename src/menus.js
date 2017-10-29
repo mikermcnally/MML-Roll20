@@ -1,6 +1,3 @@
-var _ = require('underscore');
-var MML = MML || {};
-
 MML.GmMenuMain = function GmMenuMain(player) {
   return MML.goToMenu(player, {message: 'Main Menu: ', buttons: ['Combat', 'Roll Dice']})
     .then(function(player) {
@@ -263,5 +260,3 @@ MML.startActionMenu = function startActionMenu(player, character, validAction) {
     buttons: buttons
   };
 };
-
-module.exports = MML;

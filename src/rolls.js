@@ -1,6 +1,3 @@
-var _ = require('underscore');
-var MML = MML || {};
-
 MML.rollDice = function rollDice(amount, size) {
   switch (state.MML.rollStyle) {
     case 'physicalDice':
@@ -652,5 +649,3 @@ MML.hitPositionRollResult = function hitPositionRollResult(roll) {
 
   return roll;
 };
-
-module.exports = MML;

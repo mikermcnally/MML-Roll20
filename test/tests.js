@@ -1,4 +1,31 @@
-var _ = require('underscore');
+var fs = require('fs');
+_ = require('underscore');
+
+var roll20String = '';
+var source_path = '../r20/src/';
+var filenames = fs.readdirSync(source_path).filter(function(filename) {
+  return filename.search(/\.js$/) !== -1;
+});
+_.each(filenames, function(filename, index) {
+  if (filename === 'init.js') {
+    roll20String = fs.readFileSync(source_path + filename, 'utf-8') + roll20String;
+  }
+  roll20String += fs.readFileSync(source_path + filename, 'utf-8');
+});
+
+var lib_path = '../r20/src/lib/';
+var lib_files = fs.readdirSync(lib_path).filter(function(filename) {
+  return filename.search(/\.js$/) !== -1;
+});
+_.each(lib_files, function(filename, index) {
+  roll20String += fs.readFileSync(lib_path + filename, 'utf-8');
+});
+
+pbcopy(roll20String);
+fs.writeFileSync('../r20/MML.txt', roll20String, 'utf8');
+roll20String += 'module.exports = { MML: MML };';
+fs.writeFileSync('../r20/MML_Test.js', roll20String, 'utf8');
+
 var roll20 = require('../Roll20-Emulation/Roll20');
 state = roll20.state;
 log = roll20.log;
@@ -18,9 +45,7 @@ on = function(eventName, listener) {
   emitter.on(eventName, listener);
 };
 var expect = require('chai').expect;
-var MML = require('./test.js');
-
-// console.log(MML.Player.toString());
+var MML = require('../MML_Test.js').MML;
 
 runTests();
 
@@ -423,7 +448,6 @@ function resetEnvironment() {
   // MML.characters = {};
   // return player;
   delete state.MML;
-  console.log(MML);
   MML.init();
   return state.MML.GM.player;
 }

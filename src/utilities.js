@@ -1,6 +1,3 @@
-var _ = require('underscore');
-var MML = MML || {};
-
 // Character Functions
 MML.getCharFromName = function getCharFromName(charName) {
   var character = findObjs({
@@ -381,5 +378,3 @@ MML.dehexify = function dehexify(hexIn) {
 
   return dehexed;
 };
-
-module.exports = MML;
