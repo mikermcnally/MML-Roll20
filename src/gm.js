@@ -1,20 +1,21 @@
 MML.startCombat = function startCombat(player) {
   var gm = state.MML.GM;
+  var charNames = player.selectedCharNames;
   gm.currentRound = 0;
   gm.combatants = [];
-  if (player.selectedCharNames.length > 0) {
+  if (charNames.length > 0) {
     gm.inCombat = true;
-    _.each(MML.players, function(player) { player.combatants = []; });
-    _.each(player.selectedCharNames, function(charName) {
-      var character = MML.characters[charName];
-      gm.combatants.push(character);
-      character.player.combatants.push(character);
+    gm.combatants = charNames.map(name => MML.characters[name]);
+    _.each(MML.players, function(player) {
+      player.combatants = player.characters.filter(character => charNames.includes(character.name));
+    });
+    _.each(gm.combatants, function(character) {
       MML.setReady(character, false);
       MML.setCombatVision(character);
     });
     MML.setTurnOrder(gm.combatants);
     Campaign().set('initiativepage', 'true');
-    return MML.newRound();
+    return MML.newRound(gm);
     // return MML.combatMenu(player);
   } else {
     sendChat('', '&{template:charMenu} {{name=Error}} {{message=No tokens selected}}');
@@ -22,25 +23,15 @@ MML.startCombat = function startCombat(player) {
   }
 };
 
-MML.newRound = function newRound() {
-  var gm = state.MML.GM;
+MML.newRound = function newRound(gm) {
   gm.currentRound++;
   gm.roundStarted = false;
-  gm.fatigueChecks = [];
-  _.each(gm.combatants, function(character) {
-    MML.newRoundUpdate(character);
-  });
-  if (gm.fatigueChecks.length > 0) {
-    gm.fatigueCheckIndex = 0;
-    MML.nextFatigueCheck();
-  } else {
-    return Promise.all(_.values(MML.players).map(function (player) {
-        return MML.prepareCharacters(player);
-      }))
-      .then(function (players) {
-        return MML.startRound(gm.player);
-      });
-  }
+  gm.combatants = gm.combatants.map(character => MML.newRoundUpdate(character));
+
+  return Promise.all(_.values(MML.players).map(player => MML.prepareCharacters(player)))
+    .then(function (players) {
+      return MML.startRound(gm.player);
+    });
 };
 
 MML.endCombat = function endCombat() {
@@ -67,7 +58,7 @@ MML.nextAction = function nextAction() {
         .then(MML.nextAction)
         .catch(log);
     } else {
-      return MML.newRound();
+      return MML.newRound(gm);
     }
   }
 };

@@ -21,7 +21,6 @@ _.each(lib_files, function(filename, index) {
   roll20String += fs.readFileSync(lib_path + filename, 'utf-8');
 });
 
-pbcopy(roll20String);
 fs.writeFileSync('../r20/MML.txt', roll20String, 'utf8');
 roll20String += 'module.exports = { MML: MML };';
 fs.writeFileSync('../r20/MML_Test.js', roll20String, 'utf8');
@@ -66,7 +65,7 @@ function runTests() {
         character.remove();
       });
     });
-    describe('Main Menu', function() {
+    describe.only('Main Menu', function() {
       it('Checks that the menu initializes properly', function() {
         initializeMenu(player)
           .then(clickButton('Combat'))
@@ -140,90 +139,85 @@ function runTests() {
       });
 
       it.only('Checks that start combat works', function() {
-        createTestCharacters(3);
-        startTestCombat(player, _.pluck(MML.characters, 'name'))
+        createTestCharacters(player, 3);
+        return startTestCombat(player, _.pluck(MML.characters, 'name'))
           .then(setActionPunchAttack)
           .then(clickButton('Roll'))
-          .then(clickButton('Roll'))
-          .then(clickButton('changeRoll eleventy'))
-          .then(clickButton('changeRoll 11'))
-          .then(clickButton('changeRoll 1'))
-          .then(clickButton('changeRoll 10'))
-          .then(clickButton('acceptRoll'))
+          // .then(clickButton('changeRoll eleventy'))
+          // .then(clickButton('changeRoll 36'))
+          // .then(clickButton('changeRoll 25'))
+          // .then(clickButton('changeRoll 26'))
+          .then(clickButton('changeRoll 35'))
           .then(clickButton('acceptRoll'))
           .then(clickButton('Observe'))
-          .then(clickButton('Observe'))
           .then(clickButton('Roll'))
-          .then(clickButton('changeRoll 2'))
-          .then(clickButton('acceptRoll'))
+          .then(clickButton('changeRoll 27'))
           .then(clickButton('acceptRoll'))
           .then(clickButton('Movement Only'))
           .then(clickButton('Roll'))
-          .then(clickButton('changeRoll 1'))
+          .then(clickButton('changeRoll 26'))
+          .then(clickButton('acceptRoll'))
+          .then(clickButton('Start Round'))
+          // .then(clickButton('Start Round'))
+          // .then(clickButton('Start Action'))
+          // .then(clickButton('Start Action'))
+          // .then(clickButton('changeRoll 80'))
+          // .then(clickButton('acceptRoll'))
+          // .then(clickButton('End Movement'))
+          // .then(clickButton('selectTarget test1'))
           // .then(clickButton('Roll'))
-          .then(clickButton('acceptRoll'))
-          .then(clickButton('acceptRoll'))
-          .then(clickButton('Start Round'))
-          .then(clickButton('Start Round'))
-          .then(clickButton('Start Action'))
-          .then(clickButton('changeRoll 80'))
-          .then(clickButton('acceptRoll'))
-          .then(clickButton('acceptRoll'))
-          .then(clickButton('End Movement'))
-          .then(clickButton('selectTarget test1'))
-          .then(clickButton('Roll'))
-          .then(clickButton('changeRoll 10'))
-          .then(clickButton('acceptRoll'))
-          .then(clickButton('acceptRoll'))
-          .then(clickButton('Block: 15%'))
-          .then(clickButton('changeRoll 16'))
-          .then(clickButton('acceptRoll'))
+          // .then(clickButton('changeRoll 10'))
           // .then(clickButton('acceptRoll'))
-          .then(clickButton('Roll'))
-          .then(clickButton('changeRoll 33'))
-          .then(clickButton('acceptRoll'))
           // .then(clickButton('acceptRoll'))
-          .then(clickButton('Roll'))
-          .then(clickButton('changeRoll 4'))
-          .then(clickButton('acceptRoll'))
-          .then(clickButton('acceptRoll'))
-          .then(clickButton('Roll'))
-          .then(clickButton('changeRoll 4'))
-          .then(clickButton('acceptRoll'))
-          .then(clickButton('acceptRoll'))
-          .then(setActionPunchAttack)
-          .then(clickButton('Accept'))
-          .then(clickButton('Change Action'))
-          .then(clickButton('Observe'))
-          .then(clickButton('Edit Action'))
-          .then(clickButton('Observe'))
-          .then(clickButton('Accept'))
-          .then(clickButton('Start Action'))
-          .then(clickButton('Start Action'))
-          .then(clickButton('End Movement'))
-          .then(clickButton('End Action'))
-          .then(clickButton('Movement Only'))
-          .then(clickButton('Accept'))
-          .then(clickButton('Start Action'))
-          .then(clickButton('End Movement'))
-          .then(clickButton('End Action'))
-          .then(clickButton('Movement Only'))
-          .then(clickButton('End Movement'))
-          .then(clickButton('Start Action'))
-          .then(clickButton('End Movement'))
-          .then(clickButton('End Action'))
+          // .then(clickButton('Block: 15%'))
+          // .then(clickButton('changeRoll 16'))
+          // .then(clickButton('acceptRoll'))
+          // // .then(clickButton('acceptRoll'))
+          // .then(clickButton('Roll'))
+          // .then(clickButton('changeRoll 33'))
+          // .then(clickButton('acceptRoll'))
+          // // .then(clickButton('acceptRoll'))
+          // .then(clickButton('Roll'))
+          // .then(clickButton('changeRoll 4'))
+          // .then(clickButton('acceptRoll'))
+          // .then(clickButton('acceptRoll'))
+          // .then(clickButton('Roll'))
+          // .then(clickButton('changeRoll 4'))
+          // .then(clickButton('acceptRoll'))
+          // .then(clickButton('acceptRoll'))
+          // .then(setActionPunchAttack)
+          // .then(clickButton('Accept'))
+          // .then(clickButton('Change Action'))
+          // .then(clickButton('Observe'))
+          // .then(clickButton('Edit Action'))
+          // .then(clickButton('Observe'))
+          // .then(clickButton('Accept'))
+          // .then(clickButton('Start Action'))
+          // .then(clickButton('Start Action'))
+          // .then(clickButton('End Movement'))
+          // .then(clickButton('End Action'))
+          // .then(clickButton('Movement Only'))
+          // .then(clickButton('Accept'))
+          // .then(clickButton('Start Action'))
+          // .then(clickButton('End Movement'))
+          // .then(clickButton('End Action'))
+          // .then(clickButton('Movement Only'))
+          // .then(clickButton('End Movement'))
+          // .then(clickButton('Start Action'))
+          // .then(clickButton('End Movement'))
+          // .then(clickButton('End Action'))
           // .then(clickButton('Observe'))
           // .then(clickButton('Accept'))
           // .then(clickButton('acceptRoll'))
-          // .then(idkWhatImDoing)
+          // .then(Promise.resolve)
           // .then(console.log)
           // .then(clickButton('Start Action'))
-          // .then(function (input) { console.log(input); return player; })
+          .then(function (input) { console.log('done'); })
           .catch(console.log);
       });
     });
 
-    describe.only('Prepare Action Menu', function() {
+    describe('Prepare Action Menu', function() {
       it('Works with default character', function() {
         var character = createCharacter('test');
         var result = MML.prepareActionMenu(player, character, createTestAction(character));
@@ -397,7 +391,7 @@ function runTests() {
       });
     });
 
-    describe.skip('Prepare Character Action Buttons', function() {
+    describe('Prepare Character Action Buttons', function() {
       it('Attack button works with default character', function() {
         var result = MML.prepareActionCommand(setPressedButton(player, 'Attack'), createCharacter('test'));
         console.log(result);
@@ -408,19 +402,14 @@ function runTests() {
 }
 
 function setPressedButton(player, button, selectedCharNames) {
-  player.buttonPressed(_.extend(player, { pressedButton: button, selectedCharNames: selectedCharNames ? selectedCharNames : [] }));
+  player.buttonPressed(_.extend(player, { pressedButton: button, selectedCharNames: selectedCharNames || [] }));
   return player;
 }
 
 function clickButton(button, selectedCharNames) {
   return function(player) {
-    return idkWhatImDoing(player)
-      .then(function(player) {
-        return new Promise(function(resolve, reject) {
-          resolve(setPressedButton(player, button, selectedCharNames));
-          reject();
-        });
-      });
+    player.buttonPressed(_.extend(player, { pressedButton: button, selectedCharNames: selectedCharNames || [] }));
+    return Promise.resolve(player);
   };
 }
 
@@ -452,7 +441,7 @@ function resetEnvironment() {
   return state.MML.GM.player;
 }
 
-function createCharacter(name) {
+function createCharacter(player, name) {
   try {
     character = createObj("character", {
       name: name,
@@ -464,7 +453,7 @@ function createCharacter(name) {
       "controlledby": "",
       "avatar": ""
     });
-    MML.createAttribute("player", 'Robot', "", character);
+    MML.createAttribute("player", player.name, "", character);
     MML.createAttribute("name", name, "", character);
     MML.createAttribute("race", "Human", "", character);
     MML.createAttribute("gender", "Male", "", character);
@@ -491,6 +480,7 @@ function createCharacter(name) {
     createTestToken(name, character.id);
     var mml_character = MML.createCharacter(name, character.id);
     MML.characters[name] = mml_character;
+    player.characters.push(mml_character);
 
     return mml_character;
   } catch (e) {
@@ -511,9 +501,9 @@ function createTestToken(name, id) {
   });
 }
 
-function createTestCharacters(amount) {
+function createTestCharacters(player, amount) {
   for (var i = 0; i < amount; i++) {
-    createCharacter('test' + i);
+    createCharacter(player, 'test' + i);
   }
   return MML.characters;
 }
@@ -549,20 +539,13 @@ function initializeMenu(player) {
   return clickButton('initializeMenu')(player);
 }
 
-function idkWhatImDoing(player) {
-  return new Promise(function(resolve, reject) {
-    resolve(player);
-    reject();
-  });
-}
-
 function startTestCombat(player, characters) {
   return initializeMenu(player)
     .then(clickButton('Combat'))
     .then(clickButton('Back'))
     .then(clickButton('Combat'))
     .then(clickButton('Start Combat', characters))
-    .then(idkWhatImDoing(player));
+    .then(Promise.resolve(player));
 }
 
 function setActionStandardAttack(player) {
@@ -570,15 +553,15 @@ function setActionStandardAttack(player) {
     .then(clickButton('Standard'))
     .then(clickButton('None'))
     .then(clickButton('Neutral'))
-    .then(idkWhatImDoing(player));
+    .then(Promise.resolve(player));
 }
 
 function setActionPunchAttack(player) {
   return clickButton('Attack')(player)
     .then(clickButton('Punch'))
     .then(clickButton('None'))
-    .then(clickButton('Neutral'))
-    .then(idkWhatImDoing(player));
+    .then(clickButton('Neutral'));
+    // .then(Promise.resolve(player));
 }
 
 function executeObserve(player) {

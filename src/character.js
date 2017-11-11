@@ -39,6 +39,7 @@ MML.newRoundUpdate = function newRoundUpdate(character) {
   }
   MML.updateCharacter(character);
   MML.setReady(character, false);
+  return character;
 };
 
 MML.setAction = function setAction(character, action) {
@@ -859,9 +860,9 @@ MML.setPlayer = function setPlayer(character) {
   MML.getCharFromName(character.name).set('controlledby', newPlayer.id);
   _.each(MML.players, function(player) {
     if (player.name === MML.getCurrentAttribute(character.name, 'player')) {
-      player.characters.push(character.name);
+      player.characters.push(character);
     } else {
-      player.characters = _.without(player.characters, character.name);
+      player.characters = _.reject(player.characters, otherCharacter => otherCharacter.name !== character.name);
     }
   }, character);
 };

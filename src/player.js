@@ -140,7 +140,10 @@ MML.initializeMenu = function initializeMenu(player) {
         return MML.GmMenuMain(player);
       }
     })
-    .catch(log);
+    .catch(function (err) {
+      log('hmm');
+      log(err);
+    });
 };
 
 MML.prepareAction = function prepareAction(player, character, action) {
@@ -297,7 +300,8 @@ MML.prepareNextCharacter = function prepareNextCharacter(player, index) {
     return MML.buildAction(player, player.combatants[index])
       .then(function(player) {
         return MML.prepareNextCharacter(player, index + 1);
-      }).catch(log);
+      })
+      .catch(log);
   } else {
     return player;
   }
@@ -397,6 +401,7 @@ MML.GmMenuCombat = function GmMenuCombat(player) {
 
   return MML.goToMenu(player, menu)
     .then(function(player) {
+      log(player.pressedButton);
       switch (player.pressedButton) {
         case 'Start Combat':
           return MML.startCombat(player);

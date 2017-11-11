@@ -194,10 +194,11 @@ MML.missileAttackAction = function missileAttackAction(player, character, action
 };
 
 MML.meleeAttackAction = function meleeAttackAction(player, character, action) {
+  var rolls = {};
   var weapon = action.weapon;
   return MML.getSingleTarget(player)
     .then(function (target) {
-      return MML.meleeAttackRoll(player, character, target, weapon, action.skill)
+      return MML.meleeAttackRoll(player, character, target, weapon, action.skill)(rolls)
         .then(MML.meleeDefense(target.player, target, weapon))
         .then(MML.hitPositionRoll(player, target, action))
         .then(MML.meleeDamageRoll(player, character, target, weapon, attackRoll))
