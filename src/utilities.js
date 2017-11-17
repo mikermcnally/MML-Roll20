@@ -345,9 +345,9 @@ function generateUUID() {
   }();
 }
 
-function generateRowID() {
+MML.generateRowID = function generateRowID() {
   return generateUUID().replace(/_/g, 'Z');
-}
+};
 
 MML.clone = function clone(obj) {
   if (obj === null || typeof obj !== 'object')

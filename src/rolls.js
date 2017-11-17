@@ -121,7 +121,7 @@ MML.damageRollResult = function damageRollResult(roll) {
   return roll;
 };
 
-MML.genericRoll = function genericRoll(name, diceString, modifiers) {
+MML.genericRoll = function genericRoll(player, name, diceString, modifiers) {
   var dice = MML.parseDice(diceString);
   var amount = dice.amount;
   var size = dice.size;
@@ -137,7 +137,8 @@ MML.genericRoll = function genericRoll(name, diceString, modifiers) {
         modifier: modifier,
         modifiers: modifiers
       });
-    });
+    })
+    .then(MML.processRoll(player));
 };
 
 MML.genericRollResult = function genericRollResult(roll) {
@@ -191,7 +192,7 @@ MML.changeRoll = function changeRoll(player, roll, resultString) {
   }
 };
 
-MML.initiativeRoll = function initiativeRoll(player, character, action) {
+MML.initiativeRoll = function initiativeRoll(player, character) {
   var modifiers = [character.situationalInitBonus,
     character.movementRatioInitBonus,
     character.attributeInitBonus,
@@ -202,7 +203,6 @@ MML.initiativeRoll = function initiativeRoll(player, character, action) {
     character.spentInitiative];
 
   return MML.genericRoll('initiative', '1d10', modifiers)
-    .then(MML.processRoll(player))
     .then(function(value) {
       character.initiativeRollValue = value;
       MML.setReady(character, true);

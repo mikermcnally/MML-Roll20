@@ -36,7 +36,6 @@ filterObjs = roll20.filterObjs;
 getAttrByName = roll20.getAttrByName;
 randomInteger = roll20.randomInteger;
 Campaign = roll20.Campaign;
-generateRowID = roll20.generateRowID;
 on = roll20.on;
 var expect = require('chai').expect;
 var MML = require('../MML_Test.js').MML;
@@ -70,7 +69,7 @@ function runTests() {
       });
 
       it('Basic Weapon Attack', function() {
-        var character = createCharacter('test');
+        var character = createCharacter(player, 'test');
         var itemId = addItemToInventory(character, 'Hand Axe');
         MML.equipItem(character, itemId, 'Right Hand');
         startTestCombat(player, _.pluck(MML.characters, 'name'))
@@ -86,7 +85,7 @@ function runTests() {
       });
 
       it('Release Opponent', function() {
-        var character = createCharacter('test');
+        var character = createCharacter(player, 'test');
         character.statusEffects['Holding'] = {};
         startTestCombat(player, _.pluck(MML.characters, 'name'))
           .then(clickButton('Release Opponent'))
@@ -102,7 +101,7 @@ function runTests() {
       });
 
       it('Ready Item', function() {
-        var character = createCharacter('test');
+        var character = createCharacter(player, 'test');
         addItemToInventory(character, 'Hand Axe');
         addItemToInventory(character, 'Hand Axe', 'Excellent');
         addItemToInventory(character, 'Hand Axe', 'Poor');
@@ -214,7 +213,7 @@ function runTests() {
 
     describe('Prepare Action Menu', function() {
       it('Works with default character', function() {
-        var character = createCharacter('test');
+        var character = createCharacter(player, 'test');
         var result = MML.prepareActionMenu(player, character, createTestAction(character));
         expect(result.message).to.equal('Prepare test\'s action');
         expect(result.buttons).to.contain('Attack');
@@ -225,7 +224,7 @@ function runTests() {
       });
 
       it('Works with missile weapons', function() {
-        var character = createCharacter('test');
+        var character = createCharacter(player, 'test');
         createTestToken(character.name, character.id);
         var crossbow = MML.items['Light Cross Bow'];
         crossbow.quality = 'Standard';
@@ -245,7 +244,7 @@ function runTests() {
       });
 
       it('Works with unloaded missile weapons', function() {
-        var character = createCharacter('test');
+        var character = createCharacter(player, 'test');
         createTestToken(character.name, character.id);
         var crossbow = MML.items['Light Cross Bow'];
         crossbow.quality = 'Standard';
@@ -265,7 +264,7 @@ function runTests() {
       });
 
       it('Works with holding status effect', function() {
-        var character = createCharacter('test');
+        var character = createCharacter(player, 'test');
         character.statusEffects['Holding'] = {};
         state.MML.GM.inCombat = true;
         MML.newRoundUpdate(character);
@@ -280,7 +279,7 @@ function runTests() {
       });
 
       it('Works with grappling status effect with one target', function() {
-        var character = createCharacter('test');
+        var character = createCharacter(player, 'test');
         createTestToken(character.name, character.id);
         character.statusEffects['Grappled'] = { targets: ['1'] };
         state.MML.GM.inCombat = true;
@@ -296,7 +295,7 @@ function runTests() {
       });
 
       it('Works with grappling status effect with two targets', function() {
-        var character = createCharacter('test');
+        var character = createCharacter(player, 'test');
         createTestToken(character.name, character.id);
         character.statusEffects['Grappled'] = { targets: ['1', '2'] };
         state.MML.GM.inCombat = true;
@@ -311,7 +310,7 @@ function runTests() {
       });
 
       it('Works with held status effect', function() {
-        var character = createCharacter('test');
+        var character = createCharacter(player, 'test');
         createTestToken(character.name, character.id);
         character.statusEffects['Grappled'] = { targets: ['1'] };
         character.statusEffects['Held'] = { targets: ['2'] };
@@ -327,7 +326,7 @@ function runTests() {
       });
 
       it('Works with release opponent action modifier', function() {
-        var character = createCharacter('test');
+        var character = createCharacter(player, 'test');
         createTestToken(character.name, character.id);
         character.statusEffects['Grappled'] = { targets: ['1'] };
         state.MML.GM.inCombat = true;
@@ -345,7 +344,7 @@ function runTests() {
       });
 
       it('Works with spells', function() {
-        var character = createCharacter('test');
+        var character = createCharacter(player, 'test');
         createTestToken(character.name, character.id);
         MML.setCurrentAttribute('test', 'spells', JSON.stringify(['Dart']));
         state.MML.GM.inCombat = true;
@@ -361,7 +360,7 @@ function runTests() {
       });
 
       it('Works with multi-action spells', function() {
-        var character = createCharacter('test');
+        var character = createCharacter(player, 'test');
         createTestToken(character.name, character.id);
         MML.setCurrentAttribute('test', 'spells', JSON.stringify(['Dart']));
         character.previousAction = {
@@ -388,7 +387,7 @@ function runTests() {
 
     describe('Prepare Character Action Buttons', function() {
       it('Attack button works with default character', function() {
-        var result = MML.prepareActionCommand(setPressedButton(player, 'Attack'), createCharacter('test'));
+        var result = MML.prepareActionCommand(setPressedButton(player, 'Attack'), createCharacter(player, 'test'));
         console.log(result);
         // expect(result.command.name).to.equal('prepareActionCommand');
       });
@@ -408,10 +407,12 @@ function clickButton(button, selectedCharNames) {
   };
 }
 
-function setTestRoll(player, value) {
-  player.changeRoll(value);
-  player.currentRoll.accepted = true;
-  MML.characters[player.currentRoll.character][player.currentRoll.callback]();
+function setTestRoll(value) {
+  return function (player) {
+    return Promise.resolve(player)
+    .then(clickButton('changeRoll ' + value))
+    .then(clickButton('acceptRoll'));
+  };
 }
 
 function resetEnvironment() {
@@ -479,7 +480,8 @@ function createCharacter(player, name) {
 
     return mml_character;
   } catch (e) {
-    createCharacter(name);
+    console.log(e.message);
+    return createCharacter(name);
   }
 }
 
@@ -512,7 +514,7 @@ function createTestAction(character) {
 }
 
 function addItemToInventory(character, itemName, quality = 'Standard') {
-  var id = generateRowID();
+  var id = MML.generateRowID();
   var item = MML.items[itemName];
   item.quality = quality;
   item._id = id;
@@ -537,20 +539,20 @@ function initializeMenu(player) {
 function startTestCombat(player, characters) {
   return initializeMenu(player)
     .then(clickButton('Combat'))
-    .then(clickButton('Start Combat', characters))
-    .then(Promise.resolve(player));
+    .then(clickButton('Start Combat', characters));
 }
 
 function setActionStandardAttack(player) {
-  return clickButton('Attack')(player)
+  return Promise.resolve(player)
+    .then(clickButton('Attack'))
     .then(clickButton('Standard'))
     .then(clickButton('None'))
-    .then(clickButton('Neutral'))
-    .then(Promise.resolve(player));
+    .then(clickButton('Neutral'));
 }
 
 function setActionPunchAttack(player) {
-  return clickButton('Attack')(player)
+  return Promise.resolve(player)
+    .then(clickButton('Attack'))
     .then(clickButton('Punch'))
     .then(clickButton('None'))
     .then(clickButton('Neutral'));

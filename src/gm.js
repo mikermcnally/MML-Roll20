@@ -132,7 +132,7 @@ MML.assignNewItem = function assignNewItem(input) {
     callback: 'setApiCharAttributeJSON',
     input: {
       attribute: 'inventory',
-      index: generateRowID(),
+      index: MML.generateRowID(),
       value: state.MML.GM.newItem
     }
   });

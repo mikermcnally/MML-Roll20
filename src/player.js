@@ -8,6 +8,7 @@ MML.displayMenu = function displayMenu(player, menu) {
   sendChat(player.name, toChat, null, {
     noarchive: true
   });
+  return player;
 };
 
 MML.setMenuButtons = function setMenuButtons(player, buttons) {
@@ -41,14 +42,25 @@ MML.processRoll = function processRoll(player) {
       }
     });
   };
+  return MML.setMenuButtons(MML.displayMenu(player, menu), menu.buttons);
 };
 
 MML.displayGmRoll = function displayGmRoll(player, roll) {
   sendChat(player.name, '/w "' + player.name + '" &{template:rollMenuGM} {{title=' + roll.message + "}}");
+  return player;
 };
 
 MML.displayPlayerRoll = function displayPlayerRoll(player) {
   sendChat(player.name, '/w "' + player.name + '" &{template:rollMenu} {{title=' + roll.message + "}}");
+  return player;
+};
+
+MML.displayRoll = function displayRoll(player, roll) {
+  if (player.name === state.MML.GM.name) {
+    return MML.displayGmRoll(player, roll);
+  } else {
+    return MML.displayPlayerRoll(player, roll);
+  }
 };
 
 MML.setRollButtons = function setRollButtons(player) {

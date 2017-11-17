@@ -1,27 +1,21 @@
 MML.buildAction = function buildAction(player, character) {
+  var action = {
+    ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
+    modifiers: [],
+    weapon: MML.getEquippedWeapon(character)
+  };
+
   if (_.has(character.statusEffects, 'Stunned')) {
     MML.applyStatusEffects(character);
-    return MML.finalizeAction(player, character)({
-      ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
-      modifiers: [],
-      weapon: MML.getEquippedWeapon(character),
-      name: 'Movement Only'
-    });
+    action.name = 'Movement Only';
+    return MML.finalizeAction(player, character)(action);
   } else if (character.situationalInitBonus !== 'No Combat') {
-    return MML.prepareActionFlow(player, character, {
-        ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
-        modifiers: [],
-        weapon: MML.getEquippedWeapon(character)
-      })
+    return MML.prepareActionFlow(player, character, action)
       .catch(log);
   } else {
     MML.setReady(character, true);
-    return [player, character, {
-      ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
-      modifiers: [],
-      weapon: MML.getEquippedWeapon(character),
-      name: 'No Combat'
-    }];
+    action.name = 'No Combat';
+    return [player, character, action];
   }
 };
 
@@ -291,7 +285,7 @@ MML.castAction = function castAction(player, character, action) {
 
 MML.observeAction = function observeAction(player, character, action) {
   MML.addStatusEffect(character, 'Observing', {
-    id: generateRowID(),
+    id: MML.generateRowID(),
     name: 'Observing',
     startingRound: state.MML.GM.currentRound
   });
@@ -306,7 +300,7 @@ MML.aimAction = function aimAction(player, character, action) {
     return MML.getSingleTarget(player)
       .then(function(target) {
         MML.addStatusEffect(character, 'Taking Aim', {
-          id: generateRowID(),
+          id: MML.generateRowID(),
           name: 'Taking Aim',
           level: 1,
           target: target,
