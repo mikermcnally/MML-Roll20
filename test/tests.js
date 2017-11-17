@@ -37,12 +37,7 @@ getAttrByName = roll20.getAttrByName;
 randomInteger = roll20.randomInteger;
 Campaign = roll20.Campaign;
 generateRowID = roll20.generateRowID;
-var eventEmitter = require('events');
-var emitter = new eventEmitter();
-
-on = function(eventName, listener) {
-  emitter.on(eventName, listener);
-};
+on = roll20.on;
 var expect = require('chai').expect;
 var MML = require('../MML_Test.js').MML;
 
@@ -541,8 +536,6 @@ function initializeMenu(player) {
 
 function startTestCombat(player, characters) {
   return initializeMenu(player)
-    .then(clickButton('Combat'))
-    .then(clickButton('Back'))
     .then(clickButton('Combat'))
     .then(clickButton('Start Combat', characters))
     .then(Promise.resolve(player));
