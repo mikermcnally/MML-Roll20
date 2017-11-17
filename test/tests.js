@@ -37,8 +37,11 @@ getAttrByName = roll20.getAttrByName;
 randomInteger = roll20.randomInteger;
 Campaign = roll20.Campaign;
 on = roll20.on;
+once = roll20.once;
 var expect = require('chai').expect;
 var MML = require('../MML_Test.js').MML;
+var eventEmitter = require('events');
+var emitter = new eventEmitter();
 
 runTests();
 
@@ -153,12 +156,12 @@ function runTests() {
           .then(clickButton('acceptRoll'))
           .then(clickButton('Start Round'))
           // .then(clickButton('Start Round'))
-          // .then(clickButton('Start Action'))
+          .then(clickButton('Start Action'))
           // .then(clickButton('Start Action'))
           // .then(clickButton('changeRoll 80'))
           // .then(clickButton('acceptRoll'))
-          // .then(clickButton('End Movement'))
-          // .then(clickButton('selectTarget test1'))
+          .then(clickButton('End Movement'))
+          .then(clickButton('selectTarget test1'))
           // .then(clickButton('Roll'))
           // .then(clickButton('changeRoll 10'))
           // .then(clickButton('acceptRoll'))
@@ -402,8 +405,12 @@ function setPressedButton(player, button, selectedCharNames) {
 
 function clickButton(button, selectedCharNames) {
   return function(player) {
-    player.buttonPressed(_.extend(player, { pressedButton: button, selectedCharNames: selectedCharNames || [] }));
-    return Promise.resolve(player);
+    return new Promise(function(resolve, reject) {
+      once('sendChat', function () {
+        resolve(player);
+      });
+      player.buttonPressed(_.extend(player, { pressedButton: button, selectedCharNames: selectedCharNames || [] }));
+    });
   };
 }
 

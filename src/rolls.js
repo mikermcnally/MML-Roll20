@@ -122,6 +122,8 @@ MML.damageRollResult = function damageRollResult(roll) {
 };
 
 MML.genericRoll = function genericRoll(player, name, diceString, modifiers) {
+  console.log("SHOW ME WHAT YOU GOT");
+  console.log(diceString);
   var dice = MML.parseDice(diceString);
   var amount = dice.amount;
   var size = dice.size;
@@ -202,7 +204,7 @@ MML.initiativeRoll = function initiativeRoll(player, character) {
     character.actionInitCostMod,
     character.spentInitiative];
 
-  return MML.genericRoll('initiative', '1d10', modifiers)
+  return MML.genericRoll(player, 'initiative', '1d10', modifiers)
     .then(function(value) {
       character.initiativeRollValue = value;
       MML.setReady(character, true);

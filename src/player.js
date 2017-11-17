@@ -42,7 +42,6 @@ MML.processRoll = function processRoll(player) {
       }
     });
   };
-  return MML.setMenuButtons(MML.displayMenu(player, menu), menu.buttons);
 };
 
 MML.displayGmRoll = function displayGmRoll(player, roll) {
