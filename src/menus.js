@@ -50,7 +50,7 @@ MML.chooseAttackTypeMenu = function chooseAttackTypeMenu(player, character, acti
     buttons: function() {
       var buttons = [];
       var weapon = action.weapon;
-      var notSomeKindOGrappled = _.isEmpty(_.intersection(_.keys(character.statusEffects),
+      var notSomeKindOfGrappled = _.isEmpty(_.intersection(_.keys(character.statusEffects),
         ['Grappled',
         'Held',
         'Taken Down',

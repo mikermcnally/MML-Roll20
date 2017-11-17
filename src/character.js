@@ -413,7 +413,7 @@ MML.rangedDefense = function rangedDefense(character, attackerWeapon, range) {
   var rangeMod;
 
   character.statusEffects['Melee This Round'] = {
-    id: generateRowID(),
+    id: MML.generateRowID(),
     name: 'Melee This Round'
   };
 
@@ -544,7 +544,7 @@ MML.grappleHandler = function grappleHandler(character, defender, attackName) {
 
 MML.applyGrapple = function applyGrapple(character, defender) {
   character.statusEffects['Grappled'] = {
-    id: _.has(character.statusEffects, 'Grappled') ? character.statusEffects['Grappled'].id : generateRowID(),
+    id: _.has(character.statusEffects, 'Grappled') ? character.statusEffects['Grappled'].id : MML.generateRowID(),
     name: 'Grappled',
     targets: _.has(character.statusEffects, 'Grappled') ? character.statusEffects['Grappled'].targets.concat([defender.name]) : [defender.name]
   };
@@ -553,7 +553,7 @@ MML.applyGrapple = function applyGrapple(character, defender) {
     character.applyHoldBreak(MML.characters[defender.statusEffects['Holding'].targets[0]], defender);
   }
   defender.statusEffects['Grappled'] = {
-    id: _.has(defender.statusEffects, 'Grappled') ? defender.statusEffects['Grappled'].id : generateRowID(),
+    id: _.has(defender.statusEffects, 'Grappled') ? defender.statusEffects['Grappled'].id : MML.generateRowID(),
     name: 'Grappled',
     targets: _.has(defender.statusEffects, 'Grappled') ? defender.statusEffects['Grappled'].targets.concat([character.name]) : [character.name]
   };
@@ -564,14 +564,14 @@ MML.applyHold = function applyHold(character, defender) {
     character.removeStatusEffect('Grappled');
   }
   character.statusEffects['Holding'] = {
-    id: generateRowID(),
+    id: MML.generateRowID(),
     name: 'Holding',
     targets: [defender.name],
     bodyPart: state.MML.GM.currentAction.calledShot
   };
   if (['Chest', 'Abdomen'].indexOf(state.MML.GM.currentAction.calledShot) > -1 && defender.movementType === 'Prone') {
     defender.statusEffects['Pinned'] = {
-      id: _.has(defender.statusEffects, 'Pinned') ? defender.statusEffects['Pinned'].id : generateRowID(),
+      id: _.has(defender.statusEffects, 'Pinned') ? defender.statusEffects['Pinned'].id : MML.generateRowID(),
       name: 'Pinned',
       targets: _.has(defender.statusEffects, 'Pinned') ? defender.statusEffects['Pinned'].targets.concat([character.name]) : [character.name]
     };
@@ -581,7 +581,7 @@ MML.applyHold = function applyHold(character, defender) {
       bodyPart: state.MML.GM.currentAction.calledShot
     };
     defender.statusEffects['Held'] = {
-      id: _.has(defender.statusEffects, 'Held') ? defender.statusEffects['Held'].id : generateRowID(),
+      id: _.has(defender.statusEffects, 'Held') ? defender.statusEffects['Held'].id : MML.generateRowID(),
       name: 'Held',
       targets: _.has(defender.statusEffects, 'Pinned') ? defender.statusEffects['Pinned'].targets.concat([holder]) : [holder]
     };
@@ -601,13 +601,13 @@ MML.applyHold = function applyHold(character, defender) {
 
 MML.applyHoldBreak = function applyHoldBreak(character, defender) {
   defender.statusEffects['Grappled'] = {
-    id: _.has(defender.statusEffects, 'Grappled') ? defender.statusEffects['Grappled'].id : generateRowID(),
+    id: _.has(defender.statusEffects, 'Grappled') ? defender.statusEffects['Grappled'].id : MML.generateRowID(),
     name: 'Grappled',
     targets: _.has(defender.statusEffects, 'Grappled') ? defender.statusEffects['Grappled'].targets.concat([character.name]) : [character.name]
   };
   defender.removeStatusEffect('Holding');
   character.statusEffects['Grappled'] = {
-    id: _.has(character.statusEffects, 'Grappled') ? character.statusEffects['Grappled'].id : generateRowID(),
+    id: _.has(character.statusEffects, 'Grappled') ? character.statusEffects['Grappled'].id : MML.generateRowID(),
     name: 'Grappled',
     targets: _.has(character.statusEffects, 'Grappled') ? character.statusEffects['Grappled'].targets.concat([defender.name]) : [defender.name]
   };
@@ -663,12 +663,12 @@ MML.applyTakedown = function applyTakedown(character, defender) {
   var holders = _.has(defender.statusEffects, 'Held') ? defender.statusEffects['Held'].targets : [];
   if (grapplers.length + holders.length > 1) {
     defender.statusEffects['Overborne'] = {
-      id: generateRowID(),
+      id: MML.generateRowID(),
       name: 'Overborne'
     };
   } else {
     defender.tatusEffects['Taken Down'] = {
-      id: generateRowID(),
+      id: MML.generateRowID(),
       name: 'Taken Down'
     };
   }
@@ -682,7 +682,7 @@ MML.applyTakedown = function applyTakedown(character, defender) {
     });
     if (targets.length > 0) {
       defender.statusEffects['Pinned'] = {
-        id: generateRowID(),
+        id: MML.generateRowID(),
         name: 'Pinned',
         targets: targets
       };
@@ -808,7 +808,7 @@ MML.applyStatusEffects = function applyStatusEffects(character) {
 };
 
 MML.addStatusEffect = function addStatusEffect(character, index, effect) {
-  effect.id = generateRowID();
+  effect.id = MML.generateRowID();
   effect.name = index;
   character.statusEffects[index] = effect;
   MML.applyStatusEffects(character);
@@ -2540,7 +2540,7 @@ MML.Character = function (name, id) {
         characterSkills["Default Martial"] = {
           input: 0,
           level: 0,
-          _id: generateRowID()
+          _id: MML.generateRowID()
         };
       }
 

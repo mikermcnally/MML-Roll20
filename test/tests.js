@@ -36,7 +36,6 @@ filterObjs = roll20.filterObjs;
 getAttrByName = roll20.getAttrByName;
 randomInteger = roll20.randomInteger;
 Campaign = roll20.Campaign;
-generateRowID = roll20.generateRowID;
 var eventEmitter = require('events');
 var emitter = new eventEmitter();
 
@@ -76,6 +75,7 @@ function runTests() {
 
       it('Basic Weapon Attack', function() {
         var character = createCharacter('test');
+        var character = createCharacter(player, 'test');
         var itemId = addItemToInventory(character, 'Hand Axe');
         MML.equipItem(character, itemId, 'Right Hand');
         startTestCombat(player, _.pluck(MML.characters, 'name'))
@@ -413,10 +413,12 @@ function clickButton(button, selectedCharNames) {
   };
 }
 
-function setTestRoll(player, value) {
-  player.changeRoll(value);
-  player.currentRoll.accepted = true;
-  MML.characters[player.currentRoll.character][player.currentRoll.callback]();
+function setTestRoll(value) {
+  return function (player) {
+    return Promise.resolve(player)
+    .then(clickButton('changeRoll ' + value))
+    .then(clickButton('acceptRoll'));
+  };
 }
 
 function resetEnvironment() {
@@ -484,7 +486,8 @@ function createCharacter(player, name) {
 
     return mml_character;
   } catch (e) {
-    createCharacter(name);
+    console.log(e.message);
+    return createCharacter(name);
   }
 }
 
@@ -517,7 +520,7 @@ function createTestAction(character) {
 }
 
 function addItemToInventory(character, itemName, quality = 'Standard') {
-  var id = generateRowID();
+  var id = MML.generateRowID();
   var item = MML.items[itemName];
   item.quality = quality;
   item._id = id;
@@ -544,20 +547,20 @@ function startTestCombat(player, characters) {
     .then(clickButton('Combat'))
     .then(clickButton('Back'))
     .then(clickButton('Combat'))
-    .then(clickButton('Start Combat', characters))
-    .then(Promise.resolve(player));
+    .then(clickButton('Start Combat', characters));
 }
 
 function setActionStandardAttack(player) {
-  return clickButton('Attack')(player)
+  return Promise.resolve(player)
+    .then(clickButton('Attack'))
     .then(clickButton('Standard'))
     .then(clickButton('None'))
-    .then(clickButton('Neutral'))
-    .then(Promise.resolve(player));
+    .then(clickButton('Neutral'));
 }
 
 function setActionPunchAttack(player) {
-  return clickButton('Attack')(player)
+  return Promise.resolve(player)
+    .then(clickButton('Attack'))
     .then(clickButton('Punch'))
     .then(clickButton('None'))
     .then(clickButton('Neutral'));
