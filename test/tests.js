@@ -25,7 +25,7 @@ fs.writeFileSync('../r20/MML.txt', roll20String, 'utf8');
 roll20String += 'module.exports = { MML: MML };';
 fs.writeFileSync('../r20/MML_Test.js', roll20String, 'utf8');
 
-var roll20 = require('../Roll20-Emulation/Roll20');
+var roll20 = require('../../Roll20-Emulation/Roll20');
 state = roll20.state;
 log = roll20.log;
 sendChat = roll20.sendChat;

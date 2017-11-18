@@ -1,16 +1,16 @@
-MML.GmMenuMain = function GmMenuMain(player) {
+MML.menuMainGm = function menuMainGm(player) {
   return MML.goToMenu(player, {message: 'Main Menu: ', buttons: ['Combat', 'Roll Dice']})
     .then(function(player) {
       switch (player.pressedButton) {
         case 'Combat':
-          return MML.GmMenuCombat(player);
+          return MML.menuGmCombat(player);
         case 'Roll Dice':
-          return MML.selectDieSizeMenu(player);
+          return MML.menuselectDieSize(player);
       }
     });
 };
 
-MML.prepareActionMenu = function prepareActionMenu(player, character, action) {
+MML.menuPrepareAction = function menuPrepareAction(player, character, action) {
   return {
     message: 'Prepare ' + character.name + '\'s action',
     buttons: function() {
@@ -44,7 +44,7 @@ MML.prepareActionMenu = function prepareActionMenu(player, character, action) {
   };
 };
 
-MML.chooseAttackTypeMenu = function chooseAttackTypeMenu(player, character, action) {
+MML.menuchooseAttackType = function menuchooseAttackType(player, character, action) {
   return {
     message: 'Attack Menu',
     buttons: function() {
@@ -113,7 +113,7 @@ MML.chooseAttackTypeMenu = function chooseAttackTypeMenu(player, character, acti
   };
 };
 
-MML.chooseMeleeDefenseMenu = function chooseMeleeDefenseMenu(character, dodgeChance, blockChance, attackerWeapon) {
+MML.menuchooseMeleeDefense = function menuchooseMeleeDefense(character, dodgeChance, blockChance, attackerWeapon) {
   var message = 'How will ' + character.name + ' defend?';
   var buttons = ['Dodge: ' + dodgeChance + '%', 'Take it'];
   if (!MML.isUnarmed(character) || attackerWeapon.family === "Unarmed") {
@@ -125,7 +125,7 @@ MML.chooseMeleeDefenseMenu = function chooseMeleeDefenseMenu(character, dodgeCha
   };
 };
 
-MML.assignStatusEffectMenu = function assignStatusEffectMenu(player, character) {
+MML.menuassignStatusEffect = function menuassignStatusEffect(player, character) {
   var message = 'Choose a Status Effect: ';
   var buttons = [];
 
@@ -135,7 +135,7 @@ MML.assignStatusEffectMenu = function assignStatusEffectMenu(player, character) 
   return {message: message, buttons: buttons};
 };
 
-MML.chooseSpellMenu = function chooseSpellMenu(player, character, action) {
+MML.menuchooseSpell = function menuchooseSpell(player, character, action) {
   var message = 'Choose a spell';
   var buttons = [];
   _.each(character.spells, function(spellName) {
@@ -153,7 +153,7 @@ MML.chooseSpellMenu = function chooseSpellMenu(player, character, action) {
   return {message: message, buttons: buttons};
 };
 
-MML.chooseMetaMagicInitiativeMenu = function chooseMetaMagicInitiativeMenu(player, character, action) {
+MML.menuchooseMetaMagicInitiative = function menuchooseMetaMagicInitiative(player, character, action) {
   var message = 'Choose meta magic';
   var buttons = ['Next Menu'];
 
@@ -185,7 +185,7 @@ MML.chooseMetaMagicInitiativeMenu = function chooseMetaMagicInitiativeMenu(playe
   return {message: message, buttons: buttons};
 };
 
-MML.chooseMetaMagicMenu = function chooseMetaMagicMenu(action) {
+MML.menuchooseMetaMagic = function menuchooseMetaMagic(action) {
   var message = 'Choose meta magic';
   var buttons = ['Cast Spell'];
 
@@ -199,7 +199,7 @@ MML.chooseMetaMagicMenu = function chooseMetaMagicMenu(action) {
   return {message: message, buttons: buttons};
 };
 
-MML.combatMovementMenu = function combatMovementMenu(player, character) {
+MML.menucombatMovement = function menucombatMovement(player, character) {
   var message = 'Move ' + character.name + '.';
   var buttons = ['Prone', 'Stalk', 'Crawl', 'Walk', 'Jog', 'Run', 'End Movement'];
   return {
@@ -208,7 +208,7 @@ MML.combatMovementMenu = function combatMovementMenu(player, character) {
   };
 };
 
-MML.finalizeActionMenu = function finalizeActionMenu(player, character, action) {
+MML.menufinalizeAction = function menufinalizeAction(player, character, action) {
   var message;
   var buttons;
   if (state.MML.GM.roundStarted === true) {
@@ -235,7 +235,7 @@ MML.finalizeActionMenu = function finalizeActionMenu(player, character, action) 
   };
 };
 
-MML.startActionMenu = function startActionMenu(player, character, validAction) {
+MML.menustartAction = function menustartAction(player, character, validAction) {
   var message;
   var buttons = ['Movement Only'];
   if (_.has(character.statusEffects, 'Stunned') || _.has(character.statusEffects, 'Dodged This Round')) {
