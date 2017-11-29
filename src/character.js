@@ -44,7 +44,6 @@ MML.newRoundUpdate = function newRoundUpdate(character) {
 
 MML.setAction = function setAction(character, action) {
   var initBonus = 10;
-
   if (action.name === 'Attack' || action.name === 'Aim') {
     if (MML.isUnarmedAction(action) || action.weapon === 'unarmed') {
       if (!_.isUndefined(character.weaponSkills['Brawling']) && character.weaponSkills['Brawling'].level > character.weaponSkills['Default Martial'].level) {
@@ -81,66 +80,6 @@ MML.setAction = function setAction(character, action) {
     });
   }
   character.action = action;
-};
-
-MML.meleeDefense = function meleeDefense(player, character, attackerWeapon) {
-  var itemId;
-  var grip;
-  var defenderWeapon;
-  var dodgeChance;
-  var blockChance;
-  var dodgeSkill;
-  var blockSkill;
-  var weaponSkills = character.weaponSkills;
-  var defaultMartialSkill = weaponSkills['Default Martial'].level;
-  var shieldMod = MML.getShieldDefenseBonus(character);
-  var defenseMod = character.meleeDefenseMod + character.attributeDefenseMod;
-  var sitMod = character.situationalMod;
-
-  if (!_.isUndefined(weaponSkills['Dodge']) && defaultMartialSkill < weaponSkills['Dodge'].level) {
-    dodgeChance = weaponSkills['Dodge'].level + defenseMod + sitMod;
-  } else {
-    dodgeChance = defaultMartialSkill + defenseMod + sitMod;
-  }
-
-  if (attackerWeapon.initiative < 6) {
-    dodgeChance += 15;
-  }
-
-  if (MML.isDualWielding(character)) {
-    log('Dual Wield defense');
-  } else if (MML.isUnarmed(character) || MML.isWieldingRangedWeapon(character)) {
-    blockChance = 0;
-  } else {
-    if (MML.getWeaponFamily(character, 'rightHand') !== 'unarmed') {
-      itemId = character.rightHand._id;
-      grip = character.rightHand.grip;
-    } else {
-      itemId = character.leftHand._id;
-      grip = character.leftHand.grip;
-    }
-
-    defenderWeapon = character.inventory[itemId];
-    blockChance = defenderWeapon.grips[grip].defense + sitMod + defenseMod + shieldMod;
-    blockSkill = Math.round(MML.getWeaponSkill(character, defenderWeapon) / 2);
-
-    if (blockSkill >= defaultMartialSkill) {
-      blockChance += blockSkill;
-    } else {
-      blockChance += defaultMartialSkill;
-    }
-  }
-
-  if (attackerWeapon.family === 'Flexible') {
-    dodgeChance += -10;
-    blockChance += -10;
-  } else if (attackerWeapon.family === 'Unarmed') {
-    dodgeChance += attackerWeapon.defenseMod;
-    blockChance += attackerWeapon.defenseMod;
-  }
-
-  MML.removeAimAndObserving(character);
-  return MML.chooseMeleeDefense(player, character, dodgeChance, blockChance, attackerWeapon);
 };
 
 MML.displayMovement = function displayMovement(character) {

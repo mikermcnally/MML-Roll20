@@ -113,11 +113,11 @@ MML.menuchooseAttackType = function menuchooseAttackType(player, character, acti
   };
 };
 
-MML.menuchooseMeleeDefense = function menuchooseMeleeDefense(character, dodgeChance, blockChance, attackerWeapon) {
+MML.menuChooseMeleeDefense = function menuChooseMeleeDefense(character, dodgeMods, blockMods, attackerWeapon) {
   var message = 'How will ' + character.name + ' defend?';
-  var buttons = ['Dodge: ' + dodgeChance + '%', 'Take it'];
+  var buttons = ['Dodge: ' + MML.sumModifiers(dodgeMods) + '%', 'Take it'];
   if (!MML.isUnarmed(character) || attackerWeapon.family === "Unarmed") {
-    buttons.unshift('Block: ' + blockChance + '%');
+    buttons.unshift('Block: ' + MML.sumModifiers(blockMods) + '%');
   }
   return {
     message: message,

@@ -24,7 +24,69 @@ MML.sumModifiers = function sumModifiers(modifiers) {
   return modifiers.reduce((sum, value) => sum + value, 0);
 };
 
-MML.universalRoll = function universalRoll(name, modifiers) {
+MML.processRoll = function processRoll(player) {
+  return function (roll) {
+    // console.log("GRASS TASTES BAD");
+    // console.log(roll);
+    if (player.name === state.MML.GM.name) {
+      MML.displayGmRoll(player, roll);
+    } else {
+      MML.displayPlayerRoll(player, roll);
+    }
+    return MML.setRollButtons(player)
+    .then(function(player) {
+      if (player.pressedButton === 'acceptRoll') {
+        return roll.result;
+      } else {
+        return MML.processRoll(player)(MML.changeRoll(player, roll, player.pressedButton.replace('changeRoll ', '')));
+      }
+    });
+  };
+};
+
+MML.changeRoll = function changeRoll(player, roll, resultString) {
+  var result = parseInt(resultString);
+  var range = roll.range.split('-');
+  var low = parseInt(range[0]);
+  var high = parseInt(range[1]);
+  var modifier = MML.sumModifiers(roll.modifiers);
+
+  if (isNaN(result)) {
+    sendChat('Error', 'Roll value must be numerical.');
+    return roll;
+  } else {
+    if (roll.type === 'universal' || roll.type === 'attribute' || roll.type === 'hitPosition') {
+      if (result >= low && result <= high) {
+        roll.value = result;
+        if (roll.type === 'universal') {
+          roll = MML.universalRollResult(roll);
+        } else if (roll.type === 'attribute') {
+          roll = MML.attributeCheckResult(roll);
+        } else {
+          roll = MML.hitPositionRollResult(roll);
+        }
+      } else {
+        sendChat('Error', 'New roll value out of range.');
+      }
+    } else {
+      if (result >= low && result <= high) {
+        roll.value = result - modifier;
+        if (roll.type === 'damage') {
+          roll = MML.damageRollResult(roll);
+        } else if (roll.type === 'generic') {
+          roll = MML.genericRollResult(roll);
+        } else {
+          roll.result = result;
+        }
+      } else {
+        sendChat('Error', 'New roll value out of range.');
+      }
+    }
+    return roll;
+  }
+};
+
+MML.universalRoll = function universalRoll(player, name, modifiers) {
   return MML.rollDice(1, 100)
     .then(function(value) {
       return MML.universalRollResult({
@@ -35,7 +97,8 @@ MML.universalRoll = function universalRoll(name, modifiers) {
         target: MML.sumModifiers(modifiers),
         modifiers: modifiers
       });
-    });
+    })
+    .then(MML.processRoll(player));
 };
 
 MML.universalRollResult = function universalRollResult(roll) {
@@ -122,8 +185,6 @@ MML.damageRollResult = function damageRollResult(roll) {
 };
 
 MML.genericRoll = function genericRoll(player, name, diceString, modifiers) {
-  console.log("SHOW ME WHAT YOU GOT");
-  console.log(diceString);
   var dice = MML.parseDice(diceString);
   var amount = dice.amount;
   var size = dice.size;
@@ -152,48 +213,6 @@ MML.genericRollResult = function genericRollResult(roll) {
   return roll;
 };
 
-MML.changeRoll = function changeRoll(player, roll, resultString) {
-  var result = parseInt(resultString);
-  var range = roll.range.split('-');
-  var low = parseInt(range[0]);
-  var high = parseInt(range[1]);
-  var modifier = roll.modifier;
-
-  if (isNaN(result)) {
-    sendChat('Error', 'Roll value must be numerical.');
-    return roll;
-  } else {
-    if (roll.type === 'universal' || roll.type === 'attribute' || roll.type === 'hitPosition') {
-      if (result >= low && result <= high) {
-        roll.value = result - modifier;
-        if (roll.type === 'universal') {
-          roll = MML.universalRollResult(roll);
-        } else if (roll.type === 'attribute') {
-          roll = MML.attributeCheckResult(roll);
-        } else {
-          roll = MML.hitPositionRollResult(roll);
-        }
-      } else {
-        sendChat('Error', 'New roll value out of range.');
-      }
-    } else {
-      if (result >= low && result <= high) {
-        roll.value = result - modifier;
-        if (roll.type === 'damage') {
-          roll = MML.damageRollResult(roll);
-        } else if (roll.type === 'generic') {
-          roll = MML.genericRollResult(roll);
-        } else {
-          roll.result = result;
-        }
-      } else {
-        sendChat('Error', 'New roll value out of range.');
-      }
-    }
-    return roll;
-  }
-};
-
 MML.initiativeRoll = function initiativeRoll(player, character) {
   var modifiers = [character.situationalInitBonus,
     character.movementRatioInitBonus,
@@ -216,7 +235,7 @@ MML.meleeAttackRoll = function meleeAttackRoll(player, character, task, skill) {
   return function(rolls) {
     return MML.goToMenu(player, { message: character.name + '\'s Attack Roll', buttons: ['Roll'] })
       .then(function(player) {
-        return MML.universalRoll('meleeAttack', [
+        return MML.universalRoll(player, 'meleeAttack', [
           character.situationalMod,
           character.meleeAttackMod,
           character.attributeMeleeAttackMod,
@@ -224,12 +243,9 @@ MML.meleeAttackRoll = function meleeAttackRoll(player, character, task, skill) {
           skill
         ]);
       })
-      .then(function() {
-        return MML.processRoll(player);
-      })
       .then(function(result) {
         rolls.meleeAttackRoll = result;
-        if (result === 'Failure' || 'Critical Failure') {
+        if (result === 'Failure' || result === 'Critical Failure') {
           throw rolls;
         }
         return rolls;
@@ -237,16 +253,78 @@ MML.meleeAttackRoll = function meleeAttackRoll(player, character, task, skill) {
   };
 };
 
-MML.defenseRoll = function defenseRoll(player, name, chance) {
-  return function(rolls) {
-    return MML.universalRoll(name, chance)
-      .then(MML.processRoll(player))
-      .then(function(result) {
-        rolls.meleeDefenseRoll = result;
-        if (result === 'Success' || 'Critical Success') {
-          throw rolls;
-        }
-        return rolls;
+MML.defenseRoll = function defenseRoll(player, name, modifiers, rolls) {
+  return MML.universalRoll(player, name, modifiers)
+    .then(function(result) {
+      rolls.meleeDefenseRoll = result;
+      if (result === 'Success' || result === 'Critical Success') {
+        throw rolls;
+      }
+      return rolls;
+    });
+};
+
+MML.meleeDefenseRoll = function meleeDefenseRoll(player, character, attackerWeapon) {
+  return function (rolls) {
+    var itemId;
+    var grip;
+    var defenderWeapon;
+    var dodgeMods;
+    var blockMods;
+    var dodgeSkill;
+    var blockSkill;
+    var weaponSkills = character.weaponSkills;
+    var defaultMartialSkill = weaponSkills['Default Martial'].level;
+    var shieldMod = MML.getShieldDefenseBonus(character);
+    var defenseMod = character.meleeDefenseMod + character.attributeDefenseMod;
+    var sitMod = character.situationalMod;
+
+    if (!_.isUndefined(weaponSkills['Dodge']) && defaultMartialSkill < weaponSkills['Dodge'].level) {
+      dodgeMods = [weaponSkills['Dodge'].level, defenseMod, sitMod];
+    } else {
+      dodgeMods = [defaultMartialSkill, defenseMod, sitMod];
+    }
+
+    if (attackerWeapon.initiative < 6) {
+      dodgeMods.push(15);
+    }
+
+    if (MML.isDualWielding(character)) {
+      log('Dual Wield defense');
+    } else if (MML.isUnarmed(character) || MML.isWieldingRangedWeapon(character)) {
+      blockMods = [];
+    } else {
+      if (MML.getWeaponFamily(character, 'rightHand') !== 'unarmed') {
+        itemId = character.rightHand._id;
+        grip = character.rightHand.grip;
+      } else {
+        itemId = character.leftHand._id;
+        grip = character.leftHand.grip;
+      }
+
+      defenderWeapon = character.inventory[itemId];
+      blockMods = [defenderWeapon.grips[grip].defense, sitMod, defenseMod, shieldMod];
+      blockSkill = Math.round(MML.getWeaponSkill(character, defenderWeapon) / 2);
+
+      if (blockSkill >= defaultMartialSkill) {
+        blockMods.push(blockSkill);
+      } else {
+        blockMods.push(defaultMartialSkill);
+      }
+    }
+
+    if (attackerWeapon.family === 'Flexible') {
+      dodgeMods.push(-10);
+      blockMods.push(-10);
+    } else if (attackerWeapon.family === 'Unarmed') {
+      dodgeMods.push(attackerWeapon.defenseMod);
+      blockMods.push(attackerWeapon.defenseMod);
+    }
+
+    MML.removeAimAndObserving(character);
+    return MML.chooseMeleeDefense(player, character, dodgeMods, blockMods, attackerWeapon)
+      .then(function (defense) {
+        return MML.defenseRoll(player, defense.name, defense.modifiers, rolls);
       });
   };
 };
@@ -323,7 +401,7 @@ MML.missileAttackRoll = function missileAttackRoll(player, character, target, we
     return function(rolls) {
       return MML.goToMenu(player, { message: character.name + '\'s Attack Roll', buttons: ['Roll'] })
         .then(function(player) {
-          return MML.missileAttackRoll(player, MML.universalRoll('missileAttack', mods));
+          return MML.missileAttackRoll(player, MML.universalRoll(player, 'missileAttack', mods));
         })
         .then(function(result) {
           rolls.missileAttackRoll = result;
@@ -355,7 +433,7 @@ MML.armorCoverageRoll = function armorCoverageRoll() {
 };
 
 MML.rangedDefenseRoll = function rangedDefenseRoll(character, defenseChance) {
-  MML.universalRoll(character, 'rangedDefenseRoll', [defenseChance], 'rangedDefenseRollResult');
+  MML.universalRoll(player, character, 'rangedDefenseRoll', [defenseChance], 'rangedDefenseRollResult');
 };
 
 MML.rangedDefenseRollApply = function rangedDefenseRollApply(character) {
@@ -378,7 +456,7 @@ MML.rangedDefenseRollApply = function rangedDefenseRollApply(character) {
 };
 
 MML.grappleDefenseWeaponRoll = function grappleDefenseWeaponRoll(character, attackChance) {
-  MML.universalRoll(character, 'Weapon Defense Roll', [attackChance], 'grappleDefenseWeaponRollResult');
+  MML.universalRoll(player, character, 'Weapon Defense Roll', [attackChance], 'grappleDefenseWeaponRollResult');
 };
 
 MML.grappleDefenseWeaponRollApply = function grappleDefenseWeaponRollApply(character) {
@@ -399,7 +477,7 @@ MML.grappleDefenseWeaponRollApply = function grappleDefenseWeaponRollApply(chara
 };
 
 MML.grappleDefenseBrawlRoll = function grappleDefenseBrawlRoll(character, brawlChance) {
-  MML.universalRoll(character, 'Brawl Defense Roll', [brawlChance], 'grappleDefenseBrawlRollResult');
+  MML.universalRoll(player, character, 'Brawl Defense Roll', [brawlChance], 'grappleDefenseBrawlRollResult');
 };
 
 MML.grappleDefenseBrawlRollApply = function grappleDefenseBrawlRollApply(character) {
@@ -430,7 +508,7 @@ MML.holdAimRoll = function holdAimRoll(character) {
 MML.castingRoll = function castingRoll(player, character, rollName, task, skill, metaMagicMod) {
   return MML.goToMenu(player, { message: character.name + '\'s Casting Roll', buttons: ['Roll'] })
     .then(function(player) {
-      return MML.universalRoll(rollName, [task, skill, character.situationalMod, character.castingMod, character.attributeCastingMod, metaMagicMod]);
+      return MML.universalRoll(player, rollName, [task, skill, character.situationalMod, character.castingMod, character.attributeCastingMod, metaMagicMod]);
     })
     .then(MML.processRoll(player))
     .then(function(roll) {
@@ -598,71 +676,76 @@ MML.fatigueRecoveryRollApply = function fatigueRecoveryRollApply(character) {
 };
 
 MML.hitPositionRoll = function hitPositionRoll(player, target, action) {
-  var rollValue;
-  var range;
-  var rangeUpper;
-  var result;
-  var accepted;
-  var hitPositions;
+  return function(rolls) {
+    return MML.goToMenu(player, { message: character.name + '\'s Hit Position Roll', buttons: ['Roll'] })
+      .then(function(player) {
+        var rollValue;
+        var range;
+        var rangeUpper;
+        var result;
+        var accepted;
+        var hitPositions;
+        var hitPositionIndex;
 
-  if (_.contains(action.modifiers, 'Called Shot Specific')) {
-    var hitPositionIndex = parseInt(_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
-      return hitPosition.name === action.calledShot;
-    }));
-    if (_.contains(action.modifiers, 'Near Miss')) {
-      var bodyPart = MML.hitPositions[target.bodyType][hitPositionIndex].bodyPart;
-      hitPositions = MML.getAvailableHitPositions(target, bodyPart);
-      rangeUpper = hitPositions.length;
-      rollValue = MML.rollDice(1, rangeUpper);
-      range = '1-' + rangeUpper;
-      result = MML.getCalledShotHitPosition(target, rollValue, bodyPart);
-      calledShot = 'Called Shot';
-    } else {
-      rollValue = hitPositionIndex;
-      range = rollValue + '-' + rollValue;
-      result = MML.getHitPosition(target, rollValue);
-    }
-  } else if (_.contains(action.modifiers, 'Called Shot')) {
-    hitPositions = MML.getAvailableHitPositions(target, action.calledShot);
-    rangeUpper = hitPositions.length;
-    rollValue = MML.rollDice(1, rangeUpper);
-    range = '1-' + rangeUpper;
-    result = MML.getCalledShotHitPosition(target, rollValue, action.calledShot);
-    calledShot = 'Called Shot';
-  } else {
-    hitPositions = MML.hitPositions[target.bodyType];
-    range = '1-' + _.keys(hitPositions).length;
-    result = MML.getHitPosition(target, MML.rollDice(1, 100));
-    rollValue = parseInt(_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
-      return hitPosition.name === result.name;
-    }));
-    calledShot = false;
-  }
-  return MML.processRoll(player, MML.hitPositionRollResult({
-    type: 'hitPosition',
-    calledShot: calledShot,
-    range: range,
-    hitPositions: hitPositions,
-    result: result,
-    value: rollValue
-  }));
+        if (_.contains(action.modifiers, 'Called Shot Specific') && !_.contains(action.modifiers, 'Near Miss')) {
+          hitPositionIndex = parseInt(_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
+            return hitPosition.name === action.calledShot;
+          }));
+          return MML.getHitPosition(target, hitPositionIndex);
+        } else {
+          if (_.contains(action.modifiers, 'Called Shot Specific') || _.contains(action.modifiers, 'Near Miss')) {
+            var bodyPart = MML.hitPositions[target.bodyType][hitPositionIndex].bodyPart;
+            hitPositions = MML.getAvailableHitPositions(target, bodyPart);
+            rangeUpper = hitPositions.length;
+            range = '1-' + rangeUpper;
+            calledShot = true;
+          } else if (_.contains(action.modifiers, 'Called Shot')) {
+            hitPositions = MML.getAvailableHitPositions(target, action.calledShot);
+            rangeUpper = hitPositions.length;
+            range = '1-' + rangeUpper;
+            calledShot = true;
+          } else {
+            hitPositions = MML.hitPositions[target.bodyType];
+            rangeUpper = 100;
+            range = '1-100';
+            calledShot = false;
+          }
+          return MML.rollDice(1, rangeUpper)
+            .then(function(value) {
+              return MML.hitPositionRollResult({
+                type: 'hitPosition',
+                calledShot: calledShot,
+                range: range,
+                hitPositions: hitPositions,
+                target: target,
+                value: value
+              });
+            })
+            .then(MML.processRoll(player))
+            .then(function(result) {
+              rolls.hitPositionRoll = result;
+              return rolls;
+            });
+        }
+      });
+  };
 };
 
 MML.hitPositionRollResult = function hitPositionRollResult(roll) {
-  if (_.has(character.statusEffects, 'Called Shot')) {
-    roll.result = MML.getCalledShotHitPosition(target, roll.value, action.calledShot);
-  } else if (_.has(character.statusEffects, 'Called Shot Specific') && character.statusEffects['Called Shot Specific'].nearMiss) {
-    var hitPositionIndex = parseInt(_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
-      return hitPosition.name === action.calledShot;
-    }));
-    roll.result = MML.getCalledShotHitPosition(target, roll.value, MML.hitPositions[target.bodyType][hitPositionIndex].bodyPart);
-  } else {
+  // result = MML.getCalledShotHitPosition(target, rollValue, bodyPart);
+  // result = MML.getCalledShotHitPosition(target, rollValue, action.calledShot);
+  // result = MML.getHitPosition(target, MML.rollDice(1, 100));
+  // rollValue = parseInt(_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
+  //   return hitPosition.name === result.name;
+  // }));
+  if (roll.calledShot) {
     roll.result = roll.hitPositions[roll.value];
+  } else {
+    roll.result = MML.getHitPosition(roll.target, roll.value);
   }
 
   roll.message = 'Roll: ' + roll.value +
     '\nResult: ' + roll.result.name +
     '\nRange: ' + roll.range;
-
   return roll;
 };
