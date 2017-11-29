@@ -192,12 +192,15 @@ MML.meleeAttackAction = function meleeAttackAction(player, character, action) {
   var weapon = action.weapon;
   return MML.getSingleTarget(player)
     .then(function (target) {
-      return MML.meleeAttackRoll(player, character, target, weapon, action.skill)(rolls)
-        .then(MML.meleeDefense(target.player, target, weapon))
+      return MML.meleeAttackRoll(player, character, weapon.task, action.skill)(rolls)
+        .then(MML.meleeDefenseRoll(target.player, target, weapon))
         .then(MML.hitPositionRoll(player, target, action))
-        .then(MML.meleeDamageRoll(player, character, target, weapon, attackRoll))
+        .then(MML.meleeDamageRoll(player, character, target, weapon))
         .then(MML.damageCharacter(target.player, target, weapon.damageType))
         .catch(function (rolls) {
+          if (_.isError(rolls)) {
+            throw rolls;
+          }
           return rolls;
         })
         .then(MML.endAction(player, character, action, target));
@@ -343,18 +346,20 @@ MML.reloadAction = function reloadAction(player, character, action) {
 };
 
 MML.endAction = function endAction(player, character, action, targets) {
-  character.spentInitiative = character.spentInitiative +
-    character.actionTempo +
-    (character.actionInitCostMod > -1 ? -1 : character.actionTempo + character.actionInitCostMod);
-  character.previousAction = MML.clone(character.action);
-  MML.updateCharacter(character);
-  _.each(action.targetArray || [], function(target) {
-    MML.updateCharacter(MML.characters[target]);
-  });
+  return function (rolls) {
+    character.spentInitiative = character.spentInitiative +
+      character.actionTempo +
+      (character.actionInitCostMod > -1 ? -1 : character.actionTempo + character.actionInitCostMod);
+    character.previousAction = MML.clone(character.action);
+    MML.updateCharacter(character);
+    _.each(action.targetArray || [], function(target) {
+      MML.updateCharacter(MML.characters[target]);
+    });
 
-  if (character.initiative > 0) {
-    return MML.buildAction(player, character);
-  } else {
-    return player;
-  }
+    if (character.initiative > 0) {
+      return MML.buildAction(player, character);
+    } else {
+      return player;
+    }
+  };
 };

@@ -26,24 +26,6 @@ MML.goToMenu = function goToMenu(player, menu) {
   return MML.setMenuButtons(player, menu.buttons);
 };
 
-MML.processRoll = function processRoll(player) {
-  return function (roll) {
-    if (player.name === state.MML.GM.name) {
-      MML.displayGmRoll(player, roll);
-    } else {
-      MML.displayPlayerRoll(player, roll);
-    }
-    return MML.setRollButtons(player)
-    .then(function(player) {
-      if (player.pressedButton === 'acceptRoll') {
-        return roll.result;
-      } else {
-        return MML.processRoll(player)(MML.changeRoll(player, roll, player.pressedButton.replace('changeRoll ', '')));
-      }
-    });
-  };
-};
-
 MML.displayGmRoll = function displayGmRoll(player, roll) {
   sendChat(player.name, '/w "' + player.name + '" &{template:rollMenuGM} {{title=' + roll.message + "}}");
   return player;
@@ -183,6 +165,10 @@ MML.chooseAttackType = function chooseAttackType(player, character, action) {
       } else if (player.pressedButton !== 'Standard') {
         action.attackType = player.pressedButton;
       }
+
+      if (MML.isUnarmedAction(action)) {
+        action.weapon = MML.unarmedAttacks[action.attackType];
+      }
       return action;
     });
 };
@@ -227,46 +213,45 @@ MML.chooseAttackStance = function chooseAttackStance(player, character) {
 MML.chooseDamageType = function chooseDamageType(player, character) {
   return function (action) {
     var weapon = action.weapon;
-    if (MML.isUnarmedAction(action)) {
-      weapon = MML.unarmedAttacks[action.attackType];
-    } else if (weapon.secondaryType !== '') {
-      return MML.goToMenu(player, {
-          message: 'Choose a Damage Type',
-          buttons: ['Primary', 'Secondary']
-        })
-        .then(function (player) {
-          if (player.pressedButton === 'Secondary') {
-            _.extend(weapon, {
-              damageType: weapon.secondaryType,
-              task: weapon.secondaryTask,
-              damage: weapon.secondaryDamage
-            });
-          } else {
-            _.extend(weapon, {
-              damageType: weapon.primaryType,
-              task: weapon.primaryTask,
-              damage: weapon.primaryDamage
-            });
-          }
+    if (!MML.isUnarmedAction(action)) {
+      if (weapon.secondaryType !== '') {
+        return MML.goToMenu(player, {
+            message: 'Choose a Damage Type',
+            buttons: ['Primary', 'Secondary']
+          })
+          .then(function (player) {
+            if (player.pressedButton === 'Secondary') {
+              _.extend(weapon, {
+                damageType: weapon.secondaryType,
+                task: weapon.secondaryTask,
+                damage: weapon.secondaryDamage
+              });
+            } else {
+              _.extend(weapon, {
+                damageType: weapon.primaryType,
+                task: weapon.primaryTask,
+                damage: weapon.primaryDamage
+              });
+            }
+          });
+      } else {
+        _.extend(weapon, {
+          damageType: weapon.primaryType,
+          task: weapon.primaryTask,
+          damage: weapon.primaryDamage
         });
-    } else {
-      _.extend(weapon, {
-        damageType: weapon.primaryType,
-        task: weapon.primaryTask,
-        damage: weapon.primaryDamage
-      });
+      }
     }
     return action;
   };
 };
-
-MML.chooseMeleeDefense = function chooseMeleeDefense(player, character, dodgeChance, blockChance, attackerWeapon) {
-  return MML.goToMenu(player, MML.menuchooseMeleeDefense(character, dodgeChance, blockChance, attackerWeapon))
+MML.chooseMeleeDefense = function chooseMeleeDefense(player, character, dodgeMods, blockMods, attackerWeapon) {
+  return MML.goToMenu(player, MML.menuChooseMeleeDefense(character, dodgeMods, blockMods, attackerWeapon))
     .then(function(player) {
       switch (player.pressedButton) {
-        case 'Block: ' + blockChance + '%':
+        case 'Block: ' + MML.sumModifiers(blockMods) + '%':
           character.statusEffects['Melee This Round'] = {
-            id: generateRowID(),
+            id: MML.generateRowID(),
             name: 'Melee This Round'
           };
           if (_.has(character.statusEffects, 'Number of Defenses')) {
@@ -276,14 +261,14 @@ MML.chooseMeleeDefense = function chooseMeleeDefense(player, character, dodgeCha
               number: 1
             });
           }
-          return MML.defenseRoll(player, 'meleeBlock', blockChance);
-        case 'Dodge: ' + dodgeChance + '%':
+          return {name: 'Block', modifiers: blockMods};
+        case 'Dodge: ' + MML.sumModifiers(dodgeMods) + '%':
           character.statusEffects['Melee This Round'] = {
-            id: generateRowID(),
+            id: MML.generateRowID(),
             name: 'Melee This Round'
           };
           character.statusEffects['Dodged This Round'] = {
-            id: generateRowID(),
+            id: MML.generateRowID(),
             name: 'Dodged This Round'
           };
           if (_.has(character.statusEffects, 'Number of Defenses')) {
@@ -293,7 +278,7 @@ MML.chooseMeleeDefense = function chooseMeleeDefense(player, character, dodgeCha
               number: 1
             });
           }
-          return MML.defenseRoll(player, 'meleeDodge', dodgeChance);
+          return {name: 'Dodge', modifiers: dodgeMods};
         case 'Take it':
           return 'Failure';
       }
@@ -939,7 +924,7 @@ MML.startAction = function startAction(player, character, validAction) {
             character.statusEffects['Changed Action'].level++;
           } else {
             MML.addStatusEffect(character, 'Changed Action', {
-              id: generateRowID(),
+              id: MML.generateRowID(),
               name: 'Changed Action',
               level: 1
             });
@@ -1039,7 +1024,7 @@ MML.menucharRangedDefenseRoll = function menucharRangedDefenseRoll(player, who, 
     nextMenu: 'menuIdle',
     callback: function() {
       character.statusEffects['Melee player Round'] = {
-        id: generateRowID(),
+        id: MML.generateRowID(),
         name: 'Melee player Round'
       };
       character.rangedDefenseRoll(defenseChance);
