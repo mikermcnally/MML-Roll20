@@ -378,3 +378,15 @@ MML.dehexify = function dehexify(hexIn) {
 
   return dehexed;
 };
+
+MML.recursivePromises = function recursivePromises(array, index, input) {
+  return array[index](input)
+    .then(function (input) {
+      console.log(input);
+      return index + 1 < array.length ? recursivePromises(array, index + 1, input) : input;
+    })
+    .catch(function (err) {
+      console.log('A problem was had!');
+      console.log(err);
+    });
+};

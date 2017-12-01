@@ -207,7 +207,6 @@ MML.meleeAttackAction = function meleeAttackAction(player, character, action) {
     });
 };
 
-
 MML.grappleAttackAction = function grappleAttackAction(player, character, action) {
   var rolls = {};
   var weapon = action.weapon;
