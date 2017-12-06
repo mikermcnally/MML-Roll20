@@ -386,18 +386,18 @@ function runTests() {
   });
 }
 
-function setPressedButton(player, button, selectedCharNames) {
-  player.buttonPressed(_.extend(player, { pressedButton: button, selectedCharNames: selectedCharNames || [] }));
+function setPressedButton(player, button, selectedIds) {
+  player.buttonPressed(_.extend(player, { pressedButton: button, selectedIds: selectedIds || [] }));
   return player;
 }
 
-function clickButton(button, selectedCharNames) {
+function clickButton(button, selectedIds) {
   return function(player) {
     return new Promise(function(resolve, reject) {
       once('sendChat', function () {
         resolve(player);
       });
-      player.buttonPressed(_.extend(player, { pressedButton: button, selectedCharNames: selectedCharNames || [] }));
+      player.buttonPressed(_.extend(player, { pressedButton: button, selectedIds: selectedIds || [] }));
     });
   };
 }
@@ -468,15 +468,17 @@ function createCharacter(player, name) {
     MML.createAttribute('repeating_weaponskills_1_input', '1', "", character);
     MML.createAttribute('repeating_weaponskills_1_level', '1', "", character);
 
-    createTestToken(name, character.id);
-    var mml_character = MML.createCharacter(name, character.id);
-    MML.characters[name] = mml_character;
+    var id = character.id;
+    createTestToken(name, id);
+    var mml_character = MML.createCharacter(name, id);
+    MML.characters[id] = mml_character;
     player.characters.push(mml_character);
 
     return mml_character;
   } catch (e) {
     console.log(e.message);
-    return createCharacter(name);
+    console.log(e.stack);
+    // return createCharacter(name);
   }
 }
 

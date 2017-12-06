@@ -274,7 +274,7 @@ MML.releaseOpponentAction = function releaseOpponentAction(player, character, ac
     };
     state.MML.GM.currentAction = {
       character: character,
-      targetArray: [target.name],
+      targetArray: [target.id],
       targetIndex: 0,
       resistRelease: true
     };
@@ -320,7 +320,7 @@ MML.aimAction = function aimAction(player, character, action) {
         if (roll.result !== 'Success') {
           return MML.missileAttackAction(player, character, action);
         } else {
-          if (target.name === character.statusEffects['Taking Aim'].target.name) {
+          if (target.id === character.statusEffects['Taking Aim'].target.id) {
             character.statusEffects['Taking Aim'].level = 2;
           } else {
             character.statusEffects['Taking Aim'].target = target;

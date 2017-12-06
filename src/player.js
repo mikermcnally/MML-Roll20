@@ -62,6 +62,7 @@ MML.selectTarget = function selectTarget(player) {
   return new Promise(function(resolve, reject) {
     player.buttonPressed = function(player) {
       if (player.pressedButton.indexOf('selectTarget') > -1) {
+        player.pressedButton = player.pressedButton.replace('selectTarget ', '');
         resolve(player);
       }
     };
@@ -72,7 +73,7 @@ MML.getSingleTarget = function getSingleTarget(player) {
   MML.displayTargetSelection(player);
   return MML.selectTarget(player)
     .then(function (player) {
-      return MML.characters[player.pressedButton.replace('selectTarget ', '')];
+      return MML.getCharFromName(player.pressedButton);
     });
 };
 
@@ -965,7 +966,7 @@ MML.displaySpellMarker = function displaySpellMarker(player) {
       var targets = MML.getAoESpellTargets(spellMarker);
       var character = MML.characters[who];
       _.each(MML.characters, function(character) {
-        var token = MML.getCharacterToken(character.name);
+        var token = MML.getCharacterToken(character.id);
         if (!_.isUndefined(token)) {
           token.set('tint_color', 'transparent');
         }

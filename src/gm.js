@@ -1,13 +1,13 @@
 MML.startCombat = function startCombat(player) {
   var gm = state.MML.GM;
-  var charNames = player.selectedCharNames;
+  var ids = player.selectedIds;
   gm.currentRound = 0;
   gm.combatants = [];
-  if (charNames.length > 0) {
+  if (ids.length > 0) {
     gm.inCombat = true;
-    gm.combatants = charNames.map(name => MML.characters[name]);
+    gm.combatants = ids.map(id => MML.characters[id]);
     _.each(MML.players, function(player) {
-      player.combatants = player.characters.filter(character => charNames.includes(character.name));
+      player.combatants = player.characters.filter(character => ids.includes(character.id));
     });
     _.each(gm.combatants, function(character) {
       MML.setReady(character, false);
@@ -37,9 +37,9 @@ MML.newRound = function newRound(gm) {
 MML.endCombat = function endCombat() {
   var gm = state.MML.GM;
   if (gm.combatants.length > 0) {
-    _.each(gm.combatants, function(charName) {
-      MML.characters[charName].setReady(true);
-      MML.characters[charName].setCombatVision();
+    _.each(gm.combatants, function(id) {
+      MML.characters[id].setReady(true);
+      MML.characters[id].setCombatVision();
     });
     gm.inCombat = false;
     gm.combatants = [];
@@ -53,7 +53,7 @@ MML.nextAction = function nextAction() {
   if (MML.checkReady()) {
     var character = gm.combatants[0];
     if (character.initiative > 0) {
-      gm.actor = character.name;
+      gm.actor = character.id;
       return MML.startAction(character.player, character, MML.validateAction(character))
         .then(MML.nextAction)
         .catch(log);
@@ -142,14 +142,4 @@ MML.assignNewItem = function assignNewItem(input) {
     callback: 'displayMenu',
     input: {}
   });
-};
-
-MML.parseCommand = function(msg) {
-  if (msg.type === 'api' && msg.content.indexOf('!MML|') !== -1) {
-    var player = MML.players[msg.who.replace(' (GM)', '')];
-    player.buttonPressed(_.extend(player, {
-      pressedButton: msg.content.replace('!MML|', ''),
-      selectedCharNames: MML.getSelectedCharNames(msg.selected)
-    }));
-  }
 };

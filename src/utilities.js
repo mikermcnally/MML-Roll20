@@ -1,9 +1,9 @@
 // Character Functions
-MML.getCharFromName = function getCharFromName(charName) {
+MML.getCharFromName = function getCharFromName(name) {
   var character = findObjs({
     _type: 'character',
     archived: false,
-    name: charName
+    name: name
   }, {
     caseInsensitive: false
   });
@@ -12,23 +12,17 @@ MML.getCharFromName = function getCharFromName(charName) {
 };
 
 // Attribute and Ability Functions
-MML.createAttribute = function createAttribute(name, current, max, character) {
+MML.createAttribute = function createAttribute(name, current, max, id) {
   return createObj('attribute', {
     name: name,
     current: current,
     max: max,
-    characterid: character.id
+    characterid: id
   });
 };
 
-MML.createAttributesFromArray = function createAttributesFromArray(inputArray, character) {
-  _.each(inputArray, function(attribute) {
-    MML.createAttribute(attribute.name, attribute.current, attribute.max, character);
-  });
-};
-
-MML.createAbility = function createAbility(name, action, istokenaction, character) {
-  createObj('ability', {
+MML.createAbility = function createAbility(id, name, action, istokenaction) {
+  return createObj('ability', {
     name: name,
     action: action,
     istokenaction: istokenaction,
@@ -36,51 +30,49 @@ MML.createAbility = function createAbility(name, action, istokenaction, characte
   });
 };
 
-MML.getCharAttribute = function getCharAttribute(charName, attribute) {
-  var character = MML.getCharFromName(charName);
-  var charAttribute = findObjs({
+MML.getCharAttribute = function getCharAttribute(characterId, attribute) {
+  var attributeObject = findObjs({
     _type: 'attribute',
-    _characterid: character.get('_id'),
+    _characterid: characterId,
     name: attribute
   }, {
     caseInsensitive: false
   })[0];
 
-  if (typeof(charAttribute) === 'undefined') {
-    charAttribute = MML.createAttribute(attribute, '', '', MML.getCharFromName(charName));
+  if (_.isUndefined(attributeObject)) {
+    attributeObject = MML.createAttribute(attribute, '', '', characterId);
   }
-
-  return charAttribute;
+  return attributeObject;
 };
 
-MML.getCurrentAttribute = function getCurrentAttribute(charName, attribute) {
-  return MML.getCharAttribute(charName, attribute).get('current');
+MML.getCurrentAttribute = function getCurrentAttribute(id, attribute) {
+  return MML.getCharAttribute(id, attribute).get('current');
 };
 
-MML.getCurrentAttributeAsFloat = function getCurrentAttributeAsFloat(charName, attribute) {
-  var result = parseFloat(MML.getCurrentAttribute(charName, attribute));
+MML.getCurrentAttributeAsFloat = function getCurrentAttributeAsFloat(id, attribute) {
+  var result = parseFloat(MML.getCurrentAttribute(id, attribute));
 
   if (isNaN(result)) {
-    MML.setCurrentAttribute(charName, attribute, 0);
+    MML.setCurrentAttribute(id, attribute, 0);
     result = 0;
   }
 
   return result;
 };
 
-MML.getMaxAttributeAsFloat = function getMaxAttributeAsFloat(charName, attribute) {
-  var result = parseFloat(MML.getCharAttribute(charName, attribute).get('max'));
+MML.getMaxAttributeAsFloat = function getMaxAttributeAsFloat(id, attribute) {
+  var result = parseFloat(MML.getCharAttribute(id, attribute).get('max'));
 
   if (isNaN(result)) {
-    MML.setMaxAttribute(charName, attribute, 0);
+    MML.setMaxAttribute(id, attribute, 0);
     result = 0;
   }
 
   return result;
 };
 
-MML.getCurrentAttributeAsBool = function getCurrentAttributeAsBool(charName, attribute) {
-  var result = MML.getCurrentAttribute(charName, attribute);
+MML.getCurrentAttributeAsBool = function getCurrentAttributeAsBool(id, attribute) {
+  var result = MML.getCurrentAttribute(id, attribute);
   if (result.toString() === 'true') {
     return true;
   } else {
@@ -88,35 +80,34 @@ MML.getCurrentAttributeAsBool = function getCurrentAttributeAsBool(charName, att
   }
 };
 
-MML.getCurrentAttributeAsArray = function getCurrentAttributeAsArray(charName, attribute) {
-  var result = MML.getCurrentAttribute(charName, attribute);
+MML.getCurrentAttributeAsArray = function getCurrentAttributeAsArray(id, attribute) {
+  var result = MML.getCurrentAttribute(id, attribute);
 
   try {
     result = JSON.parse(result);
   } catch (e) {
-    MML.setCurrentAttribute(charName, attribute, '[]');
+    MML.setCurrentAttribute(id, attribute, '[]');
     result = [];
   }
   return result;
 };
 
-MML.getCurrentAttributeJSON = function getCurrentAttributeJSON(charName, attribute) {
-  var result = MML.getCurrentAttribute(charName, attribute);
+MML.getCurrentAttributeJSON = function getCurrentAttributeJSON(id, attribute) {
+  var result = MML.getCurrentAttribute(id, attribute);
 
   try {
     result = JSON.parse(result);
   } catch (e) {
-    MML.setCurrentAttribute(charName, attribute, '{}');
+    MML.setCurrentAttribute(id, attribute, '{}');
     result = {};
   }
   return result;
 };
 
-MML.getSkillAttributes = function getSkillAttributes(charName, skillType) {
-  var character = MML.getCharFromName(charName);
+MML.getSkillAttributes = function getSkillAttributes(id, skillType) {
   var attributes = findObjs({
     _type: 'attribute',
-    _characterid: character.get('_id')
+    _characterid: id
   }, {
     caseInsensitive: false
   });
@@ -164,12 +155,13 @@ MML.getSkillAttributes = function getSkillAttributes(charName, skillType) {
   return skills;
 };
 
-MML.setCurrentAttribute = function setCurrentAttribute(charName, attribute, value) {
-  MML.getCharAttribute(charName, attribute).set('current', value);
+MML.setCurrentAttribute = function setCurrentAttribute(id, attribute, value) {
+  MML.getCharAttribute(id, attribute).set('current', value);
+  console.log(MML.getCharAttribute(id, attribute));
 };
 
-MML.setMaxAttribute = function setMaxAttribute(charName, attribute, value) {
-  MML.getCharAttribute(charName, attribute).set('max', value);
+MML.setMaxAttribute = function setMaxAttribute(id, attribute, value) {
+  MML.getCharAttribute(id, attribute).set('max', value);
 };
 
 MML.getAttributeTableValue = function getAttributeTableValue(attribute, inputValue, table) {
@@ -177,7 +169,7 @@ MML.getAttributeTableValue = function getAttributeTableValue(attribute, inputVal
 };
 
 // Token Functions
-MML.getTokenCharacter = function getTokenCharacter(token) {
+MML.getCharacterIdFromToken = function getCharacterIdFromToken(token) {
   var tokenObject = getObj('graphic', token.id);
   var characterObject = getObj('character', tokenObject.get('represents'));
 
@@ -187,7 +179,7 @@ MML.getTokenCharacter = function getTokenCharacter(token) {
     tokenObject.set('tint_color', '#FFFF00');
     sendChat('Error', 'Selected Token(s) not associated to a character.');
   } else {
-    return characterObject.get('name');
+    return characterObject.get('id');
   }
 };
 
@@ -222,13 +214,13 @@ MML.getSelectedTokens = function getSelectedTokens(selected) {
   return tokens;
 };
 
-MML.getSelectedCharNames = function getSelectedCharNames(selected) {
+MML.getSelectedIds = function getSelectedIds(selected) {
   characters = [];
 
   var index;
   _.each(selected, function(object) {
     if (object._type === 'graphic') {
-      characters.push(MML.getTokenCharacter(getObj('graphic', object._id)));
+      characters.push(MML.getCharacterIdFromToken(getObj('graphic', object._id)));
     }
   });
   return characters;

@@ -46,7 +46,7 @@ MML.spells['Dart'] = {
       character.castingRoll('castingRoll', spell.task, casterSkill, _.reduce(_.pluck(metaMagic, 'castingMod'), function(memo, num) { return memo + num; }));
     } else if (_.isUndefined(rolls.defenseRoll)) {
       if (rolls.castingRoll === 'Critical Success' || rolls.castingRoll === 'Success') {
-        target.rangedDefense({ family: 'MWM' }, MML.getDistanceBetweenCharacters(character.name, target.name));
+        target.rangedDefense({ family: 'MWM' }, MML.getDistanceBetweenCharacters(character.id, target.id));
       } else if (rolls.castingRoll === 'Critical Failure') {
         MML.endAction();
       } else {
@@ -117,7 +117,7 @@ MML.spells['Hail of Stones'] = {
       }
     } else if (rolls.numberOfStonesRoll > 0) {
       if (_.isUndefined(rolls.defenseRoll)) {
-        target.rangedDefense({ family: 'SLI' }, MML.getDistanceBetweenCharacters(character.name, target.name));
+        target.rangedDefense({ family: 'SLI' }, MML.getDistanceBetweenCharacters(character.id, target.id));
       } else if (_.isUndefined(rolls.hitPositionRoll)) {
         if (rolls.defenseRoll === 'Critical Success') {
           state.MML.GM.currentAction.rolls.numberOfStonesRoll += -1;
