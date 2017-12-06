@@ -707,7 +707,7 @@ MML.hitPositionRoll = function hitPositionRoll(player, target, action) {
           } else {
             hitPositions = MML.hitPositions[target.bodyType];
             rangeUpper = 100;
-            range = '1-100';
+            range = '1-' + hitPositions.length;
             calledShot = false;
           }
           return MML.rollDice(1, rangeUpper)
@@ -715,19 +715,37 @@ MML.hitPositionRoll = function hitPositionRoll(player, target, action) {
               return MML.hitPositionRollResult({
                 type: 'hitPosition',
                 calledShot: calledShot,
-                range: range,
+                range: hitPositions.length,
                 hitPositions: hitPositions,
                 target: target,
                 value: value
               });
             })
-            .then(MML.processRoll(player))
+            .then(MML.processHitPositionRoll(player))
             .then(function(result) {
               rolls.hitPositionRoll = result;
               return rolls;
             });
         }
       });
+  };
+};
+
+MML.processHitPositionRoll = function processHitPositionRoll(player) {
+  return function (roll) {
+    if (player.name === state.MML.GM.name) {
+      MML.displayGmRoll(player, roll);
+    } else {
+      MML.displayPlayerRoll(player, roll);
+    }
+    return MML.setRollButtons(player)
+    .then(function(player) {
+      if (player.pressedButton === 'acceptRoll') {
+        return roll.result;
+      } else {
+        return MML.processHitPositionRoll(player)(MML.changeRoll(player, roll, player.pressedButton.replace('changeRoll ', '')));
+      }
+    });
   };
 };
 
@@ -748,4 +766,76 @@ MML.hitPositionRollResult = function hitPositionRollResult(roll) {
     '\nResult: ' + roll.result.name +
     '\nRange: ' + roll.range;
   return roll;
+};
+
+MML.hitPositionRoll = function hitPositionRoll(player, target, action) {
+  return function(rolls) {
+    return MML.goToMenu(player, { message: character.name + '\'s Hit Position Roll', buttons: ['Roll'] })
+      .then(function(player) {
+        var rollValue;
+        var range;
+        var rangeUpper;
+        var result;
+        var accepted;
+        var hitPositions;
+        var hitPositionIndex;
+
+        if (_.contains(action.modifiers, 'Called Shot Specific')) {
+          return MML.calledShotSpecificRoll(target, action.calledShot, rolls);
+        } else if (_.contains(action.modifiers, 'Called Shot')) {
+          return MML.calledShotRoll(target, action.calledShot, rolls);
+        } else {
+
+          hitPositions = MML.hitPositions[target.bodyType];
+          rangeUpper = 100;
+          range = '1-' + hitPositions.length;
+          calledShot = false;
+        }
+          return MML.rollDice(1, rangeUpper)
+            .then(function(value) {
+              return MML.hitPositionRollResult({
+                type: 'hitPosition',
+                calledShot: calledShot,
+                range: hitPositions.length,
+                hitPositions: hitPositions,
+                target: target,
+                value: value
+              });
+            })
+            .then(MML.processHitPositionRoll(player))
+            .then(function(result) {
+              rolls.hitPositionRoll = result;
+              return rolls;
+            });
+      });
+  };
+};
+
+MML.calledShotSpecificRoll = function calledShotSpecificRoll(target, calledShot, rolls) {
+  var hitPositionIndex = parseInt(_.findKey(MML.hitPositions[target.bodyType], function(hitPosition) {
+    return hitPosition.name === calledShot;
+  }));
+  rolls.hitPositionRoll = MML.getHitPosition(target, hitPositionIndex);
+  return rolls;
+};
+
+MML.calledShotRoll = function calledShotRoll(target, calledShot, rolls) {
+  var hitPositions = MML.getAvailableHitPositions(target, calledShot);
+  var rangeUpper = hitPositions.length;
+  var range = '1-' + rangeUpper;
+  return MML.rollDice(1, rangeUpper)
+    .then(function(value) {
+      return MML.calledShotRollResult({
+        type: 'hitPosition',
+        range: range,
+        hitPositions: hitPositions,
+        target: target,
+        value: value
+      });
+    })
+    .then(MML.processCalledShotRoll(player))
+    .then(function(result) {
+      rolls.hitPositionRoll = result;
+      return rolls;
+    });
 };

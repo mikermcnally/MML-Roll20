@@ -208,48 +208,18 @@ MML.meleeAttackAction = function meleeAttackAction(player, character, action) {
 };
 
 MML.grappleAttackAction = function grappleAttackAction(player, character, action) {
-  var attackerSkill = parameters.attackerSkill;
-  var attackType = parameters.attackType;
-  var target = parameters.target;
-  var defender = parameters.defender;
-  var defenderWeapon = parameters.defenderWeapon;
-  var rolls = currentAction.rolls;
-
-  if (_.isUndefined(rolls.attackRoll)) {
-    MML.meleeAttackRoll(character, 'attackRoll', attackType.task, attackerSkill);
-  } else if (_.isUndefined(rolls.brawlDefenseRoll) && _.isUndefined(rolls.weaponDefenseRoll)) {
-    if (rolls.attackRoll === 'Critical Success' || rolls.attackRoll === 'Success') {
-      target.grappleDefense(attackType);
-    } else if (rolls.attackRoll === 'Critical Failure') {
-      MML.endAction();
-    } else {
-      MML.endAction();
-    }
-  } else if (!_.isUndefined(rolls.brawlDefenseRoll)) {
-    if (rolls.brawlDefenseRoll === 'Critical Success') {
-      target.criticalDefense();
-    } else if (rolls.brawlDefenseRoll === 'Success') {
-      MML.endAction();
-    } else {
-      MML.grappleHandler(character, target, attackType.name);
-    }
-  } else if (!_.isUndefined(rolls.weaponDefenseRoll) && _.isUndefined(rolls.hitPositionRoll)) {
-    if (rolls.weaponDefenseRoll === 'Critical Success' || rolls.weaponDefenseRoll === 'Success') {
-      state.MML.GM.currentAction.parameters.target = character;
-      state.MML.GM.currentAction.parameters.defender = target;
-      target.hitPositionRoll();
-    } else {
-      MML.grappleHandler(character, target, attackType.name);
-    }
-  } else if (!_.isUndefined(rolls.hitPositionRoll) && _.isUndefined(rolls.damageRoll)) {
-    if (rolls.weaponDefenseRoll === 'Critical Success') {
-      defender.meleeDamageRoll(defenderWeapon, true);
-    } else {
-      defender.meleeDamageRoll(defenderWeapon, false);
-    }
-  } else {
-    MML.damageCharacter(target.player, target, hitPosition.result, damageRoll.result).then(MML.endAction());
-  }
+  var rolls = {};
+  var weapon = action.weapon;
+  return MML.getSingleTarget(player)
+    .then(function (target) {
+      return MML.meleeAttackRoll(player, character, target, weapon, action.skill)(rolls)
+        .then(MML.grappleDefense(target.player, target, weapon))
+        .then(MML.grappleHandler(player, character, target, weapon, attackRoll))
+        .catch(function (rolls) {
+          return rolls;
+        })
+        .then(MML.endAction(player, character, action, target));
+    });
 };
 
 MML.releaseOpponentAction = function releaseOpponentAction(player, character, action) {
