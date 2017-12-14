@@ -1,6 +1,7 @@
 MML.txt
 MML_Test.js
 .gitignore
+.eslintrc
 .jshintrc
 .eslintrc
 /node_modules
