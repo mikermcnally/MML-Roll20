@@ -1,6 +1,7 @@
 MML.txt
 MML_Test.js
 .gitignore
+.eslintrc
 .jshintrc
 /node_modules
 /Roll20-Emulation
