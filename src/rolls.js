@@ -26,8 +26,6 @@ MML.sumModifiers = function sumModifiers(modifiers) {
 
 MML.processRoll = function processRoll(player) {
   return function (roll) {
-    // console.log("GRASS TASTES BAD");
-    // console.log(roll);
     if (player.name === state.MML.GM.name) {
       MML.displayGmRoll(player, roll);
     } else {

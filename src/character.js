@@ -1534,6 +1534,9 @@ MML.createCharacter = function (name, id) {
       }
       MML.setCurrentAttribute(character.id, prop, value);
       return true;
+    },
+    get: function (character, prop) {
+      return character[prop];
     }
   });
   return characterProxy;
@@ -1639,8 +1642,6 @@ MML.Character = function (name, id) {
     },
     enumerable: true
   });
-  console.log(character.intellect);
-  console.log('whut');
   Object.defineProperty(character, 'reason', {
     get: function() {
       var value = MML.racialAttributeBonuses[character.race].reason + MML.getCurrentAttributeAsFloat(character.id, 'reasonRoll');
@@ -1732,10 +1733,6 @@ MML.Character = function (name, id) {
   });
   Object.defineProperty(character, 'evocation', {
     get: function() {
-      console.log("SHOW ME WHAT YOU GOT");
-      console.log(character.race);
-      console.log(character);
-      console.log("GRASS TASTES BAD");
       return [character.intellect,
         character.reason,
         character.creativity,

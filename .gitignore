@@ -2,6 +2,7 @@ MML.txt
 MML_Test.js
 .gitignore
 .jshintrc
+.eslintrc
 /node_modules
 /Roll20-Emulation
 .remote-sync.json

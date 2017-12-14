@@ -1,13 +1,11 @@
-MML.menuMainGm = function menuMainGm(player) {
-  return MML.goToMenu(player, {message: 'Main Menu: ', buttons: ['Combat', 'Roll Dice']})
-    .then(function(player) {
-      switch (player.pressedButton) {
-        case 'Combat':
-          return MML.menuGmCombat(player);
-        case 'Roll Dice':
-          return MML.menuselectDieSize(player);
-      }
-    });
+MML.menuMainGm = async function menuMainGm(player) {
+  const pressedButton = await MML.goToMenu(player, 'Main Menu: ', ['Combat', 'Roll Dice'])
+  switch (pressedButton) {
+    case 'Combat':
+      return MML.menuGmCombat(player);
+    case 'Roll Dice':
+      return MML.menuselectDieSize(player);
+  }
 };
 
 MML.menuPrepareAction = function menuPrepareAction(player, character, action) {

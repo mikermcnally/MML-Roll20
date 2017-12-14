@@ -1,6 +1,6 @@
-MML.displayMenu = function displayMenu(player, menu) {
-  var toChat = '/w "' + player.name + '" &{template:charMenu} {{name=' + menu.message + '}} ' +
-    menu.buttons.map(function(button) {
+MML.displayMenu = function displayMenu(player, message, buttons) {
+  var toChat = '/w "' + player.name + '" &{template:charMenu} {{name=' + message + '}} ' +
+    buttons.map(function(button) {
       var noSpace = button.replace(/\s+/g, '');
       return '{{' + noSpace + '=[' + button + '](!MML|' + button + ')}}';
     }).join(' ');
@@ -15,15 +15,15 @@ MML.setMenuButtons = function setMenuButtons(player, buttons) {
   return new Promise(function(resolve, reject) {
     player.buttonPressed = function(player) {
       if (_.contains(buttons, player.pressedButton)) {
-        resolve(player);
+        resolve(player.pressedButton);
       }
     };
   });
 };
 
-MML.goToMenu = function goToMenu(player, menu) {
-  MML.displayMenu(player, menu);
-  return MML.setMenuButtons(player, menu.buttons);
+MML.goToMenu = function goToMenu(player, message, buttons) {
+  MML.displayMenu(player, message, buttons);
+  return MML.setMenuButtons(player, buttons);
 };
 
 MML.displayGmRoll = function displayGmRoll(player, roll) {
@@ -127,19 +127,13 @@ MML.chooseSpellTargets = function chooseSpellTargets(player, character, action) 
   }
 };
 
-MML.initializeMenu = function initializeMenu(player) {
-  return MML.setMenuButtons(player, ['initializeMenu'])
-    .then(function(player) {
-      if (player.name === state.MML.GM.name) {
-        return MML.menuMainGm(player);
-      } else {
-        return MML.menuMainPlayer(player);
-      }
-    })
-    .catch(function (err) {
-      log('hmm');
-      log(err);
-    });
+MML.initializeMenu = async function initializeMenu(player) {
+  await MML.setMenuButtons(player, ['initializeMenu']);
+  if (player.name === state.MML.GM.name) {
+    return MML.menuMainGm(player);
+  } else {
+    return MML.menuMainPlayer(player);
+  }
 };
 
 MML.prepareAction = function prepareAction(player, character, action) {
@@ -385,29 +379,21 @@ MML.menuselectDieSize = function menuselectDieSize(player, who) {
   });
 };
 
-MML.menuselectDieSize = function menuselectDieSize(player) {
+MML.menuSelectDieSize = function menuselectDieSize(player) {
   MML.enterNumberOfDice(player);
 };
 
-MML.menuGmCombat = function menuGmCombat(player) {
-  var menu = {
-    message: 'Select tokens and begin.',
-    buttons: [
-      'Start Combat',
-      'Back'
-    ]
-  };
+MML.menuGmCombat = async function menuGmCombat(player) {
+  const message = 'Select tokens and begin.';
+  const buttons = ['Start Combat', 'Back'];
 
-  return MML.goToMenu(player, menu)
-    .then(function(player) {
-      log(player.pressedButton);
-      switch (player.pressedButton) {
-        case 'Start Combat':
-          return MML.startCombat(player);
-        case 'Back':
-          return MML.menuMainGm(player);
-      }
-    });
+  const pressedButton = await MML.goToMenu(player, message, buttons);
+  switch (pressedButton) {
+    case 'Start Combat':
+      return MML.startCombat(player);
+    case 'Back':
+      return MML.menuMainGm(player);
+  }
 };
 
 MML.menuGmNewItem = function menuGmNewItem(player, who) {

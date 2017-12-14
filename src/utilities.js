@@ -157,7 +157,6 @@ MML.getSkillAttributes = function getSkillAttributes(id, skillType) {
 
 MML.setCurrentAttribute = function setCurrentAttribute(id, attribute, value) {
   MML.getCharAttribute(id, attribute).set('current', value);
-  console.log(MML.getCharAttribute(id, attribute));
 };
 
 MML.setMaxAttribute = function setMaxAttribute(id, attribute, value) {
@@ -369,16 +368,4 @@ MML.dehexify = function dehexify(hexIn) {
   }
 
   return dehexed;
-};
-
-MML.recursivePromises = function recursivePromises(array, index, input) {
-  return array[index](input)
-    .then(function (input) {
-      console.log(input);
-      return index + 1 < array.length ? recursivePromises(array, index + 1, input) : input;
-    })
-    .catch(function (err) {
-      console.log('A problem was had!');
-      console.log(err);
-    });
 };

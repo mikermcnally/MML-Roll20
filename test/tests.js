@@ -444,31 +444,31 @@ function createCharacter(player, name) {
       "controlledby": "",
       "avatar": ""
     });
-    MML.createAttribute("player", player.name, "", character);
-    MML.createAttribute("name", name, "", character);
-    MML.createAttribute("race", "Human", "", character);
-    MML.createAttribute("gender", "Male", "", character);
-    MML.createAttribute("statureRoll", 10, "", character);
-    MML.createAttribute("strengthRoll", 10, "", character);
-    MML.createAttribute("coordinationRoll", 10, "", character);
-    MML.createAttribute("healthRoll", 10, "", character);
-    MML.createAttribute("beautyRoll", 10, "", character);
-    MML.createAttribute("intellectRoll", 10, "", character);
-    MML.createAttribute("reasonRoll", 10, "", character);
-    MML.createAttribute("creativityRoll", 10, "", character);
-    MML.createAttribute("presenceRoll", 10, "", character);
-    MML.createAttribute("fomInitBonus", 6, "", character);
+    const id = character.id;
+    MML.createAttribute("player", player.name, "", id);
+    MML.createAttribute("name", name, "", id);
+    MML.createAttribute("race", "Human", "", id);
+    MML.createAttribute("gender", "Male", "", id);
+    MML.createAttribute("statureRoll", 10, "", id);
+    MML.createAttribute("strengthRoll", 10, "", id);
+    MML.createAttribute("coordinationRoll", 10, "", id);
+    MML.createAttribute("healthRoll", 10, "", id);
+    MML.createAttribute("beautyRoll", 10, "", id);
+    MML.createAttribute("intellectRoll", 10, "", id);
+    MML.createAttribute("reasonRoll", 10, "", id);
+    MML.createAttribute("creativityRoll", 10, "", id);
+    MML.createAttribute("presenceRoll", 10, "", id);
+    MML.createAttribute("fomInitBonus", 6, "", id);
     MML.createAttribute("rightHand", JSON.stringify({
       _id: "emptyHand"
-    }), "", character);
+    }), "", id);
     MML.createAttribute("leftHand", JSON.stringify({
       _id: "emptyHand"
-    }), "", character);
-    MML.createAttribute('repeating_weaponskills_1_name', 'Default Martial', "", character);
-    MML.createAttribute('repeating_weaponskills_1_input', '1', "", character);
-    MML.createAttribute('repeating_weaponskills_1_level', '1', "", character);
+    }), "", id);
+    MML.createAttribute('repeating_weaponskills_1_name', 'Default Martial', "", id);
+    MML.createAttribute('repeating_weaponskills_1_input', '1', "", id);
+    MML.createAttribute('repeating_weaponskills_1_level', '1', "", id);
 
-    var id = character.id;
     createTestToken(name, id);
     var mml_character = MML.createCharacter(name, id);
     MML.characters[id] = mml_character;
