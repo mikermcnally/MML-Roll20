@@ -1,10 +1,37 @@
+MML.initializeMenu = async function initializeMenu(player) {
+  try {
+    await MML.setMenuButtons(player, ['initializeMenu']);
+    console.log("SHOW ME WHAT YOU GOT");
+    if (player.name === state.MML.GM.name) {
+      return MML.menuMainGm(player);
+    } else {
+      return MML.menuMainPlayer(player);
+    }
+  } catch (err) {
+    log(err);
+  }
+};
+
 MML.menuMainGm = async function menuMainGm(player) {
-  const pressedButton = await MML.goToMenu(player, 'Main Menu: ', ['Combat', 'Roll Dice'])
+  const {pressedButton} = await MML.goToMenu(player, 'Main Menu: ', ['Combat', 'Roll Dice'])
   switch (pressedButton) {
     case 'Combat':
       return MML.menuGmCombat(player);
     case 'Roll Dice':
       return MML.menuselectDieSize(player);
+  }
+};
+
+MML.menuGmCombat = async function menuGmCombat(player) {
+  const message = 'Select tokens and begin.';
+  const buttons = ['Start Combat', 'Back'];
+
+  const {pressedButton} = await MML.goToMenu(player, message, buttons);
+  switch (pressedButton) {
+    case 'Start Combat':
+      return MML.startCombat(player);
+    case 'Back':
+      return MML.menuMainGm(player);
   }
 };
 

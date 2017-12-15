@@ -307,14 +307,16 @@ MML.getPlayerFromName = function getPlayerFromName(playerName) {
 };
 
 // Code borrowed from The Aaron from roll20.net forums
+// This code is disgusting. Who codes like this?
 function generateUUID() {
-  var a = 0,
-    b = [];
+  var a = 0;
+  var b = [];
+  var c = (new Date()).getTime() + 0;
+  var e = new Array(8);
   return function() {
-    var c = (new Date()).getTime() + 0,
-      d = c === a;
+    d = c === a;
     a = c;
-    for (var e = new Array(8), f = 7; 0 <= f; f--) {
+    for (e, f = 7; 0 <= f; f--) {
       e[f] = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz'.charAt(c % 64);
       c = Math.floor(c / 64);
     }

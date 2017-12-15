@@ -82,7 +82,7 @@ MML.init = function() {
     }
   });
 
-  on('chat:message', MML.stream(MML.chatStream));
+  on('chat:message', MML.parseChat);
 
   on('change:token', function(obj, prev) {
     if (obj.get('name').indexOf('spellMarker') === -1 && obj.get('left') !== prev['left'] && obj.get('top') !== prev['top'] && state.MML.GM.inCombat === true) {
@@ -169,58 +169,13 @@ MML.init = function() {
   });
 };
 
-MML.chatStream = function chatStream(msg) {
-  return
-};
-
-MML.ParseChat = function({who , content, selected, type}) {
+MML.parseChat = function({who , content, selected, type}) {
+  console.log("GRASS TASTES BAD");
   MML.getPlayer(who);
   if (msg.type === 'api' && msg.content.indexOf('!MML|') !== -1) {
     var player = MML.players[msg.who.replace(' (GM)', '')];
-    player.buttonPressed(_.extend(player, {
-      pressedButton: msg.content.replace('!MML|', ''),
-      selectedIds: MML.getSelectedIds(msg.selected)
-    }));
+    player.buttonPressed(msg.content.replace('!MML|', ''), MML.getSelectedIds(msg.selected));
   }
 };
-
-MML.stream = function stream(fn, initial) {
-  function lazy(value) {
-    return {value, next: () => lazy(fn(value))};
-  }
-  return () => lazy(initial);
-};
-
-MML.streamFilter = function streamFilter(filter, rawStream) {
-  function filteredStream(stream) {
-    const { value, next } = stream();
-
-    if (filter(value)) {
-      return {
-        value,
-        next() {
-          return (next);
-        }
-      };
-    }
-
-    return filteredStream(next);
-  }
-
-  return () => filteredStream(rawStream);
-};
-
-MML.streamUntil = function streamUntil(stream, until) {
-  function lazy(stream, until, output) {
-    if (until) {
-      return output;
-    }
-    const { value, next } = stream();
-    return lazy(next, until, output.concat(value));
-  }
-  return lazy(stream, until, []);
-};
-
-MML.streamMap = function streamMap(stream) {};
 
 on('ready', MML.init);

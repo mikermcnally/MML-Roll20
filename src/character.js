@@ -1240,7 +1240,6 @@ MML.getMagicSkill = function getMagicSkill(character, spell) {
             level: elementalism_skill
           };
         }
-        break;
       case 'Earth':
         if (!_.isUndefined(character.skills['Earth Elementalism'])) {
           elementalism_skill = character.skills['Earth Elementalism'].level;
@@ -1261,7 +1260,6 @@ MML.getMagicSkill = function getMagicSkill(character, spell) {
             level: elementalism_skill
           };
         }
-        break;
       case 'Water':
         if (!_.isUndefined(character.skills['Water Elementalism'])) {
           elementalism_skill = character.skills['Water Elementalism'].level;
@@ -1282,7 +1280,6 @@ MML.getMagicSkill = function getMagicSkill(character, spell) {
             level: elementalism_skill
           };
         }
-        break;
       case 'Air':
         if (!_.isUndefined(character.skills['Air Elementalism'])) {
           elementalism_skill = character.skills['Air Elementalism'].level;
@@ -1303,7 +1300,6 @@ MML.getMagicSkill = function getMagicSkill(character, spell) {
             level: elementalism_skill
           };
         }
-        break;
       case 'Life':
         if (!_.isUndefined(character.skills['Life Elementalism'])) {
           elementalism_skill = character.skills['Life Elementalism'].level;
@@ -1324,7 +1320,6 @@ MML.getMagicSkill = function getMagicSkill(character, spell) {
             level: elementalism_skill
           };
         }
-        break;
       default:
     }
   } else if (spell.family === 'Symbolism') {

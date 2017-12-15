@@ -1,14 +1,14 @@
-MML.rollDice = function rollDice(amount, size) {
+MML.rollDice = async function rollDice(amount, size) {
   switch (state.MML.rollStyle) {
     case 'physicalDice':
       break;
     case '3d':
       break;
     default:
-      return Promise.resolve(Array(amount)
+      return Array(amount)
         .fill()
         .map(() => randomInteger(size))
-        .reduce((sum, value) => sum + value, 0));
+        .reduce((sum, value) => sum + value, 0);
   }
 };
 

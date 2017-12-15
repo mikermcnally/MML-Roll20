@@ -187,24 +187,19 @@ MML.missileAttackAction = function missileAttackAction(player, character, action
     });
 };
 
-MML.meleeAttackAction = function meleeAttackAction(player, character, action) {
-  var rolls = {};
-  var weapon = action.weapon;
-  return MML.getSingleTarget(player)
-    .then(function (target) {
-      return MML.meleeAttackRoll(player, character, weapon.task, action.skill)(rolls)
-        .then(MML.meleeDefenseRoll(target.player, target, weapon))
-        .then(MML.hitPositionRoll(player, target, action))
-        .then(MML.meleeDamageRoll(player, character, target, weapon))
-        .then(MML.damageCharacter(target.player, target, weapon.damageType))
-        .catch(function (rolls) {
-          if (_.isError(rolls)) {
-            throw rolls;
-          }
-          return rolls;
-        })
-        .then(MML.endAction(player, character, action, target));
-    });
+MML.meleeAttackAction = async function meleeAttackAction(player, character, action) {
+  const weapon = action.weapon;
+  const target = await MML.getSingleTarget(player);
+  const attackRoll = await MML.meleeAttackRoll(player, character, weapon.task, action.skill);
+  if (['Success', 'Critical Success'].includes(attackRoll)) {
+    const defenseRoll = await MML.meleeDefenseRoll(target.player, target, weapon);
+    if (!['Success', 'Critical Success'].includes(defenseRoll)) {
+      const hitPositionRoll = await MML.hitPositionRoll(player, target, action);
+      const damageRoll = await MML.meleeDamageRoll(player, character, target, weapon, attackRoll);
+      await MML.damageCharacter(target.player, target, weapon.damageType, hitPositionRoll, damageRoll);
+    }
+  }
+  return MML.endAction(player, character, action, target);
 };
 
 MML.grappleAttackAction = function grappleAttackAction(player, character, action) {
@@ -222,10 +217,9 @@ MML.grappleAttackAction = function grappleAttackAction(player, character, action
     });
 };
 
-MML.releaseOpponentAction = function releaseOpponentAction(player, character, action) {
-  var target = parameters.target;
-  var rolls = currentAction.rolls;
-
+MML.releaseOpponentAction = async function releaseOpponentAction(player, character, action) {
+  const target = await MML.getSingleTarget(player);
+  const targetAgreed = await menuResistRelease(target.player);
   if (_.isUndefined(parameters.targetAgreed)) {
     if (_.has(character.statusEffects, 'Holding')) {
       MML.releaseHold(character, target);
@@ -256,80 +250,66 @@ MML.castAction = function castAction(player, character, action) {
   MML.spells[action.spell.name].process(player, character, action);
 };
 
-MML.observeAction = function observeAction(player, character, action) {
+MML.observeAction = async function observeAction(player, character, action) {
   MML.addStatusEffect(character, 'Observing', {
     id: MML.generateRowID(),
     name: 'Observing',
     startingRound: state.MML.GM.currentRound
   });
-  return MML.displayObserveMenu(player, character, action)
-    .then(function([player, character, action]) {
-      MML.endAction(player, character, action);
-    });
+  await MML.displayObserveMenu(player, character, action);
+  return MML.endAction(player, character, action);
 };
 
-MML.aimAction = function aimAction(player, character, action) {
+MML.aimAction = async function aimAction(player, character, action) {
   if (!_.has(character.statusEffects, 'Taking Aim')) {
-    return MML.getSingleTarget(player)
-      .then(function(target) {
-        MML.addStatusEffect(character, 'Taking Aim', {
-          id: MML.generateRowID(),
-          name: 'Taking Aim',
-          level: 1,
-          target: target,
-          startingRound: state.MML.GM.currentRound
-        });
-        return MML.goToMenu(player, { message: character.name + ' aims at ' + target.name, buttons: ['End Action'] })
-          .then(function(player) {
-            return MML.endAction(player, character, action);
-          });
-      });
+    const target = await MML.getSingleTarget(player);
+    MML.addStatusEffect(character, 'Taking Aim', {
+      id: MML.generateRowID(),
+      name: 'Taking Aim',
+      level: 1,
+      target: target,
+      startingRound: state.MML.GM.currentRound
+    });
+    await MML.goToMenu(player, { message: character.name + ' aims at ' + target.name, buttons: ['End Action'] });
+    return MML.endAction(player, character, action);
   } else if (character.statusEffects['Taking Aim'].startingRound !== state.MML.GM.currentRound && attackerWeapon.family === 'MWD') {
-    return MML.holdAimRoll(player, character, target)
-      .then(function(roll) {
-        if (roll.result !== 'Success') {
-          return MML.missileAttackAction(player, character, action);
-        } else {
-          if (target.id === character.statusEffects['Taking Aim'].target.id) {
-            character.statusEffects['Taking Aim'].level = 2;
-          } else {
-            character.statusEffects['Taking Aim'].target = target;
-            character.statusEffects['Taking Aim'].level = 1;
-            character.statusEffects['Taking Aim'].startingRound = state.MML.GM.currentRound;
-          }
-          return MML.goToMenu(player, { message: character.name + ' aims at ' + target.name, buttons: ['End Action'] })
-            .then(function(player) {
-              return MML.endAction(player, character, action);
-            });
-        }
-      });
+    const holdAimRoll = MML.holdAimRoll(player, character, target);
+    if (MML.failure(holdAimRoll)) {
+      return await MML.missileAttackAction(player, character, action);
+    } else {
+      if (target.id === character.statusEffects['Taking Aim'].target.id) {
+        character.statusEffects['Taking Aim'].level = 2;
+      } else {
+        character.statusEffects['Taking Aim'].target = target;
+        character.statusEffects['Taking Aim'].level = 1;
+        character.statusEffects['Taking Aim'].startingRound = state.MML.GM.currentRound;
+      }
+      await MML.goToMenu(player, { message: character.name + ' aims at ' + target.name, buttons: ['End Action'] })
+      return MML.endAction(player, character, action);
+    }
   }
 };
 
-MML.reloadAction = function reloadAction(player, character, action) {
+MML.reloadAction = async function reloadAction(player, character, action) {
   var weapon = character.inventory[action.weapon._id];
   weapon.loaded++;
-  return MML.goToMenu(player, { message: character.name + ' reloads their ' + weapon.name + ' (' + weapon.loaded + '/' + weapon.reload + ')', buttons: ['End Action'] })
-    .then(function(player) {
-      return MML.endAction(player, character, action);
-    });
+  await MML.goToMenu(player, character.name + ' reloads their ' + weapon.name + ' (' + weapon.loaded + '/' + weapon.reload + ')', ['End Action']);
+  return MML.endAction(player, character, action);
 };
 
 MML.endAction = function endAction(player, character, action, targets) {
-  return function (rolls) {
-    character.spentInitiative = character.spentInitiative +
-      character.actionTempo +
-      (character.actionInitCostMod > -1 ? -1 : character.actionTempo + character.actionInitCostMod);
-    character.previousAction = MML.clone(character.action);
-    MML.updateCharacter(character);
-    _.each(action.targetArray || [], function(target) {
-      MML.updateCharacter(MML.characters[target]);
-    });
+  character.spentInitiative = character.spentInitiative +
+    character.actionTempo +
+    (character.actionInitCostMod > -1 ? -1 : character.actionTempo + character.actionInitCostMod);
+  character.previousAction = MML.clone(character.action);
+  MML.updateCharacter(character);
+  _.each(action.targetArray || [], function(target) {
+    MML.updateCharacter(MML.characters[target]);
+  });
 
-    if (character.initiative > 0) {
-      return MML.buildAction(player, character);
-    } else {
-      return player;
-    }
-  };
+  if (character.initiative > 0) {
+    return MML.buildAction(player, character);
+  } else {
+    return player;
+  }
 };

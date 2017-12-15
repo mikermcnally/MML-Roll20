@@ -1,8 +1,8 @@
 MML.displayMenu = function displayMenu(player, message, buttons) {
-  var toChat = '/w "' + player.name + '" &{template:charMenu} {{name=' + message + '}} ' +
+  var toChat = '/w "' + player.name +
+    '" &{template:charMenu} {{name=' + message + '}} ' +
     buttons.map(function(button) {
-      var noSpace = button.replace(/\s+/g, '');
-      return '{{' + noSpace + '=[' + button + '](!MML|' + button + ')}}';
+      return '{{' + button.replace(/\s+/g, '') + '=[' + button + '](!MML|' + button + ')}}';
     }).join(' ');
 
   sendChat(player.name, toChat, null, {
@@ -13,9 +13,9 @@ MML.displayMenu = function displayMenu(player, message, buttons) {
 
 MML.setMenuButtons = function setMenuButtons(player, buttons) {
   return new Promise(function(resolve, reject) {
-    player.buttonPressed = function(player) {
-      if (_.contains(buttons, player.pressedButton)) {
-        resolve(player.pressedButton);
+    player.buttonPressed = function(pressedButton, selectedIds) {
+      if (_.contains(buttons, pressedButton)) {
+        resolve({pressedButton, selectedIds});
       }
     };
   });
@@ -46,9 +46,9 @@ MML.displayRoll = function displayRoll(player, roll) {
 
 MML.setRollButtons = function setRollButtons(player) {
   return new Promise(function(resolve, reject) {
-    player.buttonPressed = function(player) {
-      if (player.pressedButton === 'acceptRoll' || (player.pressedButton.indexOf('changeRoll') > -1 && player.name === state.MML.GM.name)) {
-        resolve(player);
+    player.buttonPressed = function(pressedButton) {
+      if (pressedButton === 'acceptRoll' || (pressedButton.indexOf('changeRoll') > -1 && player.name === state.MML.GM.name)) {
+        resolve(pressedButton);
       }
     };
   });
@@ -60,10 +60,9 @@ MML.displayTargetSelection = function displayTargetSelection(player) {
 
 MML.selectTarget = function selectTarget(player) {
   return new Promise(function(resolve, reject) {
-    player.buttonPressed = function(player) {
-      if (player.pressedButton.indexOf('selectTarget') > -1) {
-        player.pressedButton = player.pressedButton.replace('selectTarget ', '');
-        resolve(player);
+    player.buttonPressed = function(pressedButton) {
+      if (pressedButton.indexOf('selectTarget') > -1) {
+        resolve(pressedButton.replace('selectTarget ', ''));
       }
     };
   });
@@ -124,15 +123,6 @@ MML.chooseSpellTargets = function chooseSpellTargets(player, character, action) 
     MML.getRadiusSpellTargets(parseInt(action.spell.target.replace('\' Radius', '')));
   } else {
     return [];
-  }
-};
-
-MML.initializeMenu = async function initializeMenu(player) {
-  await MML.setMenuButtons(player, ['initializeMenu']);
-  if (player.name === state.MML.GM.name) {
-    return MML.menuMainGm(player);
-  } else {
-    return MML.menuMainPlayer(player);
   }
 };
 
@@ -381,19 +371,6 @@ MML.menuselectDieSize = function menuselectDieSize(player, who) {
 
 MML.menuSelectDieSize = function menuselectDieSize(player) {
   MML.enterNumberOfDice(player);
-};
-
-MML.menuGmCombat = async function menuGmCombat(player) {
-  const message = 'Select tokens and begin.';
-  const buttons = ['Start Combat', 'Back'];
-
-  const pressedButton = await MML.goToMenu(player, message, buttons);
-  switch (pressedButton) {
-    case 'Start Combat':
-      return MML.startCombat(player);
-    case 'Back':
-      return MML.menuMainGm(player);
-  }
 };
 
 MML.menuGmNewItem = function menuGmNewItem(player, who) {
