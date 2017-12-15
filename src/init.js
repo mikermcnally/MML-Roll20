@@ -170,7 +170,6 @@ MML.init = function() {
 };
 
 MML.parseChat = function({who , content, selected, type}) {
-  console.log("GRASS TASTES BAD");
   MML.getPlayer(who);
   if (msg.type === 'api' && msg.content.indexOf('!MML|') !== -1) {
     var player = MML.players[msg.who.replace(' (GM)', '')];

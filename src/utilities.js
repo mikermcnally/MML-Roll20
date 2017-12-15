@@ -182,12 +182,13 @@ MML.getCharacterIdFromToken = function getCharacterIdFromToken(token) {
   }
 };
 
-MML.getCharacterToken = function getCharacterToken(character) {
+MML.getCharacterToken = function getCharacterToken(character_id) {
+  console.log(character_id);
   var tokens = findObjs({
     _pageid: Campaign().get('playerpageid'),
     _type: 'graphic',
     _subtype: 'token',
-    represents: character.id
+    represents: character_id
   });
   return tokens[0];
 };

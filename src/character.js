@@ -106,17 +106,17 @@ MML.moveDistance = function moveDistance(character, distance) {
   }
 };
 
-MML.setReady = function setReady(character, ready) {
+MML.setReady = function setReady(character_id, ready) {
   if (state.MML.GM.inCombat === true && ready === false) {
-    MML.getCharacterToken(character).set('tint_color', '#FF0000');
+    MML.getCharacterToken(character.id).set('tint_color', '#FF0000');
   } else {
-    MML.getCharacterToken(character).set('tint_color', 'transparent');
+    MML.getCharacterToken(character.id).set('tint_color', 'transparent');
   }
   character.ready = ready;
 };
 
 MML.setCombatVision = function setCombatVision(character) {
-  var token = MML.getCharacterToken(character);
+  var token = MML.getCharacterToken(character.id);
   if (state.MML.GM.inCombat || !_.has(character.statusEffects, 'Observing')) {
     token.set('light_losangle', character.fov);
     token.set('light_hassight', true);

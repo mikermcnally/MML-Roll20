@@ -397,7 +397,7 @@ function clickButton(button, selectedIds) {
       once('sendChat', function () {
         resolve(player);
       });
-      player.buttonPressed(_.extend(player, { pressedButton: button, selectedIds: selectedIds || [] }));
+      player.buttonPressed(button, selectedIds);
     });
   };
 }

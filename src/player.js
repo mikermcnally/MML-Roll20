@@ -1,31 +1,3 @@
-MML.displayMenu = function displayMenu(player, message, buttons) {
-  var toChat = '/w "' + player.name +
-    '" &{template:charMenu} {{name=' + message + '}} ' +
-    buttons.map(function(button) {
-      return '{{' + button.replace(/\s+/g, '') + '=[' + button + '](!MML|' + button + ')}}';
-    }).join(' ');
-
-  sendChat(player.name, toChat, null, {
-    noarchive: true
-  });
-  return player;
-};
-
-MML.setMenuButtons = function setMenuButtons(player, buttons) {
-  return new Promise(function(resolve, reject) {
-    player.buttonPressed = function(pressedButton, selectedIds) {
-      if (_.contains(buttons, pressedButton)) {
-        resolve({pressedButton, selectedIds});
-      }
-    };
-  });
-};
-
-MML.goToMenu = function goToMenu(player, message, buttons) {
-  MML.displayMenu(player, message, buttons);
-  return MML.setMenuButtons(player, buttons);
-};
-
 MML.displayGmRoll = function displayGmRoll(player, roll) {
   sendChat(player.name, '/w "' + player.name + '" &{template:rollMenuGM} {{title=' + roll.message + "}}");
   return player;

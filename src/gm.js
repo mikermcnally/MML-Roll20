@@ -1,26 +1,20 @@
-MML.startCombat = function startCombat(player) {
+MML.startCombat = function startCombat(selectedIds) {
   var gm = state.MML.GM;
-  var ids = player.selectedIds;
   gm.currentRound = 0;
-  gm.combatants = [];
-  if (ids.length > 0) {
-    gm.inCombat = true;
-    gm.combatants = ids.map(id => MML.characters[id]);
-    _.each(MML.players, function(player) {
-      player.combatants = player.characters.filter(character => ids.includes(character.id));
-    });
-    _.each(gm.combatants, function(character) {
-      MML.setReady(character, false);
-      MML.setCombatVision(character);
-    });
-    MML.setTurnOrder(gm.combatants);
-    Campaign().set('initiativepage', 'true');
-    return MML.newRound(gm);
-    // return MML.combatMenu(player);
-  } else {
-    sendChat('', '&{template:charMenu} {{name=Error}} {{message=No tokens selected}}');
-    return MML.goToMenu(player, MML.GmMenuCombat(player));
-  }
+  gm.inCombat = true;
+  gm.combatants = selectedIds.map(id => MML.characters[id]);
+  _.each(MML.players, function(player) {
+    player.combatants = player.characters.filter(character => selectedIds.includes(character.id));
+  });
+  _.each(gm.combatants, function(character) {
+    console.log("SHOW ME WHAT YOU GOT");
+    console.log(character);
+    MML.setReady(character, false);
+    MML.setCombatVision(character);
+  });
+  MML.setTurnOrder(gm.combatants);
+  Campaign().set('initiativepage', 'true');
+  return MML.newRound(gm);
 };
 
 MML.newRound = function newRound(gm) {
