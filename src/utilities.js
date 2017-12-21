@@ -183,7 +183,6 @@ MML.getCharacterIdFromToken = function getCharacterIdFromToken(token) {
 };
 
 MML.getCharacterToken = function getCharacterToken(character_id) {
-  console.log(character_id);
   var tokens = findObjs({
     _pageid: Campaign().get('playerpageid'),
     _type: 'graphic',

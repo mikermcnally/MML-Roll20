@@ -7,8 +7,6 @@ MML.startCombat = function startCombat(selectedIds) {
     player.combatants = player.characters.filter(character => selectedIds.includes(character.id));
   });
   _.each(gm.combatants, function(character) {
-    console.log("SHOW ME WHAT YOU GOT");
-    console.log(character);
     MML.setReady(character, false);
     MML.setCombatVision(character);
   });
@@ -90,7 +88,7 @@ MML.checkReady = function checkReady() {
 
 MML.displayThreatZones = function displayThreatZones(toggle) {
   _.each(state.MML.GM.combatants, function(character) {
-    var token = MML.getCharacterToken(character);
+    var token = MML.getCharacterToken(character.id);
     var radius1 = '';
     var radius2 = '';
     var color1 = '#FF0000';
@@ -111,7 +109,7 @@ MML.setTurnOrder = function setTurnOrder(combatants) {
   var turnorder = [];
   _.each(combatants, function (character) {
     turnorder.push({
-      id: MML.getCharacterToken(character).id,
+      id: MML.getCharacterToken(character.id).id,
       pr: character.initiative,
       custom: ''
     });

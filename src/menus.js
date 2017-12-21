@@ -68,38 +68,36 @@ MML.menuGmCombat = async function menuGmCombat(player) {
   }
 };
 
-MML.menuPrepareAction = function menuPrepareAction(player, character, action) {
-  return {
-    message: 'Prepare ' + character.name + '\'s action',
-    buttons: function() {
-      var buttons = ['Movement Only', 'Observe', 'Ready Item', 'Attack'];
+MML.prepareAction = async function prepareAction(player, character, action) {
+  const message = 'Prepare ' + character.name + '\'s action';
+  var buttons = ['Movement Only', 'Observe', 'Ready Item', 'Attack'];
 
-      if (!_.isUndefined(action.weapon) && MML.isRangedWeapon(action.weapon)) {
-        if (action.weapon.family !== 'MWM' || action.weapon.loaded === action.weapon.reload) {
-          buttons.push('Aim');
-        } else {
-          buttons.push('Reload');
-        }
-      }
+  if (!_.isUndefined(action.weapon) && MML.isRangedWeapon(action.weapon)) {
+    if (action.weapon.family !== 'MWM' || action.weapon.loaded === action.weapon.reload) {
+      buttons.push('Aim');
+    } else {
+      buttons.push('Reload');
+    }
+  }
 
-      if ((_.has(character.statusEffects, 'Holding') ||
-        (_.has(character.statusEffects, 'Grappled') && character.statusEffects['Grappled'].targets.length === 1)) &&
-        !_.has(character.statusEffects, 'Held') &&
-        !_.contains(action.modifiers, 'Release Opponent')
-      ) {
-        buttons.push('Release Opponent');
-      }
+  if ((_.has(character.statusEffects, 'Holding') ||
+    (_.has(character.statusEffects, 'Grappled') && character.statusEffects['Grappled'].targets.length === 1)) &&
+    !_.has(character.statusEffects, 'Held') &&
+    !_.contains(action.modifiers, 'Release Opponent')
+  ) {
+    buttons.push('Release Opponent');
+  }
 
-      if (character.spells.length > 0) {
-        buttons.push('Cast');
-      }
+  if (character.spells.length > 0) {
+    buttons.push('Cast');
+  }
 
-      if (!_.isUndefined(character.previousAction.spell) && character.previousAction.spell.actions > 0) {
-        buttons.push('Continue Casting');
-      }
-      return buttons;
-    }()
-  };
+  if (!_.isUndefined(character.previousAction.spell) && character.previousAction.spell.actions > 0) {
+    buttons.push('Continue Casting');
+  }
+
+  const {pressedButton, selectedIds} = await MML.goToMenu(player, message, buttons);
+  
 };
 
 MML.menuchooseAttackType = function menuchooseAttackType(player, character, action) {

@@ -5,10 +5,7 @@ MML.rollDice = async function rollDice(amount, size) {
     case '3d':
       break;
     default:
-      return Array(amount)
-        .fill()
-        .map(() => randomInteger(size))
-        .reduce((sum, value) => sum + value, 0);
+      return Array.from({length: amount}, () => randomInteger(size)).reduce((sum, value) => sum + value, 0);
   }
 };
 

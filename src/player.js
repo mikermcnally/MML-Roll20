@@ -71,7 +71,7 @@ MML.getAdditionalTarget = function getAdditionalTarget(target) {
 
 MML.getRadiusSpellTargets = function getRadiusSpellTargets(player, radius) {
   state.MML.GM.currentAction.parameters.spellMarker = 'spellMarkerCircle';
-  var token = MML.getCharacterToken(this);
+  var token = MML.getCharacterToken(this.id);
   var graphic = createObj('graphic', {
     name: 'spellMarkerCircle',
     _pageid: token.get('_pageid'),
@@ -96,13 +96,6 @@ MML.chooseSpellTargets = function chooseSpellTargets(player, character, action) 
   } else {
     return [];
   }
-};
-
-MML.prepareAction = function prepareAction(player, character, action) {
-  return MML.goToMenu(player, MML.menuPrepareAction(player, character, action))
-    .then(function(player) {
-      return [player, character, action];
-    });
 };
 
 MML.prepareAttackAction = function prepareAttackAction([player, character, action]) {
@@ -250,13 +243,10 @@ MML.prepareCharacters = function prepareCharacters(player) {
   return MML.prepareNextCharacter(player, 0);
 };
 
-MML.prepareNextCharacter = function prepareNextCharacter(player, index) {
+MML.prepareNextCharacter = async function prepareNextCharacter(player, index) {
+  await MML.buildAction(player, player.combatants[index]);
   if (index < player.combatants.length) {
-    return MML.buildAction(player, player.combatants[index])
-      .then(function(player) {
-        return MML.prepareNextCharacter(player, index + 1);
-      })
-      .catch(log);
+    return MML.prepareNextCharacter(player, index + 1);
   } else {
     return player;
   }

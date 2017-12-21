@@ -83,7 +83,7 @@ MML.setAction = function setAction(character, action) {
 };
 
 MML.displayMovement = function displayMovement(character) {
-  var token = MML.getCharacterToken(character);
+  var token = MML.getCharacterToken(character.id);
   var path = getObj('path', character.pathID);
 
   if (!_.isUndefined(path)) {
@@ -1134,8 +1134,8 @@ MML.buildHpAttribute = function buildHpAttribute(character) {
 };
 
 MML.getDistanceBetweenCharacters = function getDistanceBetweenCharacters(character, target) {
-  var charToken = MML.getCharacterToken(character);
-  var targetToken = MML.getCharacterToken(target);
+  var charToken = MML.getCharacterToken(character.id);
+  var targetToken = MML.getCharacterToken(target.id);
 
   return MML.pixelsToFeet(MML.getDistanceBetweenTokens);
 };
@@ -1412,7 +1412,7 @@ MML.getAoESpellModifier = function getAoESpellModifier(spellMarker, spell) {
 MML.getRangeCastingModifier = function getRangeCastingModifier(caster, targets, spell) {
   var mod = 0;
   if (['Caster', 'Touch', 'Single'].indexOf(spell.target) === -1) {
-    var distance = MML.getDistanceBetweenTokens(MML.getCharacterToken(caster), MML.getSpellMarkerToken(spell.name));
+    var distance = MML.getDistanceBetweenTokens(MML.getCharacterToken(caster.id), MML.getSpellMarkerToken(spell.name));
     if (distance > spell.range) {
       mod += Math.round(((spell.range - distance) / distance) * 10);
     }

@@ -75,7 +75,7 @@ function runTests() {
         var character = createCharacter(player, 'test');
         var itemId = addItemToInventory(character, 'Hand Axe');
         MML.equipItem(character, itemId, 'Right Hand');
-        startTestCombat(player, _.pluck(MML.characters, 'name'))
+        startTestCombat(player, _.pluck(MML.characters, 'id'))
           .then(clickButton('Attack'))
           .then(clickButton('Standard'))
           .then(clickButton('None'))
@@ -90,7 +90,7 @@ function runTests() {
       it('Release Opponent', function() {
         var character = createCharacter(player, 'test');
         character.statusEffects['Holding'] = {};
-        startTestCombat(player, _.pluck(MML.characters, 'name'))
+        startTestCombat(player, _.pluck(MML.characters, 'id'))
           .then(clickButton('Release Opponent'))
           .then(clickButton('Attack'))
           .then(clickButton('Punch'))
@@ -108,7 +108,7 @@ function runTests() {
         addItemToInventory(character, 'Hand Axe');
         addItemToInventory(character, 'Hand Axe', 'Excellent');
         addItemToInventory(character, 'Hand Axe', 'Poor');
-        startTestCombat(player, _.pluck(MML.characters, 'name'))
+        startTestCombat(player, _.pluck(MML.characters, 'id'))
           .then(clickButton('Ready Item'))
           .then(clickButton('Hand Axe'))
           .then(clickButton('Right Hand'))
@@ -137,7 +137,7 @@ function runTests() {
 
       it.only('Checks that start combat works', function() {
         createTestCharacters(player, 3);
-        return startTestCombat(player, _.pluck(MML.characters, 'name'))
+        return startTestCombat(player, _.pluck(MML.characters, 'id'))
           .then(setActionPunchAttack)
           .then(clickButton('Roll'))
           // .then(clickButton('changeRoll eleventy'))
