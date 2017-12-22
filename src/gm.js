@@ -15,19 +15,41 @@ MML.startCombat = function startCombat(selectedIds) {
   return MML.newRound(gm);
 };
 
-MML.newRound = function newRound(gm) {
-  gm.currentRound++;
-  gm.roundStarted = false;
-  gm.combatants = gm.combatants.map(character => MML.newRoundUpdate(character));
+MML.newRound = async function newRound(gm) {
+  try {
+    gm.currentRound++;
+    gm.roundStarted = false;
+    gm.combatants = gm.combatants.map(character => MML.newRoundUpdate(character));
 
-  return Promise.all(_.values(MML.players).map(player => MML.prepareCharacters(player)))
-    .then(function (players) {
-      return MML.startRound(gm.player);
-    });
+    await Promise.all(_.values(MML.players).map(player => MML.prepareCharacters(player)));
+    return await MML.startRound(gm);
+  } catch (err) {
+    log(err)
+  }
 };
 
-MML.endCombat = function endCombat() {
-  var gm = state.MML.GM;
+MML.startRound = async function startRound(gm) {
+  const buttonPressed = await MML.goToMenu(gm.player, {
+    message: 'Start round when all characters are ready.',
+    buttons: ['Start Round', 'End Combat']
+  });
+  if (buttonPressed === 'Start Round') {
+    if (MML.checkReady()) {
+      gm.roundStarted = true;
+      _.each(gm.combatants, function(character) {
+        character.movementAvailable = character.movementRatio;
+      });
+      return MML.nextAction(gm);
+    } else {
+      sendChat('Error', 'Not All Characters Are Ready');
+      return await MML.startRound(gm);
+    }
+  } else {
+    return MML.endCombat(gm);
+  }
+};
+
+MML.endCombat = function endCombat(gm) {
   if (gm.combatants.length > 0) {
     _.each(gm.combatants, function(id) {
       MML.characters[id].setReady(true);
@@ -39,8 +61,7 @@ MML.endCombat = function endCombat() {
   }
 };
 
-MML.nextAction = function nextAction() {
-  var gm = state.MML.GM;
+MML.nextAction = function nextAction(gm) {
   MML.setTurnOrder(gm.combatants);
   if (MML.checkReady()) {
     var character = gm.combatants[0];

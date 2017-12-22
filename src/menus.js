@@ -68,105 +68,68 @@ MML.menuGmCombat = async function menuGmCombat(player) {
   }
 };
 
-MML.prepareAction = async function prepareAction(player, character, action) {
-  const message = 'Prepare ' + character.name + '\'s action';
-  var buttons = ['Movement Only', 'Observe', 'Ready Item', 'Attack'];
+MML.menuChooseAttackType = function menuChooseAttackType(player, character, action) {
+  var buttons = [];
+  var weapon = action.weapon;
+  var notSomeKindOfGrappled = _.isEmpty(_.intersection(_.keys(character.statusEffects),
+    ['Grappled',
+    'Held',
+    'Taken Down',
+    'Pinned',
+    'Overborne']));
 
-  if (!_.isUndefined(action.weapon) && MML.isRangedWeapon(action.weapon)) {
-    if (action.weapon.family !== 'MWM' || action.weapon.loaded === action.weapon.reload) {
-      buttons.push('Aim');
-    } else {
-      buttons.push('Reload');
+  if (weapon !== 'unarmed' &&
+    (weapon.family !== 'MWM' || weapon.loaded === weapon.reload) &&
+    (notSomeKindOfGrappled || (!MML.isRangedWeapon(weapon) && weapon.rank < 2))
+  ) {
+    buttons.push('Standard');
+    if (MML.isRangedWeapon(weapon)) {
+      buttons.push('Shoot From Cover');
+    // } else {
+    //   buttons.push('Sweep Attack');
     }
   }
 
-  if ((_.has(character.statusEffects, 'Holding') ||
-    (_.has(character.statusEffects, 'Grappled') && character.statusEffects['Grappled'].targets.length === 1)) &&
-    !_.has(character.statusEffects, 'Held') &&
-    !_.contains(action.modifiers, 'Release Opponent')
-  ) {
-    buttons.push('Release Opponent');
-  }
-
-  if (character.spells.length > 0) {
-    buttons.push('Cast');
-  }
-
-  if (!_.isUndefined(character.previousAction.spell) && character.previousAction.spell.actions > 0) {
-    buttons.push('Continue Casting');
-  }
-
-  const {pressedButton, selectedIds} = await MML.goToMenu(player, message, buttons);
-  
-};
-
-MML.menuchooseAttackType = function menuchooseAttackType(player, character, action) {
-  return {
-    message: 'Attack Menu',
-    buttons: function() {
-      var buttons = [];
-      var weapon = action.weapon;
-      var notSomeKindOfGrappled = _.isEmpty(_.intersection(_.keys(character.statusEffects),
-        ['Grappled',
-        'Held',
-        'Taken Down',
-        'Pinned',
-        'Overborne']));
-
-      if (weapon !== 'unarmed' &&
-        (weapon.family !== 'MWM' || weapon.loaded === weapon.reload) &&
-        (notSomeKindOfGrappled || (!MML.isRangedWeapon(weapon) && weapon.rank < 2))
-      ) {
-        buttons.push('Standard');
-        if (MML.isRangedWeapon(weapon)) {
-          buttons.push('Shoot From Cover');
-        // } else {
-        //   buttons.push('Sweep Attack');
-        }
+  buttons.push('Punch');
+  buttons.push('Kick');
+  if (!_.contains(action.modifiers, 'Release Opponent')) {
+    if (!MML.hasStatusEffects(character, ['Grappled', 'Holding', 'Held', 'Taken Down', 'Pinned', 'Overborne'])) {
+      buttons.push('Grapple');
+    }
+    if ((MML.hasStatusEffects(character, ['Grappled', 'Holding', 'Held']) && character.movementType === 'Prone') ||
+      (MML.hasStatusEffects(character, ['Taken Down', 'Overborne']) && !_.has(character.statusEffects, 'Pinned'))
+    ) {
+      buttons.push('Regain Feet');
+    }
+    if (!MML.hasStatusEffects(character, ['Holding', 'Held', 'Pinned']) &&
+      (!_.has(character.statusEffects, 'Grappled') || character.statusEffects['Grappled'].targets.length === 1)
+    ) {
+      buttons.push('Place a Hold');
+    }
+    if (MML.hasStatusEffects(character, ['Held', 'Pinned'])) {
+      buttons.push('Break a Hold');
+    }
+    if ((_.has(character.statusEffects, 'Grappled')) && !MML.hasStatusEffects(character, ['Held', 'Pinned'])) {
+      buttons.push('Break Grapple');
+    }
+    if ((_.has(character.statusEffects, 'Holding') ||
+        (_.has(character.statusEffects, 'Grappled') && character.statusEffects['Grappled'].targets.length === 1) ||
+        (_.has(character.statusEffects, 'Held') && character.statusEffects['Held'].targets.length === 1)) &&
+      !(_.has(character.statusEffects, 'Grappled') && _.has(character.statusEffects, 'Held')) &&
+      character.movementType !== 'Prone'
+    ) {
+      buttons.push('Takedown');
+    }
+    if (MML.hasStatusEffects(character, ['Grappled', 'Holding', 'Held', 'Taken Down', 'Pinned', 'Overborne'])) {
+      if (_.has(character.statusEffects, 'Held') && _.filter(character.statusEffects['Held'].targets, function(target) {
+          return target.bodyPart === 'Head';
+        }).length === 0) {
+        buttons.push('Head Butt');
       }
-
-      buttons.push('Punch');
-      buttons.push('Kick');
-      if (!_.contains(action.modifiers, 'Release Opponent')) {
-        if (!MML.hasStatusEffects(character, ['Grappled', 'Holding', 'Held', 'Taken Down', 'Pinned', 'Overborne'])) {
-          buttons.push('Grapple');
-        }
-        if ((MML.hasStatusEffects(character, ['Grappled', 'Holding', 'Held']) && character.movementType === 'Prone') ||
-          (MML.hasStatusEffects(character, ['Taken Down', 'Overborne']) && !_.has(character.statusEffects, 'Pinned'))
-        ) {
-          buttons.push('Regain Feet');
-        }
-        if (!MML.hasStatusEffects(character, ['Holding', 'Held', 'Pinned']) &&
-          (!_.has(character.statusEffects, 'Grappled') || character.statusEffects['Grappled'].targets.length === 1)
-        ) {
-          buttons.push('Place a Hold');
-        }
-        if (MML.hasStatusEffects(character, ['Held', 'Pinned'])) {
-          buttons.push('Break a Hold');
-        }
-        if ((_.has(character.statusEffects, 'Grappled')) && !MML.hasStatusEffects(character, ['Held', 'Pinned'])) {
-          buttons.push('Break Grapple');
-        }
-        if ((_.has(character.statusEffects, 'Holding') ||
-            (_.has(character.statusEffects, 'Grappled') && character.statusEffects['Grappled'].targets.length === 1) ||
-            (_.has(character.statusEffects, 'Held') && character.statusEffects['Held'].targets.length === 1)) &&
-          !(_.has(character.statusEffects, 'Grappled') && _.has(character.statusEffects, 'Held')) &&
-          character.movementType !== 'Prone'
-        ) {
-          buttons.push('Takedown');
-        }
-        if (MML.hasStatusEffects(character, ['Grappled', 'Holding', 'Held', 'Taken Down', 'Pinned', 'Overborne'])) {
-          if (_.has(character.statusEffects, 'Held') && _.filter(character.statusEffects['Held'].targets, function(target) {
-              return target.bodyPart === 'Head';
-            }).length === 0) {
-            buttons.push('Head Butt');
-          }
-          buttons.push('Bite');
-        }
-      }
-      return buttons;
-    }()
-  };
+      buttons.push('Bite');
+    }
+  }
+  return buttons;
 };
 
 MML.menuChooseMeleeDefense = function menuChooseMeleeDefense(character, dodgeMods, blockMods, attackerWeapon) {

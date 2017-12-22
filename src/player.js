@@ -107,20 +107,18 @@ MML.prepareAttackAction = function prepareAttackAction([player, character, actio
     .then(MML.chooseDamageType(player, character));
 };
 
-MML.chooseAttackType = function chooseAttackType(player, character, action) {
-  return MML.goToMenu(player, MML.menuchooseAttackType(player, character, action))
-    .then(function(player) {
-      if (player.pressedButton === 'Shoot From Cover') {
-        action.modifiers.push('Shoot From Cover');
-      } else if (player.pressedButton !== 'Standard') {
-        action.attackType = player.pressedButton;
-      }
+MML.chooseAttackType = async function chooseAttackType(player, character, action) {
+  const pressedButton = await MML.goToMenu(player, 'Attack Menu', MML.menuChooseAttackType(player, character, action));
+  if (pressedButton === 'Shoot From Cover') {
+    action.modifiers.push('Shoot From Cover');
+  } else if (player.pressedButton !== 'Standard') {
+    action.attackType = pressedButton;
+  }
 
-      if (MML.isUnarmedAction(action)) {
-        action.weapon = MML.unarmedAttacks[action.attackType];
-      }
-      return action;
-    });
+  if (MML.isUnarmedAction(action)) {
+    action.weapon = MML.unarmedAttacks[action.attackType];
+  }
+  return action;
 };
 
 MML.chooseCalledShot = function chooseCalledShot(player, character) {
@@ -244,7 +242,8 @@ MML.prepareCharacters = function prepareCharacters(player) {
 };
 
 MML.prepareNextCharacter = async function prepareNextCharacter(player, index) {
-  await MML.buildAction(player, player.combatants[index]);
+  var character = player.combatants[index];
+  MML.setAction(character, await MML.prepareAction(player, character));
   if (index < player.combatants.length) {
     return MML.prepareNextCharacter(player, index + 1);
   } else {
@@ -589,24 +588,6 @@ MML.displayItemOptions = function displayItemOptions(player, who, itemId) {
 
   player.buttons = buttons;
   MML.displayMenu(player);
-};
-
-MML.startRound = function startRound(player) {
-  return MML.goToMenu(player, {
-      message: 'Start round when all characters are ready.',
-      buttons: ['Start Round', 'End Combat']
-    })
-    .then(function() {
-      var gm = state.MML.GM;
-
-      if (MML.checkReady()) {
-        gm.roundStarted = true;
-        _.each(gm.combatants, function(character) {
-          character.movementAvailable = character.movementRatio;
-        });
-        return MML.nextAction();
-      }
-    });
 };
 
 MML.chooseSpell = function chooseSpell([player, character, action]) {
