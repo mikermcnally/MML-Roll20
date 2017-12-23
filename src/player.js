@@ -98,90 +98,55 @@ MML.chooseSpellTargets = function chooseSpellTargets(player, character, action) 
   }
 };
 
-MML.prepareAttackAction = function prepareAttackAction([player, character, action]) {
+MML.prepareAttackAction = async function prepareAttackAction(player, character, action) {
   action.ts = Date.now();
   action.name = 'Attack';
-  return MML.chooseAttackType(player, character, action)
-    .then(MML.chooseCalledShot(player, character))
-    .then(MML.chooseAttackStance(player, character))
-    .then(MML.chooseDamageType(player, character));
-};
+  console.log("SHOW ME WHAT YOU GOT");
+  const attackType = await MML.chooseAttackType(player, character, action);
+  action.attackType = attackType;
 
-MML.chooseAttackType = async function chooseAttackType(player, character, action) {
-  const pressedButton = await MML.goToMenu(player, 'Attack Menu', MML.menuChooseAttackType(player, character, action));
-  if (pressedButton === 'Shoot From Cover') {
+  if (attackType === 'Shoot From Cover') {
     action.modifiers.push('Shoot From Cover');
-  } else if (player.pressedButton !== 'Standard') {
-    action.attackType = pressedButton;
   }
 
-  if (MML.isUnarmedAction(action)) {
-    action.weapon = MML.unarmedAttacks[action.attackType];
+  if (!_.contains([
+    'Grapple',
+    'Break a Hold',
+    'Break Grapple',
+    'Takedown',
+    'Regain Feet'],
+    action.attackType)
+  ) {
+    const calledShot = MML.chooseCalledShot(player);
+    if (calledShot !== 'None') {
+      action.modifiers.push(calledShot);
+    }
   }
-  return action;
-};
-
-MML.chooseCalledShot = function chooseCalledShot(player, character) {
-  return function (action) {
-    return MML.goToMenu(player, {
-        message: 'Choose Called Shot',
-        buttons: ['None', 'Body Part', 'Specific Hit Position']
-      })
-      .then(function(player) {
-        if (player.pressedButton !== 'None') {
-          action.modifiers.push(player.pressedButton);
-        }
-        return action;
-      });
-  };
-};
-
-MML.chooseAttackStance = function chooseAttackStance(player, character) {
-  return function (action) {
-    return MML.goToMenu(player, {
-        message: 'Choose Attack Stance',
-        buttons: ['Neutral', 'Defensive', 'Aggressive']
-      })
-      .then(function(player) {
-        switch (player.pressedButton) {
-          case 'Defensive':
-            action.modifiers.push('Defensive Stance');
-            break;
-          case 'Neutral':
-            break;
-          case 'Aggressive':
-            action.modifiers.push('Aggressive Stance');
-            break;
-        }
-        return action;
-      });
-  };
-};
-
-MML.chooseDamageType = function chooseDamageType(player, character) {
-  return function (action) {
-    var weapon = action.weapon;
-    if (!MML.isUnarmedAction(action)) {
-      if (weapon.secondaryType !== '') {
-        return MML.goToMenu(player, {
-            message: 'Choose a Damage Type',
-            buttons: ['Primary', 'Secondary']
-          })
-          .then(function (player) {
-            if (player.pressedButton === 'Secondary') {
-              _.extend(weapon, {
-                damageType: weapon.secondaryType,
-                task: weapon.secondaryTask,
-                damage: weapon.secondaryDamage
-              });
-            } else {
-              _.extend(weapon, {
-                damageType: weapon.primaryType,
-                task: weapon.primaryTask,
-                damage: weapon.primaryDamage
-              });
-            }
-          });
+  if (!state.MML.GM.roundStarted) {
+    const attackStance = await MML.chooseAttackStance(player);
+    switch (attackStance) {
+      case 'Defensive':
+        action.modifiers.push('Defensive Stance');
+        break;
+      case 'Neutral':
+        break;
+      case 'Aggressive':
+        action.modifiers.push('Aggressive Stance');
+        break;
+    }
+  }
+  if (!MML.isUnarmedAction(action)) {
+    action.weapon = MML.unarmedAttacks[attackType];
+  } else {
+    const weapon = action.weapon;
+    if (weapon.secondaryType !== '') {
+      const damageType = await MML.chooseDamageType();
+      if (damageType === 'Secondary') {
+        _.extend(weapon, {
+          damageType: weapon.secondaryType,
+          task: weapon.secondaryTask,
+          damage: weapon.secondaryDamage
+        });
       } else {
         _.extend(weapon, {
           damageType: weapon.primaryType,
@@ -189,11 +154,97 @@ MML.chooseDamageType = function chooseDamageType(player, character) {
           damage: weapon.primaryDamage
         });
       }
+    } else {
+      _.extend(weapon, {
+        damageType: weapon.primaryType,
+        task: weapon.primaryTask,
+        damage: weapon.primaryDamage
+      });
     }
-    return action;
-  };
+  }
 };
-MML.chooseMeleeDefense = function chooseMeleeDefense(player, character, dodgeMods, blockMods, attackerWeapon) {
+
+MML.chooseAttackType = async function chooseAttackType(player, character, action) {
+  var buttons = [];
+  var weapon = action.weapon;
+  var notSomeKindOfGrappled = _.isEmpty(_.intersection(_.keys(character.statusEffects),
+    ['Grappled',
+    'Held',
+    'Taken Down',
+    'Pinned',
+    'Overborne']));
+
+  if (weapon !== 'unarmed' &&
+    (weapon.family !== 'MWM' || weapon.loaded === weapon.reload) &&
+    (notSomeKindOfGrappled || (!MML.isRangedWeapon(weapon) && weapon.rank < 2))
+  ) {
+    buttons.push('Standard');
+    if (MML.isRangedWeapon(weapon)) {
+      buttons.push('Shoot From Cover');
+    // } else {
+    //   buttons.push('Sweep Attack');
+    }
+  }
+
+  buttons.push('Punch');
+  buttons.push('Kick');
+  if (!_.contains(action.modifiers, 'Release Opponent')) {
+    if (!MML.hasStatusEffects(character, ['Grappled', 'Holding', 'Held', 'Taken Down', 'Pinned', 'Overborne'])) {
+      buttons.push('Grapple');
+    }
+    if ((MML.hasStatusEffects(character, ['Grappled', 'Holding', 'Held']) && character.movementType === 'Prone') ||
+      (MML.hasStatusEffects(character, ['Taken Down', 'Overborne']) && !_.has(character.statusEffects, 'Pinned'))
+    ) {
+      buttons.push('Regain Feet');
+    }
+    if (!MML.hasStatusEffects(character, ['Holding', 'Held', 'Pinned']) &&
+      (!_.has(character.statusEffects, 'Grappled') || character.statusEffects['Grappled'].targets.length === 1)
+    ) {
+      buttons.push('Place a Hold');
+    }
+    if (MML.hasStatusEffects(character, ['Held', 'Pinned'])) {
+      buttons.push('Break a Hold');
+    }
+    if ((_.has(character.statusEffects, 'Grappled')) && !MML.hasStatusEffects(character, ['Held', 'Pinned'])) {
+      buttons.push('Break Grapple');
+    }
+    if ((_.has(character.statusEffects, 'Holding') ||
+        (_.has(character.statusEffects, 'Grappled') && character.statusEffects['Grappled'].targets.length === 1) ||
+        (_.has(character.statusEffects, 'Held') && character.statusEffects['Held'].targets.length === 1)) &&
+      !(_.has(character.statusEffects, 'Grappled') && _.has(character.statusEffects, 'Held')) &&
+      character.movementType !== 'Prone'
+    ) {
+      buttons.push('Takedown');
+    }
+    if (MML.hasStatusEffects(character, ['Grappled', 'Holding', 'Held', 'Taken Down', 'Pinned', 'Overborne'])) {
+      if (_.has(character.statusEffects, 'Held') && _.filter(character.statusEffects['Held'].targets, function(target) {
+          return target.bodyPart === 'Head';
+        }).length === 0) {
+        buttons.push('Head Butt');
+      }
+      buttons.push('Bite');
+    }
+  }
+  const {pressedButton, selectedIds} = await MML.goToMenu(player, 'Attack Menu', buttons);
+  return pressedButton;
+};
+
+MML.chooseCalledShot = async function chooseCalledShot(player) {
+  const {pressedButton, selectedIds} = await MML.goToMenu(player, 'Choose Called Shot', ['None', 'Body Part', 'Specific Hit Position']);
+  return pressedButton;
+};
+
+MML.chooseAttackStance = async function chooseAttackStance(player) {
+  const {pressedButton, selectedIds} = await MML.goToMenu(player, 'Choose Attack Stance', ['Neutral', 'Defensive', 'Aggressive']);
+  return pressedButton;
+};
+
+MML.chooseDamageType = async function chooseDamageType(player) {
+  const {pressedButton, selectedIds} = await MML.goToMenu(player, 'Choose a Damage Type', ['Primary', 'Secondary']);
+  return pressedButton;
+};
+
+MML.chooseMeleeDefense = async function chooseMeleeDefense(player, character, dodgeMods, blockMods, attackerWeapon) {
   return MML.goToMenu(player, MML.menuChooseMeleeDefense(character, dodgeMods, blockMods, attackerWeapon))
     .then(function(player) {
       switch (player.pressedButton) {
@@ -243,7 +294,8 @@ MML.prepareCharacters = function prepareCharacters(player) {
 
 MML.prepareNextCharacter = async function prepareNextCharacter(player, index) {
   var character = player.combatants[index];
-  MML.setAction(character, await MML.prepareAction(player, character));
+  await MML.prepareAction(player, character);
+  // MML.setAction(character, await MML.prepareAction(player, character));
   if (index < player.combatants.length) {
     return MML.prepareNextCharacter(player, index + 1);
   } else {

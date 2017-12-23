@@ -24,7 +24,7 @@ MML.newRound = async function newRound(gm) {
     await Promise.all(_.values(MML.players).map(player => MML.prepareCharacters(player)));
     return await MML.startRound(gm);
   } catch (err) {
-    log(err)
+    log(err.stack)
   }
 };
 

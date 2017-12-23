@@ -33,7 +33,7 @@ MML.prepareAction = async function prepareAction(player, character) {
       return [player, character, action];
     }
   } catch (err) {
-    log(err);
+    log(err.stack);
   }
 };
 
@@ -62,7 +62,7 @@ MML.buildAction = async function buildAction(player, character, action) {
     case 'Movement Only':
       return _.extend(action, { ts: Date.now(), name: 'Movement Only' });
     case 'Attack':
-      return await MML.prepareAttackAction([player, character, action]);
+      return await MML.prepareAttackAction(player, character, action);
     case 'Ready Item':
       const itemArray = await MML.readyItem(player, character, action);
       action.items = itemArray;
