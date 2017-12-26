@@ -68,18 +68,6 @@ MML.menuGmCombat = async function menuGmCombat(player) {
   }
 };
 
-MML.menuChooseMeleeDefense = function menuChooseMeleeDefense(character, dodgeMods, blockMods, attackerWeapon) {
-  var message = 'How will ' + character.name + ' defend?';
-  var buttons = ['Dodge: ' + MML.sumModifiers(dodgeMods) + '%', 'Take it'];
-  if (!MML.isUnarmed(character) || attackerWeapon.family === "Unarmed") {
-    buttons.unshift('Block: ' + MML.sumModifiers(blockMods) + '%');
-  }
-  return {
-    message: message,
-    buttons: buttons
-  };
-};
-
 MML.menuassignStatusEffect = function menuassignStatusEffect(player, character) {
   var message = 'Choose a Status Effect: ';
   var buttons = [];
@@ -152,66 +140,4 @@ MML.menuchooseMetaMagic = function menuchooseMetaMagic(action) {
     }
   });
   return {message: message, buttons: buttons};
-};
-
-MML.menucombatMovement = function menucombatMovement(player, character) {
-  var message = 'Move ' + character.name + '.';
-  var buttons = ['Prone', 'Stalk', 'Crawl', 'Walk', 'Jog', 'Run', 'End Movement'];
-  return {
-    message: message,
-    buttons: buttons
-  };
-};
-
-MML.menufinalizeAction = function menufinalizeAction(player, character, action) {
-  var message;
-  var buttons;
-  if (state.MML.GM.roundStarted === true) {
-    message = 'Accept or edit action for ' + character.name;
-    buttons = [
-      'Accept',
-      'Edit Action'
-    ];
-  } else if (_.has(character.statusEffects, 'Stunned')) {
-    message = character.name + ' is stunned and can only move. Roll initiative';
-    buttons = [
-      'Roll'
-    ];
-  } else {
-    message = 'Roll initiative or edit action for ' + character.name;
-    buttons = [
-      'Roll',
-      'Edit Action'
-    ];
-  }
-  return {
-    message: message,
-    buttons: buttons
-  };
-};
-
-MML.menustartAction = function menustartAction(player, character, validAction) {
-  var message;
-  var buttons = ['Movement Only'];
-  if (_.has(character.statusEffects, 'Stunned') || _.has(character.statusEffects, 'Dodged This Round')) {
-    message = character.name + ' cannot act.';
-  } else if (validAction) {
-    if (character.initiative - 10 > 0) {
-      message = 'Start or change ' + character.name + '\'s action';
-      buttons.unshift('Change Action');
-      buttons.unshift('Start Action');
-    } else {
-      message = 'Start ' + character.name + '\'s action';
-      buttons.unshift('Start Action');
-    }
-  } else {
-    message = character.name + '\'s action no longer valid.';
-    if (character.initiative - 10 > 0) {
-      buttons.unshift('Change Action');
-    }
-  }
-  return {
-    message: message,
-    buttons: buttons
-  };
 };

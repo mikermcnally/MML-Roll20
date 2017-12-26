@@ -29,17 +29,15 @@ MML.newRound = async function newRound(gm) {
 };
 
 MML.startRound = async function startRound(gm) {
-  const buttonPressed = await MML.goToMenu(gm.player, {
-    message: 'Start round when all characters are ready.',
-    buttons: ['Start Round', 'End Combat']
-  });
-  if (buttonPressed === 'Start Round') {
-    if (MML.checkReady()) {
+  const {pressedButton} = await MML.goToMenu(gm.player, 'Start round when all characters are ready.', ['Start Round', 'End Combat']);
+
+  if (pressedButton === 'Start Round') {
+    if (MML.checkReady(gm.combatants)) {
       gm.roundStarted = true;
       _.each(gm.combatants, function(character) {
         character.movementAvailable = character.movementRatio;
       });
-      return MML.nextAction(gm);
+      return await MML.nextAction(gm);
     } else {
       sendChat('Error', 'Not All Characters Are Ready');
       return await MML.startRound(gm);
@@ -51,9 +49,9 @@ MML.startRound = async function startRound(gm) {
 
 MML.endCombat = function endCombat(gm) {
   if (gm.combatants.length > 0) {
-    _.each(gm.combatants, function(id) {
-      MML.characters[id].setReady(true);
-      MML.characters[id].setCombatVision();
+    _.each(gm.combatants, function(character) {
+      character.setReady(true);
+      character.setCombatVision();
     });
     gm.inCombat = false;
     gm.combatants = [];
@@ -61,15 +59,15 @@ MML.endCombat = function endCombat(gm) {
   }
 };
 
-MML.nextAction = function nextAction(gm) {
+MML.nextAction = async function nextAction(gm) {
   MML.setTurnOrder(gm.combatants);
-  if (MML.checkReady()) {
+  if (MML.checkReady(gm.combatants)) {
     var character = gm.combatants[0];
     if (character.initiative > 0) {
       gm.actor = character.id;
-      return MML.startAction(character.player, character, MML.validateAction(character))
-        .then(MML.nextAction)
-        .catch(log);
+      await MML.startAction(character.player, character, MML.validateAction(character));
+      console.log("GRASS TASTES BAD");
+      return await MML.nextAction(gm);
     } else {
       return MML.newRound(gm);
     }
@@ -101,8 +99,8 @@ MML.setTargets = function setTargets() {
   this.currentTarget = this.targets[0];
 };
 
-MML.checkReady = function checkReady() {
-  return _.every(state.MML.GM.combatants, function (character) {
+MML.checkReady = function checkReady(combatants) {
+  return _.every(combatants, function (character) {
     return character.ready;
   });
 };

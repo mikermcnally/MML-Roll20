@@ -106,7 +106,7 @@ MML.moveDistance = function moveDistance(character, distance) {
   }
 };
 
-MML.setReady = function setReady(character_id, ready) {
+MML.setReady = function setReady(character, ready) {
   if (state.MML.GM.inCombat === true && ready === false) {
     MML.getCharacterToken(character.id).set('tint_color', '#FF0000');
   } else {

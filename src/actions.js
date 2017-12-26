@@ -8,30 +8,16 @@ MML.prepareAction = async function prepareAction(player, character) {
 
     if (_.has(character.statusEffects, 'Stunned')) {
       MML.applyStatusEffects(character);
-      action.name = 'Movement Only';
-      return await MML.finalizeAction(player, character, action);
+      _.extend(action, { ts: Date.now(), name: 'Movement Only' });
+      await MML.finalizeAction(player, character, action);
     } else if (character.situationalInitBonus !== 'No Combat') {
       action = await MML.buildAction(player, character, action);
-      const pressedButton = await MML.finalizeAction(player, character, action);
-      switch (pressedButton) {
-        case 'Roll':
-          MML.setAction(character, action);
-          return MML.initiativeRoll(player, character, action);
-        case 'Edit Action':
-          return MML.buildAction(player, character, {
-            ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
-            modifiers: [],
-            weapon: MML.getEquippedWeapon(character)
-          });
-        case 'Accept':
-          MML.setAction(character, action);
-          return player;
-      }
+      await MML.finalizeAction(player, character, action);
     } else {
-      MML.setReady(character, true);
-      action.name = 'No Combat';
-      return [player, character, action];
+      _.extend(action, { ts: Date.now(), name: 'No Combat' });
     }
+    MML.setReady(character, true);
+    return action;
   } catch (err) {
     log(err.stack);
   }
@@ -67,14 +53,14 @@ MML.buildAction = async function buildAction(player, character, action) {
       const itemArray = await MML.readyItem(player, character, action);
       action.items = itemArray;
       action.modifiers.push('Ready Item');
-      return buildAction(player, character, action);
+      return MML.buildAction(player, character, action);
     case 'Aim':
       return _.extend(action, { ts: Date.now(), name: 'Aim' });
     case 'Reload':
       return _.extend(action, { ts: Date.now(), name: 'Reload' });
     case 'Release Opponent':
       action.modifiers.push('Release Opponent');
-      return buildAction(player, character, action);
+      return MML.buildAction(player, character, action);
     case 'Cast':
       return await MML.prepareCastAction([player, character, action]);
     case 'Continue Casting':
@@ -129,7 +115,7 @@ MML.isUnarmedAction = function isUnarmedAction(action) {
     action.attackType);
 };
 
-MML.processAction = function processAction(player, character, action) {
+MML.processAction = async function processAction(player, character, action) {
   if (_.contains(action.modifiers, 'Ready Item')) {
     _.each(action.items, function(itemWithGrip) {
       MML.equipItem(character, itemWithGrip.item._id, itemWithGrip.grip);
@@ -140,7 +126,7 @@ MML.processAction = function processAction(player, character, action) {
   }
   switch (action.name) {
     case 'Attack':
-      return MML.processAttack(player, character, action);
+      return await MML.processAttack(player, character, action);
     case 'Observe':
       return MML.observeAction(player, character, action);
     case 'Movement Only':
@@ -170,7 +156,7 @@ MML.processAction = function processAction(player, character, action) {
   //     character.player.chooseMetaMagic(character.name);
 };
 
-MML.processAttack = function processAttack(player, character, action) {
+MML.processAttack = async function processAttack(player, character, action) {
   MML.addStatusEffect(character, 'Melee This Round', {
     name: 'Melee This Round'
   });
@@ -185,7 +171,7 @@ MML.processAttack = function processAttack(player, character, action) {
   } else if (MML.isWieldingThrowingWeapon(character)) {
     return MML.throwingAttackAction(player, character, action);
   } else {
-    return MML.meleeAttackAction(player, character, action);
+    return await MML.meleeAttackAction(player, character, action);
   }
 };
 
@@ -212,7 +198,8 @@ MML.meleeAttackAction = async function meleeAttackAction(player, character, acti
   if (['Success', 'Critical Success'].includes(attackRoll)) {
     const defenseRoll = await MML.meleeDefenseRoll(target.player, target, weapon);
     if (!['Success', 'Critical Success'].includes(defenseRoll)) {
-      const hitPositionRoll = await MML.hitPositionRoll(player, target, action);
+      console.log("GRASS TASTES BAD");
+      const hitPositionRoll = await MML.hitPositionRoll(player, character, target, action);
       const damageRoll = await MML.meleeDamageRoll(player, character, target, weapon, attackRoll);
       await MML.damageCharacter(target.player, target, weapon.damageType, hitPositionRoll, damageRoll);
     }

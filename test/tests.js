@@ -135,70 +135,70 @@ function runTests() {
           ;
       });
 
-      it.only('Checks that start combat works', function() {
+      it.only('Checks that start combat works', async function() {
         createTestCharacters(player, 3);
-        return startTestCombat(player, _.pluck(MML.characters, 'id'))
-          .then(setActionPunchAttack)
-          .then(clickButton('Roll'))
-          // .then(clickButton('changeRoll eleventy'))
-          // .then(clickButton('changeRoll 36'))
-          // .then(clickButton('changeRoll 25'))
-          // .then(clickButton('changeRoll 26'))
-          .then(clickButton('changeRoll 35'))
-          .then(clickButton('acceptRoll'))
-          .then(clickButton('Observe'))
-          .then(clickButton('Roll'))
-          .then(clickButton('changeRoll 27'))
-          .then(clickButton('acceptRoll'))
-          .then(clickButton('Movement Only'))
-          .then(clickButton('Roll'))
-          .then(clickButton('changeRoll 26'))
-          .then(clickButton('acceptRoll'))
-          .then(clickButton('Start Round'))
-          .then(clickButton('Start Action'))
-          .then(clickButton('End Movement'))
-          .then(clickButton('selectTarget test1'))
-          .then(clickButton('Roll'))
-          .then(clickButton('changeRoll 10'))
-          .then(clickButton('acceptRoll'))
-          .then(clickButton('Block: 15%'))
-          .then(clickButton('changeRoll 16'))
-          .then(clickButton('acceptRoll'))
-          .then(clickButton('Roll'))
-          .then(clickButton('changeRoll 33'))
-          // .then(clickButton('acceptRoll'))
-          // .then(clickButton('Roll'))
-          // .then(clickButton('changeRoll 4'))
-          // .then(clickButton('acceptRoll'))
-          // .then(clickButton('Roll'))
-          // .then(clickButton('changeRoll 4'))
-          // .then(clickButton('acceptRoll'))
+        await startTestCombat(player, _.pluck(MML.characters, 'id'));
+        await setActionPunchAttack(player);
+        await clickButton(player, 'Roll');
+          // await clickButton(player, 'changeRoll eleventy');
+          // await clickButton(player, 'changeRoll 36');
+          // await clickButton(player, 'changeRoll 25');
+          // await clickButton(player, 'changeRoll 26');
+        await clickButton(player, 'changeRoll 35');
+        await clickButton(player, 'acceptRoll');
+        await clickButton(player, 'Observe');
+        await clickButton(player, 'Roll');
+        await clickButton(player, 'changeRoll 27');
+        await clickButton(player, 'acceptRoll');
+        await clickButton(player, 'Movement Only');
+        await clickButton(player, 'Roll');
+        await clickButton(player, 'changeRoll 26');
+        await clickButton(player, 'acceptRoll');
+        await clickButton(player, 'Start Round');
+        await clickButton(player, 'Start Action');
+        await clickButton(player, 'End Movement');
+        await clickButton(player, 'selectTarget test1');
+        await clickButton(player, 'Roll');
+        await clickButton(player, 'changeRoll 10');
+        await clickButton(player, 'acceptRoll');
+        await clickButton(player, 'Block: 15%');
+        await clickButton(player, 'changeRoll 16');
+        await clickButton(player, 'acceptRoll');
+        await clickButton(player, 'Roll');
+        // await clickButton(player, 'changeRoll 33');
+          // await clickButton(player, 'acceptRoll');
+          // await clickButton(player, 'Roll');
+          // await clickButton(player, 'changeRoll 4');
+          // await clickButton(player, 'acceptRoll');
+          // await clickButton(player, 'Roll');
+          // await clickButton(player, 'changeRoll 4');
+          // await clickButton(player, 'acceptRoll');
           // .then(setActionPunchAttack)
-          // .then(clickButton('Accept'))
-          // .then(clickButton('Change Action'))
-          // .then(clickButton('Observe'))
-          // .then(clickButton('Edit Action'))
-          // .then(clickButton('Observe'))
-          // .then(clickButton('Accept'))
-          // .then(clickButton('Start Action'))
-          // .then(clickButton('End Movement'))
-          // .then(clickButton('End Action'))
-          // .then(clickButton('Movement Only'))
-          // .then(clickButton('Accept'))
-          // .then(clickButton('Start Action'))
-          // .then(clickButton('End Movement'))
-          // .then(clickButton('End Action'))
-          // .then(clickButton('Movement Only'))
-          // .then(clickButton('End Movement'))
-          // .then(clickButton('Start Action'))
-          // .then(clickButton('End Movement'))
-          // .then(clickButton('End Action'))
-          // .then(clickButton('Observe'))
-          // .then(clickButton('Accept'))
-          // .then(clickButton('acceptRoll'))
+          // await clickButton(player, 'Accept');
+          // await clickButton(player, 'Change Action');
+          // await clickButton(player, 'Observe');
+          // await clickButton(player, 'Edit Action');
+          // await clickButton(player, 'Observe');
+          // await clickButton(player, 'Accept');
+          // await clickButton(player, 'Start Action');
+          // await clickButton(player, 'End Movement');
+          // await clickButton(player, 'End Action');
+          // await clickButton(player, 'Movement Only');
+          // await clickButton(player, 'Accept');
+          // await clickButton(player, 'Start Action');
+          // await clickButton(player, 'End Movement');
+          // await clickButton(player, 'End Action');
+          // await clickButton(player, 'Movement Only');
+          // await clickButton(player, 'End Movement');
+          // await clickButton(player, 'Start Action');
+          // await clickButton(player, 'End Movement');
+          // await clickButton(player, 'End Action');
+          // await clickButton(player, 'Observe');
+          // await clickButton(player, 'Accept');
+          // await clickButton(player, 'acceptRoll');
           // .then(console.log)
-          .then(function (input) { console.log('done'); })
-          .catch(console.log);
+          // .then(function (input) { console.log('done'); })
+          // .catch(console.log);
       });
     });
 
@@ -391,18 +391,16 @@ function setPressedButton(player, button, selectedIds) {
   return player;
 }
 
-function clickButton(button, selectedIds) {
-  return function(player) {
-    return new Promise(function(resolve, reject) {
-      once('sendChat', function () {
-        resolve(player);
-      });
-      player.buttonPressed(button, selectedIds);
+function clickButton(player, button, selectedIds) {
+  return new Promise(function(resolve, reject) {
+    once('sendChat', function () {
+      resolve(player);
     });
-  };
+    player.buttonPressed(button, selectedIds);
+  });
 }
 
-function setTestRoll(value) {
+function setTestRoll(player, value) {
   return function (player) {
     return Promise.resolve(player)
     .then(clickButton('changeRoll ' + value))
@@ -530,37 +528,33 @@ function clone(obj) {
 }
 
 function initializeMenu(player) {
-  return clickButton('initializeMenu')(player);
+  return clickButton(player, 'initializeMenu');
 }
 
-function startTestCombat(player, characters) {
-  return initializeMenu(player)
-    .then(clickButton('Combat'))
-    .then(clickButton('Start Combat', characters));
+async function startTestCombat(player, characters) {
+  await initializeMenu(player);
+  await clickButton(player, 'Combat');
+  await clickButton(player, 'Start Combat', characters);
 }
 
-function setActionStandardAttack(player) {
-  return Promise.resolve(player)
-    .then(clickButton('Attack'))
-    .then(clickButton('Standard'))
-    .then(clickButton('None'))
-    .then(clickButton('Neutral'));
+async function setActionStandardAttack(player) {
+  await clickButton(player, 'Attack');
+  await clickButton(player, 'Standard');
+  await clickButton(player, 'None');
+  await clickButton(player, 'Neutral');
 }
 
-function setActionPunchAttack(player) {
-  return Promise.resolve(player)
-    .then(clickButton('Attack'))
-    .then(clickButton('Punch'))
-    .then(clickButton('None'))
-    .then(clickButton('Neutral'));
-    // .then(Promise.resolve(player));
+async function setActionPunchAttack(player) {
+  await clickButton(player, 'Attack');
+  await clickButton(player, 'Punch');
+  await clickButton(player, 'None');
+  await clickButton(player, 'Neutral');
 }
 
-function executeObserve(player) {
-  return clickButton('initializeMenu')(player)
-    .then(clickButton('Start Action'))
-    .then(clickButton('End Movement'))
-    .then(clickButton('End Action'));
+async function executeObserve(player) {
+  await clickButton(player, 'Start Action');
+  await clickButton(player, 'End Movement');
+  await clickButton(player, 'End Action');
 }
 
 function pbcopy(data) {

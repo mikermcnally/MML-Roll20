@@ -170,10 +170,9 @@ MML.init = function() {
 };
 
 MML.parseChat = function({who , content, selected, type}) {
-  MML.getPlayer(who);
-  if (msg.type === 'api' && msg.content.indexOf('!MML|') !== -1) {
-    var player = MML.players[msg.who.replace(' (GM)', '')];
-    player.buttonPressed(msg.content.replace('!MML|', ''), MML.getSelectedIds(msg.selected));
+  if (type === 'api' && content.indexOf('!MML|') !== -1) {
+    var player = MML.players[who.replace(' (GM)', '')];
+    player.buttonPressed(content.replace('!MML|', ''), MML.getSelectedIds(selected));
   }
 };
 

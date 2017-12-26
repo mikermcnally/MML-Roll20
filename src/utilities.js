@@ -7,7 +7,6 @@ MML.getCharFromName = function getCharFromName(name) {
   }, {
     caseInsensitive: false
   });
-
   return character[0];
 };
 

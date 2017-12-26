@@ -33,19 +33,17 @@ MML.displayTargetSelection = function displayTargetSelection(player) {
 MML.selectTarget = function selectTarget(player) {
   return new Promise(function(resolve, reject) {
     player.buttonPressed = function(pressedButton) {
-      if (pressedButton.indexOf('selectTarget') > -1) {
+      if (pressedButton.includes('selectTarget')) {
         resolve(pressedButton.replace('selectTarget ', ''));
       }
     };
   });
 };
 
-MML.getSingleTarget = function getSingleTarget(player) {
+MML.getSingleTarget = async function getSingleTarget(player) {
   MML.displayTargetSelection(player);
-  return MML.selectTarget(player)
-    .then(function (player) {
-      return MML.getCharFromName(player.pressedButton);
-    });
+  const pressedButton = await MML.selectTarget(player);
+  return _.find(MML.characters, character => character.name === pressedButton);
 };
 
 MML.getSpellTargets = function getSpellTargets() {
@@ -101,7 +99,6 @@ MML.chooseSpellTargets = function chooseSpellTargets(player, character, action) 
 MML.prepareAttackAction = async function prepareAttackAction(player, character, action) {
   action.ts = Date.now();
   action.name = 'Attack';
-  console.log("SHOW ME WHAT YOU GOT");
   const attackType = await MML.chooseAttackType(player, character, action);
   action.attackType = attackType;
 
@@ -117,7 +114,7 @@ MML.prepareAttackAction = async function prepareAttackAction(player, character, 
     'Regain Feet'],
     action.attackType)
   ) {
-    const calledShot = MML.chooseCalledShot(player);
+    const calledShot = await MML.chooseCalledShot(player);
     if (calledShot !== 'None') {
       action.modifiers.push(calledShot);
     }
@@ -135,12 +132,12 @@ MML.prepareAttackAction = async function prepareAttackAction(player, character, 
         break;
     }
   }
-  if (!MML.isUnarmedAction(action)) {
+  if (MML.isUnarmedAction(action)) {
     action.weapon = MML.unarmedAttacks[attackType];
   } else {
     const weapon = action.weapon;
     if (weapon.secondaryType !== '') {
-      const damageType = await MML.chooseDamageType();
+      const damageType = await MML.chooseDamageType(player);
       if (damageType === 'Secondary') {
         _.extend(weapon, {
           damageType: weapon.secondaryType,
@@ -162,6 +159,7 @@ MML.prepareAttackAction = async function prepareAttackAction(player, character, 
       });
     }
   }
+  return action;
 };
 
 MML.chooseAttackType = async function chooseAttackType(player, character, action) {
@@ -240,48 +238,51 @@ MML.chooseAttackStance = async function chooseAttackStance(player) {
 };
 
 MML.chooseDamageType = async function chooseDamageType(player) {
-  const {pressedButton, selectedIds} = await MML.goToMenu(player, 'Choose a Damage Type', ['Primary', 'Secondary']);
+  const {pressedButton} = await MML.goToMenu(player, 'Choose a Damage Type', ['Primary', 'Secondary']);
   return pressedButton;
 };
 
 MML.chooseMeleeDefense = async function chooseMeleeDefense(player, character, dodgeMods, blockMods, attackerWeapon) {
-  return MML.goToMenu(player, MML.menuChooseMeleeDefense(character, dodgeMods, blockMods, attackerWeapon))
-    .then(function(player) {
-      switch (player.pressedButton) {
-        case 'Block: ' + MML.sumModifiers(blockMods) + '%':
-          character.statusEffects['Melee This Round'] = {
-            id: MML.generateRowID(),
-            name: 'Melee This Round'
-          };
-          if (_.has(character.statusEffects, 'Number of Defenses')) {
-            character.statusEffects['Number of Defenses'].number++;
-          } else {
-            MML.addStatusEffect(character, 'Number of Defenses', {
-              number: 1
-            });
-          }
-          return {name: 'Block', modifiers: blockMods};
-        case 'Dodge: ' + MML.sumModifiers(dodgeMods) + '%':
-          character.statusEffects['Melee This Round'] = {
-            id: MML.generateRowID(),
-            name: 'Melee This Round'
-          };
-          character.statusEffects['Dodged This Round'] = {
-            id: MML.generateRowID(),
-            name: 'Dodged This Round'
-          };
-          if (_.has(character.statusEffects, 'Number of Defenses')) {
-            character.statusEffects['Number of Defenses'].number++;
-          } else {
-            MML.addStatusEffect(character, 'Number of Defenses', {
-              number: 1
-            });
-          }
-          return {name: 'Dodge', modifiers: dodgeMods};
-        case 'Take it':
-          return 'Failure';
+  const message = 'How will ' + character.name + ' defend?';
+  const buttons = ['Dodge: ' + MML.sumModifiers(dodgeMods) + '%', 'Take it'];
+  if (!MML.isUnarmed(character) || attackerWeapon.family === "Unarmed") {
+    buttons.unshift('Block: ' + MML.sumModifiers(blockMods) + '%');
+  }
+  const {pressedButton} = await MML.goToMenu(player, message, buttons);
+  switch (pressedButton) {
+    case 'Block: ' + MML.sumModifiers(blockMods) + '%':
+      character.statusEffects['Melee This Round'] = {
+        id: MML.generateRowID(),
+        name: 'Melee This Round'
+      };
+      if (_.has(character.statusEffects, 'Number of Defenses')) {
+        character.statusEffects['Number of Defenses'].number++;
+      } else {
+        MML.addStatusEffect(character, 'Number of Defenses', {
+          number: 1
+        });
       }
-    });
+      return {name: 'Block', modifiers: blockMods};
+    case 'Dodge: ' + MML.sumModifiers(dodgeMods) + '%':
+      character.statusEffects['Melee This Round'] = {
+        id: MML.generateRowID(),
+        name: 'Melee This Round'
+      };
+      character.statusEffects['Dodged This Round'] = {
+        id: MML.generateRowID(),
+        name: 'Dodged This Round'
+      };
+      if (_.has(character.statusEffects, 'Number of Defenses')) {
+        character.statusEffects['Number of Defenses'].number++;
+      } else {
+        MML.addStatusEffect(character, 'Number of Defenses', {
+          number: 1
+        });
+      }
+      return {name: 'Dodge', modifiers: dodgeMods};
+    case 'Take it':
+      return 'Failure';
+  }
 };
 
 MML.enterNumberOfDice = function enterNumberOfDice(player) {
@@ -293,10 +294,8 @@ MML.prepareCharacters = function prepareCharacters(player) {
 };
 
 MML.prepareNextCharacter = async function prepareNextCharacter(player, index) {
-  var character = player.combatants[index];
-  await MML.prepareAction(player, character);
-  // MML.setAction(character, await MML.prepareAction(player, character));
   if (index < player.combatants.length) {
+    await MML.prepareAction(player, player.combatants[index]);
     return MML.prepareNextCharacter(player, index + 1);
   } else {
     return player;
@@ -860,61 +859,102 @@ MML.readyAdditionalItem = function readyAdditionalItem(player, character, itemMa
     });
 };
 
-MML.finalizeAction = function finalizeAction(player, character) {
-  return function (action) {
-    return MML.goToMenu(player, MML.menufinalizeAction(player, character, action))
-      .then(function(player) {
-        return action;
+MML.finalizeAction = async function finalizeAction(player, character, action) {
+  var message;
+  var buttons;
+  if (state.MML.GM.roundStarted === true) {
+    message = 'Accept or edit action for ' + character.name;
+    buttons = [
+      'Accept',
+      'Edit Action'
+    ];
+  } else if (_.has(character.statusEffects, 'Stunned')) {
+    message = character.name + ' is stunned and can only move. Roll initiative';
+    buttons = [
+      'Roll'
+    ];
+  } else {
+    message = 'Roll initiative or edit action for ' + character.name;
+    buttons = [
+      'Roll',
+      'Edit Action'
+    ];
+  }
+  const {pressedButton} = await MML.goToMenu(player, message, buttons);
+  switch (pressedButton) {
+    case 'Roll':
+      MML.setAction(character, action);
+      await MML.initiativeRoll(player, character, action);
+      break;
+    case 'Edit Action':
+      return MML.buildAction(player, character, {
+        ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
+        modifiers: [],
+        weapon: MML.getEquippedWeapon(character)
       });
-  };
+    case 'Accept':
+      MML.setAction(character, action);
+      return player;
+  }
 };
 
-MML.startAction = function startAction(player, character, validAction) {
-  return MML.goToMenu(player, MML.menustartAction(player, character, validAction))
-    .then(function(player) {
-      switch (player.pressedButton) {
-        case 'Start Action':
-          return MML.combatMovement(player, character)
-            .then(function ([player, character]) {
-              return MML.processAction(player, character, character.action);
-            });
-        case 'Change Action':
-          if (_.has(character.statusEffects, 'Changed Action')) {
-            character.statusEffects['Changed Action'].level++;
-          } else {
-            MML.addStatusEffect(character, 'Changed Action', {
-              id: MML.generateRowID(),
-              name: 'Changed Action',
-              level: 1
-            });
-          }
-          return MML.buildAction(player, character);
-        case 'Movement Only':
-          return MML.combatMovement(player, character)
-            .then(function ([player, character]) {
-              return MML.endAction(player, character, character.action);
-            });
-      }
-    });
-};
+MML.startAction = async function startAction(player, character, validAction) {
+  var message;
+  var buttons = ['Movement Only'];
+  if (_.has(character.statusEffects, 'Stunned') || _.has(character.statusEffects, 'Dodged This Round')) {
+    message = character.name + ' cannot act.';
+  } else if (validAction) {
+    if (character.initiative - 10 > 0) {
+      message = 'Start or change ' + character.name + '\'s action';
+      buttons.unshift('Change Action');
+      buttons.unshift('Start Action');
+    } else {
+      message = 'Start ' + character.name + '\'s action';
+      buttons.unshift('Start Action');
+    }
+  } else {
+    message = character.name + '\'s action no longer valid.';
+    if (character.initiative - 10 > 0) {
+      buttons.unshift('Change Action');
+    }
+  }
 
-MML.combatMovement = function combatMovement(player, character) {
-  MML.displayThreatZones(true);
-  return MML.goToMenu(player, MML.menucombatMovement(player, character))
-    .then(function(player) {
-      if (player.pressedButton !== 'End Movement') {
-        character.movementType = player.pressedButton;
-        MML.displayMovement(character);
-        return MML.goToMenu(player, {message: 'End ' + character.name + '\'s movement', buttons: ['End Movement']})
-          .then(function(player) {
-            MML.displayThreatZones(false);
-            return [player, character];
-          });
+  const {pressedButton} = await MML.goToMenu(player, message, buttons);
+  switch (pressedButton) {
+    case 'Start Action':
+      await MML.combatMovement(player, character);
+      return await MML.processAction(player, character, character.action);
+    case 'Change Action':
+      if (_.has(character.statusEffects, 'Changed Action')) {
+        character.statusEffects['Changed Action'].level++;
       } else {
-        MML.displayThreatZones(false);
-        return [player, character];
+        MML.addStatusEffect(character, 'Changed Action', {
+          id: MML.generateRowID(),
+          name: 'Changed Action',
+          level: 1
+        });
       }
-    });
+      return MML.buildAction(player, character);
+    case 'Movement Only':
+      await MML.combatMovement(player, character);
+      return MML.endAction(player, character, character.action);
+    }
+};
+
+MML.combatMovement = async function combatMovement(player, character) {
+  MML.displayThreatZones(true);
+  const message = 'Move ' + character.name + '.';
+  const buttons = ['Prone', 'Stalk', 'Crawl', 'Walk', 'Jog', 'Run', 'End Movement'];
+  const {pressedButton} = await MML.goToMenu(player, message, buttons);
+
+  if (pressedButton !== 'End Movement') {
+    character.movementType = pressedButton;
+    MML.displayMovement(character);
+    await MML.goToMenu(player, 'End ' + character.name + '\'s movement', ['End Movement']);
+    MML.displayThreatZones(false);
+  } else {
+    MML.displayThreatZones(false);
+  }
 };
 
 MML.displaySpellMarker = function displaySpellMarker(player) {
