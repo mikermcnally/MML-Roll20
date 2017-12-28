@@ -18,7 +18,7 @@ MML.parseDice = function parseDice(dice) {
 };
 
 MML.sumModifiers = function sumModifiers(modifiers) {
-  return modifiers.reduce((sum, value) => sum + value, 0);
+  return modifiers ? modifiers.reduce((sum, value) => sum + value, 0) : 0;
 };
 
 MML.processRoll = async function processRoll(player, roll) {
@@ -468,119 +468,17 @@ MML.castingRollResult = function castingRollResult(character) {
   }
 };
 
-MML.woundFatigueRoll = function woundFatigueRoll(player, character) {
-  return function(rolls) {
-    return MML.attributeCheckRoll('Wound Fatigue Roll', character.systemStrength)
-      .then(MML.processRoll(player))
-      .then(function(result) {
-        if (result === 'Failure') {
-          MML.addStatusEffect(character, 'Wound Fatigue', {});
-        }
-        rolls.woundFatigueRoll = result;
-        return rolls;
-      });
-  };
-};
-
-MML.majorWoundRoll = function majorWoundRoll(player, character, bodyPart, duration) {
-  return function(rolls) {
-    return MML.attributeCheckRoll('Major Wound Willpower Roll', character.willpower)
-      .then(MML.processRoll(player))
-      .then(function(result) {
-        if (result === 'Failure') {
-          MML.addStatusEffect(character, 'Major Wound, ' + bodyPart, {
-            duration: duration,
-            startingRound: state.MML.GM.currentRound,
-            bodyPart: bodyPart
-          });
-        }
-        rolls.majorWoundRoll = result;
-        return rolls;
-      });
-  };
-};
-
-MML.disablingWoundRoll = function disablingWoundRoll(player, character, bodyPart, duration) {
-  return function(rolls) {
-    return MML.attributeCheckRoll('Disabling Wound System Strength Roll', character.systemStrength)
-      .then(MML.processRoll(player))
-      .then(function(result) {
-        MML.addStatusEffect(character, 'Disabling Wound, ' + bodyPart, {
-          bodyPart: bodyPart
-        });
-        if (result === 'Failure') {
-          if (_.has(character.statusEffects, 'Stunned')) {
-            character.statusEffects['Stunned'].duration = duration;
-          } else {
-            MML.addStatusEffect(character, 'Stunned', {
-              startingRound: state.MML.GM.currentRound,
-              duration: duration
-            });
-          }
-        }
-        rolls.disablingWoundRoll = result;
-        return rolls;
-      });
-  };
-};
-
-MML.knockdownRoll = function knockdownRoll(player, character) {
-  return function(rolls) {
-    return MML.attributeCheckRoll('Knockdown System Strength Roll', character.systemStrength, [_.has(character.statusEffects, 'Stumbling') ? -5 : 0])
-      .then(MML.processRoll(player))
-      .then(function(result) {
-        if (result === 'Failure') {
-          character.movementType = 'Prone';
-        } else {
-          MML.addStatusEffect(character, 'Stumbling', {
-            startingRound: state.MML.GM.currentRound
-          });
-        }
-        rolls.knockdownRoll = result;
-        return rolls;
-      });
-  };
-};
-
-MML.sensitiveAreaRoll = function sensitiveAreaRoll(player, character) {
-  return function(rolls) {
-    return MML.goToMenu(player, { message: character.name + '\'s Sensitive Area Roll', buttons: ['Roll'] })
-      .then(function(player) {
-        return MML.attributeCheckRoll('Sensitive Area Willpower Roll', character.willpower);
-      })
-      .then(MML.processRoll(player))
-      .then(function(result) {
-        if (result === 'Failure') {
-          MML.addStatusEffect(character, 'Sensitive Area', {
-            startingRound: state.MML.GM.currentRound
-          });
-        }
-        rolls.sensitiveAreaRoll = result;
-        return rolls;
-      });
-  };
-};
-
-MML.fatigueCheckRoll = function fatigueCheckRoll(player, character) {
-  return function(rolls) {
-    return MML.attributeCheckRoll('Knockdown System Strength Roll', character.systemStrength, [_.has(character.statusEffects, 'Fatigue') ? -4 : 0])
-      .then(MML.processRoll(player))
-      .then(function(roll) {
-        if (roll.result === 'Failure') {
-          if (_.has(character.statusEffects, 'Fatigue')) {
-            character.statusEffects['Fatigue'].level += 1;
-            MML.applyStatusEffects(character);
-          } else {
-            MML.addStatusEffect(character, 'Fatigue', {
-              level: 1
-            });
-          }
-          character.roundsExertion = 0;
-        }
-        rolls.fatigueCheckRoll = result;
-        return rolls;
-      });
-  };
+MML.fatigueCheckRoll = async function fatigueCheckRoll(player, character) {
+  const result = await MML.attributeCheckRoll('Knockdown System Strength Roll', character.systemStrength, [_.has(character.statusEffects, 'Fatigue') ? -4 : 0]);
+  if (_.has(character.statusEffects, 'Fatigue')) {
+    character.statusEffects['Fatigue'].level += 1;
+    MML.applyStatusEffects(character);
+  } else {
+    MML.addStatusEffect(character, 'Fatigue', {
+      level: 1
+    });
+  }
+  character.roundsExertion = 0;
 };
 
 MML.fatigueRecoveryRoll = function fatigueRecoveryRoll(character, modifier) {

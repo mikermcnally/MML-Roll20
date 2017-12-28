@@ -126,7 +126,7 @@ MML.setCombatVision = function setCombatVision(character) {
   }
 };
 
-MML.alterHP = function alterHP(player, character, bodyPart, hpAmount) {
+MML.alterHP = async function alterHP(player, character, bodyPart, hpAmount) {
   var initialHP = character.hp[bodyPart];
   var currentHP = initialHP + hpAmount;
   var maxHP = character.hpMax[bodyPart];
@@ -144,7 +144,14 @@ MML.alterHP = function alterHP(player, character, bodyPart, hpAmount) {
       } else { //Add damage to duration of effect
         duration = parseInt(character.statusEffects['Major Wound, ' + bodyPart].duration) - hpAmount;
       }
-      return MML.majorWoundRoll(player, character, bodyPart, duration);
+      const result = await MML.attributeCheckRoll('Major Wound Willpower Roll', character.willpower);
+      if (result === 'Failure') {
+        MML.addStatusEffect(character, 'Major Wound, ' + bodyPart, {
+          duration: duration,
+          startingRound: state.MML.GM.currentRound,
+          bodyPart: bodyPart
+        });
+      }
     } else if (currentHP < 0 && currentHP > -maxHP) { //Disabling wound
       if (!_.has(character.statusEffects, 'Disabling Wound, ' + bodyPart)) { //Fresh wound
         duration = -currentHP;
@@ -153,25 +160,35 @@ MML.alterHP = function alterHP(player, character, bodyPart, hpAmount) {
       } else {
         duration = -hpAmount;
       }
-      return MML.disablingWoundRoll(player, character, bodyPart, duration);
+      const result = await MML.attributeCheckRoll('Disabling Wound System Strength Roll', character.systemStrength);
+      MML.addStatusEffect(character, 'Disabling Wound, ' + bodyPart, {
+        bodyPart: bodyPart
+      });
+      if (result === 'Failure') {
+        if (_.has(character.statusEffects, 'Stunned')) {
+          character.statusEffects['Stunned'].duration = duration;
+        } else {
+          MML.addStatusEffect(character, 'Stunned', {
+            startingRound: state.MML.GM.currentRound,
+            duration: duration
+          });
+        }
+      }
     } else if (currentHP < -maxHP) { //Mortal wound
       MML.addStatusEffect(character, 'Mortal Wound, ' + bodyPart, {
         bodyPart: bodyPart
       });
-      return Promise.resolve(player);
-    } else {
-      return Promise.resolve(player);
     }
   } else { //if healing
     character.hp[bodyPart] += hpAmount;
     if (character.hp[bodyPart] > maxHP) {
       character.hp[bodyPart] = maxHP;
     }
-    return Promise.resolve(player);
   }
+  await MML.setWoundFatigue(player, character);
 };
 
-MML.setWoundFatigue = function setWoundFatigue(player, character) {
+MML.setWoundFatigue = async function setWoundFatigue(player, character) {
   var currentHP = character.hp;
   currentHP['Wound Fatigue'] = character.hpMax['Wound Fatigue'];
 
@@ -186,40 +203,44 @@ MML.setWoundFatigue = function setWoundFatigue(player, character) {
   character.hp = currentHP;
 
   if (currentHP['Wound Fatigue'] < 0 && !_.has(character.statusEffects, 'Wound Fatigue')) {
-    return MML.woundFatigueRoll(player, character);
-  } else {
-    return Promise.resolve(player);
+    const result = await MML.attributeCheckRoll('Wound Fatigue Roll', character.systemStrength);
+    if (result === 'Failure') {
+      MML.addStatusEffect(character, 'Wound Fatigue', {});
+    }
   }
 };
 
-MML.knockdownCheck = function knockdownCheck(player, character, damage) {
+MML.knockdownCheck = async function knockdownCheck(player, character, damage) {
   character.knockdown += damage;
   if (character.movementType !== 'Prone' && character.knockdown < 1) {
-    MML.knockdownRoll(player, character);
-  } else {
-    return Promise.resolve(player);
-  }
-};
-
-MML.sensitiveAreaCheck = function sensitiveAreaCheck(player, character, hitPosition) {
-  if (MML.sensitiveAreas[character.bodyType].indexOf(hitPosition) > -1) {
-    return MML.sensitiveAreaRoll(player, character);
-  } else {
-    return Promise.resolve(player);
-  }
-};
-
-MML.damageCharacter = function damageCharacter(player, character, type) {
-  return function (rolls) {
-    var hitPosition = rolls.hitPosition;
-    return MML.armorDamageReduction(player, character, hitPosition.name, damage, type)
-      .then(function (damageAfterArmor) {
-        return MML.alterHP(player, character, hitPosition.bodyPart, damageAfterArmor)
-          .then(MML.setWoundFatigue(player, character))
-          .then(MML.sensitiveAreaCheck(player, character, hitPosition.name))
-          .then(MML.knockdownCheck(player, character, damage));
+    const result = await MML.attributeCheckRoll('Knockdown System Strength Roll', character.systemStrength, [_.has(character.statusEffects, 'Stumbling') ? -5 : 0])
+    if (result === 'Failure') {
+      character.movementType = 'Prone';
+    } else {
+      MML.addStatusEffect(character, 'Stumbling', {
+        startingRound: state.MML.GM.currentRound
       });
-    };
+    }
+  }
+};
+
+MML.sensitiveAreaCheck = async function sensitiveAreaCheck(player, character, hitPosition) {
+  if (MML.sensitiveAreas[character.bodyType].indexOf(hitPosition) > -1) {
+    await MML.goToMenu(player, { message: character.name + '\'s Sensitive Area Roll', buttons: ['Roll'] });
+    const result = await MML.attributeCheckRoll('Sensitive Area Willpower Roll', character.willpower);
+    if (result === 'Failure') {
+      MML.addStatusEffect(character, 'Sensitive Area', {
+        startingRound: state.MML.GM.currentRound
+      });
+    }
+  }
+};
+
+MML.damageCharacter = async function damageCharacter(player, character, damage, type, hitPosition) {
+  const reducedDamage = await MML.armorDamageReduction(player, character, hitPosition.name, damage, type);
+  await MML.alterHP(player, character, hitPosition.bodyPart, damageAfterArmor);
+  await MML.sensitiveAreaCheck(player, character, hitPosition.name);
+  await MML.knockdownCheck(player, character, damage);
 };
 
 MML.alterEP = function alterEP(player, character, epAmount) {
