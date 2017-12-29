@@ -25,9 +25,7 @@ MML.prepareAction = async function prepareAction(player, character) {
 
 MML.buildAction = async function buildAction(player, character, action) {
   if (_.contains(action.modifiers, 'Ready Item')) {
-    var weaponWithGrip = _.find(action.items, function(itemWithGrip) {
-      return itemWithGrip.item.type === 'weapon';
-    });
+    const weaponWithGrip = _.find(action.items, itemWithGrip => itemWithGrip.item.type === 'weapon');
     if (_.isUndefined(weaponWithGrip)) {
       action.weapon = 'unarmed';
     } else {
@@ -175,20 +173,19 @@ MML.processAttack = async function processAttack(player, character, action) {
   }
 };
 
-MML.missileAttackAction = function missileAttackAction(player, character, action) {
-  var weapon = action.weapon;
-  return MML.getSingleTarget(player)
-    .then(function (target) {
-      return MML.missileAttackRoll(player, character, target, weapon, action.skill)
-        .then(MML.rangedDefense(target.player, target, weapon))
-        .then(MML.hitPositionRoll(player, target, action))
-        .then(MML.missileDamageRoll(player, character, target, weapon, attackRoll))
-        .then(MML.damageCharacter(target.player, target, weapon.damageType))
-        .catch(function (rolls) {
-          return rolls;
-        })
-        .then(MML.endAction(player, character, action, target));
-    });
+MML.missileAttackAction = async function missileAttackAction(player, character, action) {
+    const weapon = action.weapon;
+    const target = await MML.getSingleTarget(player);
+    const attackRoll = await MML.missileAttackRoll(player, character, weapon.task, action.skill);
+    if (['Success', 'Critical Success'].includes(attackRoll)) {
+      const defenseRoll = await MML.rangedDefense(target.player, target, weapon);
+      if (!['Success', 'Critical Success'].includes(defenseRoll)) {
+        const hitPositionRoll = await MML.hitPositionRoll(player, character, target, action);
+        const damageRoll = await MML.missileDamageRoll(player, character, target, weapon, attackRoll);
+        await MML.damageCharacter(target.player, target, weapon.damageType, hitPositionRoll, damageRoll);
+      }
+    }
+    return MML.endAction(player, character, action, target);
 };
 
 MML.meleeAttackAction = async function meleeAttackAction(player, character, action) {
@@ -207,52 +204,36 @@ MML.meleeAttackAction = async function meleeAttackAction(player, character, acti
   return MML.endAction(player, character, action, target);
 };
 
-MML.grappleAttackAction = function grappleAttackAction(player, character, action) {
-  var rolls = {};
-  var weapon = action.weapon;
-  return MML.getSingleTarget(player)
-    .then(function (target) {
-      return MML.meleeAttackRoll(player, character, target, weapon, action.skill)(rolls)
-        .then(MML.grappleDefense(target.player, target, weapon))
-        .then(MML.grappleHandler(player, character, target, weapon, attackRoll))
-        .catch(function (rolls) {
-          return rolls;
-        })
-        .then(MML.endAction(player, character, action, target));
-    });
+MML.grappleAttackAction = async function grappleAttackAction(player, character, action) {
+  const weapon = action.weapon;
+  const target = await MML.getSingleTarget(player);
+  const attackRoll = await MML.meleeAttackRoll(player, character, weapon.task, action.skill);
+  if (['Success', 'Critical Success'].includes(attackRoll)) {
+    const defenseRoll = await MML.grappleDefense(target.player, target, weapon);
+    if (!['Success', 'Critical Success'].includes(defenseRoll)) {
+      await MML.grappleHandler(player, character, target, action);
+    }
+  }
+  return MML.endAction(player, character, action, target);
 };
 
 MML.releaseOpponentAction = async function releaseOpponentAction(player, character, action) {
-  const target = await MML.getSingleTarget(player);
-  const targetAgreed = await menuResistRelease(target.player);
-  if (_.isUndefined(parameters.targetAgreed)) {
-    if (_.has(character.statusEffects, 'Holding')) {
-      MML.releaseHold(character, target);
-    } else {
-      target.player.charMenuResistRelease(target.name, character, target);
-      target.player.displayMenu();
-    }
-  } else if (parameters.targetAgreed) {
-    MML.releaseGrapple(character, target);
+  const target = await MML.getSingleTarget(player);y
+  if (_.has(character.statusEffects, 'Holding')) {
+    await MML.releaseHold(character, target);
   } else {
-    character.action = {
-      ts: Date.now(),
-      name: 'Attack',
-      attackType: 'Break Grapple',
-      modifiers: []
-    };
-    state.MML.GM.currentAction = {
-      character: character,
-      targetArray: [target.id],
-      targetIndex: 0,
-      resistRelease: true
-    };
-    character[character.action.callback]();
+    const targetAgreed = await menuResistRelease(target.player);
+    if (targetAgreed) {
+      await MML.releaseGrapple(character, target);
+    } else {
+      await MML.breakGrapple(character, target);
+    }
   }
 };
 
-MML.castAction = function castAction(player, character, action) {
-  MML.spells[action.spell.name].process(player, character, action);
+MML.castAction = async function castAction(player, character, action) {
+  await MML.spells[action.spell.name](player, character, action);
+  return MML.endAction(player, character, action);
 };
 
 MML.observeAction = async function observeAction(player, character, action) {
@@ -275,10 +256,10 @@ MML.aimAction = async function aimAction(player, character, action) {
       target: target,
       startingRound: state.MML.GM.currentRound
     });
-    await MML.goToMenu(player, { message: character.name + ' aims at ' + target.name, buttons: ['End Action'] });
+    await MML.goToMenu(player, character.name + ' aims at ' + target.name, ['End Action']);
     return MML.endAction(player, character, action);
   } else if (character.statusEffects['Taking Aim'].startingRound !== state.MML.GM.currentRound && attackerWeapon.family === 'MWD') {
-    const holdAimRoll = MML.holdAimRoll(player, character, target);
+    const holdAimRoll = await MML.holdAimRoll(player, character, target);
     if (MML.failure(holdAimRoll)) {
       return await MML.missileAttackAction(player, character, action);
     } else {
@@ -289,7 +270,7 @@ MML.aimAction = async function aimAction(player, character, action) {
         character.statusEffects['Taking Aim'].level = 1;
         character.statusEffects['Taking Aim'].startingRound = state.MML.GM.currentRound;
       }
-      await MML.goToMenu(player, { message: character.name + ' aims at ' + target.name, buttons: ['End Action'] })
+      await MML.goToMenu(player, character.name + ' aims at ' + target.name, ['End Action']);
       return MML.endAction(player, character, action);
     }
   }

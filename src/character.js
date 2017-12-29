@@ -237,8 +237,8 @@ MML.sensitiveAreaCheck = async function sensitiveAreaCheck(player, character, hi
 };
 
 MML.damageCharacter = async function damageCharacter(player, character, damage, type, hitPosition) {
-  const reducedDamage = await MML.armorDamageReduction(player, character, hitPosition.name, damage, type);
-  await MML.alterHP(player, character, hitPosition.bodyPart, damageAfterArmor);
+  const reducedDamage = await MML.armorDamageReduction(player, character, hitPosition, damage, type);
+  await MML.alterHP(player, character, MML.getBodyPart(hitPosition).bodyPart, damageAfterArmor);
   await MML.sensitiveAreaCheck(player, character, hitPosition.name);
   await MML.knockdownCheck(player, character, damage);
 };
@@ -1105,6 +1105,14 @@ MML.getBodyParts = function getBodyParts(character) {
     return 'Error: Body type not found';
   } else {
     return _.chain(MML.hitPositions[character.bodyType]).pluck('bodyPart').uniq().value();
+  }
+};
+
+MML.getBodyPart = function getBodyPart(character, hitPosition) {
+  if (_.isUndefined(MML.hitPositions[character.bodyType])) {
+    return 'Error: Body type not found';
+  } else {
+    return _.findWhere(MML.hitPositions[character.bodyType], {name: hitPosition});
   }
 };
 

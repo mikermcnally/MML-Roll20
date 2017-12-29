@@ -1,6 +1,5 @@
 MML.displayGmRoll = function displayGmRoll(player, roll) {
-  sendChat(player.name, '/w "' + player.name + '" &{template:rollMenuGM} {{title=' + roll.message + "}}");
-  return player;
+  sendChat(player.name, '/w "' + player.name + '" &{template:rollMenuGM} {{title=' + message + "}}");
 };
 
 MML.displayPlayerRoll = function displayPlayerRoll(player) {
@@ -19,8 +18,10 @@ MML.displayRoll = function displayRoll(player, roll) {
 MML.setRollButtons = function setRollButtons(player) {
   return new Promise(function(resolve, reject) {
     player.buttonPressed = function(pressedButton) {
-      if (pressedButton === 'acceptRoll' || (pressedButton.indexOf('changeRoll') > -1 && player.name === state.MML.GM.name)) {
+      if (pressedButton === 'acceptRoll') {
         resolve(pressedButton);
+      } else if (pressedButton.includes('changeRoll') && player.name === state.MML.GM.name) {
+        resolve(pressedButton.replace('changeRoll ', ''));
       }
     };
   });
