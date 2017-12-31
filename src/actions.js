@@ -241,7 +241,7 @@ MML.observeAction = async function observeAction(player, character, action) {
     name: 'Observing',
     startingRound: state.MML.GM.currentRound
   });
-  await MML.displayObserveMenu(player, character, action);
+  await MML.goToMenu(player, character.name + ' observes the situation.', ['End Action']);
   return MML.endAction(player, character, action);
 };
 

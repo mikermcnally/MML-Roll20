@@ -882,18 +882,13 @@ MML.finalizeAction = async function finalizeAction(player, character, action) {
     ];
   }
   const {pressedButton} = await MML.goToMenu(player, message, buttons);
-  console.log("SHOW ME WHAT YOU GOT");
   switch (pressedButton) {
     case 'Roll':
       MML.setAction(character, action);
       await MML.initiativeRoll(player, character, action);
       break;
     case 'Edit Action':
-      return MML.buildAction(player, character, {
-        ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
-        modifiers: [],
-        weapon: MML.getEquippedWeapon(character)
-      });
+      return MML.prepareAction(player, character);
     case 'Accept':
       MML.setAction(character, action);
       return player;
@@ -925,7 +920,7 @@ MML.startAction = async function startAction(player, character, validAction) {
   switch (pressedButton) {
     case 'Start Action':
       await MML.combatMovement(player, character);
-      return await MML.processAction(player, character, character.action);
+      return MML.processAction(player, character, character.action);
     case 'Change Action':
       if (_.has(character.statusEffects, 'Changed Action')) {
         character.statusEffects['Changed Action'].level++;
@@ -936,7 +931,7 @@ MML.startAction = async function startAction(player, character, validAction) {
           level: 1
         });
       }
-      return MML.buildAction(player, character);
+      return MML.prepareAction(player, character);
     case 'Movement Only':
       await MML.combatMovement(player, character);
       return MML.endAction(player, character, character.action);
@@ -1103,13 +1098,6 @@ MML.menucharGenericRoll = function menucharGenericRoll(player, who, message, dic
       MML.genericRoll(MML.characters[who], name, dice, callback);
     }
   }];
-};
-
-MML.displayObserveMenu = function displayObserveMenu(player, character, action) {
-  return MML.goToMenu(player, {message: character.name + ' observes the situation.', buttons: ['End Action']})
-    .then(function(player) {
-      return [player, character, action];
-    });
 };
 
 MML.menucharReloadAction = function menucharReloadAction(player, who) {

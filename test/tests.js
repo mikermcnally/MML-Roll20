@@ -139,6 +139,7 @@ function runTests() {
         createTestCharacters(player, 3);
         await startTestCombat(player, _.pluck(MML.characters, 'id'));
         await setActionPunchAttack(player);
+        await clickButton(player, 'Neutral');
         await clickButton(player, 'Roll');
         await clickButton(player, 'changeRoll eleventy');
         await clickButton(player, 'changeRoll 36');
@@ -176,27 +177,31 @@ function runTests() {
         await clickButton(player, 'acceptRoll');
         await setActionPunchAttack(player);
         await clickButton(player, 'Accept');
-        // await clickButton(player, 'Change Action');
-        // await clickButton(player, 'Observe');
-        // await clickButton(player, 'Edit Action');
-        // await clickButton(player, 'Observe');
-        // await clickButton(player, 'Accept');
-        // await clickButton(player, 'Start Action');
-        // await clickButton(player, 'End Movement');
-        // await clickButton(player, 'End Action');
-        // await clickButton(player, 'Movement Only');
-        // await clickButton(player, 'Accept');
-        // await clickButton(player, 'Start Action');
-        // await clickButton(player, 'End Movement');
-        // await clickButton(player, 'End Action');
-        // await clickButton(player, 'Movement Only');
-        // await clickButton(player, 'End Movement');
-        // await clickButton(player, 'Start Action');
-        // await clickButton(player, 'End Movement');
-        // await clickButton(player, 'End Action');
-        // await clickButton(player, 'Observe');
+        await clickButton(player, 'Change Action');
+        await clickButton(player, 'Observe');
+        await clickButton(player, 'Edit Action');
+        await clickButton(player, 'Observe');
+        await clickButton(player, 'Accept');
+        await clickButton(player, 'Start Action');
+        await clickButton(player, 'End Movement');
+        await clickButton(player, 'Movement Only');
+        await clickButton(player, 'Accept');
+        await clickButton(player, 'Start Action');
+        await clickButton(player, 'End Movement');
+        await clickButton(player, 'End Action');
+        await clickButton(player, 'Movement Only');
+        await clickButton(player, 'Accept');
+        await clickButton(player, 'Start Action');
+        await clickButton(player, 'End Movement');
+        await clickButton(player, 'selectTarget test1');
+        await clickButton(player, 'Roll');
+        await clickButton(player, 'changeRoll 80');
+        await clickButton(player, 'acceptRoll');
+        await clickButton(player, 'End Action');
+        await clickButton(player, 'Observe');
         // await clickButton(player, 'Accept');
         // await clickButton(player, 'acceptRoll');
+
         // .then(console.log)
         // .then(function (input) { console.log('done'); })
         // .catch(console.log);
@@ -549,8 +554,6 @@ async function setActionPunchAttack(player) {
   await clickButton(player, 'Attack');
   await clickButton(player, 'Punch');
   await clickButton(player, 'None');
-  await clickButton(player, 'Neutral');
-  return;
 }
 
 async function executeObserve(player) {
@@ -565,6 +568,7 @@ function pbcopy(data) {
 
 // it('Tested: Unarmed striking, observe without ranged weapon, basic combat flow, basic damage, multiple defenses', function() {
 //   setActionPunchAttack(player)
+//   await clickButton(player, 'Neutral');
 //   .then(clickButton('Roll'))
 //   .then(setTestRoll(player, 10))
 //   .then(clickButton('Observe'))
@@ -624,6 +628,7 @@ function pbcopy(data) {
 //   expect(MML.characters['test1'].roundsExertion, 'forgoing defense should not add to roundsExertion').to.equal(0);
 //
 //   .then(setActionPunchAttack(player))
+//   await clickButton(player, 'Neutral');
 //   .then(clickButton('Roll'))
 //   .then(setTestRoll(player, 10);
 //   .then(clickButton('Observe');
