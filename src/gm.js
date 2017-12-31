@@ -30,7 +30,6 @@ MML.newRound = async function newRound(gm) {
 
 MML.startRound = async function startRound(gm) {
   const {pressedButton} = await MML.goToMenu(gm.player, 'Start round when all characters are ready.', ['Start Round', 'End Combat']);
-
   if (pressedButton === 'Start Round') {
     if (MML.checkReady(gm.combatants)) {
       gm.roundStarted = true;

@@ -1,9 +1,9 @@
-MML.displayGmRoll = function displayGmRoll(player, roll) {
+MML.displayGmRoll = function displayGmRoll(player, message) {
   sendChat(player.name, '/w "' + player.name + '" &{template:rollMenuGM} {{title=' + message + "}}");
 };
 
-MML.displayPlayerRoll = function displayPlayerRoll(player) {
-  sendChat(player.name, '/w "' + player.name + '" &{template:rollMenu} {{title=' + roll.message + "}}");
+MML.displayPlayerRoll = function displayPlayerRoll(player, message) {
+  sendChat(player.name, '/w "' + player.name + '" &{template:rollMenu} {{title=' + message + "}}");
   return player;
 };
 
@@ -882,6 +882,7 @@ MML.finalizeAction = async function finalizeAction(player, character, action) {
     ];
   }
   const {pressedButton} = await MML.goToMenu(player, message, buttons);
+  console.log("SHOW ME WHAT YOU GOT");
   switch (pressedButton) {
     case 'Roll':
       MML.setAction(character, action);

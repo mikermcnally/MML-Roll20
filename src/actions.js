@@ -174,31 +174,30 @@ MML.processAttack = async function processAttack(player, character, action) {
 };
 
 MML.missileAttackAction = async function missileAttackAction(player, character, action) {
-    const weapon = action.weapon;
-    const target = await MML.getSingleTarget(player);
-    const attackRoll = await MML.missileAttackRoll(player, character, weapon.task, action.skill);
-    if (['Success', 'Critical Success'].includes(attackRoll)) {
-      const defenseRoll = await MML.rangedDefense(target.player, target, weapon);
-      if (!['Success', 'Critical Success'].includes(defenseRoll)) {
-        const hitPositionRoll = await MML.hitPositionRoll(player, character, target, action);
-        const damageRoll = await MML.missileDamageRoll(player, character, target, weapon, attackRoll);
-        await MML.damageCharacter(target.player, target, weapon.damageType, hitPositionRoll, damageRoll);
-      }
+  const weapon = action.weapon;
+  const target = await MML.getSingleTarget(player);
+  const attack = await MML.missileAttackRoll(player, character, weapon.task, action.skill);
+  if (['Success', 'Critical Success'].includes(attack)) {
+    const defense = await MML.rangedDefense(target.player, target, weapon);
+    if (!['Success', 'Critical Success'].includes(defense)) {
+      const hitPosition = await MML.hitPositionRoll(player, character, target, action);
+      const damage = await MML.missileDamageRoll(player, character, target, weapon, attack);
+      await MML.damageCharacter(target.player, target, weapon.damageType, hitPosition, damage);
     }
-    return MML.endAction(player, character, action, target);
+  }
+  return MML.endAction(player, character, action, target);
 };
 
 MML.meleeAttackAction = async function meleeAttackAction(player, character, action) {
   const weapon = action.weapon;
   const target = await MML.getSingleTarget(player);
-  const attackRoll = await MML.meleeAttackRoll(player, character, weapon.task, action.skill);
-  if (['Success', 'Critical Success'].includes(attackRoll)) {
-    const defenseRoll = await MML.meleeDefenseRoll(target.player, target, weapon);
-    if (!['Success', 'Critical Success'].includes(defenseRoll)) {
-      console.log("GRASS TASTES BAD");
-      const hitPositionRoll = await MML.hitPositionRoll(player, character, target, action);
-      const damageRoll = await MML.meleeDamageRoll(player, character, target, weapon, attackRoll);
-      await MML.damageCharacter(target.player, target, weapon.damageType, hitPositionRoll, damageRoll);
+  const attack = await MML.meleeAttackRoll(player, character, weapon.task, action.skill);
+  if (['Success', 'Critical Success'].includes(attack)) {
+    const defense = await MML.meleeDefenseRoll(target.player, target, weapon);
+    if (!['Success', 'Critical Success'].includes(defense)) {
+      const hitPosition = await MML.hitPositionRoll(player, character, target, action);
+      const damage = await MML.meleeDamageRoll(player, character, weapon, attack);
+      await MML.damageCharacter(target.player, target, damage, weapon.damageType, hitPosition);
     }
   }
   return MML.endAction(player, character, action, target);
@@ -207,10 +206,10 @@ MML.meleeAttackAction = async function meleeAttackAction(player, character, acti
 MML.grappleAttackAction = async function grappleAttackAction(player, character, action) {
   const weapon = action.weapon;
   const target = await MML.getSingleTarget(player);
-  const attackRoll = await MML.meleeAttackRoll(player, character, weapon.task, action.skill);
+  const attack = await MML.meleeAttackRoll(player, character, weapon.task, action.skill);
   if (['Success', 'Critical Success'].includes(attackRoll)) {
-    const defenseRoll = await MML.grappleDefense(target.player, target, weapon);
-    if (!['Success', 'Critical Success'].includes(defenseRoll)) {
+    const defense = await MML.grappleDefense(target.player, target, weapon);
+    if (!['Success', 'Critical Success'].includes(defense)) {
       await MML.grappleHandler(player, character, target, action);
     }
   }
@@ -294,7 +293,7 @@ MML.endAction = function endAction(player, character, action, targets) {
   });
 
   if (character.initiative > 0) {
-    return MML.buildAction(player, character);
+    return MML.prepareAction(player, character);
   } else {
     return player;
   }

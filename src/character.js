@@ -213,7 +213,7 @@ MML.setWoundFatigue = async function setWoundFatigue(player, character) {
 MML.knockdownCheck = async function knockdownCheck(player, character, damage) {
   character.knockdown += damage;
   if (character.movementType !== 'Prone' && character.knockdown < 1) {
-    const result = await MML.attributeCheckRoll('Knockdown System Strength Roll', character.systemStrength, [_.has(character.statusEffects, 'Stumbling') ? -5 : 0])
+    const result = await MML.attributeCheckRoll(player, character.systemStrength, [_.has(character.statusEffects, 'Stumbling') ? -5 : 0])
     if (result === 'Failure') {
       character.movementType = 'Prone';
     } else {
@@ -225,9 +225,9 @@ MML.knockdownCheck = async function knockdownCheck(player, character, damage) {
 };
 
 MML.sensitiveAreaCheck = async function sensitiveAreaCheck(player, character, hitPosition) {
-  if (MML.sensitiveAreas[character.bodyType].indexOf(hitPosition) > -1) {
-    await MML.goToMenu(player, { message: character.name + '\'s Sensitive Area Roll', buttons: ['Roll'] });
-    const result = await MML.attributeCheckRoll('Sensitive Area Willpower Roll', character.willpower);
+  if (MML.sensitiveAreas[character.bodyType].includes(hitPosition)) {
+    await MML.goToMenu(player, character.name + '\'s Sensitive Area Roll', ['Roll']);
+    const result = await MML.attributeCheckRoll(player, character.willpower);
     if (result === 'Failure') {
       MML.addStatusEffect(character, 'Sensitive Area', {
         startingRound: state.MML.GM.currentRound
@@ -237,8 +237,8 @@ MML.sensitiveAreaCheck = async function sensitiveAreaCheck(player, character, hi
 };
 
 MML.damageCharacter = async function damageCharacter(player, character, damage, type, hitPosition) {
-  const reducedDamage = await MML.armorDamageReduction(player, character, hitPosition, damage, type);
-  await MML.alterHP(player, character, MML.getBodyPart(hitPosition).bodyPart, damageAfterArmor);
+  const reducedDamage = await MML.armorDamageReduction(player, character, hitPosition.name, damage, type);
+  await MML.alterHP(player, character, hitPosition.bodyPart, reducedDamage);
   await MML.sensitiveAreaCheck(player, character, hitPosition.name);
   await MML.knockdownCheck(player, character, damage);
 };
@@ -252,35 +252,33 @@ MML.alterEP = function alterEP(player, character, epAmount) {
   }
 };
 
-MML.armorDamageReduction = function armorDamageReduction(player, character, position, damage, type, coverageRoll) {
-  var positionApvs = character.armorProtectionValues[position];
-  return MML.armorCoverageRoll(positionApvs[type].coverage)
-    .then(function (coverageRoll) {
-      var apvBase = _.find(positionApvs[type], function (apv) {
-        return coverageRoll <= apv.coverage;
-      }).value;
-      var apvImpact = _.find(positionApvs.Impact, function (apv) {
-        return coverageRoll <= apv.coverage;
-      }).value;
-
-      if (damage + apvBase >= 0) {
-        var impactDamage;
-        if (type === 'Surface' || type === 'Cut' || type === 'Pierce') {
-          impactDamage = Math.ceil(damage / 2);
-        } else if (type === 'Chop' || type === 'Thrust') {
-          impactDamage = Math.ceil(damage * 0.75);
-        } else {
-          return 0;
-        }
-        if (impactDamage + apvImpact >= 0) {
-          return 0;
-        } else {
-          return impactDamage + apvImpact;
-        }
-      } else {
-        return damage + apvBase;
-      }
-    });
+MML.armorDamageReduction = async function armorDamageReduction(player, character, position, damage, type) {
+  const positionApvs = character.armorProtectionValues[position];
+  const baseApvs = positionApvs[type];
+  const impactApvs = positionApvs['Impact'];
+  var apvBase;
+  var apvImpact;
+  if (baseApvs.length > 1) {
+    await MML.goToMenu(player, 'Armor Coverage Roll', ['Roll']);
+    const coverageRoll = await genericRoll(player, '1d100');
+    apvBase = _.find(positionApvs[type], function (apv) {
+      return coverageRoll <= apv.coverage;
+    }).value;
+    apvImpact = _.find(positionApvs.Impact, function (apv) {
+      return coverageRoll <= apv.coverage;
+    }).value;
+  } else {
+    apvBase = baseApvs[0];
+    apvImpact = impactApvs[0];
+  }
+  const baseDamage = damage + apvBase;
+  if (baseDamage > 0 && !['Impact', 'Flanged'].includes(type)) {
+    const impactDamage = ['Surface', 'Cut', 'Pierce'].includes(type) ? Math.ceil(damage / 2) : Math.ceil(damage * 0.75);
+    if (impactDamage + apvImpact < 0) {
+      return impactDamage + apvImpact;
+    }
+  }
+  return 0;
 };
 
 MML.startCastAction = function startCastAction(character) {

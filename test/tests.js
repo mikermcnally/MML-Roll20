@@ -140,10 +140,10 @@ function runTests() {
         await startTestCombat(player, _.pluck(MML.characters, 'id'));
         await setActionPunchAttack(player);
         await clickButton(player, 'Roll');
-          // await clickButton(player, 'changeRoll eleventy');
-          // await clickButton(player, 'changeRoll 36');
-          // await clickButton(player, 'changeRoll 25');
-          // await clickButton(player, 'changeRoll 26');
+        await clickButton(player, 'changeRoll eleventy');
+        await clickButton(player, 'changeRoll 36');
+        await clickButton(player, 'changeRoll 25');
+        await clickButton(player, 'changeRoll 26');
         await clickButton(player, 'changeRoll 35');
         await clickButton(player, 'acceptRoll');
         await clickButton(player, 'Observe');
@@ -165,40 +165,41 @@ function runTests() {
         await clickButton(player, 'changeRoll 16');
         await clickButton(player, 'acceptRoll');
         await clickButton(player, 'Roll');
-        // await clickButton(player, 'changeRoll 33');
-          // await clickButton(player, 'acceptRoll');
-          // await clickButton(player, 'Roll');
-          // await clickButton(player, 'changeRoll 4');
-          // await clickButton(player, 'acceptRoll');
-          // await clickButton(player, 'Roll');
-          // await clickButton(player, 'changeRoll 4');
-          // await clickButton(player, 'acceptRoll');
-          // .then(setActionPunchAttack)
-          // await clickButton(player, 'Accept');
-          // await clickButton(player, 'Change Action');
-          // await clickButton(player, 'Observe');
-          // await clickButton(player, 'Edit Action');
-          // await clickButton(player, 'Observe');
-          // await clickButton(player, 'Accept');
-          // await clickButton(player, 'Start Action');
-          // await clickButton(player, 'End Movement');
-          // await clickButton(player, 'End Action');
-          // await clickButton(player, 'Movement Only');
-          // await clickButton(player, 'Accept');
-          // await clickButton(player, 'Start Action');
-          // await clickButton(player, 'End Movement');
-          // await clickButton(player, 'End Action');
-          // await clickButton(player, 'Movement Only');
-          // await clickButton(player, 'End Movement');
-          // await clickButton(player, 'Start Action');
-          // await clickButton(player, 'End Movement');
-          // await clickButton(player, 'End Action');
-          // await clickButton(player, 'Observe');
-          // await clickButton(player, 'Accept');
-          // await clickButton(player, 'acceptRoll');
-          // .then(console.log)
-          // .then(function (input) { console.log('done'); })
-          // .catch(console.log);
+        await clickButton(player, 'Change');
+        await clickButton(player, 'Groin');
+        await clickButton(player, 'Continue');
+        await clickButton(player, 'Roll');
+        await clickButton(player, 'changeRoll 4');
+        await clickButton(player, 'acceptRoll');
+        await clickButton(player, 'Roll');
+        await clickButton(player, 'changeRoll 4');
+        await clickButton(player, 'acceptRoll');
+        await setActionPunchAttack(player);
+        await clickButton(player, 'Accept');
+        // await clickButton(player, 'Change Action');
+        // await clickButton(player, 'Observe');
+        // await clickButton(player, 'Edit Action');
+        // await clickButton(player, 'Observe');
+        // await clickButton(player, 'Accept');
+        // await clickButton(player, 'Start Action');
+        // await clickButton(player, 'End Movement');
+        // await clickButton(player, 'End Action');
+        // await clickButton(player, 'Movement Only');
+        // await clickButton(player, 'Accept');
+        // await clickButton(player, 'Start Action');
+        // await clickButton(player, 'End Movement');
+        // await clickButton(player, 'End Action');
+        // await clickButton(player, 'Movement Only');
+        // await clickButton(player, 'End Movement');
+        // await clickButton(player, 'Start Action');
+        // await clickButton(player, 'End Movement');
+        // await clickButton(player, 'End Action');
+        // await clickButton(player, 'Observe');
+        // await clickButton(player, 'Accept');
+        // await clickButton(player, 'acceptRoll');
+        // .then(console.log)
+        // .then(function (input) { console.log('done'); })
+        // .catch(console.log);
       });
     });
 
@@ -549,6 +550,7 @@ async function setActionPunchAttack(player) {
   await clickButton(player, 'Punch');
   await clickButton(player, 'None');
   await clickButton(player, 'Neutral');
+  return;
 }
 
 async function executeObserve(player) {
