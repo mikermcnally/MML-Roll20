@@ -11,7 +11,7 @@ MML.spells['Flame Bolt'] = {
   target: [15, 1],
   targetSizeMatters: false,
   metaMagic: ['Increase Potency'],
-  process: function() {
+  cast: function() {
 
   }
 };
@@ -28,7 +28,7 @@ MML.spells['Dart'] = {
   target: 'Single',
   targetSizeMatters: false,
   metaMagic: ['Increase Potency', 'Called Shot', 'Called Shot Specific'],
-  process: function() {
+  cast: function() {
     var currentAction = state.MML.GM.currentAction;
     var character = currentAction.character;
     var parameters = currentAction.parameters;
@@ -91,7 +91,7 @@ MML.spells['Hail of Stones'] = {
   target: '5\' Radius',
   targetSizeMatters: false,
   metaMagic: ['Increase Potency'],
-  process: function() {
+  cast: function() {
     var currentAction = state.MML.GM.currentAction;
     var character = currentAction.character;
     var parameters = currentAction.parameters;

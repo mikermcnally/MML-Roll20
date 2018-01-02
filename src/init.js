@@ -1,8 +1,8 @@
 var MML = MML || {};
 
 MML.init = function() {
-  state.MML = state.MML || {};
-  state.MML.GM = state.MML.GM || {
+  state.MML = {};
+  state.MML.GM = {
     player: new MML.Player('Robot', true),
     name: 'Robot',
     currentAction: {},

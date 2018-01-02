@@ -58,13 +58,13 @@ MML.menuGmCombat = async function menuGmCombat(player) {
           return MML.startCombat(selectedIds);
         } else {
           sendChat('', '&{template:charMenu} {{name=Error}} {{message=No tokens selected}}');
-          return MML.goToMenu(player, MML.menuGmCombat(player));
+          return MML.menuGmCombat(player);
         }
       case 'Back':
         return MML.menuMainGm(player);
     }
-  } catch (e) {
-    console.log(e);
+  } catch (error) {
+    log(error);
   }
 };
 

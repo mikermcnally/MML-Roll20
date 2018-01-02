@@ -160,7 +160,7 @@ MML.processAttack = async function processAttack(player, character, action) {
   });
 
   var attackType = action.attackType;
-  if (['Grapple', 'Place a Hold', 'Break a Hold', 'Break Grapple', 'Takedown', 'Regain Feet'].indexOf(attackType) > -1) {
+  if (['Grapple', 'Place a Hold', 'Break a Hold', 'Break Grapple', 'Takedown', 'Regain Feet'].includes(attackType)) {
     return MML.grappleAttackAction(player, character, action);
   } else if (MML.isDualWielding(character)) {
     return MML.dualWieldAttackAction(player, character, action);

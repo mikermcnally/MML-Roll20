@@ -197,9 +197,9 @@ function runTests() {
         await clickButton(player, 'Roll');
         await clickButton(player, 'changeRoll 80');
         await clickButton(player, 'acceptRoll');
-        await clickButton(player, 'End Action');
         await clickButton(player, 'Observe');
-        // await clickButton(player, 'Accept');
+        await clickButton(player, 'Accept');
+        await clickButton(player, 'Start Action');
         // await clickButton(player, 'acceptRoll');
 
         // .then(console.log)

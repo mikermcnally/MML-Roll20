@@ -1,4 +1,4 @@
-MML.newRoundUpdate = function newRoundUpdate(character) {
+MML.newRoundUpdate = async function newRoundUpdate(character) {
   if (_.has(character.statusEffects, 'Melee This Round')) {
     var fatigueRate = 1;
     if (_.has(character.statusEffects, 'Pinned')) {
@@ -9,17 +9,17 @@ MML.newRoundUpdate = function newRoundUpdate(character) {
 
     if (!_.has(character.statusEffects, 'Fatigue')) {
       if (character.roundsExertion > character.fitness) {
-        state.MML.GM.fatigueChecks.push(character);
+        await MML.fatigueCheck(player, character);
       }
     } else {
       if (character.roundsExertion > Math.round(character.fitness / 2)) {
-        state.MML.GM.fatigueChecks.push(character);
+        await MML.fatigueCheck(player, character);
       }
     }
   } else if (_.has(character.statusEffects, 'Fatigue') || character.roundsExertion > 0) {
     character.roundsRest++;
-    if (character.roundsRest >= 6) {
-      state.MML.GM.fatigueChecks.push(character);
+    if (character.roundsRest > 5) {
+      await MML.fatigueRecovery(player, character);
     }
   }
 
@@ -107,7 +107,7 @@ MML.moveDistance = function moveDistance(character, distance) {
 };
 
 MML.setReady = function setReady(character, ready) {
-  if (state.MML.GM.inCombat === true && ready === false) {
+  if (state.MML.GM.inCombat && !ready) {
     MML.getCharacterToken(character.id).set('tint_color', '#FF0000');
   } else {
     MML.getCharacterToken(character.id).set('tint_color', 'transparent');
@@ -246,7 +246,7 @@ MML.damageCharacter = async function damageCharacter(player, character, damage, 
 MML.alterEP = function alterEP(player, character, epAmount) {
   character.ep += epAmount;
   if (character.ep < Math.round(0.25 * character.epMax)) {
-    return MML.fatigueCheckRoll(player, character);
+    return MML.fatigueCheck(player, character);
   } else {
     return player;
   }

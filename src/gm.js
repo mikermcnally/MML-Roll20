@@ -2,15 +2,15 @@ MML.startCombat = function startCombat(selectedIds) {
   var gm = state.MML.GM;
   gm.currentRound = 0;
   gm.inCombat = true;
-  gm.combatants = selectedIds.map(id => MML.characters[id]);
+  gm.allCombatants = selectedIds.map(id => MML.characters[id]);
   _.each(MML.players, function(player) {
     player.combatants = player.characters.filter(character => selectedIds.includes(character.id));
   });
-  _.each(gm.combatants, function(character) {
+  _.each(gm.allCombatants, function(character) {
     MML.setReady(character, false);
     MML.setCombatVision(character);
   });
-  MML.setTurnOrder(gm.combatants);
+  MML.setTurnOrder(gm.allCombatants);
   Campaign().set('initiativepage', 'true');
   return MML.newRound(gm);
 };
@@ -19,8 +19,7 @@ MML.newRound = async function newRound(gm) {
   try {
     gm.currentRound++;
     gm.roundStarted = false;
-    gm.combatants = gm.combatants.map(character => MML.newRoundUpdate(character));
-
+    gm.allCombatants = await Promise.all(gm.allCombatants.map(character => MML.newRoundUpdate(character)));
     await Promise.all(_.values(MML.players).map(player => MML.prepareCharacters(player)));
     return await MML.startRound(gm);
   } catch (err) {
@@ -31,9 +30,9 @@ MML.newRound = async function newRound(gm) {
 MML.startRound = async function startRound(gm) {
   const {pressedButton} = await MML.goToMenu(gm.player, 'Start round when all characters are ready.', ['Start Round', 'End Combat']);
   if (pressedButton === 'Start Round') {
-    if (MML.checkReady(gm.combatants)) {
+    if (MML.checkReady(gm.allCombatants)) {
       gm.roundStarted = true;
-      _.each(gm.combatants, function(character) {
+      _.each(gm.allCombatants, function(character) {
         character.movementAvailable = character.movementRatio;
       });
       return await MML.nextAction(gm);
@@ -47,55 +46,29 @@ MML.startRound = async function startRound(gm) {
 };
 
 MML.endCombat = function endCombat(gm) {
-  if (gm.combatants.length > 0) {
-    _.each(gm.combatants, function(character) {
-      character.setReady(true);
-      character.setCombatVision();
+  if (gm.allCombatants.length > 0) {
+    _.each(gm.allCombatants, function(character) {
+      MML.setReady(character, true);
+      MML.setCombatVision(character);
     });
     gm.inCombat = false;
-    gm.combatants = [];
+    gm.allCombatants = [];
     Campaign().set('initiativepage', 'false');
   }
 };
 
 MML.nextAction = async function nextAction(gm) {
-  MML.setTurnOrder(gm.combatants);
-  if (MML.checkReady(gm.combatants)) {
-    var character = gm.combatants[0];
+  MML.setTurnOrder(gm.allCombatants);
+  if (MML.checkReady(gm.allCombatants)) {
+    var character = gm.allCombatants[0];
     if (character.initiative > 0) {
       gm.actor = character.id;
       await MML.startAction(character.player, character, MML.validateAction(character));
-      console.log("GRASS TASTES BAD");
       return await MML.nextAction(gm);
     } else {
       return MML.newRound(gm);
     }
   }
-};
-
-MML.nextFatigueCheck = function nextFatigueCheck() {
-  var gm = state.MML.GM;
-  if (gm.fatigueCheckIndex < gm.fatigueChecks.length) {
-    var character = gm.fatigueChecks[gm.fatigueCheckIndex];
-    var player = character.player;
-    if (character.roundsRest >= 6) {
-      player.charMenuFatigueRecoveryRoll(character.name);
-    } else {
-      player.charMenuFatigueCheckRoll(character.name);
-    }
-    player.displayMenu();
-    gm.fatigueCheckIndex++;
-  } else {
-    _.each(MML.players, function(player) {
-      MML.prepareCharacters(player);
-    });
-  }
-};
-
-MML.setTargets = function setTargets() {
-  this.targets = this.characters[this.actor].action.targets;
-  this.targetIndex = 0;
-  this.currentTarget = this.targets[0];
 };
 
 MML.checkReady = function checkReady(combatants) {
@@ -105,7 +78,7 @@ MML.checkReady = function checkReady(combatants) {
 };
 
 MML.displayThreatZones = function displayThreatZones(toggle) {
-  _.each(state.MML.GM.combatants, function(character) {
+  _.each(state.MML.GM.allCombatants, function(character) {
     var token = MML.getCharacterToken(character.id);
     var radius1 = '';
     var radius2 = '';
@@ -122,15 +95,14 @@ MML.displayThreatZones = function displayThreatZones(toggle) {
 };
 
 MML.setTurnOrder = function setTurnOrder(combatants) {
-  combatants.sort(function(a, b) { return b.initiative - a.initiative; });
-  state.MML.GM.combatants = combatants;
-  var turnorder = [];
-  _.each(combatants, function (character) {
-    turnorder.push({
+  combatants.sort((a, b) => b.initiative - a.initiative);
+  state.MML.GM.allCombatants = combatants;
+  const turnorder = combatants.map(function (character) {
+    return {
       id: MML.getCharacterToken(character.id).id,
       pr: character.initiative,
       custom: ''
-    });
+    };
   });
   Campaign().set('turnorder', JSON.stringify(turnorder));
 };

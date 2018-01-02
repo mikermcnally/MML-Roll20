@@ -391,9 +391,9 @@ MML.grappleDefenseBrawlRollApply = function grappleDefenseBrawlRollApply(charact
   MML[state.MML.GM.currentAction.callback]();
 };
 
-MML.holdAimRoll = async function holdAimRoll(character) {
+MML.holdAimRoll = async function holdAimRoll(player, character) {
   await MML.goToMenu(player, 'Strength Check Required to Maintain' + character.name + '\'s Aim', ['Roll']);
-  return MML.attributeCheckRoll(character.strength);
+  return MML.attributeCheckRoll(player, character.strength);
 };
 
 MML.castingRoll = async function castingRoll(player, character, task, skill, metaMagicMod) {
@@ -401,8 +401,8 @@ MML.castingRoll = async function castingRoll(player, character, task, skill, met
   return MML.universalRoll(player, [task, skill, character.situationalMod, character.castingMod, character.attributeCastingMod, metaMagicMod]);
 };
 
-MML.fatigueCheckRoll = async function fatigueCheckRoll(player, character) {
-  const result = await MML.attributeCheckRoll(character.systemStrength, [_.has(character.statusEffects, 'Fatigue') ? -4 : 0]);
+MML.fatigueCheck= async function fatigueCheck(player, character) {
+  const result = await MML.attributeCheckRoll(player, character.systemStrength, [_.has(character.statusEffects, 'Fatigue') ? -4 : 0]);
   if (result === 'Critical Success' || result === 'Success') {
     if (_.has(character.statusEffects, 'Fatigue')) {
       character.statusEffects['Fatigue'].level += 1;
@@ -414,8 +414,8 @@ MML.fatigueCheckRoll = async function fatigueCheckRoll(player, character) {
   }
 };
 
-MML.fatigueRecoveryRoll = async function fatigueRecoveryRoll(character, modifier) {
-  const result = await MML.attributeCheckRoll(character.health);
+MML.fatigueRecovery = async function fatigueRecovery(player, character, modifier) {
+  const result = await MML.attributeCheckRoll(player, character.health);
   if (result === 'Critical Success' || result === 'Success') {
     character.roundsRest = 0;
     character.roundsExertion = 0;
