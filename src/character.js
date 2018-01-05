@@ -144,7 +144,8 @@ MML.alterHP = async function alterHP(player, character, bodyPart, hpAmount) {
       } else { //Add damage to duration of effect
         duration = parseInt(character.statusEffects['Major Wound, ' + bodyPart].duration) - hpAmount;
       }
-      const result = await MML.attributeCheckRoll('Major Wound Willpower Roll', character.willpower);
+      await MML.goToMenu(player, character.name + '\'s Major Wound Roll', ['Roll']);
+      const result = await MML.attributeCheckRoll(player, character.willpower);
       if (result === 'Failure') {
         MML.addStatusEffect(character, 'Major Wound, ' + bodyPart, {
           duration: duration,
@@ -160,7 +161,8 @@ MML.alterHP = async function alterHP(player, character, bodyPart, hpAmount) {
       } else {
         duration = -hpAmount;
       }
-      const result = await MML.attributeCheckRoll('Disabling Wound System Strength Roll', character.systemStrength);
+      await MML.goToMenu(player, character.name + '\'s Disabling Wound Roll', ['Roll']);
+      const result = await MML.attributeCheckRoll(player, character.systemStrength);
       MML.addStatusEffect(character, 'Disabling Wound, ' + bodyPart, {
         bodyPart: bodyPart
       });
@@ -203,7 +205,8 @@ MML.setWoundFatigue = async function setWoundFatigue(player, character) {
   character.hp = currentHP;
 
   if (currentHP['Wound Fatigue'] < 0 && !_.has(character.statusEffects, 'Wound Fatigue')) {
-    const result = await MML.attributeCheckRoll('Wound Fatigue Roll', character.systemStrength);
+    await MML.goToMenu(player, character.name + '\'s Wound Fatigue Roll', ['Roll']);
+    const result = await MML.attributeCheckRoll(player, character.systemStrength);
     if (result === 'Failure') {
       MML.addStatusEffect(character, 'Wound Fatigue', {});
     }
@@ -213,6 +216,7 @@ MML.setWoundFatigue = async function setWoundFatigue(player, character) {
 MML.knockdownCheck = async function knockdownCheck(player, character, damage) {
   character.knockdown += damage;
   if (character.movementType !== 'Prone' && character.knockdown < 1) {
+    await MML.goToMenu(player, character.name + '\'s Knockdown Roll', ['Roll']);
     const result = await MML.attributeCheckRoll(player, character.systemStrength, [_.has(character.statusEffects, 'Stumbling') ? -5 : 0])
     if (result === 'Failure') {
       character.movementType = 'Prone';
@@ -243,12 +247,10 @@ MML.damageCharacter = async function damageCharacter(player, character, damage, 
   await MML.knockdownCheck(player, character, damage);
 };
 
-MML.alterEP = function alterEP(player, character, epAmount) {
+MML.alterEP = async function alterEP(player, character, epAmount) {
   character.ep += epAmount;
   if (character.ep < Math.round(0.25 * character.epMax)) {
-    return MML.fatigueCheck(player, character);
-  } else {
-    return player;
+    await MML.fatigueCheck(player, character);
   }
 };
 

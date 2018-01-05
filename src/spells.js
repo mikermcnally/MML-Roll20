@@ -28,10 +28,7 @@ MML.spells['Dart'] = {
   target: 'Single',
   targetSizeMatters: false,
   metaMagic: ['Increase Potency', 'Called Shot', 'Called Shot Specific'],
-  cast: function() {
-    var currentAction = state.MML.GM.currentAction;
-    var character = currentAction.character;
-    var parameters = currentAction.parameters;
+  cast: async function castDart(player, character, action) {
     var casterSkill = parameters.casterSkill;
     var spell = parameters.spell;
     var target = parameters.target;
@@ -69,7 +66,7 @@ MML.spells['Dart'] = {
       }
     } else if (epModified !== true) {
       parameters.epModified = true;
-      character.alterEP(-1 * epCost * _.reduce(_.pluck(metaMagic, 'epMod'), function(memo, num) { return memo * num; }));
+      await MML.alterEP(player, character, -1 * epCost * _.reduce(_.pluck(metaMagic, 'epMod'), function(memo, num) { return memo * num; }));
     } else {
       if (_.isUndefined(targetArray[state.MML.GM.currentAction.targetIndex + 1])) {
         MML.damageCharacter('endAction');
@@ -91,10 +88,7 @@ MML.spells['Hail of Stones'] = {
   target: '5\' Radius',
   targetSizeMatters: false,
   metaMagic: ['Increase Potency'],
-  cast: function() {
-    var currentAction = state.MML.GM.currentAction;
-    var character = currentAction.character;
-    var parameters = currentAction.parameters;
+  cast: async function castHailOfStones(player, character, action) {
     var casterSkill = parameters.casterSkill;
     var spell = parameters.spell;
     var target = parameters.target;
@@ -145,7 +139,7 @@ MML.spells['Hail of Stones'] = {
       }
     } else if (epModified !== true) {
       state.MML.GM.currentAction.parameters.epModified = true;
-      character.alterEP(-1 * epCost * _.reduce(_.pluck(metaMagic, 'epMod'), function(memo, num) { return memo * num; }));
+      await MML.alterEP(player, character, -1 * epCost * _.reduce(_.pluck(metaMagic, 'epMod'), function(memo, num) { return memo * num; }));
     } else {
       if (_.isUndefined(state.MML.GM.currentAction.targetArray[state.MML.GM.currentAction.targetIndex + 1])) {
         MML.damageCharacter('endAction');
