@@ -655,23 +655,6 @@ MML.menucharAddTarget = function menucharAddTarget(player, who) {
     return memo * num;
   }) * parameters.epCost;
   player.message = 'Current EP Cost: ' + epProduct + '\nAdd another target or cast spell:';
-
-  if (character.ep > epProduct) {
-    player.buttons.push({
-      text: 'Add Target',
-      nextMenu: 'menuPause',
-      callback: function() {
-        character.chooseSpellTargets();
-      }
-    });
-  }
-  player.buttons.push({
-    text: 'Cast Spell',
-    nextMenu: 'menuPause',
-    callback: function() {
-      character[character.action.callback]();
-    }
-  });
 };
 
 MML.menucharIncreasePotency = function menucharIncreasePotency(player, who) {
