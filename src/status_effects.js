@@ -60,7 +60,7 @@ MML.statusEffects['Number of Defenses'] = function(effect, index) {
   if (state.MML.GM.roundStarted === false) {
     delete this.statusEffects[index];
   } else {
-    this.rangedDefenseMod += -20 * effect.number;
+    this.missileDefenseMod += -20 * effect.number;
     this.meleeDefenseMod += -20 * effect.number;
     this.statusEffects[index].description = 'Defense Modifier: ' + (-20 * effect.number) + '%';
   }
@@ -105,7 +105,7 @@ MML.statusEffects['Called Shot'] = function(effect, index) {
   ) {
     delete this.statusEffects[index];
   } else {
-    this.rangedDefenseMod += -10;
+    this.missileDefenseMod += -10;
     this.meleeDefenseMod += -10;
     this.missileAttackMod += -10;
     this.meleeAttackMod += -10;
@@ -123,7 +123,7 @@ MML.statusEffects['Called Shot Specific'] = function(effect, index) {
   if (state.MML.GM.inCombat === false || !_.contains(this.action.modifiers, 'Called Shot Specific')) {
     delete this.statusEffects[index];
   } else {
-    this.rangedDefenseMod += -30;
+    this.missileDefenseMod += -30;
     this.meleeDefenseMod += -30;
     this.meleeAttackMod += -30;
     this.missileAttackMod += -30;
@@ -140,7 +140,7 @@ MML.statusEffects['Aggressive Stance'] = function(effect, index) {
   if (state.MML.GM.inCombat === false || !_.contains(this.action.modifiers, 'Aggressive Stance')) {
     delete this.statusEffects[index];
   } else {
-    this.rangedDefenseMod += -40;
+    this.missileDefenseMod += -40;
     this.meleeDefenseMod += -40;
     this.meleeAttackMod += 10;
     this.perceptionCheckMod += -4;
@@ -154,7 +154,7 @@ MML.statusEffects['Defensive Stance'] = function(effect, index) {
   if (state.MML.GM.inCombat === false || !_.contains(this.action.modifiers, 'Defensive Stance')) {
     delete this.statusEffects[index];
   } else {
-    this.rangedDefenseMod += 40;
+    this.missileDefenseMod += 40;
     this.meleeDefenseMod += 40;
     this.meleeAttackMod += -30;
     this.perceptionCheckMod += -4;
@@ -173,7 +173,7 @@ MML.statusEffects['Observing'] = function(effect, index) {
   } else {
     // Observing this round
     this.perceptionCheckMod += 4;
-    this.rangedDefenseMod += -10;
+    this.missileDefenseMod += -10;
     this.meleeDefenseMod += -10;
     this.statusEffects[index].description = 'Defense Modifier: -10%. Preception Modifier: +4';
   }
@@ -277,7 +277,7 @@ MML.statusEffects['Held'] = function(effect, index) {
   if (!state.MML.GM.inCombat) {
     delete this.statusEffects[index];
   } else {
-    this.rangedDefenseMod += -20;
+    this.missileDefenseMod += -20;
     this.meleeDefenseMod += -20;
     this.meleeAttackMod += -10;
     this.statusEffects[index].description = 'Attack Modifier: -10%. Defense Modifier: -20';
@@ -287,7 +287,7 @@ MML.statusEffects['Holding'] = function(effect, index) {
   if (!state.MML.GM.inCombat) {
     delete this.statusEffects[index];
   } else {
-    this.rangedDefenseMod += -20;
+    this.missileDefenseMod += -20;
     this.meleeDefenseMod += -20;
     this.meleeAttackMod += -15;
     this.statusEffects[index].description = 'Attack Modifier: -15%. Defense Modifier: -20%';
@@ -334,7 +334,7 @@ MML.statusEffects['Overborne'] = function(effect, index) {
     if (this.situationalInitBonus !== 'No Combat') {
       this.situationalInitBonus += -15;
     }
-    this.rangedDefenseMod += -40;
+    this.missileDefenseMod += -40;
     this.meleeDefenseMod += -30;
     this.meleeAttackMod += -20;
     this.statusEffects[index].description = 'Attack Modifier: -20%. Defense Modifier: -30%. Dodge Modifier: -40%. Initiative: -15';

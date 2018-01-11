@@ -599,7 +599,7 @@ function pbcopy(data) {
 //   .then(executeObserve(player))
 //   expect(MML.characters['test1'].statusEffects, 'observe action should create "Observing" status effect').to.have.property("Observing");
 //   expect(MML.characters['test1'].perceptionCheckMod, '"Observing" status effect should add 4 to perceptionCheckMod').to.equal(4);
-//   expect(MML.characters['test1'].rangedDefenseMod, '"Observing" status effect should add -10 to rangedDefenseMod').to.equal(-10);
+//   expect(MML.characters['test1'].missileDefenseMod, '"Observing" status effect should add -10 to missileDefenseMod').to.equal(-10);
 //   expect(MML.characters['test1'].meleeDefenseMod, '"Observing" status effect should add -10 to meleeDefenseMod').to.equal(-10);
 //   expect(MML.characters['test1'].statusEffects, 'observe action should not create "Melee This Round" status effect').not.to.have.property("Melee This Round");
 //
@@ -639,7 +639,7 @@ function pbcopy(data) {
 //   .then(setTestRoll(player, 1);
 //   expect(MML.characters['test1'].statusEffects, 'observer should have "Observed" status effect').to.have.property("Observed");
 //   expect(MML.characters['test1'].situationalInitBonus, '"Observed" status effect should add 5 to situationalInitBonus').to.equal(5);
-//   expect(MML.characters['test1'].rangedDefenseMod, '"Observed" status effect should not add 10 to missileAttackMod when not wielding ranged weapon').to.equal(0);
+//   expect(MML.characters['test1'].missileDefenseMod, '"Observed" status effect should not add 10 to missileAttackMod when not wielding ranged weapon').to.equal(0);
 //
 //   .then(clickButton('Start Round');
 //   .then(clickButton('Start Action');
@@ -654,7 +654,7 @@ function pbcopy(data) {
 //   expect(MML.characters['test1'].statusEffects, 'blocking should create "Melee This Round" status effect for defender').to.have.property("Melee This Round");
 //   expect(MML.characters['test1'].statusEffects, 'blocking should create "Number of Defenses" status effect for defender').to.have.property("Number of Defenses");
 //   expect(MML.characters['test1'].statusEffects["Number of Defenses"].number, 'blocking should add 1 to "Number of Defenses" status effect for defender').to.equal(1);
-//   expect(MML.characters['test1'].rangedDefenseMod, '"Number of Defenses" status effect should add -20 to rangedDefenseMod').to.equal(-20);
+//   expect(MML.characters['test1'].missileDefenseMod, '"Number of Defenses" status effect should add -20 to missileDefenseMod').to.equal(-20);
 //   expect(MML.characters['test1'].meleeDefenseMod, '"Number of Defenses" status effect should add -20 to meleeDefenseMod').to.equal(-20);
 //   .then(setActionPunchAttack(player))
 //   .then(clickButton('Accept');
@@ -673,7 +673,7 @@ function pbcopy(data) {
 //   .then(setTestRoll(player, 1);
 //   .then(setTestRoll(player, 1);
 //   expect(MML.characters['test1'].statusEffects["Number of Defenses"].number, 'blocking should add 1 to "Number of Defenses" status effect for defender').to.equal(2);
-//   expect(MML.characters['test1'].rangedDefenseMod, '2 defenses should add -40 to rangedDefenseMod').to.equal(-40);
+//   expect(MML.characters['test1'].missileDefenseMod, '2 defenses should add -40 to missileDefenseMod').to.equal(-40);
 //   expect(MML.characters['test1'].meleeDefenseMod, '2 defenses should add -40 to meleeDefenseMod').to.equal(-40);
 //   expect(MML.characters['test1'].hp.Head, 'damage should accumlate').to.equal(MML.characters['test1'].hpMax.Head - 3);
 //   expect(MML.characters['test1'].hp['Wound Fatigue'], 'damage should accumlate').to.equal(MML.characters['test1'].hpMax['Wound Fatigue'] - 3);
@@ -682,7 +682,7 @@ function pbcopy(data) {
 //   .then(executeObserve(player))
 //   .then(executeObserve(player))
 //   expect(MML.characters['test1'].statusEffects, 'new rounds should remove "Number of Defenses" status effect for defender').not.to.have.property("Number of Defenses");
-//   expect(MML.characters['test1'].rangedDefenseMod, 'new rounds should remove "Number of Defenses" status effect -40 penalty to rangedDefenseMod').to.equal(0);
+//   expect(MML.characters['test1'].missileDefenseMod, 'new rounds should remove "Number of Defenses" status effect -40 penalty to missileDefenseMod').to.equal(0);
 //   expect(MML.characters['test1'].meleeDefenseMod, 'new rounds should remove "Number of Defenses" status effect -40 penalty to meleeDefenseMod').to.equal(0);
 //   expect(MML.characters['test1'].hp.Head, 'damage should accumlate').to.equal(MML.characters['test1'].hpMax.Head - 3);
 //   expect(MML.characters['test1'].hp['Wound Fatigue'], 'damage should accumlate').to.equal(MML.characters['test1'].hpMax['Wound Fatigue'] - 3);
@@ -1892,13 +1892,13 @@ function pbcopy(data) {
 //   expect(MML.characters['test0'].statusEffects, 'Choosing "Called Shot" modifier should add "Called Shot" status effect').to.have.property("Called Shot");
 //   expect(MML.characters['test0'].spentInitiative, '"Called Shot" status effect should add -5 to spentInitiative').to.equal(-5);
 //   expect(MML.characters['test0'].missileAttackMod, '"Called Shot" status effect should add -10 to missileAttackMod').to.equal(-10);
-//   expect(MML.characters['test0'].rangedDefenseMod, '"Called Shot" status effect should add -10 to rangedDefenseMod').to.equal(-10);
+//   expect(MML.characters['test0'].missileDefenseMod, '"Called Shot" status effect should add -10 to missileDefenseMod').to.equal(-10);
 //   expect(MML.characters['test0'].meleeAttackMod, '"Called Shot" status effect should add -10 to meleeAttackMod').to.equal(-10);
 //   expect(MML.characters['test0'].meleeDefenseMod, '"Called Shot" status effect should add -10 to missileAttackMod').to.equal(-10);
 //   expect(MML.characters['test1'].statusEffects, 'Choosing "Called Shot Specific" modifier should add "Called Shot Specific" status effect').to.have.property("Called Shot Specific");
 //   expect(MML.characters['test1'].spentInitiative, '"Called Shot Specific" status effect should add -5 to spentInitiative').to.equal(-5);
 //   expect(MML.characters['test1'].missileAttackMod, '"Called Shot Specific" status effect should add -30 and "Taking Aim" status effect level 1 should add 30 to missileAttackMod').to.equal(0);
-//   expect(MML.characters['test1'].rangedDefenseMod, '"Called Shot Specific" status effect should add -30 to rangedDefenseMod').to.equal(-30);
+//   expect(MML.characters['test1'].missileDefenseMod, '"Called Shot Specific" status effect should add -30 to missileDefenseMod').to.equal(-30);
 //   expect(MML.characters['test1'].meleeAttackMod, '"Called Shot Specific" status effect should add -30 to meleeAttackMod').to.equal(-30);
 //   expect(MML.characters['test1'].meleeDefenseMod, '"Called Shot Specific" status effect should add -30 to missileAttackMod').to.equal(-30);
 //   .then(clickButton('Start Action');

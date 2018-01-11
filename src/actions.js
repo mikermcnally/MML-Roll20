@@ -178,7 +178,7 @@ MML.missileAttackAction = async function missileAttackAction(player, character, 
   const target = await MML.getSingleTarget(player);
   const attack = await MML.missileAttackRoll(player, character, weapon.task, action.skill);
   if (['Success', 'Critical Success'].includes(attack)) {
-    const defense = await MML.rangedDefense(target.player, target, weapon);
+    const defense = await MML.missileDefense(target.player, target, weapon);
     if (!['Success', 'Critical Success'].includes(defense)) {
       const hitPosition = await MML.hitPositionRoll(player, character, target, action);
       const damage = await MML.missileDamageRoll(player, character, target, weapon, attack);

@@ -256,7 +256,7 @@ MML.meleeDefenseRoll = async function meleeDefenseRoll(player, character, attack
 
   MML.removeAimAndObserving(character);
   const defense = await MML.chooseMeleeDefense(player, character, dodgeMods, blockMods, attackerWeapon);
-  return defense === 'Failure' ? defense : MML.universalRoll(player, defense.modifiers);
+  return defense === 'Failure' ? defense : MML.universalRoll(player, defense);
 };
 
 MML.meleeDamageRoll = async function meleeDamageRoll(player, character, weapon, attack, bonusDamage) {
@@ -327,27 +327,48 @@ MML.missileDamageRoll = async function missileDamageRoll(player, character, weap
   return MML.damageRoll('Missile Damage Roll', weapon.damage, weapon.damageType, [bonusDamage || 0], rolls.attackRoll);
 };
 
-MML.rangedDefenseRoll = function rangedDefenseRoll(character, defenseChance) {
-  MML.universalRoll(player, [defenseChance]);
-};
+MML.missileDefenseRoll = async function missileDefenseRoll(player, character, attackerWeapon, range) {
+  const dodgeMods = [
+    character.missileDefenseMod,
+    character.attributeDefenseMod,
+    character.situationalMod,
+    MML.getShieldDefenseBonus(character)
+  ];
+  const defaultMartialSkill = character.weaponSkills['Default Martial'].level;
+  const dodgeSkill = _.isUndefined(character.skills['Dodge']) ? 0 : character.skills['Dodge'].level;
+  dodgeMods.push(dodgeSkill > defaultMartialSkill ? dodgeSkill : defaultMartialSkill);
 
-MML.rangedDefenseRollApply = function rangedDefenseRollApply(character) {
-  var result = character.player.currentRoll.result;
-
-  if (result === 'Success') {
-    if (_.has('Number of Defenses')) {
-      character.statusEffects['Number of Defenses'].number++;
-    } else {
-      MML.addStatusEffect(character, 'Number of Defenses', {
-        number: 1
-      });
-    }
-    if (!_.has(character.statusEffects, 'Dodged This Round')) {
-      MML.addStatusEffect(character, 'Dodged This Round', {});
-    }
+  var rangeMod;
+  switch (attackerWeapon.family) {
+    case 'MWD':
+    case 'MWM':
+      rangeMod = Math.floor(range / 75);
+      dodgeMods.push(rangeMod > 3 ? 3 : rangeMod);
+      break;
+    case 'TWH':
+      rangeMod = Math.floor(range / 5);
+      dodgeMods.push(rangeMod > 5 ? 5 : rangeMod);
+      dodgeMods.push(25);
+      break;
+    case 'TWK':
+      rangeMod = Math.floor(range / 5);
+      dodgeMods.push(rangeMod > 3 ? 3 : rangeMod);
+      dodgeMods.push(15);
+      break;
+    case 'TWS':
+      rangeMod = Math.floor(range / 5);
+      dodgeMods.push(rangeMod > 5 ? 5 : rangeMod);
+      dodgeMods.push(15);
+      break;
+    default:
+      rangeMod = Math.floor(range / 20);
+      dodgeMods.push(rangeMod > 5 ? 5 : rangeMod);
   }
-  state.MML.GM.currentAction.rolls.defenseRoll = result;
-  MML[state.MML.GM.currentAction.callback]();
+
+  MML.removeAimAndObserving(character);
+  MML.chooseMissileDefense(player, character, dodgeMods)
+  const defense = await MML.chooseMissileDefense(player, character, defense, attackerWeapon);
+  return defense === 'Failure' ? defense : MML.universalRoll(player, defense);
 };
 
 MML.grappleDefenseWeaponRoll = function grappleDefenseWeaponRoll(character, attackChance) {

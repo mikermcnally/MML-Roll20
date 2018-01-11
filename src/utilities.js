@@ -1,6 +1,6 @@
 // Character Functions
 MML.getCharFromName = function getCharFromName(name) {
-  var character = findObjs({
+  const character = findObjs({
     _type: 'character',
     archived: false,
     name: name
@@ -30,7 +30,7 @@ MML.createAbility = function createAbility(id, name, action, istokenaction) {
 };
 
 MML.getCharAttribute = function getCharAttribute(characterId, attribute) {
-  var attributeObject = findObjs({
+  const attributeObject = findObjs({
     _type: 'attribute',
     _characterid: characterId,
     name: attribute
@@ -39,7 +39,7 @@ MML.getCharAttribute = function getCharAttribute(characterId, attribute) {
   })[0];
 
   if (_.isUndefined(attributeObject)) {
-    attributeObject = MML.createAttribute(attribute, '', '', characterId);
+    return MML.createAttribute(attribute, '', '', characterId);
   }
   return attributeObject;
 };
@@ -49,29 +49,25 @@ MML.getCurrentAttribute = function getCurrentAttribute(id, attribute) {
 };
 
 MML.getCurrentAttributeAsFloat = function getCurrentAttributeAsFloat(id, attribute) {
-  var result = parseFloat(MML.getCurrentAttribute(id, attribute));
-
+  const result = parseFloat(MML.getCurrentAttribute(id, attribute));
   if (isNaN(result)) {
     MML.setCurrentAttribute(id, attribute, 0);
-    result = 0;
+    return 0;
   }
-
   return result;
 };
 
 MML.getMaxAttributeAsFloat = function getMaxAttributeAsFloat(id, attribute) {
-  var result = parseFloat(MML.getCharAttribute(id, attribute).get('max'));
-
+  const result = parseFloat(MML.getCharAttribute(id, attribute).get('max'));
   if (isNaN(result)) {
     MML.setMaxAttribute(id, attribute, 0);
-    result = 0;
+    return 0;
   }
-
   return result;
 };
 
 MML.getCurrentAttributeAsBool = function getCurrentAttributeAsBool(id, attribute) {
-  var result = MML.getCurrentAttribute(id, attribute);
+  const result = MML.getCurrentAttribute(id, attribute);
   if (result.toString() === 'true') {
     return true;
   } else {
@@ -80,47 +76,45 @@ MML.getCurrentAttributeAsBool = function getCurrentAttributeAsBool(id, attribute
 };
 
 MML.getCurrentAttributeAsArray = function getCurrentAttributeAsArray(id, attribute) {
-  var result = MML.getCurrentAttribute(id, attribute);
-
+  const result = MML.getCurrentAttribute(id, attribute);
   try {
-    result = JSON.parse(result);
-  } catch (e) {
+    return JSON.parse(result);
+  } catch (err) {
+    log(err);
     MML.setCurrentAttribute(id, attribute, '[]');
-    result = [];
+    return [];
   }
-  return result;
 };
 
 MML.getCurrentAttributeJSON = function getCurrentAttributeJSON(id, attribute) {
-  var result = MML.getCurrentAttribute(id, attribute);
-
+  const result = MML.getCurrentAttribute(id, attribute);
   try {
-    result = JSON.parse(result);
-  } catch (e) {
+    return JSON.parse(result);
+  } catch (err) {
+    log(err);
     MML.setCurrentAttribute(id, attribute, '{}');
-    result = {};
+    return [];
   }
-  return result;
 };
 
 MML.getSkillAttributes = function getSkillAttributes(id, skillType) {
-  var attributes = findObjs({
+  const attributes = findObjs({
     _type: 'attribute',
     _characterid: id
   }, {
     caseInsensitive: false
   });
-  var skills = {};
-  var skill_data = {};
+  const skills = {};
+  const skill_data = {};
 
   _.each(attributes, function(attribute) {
-    var attributeName = attribute.get('name');
+    const attributeName = attribute.get('name');
 
     if (attributeName.indexOf('repeating_' + skillType) !== -1) {
-      var attributeString = attributeName.split('_');
+      const attributeString = attributeName.split('_');
       var _id = attributeString[2];
-      var property = attributeString[3];
-      var value = attribute.get('current');
+      const property = attributeString[3];
+      const value = attribute.get('current');
       _.each(skills, function(skill, key) {
         if (key.toLowerCase() === _id) {
           _id = key;
@@ -168,8 +162,8 @@ MML.getAttributeTableValue = function getAttributeTableValue(attribute, inputVal
 
 // Token Functions
 MML.getCharacterIdFromToken = function getCharacterIdFromToken(token) {
-  var tokenObject = getObj('graphic', token.id);
-  var characterObject = getObj('character', tokenObject.get('represents'));
+  const tokenObject = getObj('graphic', token.id);
+  const characterObject = getObj('character', tokenObject.get('represents'));
 
   if (tokenObject.get('name').indexOf('spellMarker') > -1) {
     // Do nothing
@@ -182,7 +176,7 @@ MML.getCharacterIdFromToken = function getCharacterIdFromToken(token) {
 };
 
 MML.getCharacterToken = function getCharacterToken(character_id) {
-  var tokens = findObjs({
+  const tokens = findObjs({
     _pageid: Campaign().get('playerpageid'),
     _type: 'graphic',
     _subtype: 'token',
@@ -191,51 +185,23 @@ MML.getCharacterToken = function getCharacterToken(character_id) {
   return tokens[0];
 };
 
-MML.getSpellMarkerToken = function getSpellMarkerToken(spell) {
-  var tokens = findObjs({
+MML.getSpellMarkerToken = function getSpellMarkerToken(name) {
+  const tokens = findObjs({
     _pageid: Campaign().get('playerpageid'),
     _type: 'graphic',
     _subtype: 'token',
     name: name
   });
-
   return tokens[0];
 };
 
-MML.getSelectedTokens = function getSelectedTokens(selected) {
-  tokens = [];
-
-  var index;
-  for (index in selected) {
-    tokens.push(getObj('graphic', selected[index]._id));
-  }
-  return tokens;
-};
-
 MML.getSelectedIds = function getSelectedIds(selected) {
-  characters = [];
-
-  var index;
-  _.each(selected, function(object) {
-    if (object._type === 'graphic') {
-      characters.push(MML.getCharacterIdFromToken(getObj('graphic', object._id)));
-    }
-  });
-  return characters;
+  return selected.map(token => MML.getCharacterIdFromToken(token));
 };
 
 MML.displayAura = function displayAura(token, radius, auraNumber, color) {
-  var auraRadius;
-  var auraColor;
-  if (auraNumber === 2) {
-    auraRadius = 'aura2_radius';
-    auraColor = 'aura2_color';
-  } else {
-    auraRadius = 'aura1_radius';
-    auraColor = 'aura1_color';
-  }
-  token.set(auraRadius, radius);
-  token.set(auraColor, color);
+  token.set(auraNumber === 2 ? 'aura2_radius' : 'aura1_radius', radius);
+  token.set(auraNumber === 2 ? 'aura1_color' : 'aura1_color', color);
 };
 
 MML.getDistanceBetweenTokens = function getDistanceBetweenTokens(a, b) {
@@ -243,17 +209,17 @@ MML.getDistanceBetweenTokens = function getDistanceBetweenTokens(a, b) {
 };
 
 // Geometry Functions
-MML.feetToPixels = function feetToPixels(pixels) {
-  return pixels * 14;
+MML.feetToPixels = function feetToPixels(feet) {
+  return feet * 14;
 };
 
-MML.pixelsToFeet = function pixelsToFeet(feet) {
-  return Math.floor((feet / 14) + 0.5);
+MML.pixelsToFeet = function pixelsToFeet(pixels) {
+  return Math.floor((pixels / 14) + 0.5);
 };
 
 MML.getDistance = function getDistance(left1, left2, top1, top2) {
-  var leftDistance = Math.abs(left2 - left1);
-  var topDistance = Math.abs(top2 - top1);
+  const leftDistance = Math.abs(left2 - left1);
+  const topDistance = Math.abs(top2 - top1);
   return Math.sqrt(Math.pow(leftDistance, 2) + Math.pow(topDistance, 2));
 };
 
@@ -261,17 +227,16 @@ MML.getDistanceFeet = function getDistanceFeet(left1, left2, top1, top2) {
   return MML.pixelsToFeet(MML.getDistance(left1, left2, top1, top2));
 };
 
-MML.drawCirclePath = function drawCirclePath(left, top, radius) {
-  var pixelPerFoot = 14;
-  radius *= pixelPerFoot;
-  var pathArray = [
+MML.drawCirclePath = function drawCirclePath(left, top, radiusInFeet) {
+  const radius = MML.feetToPixels(radiusInFeet);
+  const pathArray = [
     ['M', left - radius, top],
     ['C', left - radius, top - (radius / 2), left - (radius / 2), top - radius, left, top - radius],
     ['C', left + (radius / 2), top - radius, left + radius, top - (radius / 2), left + radius, top],
     ['C', left + radius, top + (radius / 2), left + (radius / 2), top + radius, left, top + radius],
     ['C', left - (radius / 2), top + radius, left - radius, top + (radius / 2), left - radius, top]
   ];
-  var path = createObj('path', {
+  const path = createObj('path', {
     _path: JSON.stringify(pathArray),
     _pageid: Campaign().get('playerpageid'),
     layer: 'map',
@@ -286,22 +251,20 @@ MML.drawCirclePath = function drawCirclePath(left, top, radius) {
 };
 
 MML.rotateAxes = function rotateAxes(left, top, angle) {
-  var leftNew = left * Math.cos(angle * Math.PI / 180) + top * Math.sin(angle * Math.PI / 180);
-  var topNew = -left * Math.sin(angle * Math.PI / 180) + top * Math.cos(angle * Math.PI / 180);
-
+  const leftNew = left * Math.cos(angle * Math.PI / 180) + top * Math.sin(angle * Math.PI / 180);
+  const topNew = -left * Math.sin(angle * Math.PI / 180) + top * Math.cos(angle * Math.PI / 180);
   return [leftNew, topNew];
 };
 
 // Player Functions
 MML.getPlayerFromName = function getPlayerFromName(playerName) {
-  var player = findObjs({
+  const player = findObjs({
     _type: 'player',
     online: true,
     _displayname: playerName
   }, {
     caseInsensitive: false
   });
-
   return player[0];
 };
 
@@ -349,24 +312,4 @@ MML.clone = function clone(obj) {
     target[i] = this.clone(obj[i]);
   }
   return target;
-};
-
-MML.hexify = function hexify(stringIn) {
-  var stringOut = '';
-  var i;
-  for (i = 0; i < stringIn.length; i++) {
-    stringOut += ('000' + stringIn.charCodeAt(i).toString(16)).slice(-4);
-  }
-  return stringOut;
-};
-
-MML.dehexify = function dehexify(hexIn) {
-  var i;
-  var hexes = hexIn.match(/.{1,4}/g) || [];
-  var dehexed = '';
-  for (i = 0; i < hexes.length; i++) {
-    dehexed += String.fromCharCode(parseInt(hexes[i], 16));
-  }
-
-  return dehexed;
 };

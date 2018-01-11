@@ -10,7 +10,7 @@ MML.init = function() {
     currentRound: 0,
     roundStarted: false
   };
-  var playerObjects = findObjs({
+  const playerObjects = findObjs({
     _type: 'player',
     online: true
   }, {
@@ -25,7 +25,7 @@ MML.init = function() {
     }
   });
 
-  var characterObjects = findObjs({
+  const characterObjects = findObjs({
     _type: 'character',
     archived: false
   }, {
@@ -34,7 +34,7 @@ MML.init = function() {
 
   MML.characters = {};
   _.each(characterObjects, function(characterObject) {
-    var character = MML.createCharacter(characterObject.get('name'), characterObject.id);
+    const character = MML.createCharacter(characterObject.get('name'), characterObject.id);
     MML.setPlayer(character);
     MML.characters[character.id] = character;
   });
@@ -42,8 +42,8 @@ MML.init = function() {
   MML.initializeMenu(state.MML.GM.player);
 
   on('add:character', function(character) {
-    var id = character.get('id');
-    var name = character.get('name');
+    const id = character.get('id');
+    const name = character.get('name');
 
     MML.createAttribute('id', id, '', character);
     MML.createAttribute('player', state.MML.GM.player.name, '', character);
@@ -69,7 +69,7 @@ MML.init = function() {
 
     setTimeout(function () {
       MML.characters[id] = MML.createCharacter(name, character.id);
-      MML.characters[id].updateCharacterSheet();
+      MML.updateCharacterSheet(characters[id]);
     }, 2000);
   });
 
@@ -77,8 +77,8 @@ MML.init = function() {
     var id = attribute.get('_characterid');
     var attrName = attribute.get('name');
 
-    if (attrName.indexOf('repeating_skills') !== -1 || attrName.indexOf('repeating_weaponskills') !== -1) {
-      MML.characters[id].updateCharacterSheet();
+    if (attrName.includes('repeating_skills') || attrName.includes('repeating_weaponskills')) {
+      MML.updateCharacterSheet(characters[id]);
     }
   });
 
@@ -86,19 +86,19 @@ MML.init = function() {
 
   on('change:token', function(obj, prev) {
     if (obj.get('name').indexOf('spellMarker') === -1 && obj.get('left') !== prev['left'] && obj.get('top') !== prev['top'] && state.MML.GM.inCombat === true) {
-      var character = MML.characters[MML.getCharacterIdFromToken(obj)];
-      var left1 = prev['left'];
-      var left2 = obj.get('left');
-      var top1 = prev['top'];
-      var top2 = obj.get('top');
-      var distance = MML.getDistanceFeet(left1, left2, top1, top2);
-      var distanceAvailable = MML.movementRates[character.race][character.movementType] * character.movementAvailable;
+      const character = MML.characters[MML.getCharacterIdFromToken(obj)];
+      const left1 = prev['left'];
+      const left2 = obj.get('left');
+      const top1 = prev['top'];
+      const top2 = obj.get('top');
+      const distance = MML.getDistanceFeet(left1, left2, top1, top2);
+      const distanceAvailable = MML.movementRates[character.race][character.movementType] * character.movementAvailable;
 
       if (state.MML.GM.actor === charName && distanceAvailable > 0) {
         // If they move too far, move the maxium distance in the same direction
         if (distance > distanceAvailable) {
-          left3 = Math.floor(((left2 - left1) / distance) * distanceAvailable + left1 + 0.5);
-          top3 = Math.floor(((top2 - top1) / distance) * distanceAvailable + top1 + 0.5);
+          const left3 = Math.floor(((left2 - left1) / distance) * distanceAvailable + left1 + 0.5);
+          const top3 = Math.floor(((top2 - top1) / distance) * distanceAvailable + top1 + 0.5);
           obj.set('left', left3);
           obj.set('top', top3);
           character.movementAvailable(0);
@@ -113,7 +113,7 @@ MML.init = function() {
       _.each(MML.characters, function (character) {
         var token = MML.getCharacterToken(character.id);
         if (!_.isUndefined(token)) {
-          if (targets.indexOf(character.id) > -1) {
+          if (targets.includes(character.id)) {
             token.set('tint_color', '#00FF00');
           } else {
             token.set('tint_color', 'transparent');
@@ -130,11 +130,9 @@ MML.init = function() {
   });
 
   on('change:character:name', function(changedCharacter) {
-    var id = changedCharacter.get('id');
-    var newName = changedCharacter.get('name');
-
-    MML.characters[id].name = newName;
-    MML.characters[id].updateCharacterSheet();
+    const character = MML.characters[changedCharacter.get('id')];
+    character.name = changedCharacter.get('name');
+    MML.updateCharacterSheet(character);
   });
 
   on('change:attribute:current', function(attribute) {
@@ -171,7 +169,7 @@ MML.init = function() {
 
 MML.parseChat = function({who , content, selected, type}) {
   if (type === 'api' && content.indexOf('!MML|') !== -1) {
-    var player = MML.players[who.replace(' (GM)', '')];
+    const player = MML.players[who.replace(' (GM)', '')];
     player.buttonPressed(content.replace('!MML|', ''), MML.getSelectedIds(selected));
   }
 };

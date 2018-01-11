@@ -191,7 +191,7 @@ MML.alterHP = async function alterHP(player, character, bodyPart, hpAmount) {
 };
 
 MML.setWoundFatigue = async function setWoundFatigue(player, character) {
-  var currentHP = character.hp;
+  const currentHP = character.hp;
   currentHP['Wound Fatigue'] = character.hpMax['Wound Fatigue'];
 
   _.each(MML.getBodyParts(character), function(bodyPart) {
@@ -201,8 +201,6 @@ MML.setWoundFatigue = async function setWoundFatigue(player, character) {
       currentHP['Wound Fatigue'] -= character.hpMax[bodyPart] - Math.round(character.hpMax[bodyPart] / 2);
     }
   });
-
-  character.hp = currentHP;
 
   if (currentHP['Wound Fatigue'] < 0 && !_.has(character.statusEffects, 'Wound Fatigue')) {
     await MML.goToMenu(player, character.name + '\'s Wound Fatigue Roll', ['Roll']);
@@ -283,164 +281,14 @@ MML.armorDamageReduction = async function armorDamageReduction(player, character
   return 0;
 };
 
-MML.startCastAction = function startCastAction(character) {
-  state.MML.GM.currentAction.parameters.target = MML.characters[state.MML.GM.currentAction.targetArray[0]];
-  MML.applyStatusEffects(character);
-  MML[state.MML.GM.currentAction.callback]();
-};
-
-MML.startAttackAction = function startAttackAction(character, target) {
-  state.MML.GM.currentAction.parameters = {
-    target: MML.characters[state.MML.GM.currentAction.targetArray[0]]
-  };
-  MML.applyStatusEffects(character);
-  if (_.has(character.statusEffects, 'Called Shot') || character.action.attackType === 'Place a Hold' || character.action.attackType === 'Head Butt') {
-    character.player.charMenuSelectBodyPart(character.name);
-    character.player.displayMenu();
-  } else if (_.has(character.statusEffects, 'Called Shot Specific')) {
-    character.player.charMenuSelectHitPosition(character.name);
-    character.player.displayMenu();
-  } else {
-    character.processAttack();
-  }
-};
-
-MML.unarmedAttack = function unarmedAttack(character) {
-  var attackType;
-  switch (character.action.attackType) {
-    case 'Punch':
-      attackType = MML.unarmedAttacks['Punch'];
-      break;
-    case 'Kick':
-      attackType = MML.unarmedAttacks['Kick'];
-      break;
-    case 'Head Butt':
-      attackType = MML.unarmedAttacks['Head Butt'];
-      break;
-    case 'Bite':
-      attackType = MML.unarmedAttacks['Bite'];
-      break;
-    default:
-  }
-
-  state.MML.GM.currentAction.callback = 'unarmedAttackAction';
-  state.MML.GM.currentAction.parameters.attackType = attackType;
-  state.MML.GM.currentAction.parameters.attackerSkill = character.action.skill;
-  MML.unarmedAttackAction();
-};
-
-MML.grappleAttack = function grappleAttack(character) {
-  var attackType;
-  switch (character.action.attackType) {
-    case 'Grapple':
-      attackType = MML.unarmedAttacks['Grapple'];
-      break;
-    case 'Place a Hold':
-      if (['Chest', 'Abdomen'].indexOf(state.MML.GM.currentAction.calledShot)) {
-        attackType = MML.unarmedAttacks['Place a Hold, Chest, Abdomen'];
-      } else {
-        attackType = MML.unarmedAttacks['Place a Hold, Head, Arm, Leg'];
-      }
-      break;
-    case 'Break a Hold':
-      attackType = MML.unarmedAttacks['Break a Hold'];
-      break;
-    case 'Break Grapple':
-      attackType = MML.unarmedAttacks['Break Grapple'];
-      break;
-    case 'Takedown':
-      attackType = MML.unarmedAttacks['Takedown'];
-      break;
-    case 'Regain Feet':
-      attackType = MML.unarmedAttacks['Regain Feet'];
-      break;
-    default:
-      break;
-  }
-
-  state.MML.GM.currentAction.callback = 'grappleAttackAction';
-  state.MML.GM.currentAction.parameters.attackType = attackType;
-  state.MML.GM.currentAction.parameters.attackerSkill = character.action.skill;
-  MML.grappleAttackAction();
-};
-
-MML.rangedDefense = function rangedDefense(character, attackerWeapon, range) {
-  var defenseChance;
-  var defaultMartialSkill = character.weaponSkills['Default Martial'].level;
-  var shieldMod = MML.getShieldDefenseBonus(character);
-  var defenseMod = character.rangedDefenseMod + character.attributeDefenseMod;
-  var sitMod = character.situationalMod;
-  var rangeMod;
-
-  character.statusEffects['Melee This Round'] = {
-    id: MML.generateRowID(),
-    name: 'Melee This Round'
-  };
-
-  if (!_.isUndefined(character.skills['Dodge']) && character.skills['Dodge'].level >= defaultMartialSkill) {
-    defenseChance = character.weaponSkills['Dodge'].level + defenseMod + sitMod + shieldMod;
-  } else {
-    defenseChance = defaultMartialSkill + defenseMod + sitMod + shieldMod;
-  }
-
-  if (attackerWeapon.family === 'MWD' || attackerWeapon.family === 'MWM') {
-    rangeMod = Math.floor(range / 75);
-
-    if (rangeMod > 3) {
-      rangeMod = 3;
-    }
-    defenseChance += rangeMod;
-  } else if (attackerWeapon.family === 'TWH') {
-    rangeMod = Math.floor(range / 5);
-
-    if (rangeMod > 5) {
-      rangeMod = 5;
-    }
-    defenseChance += rangeMod + 25;
-  } else if (attackerWeapon.family === 'TWK') {
-    rangeMod = Math.floor(range / 5);
-
-    if (rangeMod > 3) {
-      rangeMod = 3;
-    }
-    defenseChance += rangeMod + 15;
-  } else if (attackerWeapon.family === 'TWS') {
-    rangeMod = Math.floor(range / 5);
-
-    if (rangeMod > 5) {
-      rangeMod = 5;
-    }
-    defenseChance += rangeMod + 15;
-  } else {
-    rangeMod = Math.floor(range / 20);
-
-    if (rangeMod > 5) {
-      rangeMod = 5;
-    }
-    defenseChance += rangeMod;
-  }
-
-  MML.removeAimAndObserving(character);
-  character.player.charMenuRangedDefenseRoll(character.name, defenseChance);
-  character.player.displayMenu();
-};
-
 MML.grappleDefense = function grappleDefense(character, attackType) {
   var defenderWeapon;
-  var brawlChance;
-  var weaponChance;
-  var brawlSkill;
+  var brawlMods = [character.meleeDefenseMod, character.attributeDefenseMod, attackType.defenseMod, character.situationalMod];
+  var weaponMods;
+  var brawlSkill = _.isUndefined(character.weaponSkills['Brawling']) ? 0 : character.weaponSkills['Brawling'].level;
   var defaultMartialSkill = character.weaponSkills['Default Martial'].level;
-  var defenseMod = character.meleeDefenseMod + character.attributeDefenseMod + attackType.defenseMod;
-  var sitMod = character.situationalMod;
 
   MML.addStatusEffect(character, 'Melee This Round', {});
-
-  if (_.isUndefined(character.weaponSkills['Brawling'])) {
-    brawlSkill = 0;
-  } else {
-    brawlSkill = character.weaponSkills['Brawling'].level;
-  }
 
   if (brawlSkill >= defaultMartialSkill) {
     brawlChance = character.weaponSkills['Brawling'].level + defenseMod + sitMod;
@@ -719,7 +567,7 @@ MML.applyStatusEffects = function applyStatusEffects(character) {
   var dependents = [
     'situationalInitBonus',
     'situationalMod',
-    'rangedDefenseMod',
+    'missileDefenseMod',
     'meleeDefenseMod',
     'missileAttackMod',
     'meleeAttackMod',
@@ -2043,8 +1891,8 @@ MML.Character = function (name, id) {
     writable: true,
     enumerable: false
   });
-  Object.defineProperty(character, 'rangedDefenseMod', {
-    value: MML.getCurrentAttributeAsFloat(character.id, 'rangedDefenseMod'),
+  Object.defineProperty(character, 'missileDefenseMod', {
+    value: MML.getCurrentAttributeAsFloat(character.id, 'missileDefenseMod'),
     writable: true,
     enumerable: false
   });
