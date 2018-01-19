@@ -282,41 +282,38 @@ MML.armorDamageReduction = async function armorDamageReduction(player, character
 };
 
 MML.grappleDefense = function grappleDefense(character, attackType) {
-  var defenderWeapon;
-  var brawlMods = [character.meleeDefenseMod, character.attributeDefenseMod, attackType.defenseMod, character.situationalMod];
-  var weaponMods;
-  var brawlSkill = _.isUndefined(character.weaponSkills['Brawling']) ? 0 : character.weaponSkills['Brawling'].level;
-  var defaultMartialSkill = character.weaponSkills['Default Martial'].level;
+  const brawlSkill = _.isUndefined(character.weaponSkills['Brawling']) ? 0 : character.weaponSkills['Brawling'].level;
+  const defaultMartialSkill = character.weaponSkills['Default Martial'].level;
+  const brawlMods = [
+    character.meleeDefenseMod,
+    character.attributeDefenseMod,
+    attackType.defenseMod,
+    character.situationalMod,
+    brawlSkill < defaultMartialSkill ? defaultMartialSkill : brawlSkill
+  ];
 
   MML.addStatusEffect(character, 'Melee This Round', {});
 
-  if (brawlSkill >= defaultMartialSkill) {
-    brawlChance = character.weaponSkills['Brawling'].level + defenseMod + sitMod;
-  } else {
-    brawlChance = defaultMartialSkill + defenseMod + sitMod;
-  }
-
-  if (
-    MML.isUnarmed(character) ||
-    _.has(character.statusEffects, 'Stunned') ||
-    _.has(character.statusEffects, 'Holding') ||
-    _.has(character.statusEffects, 'Held') ||
-    _.has(character.statusEffects, 'Grappled') ||
-    _.has(character.statusEffects, 'Taken Down') ||
-    _.has(character.statusEffects, 'Pinned') ||
-    _.has(character.statusEffects, 'Overborne')
+  if (!MML.isUnarmed(character) &&
+    _.isEmpty(_.intersection(_.keys(character.statusEffects), [
+      'Stunned',
+      'Holding',
+      'Grappled',
+      'Held',
+      'Taken Down',
+      'Pinned',
+      'Overborne'
+    ]))
   ) {
-    character.player.charMenuGrappleDefenseRoll(character.name, brawlChance);
+    return MML.grappleDefenseRoll(character.name, brawlMods);
   } else {
     var characterWeaponInfo = MML.getCharacterWeaponAndSkill(character);
-    state.MML.GM.currentAction.parameters.defenderWeapon = characterWeaponInfo.characterWeapon;
     character.player.charMenuGrappleDefenseRoll(
       character.name,
       brawlChance,
       characterWeaponInfo.characterWeapon.task + characterWeaponInfo.skill + character.situationalMod + character.meleeAttackMod + character.attributeMeleeAttackMod
     );
   }
-  character.player.displayMenu();
 };
 
 MML.grappleHandler = function grappleHandler(character, defender, attackName) {
@@ -346,7 +343,7 @@ MML.grappleHandler = function grappleHandler(character, defender, attackName) {
       sendChat('Error', 'Unhappy grapple :(');
   }
   MML.applyStatusEffects(character);
-  defender.applyStatusEffects();
+  MML.applyStatusEffects(defender);
   MML.endAction();
 };
 
