@@ -207,7 +207,7 @@ MML.grappleAttackAction = async function grappleAttackAction(player, character, 
   const weapon = action.weapon;
   const target = await MML.getSingleTarget(player);
   const attack = await MML.meleeAttackRoll(player, character, weapon.task, action.skill);
-  if (['Success', 'Critical Success'].includes(attackRoll)) {
+  if (['Success', 'Critical Success'].includes(attack)) {
     const defense = await MML.grappleDefense(target.player, target, weapon);
     if (!['Success', 'Critical Success'].includes(defense)) {
       await MML.grappleHandler(player, character, target, action);
