@@ -308,7 +308,7 @@ MML.grappleDefense = function grappleDefense(character, attackType) {
   ) {
     character.player.charMenuGrappleDefenseRoll(character.name, brawlChance);
   } else {
-    var characterWeaponInfo = MML.getCharacterWeaponAndSkill(character);
+    var characterWeaponInfo = MML.getWeaponAndSkill(character);
     state.MML.GM.currentAction.parameters.defenderWeapon = characterWeaponInfo.characterWeapon;
     character.player.charMenuGrappleDefenseRoll(
       character.name,
@@ -784,7 +784,7 @@ MML.buildWeaponObject = function buildWeaponObject(item, grip) {
   return weapon;
 };
 
-MML.getCharacterWeaponAndSkill = function getCharacterWeaponAndSkill(character) {
+MML.getWeaponAndSkill = function getWeaponAndSkill(character) {
   var itemId;
   var grip;
 
