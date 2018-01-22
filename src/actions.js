@@ -217,16 +217,15 @@ MML.grappleAttackAction = async function grappleAttackAction(player, character, 
 };
 
 MML.releaseOpponentAction = async function releaseOpponentAction(player, character, action) {
-  const target = await MML.getSingleTarget(player);y
+  const target = await MML.getSingleTarget(player);
   if (_.has(character.statusEffects, 'Holding')) {
-    await MML.releaseHold(character, target);
+    MML.removeHold(character, target);
+  }
+  const targetAgreed = await MML.menuResistRelease(target.player);
+  if (targetAgreed) {
+    await MML.removeGrapple(character, target);
   } else {
-    const targetAgreed = await menuResistRelease(target.player);
-    if (targetAgreed) {
-      await MML.releaseGrapple(character, target);
-    } else {
-      await MML.breakGrapple(character, target);
-    }
+    await MML.breakGrapple(character, target);
   }
 };
 

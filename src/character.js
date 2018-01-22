@@ -281,6 +281,7 @@ MML.armorDamageReduction = async function armorDamageReduction(player, character
   return 0;
 };
 
+
 MML.grappleDefense = function grappleDefense(character, attackType) {
   const brawlSkill = _.isUndefined(character.weaponSkills['Brawling']) ? 0 : character.weaponSkills['Brawling'].level;
   const defaultMartialSkill = character.weaponSkills['Default Martial'].level;
@@ -292,59 +293,56 @@ MML.grappleDefense = function grappleDefense(character, attackType) {
     brawlSkill < defaultMartialSkill ? defaultMartialSkill : brawlSkill
   ];
 
+  const defendWithWeapon = !MML.isUnarmed(character) && _.isEmpty(_.intersection(_.keys(character.statusEffects), [
+    'Stunned',
+    'Holding',
+    'Grappled',
+    'Held',
+    'Taken Down',
+    'Pinned',
+    'Overborne'
+  ]));
+  const characterWeaponInfo = MML.getWeaponAndSkill(character);
+  const weaponMods = [
+    characterWeaponInfo.characterWeapon.task,
+    characterWeaponInfo.skill,
+    character.situationalMod,
+    character.meleeAttackMod,
+    character.attributeMeleeAttackMod
+  ];
+
   MML.addStatusEffect(character, 'Melee This Round', {});
 
-  if (!MML.isUnarmed(character) &&
-    _.isEmpty(_.intersection(_.keys(character.statusEffects), [
-      'Stunned',
-      'Holding',
-      'Grappled',
-      'Held',
-      'Taken Down',
-      'Pinned',
-      'Overborne'
-    ]))
-  ) {
-    return MML.grappleDefenseRoll(character.name, brawlMods);
-  } else {
-    var characterWeaponInfo = MML.getWeaponAndSkill(character);
-    character.player.charMenuGrappleDefenseRoll(
-      character.name,
-      brawlChance,
-      characterWeaponInfo.characterWeapon.task + characterWeaponInfo.skill + character.situationalMod + character.meleeAttackMod + character.attributeMeleeAttackMod
-    );
-  }
 };
 
 MML.grappleHandler = function grappleHandler(character, defender, attackName) {
   switch (attackName) {
     case 'Grapple':
-      character.applyGrapple(defender);
+      MML.applyGrapple(character, defender);
       break;
     case 'Place a Hold, Head, Arm, Leg':
-      character.applyHold(defender);
+      MML.applyHold(character, defender);
       break;
     case 'Place a Hold, Chest, Abdomen':
-      character.applyHold(defender);
+      MML.applyHold(character, defender);
       break;
     case 'Break a Hold':
-      character.applyHoldBreak(defender);
+      MML.removeHold(character, defender);
       break;
     case 'Break Grapple':
-      character.applyGrappleBreak(defender);
+      MML.removeGrapple(character, defender);
       break;
     case 'Takedown':
-      character.applyTakedown(defender);
+      MML.applyTakedown(character, defender);
       break;
     case 'Regain Feet':
-      character.applyRegainFeet(defender);
+      MML.applyRegainFeet(character, defender);
       break;
     default:
       sendChat('Error', 'Unhappy grapple :(');
   }
   MML.applyStatusEffects(character);
   MML.applyStatusEffects(defender);
-  MML.endAction();
 };
 
 MML.applyGrapple = function applyGrapple(character, defender) {
@@ -355,7 +353,7 @@ MML.applyGrapple = function applyGrapple(character, defender) {
   };
 
   if (_.has(defender.statusEffects, 'Holding')) {
-    character.applyHoldBreak(MML.characters[defender.statusEffects['Holding'].targets[0]], defender);
+    MML.removeHold(MML.characters[defender.statusEffects['Holding'].targets[0]], defender);
   }
   defender.statusEffects['Grappled'] = {
     id: _.has(defender.statusEffects, 'Grappled') ? defender.statusEffects['Grappled'].id : MML.generateRowID(),
@@ -366,7 +364,7 @@ MML.applyGrapple = function applyGrapple(character, defender) {
 
 MML.applyHold = function applyHold(character, defender) {
   if (_.has(character.statusEffects, 'Grappled')) {
-    character.removeStatusEffect('Grappled');
+    MML.removeStatusEffect(character, 'Grappled');
   }
   character.statusEffects['Holding'] = {
     id: MML.generateRowID(),
@@ -381,7 +379,7 @@ MML.applyHold = function applyHold(character, defender) {
       targets: _.has(defender.statusEffects, 'Pinned') ? defender.statusEffects['Pinned'].targets.concat([character.id]) : [character.id]
     };
   } else {
-    var holder = {
+    const holder = {
       name: character.id,
       bodyPart: state.MML.GM.currentAction.calledShot
     };
@@ -393,7 +391,7 @@ MML.applyHold = function applyHold(character, defender) {
   }
   if (_.has(defender.statusEffects, 'Grappled')) {
     if (defender.statusEffects['Grappled'].targets.length === 1) {
-      defender.removeStatusEffect('Grappled');
+      MML.removeStatusEffect(defender, 'Grappled');
     } else {
       defender.statusEffects['Grappled'] = {
         id: defender.statusEffects['Grappled'].id,
@@ -404,13 +402,13 @@ MML.applyHold = function applyHold(character, defender) {
   }
 };
 
-MML.applyHoldBreak = function applyHoldBreak(character, defender) {
+MML.removeHold = function removeHold(character, defender) {
   defender.statusEffects['Grappled'] = {
     id: _.has(defender.statusEffects, 'Grappled') ? defender.statusEffects['Grappled'].id : MML.generateRowID(),
     name: 'Grappled',
     targets: _.has(defender.statusEffects, 'Grappled') ? defender.statusEffects['Grappled'].targets.concat([character.id]) : [character.id]
   };
-  defender.removeStatusEffect('Holding');
+  MML.removeStatusEffect(defender, 'Holding');
   character.statusEffects['Grappled'] = {
     id: _.has(character.statusEffects, 'Grappled') ? character.statusEffects['Grappled'].id : MML.generateRowID(),
     name: 'Grappled',
@@ -419,7 +417,7 @@ MML.applyHoldBreak = function applyHoldBreak(character, defender) {
 
   if (_.has(character.statusEffects, 'Held')) {
     if (character.statusEffects['Held'].targets.length === 1) {
-      character.removeStatusEffect('Held');
+      MML.removeStatusEffect(character, 'Held');
     } else {
       character.statusEffects['Held'] = {
         id: character.statusEffects['Held'].id,
@@ -431,7 +429,7 @@ MML.applyHoldBreak = function applyHoldBreak(character, defender) {
     }
   } else if (_.has(character.statusEffects, 'Pinned')) {
     if (character.statusEffects['Pinned'].targets.length === 1) {
-      character.removeStatusEffect('Pinned');
+      MML.removeStatusEffect(character, 'Pinned');
     } else {
       character.statusEffects['Pinned'] = {
         id: character.statusEffects['Pinned'].id,
@@ -442,9 +440,9 @@ MML.applyHoldBreak = function applyHoldBreak(character, defender) {
   }
 };
 
-MML.applyGrappleBreak = function applyGrappleBreak(character, defender) {
+MML.removeGrapple = function removeGrapple(character, defender) {
   if (character.statusEffects['Grappled'].targets.length === 1) {
-    character.removeStatusEffect('Grappled');
+    MML.removeStatusEffect(character, 'Grappled');
   } else {
     character.statusEffects['Grappled'] = {
       id: character.statusEffects['Grappled'].id,
@@ -453,7 +451,7 @@ MML.applyGrappleBreak = function applyGrappleBreak(character, defender) {
     };
   }
   if (defender.statusEffects['Grappled'].targets.length === 1) {
-    defender.removeStatusEffect('Grappled');
+    MML.removeStatusEffect(defender, 'Grappled');
   } else {
     defender.statusEffects['Grappled'] = {
       id: defender.statusEffects['Grappled'].id,
@@ -464,8 +462,8 @@ MML.applyGrappleBreak = function applyGrappleBreak(character, defender) {
 };
 
 MML.applyTakedown = function applyTakedown(character, defender) {
-  var grapplers = _.has(defender.statusEffects, 'Grappled') ? defender.statusEffects['Grappled'].targets : [];
-  var holders = _.has(defender.statusEffects, 'Held') ? defender.statusEffects['Held'].targets : [];
+  const grapplers = _.has(defender.statusEffects, 'Grappled') ? defender.statusEffects['Grappled'].targets : [];
+  const holders = _.has(defender.statusEffects, 'Held') ? defender.statusEffects['Held'].targets : [];
   if (grapplers.length + holders.length > 1) {
     defender.statusEffects['Overborne'] = {
       id: MML.generateRowID(),
@@ -478,7 +476,7 @@ MML.applyTakedown = function applyTakedown(character, defender) {
     };
   }
   if (holders.length > 0) {
-    var targets = [];
+    const targets = [];
     _.each(holders, function(holder) {
       if (['Chest', 'Abdomen'].indexOf(holder.bodyPart) > -1) {
         targets.push(holder.id);
@@ -494,7 +492,7 @@ MML.applyTakedown = function applyTakedown(character, defender) {
       if (_.reject(defender.statusEffects['Held'].targets, function(target) {
           return ['Chest', 'Abdomen'].indexOf(target.bodyPart) > -1;
         }).length === 0) {
-        defender.removeStatusEffect('Held');
+        MML.removeStatusEffect(defender, 'Held');
       } else {
         defender.statusEffects['Held'] = {
           id: defender.statusEffects['Held'].id,
@@ -516,11 +514,10 @@ MML.applyTakedown = function applyTakedown(character, defender) {
 };
 
 MML.applyRegainFeet = function applyRegainFeet(character, defender) {
-  var grapplers = _.has(character.statusEffects, 'Grappled') ? character.statusEffects['Grappled'].targets : [];
-  var holders = _.has(character.statusEffects, 'Held') ? character.statusEffects['Held'].targets : [];
+  const grapplers = _.has(character.statusEffects, 'Grappled') ? character.statusEffects['Grappled'].targets : [];
+  const holders = _.has(character.statusEffects, 'Held') ? character.statusEffects['Held'].targets : [];
 
   if (holders.length > 0) {
-    var targets = [];
     _.each(holders, function(target) {
       target.movementType = 'Walk';
     });
@@ -530,21 +527,9 @@ MML.applyRegainFeet = function applyRegainFeet(character, defender) {
       target.movementType = 'Walk';
     });
   }
-  character.removeStatusEffect('Taken Down');
-  character.removeStatusEffect('Overborne');
+  MML.removeStatusEffect(character, 'Taken Down');
+  MML.removeStatusEffect(character, 'Overborne');
   character.movementType = 'Walk';
-};
-
-MML.releaseHold = function releaseHold(character, defender) {
-  defender.applyHoldBreak(character);
-  defender.player.charMenuResistRelease(defender.name, character, defender);
-  defender.player.displayMenu();
-};
-
-MML.releaseGrapple = function releaseGrapple(character, defender) {
-  character.applyGrappleBreak(defender, character);
-  MML.characters[character.id].action.modifiers = _.without(MML.characters[character.id].action.modifiers, 'Release Opponent');
-  character.startAction();
 };
 
 MML.criticalDefense = function criticalDefense(character) {
@@ -561,7 +546,7 @@ MML.equipmentFailure = function equipmentFailure(character) {
 };
 
 MML.applyStatusEffects = function applyStatusEffects(character) {
-  var dependents = [
+  const dependents = [
     'situationalInitBonus',
     'situationalMod',
     'missileDefenseMod',
@@ -588,26 +573,20 @@ MML.applyStatusEffects = function applyStatusEffects(character) {
     MML.setCurrentAttribute(character.id, 'repeating_statuseffects_' + effect.id + '_statusEffectDescription', (effect.description ? effect.description : ''));
   });
 
-  var regex = new RegExp('^repeating_statuseffects_.*?_.*?$');
-  var statusEffectIDs = _.pluck(character.statusEffects, 'id');
-  var statusEffects = filterObjs(function(obj) {
+  const regex = new RegExp('^repeating_statuseffects_.*?_.*?$');
+  const statusEffectIDs = _.pluck(character.statusEffects, 'id');
+  const statusEffects = filterObjs(function(obj) {
     if (obj.get('type') !== 'attribute' || obj.get('characterid') !== character.id) {
       return false;
     } else {
       return regex.test(obj.get('name'));
     }
   });
-  var attributestoDelete = _.filter(statusEffects, function(effect) {
-    var notFound = true;
-    _.each(statusEffectIDs, function(id) {
-      if (_.isString(effect.get('name', 'current')) && effect.get('name', 'current').indexOf(id) > -1) {
-        notFound = false;
-      }
-    });
-    return notFound;
-  });
-  _.each(attributestoDelete, function(attribute) {
-    attribute.remove();
+  _.each(statusEffects, function(attribute) {
+    const name = attribute.get('name', 'current');
+    if (_.isString(name) && !statusEffectIDs.some(id => name.includes(id))) {
+      attribute.remove();
+    }
   });
 };
 
@@ -626,7 +605,7 @@ MML.removeStatusEffect = function removeStatusEffect(character, index) {
 };
 
 MML.updateInventory = function updateInventory(character) {
-  var items = _.omit(character.inventory, 'emptyHand');
+  const items = _.omit(character.inventory, 'emptyHand');
   _.each(items, function(item, _id) {
     MML.setCurrentAttribute(character.id, 'repeating_items_' + _id + '_itemName', item.name);
     MML.setCurrentAttribute(character.id, 'repeating_items_' + _id + '_itemId', _id);
@@ -654,7 +633,7 @@ MML.updateCharacter = function updateCharacter(character) {
 };
 
 MML.setPlayer = function setPlayer(character) {
-  var playerName = MML.getCurrentAttribute(character.id, 'player');
+  const playerName = MML.getCurrentAttribute(character.id, 'player');
   var newPlayer = MML.getPlayerFromName(playerName);
   if (_.isUndefined(newPlayer)) {
     sendChat('GM', 'Player ' + playerName + ' not found.');
@@ -669,7 +648,7 @@ MML.setPlayer = function setPlayer(character) {
     } else {
       player.characters = _.reject(player.characters, otherCharacter => otherCharacter.id !== character.id);
     }
-  }, character);
+  });
 };
 
 MML.isSensitiveArea = function isSensitiveArea(position) {
@@ -677,7 +656,7 @@ MML.isSensitiveArea = function isSensitiveArea(position) {
 };
 
 MML.getWeaponFamily = function getWeaponFamily(character, hand) {
-  var item = character.inventory[character[hand]._id];
+  const item = character.inventory[character[hand]._id];
   if (!_.isUndefined(item) && item.type === 'weapon') {
     return item.grips[character[hand].grip].family;
   } else {
@@ -709,17 +688,16 @@ MML.equipItem = function equipItem(character, itemId, grip) {
 };
 
 MML.getShieldDefenseBonus = function getShieldDefenseBonus(character) {
-  var rightHand = character.inventory[character.rightHand._id];
-  var leftHand = character.inventory[character.leftHand._id];
-  var bonus = 0;
+  const rightHand = character.inventory[character.rightHand._id];
+  const leftHand = character.inventory[character.leftHand._id];
 
   if (!_.isUndefined(rightHand) && rightHand.type === 'shield') {
-    bonus = rightHand.defenseMod;
+    return rightHand.defenseMod;
+  } else if (!_.isUndefined(leftHand) && leftHand.type === 'shield' && leftHand.defenseMod > rightHand.defenseMod) {
+    return leftHand.defenseMod;
+  } else {
+    return 0;
   }
-  if (!_.isUndefined(leftHand) && leftHand.type === 'shield' && leftHand.defenseMod > rightHand.defenseMod) {
-    bonus = leftHand.defenseMod;
-  }
-  return bonus;
 };
 
 MML.getWeaponGrip = function getWeaponGrip(character) {
@@ -733,7 +711,7 @@ MML.getWeaponGrip = function getWeaponGrip(character) {
 };
 
 MML.getEquippedWeapon = function getEquippedWeapon(character) {
-  var grip = MML.getWeaponGrip(character);
+  const grip = MML.getWeaponGrip(character);
   var weapon;
   var item;
   var itemId;
@@ -760,7 +738,7 @@ MML.buildWeaponObject = function buildWeaponObject(item, grip) {
     hands: item.grips[grip].hands
   };
 
-  if (['MWD', 'MWM', 'TWH', 'TWK', 'TWS', 'SLI'].indexOf(weapon.family)) {
+  if (['MWD', 'MWM', 'TWH', 'TWK', 'TWS', 'SLI'].includes(weapon.family)) {
     _.extend(weapon, item.grips[grip]);
     if (weapon.family === 'MWM') {
       weapon.loaded = item.loaded;
@@ -815,8 +793,6 @@ MML.getWeaponAndSkill = function getWeaponAndSkill(character) {
 
 MML.getWeaponSkill = function getWeaponSkill(character, weapon) {
   var item = weapon;
-  var grip;
-  var skillName;
   var skill;
 
   if (item.type !== 'weapon') {
@@ -824,16 +800,11 @@ MML.getWeaponSkill = function getWeaponSkill(character, weapon) {
     MML.error();
   }
 
-  grip = MML.getWeaponGrip(character);
+  const grip = MML.getWeaponGrip(character);
+  const skillName = item.name + ['War Spear', 'Boar Spear', 'Military Fork', 'Bastard Sword'].includes(item.name) ? ', ' + grip : '';
 
-  if (item.name === 'War Spear' || item.name === 'Boar Spear' || item.name === 'Military Fork' || item.name === 'Bastard Sword') {
-    skillName = item.name + ', ' + grip;
-  } else {
-    skillName = item.name;
-  }
-
-  if (typeof character.weaponSkills[skillName] !== 'undefined') {
-    skill = character.weaponSkills[skillName].level;
+  if (_.has(character.weaponSkills, skillName)) {
+    return character.weaponSkills[skillName].level;
   } else {
     var relatedSkills = [];
     _.each(character.weaponSkills, function(relatedSkill, skillName) {
@@ -847,14 +818,13 @@ MML.getWeaponSkill = function getWeaponSkill(character, weapon) {
     }, character);
 
     if (relatedSkills.length === 0) {
-      skill = character.weaponSkills['Default Martial'].level;
+      return character.weaponSkills['Default Martial'].level;
     } else {
-      skill = _.max(relatedSkills, function(skill) {
+      return _.max(relatedSkills, function(skill) {
         return skill.level;
       }).level - 10;
     }
   }
-  return skill;
 };
 
 MML.isWieldingRangedWeapon = function isWieldingRangedWeapon(character) {
@@ -862,17 +832,15 @@ MML.isWieldingRangedWeapon = function isWieldingRangedWeapon(character) {
 };
 
 MML.isWieldingMissileWeapon = function isWieldingMissileWeapon(character) {
-  var leftFamily = MML.getWeaponFamily(character, 'leftHand');
-  var rightFamily = MML.getWeaponFamily(character, 'rightHand');
-  var rangedFamilies = ['MWD', 'MWM'];
-  return (rangedFamilies.indexOf(leftFamily) > -1 || rangedFamilies.indexOf(rightFamily) > -1);
+  return MML.isWieldingWeaponFamily(character, ['MWD', 'MWM']);
 };
 
 MML.isWieldingThrowingWeapon = function isWieldingThrowingWeapon(character) {
-  var leftFamily = MML.getWeaponFamily(character, 'leftHand');
-  var rightFamily = MML.getWeaponFamily(character, 'rightHand');
-  var rangedFamilies = ['TWH', 'TWK', 'TWS', 'SLI'];
-  return (rangedFamilies.indexOf(leftFamily) > -1 || rangedFamilies.indexOf(rightFamily) > -1);
+  return MML.isWieldingWeaponFamily(character, ['TWH', 'TWK', 'TWS', 'SLI']);
+};
+
+MML.isWieldingWeaponFamily = function isWieldingWeaponFamily(character, families) {
+  return families.includes(MML.getWeaponFamily(character, 'rightHand')) || rangedFamilies.includes(MML.getWeaponFamily(character, 'leftHand'));
 };
 
 MML.isRangedWeapon = function isRangedWeapon(weapon) {
@@ -880,19 +848,12 @@ MML.isRangedWeapon = function isRangedWeapon(weapon) {
 };
 
 MML.isUnarmed = function isUnarmed(character) {
-  var leftHand = MML.getWeaponFamily(character, 'leftHand');
-  var rightHand = MML.getWeaponFamily(character, 'rightHand');
-
-  if (leftHand === 'unarmed' && rightHand === 'unarmed') {
-    return true;
-  } else {
-    return false;
-  }
+  return MML.getWeaponFamily(character, 'leftHand') === 'unarmed' && MML.getWeaponFamily(character, 'rightHand') === 'unarmed';
 };
 
 MML.isDualWielding = function isDualWielding(character) {
-  var leftHand = MML.getWeaponFamily(character, 'leftHand');
-  var rightHand = MML.getWeaponFamily(character, 'rightHand');
+  const leftHand = MML.getWeaponFamily(character, 'leftHand');
+  const rightHand = MML.getWeaponFamily(character, 'rightHand');
 
   if (character.leftHand._id !== character.rightHand._id &&
     leftHand !== 'unarmed' &&
@@ -922,19 +883,16 @@ MML.getHitTable = function getHitTable(character) {
   switch (character.bodyType) {
     case 'humanoid':
       if (character.inventory[character.rightHand._id].type === 'shield' || character.inventory[character.leftHand._id].type === 'shield') {
-        table = 'C';
+        return 'C';
       } else if (MML.isWieldingRangedWeapon(character) || MML.isUnarmed(character) || !(character.inventory[character.leftHand._id].type === 'weapon' && character.inventory[character.rightHand._id].type === 'weapon')) {
-        table = 'A';
+        return 'A';
       } else {
-        table = 'B';
+        return 'B';
       }
-      break;
     default:
       log('Error: Body type not found');
-      table = 'Error: Body type not found';
-      break;
+      return 'Error: Body type not found';
   }
-  return table;
 };
 
 MML.getHitPositionNames = function getHitPositionNames(character) {
@@ -962,7 +920,7 @@ MML.getBodyPart = function getBodyPart(character, hitPosition) {
 };
 
 MML.getAvailableHitPositions = function getAvailableHitPositions(character, bodyPart) {
-  var availableHitPositions = _.where(MML.hitPositions[character.bodyType], {
+  const availableHitPositions = _.where(MML.hitPositions[character.bodyType], {
     bodyPart: bodyPart
   });
 
@@ -974,7 +932,7 @@ MML.getAvailableHitPositions = function getAvailableHitPositions(character, body
 };
 
 MML.getCalledShotHitPosition = function getCalledShotHitPosition(character, rollValue, bodyPart) {
-  var availableHitPositions = MML.getAvailableHitPositions(character, bodyPart);
+  const availableHitPositions = MML.getAvailableHitPositions(character, bodyPart);
   if (isNaN(rollValue)) {
     return 'Error: Value is not a number';
   } else if (availableHitPositions === 'Error: No hit positions found') {
@@ -987,10 +945,9 @@ MML.getCalledShotHitPosition = function getCalledShotHitPosition(character, roll
 };
 
 MML.buildHpAttribute = function buildHpAttribute(character) {
-  var hpAttribute;
   switch (character.bodyType) {
     case 'humanoid':
-      hpAttribute = {
+      return {
         'Wound Fatigue': Math.round((character.health + character.stature + character.willpower) / 2),
         'Head': MML.HPTables[character.race][Math.round(character.health + character.stature / 3)],
         'Chest': MML.HPTables[character.race][Math.round(character.health + character.stature + character.strength)],
@@ -1000,18 +957,13 @@ MML.buildHpAttribute = function buildHpAttribute(character) {
         'Left Leg': MML.HPTables[character.race][Math.round(character.health + character.stature)],
         'Right Leg': MML.HPTables[character.race][Math.round(character.health + character.stature)],
       };
-      break;
     default:
       log('Oh No!');
   }
-  return hpAttribute;
 };
 
 MML.getDistanceBetweenCharacters = function getDistanceBetweenCharacters(character, target) {
-  var charToken = MML.getCharacterToken(character.id);
-  var targetToken = MML.getCharacterToken(target.id);
-
-  return MML.pixelsToFeet(MML.getDistanceBetweenTokens);
+  return MML.pixelsToFeet(MML.getDistanceBetweenTokens(MML.getCharacterToken(character.id), MML.getCharacterToken(target.id)));
 };
 
 MML.getAoESpellTargets = function getAoESpellTargets(spellMarker) {
@@ -1312,10 +1264,10 @@ MML.getRangeCastingModifier = function getRangeCastingModifier(caster, targets, 
 
 MML.removeAimAndObserving = function removeAimAndObserving(character) {
   if (_.has(character.statusEffects, 'Taking Aim')) {
-    character.removeStatusEffect('Taking Aim');
+    MML.removeStatusEffect(character, 'Taking Aim');
   }
   if (_.has(character.statusEffects, 'Observing')) {
-    character.removeStatusEffect('Observing');
+    MML.removeStatusEffect(character, 'Observing');
   }
 };
 
