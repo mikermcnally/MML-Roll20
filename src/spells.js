@@ -15,6 +15,7 @@ MML.spells['Flame Bolt'] = {
 
   }
 };
+
 MML.spells['Dart'] = {
   name: 'Dart',
   family: 'Air',
@@ -35,9 +36,10 @@ MML.spells['Dart'] = {
     if (castingRoll === 'Critical Success' || castingRoll === 'Success') {
       targets.map(async function (target) {
         const defenseRoll = MML.missileDefense(target.player, target, { family: 'MWM' }, MML.getDistanceBetweenCharacters(character.id, target.id));
-        if (rolls.defenseRoll === 'Critical Failure' || rolls.defenseRoll === 'Failure') {
+        if (defenseRoll === 'Critical Failure' || defenseRoll === 'Failure') {
           const hitPosition = await MML.hitPositionRoll();
-          const damage = await MML.missileDamageRoll({damageType: 'Pierce', damage: _.has(metaMagic, 'Increase Potency') ? (3 * metaMagic['Increase Potency'].level) + 'd6' : '3d6'}, rolls.castingRoll === 'Critical Success');
+          const weapon = {damageType: 'Pierce', damage: _.has(metaMagic, 'Increase Potency') ? (3 * metaMagic['Increase Potency'].level) + 'd6' : '3d6'};
+          const damage = await MML.missileDamageRoll(weapon, castingRoll === 'Critical Success');
           await MML.damageCharacter(target);
         }
       });
@@ -46,6 +48,7 @@ MML.spells['Dart'] = {
     MML.endAction();
   }
 };
+
 MML.spells['Hail of Stones'] = {
   name: 'Hail of Stones',
   family: 'Earth',

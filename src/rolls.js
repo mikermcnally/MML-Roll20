@@ -265,7 +265,12 @@ MML.meleeDamageRoll = async function meleeDamageRoll(player, character, weapon, 
 };
 
 MML.missileAttackRoll = async function missileAttackRoll(player, character, target, weapon, skill) {
-  var mods = [skill, character.situationalMod, character.missileAttackMod, character.attributeMissileAttackMod];
+  var mods = [
+    skill,
+    character.situationalMod,
+    character.missileAttackMod,
+    character.attributeMissileAttackMod
+  ];
   if (_.has(target.statusEffects, 'Shoot From Cover')) {
     mods.push(-20);
   }
@@ -285,6 +290,7 @@ MML.missileAttackRoll = async function missileAttackRoll(player, character, targ
     grip = character.leftHand.grip;
   }
 
+  MML.buildWeaponObject(item, grip);
   var item = character.inventory[itemId];
 
   var attackerWeapon = {
@@ -322,7 +328,7 @@ MML.missileAttackRoll = async function missileAttackRoll(player, character, targ
   return MML.universalRoll(player, mods);
 };
 
-MML.missileDamageRoll = async function missileDamageRoll(player, character, weapon, attackRoll, bonusDamage) {
+MML.missileDamageRoll = async function missileDamageRoll(player, character, damage, damageType, attackRoll, bonusDamage) {
   await MML.goToMenu(player, character.name + '\'s Damage Roll', ['Roll']);
   return MML.damageRoll('Missile Damage Roll', weapon.damage, weapon.damageType, [bonusDamage || 0], rolls.attackRoll);
 };
