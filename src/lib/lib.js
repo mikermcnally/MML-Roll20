@@ -1,87 +1,4 @@
-MML.skills = {};
-MML.skills["Acrobatics"] = {attribute: "coordination"};
-MML.skills["Acting"] = {attribute: "presence"};
-MML.skills["Alchemy"] = {attribute: "intellect"};
-MML.skills["Animal Handling"] = {attribute: "presence"};
-MML.skills["Animal Husbandry"] = {attribute: "reason"};
-MML.skills["Armorer"] = {attribute: "reason"};
-MML.skills["Blacksmith"] = {attribute: "coordination"};
-MML.skills["Botany"] = {attribute: "intellect"};
-MML.skills["Bowyer"] = {attribute: "coordination"};
-MML.skills["Brawling"] = {attribute: "combat"};
-MML.skills["Brewing"] = {attribute: "reason"};
-MML.skills["Bureaucracy"] = {attribute: "creativity"};
-MML.skills["Caligraphy"] = {attribute: "creativity"};
-MML.skills["Camouflage"] = {attribute: "reason"};
-MML.skills["Carpentry"] = {attribute: "coordination"};
-MML.skills["Cartography"] = {attribute: "reason"};
-MML.skills["Climbing"] = {attribute: "coordination"};
-MML.skills["Cooking"] = {attribute: "reason"};
-MML.skills["Dancing"] = {attribute: "creativity"};
-MML.skills["Diplomacy"] = {attribute: "presence"};
-MML.skills["Disguise"] = {attribute: "creativity"};
-MML.skills["Dowsing"] = {attribute: "reason"};
-MML.skills["Ecology, Specific"] = {attribute: "intellect"};
-MML.skills["Earth Elementalism"] = {attribute: "intellect"};
-MML.skills["Air Elementalism"] = {attribute: "intellect"};
-MML.skills["Fire Elementalism"] = {attribute: "intellect"};
-MML.skills["Water Elementalism"] = {attribute: "intellect"};
-MML.skills["Life Elementalism"] = {attribute: "intellect"};
-MML.skills["Engineering"] = {attribute: "intellect"};
-MML.skills["Etiquette"] = {attribute: "presence"};
-MML.skills["Falconry"] = {attribute: "reason"};
-MML.skills["First Aid"] = {attribute: "reason"};
-MML.skills["Fishing"] = {attribute: "reason"};
-MML.skills["Fletchery"] = {attribute: "coordination"};
-MML.skills["Foraging"] = {attribute: "reason"};
-MML.skills["Forced March"] = {attribute: "Health"};
-MML.skills["Forgery"] = {attribute: "creativity"};
-MML.skills["Gambling"] = {attribute: "reason"};
-MML.skills["Gem Cutting"] = {attribute: "reason"};
-MML.skills["Geology"] = {attribute: "intellect"};
-MML.skills["Hand Signalling"] = {attribute: "coordination"};
-MML.skills["Heraldry"] = {attribute: "reason"};
-MML.skills["Herbalism"] = {attribute: "reason"};
-MML.skills["History"] = {attribute: "intellect"};
-MML.skills["Horsemanship"] = {attribute: "coordination"};
-MML.skills["Hunting and Trapping"] = {attribute: "reason"};
-MML.skills["Jeweler"] = {attribute: "creativity"};
-MML.skills["Knowledge"] = {attribute: "intellect"};
-MML.skills["Language"] = {attribute: "creativity"};
-MML.skills["Leatherworking"] = {attribute: "coordination"};
-MML.skills["Literacy"] = {attribute: "intellect"};
-MML.skills["Literature"] = {attribute: "intellect"};
-MML.skills["Lock Picking"] = {attribute: "coordination"};
-MML.skills["Lore"] = {attribute: "reason"};
-MML.skills["Mathematics"] = {attribute: "intellect"};
-MML.skills["Metallurgy"] = {attribute: "intellect"};
-MML.skills["Mimicry"] = {attribute: "presence"};
-MML.skills["Musical Instrument"] = {attribute: "creativity"};
-MML.skills["Navigation"] = {attribute: "reason"};
-MML.skills["Negotiation"] = {attribute: "presence"};
-MML.skills["Oration"] = {attribute: "presence"};
-MML.skills["Persuasion"] = {attribute: "presence"};
-MML.skills["Physician"] = {attribute: "reason"};
-MML.skills["Pick Pocket"] = {attribute: "coordination"};
-MML.skills["Running"] = {attribute: "health"};
-MML.skills["Scrounging"] = {attribute: "reason"};
-MML.skills["Sculpture"] = {attribute: "creativity"};
-MML.skills["Seamanship"] = {attribute: "reason"};
-MML.skills["Sewing"] = {attribute: "coordination"};
-MML.skills["Singing"] = {attribute: "presence"};
-MML.skills["Sleight of Hand"] = {attribute: "coordination"};
-MML.skills["Stalking"] = {attribute: "coordination"};
-MML.skills["Stealth"] = {attribute: "coordination"};
-MML.skills["Survival"] = {attribute: "reason"};
-MML.skills["Swimming"] = {attribute: "coordination"};
-MML.skills["Symbol Magic"] = {attribute: "intellect"};
-MML.skills["Tactical"] = {attribute: "reason"};
-MML.skills["Teamster"] = {attribute: "reason"};
-MML.skills["Tracking"] = {attribute: "reason"};
-MML.skills["Veterinary"] = {attribute: "reason"};
-MML.skills["Weapon Smith"] = {attribute: "coordination"};
-MML.skills["Sword Smith"] = {attribute: "coordination"};
-MML.skills["Wizardry"] = {attribute: "intellect"};
+
 
 MML.attributeMods = {};
 MML.attributeMods.strength = [];
@@ -447,8 +364,8 @@ MML.weaponSkillMods["Wood Elf"]["Medium Composite Bow"] = 10;
 
 MML.movementRates = {};
 MML.movementRates["Dwarf"] = {
-    Prone: 0,
-    Crawl: 1.75,
+  Prone: 0,
+  Crawl: 1.75,
 	Stalk: 1.75,
 	Walk: 6,
 	Jog: 14,
@@ -533,55 +450,6 @@ MML.bodyTypes["Gray Elf"] = "humanoid";
 MML.bodyTypes["Human"] = "humanoid";
 MML.bodyTypes["Hobbit"] = "humanoid";
 MML.bodyTypes["Wood Elf"] = "humanoid";
-
-MML.hitPositions = {};
-MML.hitPositions.humanoid = {};
-MML.hitPositions.humanoid[1] = { name: "Top of Head", bodyPart: "Head" };
-MML.hitPositions.humanoid[2] = { name: "Face", bodyPart: "Head" };
-MML.hitPositions.humanoid[3] = { name: "Rear of Head", bodyPart: "Head" };
-MML.hitPositions.humanoid[4] = { name: "Right Side of Head", bodyPart: "Head" };
-MML.hitPositions.humanoid[5] = { name: "Left Side of Head", bodyPart: "Head" };
-MML.hitPositions.humanoid[6] = { name: "Neck, Throat", bodyPart: "Head" };
-MML.hitPositions.humanoid[7] = { name: "Rear of Neck", bodyPart: "Head" };
-MML.hitPositions.humanoid[8] = { name: "Right Shoulder", bodyPart: "Right Arm" };
-MML.hitPositions.humanoid[9] = { name: "Right Upper Chest", bodyPart: "Chest" };
-MML.hitPositions.humanoid[10] = { name: "Right Upper Back", bodyPart: "Chest" };
-MML.hitPositions.humanoid[11] = { name: "Left Upper Chest", bodyPart: "Chest" };
-MML.hitPositions.humanoid[12] = { name: "Left Upper Back", bodyPart: "Chest" };
-MML.hitPositions.humanoid[13] = { name: "Left Shoulder", bodyPart: "Left Arm" };
-MML.hitPositions.humanoid[14] = { name: "Right Upper Arm", bodyPart: "Right Arm" };
-MML.hitPositions.humanoid[15] = { name: "Right Lower Chest", bodyPart: "Chest" };
-MML.hitPositions.humanoid[16] = { name: "Right Mid Back", bodyPart: "Chest" };
-MML.hitPositions.humanoid[17] = { name: "Left Lower Chest", bodyPart: "Chest" };
-MML.hitPositions.humanoid[18] = { name: "Left Mid Back", bodyPart: "Chest" };
-MML.hitPositions.humanoid[19] = { name: "Left Upper Arm", bodyPart: "Left Arm" };
-MML.hitPositions.humanoid[20] = { name: "Right Elbow", bodyPart: "Right Arm" };
-MML.hitPositions.humanoid[21] = { name: "Right Abdomen", bodyPart: "Abdomen" };
-MML.hitPositions.humanoid[22] = { name: "Right Lower Back", bodyPart: "Abdomen" };
-MML.hitPositions.humanoid[23] = { name: "Left Abdomen", bodyPart: "Abdomen" };
-MML.hitPositions.humanoid[24] = { name: "Left Lower Back", bodyPart: "Abdomen" };
-MML.hitPositions.humanoid[25] = { name: "Left Elbow", bodyPart: "Left Arm" };
-MML.hitPositions.humanoid[26] = { name: "Right Forearm", bodyPart: "Right Arm" };
-MML.hitPositions.humanoid[27] = { name: "Right Hip", bodyPart: "Abdomen" };
-MML.hitPositions.humanoid[28] = { name: "Right Buttock", bodyPart: "Abdomen" };
-MML.hitPositions.humanoid[29] = { name: "Left Hip", bodyPart: "Abdomen" };
-MML.hitPositions.humanoid[30] = { name: "Left Buttock", bodyPart: "Abdomen" };
-MML.hitPositions.humanoid[31] = { name: "Left Forearm", bodyPart: "Left Arm" };
-MML.hitPositions.humanoid[32] = { name: "Right Hand/Wrist", bodyPart: "Right Arm" };
-MML.hitPositions.humanoid[33] = { name: "Groin", bodyPart: "Abdomen" };
-MML.hitPositions.humanoid[34] = { name: "Left Hand/Wrist", bodyPart: "Left Arm" };
-MML.hitPositions.humanoid[35] = { name: "Right Upper Thigh", bodyPart: "Right Leg" };
-MML.hitPositions.humanoid[36] = { name: "Left Upper Thigh", bodyPart: "Left Leg" };
-MML.hitPositions.humanoid[37] = { name: "Right Lower Thigh", bodyPart: "Right Leg" };
-MML.hitPositions.humanoid[38] = { name: "Left Lower Thigh", bodyPart: "Left Leg" };
-MML.hitPositions.humanoid[39] = { name: "Right Knee", bodyPart: "Right Leg" };
-MML.hitPositions.humanoid[40] = { name: "Left Knee", bodyPart: "Left Leg" };
-MML.hitPositions.humanoid[41] = { name: "Right Upper Shin", bodyPart: "Right Leg" };
-MML.hitPositions.humanoid[42] = { name: "Left Upper Shin", bodyPart: "Left Leg" };
-MML.hitPositions.humanoid[43] = { name: "Right Lower Shin", bodyPart: "Right Leg" };
-MML.hitPositions.humanoid[44] = { name: "Left Lower Shin", bodyPart: "Left Leg" };
-MML.hitPositions.humanoid[45] = { name: "Right Foot/Ankle", bodyPart: "Right Leg" };
-MML.hitPositions.humanoid[46] = { name: "Left Foot/Ankle", bodyPart: "Left Leg" };
 
 MML.sensitiveAreas = {};
 MML.sensitiveAreas.humanoid = ["Face", "Neck, Throat", "Groin"];
@@ -1028,1252 +896,1252 @@ MML.APVList["Lames of Elven Bronze"] = { family: "Lames", name: "Lames of Elven 
 
 // Weapon Stats
 MML.items["Hand Axe"] = {
-    name: "Hand Axe",
-    type: "weapon",
-    weight: 3,
-    grips: {
-        "One Hand":{
-            family: "Axe",
-            hands: 1,
-            primaryType: "Chop",
-            primaryTask: 35,
-            primaryDamage: "1d20",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 6,
-            rank: 1}
-       }
-    };
+  name: "Hand Axe",
+  type: "weapon",
+  weight: 3,
+  grips: {
+    "One Hand":{
+      family: "Axe",
+      hands: 1,
+      primaryType: "Chop",
+      primaryTask: 35,
+      primaryDamage: "1d20",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 6,
+      rank: 1}
+     }
+  };
 MML.items["Battle Axe"] = {
-    name: "Battle Axe",
-    type: "weapon",
-    weight: 5,
-    grips: {
-        "One Hand":{
-            family: "Axe",
-            hands: 1,
-            primaryType: "Chop",
-            primaryTask: 35,
-            primaryDamage: "3d10",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 5,
-            rank: 1}
-       }
-    };
+  name: "Battle Axe",
+  type: "weapon",
+  weight: 5,
+  grips: {
+    "One Hand":{
+      family: "Axe",
+      hands: 1,
+      primaryType: "Chop",
+      primaryTask: 35,
+      primaryDamage: "3d10",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 5,
+      rank: 1}
+     }
+  };
 MML.items["Pick"] = {
-    name: "Pick",
-    type: "weapon",
-    weight: 6,
-    grips: {
-        "Two Hands":{
-            family: "Axe",
-            hands: 2,
-            primaryType: "Flanged",
-            primaryTask: 25,
-            primaryDamage: "1d20",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 4,
-            rank: 1}
-       }
-    };
+  name: "Pick",
+  type: "weapon",
+  weight: 6,
+  grips: {
+    "Two Hands":{
+      family: "Axe",
+      hands: 2,
+      primaryType: "Flanged",
+      primaryTask: 25,
+      primaryDamage: "1d20",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 4,
+      rank: 1}
+     }
+  };
 MML.items["Two-Handed Axe"] = {
-    name: "Two-Handed Axe",
-    type: "weapon",
-    weight: 6.5,
-    grips: {
-        "Two Hands":{
-            family: "Axe",
-            hands: 2,
-            primaryType: "Chop",
-            primaryTask: 25,
-            primaryDamage: "4d10",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 4,
-            rank: 2}
-       }
-    };
+  name: "Two-Handed Axe",
+  type: "weapon",
+  weight: 6.5,
+  grips: {
+    "Two Hands":{
+      family: "Axe",
+      hands: 2,
+      primaryType: "Chop",
+      primaryTask: 25,
+      primaryDamage: "4d10",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 4,
+      rank: 2}
+     }
+  };
 MML.items["Bardiche"] = {
-    name: "Bardiche",
-    type: "weapon",
-    weight: 7.5,
-    grips: {
-        "Two Hands":{
-            family: "Axe",
-            hands: 2,
-            primaryType: "Chop",
-            primaryTask: 25,
-            primaryDamage: "5d10",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 3,
-            rank: 2}
-       }
-    };
+  name: "Bardiche",
+  type: "weapon",
+  weight: 7.5,
+  grips: {
+    "Two Hands":{
+      family: "Axe",
+      hands: 2,
+      primaryType: "Chop",
+      primaryTask: 25,
+      primaryDamage: "5d10",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 3,
+      rank: 2}
+     }
+  };
 MML.items["Pole Axe"] = {
-    name: "Pole Axe",
-    type: "weapon",
-    weight: 7,
-    grips: {
-        "Two Hands":{
-            family: "Axe",
-            hands: 2,
-            primaryType: "Chop",
-            primaryTask: 25,
-            primaryDamage: "4d12",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 3,
-            rank: 2}
-       }
-    };
+  name: "Pole Axe",
+  type: "weapon",
+  weight: 7,
+  grips: {
+    "Two Hands":{
+      family: "Axe",
+      hands: 2,
+      primaryType: "Chop",
+      primaryTask: 25,
+      primaryDamage: "4d12",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 3,
+      rank: 2}
+     }
+  };
 MML.items["Club"] = {
-    name: "Club",
-    type: "weapon",
-    weight: 2,
-    grips: {
-        "One Hand":{
-            family: "Bludgeoning",
-            hands: 1,
-            primaryType: "Impact",
-            primaryTask: 45,
-            primaryDamage: "2d8",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 7,
-            rank: 1}
-       }
-    };
+  name: "Club",
+  type: "weapon",
+  weight: 2,
+  grips: {
+    "One Hand":{
+      family: "Bludgeoning",
+      hands: 1,
+      primaryType: "Impact",
+      primaryTask: 45,
+      primaryDamage: "2d8",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 7,
+      rank: 1}
+     }
+  };
 MML.items["Cudgel, Light"] = {
-    name: "Cudgel, Light",
-    type: "weapon",
-    weight: 3,
-    grips: {
-        "One Hand":{
-            family: "Bludgeoning",
-            hands: 1,
-            primaryType: "Impact",
-            primaryTask: 45,
-            primaryDamage: "2d10",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 6,
-            rank: 1}
-       }
-    };
+  name: "Cudgel, Light",
+  type: "weapon",
+  weight: 3,
+  grips: {
+    "One Hand":{
+      family: "Bludgeoning",
+      hands: 1,
+      primaryType: "Impact",
+      primaryTask: 45,
+      primaryDamage: "2d10",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 6,
+      rank: 1}
+     }
+  };
 MML.items["Cudgel, Heavy"] = {
-    name: "Cudgel, Heavy",
-    type: "weapon",
-    weight: 7,
-    grips: {
-        "Two Hands":{
-            family: "Bludgeoning",
-            hands: 2,
-            primaryType: "Impact",
-            primaryTask: 35,
-            primaryDamage: "4d8",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 4,
-            rank: 2}
-       }
-    };
+  name: "Cudgel, Heavy",
+  type: "weapon",
+  weight: 7,
+  grips: {
+    "Two Hands":{
+      family: "Bludgeoning",
+      hands: 2,
+      primaryType: "Impact",
+      primaryTask: 35,
+      primaryDamage: "4d8",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 4,
+      rank: 2}
+     }
+  };
 MML.items["Mace"] = {
-    name: "Mace",
-    type: "weapon",
-    weight: 5,
-    grips: {
-        "One Hand":{
-            family: "Bludgeoning",
-            hands: 1,
-            primaryType: "Flanged",
-            primaryTask: 45,
-            primaryDamage: "2d10",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 5,
-            rank: 1}
-       }
-    };
+  name: "Mace",
+  type: "weapon",
+  weight: 5,
+  grips: {
+    "One Hand":{
+      family: "Bludgeoning",
+      hands: 1,
+      primaryType: "Flanged",
+      primaryTask: 45,
+      primaryDamage: "2d10",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 5,
+      rank: 1}
+     }
+  };
 MML.items["Maul"] = {
-    name: "Maul",
-    type: "weapon",
-    weight: 9,
-    grips: {
-        "Two Hands":{
-            family: "Bludgeoning",
-            hands: 2,
-            primaryType: "Impact",
-            primaryTask: 25,
-            primaryDamage: "4d10",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 4,
-            rank: 2}
-       }
-    };
+  name: "Maul",
+  type: "weapon",
+  weight: 9,
+  grips: {
+    "Two Hands":{
+      family: "Bludgeoning",
+      hands: 2,
+      primaryType: "Impact",
+      primaryTask: 25,
+      primaryDamage: "4d10",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 4,
+      rank: 2}
+     }
+  };
 MML.items["Morningstar"] = {
-    name: "Morningstar",
-    type: "weapon",
-    weight: 5,
-    grips: {
-        "One Hand":{
-            family: "Bludgeoning",
-            hands: 1,
-            primaryType: "Thrust",
-            primaryTask: 45,
-            primaryDamage: "3d10",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 5,
-            rank: 1}
-       }
-    };
+  name: "Morningstar",
+  type: "weapon",
+  weight: 5,
+  grips: {
+    "One Hand":{
+      family: "Bludgeoning",
+      hands: 1,
+      primaryType: "Thrust",
+      primaryTask: 45,
+      primaryDamage: "3d10",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 5,
+      rank: 1}
+     }
+  };
 MML.items["War Hammer"] = {
-    name: "War Hammer",
-    type: "weapon",
-    weight: 5.5,
-    grips: {
-        "One Hand":{
-            family: "Bludgeoning",
-            hands: 1,
-            primaryType: "Impact",
-            primaryTask: 35,
-            primaryDamage: "3d10",
-            secondaryType: "Flanged",
-            secondaryTask: 25,
-            secondaryDamage: "2d8",
-            defense: 15,
-            initiative: 5,
-            rank: 1}
-       }
-    };
+  name: "War Hammer",
+  type: "weapon",
+  weight: 5.5,
+  grips: {
+    "One Hand":{
+      family: "Bludgeoning",
+      hands: 1,
+      primaryType: "Impact",
+      primaryTask: 35,
+      primaryDamage: "3d10",
+      secondaryType: "Flanged",
+      secondaryTask: 25,
+      secondaryDamage: "2d8",
+      defense: 15,
+      initiative: 5,
+      rank: 1}
+     }
+  };
 MML.items["Ball & Chain, Footman's"] = {
-    name: "Ball & Chain, Footman's",
-    type: "weapon",
-    weight: 5,
-    grips: {
-        "Two Hands":{
-            family: "Flexible",
-            hands: 2,
-            primaryType: "Impact",
-            primaryTask: 15,
-            primaryDamage: "3d12",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 4,
-            rank: 2}
-       }
-    };
+  name: "Ball & Chain, Footman's",
+  type: "weapon",
+  weight: 5,
+  grips: {
+    "Two Hands":{
+      family: "Flexible",
+      hands: 2,
+      primaryType: "Impact",
+      primaryTask: 15,
+      primaryDamage: "3d12",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 4,
+      rank: 2}
+     }
+  };
 MML.items["Ball & Chain, Horseman's"] = {
-    name: "Ball & Chain, Horseman's",
-    type: "weapon",
-    weight: 3.5,
-    grips: {
-        "One Hand":{
-            family: "Flexible",
-            hands: 1,
-            primaryType: "Impact",
-            primaryTask: 25,
-            primaryDamage: "2d12",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 0,
-            initiative: 5,
-            rank: 1}
-       }
-    };
+  name: "Ball & Chain, Horseman's",
+  type: "weapon",
+  weight: 3.5,
+  grips: {
+    "One Hand":{
+      family: "Flexible",
+      hands: 1,
+      primaryType: "Impact",
+      primaryTask: 25,
+      primaryDamage: "2d12",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 0,
+      initiative: 5,
+      rank: 1}
+     }
+  };
 MML.items["Flail, Footman's"] = {
-    name: "Flail, Footman's",
-    type: "weapon",
-    weight: 5,
-    grips: {
-        "Two Hands":{
-            family: "Flexible",
-            hands: 2,
-            primaryType: "Impact",
-            primaryTask: 25,
-            primaryDamage: "3d10",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 4,
-            rank: 2}
-       }
-    };
+  name: "Flail, Footman's",
+  type: "weapon",
+  weight: 5,
+  grips: {
+    "Two Hands":{
+      family: "Flexible",
+      hands: 2,
+      primaryType: "Impact",
+      primaryTask: 25,
+      primaryDamage: "3d10",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 4,
+      rank: 2}
+     }
+  };
 MML.items["Flail, Horseman's"] = {
-    name: "Flail, Horseman's",
-    type: "weapon",
-    weight: 2.5,
-    grips: {
-        "One Hand":{
-            family: "Flexible",
-            hands: 1,
-            primaryType: "Impact",
-            primaryTask: 35,
-            primaryDamage: "1d20",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 0,
-            initiative: 5,
-            rank: 1}
-       }
-    };
+  name: "Flail, Horseman's",
+  type: "weapon",
+  weight: 2.5,
+  grips: {
+    "One Hand":{
+      family: "Flexible",
+      hands: 1,
+      primaryType: "Impact",
+      primaryTask: 35,
+      primaryDamage: "1d20",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 0,
+      initiative: 5,
+      rank: 1}
+     }
+  };
 MML.items["Mace & Chain"] = {
-    name: "Mace & Chain",
-    type: "weapon",
-    weight: 3.5,
-    grips: {
-        "One Hand":{
-            family: "Flexible",
-            hands: 1,
-            primaryType: "Flanged",
-            primaryTask: 25,
-            primaryDamage: "2d12",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 0,
-            initiative: 5,
-            rank: 1}
-       }
-    };
+  name: "Mace & Chain",
+  type: "weapon",
+  weight: 3.5,
+  grips: {
+    "One Hand":{
+      family: "Flexible",
+      hands: 1,
+      primaryType: "Flanged",
+      primaryTask: 25,
+      primaryDamage: "2d12",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 0,
+      initiative: 5,
+      rank: 1}
+     }
+  };
 MML.items["Morningstar & Chain"] = {
-    name: "Morningstar & Chain",
-    type: "weapon",
-    weight: 4,
-    grips: {
-        "One Hand":{
-            family: "Flexible",
-            hands: 1,
-            primaryType: "Thrust",
-            primaryTask: 25,
-            primaryDamage: "3d12",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 0,
-            initiative: 5,
-            rank: 1}
-       }
-    };
+  name: "Morningstar & Chain",
+  type: "weapon",
+  weight: 4,
+  grips: {
+    "One Hand":{
+      family: "Flexible",
+      hands: 1,
+      primaryType: "Thrust",
+      primaryTask: 25,
+      primaryDamage: "3d12",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 0,
+      initiative: 5,
+      rank: 1}
+     }
+  };
 MML.items["Boot Knife"] = {
-    name: "Boot Knife",
-    type: "weapon",
-    weight: 0.5,
-    grips: {
-        "One Hand":{
-            family: "Knives",
-            hands: 1,
-            primaryType: "Thrust",
-            primaryTask: 15,
-            primaryDamage: "1d8",
-            secondaryType: "Cut",
-            secondaryTask: 15,
-            secondaryDamage: "1d6",
-            defense: 0,
-            initiative: 10,
-            rank: 1}
-       }
-    };
+  name: "Boot Knife",
+  type: "weapon",
+  weight: 0.5,
+  grips: {
+    "One Hand":{
+      family: "Knives",
+      hands: 1,
+      primaryType: "Thrust",
+      primaryTask: 15,
+      primaryDamage: "1d8",
+      secondaryType: "Cut",
+      secondaryTask: 15,
+      secondaryDamage: "1d6",
+      defense: 0,
+      initiative: 10,
+      rank: 1}
+     }
+  };
 MML.items["Dagger"] = {
-    name: "Dagger",
-    type: "weapon",
-    weight: 1,
-    grips: {
-        "One Hand":{
-            family: "Knives",
-            hands: 1,
-            primaryType: "Thrust",
-            primaryTask: 15,
-            primaryDamage: "2d6",
-            secondaryType: "Cut",
-            secondaryTask: 15,
-            secondaryDamage: "1d8",
-            defense: 0,
-            initiative: 10,
-            rank: 1}
-       }
-    };
+  name: "Dagger",
+  type: "weapon",
+  weight: 1,
+  grips: {
+    "One Hand":{
+      family: "Knives",
+      hands: 1,
+      primaryType: "Thrust",
+      primaryTask: 15,
+      primaryDamage: "2d6",
+      secondaryType: "Cut",
+      secondaryTask: 15,
+      secondaryDamage: "1d8",
+      defense: 0,
+      initiative: 10,
+      rank: 1}
+     }
+  };
 MML.items["Knife"] = {
-    name: "Knife",
-    type: "weapon",
-    weight: 1.5,
-    grips: {
-        "One Hand":{
-            family: "Knives",
-            hands: 1,
-            primaryType: "Cut",
-            primaryTask: 25,
-            primaryDamage: "2d6",
-            secondaryType: "Thrust",
-            secondaryTask: 15,
-            secondaryDamage: "2d6",
-            defense: 0,
-            initiative: 10,
-            rank: 1}
-       }
-    };
+  name: "Knife",
+  type: "weapon",
+  weight: 1.5,
+  grips: {
+    "One Hand":{
+      family: "Knives",
+      hands: 1,
+      primaryType: "Cut",
+      primaryTask: 25,
+      primaryDamage: "2d6",
+      secondaryType: "Thrust",
+      secondaryTask: 15,
+      secondaryDamage: "2d6",
+      defense: 0,
+      initiative: 10,
+      rank: 1}
+     }
+  };
 MML.items["Dirk"] = {
-    name: "Dirk",
-    type: "weapon",
-    weight: 1.5,
-    grips: {
-        "One Hand":{
-            family: "Knives",
-            hands: 1,
-            primaryType: "Cut",
-            primaryTask: 25,
-            primaryDamage: "2d8",
-            secondaryType: "Thrust",
-            secondaryTask: 15,
-            secondaryDamage: "2d6",
-            defense: 15,
-            initiative: 9,
-            rank: 1}
-       }
-    };
+  name: "Dirk",
+  type: "weapon",
+  weight: 1.5,
+  grips: {
+    "One Hand":{
+      family: "Knives",
+      hands: 1,
+      primaryType: "Cut",
+      primaryTask: 25,
+      primaryDamage: "2d8",
+      secondaryType: "Thrust",
+      secondaryTask: 15,
+      secondaryDamage: "2d6",
+      defense: 15,
+      initiative: 9,
+      rank: 1}
+     }
+  };
 MML.items["Fauchard"] = {
-    name: "Fauchard",
-    type: "weapon",
-    weight: 5,
-    grips: {
-        "Two Hands":{
-            family: "Pole Arms",
-            hands: 2,
-            primaryType: "Cut",
-            primaryTask: 15,
-            primaryDamage: "2d12",
-            secondaryType: "Thrust",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 4,
-            rank: 2}
-       }
-    };
+  name: "Fauchard",
+  type: "weapon",
+  weight: 5,
+  grips: {
+    "Two Hands":{
+      family: "Pole Arms",
+      hands: 2,
+      primaryType: "Cut",
+      primaryTask: 15,
+      primaryDamage: "2d12",
+      secondaryType: "Thrust",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 4,
+      rank: 2}
+     }
+  };
 MML.items["Bill"] = {
-    name: "Bill",
-    type: "weapon",
-    weight: 5,
-    grips: {
-        "Two Hands":{
-            family: "Pole Arms",
-            hands: 2,
-            primaryType: "Cut",
-            primaryTask: 25,
-            primaryDamage: "2d12",
-            secondaryType: "Thrust",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 4,
-            rank: 2}
-       }
-    };
+  name: "Bill",
+  type: "weapon",
+  weight: 5,
+  grips: {
+    "Two Hands":{
+      family: "Pole Arms",
+      hands: 2,
+      primaryType: "Cut",
+      primaryTask: 25,
+      primaryDamage: "2d12",
+      secondaryType: "Thrust",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 4,
+      rank: 2}
+     }
+  };
 MML.items["Glaive"] = {
-    name: "Glaive",
-    type: "weapon",
-    weight: 6,
-    grips: {
-        "Two Hands":{
-            family: "Pole Arms",
-            hands: 2,
-            primaryType: "Chop",
-            primaryTask: 25,
-            primaryDamage: "3d20",
-            secondaryType: "Thrust",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 4,
-            rank: 2}
-       }
-    };
+  name: "Glaive",
+  type: "weapon",
+  weight: 6,
+  grips: {
+    "Two Hands":{
+      family: "Pole Arms",
+      hands: 2,
+      primaryType: "Chop",
+      primaryTask: 25,
+      primaryDamage: "3d20",
+      secondaryType: "Thrust",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 4,
+      rank: 2}
+     }
+  };
 MML.items["Halberd"] = {
-    name: "Halberd",
-    type: "weapon",
-    weight: 6,
-    grips: {
-        "Two Hands":{
-            family: "Pole Arms",
-            hands: 2,
-            primaryType: "Chop",
-            primaryTask: 25,
-            primaryDamage: "3d20",
-            secondaryType: "Thrust",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 4,
-            rank: 2}
-       }
-    };
+  name: "Halberd",
+  type: "weapon",
+  weight: 6,
+  grips: {
+    "Two Hands":{
+      family: "Pole Arms",
+      hands: 2,
+      primaryType: "Chop",
+      primaryTask: 25,
+      primaryDamage: "3d20",
+      secondaryType: "Thrust",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 4,
+      rank: 2}
+     }
+  };
 MML.items["Pole Hammer"] = {
-    name: "Pole Hammer",
-    type: "weapon",
-    weight: 6,
-    grips: {
-        "Two Hands":{
-            family: "Pole Hammers",
-            hands: 2,
-            primaryType: "Flanged",
-            primaryTask: 25,
-            primaryDamage: "3d10",
-            secondaryType: "Thrust",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 4,
-            rank: 2}
-       }
-    };
+  name: "Pole Hammer",
+  type: "weapon",
+  weight: 6,
+  grips: {
+    "Two Hands":{
+      family: "Pole Hammers",
+      hands: 2,
+      primaryType: "Flanged",
+      primaryTask: 25,
+      primaryDamage: "3d10",
+      secondaryType: "Thrust",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 4,
+      rank: 2}
+     }
+  };
 MML.items["War Spear"] = {
-    name: "War Spear",
-    type: "weapon",
-    weight: 2,
-    grips: {
-        "One Hand":{
-            family: "Spears",
-            hands: 1,
-            primaryType: "Thrust",
-            primaryTask: 35,
-            primaryDamage: "2d8",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 3,
-            rank: 1},
-        "Two Hands":{
-            family: "Spears",
-            hands: 2,
-            primaryType: "Thrust",
-            primaryTask: 45,
-            primaryDamage: "3d8",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 5,
-            rank: 2}
-       }
-    };
+  name: "War Spear",
+  type: "weapon",
+  weight: 2,
+  grips: {
+    "One Hand":{
+      family: "Spears",
+      hands: 1,
+      primaryType: "Thrust",
+      primaryTask: 35,
+      primaryDamage: "2d8",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 3,
+      rank: 1},
+    "Two Hands":{
+      family: "Spears",
+      hands: 2,
+      primaryType: "Thrust",
+      primaryTask: 45,
+      primaryDamage: "3d8",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 5,
+      rank: 2}
+     }
+  };
 MML.items["Boar Spear"] = {
-    name: "Boar Spear",
-    type: "weapon",
-    weight: 3.5,
-    grips: {
-        "One Hand":{
-            family: "Spears",
-            hands: 1,
-            primaryType: "Thrust",
-            primaryTask: 25,
-            primaryDamage: "2d10",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 2,
-            rank: 1},
-        "Two Hands":{
-            family: "Spears",
-            hands: 2,
-            primaryType: "Thrust",
-            primaryTask: 45,
-            primaryDamage: "3d10",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 4,
-            rank: 2}
-       }
-    };
+  name: "Boar Spear",
+  type: "weapon",
+  weight: 3.5,
+  grips: {
+    "One Hand":{
+      family: "Spears",
+      hands: 1,
+      primaryType: "Thrust",
+      primaryTask: 25,
+      primaryDamage: "2d10",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 2,
+      rank: 1},
+    "Two Hands":{
+      family: "Spears",
+      hands: 2,
+      primaryType: "Thrust",
+      primaryTask: 45,
+      primaryDamage: "3d10",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 4,
+      rank: 2}
+     }
+  };
 MML.items["Military Fork"] = {
-    name: "Military Fork",
-    type: "weapon",
-    weight: 3.5,
-    grips: {
-        "One Hand":{
-            family: "Spears",
-            hands: 1,
-            primaryType: "Thrust",
-            primaryTask: 15,
-            primaryDamage: "2d12",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 2,
-            rank: 1},
-        "Two Hands":{
-            family: "Spears",
-            hands: 2,
-            primaryType: "Thrust",
-            primaryTask: 35,
-            primaryDamage: "3d10",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 4,
-            rank: 2}
-       }
-    };
+  name: "Military Fork",
+  type: "weapon",
+  weight: 3.5,
+  grips: {
+    "One Hand":{
+      family: "Spears",
+      hands: 1,
+      primaryType: "Thrust",
+      primaryTask: 15,
+      primaryDamage: "2d12",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 2,
+      rank: 1},
+    "Two Hands":{
+      family: "Spears",
+      hands: 2,
+      primaryType: "Thrust",
+      primaryTask: 35,
+      primaryDamage: "3d10",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 4,
+      rank: 2}
+     }
+  };
 MML.items["Spetum"] = {
-    name: "Spetum",
-    type: "weapon",
-    weight: 4,
-    grips: {
-        "Two Hands":{
-            family: "Spears",
-            hands: 2,
-            primaryType: "Thrust",
-            primaryTask: 35,
-            primaryDamage: "3d10",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 4,
-            rank: 2}
-       }
-    };
+  name: "Spetum",
+  type: "weapon",
+  weight: 4,
+  grips: {
+    "Two Hands":{
+      family: "Spears",
+      hands: 2,
+      primaryType: "Thrust",
+      primaryTask: 35,
+      primaryDamage: "3d10",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 4,
+      rank: 2}
+     }
+  };
 MML.items["Quarter Staff"] = {
-    name: "Quarter Staff",
-    type: "weapon",
-    weight: 2,
-    grips: {
-        "Two Hands":{
-            family: "Staves",
-            hands: 2,
-            primaryType: "Impact",
-            primaryTask: 45,
-            primaryDamage: "3d8",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 35,
-            initiative: 9,
-            rank: 2}
-       }
-    };
+  name: "Quarter Staff",
+  type: "weapon",
+  weight: 2,
+  grips: {
+    "Two Hands":{
+      family: "Staves",
+      hands: 2,
+      primaryType: "Impact",
+      primaryTask: 45,
+      primaryDamage: "3d8",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 35,
+      initiative: 9,
+      rank: 2}
+     }
+  };
 MML.items["Scimitar"] = {
-    name: "Scimitar",
-    type: "weapon",
-    weight: 3.5,
-    grips: {
-        "One Hand":{
-            family: "Swords",
-            hands: 1,
-            primaryType: "Cut",
-            primaryTask: 35,
-            primaryDamage: "2d12",
-            secondaryType: "Thrust",
-            secondaryTask: 25,
-            secondaryDamage: "2d6",
-            defense: 35,
-            initiative: 7,
-            rank: 1}
-       }
-    };
+  name: "Scimitar",
+  type: "weapon",
+  weight: 3.5,
+  grips: {
+    "One Hand":{
+      family: "Swords",
+      hands: 1,
+      primaryType: "Cut",
+      primaryTask: 35,
+      primaryDamage: "2d12",
+      secondaryType: "Thrust",
+      secondaryTask: 25,
+      secondaryDamage: "2d6",
+      defense: 35,
+      initiative: 7,
+      rank: 1}
+     }
+  };
 MML.items["Short Sword"] = {
-    name: "Short Sword",
-    type: "weapon",
-    weight: 3.5,
-    grips: {
-        "One Hand":{
-            family: "Swords",
-            hands: 1,
-            primaryType: "Thrust",
-            primaryTask: 35,
-            primaryDamage: "3d8",
-            secondaryType: "Cut",
-            secondaryTask: 35,
-            secondaryDamage: "3d6",
-            defense: 35,
-            initiative: 1,
-            rank: 1}
-       }
-    };
+  name: "Short Sword",
+  type: "weapon",
+  weight: 3.5,
+  grips: {
+    "One Hand":{
+      family: "Swords",
+      hands: 1,
+      primaryType: "Thrust",
+      primaryTask: 35,
+      primaryDamage: "3d8",
+      secondaryType: "Cut",
+      secondaryTask: 35,
+      secondaryDamage: "3d6",
+      defense: 35,
+      initiative: 1,
+      rank: 1}
+     }
+  };
 MML.items["Long Sword"] = {
-    name: "Long Sword",
-    type: "weapon",
-    weight: 3,
-    grips: {
-        "One Hand":{
-            family: "Swords",
-            hands: 1,
-            primaryType: "Cut",
-            primaryTask: 45,
-            primaryDamage: "3d10",
-            secondaryType: "Thrust",
-            secondaryTask: 35,
-            secondaryDamage: "2d6",
-            defense: 25,
-            initiative: 5,
-            rank: 1}
-       }
-    };
+  name: "Long Sword",
+  type: "weapon",
+  weight: 3,
+  grips: {
+    "One Hand":{
+      family: "Swords",
+      hands: 1,
+      primaryType: "Cut",
+      primaryTask: 45,
+      primaryDamage: "3d10",
+      secondaryType: "Thrust",
+      secondaryTask: 35,
+      secondaryDamage: "2d6",
+      defense: 25,
+      initiative: 5,
+      rank: 1}
+     }
+  };
 MML.items["Falchion"] = {
-    name: "Falchion",
-    type: "weapon",
-    weight: 3.5,
-    grips: {
-        "One Hand":{
-            family: "Swords",
-            hands: 1,
-            primaryType: "Chop",
-            primaryTask: 35,
-            primaryDamage: "4d8",
-            secondaryType: "Thrust",
-            secondaryTask: 25,
-            secondaryDamage: "3d6",
-            defense: 25,
-            initiative: 5,
-            rank: 1}
-       }
-    };
+  name: "Falchion",
+  type: "weapon",
+  weight: 3.5,
+  grips: {
+    "One Hand":{
+      family: "Swords",
+      hands: 1,
+      primaryType: "Chop",
+      primaryTask: 35,
+      primaryDamage: "4d8",
+      secondaryType: "Thrust",
+      secondaryTask: 25,
+      secondaryDamage: "3d6",
+      defense: 25,
+      initiative: 5,
+      rank: 1}
+     }
+  };
 MML.items["Bastard Sword"] = {
-    name: "Bastard Sword",
-    type: "weapon",
-    weight: 6,
-    grips: {
-        "One Hand":{
-            family: "Swords",
-            hands: 1,
-            primaryType: "Cut",
-            primaryTask: 25,
-            primaryDamage: "5d6",
-            secondaryType: "Thrust",
-            secondaryTask: 15,
-            secondaryDamage: "3d6",
-            defense: 15,
-            initiative: 4,
-            rank: 1},
-        "Two Hands":{
-            family: "Swords",
-            hands: 2,
-            primaryType: "Cut",
-            primaryTask: 35,
-            primaryDamage: "4d10",
-            secondaryType: "Thrust",
-            secondaryTask: 25,
-            secondaryDamage: "4d6",
-            defense: 25,
-            initiative: 5,
-            rank: 1}
-       }
-    };
+  name: "Bastard Sword",
+  type: "weapon",
+  weight: 6,
+  grips: {
+    "One Hand":{
+      family: "Swords",
+      hands: 1,
+      primaryType: "Cut",
+      primaryTask: 25,
+      primaryDamage: "5d6",
+      secondaryType: "Thrust",
+      secondaryTask: 15,
+      secondaryDamage: "3d6",
+      defense: 15,
+      initiative: 4,
+      rank: 1},
+    "Two Hands":{
+      family: "Swords",
+      hands: 2,
+      primaryType: "Cut",
+      primaryTask: 35,
+      primaryDamage: "4d10",
+      secondaryType: "Thrust",
+      secondaryTask: 25,
+      secondaryDamage: "4d6",
+      defense: 25,
+      initiative: 5,
+      rank: 1}
+     }
+  };
 MML.items["Broadsword"] = {
-    name: "Broadsword",
-    type: "weapon",
-    weight: 5,
-    grips: {
-        "One Hand":{
-            family: "Swords",
-            hands: 1,
-            primaryType: "Chop",
-            primaryTask: 25,
-            primaryDamage: "3d12",
-            secondaryType: "Thrust",
-            secondaryTask: 15,
-            secondaryDamage: "1d12",
-            defense: 15,
-            initiative: 4,
-            rank: 1}
-       }
-    };
+  name: "Broadsword",
+  type: "weapon",
+  weight: 5,
+  grips: {
+    "One Hand":{
+      family: "Swords",
+      hands: 1,
+      primaryType: "Chop",
+      primaryTask: 25,
+      primaryDamage: "3d12",
+      secondaryType: "Thrust",
+      secondaryTask: 15,
+      secondaryDamage: "1d12",
+      defense: 15,
+      initiative: 4,
+      rank: 1}
+     }
+  };
 MML.items["Two-Handed Broadsword"] = {
-    name: "Two-Handed Broadsword",
-    type: "weapon",
-    weight: 7.5,
-    grips: {
-        "Two Hands":{
-            family: "Swords",
-            hands: 2,
-            primaryType: "Chop",
-            primaryTask: 35,
-            primaryDamage: "4d12",
-            secondaryType: "Thrust",
-            secondaryTask: 25,
-            secondaryDamage: "1d20",
-            defense: 25,
-            initiative: 3,
-            rank: 1}
-       }
-    };
+  name: "Two-Handed Broadsword",
+  type: "weapon",
+  weight: 7.5,
+  grips: {
+    "Two Hands":{
+      family: "Swords",
+      hands: 2,
+      primaryType: "Chop",
+      primaryTask: 35,
+      primaryDamage: "4d12",
+      secondaryType: "Thrust",
+      secondaryTask: 25,
+      secondaryDamage: "1d20",
+      defense: 25,
+      initiative: 3,
+      rank: 1}
+     }
+  };
 MML.items["Great Sword"] = {
-    name: "Great Sword",
-    type: "weapon",
-    weight: 13,
-    grips: {
-        "Two Hands":{
-            family: "Swords",
-            hands: 2,
-            primaryType: "Chop",
-            primaryTask: 15,
-            primaryDamage: "6d10",
-            secondaryType: "Thrust",
-            secondaryTask: 15,
-            secondaryDamage: "3d10",
-            defense: 35,
-            initiative: 2,
-            rank: 2}
-       }
-    };
+  name: "Great Sword",
+  type: "weapon",
+  weight: 13,
+  grips: {
+    "Two Hands":{
+      family: "Swords",
+      hands: 2,
+      primaryType: "Chop",
+      primaryTask: 15,
+      primaryDamage: "6d10",
+      secondaryType: "Thrust",
+      secondaryTask: 15,
+      secondaryDamage: "3d10",
+      defense: 35,
+      initiative: 2,
+      rank: 2}
+     }
+  };
 MML.items["Whip"] = {
-    name: "Whip",
-    type: "weapon",
-    weight: 1,
-    grips: {
-        "One Hand":{
-            family: "Whip",
-            hands: 1,
-            primaryType: "Surface",
-            primaryTask: 35,
-            primaryDamage: "2d4",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 0,
-            initiative: 8,
-            rank: 3}
-       }
-    };
+  name: "Whip",
+  type: "weapon",
+  weight: 1,
+  grips: {
+    "One Hand":{
+      family: "Whip",
+      hands: 1,
+      primaryType: "Surface",
+      primaryTask: 35,
+      primaryDamage: "2d4",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 0,
+      initiative: 8,
+      rank: 3}
+     }
+  };
 MML.items["Cleaver"] = {
-    name: "Cleaver",
-    type: "weapon",
-    weight: 2,
-    grips: {
-        "One Hand":{
-            family: "Axe",
-            hands: 1,
-            primaryType: "Chop",
-            primaryTask: 25,
-            primaryDamage: "1d10",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 0,
-            initiative: 8,
-            rank: 1}
-       }
-    };
+  name: "Cleaver",
+  type: "weapon",
+  weight: 2,
+  grips: {
+    "One Hand":{
+      family: "Axe",
+      hands: 1,
+      primaryType: "Chop",
+      primaryTask: 25,
+      primaryDamage: "1d10",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 0,
+      initiative: 8,
+      rank: 1}
+     }
+  };
 MML.items["Hatchet"] = {
-    name: "Hatchet",
-    type: "weapon",
-    weight: 2.5,
-    grips: {
-        "One Hand":{
-            family: "Axe",
-            hands: 1,
-            primaryType: "Chop",
-            primaryTask: 25,
-            primaryDamage: "1d12",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 0,
-            initiative: 7,
-            rank: 1}
-       }
-    };
+  name: "Hatchet",
+  type: "weapon",
+  weight: 2.5,
+  grips: {
+    "One Hand":{
+      family: "Axe",
+      hands: 1,
+      primaryType: "Chop",
+      primaryTask: 25,
+      primaryDamage: "1d12",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 0,
+      initiative: 7,
+      rank: 1}
+     }
+  };
 MML.items["Hoe"] = {
-    name: "Hoe",
-    type: "weapon",
-    weight: 4,
-    grips: {
-        "Two Hands":{
-            family: "Axe",
-            hands: 2,
-            primaryType: "Flanged",
-            primaryTask: 35,
-            primaryDamage: "1d10",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 4,
-            rank: 1}
-       }
-    };
+  name: "Hoe",
+  type: "weapon",
+  weight: 4,
+  grips: {
+    "Two Hands":{
+      family: "Axe",
+      hands: 2,
+      primaryType: "Flanged",
+      primaryTask: 35,
+      primaryDamage: "1d10",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 4,
+      rank: 1}
+     }
+  };
 MML.items["Wood Axe"] = {
-    name: "Wood Axe",
-    type: "weapon",
-    weight: 3,
-    grips: {
-        "Two Hands":{
-            family: "Axe",
-            hands: 2,
-            primaryType: "Chop",
-            primaryTask: 35,
-            primaryDamage: "2d12",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 4,
-            rank: 1}
-       }
-    };
+  name: "Wood Axe",
+  type: "weapon",
+  weight: 3,
+  grips: {
+    "Two Hands":{
+      family: "Axe",
+      hands: 2,
+      primaryType: "Chop",
+      primaryTask: 35,
+      primaryDamage: "2d12",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 4,
+      rank: 1}
+     }
+  };
 MML.items["Hammer, Medium"] = {
-    name: "Hammer, Medium",
-    type: "weapon",
-    weight: 2.5,
-    grips: {
-        "One Hand":{
-            family: "Bludgeoning",
-            hands: 1,
-            primaryType: "Impact",
-            primaryTask: 25,
-            primaryDamage: "1d10",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 0,
-            initiative: 7,
-            rank: 1}
-       }
-    };
+  name: "Hammer, Medium",
+  type: "weapon",
+  weight: 2.5,
+  grips: {
+    "One Hand":{
+      family: "Bludgeoning",
+      hands: 1,
+      primaryType: "Impact",
+      primaryTask: 25,
+      primaryDamage: "1d10",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 0,
+      initiative: 7,
+      rank: 1}
+     }
+  };
 MML.items["Shovel"] = {
-    name: "Shovel",
-    type: "weapon",
-    weight: 6,
-    grips: {
-        "Two Hands":{
-            family: "Bludgeoning",
-            hands: 2,
-            primaryType: "Impact",
-            primaryTask: 35,
-            primaryDamage: "1d8",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 4,
-            rank: 1}
-       }
-    };
+  name: "Shovel",
+  type: "weapon",
+  weight: 6,
+  grips: {
+    "Two Hands":{
+      family: "Bludgeoning",
+      hands: 2,
+      primaryType: "Impact",
+      primaryTask: 35,
+      primaryDamage: "1d8",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 4,
+      rank: 1}
+     }
+  };
 MML.items["Skinning Knife"] = {
-    name: "Skinning Knife",
-    type: "weapon",
-    weight: 0.5,
-    grips: {
-        "One Hand":{
-            family: "Knives",
-            hands: 1,
-            primaryType: "Cut",
-            primaryTask: 15,
-            primaryDamage: "1d8",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 0,
-            initiative: 9,
-            rank: 1}
-       }
-    };
+  name: "Skinning Knife",
+  type: "weapon",
+  weight: 0.5,
+  grips: {
+    "One Hand":{
+      family: "Knives",
+      hands: 1,
+      primaryType: "Cut",
+      primaryTask: 15,
+      primaryDamage: "1d8",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 0,
+      initiative: 9,
+      rank: 1}
+     }
+  };
 MML.items["Butcher's Knife"] = {
-    name: "Butcher's Knife",
-    type: "weapon",
-    weight: 1,
-    grips: {
-        "One Hand":{
-            family: "Knives",
-            hands: 1,
-            primaryType: "Cut",
-            primaryTask: 15,
-            primaryDamage: "2d6",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 0,
-            initiative: 9,
-            rank: 1}
-       }
-    };
+  name: "Butcher's Knife",
+  type: "weapon",
+  weight: 1,
+  grips: {
+    "One Hand":{
+      family: "Knives",
+      hands: 1,
+      primaryType: "Cut",
+      primaryTask: 15,
+      primaryDamage: "2d6",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 0,
+      initiative: 9,
+      rank: 1}
+     }
+  };
 MML.items["Pitch Fork"] = {
-    name: "Pitch Fork",
-    type: "weapon",
-    weight: 3,
-    grips: {
-        "Two Hands":{
-            family: "Spears",
-            hands: 2,
-            primaryType: "Thrust",
-            primaryTask: 35,
-            primaryDamage: "2d10",
-            secondaryType: "",
-            secondaryTask: 0,
-            secondaryDamage: "",
-            defense: 15,
-            initiative: 3,
-            rank: 1}
-       }
-    };
+  name: "Pitch Fork",
+  type: "weapon",
+  weight: 3,
+  grips: {
+    "Two Hands":{
+      family: "Spears",
+      hands: 2,
+      primaryType: "Thrust",
+      primaryTask: 35,
+      primaryDamage: "2d10",
+      secondaryType: "",
+      secondaryTask: 0,
+      secondaryDamage: "",
+      defense: 15,
+      initiative: 3,
+      rank: 1}
+     }
+  };
 MML.items["Wind Sword"] = {
-    name: "Wind Sword",
-    type: "weapon",
-    weight: 3,
-    grips: {
-        "One Hand":{
-            family: "Swords",
-            hands: 1,
-            primaryType: "Cut",
-            primaryTask: 45,
-            primaryDamage: "3d10",
-            secondaryType: "Thrust",
-            secondaryTask: 45,
-            secondaryDamage: "2d4",
-            defense: 25,
-            initiative: 6,
-            rank: 1},
-        "Two Hands":{
-            family: "Swords",
-            hands: 2,
-            primaryType: "Cut",
-            primaryTask: 45,
-            primaryDamage: "4d10",
-            secondaryType: "Thrust",
-            secondaryTask: 45,
-            secondaryDamage: "3d8",
-            defense: 35,
-            initiative: 8,
-            rank: 1}
-       }
-    };    
+  name: "Wind Sword",
+  type: "weapon",
+  weight: 3,
+  grips: {
+    "One Hand":{
+      family: "Swords",
+      hands: 1,
+      primaryType: "Cut",
+      primaryTask: 45,
+      primaryDamage: "3d10",
+      secondaryType: "Thrust",
+      secondaryTask: 45,
+      secondaryDamage: "2d4",
+      defense: 25,
+      initiative: 6,
+      rank: 1},
+    "Two Hands":{
+      family: "Swords",
+      hands: 2,
+      primaryType: "Cut",
+      primaryTask: 45,
+      primaryDamage: "4d10",
+      secondaryType: "Thrust",
+      secondaryTask: 45,
+      secondaryDamage: "3d8",
+      defense: 35,
+      initiative: 8,
+      rank: 1}
+    }
+  };
 MML.items["Short Bow"] = {
-    name: "Short Bow",
-    type: "weapon",
-    weight: 0,
-    grips: {
-        "Two Hands": {
-            family: "MWD",
-            hands: 2,
-            pull: 45,
-            initiative: 8,
-            reload: 1,
-            primaryType: "Pierce",
-            range: {
-                pointBlank: { task: 15, range: 74, damage: "3d6"},
-                effective: { task: 45, range: 149, damage: "2d8"},
-                long: { task: 25, range: 299, damage: "2d6"},
-                extreme: { task: 0, range: 300, damage: "1d6"}
-            }
-        }
-    }};
+  name: "Short Bow",
+  type: "weapon",
+  weight: 0,
+  grips: {
+    "Two Hands": {
+      family: "MWD",
+      hands: 2,
+      pull: 45,
+      initiative: 8,
+      reload: 1,
+      primaryType: "Pierce",
+      range: {
+        pointBlank: { task: 15, range: 74, damage: "3d6"},
+        effective: { task: 45, range: 149, damage: "2d8"},
+        long: { task: 25, range: 299, damage: "2d6"},
+        extreme: { task: 0, range: 300, damage: "1d6"}
+      }
+    }
+  }};
 MML.items["Medium Bow"] = {
-    name: "Medium Bow",
-    type: "weapon",
-    weight: 0,
-    grips: {
-        "Two Hands": {
-            family: "MWD",
-            hands: 2,
-            pull: 60,
-            initiative: 7,
-            reload: 1,
-            primaryType: "Pierce",
-            range: {
-                pointBlank: { task: 15, range: 89, damage: "3d8"},
-                effective: { task: 45, range: 179, damage: "2d10"},
-                long: { task: 25, range: 449, damage: "2d8"},
-                extreme: { task: 0, range: 450, damage: "1d8"}
-            }
-        }
-    }};
+  name: "Medium Bow",
+  type: "weapon",
+  weight: 0,
+  grips: {
+    "Two Hands": {
+      family: "MWD",
+      hands: 2,
+      pull: 60,
+      initiative: 7,
+      reload: 1,
+      primaryType: "Pierce",
+      range: {
+        pointBlank: { task: 15, range: 89, damage: "3d8"},
+        effective: { task: 45, range: 179, damage: "2d10"},
+        long: { task: 25, range: 449, damage: "2d8"},
+        extreme: { task: 0, range: 450, damage: "1d8"}
+      }
+    }
+  }};
 MML.items["Long Bow"] = {
-    name: "Long Bow",
-    type: "weapon",
-    weight: 0,
-    grips: {
-        "Two Hands": {
-            family: "MWD",
-            hands: 2,
-            pull: 80,
-            initiative: 6,
-            reload: 1,
-            primaryType: "Pierce",
-            range: {
-                pointBlank: { task: 15, range: 149, damage: "3d10"},
-                effective: { task: 45, range: 269, damage: "3d8"},
-                long: { task: 25, range: 599, damage: "3d6"},
-                extreme: { task: 0, range: 600, damage: "1d10"}
-            }
-        }
-    }};
+  name: "Long Bow",
+  type: "weapon",
+  weight: 0,
+  grips: {
+    "Two Hands": {
+      family: "MWD",
+      hands: 2,
+      pull: 80,
+      initiative: 6,
+      reload: 1,
+      primaryType: "Pierce",
+      range: {
+        pointBlank: { task: 15, range: 149, damage: "3d10"},
+        effective: { task: 45, range: 269, damage: "3d8"},
+        long: { task: 25, range: 599, damage: "3d6"},
+        extreme: { task: 0, range: 600, damage: "1d10"}
+      }
+    }
+  }};
 MML.items["Heavy Long Bow"] = {
-    name: "Heavy Long Bow",
-    type: "weapon",
-    weight: 0,
-    grips: {
-        "Two Hands": {
-            family: "MWD",
-            hands: 2,
-            pull: 100,
-            initiative: 4,
-            reload: 1,
-            primaryType: "Pierce",
-            range: {
-                pointBlank: { task: 15, range: 179, damage: "3d12"},
-                effective: { task: 45, range: 299, damage: "3d10"},
-                long: { task: 25, range: 674, damage: "3d8"},
-                extreme: { task: 0, range: 675, damage: "1d10"}
-            }
-        }
-    }};
+  name: "Heavy Long Bow",
+  type: "weapon",
+  weight: 0,
+  grips: {
+    "Two Hands": {
+      family: "MWD",
+      hands: 2,
+      pull: 100,
+      initiative: 4,
+      reload: 1,
+      primaryType: "Pierce",
+      range: {
+        pointBlank: { task: 15, range: 179, damage: "3d12"},
+        effective: { task: 45, range: 299, damage: "3d10"},
+        long: { task: 25, range: 674, damage: "3d8"},
+        extreme: { task: 0, range: 675, damage: "1d10"}
+      }
+    }
+  }};
 MML.items["Short Composite Bow"] = {
-    name: "Short Composite Bow",
-    type: "weapon",
-    weight: 0,
-    grips: {
-        "Two Hands": {
-            family: "MWD",
-            hands: 2,
-            pull: 60,
-            initiative: 7,
-            reload: 1,
-            primaryType: "Pierce",
-            range: {
-                pointBlank: { task: 15, range: 89, damage: "3d8"},
-                effective: { task: 45, range: 179, damage: "2d10"},
-                long: { task: 25, range: 449, damage: "2d8"},
-                extreme: { task: 0, range: 450, damage: "1d8"}
-            }
-        }
-    }};
+  name: "Short Composite Bow",
+  type: "weapon",
+  weight: 0,
+  grips: {
+    "Two Hands": {
+      family: "MWD",
+      hands: 2,
+      pull: 60,
+      initiative: 7,
+      reload: 1,
+      primaryType: "Pierce",
+      range: {
+        pointBlank: { task: 15, range: 89, damage: "3d8"},
+        effective: { task: 45, range: 179, damage: "2d10"},
+        long: { task: 25, range: 449, damage: "2d8"},
+        extreme: { task: 0, range: 450, damage: "1d8"}
+      }
+    }
+  }};
 MML.items["Medium Composite Bow"] = {
-    name: "Medium Composite Bow",
-    type: "weapon",
-    weight: 0,
-    grips: {
-        "Two Hands": {
-            family: "MWD",
-            hands: 2,
-            pull: 80,
-            initiative: 6,
-            reload: 1,
-            primaryType: "Pierce",
-            range: {
-                pointBlank: { task: 15, range: 149, damage: "3d10"},
-                effective: { task: 45, range: 269, damage: "3d8"},
-                long: { task: 25, range: 599, damage: "3d6"},
-                extreme: { task: 0, range: 600, damage: "1d10"}
-            }
-        }
-    }};
+  name: "Medium Composite Bow",
+  type: "weapon",
+  weight: 0,
+  grips: {
+    "Two Hands": {
+      family: "MWD",
+      hands: 2,
+      pull: 80,
+      initiative: 6,
+      reload: 1,
+      primaryType: "Pierce",
+      range: {
+        pointBlank: { task: 15, range: 149, damage: "3d10"},
+        effective: { task: 45, range: 269, damage: "3d8"},
+        long: { task: 25, range: 599, damage: "3d6"},
+        extreme: { task: 0, range: 600, damage: "1d10"}
+      }
+    }
+  }};
 MML.items["Light Cross Bow"] = {
-    name: "Light Cross Bow",
-    type: "weapon",
-    weight: 0,
-    grips: {
-        "Two Hands": {
-            family: "MWM",
-            hands: 2,
-            pull: 80,
-            initiative: 10,
-            reload: 4,
-            primaryType: "Pierce",
-            range: {
-                pointBlank: { task: 15, range: 179, damage: "3d10"},
-                effective: { task: 45, range: 299, damage: "3d8"},
-                long: { task: 25, range: 674, damage: "3d6"},
-                extreme: { task: 0, range: 675, damage: "1d10"}
-            }
-        }
-    } };
+  name: "Light Cross Bow",
+  type: "weapon",
+  weight: 0,
+  grips: {
+    "Two Hands": {
+      family: "MWM",
+      hands: 2,
+      pull: 80,
+      initiative: 10,
+      reload: 4,
+      primaryType: "Pierce",
+      range: {
+        pointBlank: { task: 15, range: 179, damage: "3d10"},
+        effective: { task: 45, range: 299, damage: "3d8"},
+        long: { task: 25, range: 674, damage: "3d6"},
+        extreme: { task: 0, range: 675, damage: "1d10"}
+      }
+    }
+  } };
 MML.items["Medium Cross Bow"] = {
-    name: "Medium Cross Bow",
-    type: "weapon",
-    weight: 0,
-    grips: {
-        "Two Hands": {
-            family: "MWM",
-            hands: 2,
-            pull: 100,
-            initiative: 10,
-            reload: 6,
-            primaryType: "Pierce",
-            range: {
-                pointBlank: { task: 15, range: 224, damage: "3d12"},
-                effective: { task: 45, range: 374, damage: "3d10"},
-                long: { task: 25, range: 899, damage: "3d8"},
-                extreme: { task: 0, range: 900, damage: "1d10"}
-            }
-        }
-    }};
+  name: "Medium Cross Bow",
+  type: "weapon",
+  weight: 0,
+  grips: {
+    "Two Hands": {
+      family: "MWM",
+      hands: 2,
+      pull: 100,
+      initiative: 10,
+      reload: 6,
+      primaryType: "Pierce",
+      range: {
+        pointBlank: { task: 15, range: 224, damage: "3d12"},
+        effective: { task: 45, range: 374, damage: "3d10"},
+        long: { task: 25, range: 899, damage: "3d8"},
+        extreme: { task: 0, range: 900, damage: "1d10"}
+      }
+    }
+  }};
 MML.items["Heavy Cross Bow"] = {
-    name: "Heavy Cross Bow",
-    type: "weapon",
-    weight: 0,
-    grips: {
-        "Two Hands": {
-            family: "MWM",
-            hands: 2,
-            pull: 120,
-            initiative: 8,
-            reload: 12,
-            primaryType: "Pierce",
-            range: {
-                pointBlank: { task: 15, range: 269, damage: "4d10"},
-                effective: { task: 45, range: 449, damage: "3d12"},
-                long: { task: 25, range: 1199, damage: "3d10"},
-                extreme: { task: 0, range: 1200, damage: "1d12"}
-            }
-        }
-    }};
+  name: "Heavy Cross Bow",
+  type: "weapon",
+  weight: 0,
+  grips: {
+    "Two Hands": {
+      family: "MWM",
+      hands: 2,
+      pull: 120,
+      initiative: 8,
+      reload: 12,
+      primaryType: "Pierce",
+      range: {
+        pointBlank: { task: 15, range: 269, damage: "4d10"},
+        effective: { task: 45, range: 449, damage: "3d12"},
+        long: { task: 25, range: 1199, damage: "3d10"},
+        extreme: { task: 0, range: 1200, damage: "1d12"}
+      }
+    }
+  }};
 MML.items["Battle Axe, Thrown"] = {
-    name: "Battle Axe, Thrown",
-    type: "weapon",
-    weight: 0,
-    grips: {
-        "One Hand": {
-            family: "TWH",
-            hands: 1,
-            initiative: 3,
-            accuracyMod: -8,
-            primaryType: "Chop",
-            range: {
-                pointBlank: { task: 35, loadDivider: 8, damage: "2d12"},
-                effective: { task: 45, loadDivider: 4, damage: "2d10"},
-                long: { task: 25, loadDivider: 3, damage: "2d6"},
-                extreme: { task: 0, loadDivider: 2, damage: "1d6"}
-            }
-        }
-    }};
+  name: "Battle Axe, Thrown",
+  type: "weapon",
+  weight: 0,
+  grips: {
+    "One Hand": {
+      family: "TWH",
+      hands: 1,
+      initiative: 3,
+      accuracyMod: -8,
+      primaryType: "Chop",
+      range: {
+        pointBlank: { task: 35, loadDivider: 8, damage: "2d12"},
+        effective: { task: 45, loadDivider: 4, damage: "2d10"},
+        long: { task: 25, loadDivider: 3, damage: "2d6"},
+        extreme: { task: 0, loadDivider: 2, damage: "1d6"}
+      }
+    }
+  }};
 
 //Spell Components
 MML.items["Dart"] = {name: "Dart", type: "spellComponent", spell: "Dart", weight: 0};
@@ -2292,14 +2160,14 @@ MML.items["Large Rectangular Shield"] = {name: "Large Rectangular Shield", type:
 MML.items["Heater Shield"] = {name: "Heater Shield", type: "shield", weight: 10.6, attackMod: -10, defenseMod: 33};
 
 MML.weaponRanks = [
-    {low: 0, high: 2},
-    {low: 2, high: 5},
-    {low: 5, high: 8},
-    {low: 8, high: 12},
-    {low: 12, high: 15},
-    {low: 15, high: 18},
-    {low: 18, high: 21},
-    {low: 21, high: 24},
+  {low: 0, high: 2},
+  {low: 2, high: 5},
+  {low: 5, high: 8},
+  {low: 8, high: 12},
+  {low: 12, high: 15},
+  {low: 15, high: 18},
+  {low: 18, high: 21},
+  {low: 21, high: 24},
 ];
 
 MML.HPTables = {};

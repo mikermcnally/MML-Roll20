@@ -1,5 +1,5 @@
 {
-  "uploadOnSave": true,
+  "uploadOnSave": false,
   "useAtomicWrites": false,
   "deleteLocal": false,
   "hostname": "127.0.0.1",
