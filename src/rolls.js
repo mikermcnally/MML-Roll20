@@ -202,32 +202,22 @@ MML.meleeDefenseRoll = async function meleeDefenseRoll(player, character, attack
   var itemId;
   var grip;
   var defenderWeapon;
-  var dodgeMods;
-  var blockMods;
-  var dodgeSkill;
-  var blockSkill;
-  var weaponSkills = character.weaponSkills;
-  var defaultMartialSkill = weaponSkills['Default Martial'].level;
-  var shieldMod = MML.getShieldDefenseBonus(character);
-  var defenseMod = character.meleeDefenseMod + character.attributeDefenseMod;
-  var sitMod = character.situationalMod;
-
-  if (!_.isUndefined(weaponSkills['Dodge']) && defaultMartialSkill < weaponSkills['Dodge'].level) {
-    dodgeMods = [weaponSkills['Dodge'].level, defenseMod, sitMod];
-  } else {
-    dodgeMods = [defaultMartialSkill, defenseMod, sitMod];
-  }
+  const blockMods = [];
+  const defenseMods = [character.situationalMod, character.meleeDefenseMod, character.attributeDefenseMod];
+  const defaultMartialSkill = weaponSkills['Default Martial'].level;
+  const dodgeSkill = _.isUndefined(weaponSkills['Dodge']) ? 0 : weaponSkills['Dodge'].level;
+  const dodgeMods = defenseMods.concat(dodgeSkill > defaultMartialSkill ? dodgeSkill : defaultMartialSkill);
+  const weaponSkills = character.weaponSkills;
+  const shieldMod = MML.getShieldDefenseBonus(character);
 
   if (attackerWeapon.initiative < 6) {
     dodgeMods.push(15);
   }
 
-  if (MML.isDualWielding(character)) {
-    log('Dual Wield defense');
-  } else if (MML.isUnarmed(character) || MML.isWieldingRangedWeapon(character)) {
-    blockMods = [];
-  } else {
-    if (MML.getWeaponFamily(character, 'rightHand') !== 'unarmed') {
+  if (!MML.isUnarmed(character) && !MML.isWieldingRangedWeapon(character)) {
+    if (MML.isDualWielding(character)) {
+      log('Dual Wield defense');
+    } else if (MML.getWeaponFamily(character, 'rightHand') !== 'unarmed') {
       itemId = character.rightHand._id;
       grip = character.rightHand.grip;
     } else {
@@ -265,7 +255,7 @@ MML.meleeDamageRoll = async function meleeDamageRoll(player, character, weapon, 
 };
 
 MML.missileAttackRoll = async function missileAttackRoll(player, character, target, weapon, skill) {
-  var mods = [
+  const mods = [
     skill,
     character.situationalMod,
     character.missileAttackMod,

@@ -32,12 +32,13 @@ MML.init = function() {
     caseInsensitive: false
   });
 
-  MML.characters = {};
-  _.each(characterObjects, function(characterObject) {
-    const character = MML.createCharacter(characterObject.get('name'), characterObject.id);
+  MML.characters = characterObjects.reduce(function(characters, characterObject) {
+    const id = characterObject.id;
+    const character = MML.createCharacter(characterObject.get('name'), id);
     MML.setPlayer(character);
-    MML.characters[character.id] = character;
-  });
+    characters[id] = character;
+    return characters;
+  }, {});
 
   MML.initializeMenu(state.MML.GM.player);
 

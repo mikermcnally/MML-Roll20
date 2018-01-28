@@ -903,28 +903,6 @@ MML.displaySpellMarker = async function displaySpellMarker(player, spellMarker) 
   });
 };
 
-MML.resistRelease = function resistRelease(player, who, attacker) {
-  player.who = who;
-  player.message = 'Allow ' + attacker.name + ' to release grapple?';
-
-  var buttons = [{
-    text: 'Yes',
-    nextMenu: 'menuIdle',
-    callback: function() {
-      state.MML.GM.currentAction.parameters.targetAgreed = true;
-      MML.releaseOpponentAction();
-    }
-  }, {
-    text: 'No',
-    nextMenu: 'menuIdle',
-    callback: function() {
-      state.MML.GM.currentAction.parameters.targetAgreed = false;
-      MML.releaseOpponentAction();
-    }
-  }];
-  player.buttons = buttons;
-};
-
 MML.menucharGenericRoll = function menucharGenericRoll(player, who, message, dice, name, callback) {
   player.who = who;
   player.message = message;

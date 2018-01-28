@@ -203,32 +203,6 @@ MML.meleeAttackAction = async function meleeAttackAction(player, character, acti
   return MML.endAction(player, character, action, target);
 };
 
-MML.grappleAttackAction = async function grappleAttackAction(player, character, action) {
-  const weapon = action.weapon;
-  const target = await MML.getSingleTarget(player);
-  const attack = await MML.meleeAttackRoll(player, character, weapon.task, action.skill);
-  if (['Success', 'Critical Success'].includes(attack)) {
-    const defense = await MML.grappleDefense(target.player, target, weapon);
-    if (!['Success', 'Critical Success'].includes(defense)) {
-      await MML.grappleHandler(player, character, target, action);
-    }
-  }
-  return MML.endAction(player, character, action, target);
-};
-
-MML.releaseOpponentAction = async function releaseOpponentAction(player, character, action) {
-  const target = await MML.getSingleTarget(player);
-  if (_.has(character.statusEffects, 'Holding')) {
-    MML.removeHold(character, target);
-  }
-  const targetAgreed = await MML.menuResistRelease(target.player);
-  if (targetAgreed) {
-    await MML.removeGrapple(character, target);
-  } else {
-    await MML.breakGrapple(character, target);
-  }
-};
-
 MML.castAction = async function castAction(player, character, action) {
   await MML.spells[action.spell.name](player, character, action);
   return MML.endAction(player, character, action);
