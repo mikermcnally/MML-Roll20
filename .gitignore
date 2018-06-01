@@ -7,3 +7,4 @@ MML_Test.js
 /node_modules
 /Roll20-Emulation
 .remote-sync.json
+package-lock.json

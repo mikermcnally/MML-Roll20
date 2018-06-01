@@ -1,4 +1,6 @@
-var MML = MML || {};
+const MML = {};
+import "rxjs";
+import { map,  } from 'rxjs/operators';
 
 MML.init = function() {
   state.MML = {};
@@ -41,6 +43,10 @@ MML.init = function() {
   }, {});
 
   MML.initializeMenu(state.MML.GM.player);
+
+  MML.newCharacter = Rx.create(function (observer) {
+    
+  });
 
   on('add:character', function(character) {
     const id = character.get('id');

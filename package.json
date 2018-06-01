@@ -4,5 +4,8 @@
   "scripts": {
     "start": "node ./tests.js",
     "test": "mocha"
+  },
+  "dependencies": {
+    "rxjs": "^6.1.0"
   }
 }
