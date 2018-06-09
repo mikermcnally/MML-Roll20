@@ -1,4 +1,4 @@
-MML-Roll20
+SoS-Roll20
 ==========
 
 Work in progress. Started project without much of a concept of OOP or experience designing larger programs. This is a continuous process of learning while building.

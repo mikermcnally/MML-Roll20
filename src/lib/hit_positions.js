@@ -1,4 +1,4 @@
-MML.hitPositions = {
+SoS.hitPositions = {
   humanoid: {
     1: {name: "Top of Head", bodyPart: "Head", number: 1},
     2: {name: "Face", bodyPart: "Head", number: 2},

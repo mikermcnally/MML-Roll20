@@ -105,7 +105,6 @@
  their Grit scores.
  */
 
-
 const strength = attribute_change('strength');
 const agility = attribute_change('agility');
 const endurance = attribute_change('endurance');
@@ -114,6 +113,7 @@ const willpower = attribute_change('willpower');
 const wit = attribute_change('wit');
 const intelligence = attribute_change('intelligence');
 const perception = attribute_change('perception');
+const magic = attribute_change('magic');
 
 const adroitness = Rx.combineLatest(agility, wit)
   .pipe(map(function ([agility, wit]) {

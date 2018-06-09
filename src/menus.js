@@ -1,8 +1,8 @@
-MML.displayMenu = function displayMenu(player, message, buttons) {
+SoS.displayMenu = function displayMenu(player, message, buttons) {
   var toChat = '/w "' + player.name +
     '" &{template:charMenu} {{name=' + message + '}} ' +
     buttons.map(function(button) {
-      return '{{' + button.replace(/\s+/g, '') + '=[' + button + '](!MML|' + button + ')}}';
+      return '{{' + button.replace(/\s+/g, '') + '=[' + button + '](!SoS|' + button + ')}}';
     }).join(' ');
 
   sendChat(player.name, toChat, null, {
@@ -11,7 +11,7 @@ MML.displayMenu = function displayMenu(player, message, buttons) {
   return player;
 };
 
-MML.setMenuButtons = function setMenuButtons(player, buttons) {
+SoS.setMenuButtons = function setMenuButtons(player, buttons) {
   return new Promise(function(resolve, reject) {
     player.buttonPressed = function(pressedButton, selectedIds) {
       if (_.contains(buttons, pressedButton)) {
@@ -22,46 +22,46 @@ MML.setMenuButtons = function setMenuButtons(player, buttons) {
 };
 
 // IDEA-R: build an array of previous menus as an optional parameter to allow for backtracking
-MML.goToMenu = function goToMenu(player, message, buttons) {
-  MML.displayMenu(player, message, buttons);
-  return MML.setMenuButtons(player, buttons);
+SoS.goToMenu = function goToMenu(player, message, buttons) {
+  SoS.displayMenu(player, message, buttons);
+  return SoS.setMenuButtons(player, buttons);
 };
 
-MML.initializeMenu = async function initializeMenu(player) {
-  await MML.setMenuButtons(player, ['initializeMenu']);
-  if (player.name === state.MML.GM.name) {
-    return await MML.menuMainGm(player);
+SoS.initializeMenu = async function initializeMenu(player) {
+  await SoS.setMenuButtons(player, ['initializeMenu']);
+  if (player.name === state.SoS.GM.name) {
+    return await SoS.menuMainGm(player);
   } else {
-    return await MML.menuMainPlayer(player);
+    return await SoS.menuMainPlayer(player);
   }
 };
 
-MML.menuMainGm = async function menuMainGm(player) {
-  const {pressedButton} = await MML.goToMenu(player, 'Main Menu: ', ['Combat', 'Roll Dice'])
+SoS.menuMainGm = async function menuMainGm(player) {
+  const {pressedButton} = await SoS.goToMenu(player, 'Main Menu: ', ['Combat', 'Roll Dice'])
   switch (pressedButton) {
     case 'Combat':
-      return await MML.menuGmCombat(player);
+      return await SoS.menuGmCombat(player);
     case 'Roll Dice':
-      return await MML.menuselectDieSize(player);
+      return await SoS.menuselectDieSize(player);
   }
 };
 
 
-MML.menuGmCombat = async function menuGmCombat(player) {
+SoS.menuGmCombat = async function menuGmCombat(player) {
   try {
     const message = 'Select tokens and begin.';
     const buttons = ['Start Combat', 'Back'];
-    const {pressedButton, selectedIds} = await MML.goToMenu(player, message, buttons);
+    const {pressedButton, selectedIds} = await SoS.goToMenu(player, message, buttons);
     switch (pressedButton) {
       case 'Start Combat':
         if (selectedIds.length > 0) {
-          return MML.startCombat(selectedIds);
+          return SoS.startCombat(selectedIds);
         } else {
           sendChat('', '&{template:charMenu} {{name=Error}} {{message=No tokens selected}}');
-          return MML.menuGmCombat(player);
+          return SoS.menuGmCombat(player);
         }
       case 'Back':
-        return MML.menuMainGm(player);
+        return SoS.menuMainGm(player);
     }
   } catch (error) {
     log(error);

@@ -1,7 +1,7 @@
-MML.statusEffects = {};
+SoS.statusEffects = {};
 
-MML.statusEffects['Major Wound'] = function(effect, index) {
-  if (!state.MML.GM.inCombat) {
+SoS.statusEffects['Major Wound'] = function(effect, index) {
+  if (!state.SoS.GM.inCombat) {
     this.statusEffects[index].duration = 0;
     effect.duration = 0;
   }
@@ -11,13 +11,13 @@ MML.statusEffects['Major Wound'] = function(effect, index) {
     if (this.situationalInitBonus !== 'No Combat') {
       this.situationalInitBonus += -5;
     }
-    if (state.MML.GM.currentRound - parseInt(effect.startingRound) <= effect.duration) {
+    if (state.SoS.GM.currentRound - parseInt(effect.startingRound) <= effect.duration) {
       this.situationalMod += -10;
     }
     this.statusEffects[index].description = 'Situational Modifier: -10%. Initiative: -5';
   }
 };
-MML.statusEffects['Disabling Wound'] = function(effect, index) {
+SoS.statusEffects['Disabling Wound'] = function(effect, index) {
   if (this.hp[effect.bodyPart] > 0) {
     delete this.statusEffects[index];
   } else {
@@ -37,7 +37,7 @@ MML.statusEffects['Disabling Wound'] = function(effect, index) {
     } // TODO: else if legs limit movement
   }
 };
-MML.statusEffects['Mortal Wound'] = function(effect, index) {
+SoS.statusEffects['Mortal Wound'] = function(effect, index) {
   if (this.hp[effect.bodyPart] >= -this.hpMax[effect.bodyPart]) {
     delete this.statusEffects[index];
   } else {
@@ -45,7 +45,7 @@ MML.statusEffects['Mortal Wound'] = function(effect, index) {
     this.statusEffects[index].description = 'You\'re dying, broh!';
   }
 };
-MML.statusEffects['Wound Fatigue'] = function(effect, index) {
+SoS.statusEffects['Wound Fatigue'] = function(effect, index) {
   if (this.hp['Wound Fatigue'] > -1) {
     delete this.statusEffects[index];
   } else {
@@ -56,8 +56,8 @@ MML.statusEffects['Wound Fatigue'] = function(effect, index) {
     this.statusEffects[index].description = 'Situational Modifier: -10%. Initiative: -5';
   }
 };
-MML.statusEffects['Number of Defenses'] = function(effect, index) {
-  if (state.MML.GM.roundStarted === false) {
+SoS.statusEffects['Number of Defenses'] = function(effect, index) {
+  if (state.SoS.GM.roundStarted === false) {
     delete this.statusEffects[index];
   } else {
     this.missileDefenseMod += -20 * effect.number;
@@ -65,7 +65,7 @@ MML.statusEffects['Number of Defenses'] = function(effect, index) {
     this.statusEffects[index].description = 'Defense Modifier: ' + (-20 * effect.number) + '%';
   }
 };
-MML.statusEffects['Fatigue'] = function(effect, index) {
+SoS.statusEffects['Fatigue'] = function(effect, index) {
   if (effect.level < 1) {
     delete this.statusEffects[index];
   } else {
@@ -76,8 +76,8 @@ MML.statusEffects['Fatigue'] = function(effect, index) {
     this.statusEffects[index].description = 'Situational Modifier: ' + -10 * effect.level + '%. Initiative: ' + -5 * effect.level;
   }
 };
-MML.statusEffects['Sensitive Area'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false || state.MML.GM.currentRound - parseInt(effect.startingRound) > 1) {
+SoS.statusEffects['Sensitive Area'] = function(effect, index) {
+  if (state.SoS.GM.inCombat === false || state.SoS.GM.currentRound - parseInt(effect.startingRound) > 1) {
     delete this.statusEffects[index];
   } else {
     if (this.situationalInitBonus !== 'No Combat') {
@@ -87,8 +87,8 @@ MML.statusEffects['Sensitive Area'] = function(effect, index) {
     this.statusEffects[index].description = 'Situational Modifier: -10%. Initiative: -5';
   }
 };
-MML.statusEffects['Stumbling'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false || state.MML.GM.currentRound - parseInt(effect.startingRound) > 1) {
+SoS.statusEffects['Stumbling'] = function(effect, index) {
+  if (state.SoS.GM.inCombat === false || state.SoS.GM.currentRound - parseInt(effect.startingRound) > 1) {
     delete this.statusEffects[index];
   } else {
     if (this.situationalInitBonus !== 'No Combat') {
@@ -97,8 +97,8 @@ MML.statusEffects['Stumbling'] = function(effect, index) {
     this.statusEffects[index].description = 'Initiative: -5';
   }
 };
-MML.statusEffects['Called Shot'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false ||
+SoS.statusEffects['Called Shot'] = function(effect, index) {
+  if (state.SoS.GM.inCombat === false ||
     !_.contains(this.action.modifiers, 'Called Shot') ||
     (this.action.attackType !== 'Place a Hold' &&
     _.has(this.statusEffects, 'Holding'))
@@ -119,8 +119,8 @@ MML.statusEffects['Called Shot'] = function(effect, index) {
     this.statusEffects[index].description = 'Attack Modifier: -10%. Defense Modifier: -10%. Initiative: -5';
   }
 };
-MML.statusEffects['Called Shot Specific'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false || !_.contains(this.action.modifiers, 'Called Shot Specific')) {
+SoS.statusEffects['Called Shot Specific'] = function(effect, index) {
+  if (state.SoS.GM.inCombat === false || !_.contains(this.action.modifiers, 'Called Shot Specific')) {
     delete this.statusEffects[index];
   } else {
     this.missileDefenseMod += -30;
@@ -136,8 +136,8 @@ MML.statusEffects['Called Shot Specific'] = function(effect, index) {
     this.statusEffects[index].description = 'Attack Modifier: -30%. Defense Modifier: -30%. Initiative: -5';
   }
 };
-MML.statusEffects['Aggressive Stance'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false || !_.contains(this.action.modifiers, 'Aggressive Stance')) {
+SoS.statusEffects['Aggressive Stance'] = function(effect, index) {
+  if (state.SoS.GM.inCombat === false || !_.contains(this.action.modifiers, 'Aggressive Stance')) {
     delete this.statusEffects[index];
   } else {
     this.missileDefenseMod += -40;
@@ -150,8 +150,8 @@ MML.statusEffects['Aggressive Stance'] = function(effect, index) {
     this.statusEffects[index].description = 'Attack Modifier: +10%. Defense Modifier: -40%. Initiative: +5. Preception Modifier: -4';
   }
 };
-MML.statusEffects['Defensive Stance'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false || !_.contains(this.action.modifiers, 'Defensive Stance')) {
+SoS.statusEffects['Defensive Stance'] = function(effect, index) {
+  if (state.SoS.GM.inCombat === false || !_.contains(this.action.modifiers, 'Defensive Stance')) {
     delete this.statusEffects[index];
   } else {
     this.missileDefenseMod += 40;
@@ -164,9 +164,9 @@ MML.statusEffects['Defensive Stance'] = function(effect, index) {
     this.statusEffects[index].description = 'Attack Modifier: -30%. Defense Modifier: +40%. Initiative: -5. Preception Modifier: -4';
   }
 };
-MML.statusEffects['Observing'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false ||
-    state.MML.GM.roundStarted === false ||
+SoS.statusEffects['Observing'] = function(effect, index) {
+  if (state.SoS.GM.inCombat === false ||
+    state.SoS.GM.roundStarted === false ||
     this.situationalInitBonus === 'No Combat'
   ) {
     delete this.statusEffects[index];
@@ -178,12 +178,12 @@ MML.statusEffects['Observing'] = function(effect, index) {
     this.statusEffects[index].description = 'Defense Modifier: -10%. Preception Modifier: +4';
   }
 };
-MML.statusEffects['Observed'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false || state.MML.GM.currentRound !== parseInt(effect.startingRound)) {
+SoS.statusEffects['Observed'] = function(effect, index) {
+  if (state.SoS.GM.inCombat === false || state.SoS.GM.currentRound !== parseInt(effect.startingRound)) {
     delete this.statusEffects[index];
   } else {
     this.situationalInitBonus += 5;
-    if (MML.isWieldingRangedWeapon(this) &&
+    if (SoS.isWieldingRangedWeapon(this) &&
       (!_.has(this.statusEffects, 'Damaged This Round') ||
       !_.has(this.statusEffects, 'Dodged This Round') ||
       !_.has(this.statusEffects, 'Melee This Round'))
@@ -195,17 +195,17 @@ MML.statusEffects['Observed'] = function(effect, index) {
     }
   }
 };
-MML.statusEffects['Taking Aim'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false ||
-    (state.MML.GM.roundStarted === true &&
-    _.isObject(state.MML.GM.currentAction) &&
-    _.isObject(state.MML.GM.currentAction.character) &&
-    state.MML.GM.currentAction.character.name === this.name &&
-    state.MML.GM.currentAction.callback !== 'missileAttackAction' &&
-    state.MML.GM.currentAction.callback !== 'aimAction' &&
-    _.isObject(state.MML.GM.currentAction.parameters) &&
-    _.isObject(state.MML.GM.currentAction.parameters.target) &&
-    state.MML.GM.currentAction.parameters.target.name !== effect.target.name) ||
+SoS.statusEffects['Taking Aim'] = function(effect, index) {
+  if (state.SoS.GM.inCombat === false ||
+    (state.SoS.GM.roundStarted === true &&
+    _.isObject(state.SoS.GM.currentAction) &&
+    _.isObject(state.SoS.GM.currentAction.character) &&
+    state.SoS.GM.currentAction.character.name === this.name &&
+    state.SoS.GM.currentAction.callback !== 'missileAttackAction' &&
+    state.SoS.GM.currentAction.callback !== 'aimAction' &&
+    _.isObject(state.SoS.GM.currentAction.parameters) &&
+    _.isObject(state.SoS.GM.currentAction.parameters.target) &&
+    state.SoS.GM.currentAction.parameters.target.name !== effect.target.name) ||
     _.has(this.statusEffects, 'Damaged This Round') ||
     _.has(this.statusEffects, 'Dodged This Round') ||
     _.has(this.statusEffects, 'Melee This Round')
@@ -221,23 +221,23 @@ MML.statusEffects['Taking Aim'] = function(effect, index) {
     }
   }
 };
-MML.statusEffects['Shoot From Cover'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false || !_.contains(this.action.modifiers, 'Shoot From Cover')) {
+SoS.statusEffects['Shoot From Cover'] = function(effect, index) {
+  if (state.SoS.GM.inCombat === false || !_.contains(this.action.modifiers, 'Shoot From Cover')) {
     delete this.statusEffects[index];
   } else {
     this.missileAttackMod += -10;
     this.statusEffects[index].description = 'Missile attacks -10%. Missile attacks against -20%';
   }
 };
-MML.statusEffects['Damaged This Round'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false || state.MML.GM.roundStarted === false) {
+SoS.statusEffects['Damaged This Round'] = function(effect, index) {
+  if (state.SoS.GM.inCombat === false || state.SoS.GM.roundStarted === false) {
     delete this.statusEffects[index];
   } else {
     this.statusEffects[index].description = 'Took damage this round';
   }
 };
-MML.statusEffects['Dodged This Round'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false || state.MML.GM.roundStarted === false) {
+SoS.statusEffects['Dodged This Round'] = function(effect, index) {
+  if (state.SoS.GM.inCombat === false || state.SoS.GM.roundStarted === false) {
     delete this.statusEffects[index];
   } else {
     this.action.name = 'Movement Only';
@@ -246,15 +246,15 @@ MML.statusEffects['Dodged This Round'] = function(effect, index) {
     this.statusEffects[index].description = 'Only movement is allowed the remainder of the round';
   }
 };
-MML.statusEffects['Melee This Round'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false || state.MML.GM.roundStarted === false) {
+SoS.statusEffects['Melee This Round'] = function(effect, index) {
+  if (state.SoS.GM.inCombat === false || state.SoS.GM.roundStarted === false) {
     delete this.statusEffects[index];
   } else {
     this.statusEffects[index].description = 'Adds to rounds of exertion';
   }
 };
-MML.statusEffects['Stunned'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false || state.MML.GM.currentRound - parseInt(effect.startingRound) > effect.duration) {
+SoS.statusEffects['Stunned'] = function(effect, index) {
+  if (state.SoS.GM.inCombat === false || state.SoS.GM.currentRound - parseInt(effect.startingRound) > effect.duration) {
     delete this.statusEffects[index];
   } else {
     this.action.name = 'Movement Only';
@@ -263,8 +263,8 @@ MML.statusEffects['Stunned'] = function(effect, index) {
     this.statusEffects[index].description = 'Only movement is allowed the next ' + effect.duration + ' rounds';
   }
 };
-MML.statusEffects['Grappled'] = function(effect, index) {
-  if (!state.MML.GM.inCombat) {
+SoS.statusEffects['Grappled'] = function(effect, index) {
+  if (!state.SoS.GM.inCombat) {
     delete this.statusEffects[index];
   } else if (_.has(this.statusEffects, 'Overborne') || _.has(this.statusEffects, 'Taken Down')) {
     this.statusEffects[index].description = 'Effect does not stack with Overborne or Taken Down';
@@ -273,8 +273,8 @@ MML.statusEffects['Grappled'] = function(effect, index) {
     this.statusEffects[index].description = 'Situational Modifier: -10%.';
   }
 };
-MML.statusEffects['Held'] = function(effect, index) {
-  if (!state.MML.GM.inCombat) {
+SoS.statusEffects['Held'] = function(effect, index) {
+  if (!state.SoS.GM.inCombat) {
     delete this.statusEffects[index];
   } else {
     this.missileDefenseMod += -20;
@@ -283,8 +283,8 @@ MML.statusEffects['Held'] = function(effect, index) {
     this.statusEffects[index].description = 'Attack Modifier: -10%. Defense Modifier: -20';
   }
 };
-MML.statusEffects['Holding'] = function(effect, index) {
-  if (!state.MML.GM.inCombat) {
+SoS.statusEffects['Holding'] = function(effect, index) {
+  if (!state.SoS.GM.inCombat) {
     delete this.statusEffects[index];
   } else {
     this.missileDefenseMod += -20;
@@ -293,8 +293,8 @@ MML.statusEffects['Holding'] = function(effect, index) {
     this.statusEffects[index].description = 'Attack Modifier: -15%. Defense Modifier: -20%';
   }
 };
-MML.statusEffects['Pinned'] = function(effect, index) {
-  if (!state.MML.GM.inCombat) {
+SoS.statusEffects['Pinned'] = function(effect, index) {
+  if (!state.SoS.GM.inCombat) {
     delete this.statusEffects[index];
   } else {
     if (this.situationalInitBonus !== 'No Combat') {
@@ -305,8 +305,8 @@ MML.statusEffects['Pinned'] = function(effect, index) {
     this.statusEffects[index].description = 'Situational Modifier: -20%. Initiative: -10';
   }
 };
-MML.statusEffects['Taken Down'] = function(effect, index) {
-  if (!state.MML.GM.inCombat ||
+SoS.statusEffects['Taken Down'] = function(effect, index) {
+  if (!state.SoS.GM.inCombat ||
     (!_.has(this.statusEffects, 'Grappled') &&
     !_.has(this.statusEffects, 'Held') &&
     !_.has(this.statusEffects, 'Holding') &&
@@ -322,8 +322,8 @@ MML.statusEffects['Taken Down'] = function(effect, index) {
     this.statusEffects[index].description = 'Situational Modifier: -10%. Initiative: -15';
   }
 };
-MML.statusEffects['Overborne'] = function(effect, index) {
-  if (!state.MML.GM.inCombat ||
+SoS.statusEffects['Overborne'] = function(effect, index) {
+  if (!state.SoS.GM.inCombat ||
     (!_.has(this.statusEffects, 'Grappled') &&
     !_.has(this.statusEffects, 'Held') &&
     !_.has(this.statusEffects, 'Holding') &&
@@ -340,8 +340,8 @@ MML.statusEffects['Overborne'] = function(effect, index) {
     this.statusEffects[index].description = 'Attack Modifier: -20%. Defense Modifier: -30%. Dodge Modifier: -40%. Initiative: -15';
   }
 };
-MML.statusEffects['Hasten Spell'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false || !_.contains(this.action.modifiers, 'Hasten Spell')) {
+SoS.statusEffects['Hasten Spell'] = function(effect, index) {
+  if (state.SoS.GM.inCombat === false || !_.contains(this.action.modifiers, 'Hasten Spell')) {
     delete this.statusEffects[index];
   } else {
     this.castingMod += -10;
@@ -358,8 +358,8 @@ MML.statusEffects['Hasten Spell'] = function(effect, index) {
     }
   }
 };
-MML.statusEffects['Ease Spell'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false || this.action.ts !== effect.ts) {
+SoS.statusEffects['Ease Spell'] = function(effect, index) {
+  if (state.SoS.GM.inCombat === false || this.action.ts !== effect.ts) {
     delete this.statusEffects[index];
   } else {
     this.castingMod += 10;
@@ -370,17 +370,17 @@ MML.statusEffects['Ease Spell'] = function(effect, index) {
     this.statusEffects[index].description = 'Casting Modifier: +10%. Spell Actions Required: +1';
   }
 };
-MML.statusEffects['Release Opponent'] = function(effect, index) {};
-MML.statusEffects['Ready Item'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false || state.MML.GM.currentRound !== parseInt(effect.startingRound)) {
+SoS.statusEffects['Release Opponent'] = function(effect, index) {};
+SoS.statusEffects['Ready Item'] = function(effect, index) {
+  if (state.SoS.GM.inCombat === false || state.SoS.GM.currentRound !== parseInt(effect.startingRound)) {
     delete this.statusEffects[index];
   } else {
     this.actionInitCostMod += -10;
     this.statusEffects[index].description = 'Initiative: -10';
   }
 };
-MML.statusEffects['Changed Action'] = function(effect, index) {
-  if (state.MML.GM.inCombat === false || state.MML.GM.roundStarted === false) {
+SoS.statusEffects['Changed Action'] = function(effect, index) {
+  if (state.SoS.GM.inCombat === false || state.SoS.GM.roundStarted === false) {
     delete this.statusEffects[index];
   } else {
     this.situationalInitBonus += -10 * effect.level;

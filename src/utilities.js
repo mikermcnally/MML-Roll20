@@ -1,5 +1,5 @@
 // Character Functions
-MML.getCharFromName = function getCharFromName(name) {
+SoS.getCharFromName = function getCharFromName(name) {
   const character = findObjs({
     _type: 'character',
     archived: false,
@@ -11,7 +11,7 @@ MML.getCharFromName = function getCharFromName(name) {
 };
 
 // Attribute and Ability Functions
-MML.createAttribute = function createAttribute(name, current, max, id) {
+SoS.createAttribute = function createAttribute(name, current, max, id) {
   return createObj('attribute', {
     name: name,
     current: current,
@@ -20,7 +20,7 @@ MML.createAttribute = function createAttribute(name, current, max, id) {
   });
 };
 
-MML.createAbility = function createAbility(id, name, action, istokenaction) {
+SoS.createAbility = function createAbility(id, name, action, istokenaction) {
   return createObj('ability', {
     name: name,
     action: action,
@@ -29,7 +29,7 @@ MML.createAbility = function createAbility(id, name, action, istokenaction) {
   });
 };
 
-MML.getCharAttribute = function getCharAttribute(characterId, attribute) {
+SoS.getCharAttribute = function getCharAttribute(characterId, attribute) {
   const attributeObject = findObjs({
     _type: 'attribute',
     _characterid: characterId,
@@ -39,35 +39,35 @@ MML.getCharAttribute = function getCharAttribute(characterId, attribute) {
   })[0];
 
   if (_.isUndefined(attributeObject)) {
-    return MML.createAttribute(attribute, '', '', characterId);
+    return SoS.createAttribute(attribute, '', '', characterId);
   }
   return attributeObject;
 };
 
-MML.getCurrentAttribute = function getCurrentAttribute(id, attribute) {
-  return MML.getCharAttribute(id, attribute).get('current');
+SoS.getCurrentAttribute = function getCurrentAttribute(id, attribute) {
+  return SoS.getCharAttribute(id, attribute).get('current');
 };
 
-MML.getCurrentAttributeAsFloat = function getCurrentAttributeAsFloat(id, attribute) {
-  const result = parseFloat(MML.getCurrentAttribute(id, attribute));
+SoS.getCurrentAttributeAsFloat = function getCurrentAttributeAsFloat(id, attribute) {
+  const result = parseFloat(SoS.getCurrentAttribute(id, attribute));
   if (isNaN(result)) {
-    MML.setCurrentAttribute(id, attribute, 0);
+    SoS.setCurrentAttribute(id, attribute, 0);
     return 0;
   }
   return result;
 };
 
-MML.getMaxAttributeAsFloat = function getMaxAttributeAsFloat(id, attribute) {
-  const result = parseFloat(MML.getCharAttribute(id, attribute).get('max'));
+SoS.getMaxAttributeAsFloat = function getMaxAttributeAsFloat(id, attribute) {
+  const result = parseFloat(SoS.getCharAttribute(id, attribute).get('max'));
   if (isNaN(result)) {
-    MML.setMaxAttribute(id, attribute, 0);
+    SoS.setMaxAttribute(id, attribute, 0);
     return 0;
   }
   return result;
 };
 
-MML.getCurrentAttributeAsBool = function getCurrentAttributeAsBool(id, attribute) {
-  const result = MML.getCurrentAttribute(id, attribute);
+SoS.getCurrentAttributeAsBool = function getCurrentAttributeAsBool(id, attribute) {
+  const result = SoS.getCurrentAttribute(id, attribute);
   if (result.toString() === 'true') {
     return true;
   } else {
@@ -75,29 +75,29 @@ MML.getCurrentAttributeAsBool = function getCurrentAttributeAsBool(id, attribute
   }
 };
 
-MML.getCurrentAttributeAsArray = function getCurrentAttributeAsArray(id, attribute) {
-  const result = MML.getCurrentAttribute(id, attribute);
+SoS.getCurrentAttributeAsArray = function getCurrentAttributeAsArray(id, attribute) {
+  const result = SoS.getCurrentAttribute(id, attribute);
   try {
     return JSON.parse(result);
   } catch (err) {
     log(err);
-    MML.setCurrentAttribute(id, attribute, '[]');
+    SoS.setCurrentAttribute(id, attribute, '[]');
     return [];
   }
 };
 
-MML.getCurrentAttributeJSON = function getCurrentAttributeJSON(id, attribute) {
-  const result = MML.getCurrentAttribute(id, attribute);
+SoS.getCurrentAttributeJSON = function getCurrentAttributeJSON(id, attribute) {
+  const result = SoS.getCurrentAttribute(id, attribute);
   try {
     return JSON.parse(result);
   } catch (err) {
     log(err);
-    MML.setCurrentAttribute(id, attribute, '{}');
+    SoS.setCurrentAttribute(id, attribute, '{}');
     return [];
   }
 };
 
-MML.getSkillAttributes = function getSkillAttributes(id, skillType) {
+SoS.getSkillAttributes = function getSkillAttributes(id, skillType) {
   const attributes = findObjs({
     _type: 'attribute',
     _characterid: id
@@ -148,20 +148,20 @@ MML.getSkillAttributes = function getSkillAttributes(id, skillType) {
   return skills;
 };
 
-MML.setCurrentAttribute = function setCurrentAttribute(id, attribute, value) {
-  MML.getCharAttribute(id, attribute).set('current', value);
+SoS.setCurrentAttribute = function setCurrentAttribute(id, attribute, value) {
+  SoS.getCharAttribute(id, attribute).set('current', value);
 };
 
-MML.setMaxAttribute = function setMaxAttribute(id, attribute, value) {
-  MML.getCharAttribute(id, attribute).set('max', value);
+SoS.setMaxAttribute = function setMaxAttribute(id, attribute, value) {
+  SoS.getCharAttribute(id, attribute).set('max', value);
 };
 
-MML.getAttributeTableValue = function getAttributeTableValue(attribute, inputValue, table) {
+SoS.getAttributeTableValue = function getAttributeTableValue(attribute, inputValue, table) {
   return table[inputValue][attribute];
 };
 
 // Token Functions
-MML.getCharacterIdFromToken = function getCharacterIdFromToken(token) {
+SoS.getCharacterIdFromToken = function getCharacterIdFromToken(token) {
   const tokenObject = getObj('graphic', token.id);
   const characterObject = getObj('character', tokenObject.get('represents'));
 
@@ -175,7 +175,7 @@ MML.getCharacterIdFromToken = function getCharacterIdFromToken(token) {
   }
 };
 
-MML.getCharacterToken = function getCharacterToken(character_id) {
+SoS.getCharacterToken = function getCharacterToken(character_id) {
   const tokens = findObjs({
     _pageid: Campaign().get('playerpageid'),
     _type: 'graphic',
@@ -185,7 +185,7 @@ MML.getCharacterToken = function getCharacterToken(character_id) {
   return tokens[0];
 };
 
-MML.getSpellMarkerToken = function getSpellMarkerToken(name) {
+SoS.getSpellMarkerToken = function getSpellMarkerToken(name) {
   const tokens = findObjs({
     _pageid: Campaign().get('playerpageid'),
     _type: 'graphic',
@@ -195,40 +195,40 @@ MML.getSpellMarkerToken = function getSpellMarkerToken(name) {
   return tokens[0];
 };
 
-MML.getSelectedIds = function getSelectedIds(selected) {
-  return selected.map(token => MML.getCharacterIdFromToken(token));
+SoS.getSelectedIds = function getSelectedIds(selected) {
+  return selected.map(token => SoS.getCharacterIdFromToken(token));
 };
 
-MML.displayAura = function displayAura(token, radius, auraNumber, color) {
+SoS.displayAura = function displayAura(token, radius, auraNumber, color) {
   token.set(auraNumber === 2 ? 'aura2_radius' : 'aura1_radius', radius);
   token.set(auraNumber === 2 ? 'aura1_color' : 'aura1_color', color);
 };
 
-MML.getDistanceBetweenTokens = function getDistanceBetweenTokens(a, b) {
-  return MML.getDistance(a.get('left'), b.get('left'), a.get('top'), b.get('top'));
+SoS.getDistanceBetweenTokens = function getDistanceBetweenTokens(a, b) {
+  return SoS.getDistance(a.get('left'), b.get('left'), a.get('top'), b.get('top'));
 };
 
 // Geometry Functions
-MML.feetToPixels = function feetToPixels(feet) {
+SoS.feetToPixels = function feetToPixels(feet) {
   return feet * 14;
 };
 
-MML.pixelsToFeet = function pixelsToFeet(pixels) {
+SoS.pixelsToFeet = function pixelsToFeet(pixels) {
   return Math.floor((pixels / 14) + 0.5);
 };
 
-MML.getDistance = function getDistance(left1, left2, top1, top2) {
+SoS.getDistance = function getDistance(left1, left2, top1, top2) {
   const leftDistance = Math.abs(left2 - left1);
   const topDistance = Math.abs(top2 - top1);
   return Math.sqrt(Math.pow(leftDistance, 2) + Math.pow(topDistance, 2));
 };
 
-MML.getDistanceFeet = function getDistanceFeet(left1, left2, top1, top2) {
-  return MML.pixelsToFeet(MML.getDistance(left1, left2, top1, top2));
+SoS.getDistanceFeet = function getDistanceFeet(left1, left2, top1, top2) {
+  return SoS.pixelsToFeet(SoS.getDistance(left1, left2, top1, top2));
 };
 
-MML.drawCirclePath = function drawCirclePath(left, top, radiusInFeet) {
-  const radius = MML.feetToPixels(radiusInFeet);
+SoS.drawCirclePath = function drawCirclePath(left, top, radiusInFeet) {
+  const radius = SoS.feetToPixels(radiusInFeet);
   const pathArray = [
     ['M', left - radius, top],
     ['C', left - radius, top - (radius / 2), left - (radius / 2), top - radius, left, top - radius],
@@ -250,14 +250,14 @@ MML.drawCirclePath = function drawCirclePath(left, top, radiusInFeet) {
   return path;
 };
 
-MML.rotateAxes = function rotateAxes(left, top, angle) {
+SoS.rotateAxes = function rotateAxes(left, top, angle) {
   const leftNew = left * Math.cos(angle * Math.PI / 180) + top * Math.sin(angle * Math.PI / 180);
   const topNew = -left * Math.sin(angle * Math.PI / 180) + top * Math.cos(angle * Math.PI / 180);
   return [leftNew, topNew];
 };
 
 // Player Functions
-MML.getPlayerFromName = function getPlayerFromName(playerName) {
+SoS.getPlayerFromName = function getPlayerFromName(playerName) {
   const player = findObjs({
     _type: 'player',
     online: true,
@@ -300,11 +300,11 @@ function generateUUID() {
   }();
 }
 
-MML.generateRowID = function generateRowID() {
+SoS.generateRowID = function generateRowID() {
   return generateUUID().replace(/_/g, 'Z');
 };
 
-MML.clone = function clone(obj) {
+SoS.clone = function clone(obj) {
   if (obj === null || typeof obj !== 'object')
     return obj;
   var target = obj instanceof Array ? [] : {};

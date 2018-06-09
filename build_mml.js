@@ -10,7 +10,7 @@ var roll20_string = '';
 _.each(file_names, function(file_name, index) {
   var file_text = fs.readFileSync(source_path + file_name, 'utf-8');
   if (file_name === 'init.js') {
-    roll20_string = 'var MML = MML || {};' + file_text + roll20_string;
+    roll20_string = 'var SoS = SoS || {};' + file_text + roll20_string;
   } else {
     roll20_string += file_text;
   }
@@ -21,4 +21,4 @@ _.each(lib_files, function(file_name, index) {
   roll20_string += file_text;
 });
 
-fs.writeFileSync('../r20/MML.txt', roll20_string, 'utf8');
+fs.writeFileSync('../r20/SoS.txt', roll20_string, 'utf8');

@@ -1,5 +1,5 @@
-MML.spells = {};
-MML.spells['Flame Bolt'] = {
+SoS.spells = {};
+SoS.spells['Flame Bolt'] = {
   name: 'Flame Bolt',
   family: 'Fire',
   components: ['Spoken'],
@@ -16,7 +16,7 @@ MML.spells['Flame Bolt'] = {
   }
 };
 
-MML.spells['Dart'] = {
+SoS.spells['Dart'] = {
   name: 'Dart',
   family: 'Air',
   components: ['Spoken', 'Physical', 'Substantive'],
@@ -30,26 +30,26 @@ MML.spells['Dart'] = {
   targetSizeMatters: false,
   metaMagic: ['Increase Potency', 'Called Shot', 'Called Shot Specific'],
   cast: async function castDart(player, character, action) {
-    const targets = await MML.getSpellTargets(player);
+    const targets = await SoS.getSpellTargets(player);
     _.findWhere(character.inventory, { name: 'Dart' }).quantity -= targets.length;
-    const castingRoll = await MML.castingRoll(player, character, [spell.task, casterSkill].concat(_.pluck(metaMagic, 'castingMod')));
+    const castingRoll = await SoS.castingRoll(player, character, [spell.task, casterSkill].concat(_.pluck(metaMagic, 'castingMod')));
     if (castingRoll === 'Critical Success' || castingRoll === 'Success') {
       targets.map(async function (target) {
-        const defenseRoll = MML.missileDefense(target.player, target, { family: 'MWM' }, MML.getDistanceBetweenCharacters(character.id, target.id));
+        const defenseRoll = SoS.missileDefense(target.player, target, { family: 'MWM' }, SoS.getDistanceBetweenCharacters(character.id, target.id));
         if (defenseRoll === 'Critical Failure' || defenseRoll === 'Failure') {
-          const hitPosition = await MML.hitPositionRoll();
+          const hitPosition = await SoS.hitPositionRoll();
           const weapon = {damageType: 'Pierce', damage: _.has(metaMagic, 'Increase Potency') ? (3 * metaMagic['Increase Potency'].level) + 'd6' : '3d6'};
-          const damage = await MML.missileDamageRoll(weapon, castingRoll === 'Critical Success');
-          await MML.damageCharacter(target);
+          const damage = await SoS.missileDamageRoll(weapon, castingRoll === 'Critical Success');
+          await SoS.damageCharacter(target);
         }
       });
     }
-    await MML.alterEP(player, character, -1 * epCost * _.pluck(metaMagic, 'epMod').reduce((product, num) => product * num));
-    MML.endAction();
+    await SoS.alterEP(player, character, -1 * epCost * _.pluck(metaMagic, 'epMod').reduce((product, num) => product * num));
+    SoS.endAction();
   }
 };
 
-MML.spells['Hail of Stones'] = {
+SoS.spells['Hail of Stones'] = {
   name: 'Hail of Stones',
   family: 'Earth',
   components: ['Spoken', 'Physical'],
@@ -62,26 +62,26 @@ MML.spells['Hail of Stones'] = {
   targetSizeMatters: false,
   metaMagic: ['Increase Potency'],
   cast: async function castHailOfStones(player, character, action) {
-    const targets = await MML.getRadiusSpellTargets();
-    const castingRoll = await MML.castingRoll(player, character, [spell.task, casterSkill].concat(_.pluck(metaMagic, 'castingMod')));
+    const targets = await SoS.getRadiusSpellTargets();
+    const castingRoll = await SoS.castingRoll(player, character, [spell.task, casterSkill].concat(_.pluck(metaMagic, 'castingMod')));
     if (castingRoll === 'Critical Success' || castingRoll === 'Success') {
       targets.map(function (target) {
-        const numberOfStones = MML.genericRoll(character.name, 'numberOfStonesRoll', '1d3', 'Number of stones cast at ' + target.name, 'genericRollResult');
+        const numberOfStones = SoS.genericRoll(character.name, 'numberOfStonesRoll', '1d3', 'Number of stones cast at ' + target.name, 'genericRollResult');
 
       })
 
     } else if (rolls.numberOfStonesRoll > 0) {
       if (_.isUndefined(rolls.defenseRoll)) {
-        target.rangedDefense({ family: 'SLI' }, MML.getDistanceBetweenCharacters(character.id, target.id));
+        target.rangedDefense({ family: 'SLI' }, SoS.getDistanceBetweenCharacters(character.id, target.id));
       } else if (_.isUndefined(rolls.hitPositionRoll)) {
         if (rolls.defenseRoll === 'Critical Success') {
-          state.MML.GM.currentAction.rolls.numberOfStonesRoll += -1;
-          delete state.MML.GM.currentAction.rolls.defenseRoll;
+          state.SoS.GM.currentAction.rolls.numberOfStonesRoll += -1;
+          delete state.SoS.GM.currentAction.rolls.defenseRoll;
           // target.criticalDefense();
         } else if (rolls.defenseRoll === 'Success') {
-          state.MML.GM.currentAction.rolls.numberOfStonesRoll += -1;
-          delete state.MML.GM.currentAction.rolls.defenseRoll;
-          MML[state.MML.GM.currentAction.callback]();
+          state.SoS.GM.currentAction.rolls.numberOfStonesRoll += -1;
+          delete state.SoS.GM.currentAction.rolls.defenseRoll;
+          SoS[state.SoS.GM.currentAction.callback]();
         } else {
           character.hitPositionRoll();
         }
@@ -93,15 +93,15 @@ MML.spells['Hail of Stones'] = {
         }
       }
     } else if (epModified !== true) {
-      state.MML.GM.currentAction.parameters.epModified = true;
+      state.SoS.GM.currentAction.parameters.epModified = true;
     } else {
-      if (_.isUndefined(state.MML.GM.currentAction.targetArray[state.MML.GM.currentAction.targetIndex + 1])) {
-        MML.damageCharacter('endAction');
+      if (_.isUndefined(state.SoS.GM.currentAction.targetArray[state.SoS.GM.currentAction.targetIndex + 1])) {
+        SoS.damageCharacter('endAction');
       } else {
-        MML.damageCharacter('nextTarget');
+        SoS.damageCharacter('nextTarget');
       }
     }
-    await MML.alterEP(player, character, -1 * epCost * _.reduce(_.pluck(metaMagic, 'epMod'), function(memo, num) { return memo * num; }));
-    MML.endAction();
+    await SoS.alterEP(player, character, -1 * epCost * _.reduce(_.pluck(metaMagic, 'epMod'), function(memo, num) { return memo * num; }));
+    SoS.endAction();
   }
 };

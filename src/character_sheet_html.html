@@ -2,7 +2,7 @@
     <table>
         <tr><th>{{title}}</th></tr>
          <tr>
-            <td><span class="tcat"></span>[Change](!MML|changeRoll ?{value})</a></td><td><span class="tcat"> </span>[Accept](!MML|acceptRoll)</a></td>
+            <td><span class="tcat"></span>[Change](!SoS|changeRoll ?{value})</a></td><td><span class="tcat"> </span>[Accept](!SoS|acceptRoll)</a></td>
         </tr>
     </table>
 </rolltemplate>
@@ -11,7 +11,7 @@
     <table>
         <tr><th>{{title}}</th></tr>
          <tr>
-            <td><span class="tcat"> </span>[Accept](!MML|acceptRoll)</a></td>
+            <td><span class="tcat"> </span>[Accept](!SoS|acceptRoll)</a></td>
         </tr>
     </table>
 </rolltemplate>
@@ -20,7 +20,7 @@
     <table>
         <tr><th>Select a Token</th></tr>
         <tr>
-            <td><span class="tcat"></span>[Select](!!MML|selectTarget @{target|character_name})</td>
+            <td><span class="tcat"></span>[Select](!!SoS|selectTarget @{target|character_name})</td>
         </tr>
         <tr>
             <td><span class="tcat"></span>{{back}} </a></td><td><span class="tcat"> </span>{{accept}}</a></td>
@@ -726,7 +726,7 @@
 	                    <input type="text" name="attr_itemId" class="itemId"></input>
 	                </div>
 	                <div class="sheet-cell sheet-col3">
-	                	<button type='roll' value='!MML|displayItemOptions @{name}|@{itemId}' name='roll_displayItemOptions'>Options</button>
+	                	<button type='roll' value='!SoS|displayItemOptions @{name}|@{itemId}' name='roll_displayItemOptions'>Options</button>
 	                </div>
 				</fieldset>
 			</div> <!-- .sheet-table -->
