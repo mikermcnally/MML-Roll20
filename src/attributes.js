@@ -117,25 +117,25 @@ const perception = attribute_change('perception');
 
 const adroitness = Rx.combineLatest(agility, wit)
   .pipe(map(function ([agility, wit]) {
-    return Math.round((agility + wit) / 2);
+    return Math.floor((agility + wit) / 2);
   }));
 const mobility = Rx.combineLatest(strength, agility, endurance)
   .pipe(map(function ([strength, agility, endurance]) {
-    return Math.round((strength + agility + endurance) / 2)
+    return Math.floor((strength + agility + endurance) / 2)
   }));
 const carry = Rx.combineLatest(strength, endurance)
   .pipe(map(function ([strength, endurance]) {
-    return Math.round((strength + endurance) / 2)
+    return Math.floor((strength + endurance) / 2)
   }));
 const toughness = Rx.combineLatest(strength, endurance, health)
   .pipe(map(function ([strength, endurance, health]) {
-    return Math.round((strength + endurance + health) / 3)
+    return Math.floor((strength + endurance + health) / 3)
   }));
 const charisma = Rx.combineLatest(agility, wit)
   .pipe(map(function ([agility, wit]) {
-    return Math.round((agility + wit) / 2)
+    return Math.floor((agility + wit) / 2)
   }));
 const grit = willpower.pipe(
   map(function (willpower) {
-    return Math.round(willpower / 2)
+    return Math.floor(willpower / 2)
   }));

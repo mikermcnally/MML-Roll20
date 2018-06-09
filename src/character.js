@@ -1955,34 +1955,24 @@ MML.Character = function (name, id) {
   });
   Object.defineProperty(character, 'fov', {
     get: function() {
-      var value;
       switch (character.senseInitBonus) {
         case 4:
-          value = 180;
-          break;
+          return 180;
         case 3:
-          value = 170;
-          break;
+          return 170;
         case 2:
-          value = 160;
-          break;
+          return 160;
         case 1:
-          value = 150;
-          break;
+          return 150;
         case 0:
-          value = 140;
-          break;
+          return 140;
         case -1:
-          value = 130;
-          break;
+          return 130;
         case -2:
-          value = 120;
-          break;
+          return 120;
         default:
-          value = 180;
-          break;
+          return 180;
       }
-      return value;
     }
   });
   Object.defineProperty(character, 'spells', {

@@ -44,9 +44,11 @@ MML.init = function() {
 
   MML.initializeMenu(state.MML.GM.player);
 
-  MML.newCharacter = Rx.create(function (observer) {
-    
-  });
+  MML.newCharacter = Rx.Observable.create(function (observer) {
+    on('add:character', function (msg) {
+        observer.next(msg);
+      });
+    });
 
   on('add:character', function(character) {
     const id = character.get('id');

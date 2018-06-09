@@ -1,4 +1,4 @@
-MML.rollDice = async function rollDice(amount, size) {
+MML.rollDice = async function rollDice(amount, target) {
   switch (state.MML.rollStyle) {
     case 'physicalDice':
       break;
