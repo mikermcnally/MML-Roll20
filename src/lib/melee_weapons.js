@@ -1,75 +1,3 @@
-/**
- * Quality
- Effect
- AP Swing[X]
- Armor Piercing Swing[X].When making a Swinging attack against a Hit Location with Hard armor protection, this weapon inflicts X additional damage, up to the AV of the Armor.
- AP Thrust[X]
- Armor Piercing Thrust[X].When making a Thrusting attack against a Hit Location with Hard armor protection, this weapon inflicts X additional damage, up to the AV of the Armor.
- Bleed[X]
- Any Swinging attack from this weapon that either inflicts a Wound, or fails to inflict a Wound by 2 or fewer damage, inflicts X Blood Loss.
- Brace
- When using this weapon, you gain 2 automatic successes on Initiative Tests made as a result of Offensive / Offensive Orientation.
- Cavalry Sword
- When being used during a Ride - By Attack or a Charge
- while Mounted, this weapon inflicts + 1 damage on Swings, and triggers the Draw quality on 2 BS or more
- Chain[X]
- Any attack made at Swing TN with this weapon ignores the first X successes of an enemy’ s Parrying or Blocking defense, Maneuvers like Riposte and Arm Parry.Additionally, this weapon can neither engage in , nor be engaged in a Hilt Push of any sort.
- Companion Weapon
- When this weapon is used to make any sort of defensive Maneuver, one of the dice devoted automatically succeeds before rolling.
- Couched Charge
- When making a Lance Charge attack with this weapon, reduce its Thrusting TN by 2, and use the Horse’ s STR as the base
- for damage instead of your own.However, your Reach is not increased by the Tall Boon.In addition,
-   if a Lance Charge attack made by this weapon is Blocked, it carries through on the intended Target Zone anyway, as though it hit with 0 BS, and is reduced by the Shield’ s AV regardless of where it hit.If the total damage inflicted by an attack that takes advantage of Lance Charge exceeds the Durability of the weapon by 5 or more, then the weapon breaks immediately after the attack is made.
- Crushing[X]
- When this weapon successfully hits with a Swing attack on a Hit Location with any sort of Hard armor protection, reduce all AVs of the armor on that Hit Location by X.This is done after damage is resolved
- for this attack, and only affects future attacks.Only the highest AV armor on that location is reduced by Crushing.If that armor is reduced to AV 0 in all areas, then Crushing begins to affect lesser Hard armors beneath it.
- Draw[X]
- When making a Swinging attack that would inflict cutting damage with this weapon, inflict X additional cutting damage
- if you roll 3 or more BS.This special rule does not come into play
- if the target benefits from any sort of Hard armor on the Hit Location being hit.
- Fluid Thrusts
- This weapon can Feint from a Thrust.
- Forward Swept
- When this weapon is used in a Swing attack against which the target would receive an AV bonus, use the lower value between the armor’ s AVC and AVP.The Swing still inflicts cutting damage regardless of which AV is used.
- Freakishly Large
- This weapon is so massive that unless the character using it has either 9 STR or the greater Tall Boon, the TNs
- for the weapon are all increased by 1.
- Hand - Off
- This weapon can be wielded with one hand in addition to wielding with both hands.If used in this fashion, you may
- continue using it with its normal Proficiency, or with a 1 H version of either Blunt or Sword proficiency(depending on the base type of the weapon).However, instead of using the normal profile of the weapon, use the 1 H version of the weapon with an * next to it.Switching from 1 H to 2 H versions of a weapon can be done at the beginning of any Action(or in response to an injury) and requires no CP expenditure.
- Heavy Weapon
- When weapons with the Light Blade quality Parry Swinging attacks from this weapon, the Defense TN of the Light Blade is increased by 2, instead of 1.
- Hook
- This weapon can be used with the Hook Maneuver.
- Light Blade
- When Parrying Swinging attacks from any weapon that does not have this quality, this weapon’ s Defense TN is increased by 1. Against Heavy Weapons, this penalty increases to 2.
- Multi - Hit[Y][X]
- When this weapon is used in a Y type(Swing or Thrust) attack that targets Hit Locations that successfully hits the target, instead of resolving one attack, X identical attacks of equal strength hit instead.Roll on the Target Zone as normal
- for the first hit.The second hit lands as though the roll had been one lower, the third hit as though the roll had been one higher.
- Parrying Teeth
-   -
-   1 Parry TN vs attacks made by Swords and Daggers.
- Shock[X]
- Any hit from this weapon inflicts additional Stun equal to the listed number.If the hit also causes a Wound, the Stun from Shock adds to the Stun from the Wound.
- Spatulate Tip[X]
- When making a Thrusting attack that would inflict Piercing damage with this weapon, inflict X additional cutting damage
- if you roll 3 or more BS.This special rule does not come into play
- if the target benefits from any sort of Hard armor on the Hit Location being hit.
- Swinging Slot
- This weapon can have a Swinging Weapon Attachment added to its Swing profile.This does not replace the current Swing profile, but can be used instead of it when declaring a Maneuver.
- Thin Blade
- When making a Joint Thrust attack, this weapon’ s Thrust TN is decreased by 1. In addition, against mail armor this weapon gains AP Thrust 1. If the weapon has an AP Thrust quality already, do not combine these--use the higher one.
- Thrusting Slot
- This weapon can have its Thrust profile replaced with a Thrusting Weapon Attachment.
- Tight Grip
- When using the Power Attack option on a Swing attack, inflict 1 additional damage.When making a Stability Test to retain your weapon against a Disarm Maneuver or similar event, you may roll 2 additional dice.
- Weapon Attachment
- This weapon can be attached to any weapon with a Swinging Slot(
-   for Reverse Weapons) or a Thrusting Slot(
-   for Arming Spikes) and used instead of the weapon’ s basic swinging / thrusting profile.When using the Weapon Attachment, use its attack TN and Damage instead of the original where listed, use the original where no new number is listed.
- e.g.A Battleaxe with a Reverse Spike Weapon Attachment can make a Strike using the stats of a Reverse Spike instead of the stats of the Battleaxe.
- */
-
 const melee_weapon_list = {
   "Ballock Dagger": {
     "name": "Ballock Dagger",
@@ -1918,5 +1846,112 @@ const melee_weapon_list = {
     "special": "Forward Swept, Heavy Weapon,",
     "weight": "4",
     "cost": "4 cp"
+  }
+};
+
+const missile_weapon_special_qualities = {
+  "AP Swing[X]": {
+    "quality": "AP Swing[X]",
+    "effect": "Armor Piercing Swing[X].When making a Swinging attack against a Hit Location with Hard armor protection, this weapon inflicts X additional damage, up to the AV of the Armor."
+  },
+  "AP Thrust[X]": {
+    "quality": "AP Thrust[X]",
+    "effect": "Armor Piercing Thrust[X].When making a Thrusting attack against a Hit Location with Hard armor protection, this weapon inflicts X additional damage, up to the AV of the Armor."
+  },
+  "Bleed[X]": {
+    "quality": "Bleed[X]",
+    "effect": "Any Swinging attack from this weapon that either inflicts a Wound, or fails to inflict a Wound by 2 or fewer damage, inflicts X Blood Loss."
+  },
+  "Brace": {
+    "quality": "Brace",
+    "effect": "When using this weapon, you gain 2 automatic successes on Initiative Tests made as a result of Offensive / Offensive Orientation."
+  },
+  "Cavalry Sword": {
+    "quality": "Cavalry Sword",
+    "effect": "When being used during a Ride - By Attack or a Charge while Mounted, this weapon inflicts + 1 damage on Swings, and triggers the Draw quality on 2 BS or more"
+  },
+  "Chain[X]": {
+    "quality": "Chain[X]",
+    "effect": "Any attack made at Swing TN with this weapon ignores the first X successes of an enemy’ s Parrying or Blocking defense, Maneuvers like Riposte and Arm Parry.Additionally, this weapon can neither engage in , nor be engaged in a Hilt Push of any sort."
+  },
+  "Companion Weapon": {
+    "quality": "Companion Weapon",
+    "effect": "When this weapon is used to make any sort of defensive Maneuver, one of the dice devoted automatically succeeds before rolling."
+  },
+  "Couched Charge": {
+    "quality": "Couched Charge",
+    "effect": "When making a Lance Charge attack with this weapon, reduce its Thrusting TN by 2, and use the Horse’ s STR as the base for damage instead of your own.However, your Reach is not increased by the Tall Boon.In addition, if a Lance Charge attack made by this weapon is Blocked, it carries through on the intended Target Zone anyway, as though it hit with 0 BS, and is reduced by the Shield’ s AV regardless of where it hit.If the total damage inflicted by an attack that takes advantage of Lance Charge exceeds the Durability of the weapon by 5 or more, then the weapon breaks immediately after the attack is made."
+  },
+  "Crushing[X]": {
+    "quality": "Crushing[X]",
+    "effect": "When this weapon successfully hits with a Swing attack on a Hit Location with any sort of Hard armor protection, reduce all AVs of the armor on that Hit Location by X.This is done after damage is resolved for this attack, and only affects future attacks.Only the highest AV armor on that location is reduced by Crushing.If that armor is reduced to AV 0 in all areas, then Crushing begins to affect lesser Hard armors beneath it."
+  },
+  "Draw[X]": {
+    "quality": "Draw[X]",
+    "effect": "When making a Swinging attack that would inflict cutting damage with this weapon, inflict X additional cutting damage if you roll 3 or more BS.This special rule does not come into play if the target benefits from any sort of Hard armor on the Hit Location being hit."
+  },
+  "Fluid Thrusts": {
+    "quality": "Fluid Thrusts",
+    "effect": "This weapon can Feint from a Thrust."
+  },
+  "Forward Swept": {
+    "quality": "Forward Swept",
+    "effect": "When this weapon is used in a Swing attack against which the target would receive an AV bonus, use the lower value between the armor’ s AVC and AVP.The Swing still inflicts cutting damage regardless of which AV is used."
+  },
+  "Freakishly Large": {
+    "quality": "Freakishly Large",
+    "effect": "This weapon is so massive that unless the character using it has either 9 STR or the greater Tall Boon, the TNs for the weapon are all increased by 1."
+  },
+  "Hand-Off": {
+    "quality": "Hand-Off",
+    "effect": "This weapon can be wielded with one hand in addition to wielding with both hands. If used in this fashion, you may continue using it with its normal Proficiency, or with a 1 H version of either Blunt or Sword proficiency(depending on the base type of the weapon).However, instead of using the normal profile of the weapon, use the 1 H version of the weapon with an * next to it.Switching from 1 H to 2 H versions of a weapon can be done at the beginning of any Action(or in response to an injury) and requires no CP expenditure."
+  },
+  "Heavy Weapon": {
+    "quality": "Heavy Weapon",
+    "effect": "When weapons with the Light Blade quality Parry Swinging attacks from this weapon, the Defense TN of the Light Blade is increased by 2, instead of 1."
+  },
+  "Hook": {
+    "quality": "Hook",
+    "effect": "This weapon can be used with the Hook Maneuver."
+  },
+  "Light Blade": {
+    "quality": "Light Blade",
+    "effect": "When Parrying Swinging attacks from any weapon that does not have this quality, this weapon’ s Defense TN is increased by 1. Against Heavy Weapons, this penalty increases to 2."
+  },
+  "Multi-Hit[Y][X]": {
+    "quality": "Multi-Hit[Y][X]",
+    "effect": "When this weapon is used in a Y type(Swing or Thrust) attack that targets Hit Locations that successfully hits the target, instead of resolving one attack, X identical attacks of equal strength hit instead.Roll on the Target Zone as normal for the first hit.The second hit lands as though the roll had been one lower, the third hit as though the roll had been one higher."
+  },
+  "Parrying Teeth": {
+    "quality": "Parrying Teeth",
+    "effect": "-1 Parry TN vs attacks made by Swords and Daggers."
+  },
+  "Shock[X]": {
+    "quality": "Shock[X]",
+    "effect": "Any hit from this weapon inflicts additional Stun equal to the listed number.If the hit also causes a Wound, the Stun from Shock adds to the Stun from the Wound."
+  },
+  "Spatulate Tip[X]": {
+    "quality": "Spatulate Tip[X]",
+    "effect": "When making a Thrusting attack that would inflict Piercing damage with this weapon, inflict X additional cutting damage if you roll 3 or more BS.This special rule does not come into play if the target benefits from any sort of Hard armor on the Hit Location being hit."
+  },
+  "Swinging Slot": {
+    "quality": "Swinging Slot",
+    "effect": "This weapon can have a Swinging Weapon Attachment added to its Swing profile.This does not replace the current Swing profile, but can be used instead of it when declaring a Maneuver."
+  },
+  "Thin Blade": {
+    "quality": "Thin Blade",
+    "effect": "When making a Joint Thrust attack, this weapon’ s Thrust TN is decreased by 1. In addition, against mail armor this weapon gains AP Thrust 1. If the weapon has an AP Thrust quality already, do not combine these--use the higher one."
+  },
+  "Thrusting Slot": {
+    "quality": "Thrusting Slot",
+    "effect": "This weapon can have its Thrust profile replaced with a Thrusting Weapon Attachment."
+  },
+  "Tight Grip": {
+    "quality": "Tight Grip",
+    "effect": "When using the Power Attack option on a Swing attack, inflict 1 additional damage.When making a Stability Test to retain your weapon against a Disarm Maneuver or similar event, you may roll 2 additional dice."
+  },
+  "Weapon Attachment": {
+    "quality": "Weapon Attachment",
+    "effect": "This weapon can be attached to any weapon with a Swinging Slot(for Reverse Weapons) or a Thrusting Slot(for Arming Spikes) and used instead of the weapon’ s basic swinging / thrusting profile.When using the Weapon Attachment, use its attack TN and Damage instead of the original where listed, use the original where no new number is listed. e.g.A Battleaxe with a Reverse Spike Weapon Attachment can make a Strike using the stats of a Reverse Spike instead of the stats of the Battleaxe."
   }
 };
