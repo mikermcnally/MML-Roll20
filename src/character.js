@@ -682,7 +682,7 @@ MML.getCalledShotHitPosition = function getCalledShotHitPosition(character, roll
   }
 };
 
-MML.buildHpAttribute = function buildHpAttribute(character) {
+MML.buildHpAttribute = function buildHpAttribute(race, stature, strength, health, willpower) {
   switch (character.bodyType) {
     case 'humanoid':
       return {
@@ -1065,22 +1065,9 @@ MML.createCharacter = function (name, id) {
   const load = MML.derivedAttribute((race, stature, fitnessMod) => Math.round(stature * fitnessMod) + MML.racialAttributeBonuses[race].load, race, stature, fitnessMod);
   const overhead = MML.derivedAttribute((load) => load * 2, load);
   const deadLift = MML.derivedAttribute((load) => load * 4, load);
-  const hpMax = 
-    function () {
-      var value = MML.buildHpAttribute(character);
-      return value;
-    },
-
-    const hp = 
-    value: _.isUndefined(getAttrByName(character.id, 'hp', 'current')) ? MML.buildHpAttribute(character) : MML.getCurrentAttributeJSON(character.id, 'hp'),
-
-    const evocation = MML.derivedAttribute((compute) => intellect + reason + creativity + health + willpower + MML.racialAttributeBonuses[race].evocation)
-    function () {
-      return [
-        
-        ]
-        .reduce((sum, value) => sum + value, 0);
-    },
+  const hpMax = MML.derivedAttribute(MML.buildHpAttribute, race, stature, strength, health, willpower);
+  const hp = _.isUndefined(getAttrByName(character.id, 'hp', 'current')) ? MML.buildHpAttribute(character) : MML.getCurrentAttributeJSON(character.id, 'hp')
+  const evocation = MML.derivedAttribute((race, intellect, reason, creativity, health, willpower) => intellect + reason + creativity + health + willpower + MML.racialAttributeBonuses[race].evocation);
 
     const epMax = 
     function () {
