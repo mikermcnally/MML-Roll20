@@ -1,84 +1,168 @@
-MML.skills = {};
-MML.skills["Acrobatics"] = {attribute: "coordination"};
-MML.skills["Acting"] = {attribute: "presence"};
-MML.skills["Alchemy"] = {attribute: "intellect"};
-MML.skills["Animal Handling"] = {attribute: "presence"};
-MML.skills["Animal Husbandry"] = {attribute: "reason"};
-MML.skills["Armorer"] = {attribute: "reason"};
-MML.skills["Blacksmith"] = {attribute: "coordination"};
-MML.skills["Botany"] = {attribute: "intellect"};
-MML.skills["Bowyer"] = {attribute: "coordination"};
-MML.skills["Brawling"] = {attribute: "combat"};
-MML.skills["Brewing"] = {attribute: "reason"};
-MML.skills["Bureaucracy"] = {attribute: "creativity"};
-MML.skills["Caligraphy"] = {attribute: "creativity"};
-MML.skills["Camouflage"] = {attribute: "reason"};
-MML.skills["Carpentry"] = {attribute: "coordination"};
-MML.skills["Cartography"] = {attribute: "reason"};
-MML.skills["Climbing"] = {attribute: "coordination"};
-MML.skills["Cooking"] = {attribute: "reason"};
-MML.skills["Dancing"] = {attribute: "creativity"};
-MML.skills["Diplomacy"] = {attribute: "presence"};
-MML.skills["Disguise"] = {attribute: "creativity"};
-MML.skills["Dowsing"] = {attribute: "reason"};
-MML.skills["Ecology, Specific"] = {attribute: "intellect"};
-MML.skills["Earth Elementalism"] = {attribute: "intellect"};
-MML.skills["Air Elementalism"] = {attribute: "intellect"};
-MML.skills["Fire Elementalism"] = {attribute: "intellect"};
-MML.skills["Water Elementalism"] = {attribute: "intellect"};
-MML.skills["Life Elementalism"] = {attribute: "intellect"};
-MML.skills["Engineering"] = {attribute: "intellect"};
-MML.skills["Etiquette"] = {attribute: "presence"};
-MML.skills["Falconry"] = {attribute: "reason"};
-MML.skills["First Aid"] = {attribute: "reason"};
-MML.skills["Fishing"] = {attribute: "reason"};
-MML.skills["Fletchery"] = {attribute: "coordination"};
-MML.skills["Foraging"] = {attribute: "reason"};
-MML.skills["Forced March"] = {attribute: "Health"};
-MML.skills["Forgery"] = {attribute: "creativity"};
-MML.skills["Gambling"] = {attribute: "reason"};
-MML.skills["Gem Cutting"] = {attribute: "reason"};
-MML.skills["Geology"] = {attribute: "intellect"};
-MML.skills["Hand Signalling"] = {attribute: "coordination"};
-MML.skills["Heraldry"] = {attribute: "reason"};
-MML.skills["Herbalism"] = {attribute: "reason"};
-MML.skills["History"] = {attribute: "intellect"};
-MML.skills["Horsemanship"] = {attribute: "coordination"};
-MML.skills["Hunting and Trapping"] = {attribute: "reason"};
-MML.skills["Jeweler"] = {attribute: "creativity"};
-MML.skills["Knowledge"] = {attribute: "intellect"};
-MML.skills["Language"] = {attribute: "creativity"};
-MML.skills["Leatherworking"] = {attribute: "coordination"};
-MML.skills["Literacy"] = {attribute: "intellect"};
-MML.skills["Literature"] = {attribute: "intellect"};
-MML.skills["Lock Picking"] = {attribute: "coordination"};
-MML.skills["Lore"] = {attribute: "reason"};
-MML.skills["Mathematics"] = {attribute: "intellect"};
-MML.skills["Metallurgy"] = {attribute: "intellect"};
-MML.skills["Mimicry"] = {attribute: "presence"};
-MML.skills["Musical Instrument"] = {attribute: "creativity"};
-MML.skills["Navigation"] = {attribute: "reason"};
-MML.skills["Negotiation"] = {attribute: "presence"};
-MML.skills["Oration"] = {attribute: "presence"};
-MML.skills["Persuasion"] = {attribute: "presence"};
-MML.skills["Physician"] = {attribute: "reason"};
-MML.skills["Pick Pocket"] = {attribute: "coordination"};
-MML.skills["Running"] = {attribute: "health"};
-MML.skills["Scrounging"] = {attribute: "reason"};
-MML.skills["Sculpture"] = {attribute: "creativity"};
-MML.skills["Seamanship"] = {attribute: "reason"};
-MML.skills["Sewing"] = {attribute: "coordination"};
-MML.skills["Singing"] = {attribute: "presence"};
-MML.skills["Sleight of Hand"] = {attribute: "coordination"};
-MML.skills["Stalking"] = {attribute: "coordination"};
-MML.skills["Stealth"] = {attribute: "coordination"};
-MML.skills["Survival"] = {attribute: "reason"};
-MML.skills["Swimming"] = {attribute: "coordination"};
-MML.skills["Symbol Magic"] = {attribute: "intellect"};
-MML.skills["Tactical"] = {attribute: "reason"};
-MML.skills["Teamster"] = {attribute: "reason"};
-MML.skills["Tracking"] = {attribute: "reason"};
-MML.skills["Veterinary"] = {attribute: "reason"};
-MML.skills["Weapon Smith"] = {attribute: "coordination"};
-MML.skills["Sword Smith"] = {attribute: "coordination"};
-MML.skills["Wizardry"] = {attribute: "intellect"};
+MML.skills = {
+  'Acrobatics': { attribute: 'coordination' },
+  'Acting': { attribute: 'presence' },
+  'Alchemy': { attribute: 'intellect' },
+  'Animal Handling': { attribute: 'presence' },
+  'Animal Husbandry': { attribute: 'reason' },
+  'Armorer': { attribute: 'reason' },
+  'Blacksmith': { attribute: 'coordination' },
+  'Botany': { attribute: 'intellect' },
+  'Bowyer': { attribute: 'coordination' },
+  'Brawling': { attribute: 'combat' },
+  'Brewing': { attribute: 'reason' },
+  'Bureaucracy': { attribute: 'creativity' },
+  'Caligraphy': { attribute: 'creativity' },
+  'Camouflage': { attribute: 'reason' },
+  'Carpentry': { attribute: 'coordination' },
+  'Cartography': { attribute: 'reason' },
+  'Climbing': { attribute: 'coordination' },
+  'Cooking': { attribute: 'reason' },
+  'Dancing': { attribute: 'creativity' },
+  'Diplomacy': { attribute: 'presence' },
+  'Disguise': { attribute: 'creativity' },
+  'Dowsing': { attribute: 'reason' },
+  'Ecology, Specific': { attribute: 'intellect' },
+  'Earth Elementalism': { attribute: 'intellect' },
+  'Air Elementalism': { attribute: 'intellect' },
+  'Fire Elementalism': { attribute: 'intellect' },
+  'Water Elementalism': { attribute: 'intellect' },
+  'Life Elementalism': { attribute: 'intellect' },
+  'Engineering': { attribute: 'intellect' },
+  'Etiquette': { attribute: 'presence' },
+  'Falconry': { attribute: 'reason' },
+  'First Aid': { attribute: 'reason' },
+  'Fishing': { attribute: 'reason' },
+  'Fletchery': { attribute: 'coordination' },
+  'Foraging': { attribute: 'reason' },
+  'Forced March': { attribute: 'Health' },
+  'Forgery': { attribute: 'creativity' },
+  'Gambling': { attribute: 'reason' },
+  'Gem Cutting': { attribute: 'reason' },
+  'Geology': { attribute: 'intellect' },
+  'Hand Signalling': { attribute: 'coordination' },
+  'Heraldry': { attribute: 'reason' },
+  'Herbalism': { attribute: 'reason' },
+  'History': { attribute: 'intellect' },
+  'Horsemanship': { attribute: 'coordination' },
+  'Hunting and Trapping': { attribute: 'reason' },
+  'Jeweler': { attribute: 'creativity' },
+  'Knowledge': { attribute: 'intellect' },
+  'Language': { attribute: 'creativity' },
+  'Leatherworking': { attribute: 'coordination' },
+  'Literacy': { attribute: 'intellect' },
+  'Literature': { attribute: 'intellect' },
+  'Lock Picking': { attribute: 'coordination' },
+  'Lore': { attribute: 'reason' },
+  'Mathematics': { attribute: 'intellect' },
+  'Metallurgy': { attribute: 'intellect' },
+  'Mimicry': { attribute: 'presence' },
+  'Musical Instrument': { attribute: 'creativity' },
+  'Navigation': { attribute: 'reason' },
+  'Negotiation': { attribute: 'presence' },
+  'Oration': { attribute: 'presence' },
+  'Persuasion': { attribute: 'presence' },
+  'Physician': { attribute: 'reason' },
+  'Pick Pocket': { attribute: 'coordination' },
+  'Running': { attribute: 'health' },
+  'Scrounging': { attribute: 'reason' },
+  'Sculpture': { attribute: 'creativity' },
+  'Seamanship': { attribute: 'reason' },
+  'Sewing': { attribute: 'coordination' },
+  'Singing': { attribute: 'presence' },
+  'Sleight of Hand': { attribute: 'coordination' },
+  'Stalking': { attribute: 'coordination' },
+  'Stealth': { attribute: 'coordination' },
+  'Survival': { attribute: 'reason' },
+  'Swimming': { attribute: 'coordination' },
+  'Symbol Magic': { attribute: 'intellect' },
+  'Tactical': { attribute: 'reason' },
+  'Teamster': { attribute: 'reason' },
+  'Tracking': { attribute: 'reason' },
+  'Veterinary': { attribute: 'reason' },
+  'Weapon Smith': { attribute: 'coordination' },
+  'Sword Smith': { attribute: 'coordination' },
+  'Wizardry': { attribute: 'intellect' },
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
