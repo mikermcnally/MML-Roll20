@@ -1017,20 +1017,35 @@ MML.createCharacter = function (name, id) {
     share()
   );
 
-    // Object.defineProperty(character, 'name', {
-    //   value: name,
+  // Object.defineProperty(character, 'name', {
+  //   value: name,
 
-    // Object.defineProperty(character, 'id', {
-    //   get: function () {
-    //     return id;
-    //   },
+  // Object.defineProperty(character, 'id', {
+  //   get: function () {
+  //     return id;
+  //   },
 
-    // Object.defineProperty(character, 'player', {
-    //   get: function () {
-    //     return MML.players[MML.getCurrentAttribute(character.id, 'player')];
-    //   },
+  // Object.defineProperty(character, 'player', {
+  //   get: function () {
+  //     return MML.players[MML.getCurrentAttribute(character.id, 'player')];
+  //   },
 
-    
+  // const hp = _.isUndefined(getAttrByName(character.id, 'hp', 'current')) ? MML.buildHpAttribute(character) : MML.getCurrentAttributeJSON(character.id, 'hp')
+  // const epMax = evocation;
+
+  // const ep = _.isUndefined(getAttrByName(character.id, 'ep', 'current')) ? character.evocation : MML.getCurrentAttributeAsFloat(character.id, 'ep'),
+
+    // const fatigueMax = 
+    // function () {
+    //   var value = character.fitness;
+    //   return value;
+    // },
+
+    // const fatigue = 
+    // value: isNaN(parseFloat(MML.getCurrentAttribute(character.id, 'fatigue'))) ? character.fitness : MML.getCurrentAttributeAsFloat(character.id, 'fatigue'),
+
+
+  // #region Input Attributes
   const stature_roll = attribute_changed.pipe(MML.rollAttributeChanged('stature_roll'));
   const strength_roll = attribute_changed.pipe(MML.rollAttributeChanged('strength_roll'));
   const coordination_roll = attribute_changed.pipe(MML.rollAttributeChanged('coordination_roll'));
@@ -1043,9 +1058,17 @@ MML.createCharacter = function (name, id) {
   const race = attribute_changed.pipe(MML.inputAttributeChanged('race'));
   const gender = attribute_changed.pipe(MML.inputAttributeChanged('gender'));
   const handedness = attribute_changed.pipe(MML.inputAttributeChanged('handedness'));
+  const inventory = MML.getCurrentAttributeJSON(character.id, 'inventory').pipe(startWith({
+    emptyHand: {
+      type: 'empty',
+      weight: 0
+    }));
 
+
+  // #endregion
+
+  // #region Derived Attributes
   const bodyType = race.pipe(map(race => MML.bodyTypes[race]));
-
   const height = MML.derivedAttribute((race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].height, race, gender, stature_roll);
   const weight = MML.derivedAttribute((race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].weight, race, gender, stature_roll);
   const stature = MML.derivedAttribute((race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].stature, race, gender, stature_roll);
@@ -1066,54 +1089,12 @@ MML.createCharacter = function (name, id) {
   const overhead = MML.derivedAttribute((load) => load * 2, load);
   const deadLift = MML.derivedAttribute((load) => load * 4, load);
   const hpMax = MML.derivedAttribute(MML.buildHpAttribute, race, stature, strength, health, willpower);
-  const hp = _.isUndefined(getAttrByName(character.id, 'hp', 'current')) ? MML.buildHpAttribute(character) : MML.getCurrentAttributeJSON(character.id, 'hp')
+  const hpRecovery = MML.derivedAttribute(health => MML.recoveryMods[health].hp, health);
   const evocation = MML.derivedAttribute((race, intellect, reason, creativity, health, willpower) => intellect + reason + creativity + health + willpower + MML.racialAttributeBonuses[race].evocation);
+  const epRecovery = MML.derivedAttribute(health => MML.recoveryMods[health].ep, health);
+  const totalWeightCarried = MML.derivedAttribute(inventory => _.reduce(_.pluck(inventory, 'weight'), (sum, num) => sum + num, 0), inventory);
+  // #endregion
 
-    const epMax = 
-    function () {
-      var value = character.evocation;
-      return value;
-    },
-
-    const ep = 
-    value: _.isUndefined(getAttrByName(character.id, 'ep', 'current')) ? character.evocation : MML.getCurrentAttributeAsFloat(character.id, 'ep'),
-
-    const fatigueMax = 
-    function () {
-      var value = character.fitness;
-      return value;
-    },
-
-    const fatigue = 
-    value: isNaN(parseFloat(MML.getCurrentAttribute(character.id, 'fatigue'))) ? character.fitness : MML.getCurrentAttributeAsFloat(character.id, 'fatigue'),
-
-    const hpRecovery = 
-    function () {
-      var value = MML.recoveryMods[character.health].hp;
-      return value;
-    },
-
-    const epRecovery = 
-    function () {
-      var value = MML.recoveryMods[character.health].ep;
-      return value;
-    },
-
-    const inventory = 
-    value: _.isUndefined(getAttrByName(character.id, 'inventory', 'current')) ? {
-      emptyHand: {
-        type: 'empty',
-        weight: 0
-      }
-    } : MML.getCurrentAttributeJSON(character.id, 'inventory'),
-
-    const totalWeightCarried = 
-    function () {
-      var value = _.reduce(_.pluck(character.inventory, 'weight'), function (total, weight) {
-        return total + weight;
-      }, 0);
-      return value;
-    },
 
     const knockdownMax = 
     function () {
