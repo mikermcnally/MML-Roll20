@@ -360,8 +360,7 @@ MML.updateInventory = function updateInventory(character) {
 MML.updateCharacterSheet = function updateCharacterSheet(character) {
   // _.each(character, function(value, attribute) {
   //   if (typeof(value) === 'object') {
-  //     value = JSON.stringify(value);
-  //   }
+  //     return JSON.stringify(value);
   //   MML.setCurrentAttribute(character.id, attribute, value);
   // });
 };
@@ -611,8 +610,7 @@ MML.getHitPosition = function getHitPosition(character, rollValue) {
   }
 };
 
-MML.getHitTable = function getHitTable(character) {
-  var table;
+MML.getHitTable = function getHitTable(bodyType, inventory, leftHand, rightHand) {
   switch (character.bodyType) {
     case 'humanoid':
       if (character.inventory[character.rightHand._id].type === 'shield' || character.inventory[character.leftHand._id].type === 'shield') {
@@ -972,6 +970,130 @@ MML.validateAction = function validateAction(character) {
   return valid;
 };
 
+MML.buildApvMatrix = function buildApvMatrix (inventory, bodyType) {
+    const armor = inventory.values()
+      .filter(item => item.type === 'armor')
+      .reduce();
+
+    var apvMatrix = {};
+    // Initialize APV Matrix
+    _.each(MML.hitPositions[bodyType], function (position) {
+      apvMatrix[position.name] = {
+        Surface: [{
+          value: 0,
+          coverage: 100
+        }],
+        Cut: [{
+          value: 0,
+          coverage: 100
+        }],
+        Chop: [{
+          value: 0,
+          coverage: 100
+        }],
+        Pierce: [{
+          value: 0,
+          coverage: 100
+        }],
+        Thrust: [{
+          value: 0,
+          coverage: 100
+        }],
+        Impact: [{
+          value: 0,
+          coverage: 100
+        }],
+        Flanged: [{
+          value: 0,
+          coverage: 100
+        }]
+      };
+    });
+    //Creates raw matrix of individual pieces of armor (no layering or partial coverage)
+
+    _.each(armor, function (piece) {
+      var material = MML.APVList[piece.material];
+
+      _.each(piece.protection, function (protection) {
+        var position = MML.hitPositions[bodyType][protection.position].name;
+        var coverage = protection.coverage;
+        apvMatrix[position].Surface.push({
+          value: material.surface,
+          coverage: coverage
+        });
+        apvMatrix[position].Cut.push({
+          value: material.cut,
+          coverage: coverage
+        });
+        apvMatrix[position].Chop.push({
+          value: material.chop,
+          coverage: coverage
+        });
+        apvMatrix[position].Pierce.push({
+          value: material.pierce,
+          coverage: coverage
+        });
+        apvMatrix[position].Thrust.push({
+          value: material.thrust,
+          coverage: coverage
+        });
+        apvMatrix[position].Impact.push({
+          value: material.impact,
+          coverage: coverage
+        });
+        apvMatrix[position].Flanged.push({
+          value: material.flanged,
+          coverage: coverage
+        });
+      });
+    });
+
+    //This loop accounts for layered armor and partial coverage and outputs final APVs
+    _.each(apvMatrix, function (position, positionName) {
+      _.each(position, function (rawAPVArray, type) {
+        var apvFinalArray = [];
+        var coverageArray = [];
+
+        //Creates an array of armor coverage in ascending order.
+        _.each(rawAPVArray, function (armorProtectionValues) {
+          if (coverageArray.indexOf(armorProtectionValues.coverage) === -1) {
+            coverageArray.push(armorProtectionValues.coverage);
+          }
+        });
+        coverageArray = coverageArray.sort((a, b) => a - b);
+
+        //Creates APV array per damage type per position
+        _.each(coverageArray, function (apvCoverage) {
+          var apvToLayerArray = [];
+          var apvValue = 0;
+
+          //Builds an array of APVs that meet or exceed the coverage value
+          _.each(rawAPVArray, function (armorProtectionValues) {
+            if (armorProtectionValues.coverage >= apvCoverage) {
+              apvToLayerArray.push(armorProtectionValues.value);
+            }
+          });
+          apvToLayerArray = apvToLayerArray.sort(function (a, b) {
+            return b - a;
+          });
+
+          //Adds the values at coverage value with diminishing returns on layered armor
+          _.each(apvToLayerArray, function (value, index) {
+            apvValue += value * Math.pow(2, -index);
+            apvValue = Math.round(apvValue);
+          });
+          //Puts final APV and associated Coverage into final APV array for that damage type.
+          apvFinalArray.push({
+            value: apvValue,
+            coverage: apvCoverage
+          });
+        });
+        apvMatrix[positionName][type] = apvFinalArray;
+      });
+    });
+    return apvMatrix;
+};
+
 // Rx operators
 MML.rollAttributeChanged = function rollAttributeChanged(name) {
   return function (source) {
@@ -1010,42 +1132,29 @@ MML.derivedAttribute = function derivedAttribute(compute, ...attributes) {
 
 // Character Creation
 MML.createCharacter = function (name, id) {
-  var character = {};
+  const character = {id};
 
   const attribute_changed = attribute_changed_global.pipe(
     filter(attribute => attribute.get('_characterid') === id),
     share()
   );
 
-  // Object.defineProperty(character, 'name', {
-  //   value: name,
-
-  // Object.defineProperty(character, 'id', {
-  //   get: function () {
-  //     return id;
-  //   },
-
   // Object.defineProperty(character, 'player', {
   //   get: function () {
   //     return MML.players[MML.getCurrentAttribute(character.id, 'player')];
   //   },
 
-  // const hp = _.isUndefined(getAttrByName(character.id, 'hp', 'current')) ? MML.buildHpAttribute(character) : MML.getCurrentAttributeJSON(character.id, 'hp')
+  // const hp = _.isUndefined(getAttrByName(character.id, 'hp', 'current')) ? MML.buildHpAttribute(character) : MML.getCurrentAttributeJSON(character.id, 'hp');
   // const epMax = evocation;
 
-  // const ep = _.isUndefined(getAttrByName(character.id, 'ep', 'current')) ? character.evocation : MML.getCurrentAttributeAsFloat(character.id, 'ep'),
+  // const ep = _.isUndefined(getAttrByName(character.id, 'ep', 'current')) ? character.evocation : MML.getCurrentAttributeAsFloat(character.id, 'ep');
 
-    // const fatigueMax = 
-    // function () {
-    //   var value = character.fitness;
-    //   return value;
-    // },
-
-    // const fatigue = 
-    // value: isNaN(parseFloat(MML.getCurrentAttribute(character.id, 'fatigue'))) ? character.fitness : MML.getCurrentAttributeAsFloat(character.id, 'fatigue'),
-
+  // const fatigueMax = fitness;
+  // const fatigue = isNaN(parseFloat(MML.getCurrentAttribute(character.id, 'fatigue'))) ? character.fitness : MML.getCurrentAttributeAsFloat(character.id, 'fatigue');
+  // const knockdown = isNaN(parseFloat(MML.getCurrentAttribute(character.id, 'knockdown'))) ? character.knockdownMax : MML.getCurrentAttributeAsFloat(character.id, 'knockdown');
 
   // #region Input Attributes
+  const name = name_changed_global.pipe(filter(changed_character => changed_character.get('id') === id), map(changed_character => changed_character.get('name')));
   const stature_roll = attribute_changed.pipe(MML.rollAttributeChanged('stature_roll'));
   const strength_roll = attribute_changed.pipe(MML.rollAttributeChanged('strength_roll'));
   const coordination_roll = attribute_changed.pipe(MML.rollAttributeChanged('coordination_roll'));
@@ -1058,13 +1167,22 @@ MML.createCharacter = function (name, id) {
   const race = attribute_changed.pipe(MML.inputAttributeChanged('race'));
   const gender = attribute_changed.pipe(MML.inputAttributeChanged('gender'));
   const handedness = attribute_changed.pipe(MML.inputAttributeChanged('handedness'));
-  const inventory = MML.getCurrentAttributeJSON(character.id, 'inventory').pipe(startWith({
-    emptyHand: {
-      type: 'empty',
-      weight: 0
-    }));
+  
+  // const inventory = MML.getCurrentAttributeJSON(character.id, 'inventory').pipe(startWith({
+  //   emptyHand: {
+  //     type: 'empty',
+  //     weight: 0
+  //   }));
+  // const leftHand = _.isEmpty(MML.getCurrentAttributeJSON(character.id, 'leftHand')) ? JSON.stringify({
+  //   _id: 'emptyHand',
+  //   grip: 'unarmed'
+  // }) : MML.getCurrentAttributeJSON(character.id, 'leftHand');
 
-
+  // const rightHand = _.isEmpty(MML.getCurrentAttributeJSON(character.id, 'rightHand')) ? JSON.stringify({
+  //   _id: 'emptyHand',
+  //   grip: 'unarmed'
+  // }) : MML.getCurrentAttributeJSON(character.id, 'rightHand');
+  // const spells = MML.getCurrentAttributeAsArray(character.id, 'spells');
   // #endregion
 
   // #region Derived Attributes
@@ -1090,243 +1208,61 @@ MML.createCharacter = function (name, id) {
   const deadLift = MML.derivedAttribute((load) => load * 4, load);
   const hpMax = MML.derivedAttribute(MML.buildHpAttribute, race, stature, strength, health, willpower);
   const hpRecovery = MML.derivedAttribute(health => MML.recoveryMods[health].hp, health);
-  const evocation = MML.derivedAttribute((race, intellect, reason, creativity, health, willpower) => intellect + reason + creativity + health + willpower + MML.racialAttributeBonuses[race].evocation);
+  const evocation = MML.derivedAttribute((race, intellect, reason, creativity, health, willpower) => intellect + reason + creativity + health + willpower + MML.racialAttributeBonuses[race].evocation,
+    race, 
+    intellect,
+    reason,
+    creativity,
+    health,
+    willpower
+  );
   const epRecovery = MML.derivedAttribute(health => MML.recoveryMods[health].ep, health);
   const totalWeightCarried = MML.derivedAttribute(inventory => _.reduce(_.pluck(inventory, 'weight'), (sum, num) => sum + num, 0), inventory);
+  const knockdownMax = MML.derivedAttribute(Math.round(stature + (totalWeightCarried / 10)), stature, totalWeightCarried);
+  const armorProtectionValues = ML.derivedAttribute(MML.buildApvMatrix, bodyType, inventory);
+  const movementRatio = MML.derivedAttribute(function (load, totalWeightCarried) {
+    const movementRatio = totalWeightCarried === 0 ? Math.round(10 * load) / 10 : Math.round(10 * load / totalWeightCarried) / 10;
+    return movementRatio > 4.0 ? 4.0 : movementRatio;
+  }, load, totalWeightCarried);
+  
+  const attributeDefenseMod = MML.derivedAttribute((strength, coordination) => MML.attributeMods.strength[strength] + MML.attributeMods.coordination[coordination], strength, coordination);
+  const attributeMeleeAttackMod = MML.derivedAttribute((strength, coordination) => MML.attributeMods.strength[strength] + MML.attributeMods.coordination[coordination], strength, coordination);
+  const attributeMissileAttackMod = MML.derivedAttribute((strength, coordination, perception) => MML.attributeMods.perception[perception] + MML.attributeMods.coordination[coordination] + MML.attributeMods.strength[strength], strength, coordination, perception);
+  const meleeDamageMod = MML.derivedAttribute(_.find(MML.meleeDamageMods, ({high, low}) => load >= low && load <= high).value, load);
+  const spellLearningMod = MML.derivedAttribute(intellect => MML.attributeMods.intellect[intellect], intellect);
+
+  // const hitTable = MML.getHitTable(character);
   // #endregion
-
-
-    const knockdownMax = 
-    function () {
-      var value = Math.round(character.stature + (character.totalWeightCarried / 10));
-      return value;
-    },
-
-    const knockdown = 
-    value: isNaN(parseFloat(MML.getCurrentAttribute(character.id, 'knockdown'))) ? character.knockdownMax : MML.getCurrentAttributeAsFloat(character.id, 'knockdown'),
-
-    const armorProtectionValues = 
-    function () {
-      var bodyType = character.bodyType;
-      var armor = [];
-      _.each(
-        character.inventory,
-        function (item) {
-          if (item.type === 'armor') {
-            armor.push(item);
-          }
-        },
-        character);
-
-      var apvMatrix = {};
-      // Initialize APV Matrix
-      _.each(MML.hitPositions[bodyType], function (position) {
-        apvMatrix[position.name] = {
-          Surface: [{
-            value: 0,
-            coverage: 100
-          }],
-          Cut: [{
-            value: 0,
-            coverage: 100
-          }],
-          Chop: [{
-            value: 0,
-            coverage: 100
-          }],
-          Pierce: [{
-            value: 0,
-            coverage: 100
-          }],
-          Thrust: [{
-            value: 0,
-            coverage: 100
-          }],
-          Impact: [{
-            value: 0,
-            coverage: 100
-          }],
-          Flanged: [{
-            value: 0,
-            coverage: 100
-          }]
-        };
-      });
-      //Creates raw matrix of individual pieces of armor (no layering or partial coverage)
-
-      _.each(armor, function (piece) {
-        var material = MML.APVList[piece.material];
-
-        _.each(piece.protection, function (protection) {
-          var position = MML.hitPositions[bodyType][protection.position].name;
-          var coverage = protection.coverage;
-          apvMatrix[position].Surface.push({
-            value: material.surface,
-            coverage: coverage
-          });
-          apvMatrix[position].Cut.push({
-            value: material.cut,
-            coverage: coverage
-          });
-          apvMatrix[position].Chop.push({
-            value: material.chop,
-            coverage: coverage
-          });
-          apvMatrix[position].Pierce.push({
-            value: material.pierce,
-            coverage: coverage
-          });
-          apvMatrix[position].Thrust.push({
-            value: material.thrust,
-            coverage: coverage
-          });
-          apvMatrix[position].Impact.push({
-            value: material.impact,
-            coverage: coverage
-          });
-          apvMatrix[position].Flanged.push({
-            value: material.flanged,
-            coverage: coverage
-          });
-        });
-      });
-
-      //This loop accounts for layered armor and partial coverage and outputs final APVs
-      _.each(apvMatrix, function (position, positionName) {
-        _.each(position, function (rawAPVArray, type) {
-          var apvFinalArray = [];
-          var coverageArray = [];
-
-          //Creates an array of armor coverage in ascending order.
-          _.each(rawAPVArray, function (armorProtectionValues) {
-            if (coverageArray.indexOf(armorProtectionValues.coverage) === -1) {
-              coverageArray.push(armorProtectionValues.coverage);
-            }
-          });
-          coverageArray = coverageArray.sort(function (a, b) {
-            return a - b;
-          });
-
-          //Creates APV array per damage type per position
-          _.each(coverageArray, function (apvCoverage) {
-            var apvToLayerArray = [];
-            var apvValue = 0;
-
-            //Builds an array of APVs that meet or exceed the coverage value
-            _.each(rawAPVArray, function (armorProtectionValues) {
-              if (armorProtectionValues.coverage >= apvCoverage) {
-                apvToLayerArray.push(armorProtectionValues.value);
-              }
-            });
-            apvToLayerArray = apvToLayerArray.sort(function (a, b) {
-              return b - a;
-            });
-
-            //Adds the values at coverage value with diminishing returns on layered armor
-            _.each(apvToLayerArray, function (value, index) {
-              apvValue += value * Math.pow(2, -index);
-              apvValue = Math.round(apvValue);
-            });
-            //Puts final APV and associated Coverage into final APV array for that damage type.
-            apvFinalArray.push({
-              value: apvValue,
-              coverage: apvCoverage
-            });
-          });
-          apvMatrix[positionName][type] = apvFinalArray;
-        });
-      });
-      return apvMatrix;
-    },
-
-    const leftHand = 
-    value: _.isEmpty(MML.getCurrentAttributeJSON(character.id, 'leftHand')) ? JSON.stringify({
-      _id: 'emptyHand',
-      grip: 'unarmed'
-    }) : MML.getCurrentAttributeJSON(character.id, 'leftHand'),
-
-    const rightHand = 
-    value: _.isEmpty(MML.getCurrentAttributeJSON(character.id, 'rightHand')) ? JSON.stringify({
-      _id: 'emptyHand',
-      grip: 'unarmed'
-    }) : MML.getCurrentAttributeJSON(character.id, 'rightHand'),
-
-    const hitTable = 
-    function () {
-      var value = MML.getHitTable(character);
-      return value;
-    },
-
-    const movementRatio = 
-    function () {
-      var movementRatio;
-
-      if (character.totalWeightCarried === 0) {
-        movementRatio = Math.round(10 * character.load) / 10;
-      } else {
-        movementRatio = Math.round(10 * character.load / character.totalWeightCarried) / 10;
-      }
-
-      if (movementRatio > 4.0) {
-        movementRatio = 4.0;
-      }
-      return movementRatio;
-    },
-
-    const movementAvailable = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'movementAvailable'),
-
-    const movementType = 
-    value: MML.getCurrentAttribute(character.id, 'movementType'),
-
-    const pathID = 
-    function () {
-      return MML.getCurrentAttribute(character.id, 'pathID');
-    }
-  });
-  const situationalMod = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'situationalMod'),
-
-    const attributeDefenseMod = 
-    function () {
-      var value = MML.attributeMods.strength[character.strength] + MML.attributeMods.coordination[character.coordination];
-      return value;
-    },
-
-    const meleeDefenseMod = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'meleeDefenseMod'),
-
-    const missileDefenseMod = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'missileDefenseMod'),
-
-    const meleeAttackMod = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'meleeAttackMod'),
-
-    const attributeMeleeAttackMod = 
-    function () {
-      var value = MML.attributeMods.strength[character.strength] + MML.attributeMods.coordination[character.coordination];
-      return value;
-    },
-
-    const meleeDamageMod = 
-    function () {
-      var value = _.find(MML.meleeDamageMods, function (mod) {
-        return character.load >= mod.low && character.load <= mod.high;
-      }, character).value;
-      return value;
-    },
-
-    const missileAttackMod = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'missileAttackMod'),
-
-    const attributeMissileAttackMod = 
-    function () {
-      var value = MML.attributeMods.perception[character.perception] + MML.attributeMods.coordination[character.coordination] + MML.attributeMods.strength[character.strength];
-      return value;
-    },
-
-    const castingMod = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'castingMod'),
+  
+  // #region Variable Attributes
+  const movementAvailable = MML.getCurrentAttributeAsFloat(character.id, 'movementAvailable');
+  const movementType = MML.getCurrentAttribute(character.id, 'movementType');
+  const pathID = MML.getCurrentAttribute(character.id, 'pathID');
+  const situationalMod = MML.getCurrentAttributeAsFloat(character.id, 'situationalMod');
+  const meleeDefenseMod = MML.getCurrentAttributeAsFloat(character.id, 'meleeDefenseMod');
+  const missileDefenseMod = MML.getCurrentAttributeAsFloat(character.id, 'missileDefenseMod');
+  const meleeAttackMod = MML.getCurrentAttributeAsFloat(character.id, 'meleeAttackMod');
+  const missileAttackMod = MML.getCurrentAttributeAsFloat(character.id, 'missileAttackMod');
+  const castingMod = MML.getCurrentAttributeAsFloat(character.id, 'castingMod');
+  const statureCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'statureCheckMod');
+  const strengthCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'strengthCheckMod');
+  const coordinationCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'coordinationCheckMod');
+  const healthCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'healthCheckMod');
+  const beautyCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'beautyCheckMod');
+  const intellectCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'intellectCheckMod');
+  const reasonCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'reasonCheckMod');
+  const creativityCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'creativityCheckMod');
+  const presenceCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'presenceCheckMod');
+  const willpowerCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'willpowerCheckMod');
+  const evocationCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'evocationCheckMod');
+  const perceptionCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'perceptionCheckMod');
+  const systemStrengthCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'systemStrengthCheckMod');
+  const fitnessCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'fitnessCheckMod');
+  const statusEffects = MML.getCurrentAttributeJSON(character.id, 'statusEffects');
+  const initiativeRollValue = MML.getCurrentAttributeAsFloat(character.id, 'initiativeRollValue');
+  const situationalInitBonus = MML.getCurrentAttributeAsFloat(character.id, 'situationalInitBonus');
+  const actionInitCostMod = MML.getCurrentAttributeAsFloat(character.id, 'actionInitCostMod');
+  // #endregion
 
     const attributeCastingMod = 
     function () {
@@ -1354,140 +1290,69 @@ MML.createCharacter = function (name, id) {
       return attributeCastingMod;
     },
 
-    const spellLearningMod = 
-    function () {
-      var value = MML.attributeMods.intellect[character.intellect];
-      return value;
-    },
+  // #region Initaitive Attributes
+    const attributeInitBonus = MML.derivedAttribute(function (strength, coordination, reason, perception) {
+      const rankingAttribute = [strength, coordination, reason, perception].sort((a, b) => a - b)[0];
 
-    const statureCheckMod = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'statureCheckMod'),
-
-    const strengthCheckMod = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'strengthCheckMod'),
-
-    const coordinationCheckMod = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'coordinationCheckMod'),
-
-    const healthCheckMod = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'healthCheckMod'),
-
-    const beautyCheckMod = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'beautyCheckMod'),
-
-    const intellectCheckMod = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'intellectCheckMod'),
-
-    const reasonCheckMod = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'reasonCheckMod'),
-
-    const creativityCheckMod = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'creativityCheckMod'),
-
-    const presenceCheckMod = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'presenceCheckMod'),
-
-    const willpowerCheckMod = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'willpowerCheckMod'),
-
-    const evocationCheckMod = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'evocationCheckMod'),
-
-    const perceptionCheckMod = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'perceptionCheckMod'),
-
-    const systemStrengthCheckMod = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'systemStrengthCheckMod'),
-
-    const fitnessCheckMod = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'fitnessCheckMod'),
-
-    const statusEffects = 
-    value: MML.getCurrentAttributeJSON(character.id, 'statusEffects'),
-
-    const initiative = 
-    function () {
-      var value;
-      var initiative = character.initiativeRollValue +
-        character.situationalInitBonus +
-        character.movementRatioInitBonus +
-        character.attributeInitBonus +
-        character.senseInitBonus +
-        character.fomInitBonus +
-        character.firstActionInitBonus +
-        character.spentInitiative;
-      if (initiative < 0 || state.MML.GM.roundStarted === false || character.situationalInitBonus === 'No Combat' || character.movementRatioInitBonus === 'No Combat') {
-        value = 0;
-      } else {
-        value = initiative;
-      }
-      return value;
-    },
-
-    const initiativeRollValue = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'initiativeRollValue'),
-
-    const situationalInitBonus = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'situationalInitBonus'),
-
-    const actionInitCostMod = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'actionInitCostMod'),
-
-    const movementRatioInitBonus = 
-    function () {
-      var value;
-
-      if (character.movementRatio < 0.6) {
-        value = 'No Combat';
-      } else if (character.movementRatio === 0.6) {
-        value = -4;
-      } else if (character.movementRatio < 0.7 && character.movementRatio <= 0.8) {
-        value = -3;
-      } else if (character.movementRatio > 0.8 && character.movementRatio <= 1.0) {
-        value = -2;
-      } else if (character.movementRatio > 1.0 && character.movementRatio <= 1.2) {
-        value = -1;
-      } else if (character.movementRatio > 1.2 && character.movementRatio <= 1.4) {
-        value = 0;
-      } else if (character.movementRatio > 1.4 && character.movementRatio <= 1.7) {
-        value = 1;
-      } else if (character.movementRatio > 1.7 && character.movementRatio <= 2.0) {
-        value = 2;
-      } else if (character.movementRatio > 2.0 && character.movementRatio <= 2.5) {
-        value = 3;
-      } else if (character.movementRatio > 2.5 && character.movementRatio <= 3.2) {
-        value = 4;
-      } else if (character.movementRatio > 3.2) {
-        value = 5;
-      }
-      return value;
-    },
-
-    const attributeInitBonus = 
-    function () {
-      var value;
-      var attributeArray = [character.strength, character.coordination, character.reason, character.perception];
-      var rankingAttribute = attributeArray.sort(function (a, b) {
-        return a - b;
-      })[0];
-
-      if (rankingAttribute <= 9) {
-        value = -1;
+      if (rankingAttribute < 10) {
+        return -1;
       } else if (rankingAttribute === 10 || rankingAttribute === 11) {
-        value = 0;
+        return 0;
       } else if (rankingAttribute === 12 || rankingAttribute === 13) {
-        value = 1;
+        return 1;
       } else if (rankingAttribute === 14 || rankingAttribute === 15) {
-        value = 2;
+        return 2;
       } else if (rankingAttribute === 16 || rankingAttribute === 17) {
-        value = 3;
+        return 3;
       } else if (rankingAttribute === 18 || rankingAttribute === 19) {
-        value = 4;
-      } else if (rankingAttribute >= 20) {
-        value = 5;
+        return 4;
+      } else {
+        return 5;
       }
-      return value;
-    },
+    }, strength, coordination, reason, perception);
+
+    const movementRatioInitBonus = MML.derivedAttribute(function (movementRatio) {
+      if (movementRatio < 0.6) {
+        return 'No Combat';
+      } else if (movementRatio === 0.6) {
+        return -4;
+      } else if (movementRatio < 0.7 && movementRatio <= 0.8) {
+        return -3;
+      } else if (movementRatio > 0.8 && movementRatio <= 1.0) {
+        return -2;
+      } else if (movementRatio > 1.0 && movementRatio <= 1.2) {
+        return -1;
+      } else if (movementRatio > 1.2 && movementRatio <= 1.4) {
+        return 0;
+      } else if (movementRatio > 1.4 && movementRatio <= 1.7) {
+        return 1;
+      } else if (movementRatio > 1.7 && movementRatio <= 2.0) {
+        return 2;
+      } else if (movementRatio > 2.0 && movementRatio <= 2.5) {
+        return 3;
+      } else if (movementRatio > 2.5 && movementRatio <= 3.2) {
+        return 4;
+      } else(movementRatio > 3.2) {
+        return 5;
+      }
+    }, movementRatio);
+
+    const initiative = MML.derivedAttribute(function (initiativeRollValue, situationalInitBonus, movementRatioInitBonus, attributeInitBonus, senseInitBonus, fomInitBonus, firstActionInitBonus, spentInitiative) {
+      if ([situationalInitBonus, movementRatioInitBonus].includes('No Combat')) {
+        return 0;
+      }
+
+      const initiative = initiativeRollValue +
+        situationalInitBonus +
+        movementRatioInitBonus +
+        attributeInitBonus +
+        senseInitBonus +
+        fomInitBonus +
+        firstActionInitBonus +
+        spentInitiative;
+        
+      return initiative < 0 || state.MML.GM.roundStarted === false ? 0 : initiative;
+    }, initiativeRollValue, situationalInitBonus, movementRatioInitBonus, attributeInitBonus, senseInitBonus, fomInitBonus, firstActionInitBonus, spentInitiative);
 
     const senseInitBonus = 
     function () {
@@ -1570,16 +1435,11 @@ MML.createCharacter = function (name, id) {
       return value;
     },
 
-    const fomInitBonus = 
-    function () {
-      return MML.getCurrentAttributeAsFloat(character.id, 'fomInitBonus');
-    },
+    const fomInitBonus = MML.getCurrentAttributeAsFloat(character.id, 'fomInitBonus');
+    const firstActionInitBonus = MML.getCurrentAttributeAsFloat(character.id, 'firstActionInitBonus');
+    const spentInitiative = MML.getCurrentAttributeAsFloat(character.id, 'spentInitiative');
 
-    const firstActionInitBonus = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'firstActionInitBonus'),
-
-    const spentInitiative = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'spentInitiative'),
+    // #endregion
 
     const actionTempo = 
     function () {
@@ -1614,24 +1474,14 @@ MML.createCharacter = function (name, id) {
           tempo += 1;
         }
       }
-      var value = MML.attackTempoTable[tempo];
-      return value;
+      return MML.attackTempoTable[tempo];
     },
 
-    const ready = 
-    value: MML.getCurrentAttributeAsBool(character.id, 'ready'),
-
-    const action = 
-    value: MML.getCurrentAttributeJSON(character.id, 'action'),
-
-    const previousAction = 
-    value: MML.getCurrentAttributeJSON(character.id, 'previousAction'),
-
-    const roundsRest = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'roundsRest'),
-
-    const roundsExertion = 
-    value: MML.getCurrentAttributeAsFloat(character.id, 'roundsExertion'),
+    const ready = MML.getCurrentAttributeAsBool(character.id, 'ready');
+    const action = MML.getCurrentAttributeJSON(character.id, 'action')
+    const previousAction = MML.getCurrentAttributeJSON(character.id, 'previousAction');
+    const roundsRest = MML.getCurrentAttributeAsFloat(character.id, 'roundsRest');
+    const roundsExertion = MML.getCurrentAttributeAsFloat(character.id, 'roundsExertion');
 
     const skills = 
     function () {
@@ -1713,43 +1563,25 @@ MML.createCharacter = function (name, id) {
       return characterSkills;
     },
 
-    const fov = 
-    function () {
-      var value;
-      switch (character.senseInitBonus) {
+    const fov = MML.derivedAttribute(function (senseInitBonus) {
+      switch (senseInitBonus) {
         case 4:
-          value = 180;
-          break;
+          return 180;
         case 3:
-          value = 170;
-          break;
+          return 170;
         case 2:
-          value = 160;
-          break;
+          return 160;
         case 1:
-          value = 150;
-          break;
+          return 150;
         case 0:
-          value = 140;
-          break;
+          return 140;
         case -1:
-          value = 130;
-          break;
+          return 130;
         case -2:
-          value = 120;
-          break;
+          return 120;
         default:
-          value = 180;
-          break;
+          return 180;
       }
-      return value;
-    }
-  });
-  const spells = 
-    function () {
-      return MML.getCurrentAttributeAsArray(character.id, 'spells');
-    }
-  });
-
+    }, senseInitBonus);
   return character;
 };
