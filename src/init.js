@@ -36,7 +36,7 @@ MML.init = function() {
 
   MML.characters = characterObjects.reduce(function(characters, characterObject) {
     const id = characterObject.id;
-    const character = MML.createCharacter(characterObject.get('name'), id);
+    const character = MML.createCharacter(id);
     MML.setPlayer(character);
     characters[id] = character;
     return characters;
@@ -75,7 +75,7 @@ MML.init = function() {
     }), '', character);
 
     setTimeout(function () {
-      MML.characters[id] = MML.createCharacter(name, character.id);
+      MML.characters[id] = MML.createCharacter(character.id);
       MML.updateCharacterSheet(characters[id]);
     }, 2000);
   });

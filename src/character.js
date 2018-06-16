@@ -1131,10 +1131,10 @@ MML.derivedAttribute = function derivedAttribute(compute, ...attributes) {
 };
 
 // Character Creation
-MML.createCharacter = function (name, id) {
+MML.createCharacter = function (id) {
   const character = {id};
 
-  const attribute_changed = attribute_changed_global.pipe(
+  const attribute_changed = current_attribute_changed_global.pipe(
     filter(attribute => attribute.get('_characterid') === id),
     share()
   );
@@ -1154,7 +1154,7 @@ MML.createCharacter = function (name, id) {
   // const knockdown = isNaN(parseFloat(MML.getCurrentAttribute(character.id, 'knockdown'))) ? character.knockdownMax : MML.getCurrentAttributeAsFloat(character.id, 'knockdown');
 
   // #region Input Attributes
-  const name = name_changed_global.pipe(filter(changed_character => changed_character.get('id') === id), map(changed_character => changed_character.get('name')));
+  const name = character_name_changed.pipe(filter(changed_character => changed_character.get('id') === id), map(changed_character => changed_character.get('name')));
   const stature_roll = attribute_changed.pipe(MML.rollAttributeChanged('stature_roll'));
   const strength_roll = attribute_changed.pipe(MML.rollAttributeChanged('strength_roll'));
   const coordination_roll = attribute_changed.pipe(MML.rollAttributeChanged('coordination_roll'));
@@ -1186,7 +1186,7 @@ MML.createCharacter = function (name, id) {
   // #endregion
 
   // #region Derived Attributes
-  const bodyType = race.pipe(map(race => MML.bodyTypes[race]));
+  const bodyType = MML.derivedAttribute(race => MML.bodyTypes[race], race);
   const height = MML.derivedAttribute((race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].height, race, gender, stature_roll);
   const weight = MML.derivedAttribute((race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].weight, race, gender, stature_roll);
   const stature = MML.derivedAttribute((race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].stature, race, gender, stature_roll);
