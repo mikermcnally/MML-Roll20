@@ -94,7 +94,7 @@ MML.chooseActionType = async function chooseActionType(player, character, action
     buttons.push('Continue Casting');
   }
 
-  const {pressedButton, selectedIds} = await MML.goToMenu(player, message, buttons);
+  const {pressedButton, selectedIds} = await MML.displayMenu(player, message, buttons);
   return pressedButton;
 };
 
@@ -140,7 +140,7 @@ MML.processAction = async function processAction(player, character, action) {
   //   action.spell.actions--;
   //   if (action.spell.actions > 0) {
   //     character.player.charMenuContinueCasting(character.name);
-  //     character.player.displayMenu();
+  //     character.player.sendChatMenu();
   //       parameters: {
   //         spell: action.spell,
   //         casterSkill: action.skill,
@@ -214,7 +214,7 @@ MML.observeAction = async function observeAction(player, character, action) {
     name: 'Observing',
     startingRound: state.MML.GM.currentRound
   });
-  await MML.goToMenu(player, character.name + ' observes the situation.', ['End Action']);
+  await MML.displayMenu(player, character.name + ' observes the situation.', ['End Action']);
   return MML.endAction(player, character, action);
 };
 
@@ -228,7 +228,7 @@ MML.aimAction = async function aimAction(player, character, action) {
       target: target,
       startingRound: state.MML.GM.currentRound
     });
-    await MML.goToMenu(player, character.name + ' aims at ' + target.name, ['End Action']);
+    await MML.displayMenu(player, character.name + ' aims at ' + target.name, ['End Action']);
     return MML.endAction(player, character, action);
   } else if (character.statusEffects['Taking Aim'].startingRound !== state.MML.GM.currentRound && attackerWeapon.family === 'MWD') {
     const holdAimRoll = await MML.holdAimRoll(player, character, target);
@@ -242,7 +242,7 @@ MML.aimAction = async function aimAction(player, character, action) {
         character.statusEffects['Taking Aim'].level = 1;
         character.statusEffects['Taking Aim'].startingRound = state.MML.GM.currentRound;
       }
-      await MML.goToMenu(player, character.name + ' aims at ' + target.name, ['End Action']);
+      await MML.displayMenu(player, character.name + ' aims at ' + target.name, ['End Action']);
       return MML.endAction(player, character, action);
     }
   }
@@ -251,7 +251,7 @@ MML.aimAction = async function aimAction(player, character, action) {
 MML.reloadAction = async function reloadAction(player, character, action) {
   var weapon = character.inventory[action.weapon._id];
   weapon.loaded++;
-  await MML.goToMenu(player, character.name + ' reloads their ' + weapon.name + ' (' + weapon.loaded + '/' + weapon.reload + ')', ['End Action']);
+  await MML.displayMenu(player, character.name + ' reloads their ' + weapon.name + ' (' + weapon.loaded + '/' + weapon.reload + ')', ['End Action']);
   return MML.endAction(player, character, action);
 };
 

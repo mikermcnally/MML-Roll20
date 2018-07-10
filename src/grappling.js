@@ -16,7 +16,7 @@ MML.releaseOpponentAction = async function releaseOpponentAction(player, charact
   if (_.has(character.statusEffects, 'Holding')) {
     MML.removeHold(character, target);
   }
-  const {pressedButton} = await MML.goToMenu(target.player, 'Allow ' + character.name + ' to release the grapple?', ['Yes', 'No']);
+  const {pressedButton} = await MML.displayMenu(target.player, 'Allow ' + character.name + ' to release the grapple?', ['Yes', 'No']);
   if (pressedButton === 'Yes') {
     MML.removeGrapple(character, target);
     action.modifiers = _.without(action.modifiers, 'Release Opponent');
@@ -34,7 +34,7 @@ MML.chooseGrappleDefense = async function chooseGrappleDefense(player, character
   if (!MML.isUnarmed(character)) {
     buttons.unshift('With Weapon: ' + attackChance + '%');
   }
-  const {pressedButton} = await MML.goToMenu(player, message, buttons);
+  const {pressedButton} = await MML.displayMenu(player, message, buttons);
   switch (pressedButton) {
     case 'With Weapon: : ' + attackChance + '%':
       MML.addStatusEffect(character, 'Melee This Round', {});

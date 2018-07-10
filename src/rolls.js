@@ -1,11 +1,14 @@
-MML.rollDice = async function rollDice(amount, size) {
+MML.rollDice = function rollDice(amount, size) {
   switch (state.MML.rollStyle) {
     case 'physicalDice':
       break;
     case '3d':
       break;
     default:
-      return Array.from({length: amount}, () => randomInteger(size)).reduce((sum, value) => sum + value, 0);
+      return Rx.range(amount).pipe(
+        map(() => randomInteger(size)), 
+        reduce((sum, value) => sum + value, 0)
+      );
   }
 };
 
@@ -188,7 +191,7 @@ MML.initiativeRoll = async function initiativeRoll(player, character) {
 };
 
 MML.meleeAttackRoll = async function meleeAttackRoll(player, character, task, skill) {
-  await MML.goToMenu(player, character.name + '\'s Attack Roll', ['Roll']);
+  await MML.displayMenu(player, character.name + '\'s Attack Roll', ['Roll']);
   return MML.universalRoll(player, [
     character.situationalMod,
     character.meleeAttackMod,
@@ -250,7 +253,7 @@ MML.meleeDefenseRoll = async function meleeDefenseRoll(player, character, attack
 };
 
 MML.meleeDamageRoll = async function meleeDamageRoll(player, character, weapon, attack, bonusDamage) {
-  await MML.goToMenu(player, character.name + '\'s Damage Roll', ['Roll']);
+  await MML.displayMenu(player, character.name + '\'s Damage Roll', ['Roll']);
   return MML.damageRoll(player, weapon.damage, weapon.damageType, [character.meleeDamageMod, bonusDamage || 0], attack);
 };
 
@@ -314,12 +317,12 @@ MML.missileAttackRoll = async function missileAttackRoll(player, character, targ
   state.MML.GM.currentAction.parameters.attackerWeapon = attackerWeapon;
   state.MML.GM.currentAction.parameters.attackerSkill = MML.getWeaponSkill(character, item);
 
-  await MML.goToMenu(player, character.name + '\'s Attack Roll', ['Roll']);
+  await MML.displayMenu(player, character.name + '\'s Attack Roll', ['Roll']);
   return MML.universalRoll(player, mods);
 };
 
 MML.missileDamageRoll = async function missileDamageRoll(player, character, damage, damageType, attackRoll, bonusDamage) {
-  await MML.goToMenu(player, character.name + '\'s Damage Roll', ['Roll']);
+  await MML.displayMenu(player, character.name + '\'s Damage Roll', ['Roll']);
   return MML.damageRoll('Missile Damage Roll', weapon.damage, weapon.damageType, [bonusDamage || 0], rolls.attackRoll);
 };
 
@@ -409,12 +412,12 @@ MML.grappleDefenseBrawlRollApply = function grappleDefenseBrawlRollApply(charact
 };
 
 MML.holdAimRoll = async function holdAimRoll(player, character) {
-  await MML.goToMenu(player, 'Strength Check Required to Maintain' + character.name + '\'s Aim', ['Roll']);
+  await MML.displayMenu(player, 'Strength Check Required to Maintain' + character.name + '\'s Aim', ['Roll']);
   return MML.attributeCheckRoll(player, character.strength);
 };
 
 MML.castingRoll = async function castingRoll(player, character, task, skill, metaMagicMod) {
-  await MML.goToMenu(player, character.name + '\'s Casting Roll', ['Roll']);
+  await MML.displayMenu(player, character.name + '\'s Casting Roll', ['Roll']);
   return MML.universalRoll(player, [task, skill, character.situationalMod, character.castingMod, character.attributeCastingMod, metaMagicMod]);
 };
 
@@ -442,7 +445,7 @@ MML.fatigueRecovery = async function fatigueRecovery(player, character, modifier
 };
 
 MML.hitPositionRoll = async function hitPositionRoll(player, character, target, action) {
-  await MML.goToMenu(player, character.name + '\'s Hit Position Roll', ['Roll']);
+  await MML.displayMenu(player, character.name + '\'s Hit Position Roll', ['Roll']);
   const hitPositions = MML.hitPositions[target.bodyType];
   if (_.contains(action.modifiers, 'Called Shot Specific')) {
     return _.findWhere(hitPositions, function(hitPosition) {
@@ -481,7 +484,7 @@ MML.hitPositionRollMessage = function hitPositionRollMessage(target) {
 
 MML.changeHitPosition = function changeHitPosition(hitPositions) {
   return async function chooseNewHitPosition(player) {
-    const {pressedButton} = await MML.goToMenu(player, 'Choose Hit Position', _.pluck(hitPositions, 'name'));
+    const {pressedButton} = await MML.displayMenu(player, 'Choose Hit Position', _.pluck(hitPositions, 'name'));
     return _.findWhere(hitPositions, {name: pressedButton});
   };
 };
@@ -489,13 +492,13 @@ MML.changeHitPosition = function changeHitPosition(hitPositions) {
 MML.processHitpositionRoll = async function processHitpositionRoll(player, value, getMessage, changeValue) {
   const message = getMessage(value);
   if (player.name === state.MML.GM.name) {
-    const {pressedButton} = await MML.goToMenu(player, message, ['Continue', 'Change']);
+    const {pressedButton} = await MML.displayMenu(player, message, ['Continue', 'Change']);
     if (pressedButton !== 'Continue') {
       const newValue = await changeValue(player, pressedButton);
       return await processHitpositionRoll(player, newValue, getMessage, changeValue);
     }
   } else {
-    await MML.goToMenu(player, message, ['Continue']);
+    await MML.displayMenu(player, message, ['Continue']);
   }
   return value;
 };
