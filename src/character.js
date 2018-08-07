@@ -867,14 +867,14 @@ MML.createCharacter = function (id) {
     share()
   );
 
-  // const game_state = MML.game_state.pipe(filter(effect => ));
+  const game_state = MML.game_state.pipe(filter(effect => effect.object_id === id));
+
 
   // Object.defineProperty(character, 'player', {
   //   get: function () {
   //     return MML.players[MML.getCurrentAttribute(character.id, 'player')];
   //   },
 
-  // const hp = _.isUndefined(getAttrByName(character.id, 'hp', 'current')) ? MML.buildHpAttribute(character) : MML.getCurrentAttributeJSON(character.id, 'hp');
   // const epMax = evocation;
 
   // const ep = _.isUndefined(getAttrByName(character.id, 'ep', 'current')) ? character.evocation : MML.getCurrentAttributeAsFloat(character.id, 'ep');
@@ -995,6 +995,43 @@ MML.createCharacter = function (id) {
   const initiativeRollValue = MML.getCurrentAttributeAsFloat(character.id, 'initiativeRollValue');
   const situationalInitBonus = MML.getCurrentAttributeAsFloat(character.id, 'situationalInitBonus');
   const actionInitCostMod = MML.getCurrentAttributeAsFloat(character.id, 'actionInitCostMod');
+  const hp = game_state.pipe(
+      filter(effect => effect.attribute === 'hp'), 
+      scan(function (current, effect) {
+        current[effect.body_part] += effect.change;
+        return current;
+      }, _.isUndefined(getAttrByName(character.id, 'hp', 'current')) ? MML.buildHpAttribute(character) : MML.getCurrentAttributeJSON(id, 'hp')),
+      startWith()
+    );
+  // #endregion
+
+  // #region Saves
+  const major_wound_save = Rx.combineLatest(hpMax, hp.pipe(pairwise())).pipe(
+    filter(function ([max, [previous, current]]) {
+      return Object.keys(max).reduce(function (save_needed, body_part) {
+        const current_hp = current[body_part];
+        if (current_hp < Math.round(maxHP / 2) && currentHP >= 0) { //Major wound
+          if (initialHP >= Math.round(maxHP / 2)) { //Fresh wound
+            duration = Math.round(maxHP / 2) - currentHP;
+          } else if (!_.has(character.statusEffects, 'Major Wound, ' + bodyPart)) {
+            duration = -hpAmount;
+          } else { //Add damage to duration of effect
+            duration = parseInt(character.statusEffects['Major Wound, ' + bodyPart].duration) - hpAmount;
+          }
+          await MML.displayMenu(player, character.name + '\'s Major Wound Roll', ['Roll']);
+          const result = await MML.attributeCheckRoll(player, character.willpower);
+          if (result === 'Failure') {
+            MML.addStatusEffect(character, 'Major Wound, ' + bodyPart, {
+              duration: duration,
+              startingRound: state.MML.GM.currentRound,
+              bodyPart: bodyPart
+            });
+          }
+        }
+        return save_needed;
+      }, false)
+    })
+  )
   // #endregion
 
   // #region Initaitive Attributes

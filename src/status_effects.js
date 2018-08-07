@@ -1,5 +1,5 @@
 MML.statusEffects = {
-  'Major Wound': function (effect, index) {
+  'Major Wound':  function (effect, index) {
     if (!state.MML.GM.inCombat) {
       this.statusEffects[index].duration = 0;
       effect.duration = 0;
