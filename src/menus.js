@@ -8,7 +8,6 @@ MML.displayMenu = function displayMenu(player, message, buttons) {
   sendChat(player.name, toChat, null, {
     noarchive: true
   });
-  return player;
 };
 
 MML.setMenuButtons = function setMenuButtons(player, buttons) {

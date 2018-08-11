@@ -9,7 +9,7 @@ const chat = r20_ready.pipe(switchMapTo(Rxify('chat:message')));
 const token_changed = r20_ready.pipe(switchMapTo(Rxify('change:token')));
 const character_name_changed = r20_ready.pipe(switchMapTo(Rxify('change:character:name')));
 const current_attribute_changed_global = r20_ready.pipe(switchMapTo(Rxify('change:attribute:current')));
-// const  = r20_ready.pipe(switchMapTo(Rxify('')));
+const player_online_changed = r20_ready.pipe(switchMapTo(Rxify('change:player:_online')));
 
 function Rxify(event_name) {
   return Rx.Observable.create(function (observer) {

@@ -1,6 +1,42 @@
 const MML = {};
-import "rxjs";
-import { map,  } from 'rxjs/operators';
+
+MML.button_pressed_global = chat.pipe(filter(message => message.type === 'api' && message.content.includes('!MML|')));
+
+MML.players = player_online_changed.pipe(
+  startWith(findObjs({
+    _type: 'player',
+    online: true
+  }, {
+    caseInsensitive: false
+  })),
+  scan(function (player_list, player) {
+    const id = player.get('id');
+    if (player.get('online')) {
+      player_list[id] = player;
+    } else if (!_.isUndefined(player_list[id])) {
+      delete player_list[id];
+    }
+    return player_list;
+  }, {})
+);
+
+MML.GM = MML.players.pipe(map(player_list => _.filter(player_list, player => player.playerIsGM(player.get('id')))));
+
+MML.characters = character_added.pipe(
+  startWith(findObjs({
+    _type: 'character',
+    archived: false
+  }, {
+    caseInsensitive: false
+  })),
+  scan(function (characters, characterObject) {
+    const id = characterObject.id;
+    const character = MML.createCharacter(id);
+    MML.setPlayer(character);
+    characters[id] = character;
+    return characters;
+  }, {})
+)
 
 MML.init = function() {
   state.MML = {};
@@ -12,41 +48,14 @@ MML.init = function() {
     currentRound: 0,
     roundStarted: false
   };
-  const playerObjects = findObjs({
-    _type: 'player',
-    online: true
-  }, {
-    caseInsensitive: false
-  });
-  MML.players = {};
-  MML.players[state.MML.GM.name] = state.MML.GM.player;
-
+  
   _.each(playerObjects, function(player) {
     if (player.get('displayname') !== state.MML.GM.name) {
       MML.players[player.get('displayname')] = new MML.Player(player.get('displayname'), false);
     }
   });
 
-  const characterObjects = findObjs({
-    _type: 'character',
-    archived: false
-  }, {
-    caseInsensitive: false
-  });
-
-  MML.characters = characterObjects.reduce(function(characters, characterObject) {
-    const id = characterObject.id;
-    const character = MML.createCharacter(id);
-    MML.setPlayer(character);
-    characters[id] = character;
-    return characters;
-  }, {});
-
   MML.initializeMenu(state.MML.GM.player);
-
-  MML.newCharacter = Rx.create(function (observer) {
-    
-  });
 
   on('add:character', function(character) {
     const id = character.get('id');
@@ -89,7 +98,6 @@ MML.init = function() {
     }
   });
 
-  on('chat:message', MML.parseChat);
 
   on('change:token', function(obj, prev) {
     if (obj.get('name').indexOf('spellMarker') === -1 && obj.get('left') !== prev['left'] && obj.get('top') !== prev['top'] && state.MML.GM.inCombat === true) {
@@ -173,12 +181,3 @@ MML.init = function() {
     }
   });
 };
-
-MML.parseChat = function({who , content, selected, type}) {
-  if (type === 'api' && content.indexOf('!MML|') !== -1) {
-    const player = MML.players[who.replace(' (GM)', '')];
-    player.buttonPressed(content.replace('!MML|', ''), MML.getSelectedIds(selected));
-  }
-};
-
-on('ready', MML.init);
