@@ -242,9 +242,6 @@ MML.recoveryMods[25] = { hp: 5, ep:  10 };
 
 MML.attackTempoTable = [-25, -22, -18, -16, -14, -12, -11, -10, -9, -9];
 
-MML.sensitiveAreas = {};
-MML.sensitiveAreas.humanoid = ["Face", "Neck, Throat", "Groin"];
-
 // Weapon Stats
 MML.items["Hand Axe"] = {
   name: "Hand Axe",
@@ -2336,27 +2333,7 @@ MML.raceSizes["Hobbit"] = { size: "Medium", radius: 0.75 };
 MML.raceSizes["Gray Elf"] = { size: "Medium", radius: 1 };
 MML.raceSizes["Wood Elf"] = { size: "Medium", radius: 1 };
 
-MML.fitnessModLookup = [];
-MML.fitnessModLookup[6] = 2.1;
-MML.fitnessModLookup[7] = 2.2;
-MML.fitnessModLookup[8] = 2.3;
-MML.fitnessModLookup[9] = 2.4;
-MML.fitnessModLookup[10] = 2.5;
-MML.fitnessModLookup[11] = 2.6;
-MML.fitnessModLookup[12] = 2.7;
-MML.fitnessModLookup[13] = 2.8;
-MML.fitnessModLookup[14] = 2.9;
-MML.fitnessModLookup[15] = 3.0;
-MML.fitnessModLookup[16] = 3.2;
-MML.fitnessModLookup[17] = 3.4;
-MML.fitnessModLookup[18] = 3.6;
-MML.fitnessModLookup[19] = 3.8;
-MML.fitnessModLookup[20] = 4.0;
-MML.fitnessModLookup[21] = 4.2;
-MML.fitnessModLookup[22] = 4.5;
-MML.fitnessModLookup[23] = 5.0;
-MML.fitnessModLookup[24] = 5.5;
-MML.fitnessModLookup[25] = 6.0;
+
 
 MML.meleeDamageMods = [
 	{low: 0, high: 19, value: -7},

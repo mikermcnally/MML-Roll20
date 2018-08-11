@@ -98,19 +98,14 @@ MML.getCurrentAttributeJSON = function getCurrentAttributeJSON(id, attribute) {
 };
 
 MML.getSkillAttributes = function getSkillAttributes(id, skillType) {
-  const attributes = findObjs({
-    _type: 'attribute',
-    _characterid: id
-  }, {
-    caseInsensitive: false
-  });
+  const attributes = findObjs({_type: 'attribute', _characterid: id});
   const skills = {};
   const skill_data = {};
 
   _.each(attributes, function(attribute) {
     const attributeName = attribute.get('name');
 
-    if (attributeName.indexOf('repeating_' + skillType) !== -1) {
+    if (!attributeName.includes('repeating_' + skillType)) {
       const attributeString = attributeName.split('_');
       var _id = attributeString[2];
       const property = attributeString[3];
@@ -162,10 +157,10 @@ MML.getAttributeTableValue = function getAttributeTableValue(attribute, inputVal
 
 // Token Functions
 MML.getCharacterIdFromToken = function getCharacterIdFromToken(token) {
-  const tokenObject = getObj('graphic', token.id);
+  const tokenObject = getObj('graphic', token._id);
   const characterObject = getObj('character', tokenObject.get('represents'));
 
-  if (tokenObject.get('name').indexOf('spellMarker') > -1) {
+  if (tokenObject.get('name').includes('spellMarker')) {
     // Do nothing
   } else if (_.isUndefined(characterObject)) {
     tokenObject.set('tint_color', '#FFFF00');
@@ -195,13 +190,13 @@ MML.getSpellMarkerToken = function getSpellMarkerToken(name) {
   return tokens[0];
 };
 
-MML.getSelectedIds = function getSelectedIds(selected) {
+MML.getSelectedIds = function getSelectedIds(selected = []) {
   return selected.map(token => MML.getCharacterIdFromToken(token));
 };
 
-MML.displayAura = function displayAura(token, radius, auraNumber, color) {
-  token.set(auraNumber === 2 ? 'aura2_radius' : 'aura1_radius', radius);
-  token.set(auraNumber === 2 ? 'aura1_color' : 'aura1_color', color);
+MML.displayAura = function displayAura(token, radius, aura_number, color) {
+  token.set(aura_number === 2 ? 'aura2_radius' : 'aura1_radius', radius);
+  token.set(aura_number === 2 ? 'aura2_color' : 'aura1_color', color);
 };
 
 MML.getDistanceBetweenTokens = function getDistanceBetweenTokens(a, b) {

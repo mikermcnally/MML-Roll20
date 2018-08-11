@@ -1,20 +1,41 @@
-MML.startCombat = function startCombat(selectedIds) {
-  var gm = state.MML.GM;
-  gm.inCombat = true;
-  const allCombatants = selectedIds.map(id => MML.characters[id]);
-  _.each(MML.players, function(player) {
-    player.combatants = player.characters.filter(character => selectedIds.includes(character.id));
-  });
-  _.each(allCombatants, function(character) {
-    MML.setReady(character, false);
-    MML.setCombatVision(character);
-  });
-  const sortedCombatants = MML.setTurnOrder(allCombatants);
-  Campaign().set('initiativepage', 'true');
-  return MML.newRound(gm, 0, sortedCombatants);
-};
+// MML.game_state = MML.players.pipe();
 
-MML.newRound = async function newRound(gm, currentRound, combatants) {
+// MML.gm_created_effects = MML.menuIdle.pipe(
+  
+// );
+
+// MML.statusEffects = Rx.merge(
+//   MML.action_results,
+//   MML.gm_created_effects
+// );
+
+
+// MML.startCombat = function startCombat(selectedIds) {
+//   var gm = state.MML.GM;
+//   gm.inCombat = true;
+//   const allCombatants = selectedIds.map(id => MML.characters[id]);
+//   _.each(MML.players, function(player) {
+//     player.combatants = player.characters.filter(character => selectedIds.includes(character.id));
+//   });
+//   _.each(allCombatants, function(character) {
+//     MML.setReady(character, false);
+//     MML.setCombatVision(character);
+//   });
+//   const sortedCombatants = MML.setTurnOrder(allCombatants);
+//   return MML.newRound(gm, 0, sortedCombatants);
+// };
+
+// Rx.merge(
+//   MML.startCombat.pipe(mapTo('true')),
+//   MML.endCombat.pipe(mapTo('false'))
+// )
+// .subscribe(show => Campaign().set('initiativepage', show));
+
+// MML.newRound = Rx.merge(MML.startCombat).pipe(
+
+// );
+
+async function newRound(gm, currentRound, combatants) {
   try {
     gm.roundStarted = false;
     const updatedCombatants = await Promise.all(combatants.map(character => MML.newRoundUpdate(character)));
@@ -26,7 +47,7 @@ MML.newRound = async function newRound(gm, currentRound, combatants) {
 };
 
 MML.startRound = async function startRound(gm, currentRound, actions) {
-  const {pressedButton} = await MML.goToMenu(gm.player, 'Start round when all characters are ready.', ['Start Round', 'End Combat']);
+  const {pressedButton} = await MML.displayMenu(gm.player, 'Start round when all characters are ready.', ['Start Round', 'End Combat']);
   if (pressedButton === 'Start Round') {
     if (MML.checkReady(gm.allCombatants)) {
       gm.roundStarted = true;
@@ -51,7 +72,6 @@ MML.endCombat = function endCombat(gm) {
     });
     gm.inCombat = false;
     gm.allCombatants = [];
-    Campaign().set('initiativepage', 'false');
   }
 };
 
@@ -119,7 +139,7 @@ MML.assignNewItem = function assignNewItem(input) {
   MML.processCommand({
     type: 'player',
     who: MML.characters[input.target].player,
-    callback: 'displayMenu',
+    callback: 'sendChatMenu',
     input: {}
   });
 };

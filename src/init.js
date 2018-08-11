@@ -89,7 +89,7 @@ MML.init = function() {
     }, 2000);
   });
 
-  on('add:attribute', function(attribute) {
+  on('add:attribute', function (attribute) {
     var id = attribute.get('_characterid');
     var attrName = attribute.get('name');
 
@@ -98,59 +98,13 @@ MML.init = function() {
     }
   });
 
-
-  on('change:token', function(obj, prev) {
-    if (obj.get('name').indexOf('spellMarker') === -1 && obj.get('left') !== prev['left'] && obj.get('top') !== prev['top'] && state.MML.GM.inCombat === true) {
-      const character = MML.characters[MML.getCharacterIdFromToken(obj)];
-      const left1 = prev['left'];
-      const left2 = obj.get('left');
-      const top1 = prev['top'];
-      const top2 = obj.get('top');
-      const distance = MML.getDistanceFeet(left1, left2, top1, top2);
-      const distanceAvailable = MML.movementRates[character.race][character.movementType] * character.movementAvailable;
-
-      if (state.MML.GM.actor === charName && distanceAvailable > 0) {
-        // If they move too far, move the maxium distance in the same direction
-        if (distance > distanceAvailable) {
-          const left3 = Math.floor(((left2 - left1) / distance) * distanceAvailable + left1 + 0.5);
-          const top3 = Math.floor(((top2 - top1) / distance) * distanceAvailable + top1 + 0.5);
-          obj.set('left', left3);
-          obj.set('top', top3);
-          character.movementAvailable(0);
-        }
-        character.moveDistance(distance);
-      } else {
-        obj.set('left', prev['left']);
-        obj.set('top', prev['top']);
-      }
-    } else if (obj.get('name').indexOf('spellMarker') > -1) {
-      var targets = MML.getAoESpellTargets(obj);
-      _.each(MML.characters, function (character) {
-        var token = MML.getCharacterToken(character.id);
-        if (!_.isUndefined(token)) {
-          if (targets.includes(character.id)) {
-            token.set('tint_color', '#00FF00');
-          } else {
-            token.set('tint_color', 'transparent');
-          }
-        }
-      });
-      state.MML.GM.currentAction.parameters.metaMagic['Modified AoE'] = MML.getAoESpellModifier(obj, state.MML.GM.currentAction.parameters.spell);
-      sendChat('GM',
-        'EP Cost: ' + MML.getModifiedEpCost() + '\n' +
-        'Chance to Cast: ' + MML.getModifiedCastingChance()
-      );
-      toBack(obj);
-    }
-  });
-
-  on('change:character:name', function(changedCharacter) {
+  on('change:character:name', function (changedCharacter) {
     const character = MML.characters[changedCharacter.get('id')];
     character.name = changedCharacter.get('name');
     MML.updateCharacterSheet(character);
   });
 
-  on('change:attribute:current', function(attribute) {
+  on('change:attribute:current', function (attribute) {
     var character = MML.characters[attribute.get('_characterid')];
     var attrName = attribute.get('name');
     var roll;
@@ -163,7 +117,8 @@ MML.init = function() {
       'intellectRoll',
       'reasonRoll',
       'creativityRoll',
-      'presenceRoll'];
+      'presenceRoll'
+    ];
 
     if (rollAttributes.includes(attrName)) {
       roll = parseFloat(attribute.get('current'));
@@ -181,3 +136,65 @@ MML.init = function() {
     }
   });
 };
+
+token_changed.pipe(map(function (obj, prev) {
+  if (obj.get('name').indexOf('spellMarker') === -1 && obj.get('left') !== prev['left'] && obj.get('top') !== prev['top'] && state.MML.GM.inCombat === true) {
+    const character = MML.characters[MML.getCharacterIdFromToken(obj)];
+    const left1 = prev['left'];
+    const left2 = obj.get('left');
+    const top1 = prev['top'];
+    const top2 = obj.get('top');
+    const distance = MML.getDistanceFeet(left1, left2, top1, top2);
+    const distanceAvailable = MML.movementRates[character.race][character.movementType] * character.movementAvailable;
+
+    if (state.MML.GM.actor === charName && distanceAvailable > 0) {
+      // If they move too far, move the maxium distance in the same direction
+      if (distance > distanceAvailable) {
+        const left3 = Math.floor(((left2 - left1) / distance) * distanceAvailable + left1 + 0.5);
+        const top3 = Math.floor(((top2 - top1) / distance) * distanceAvailable + top1 + 0.5);
+        obj.set('left', left3);
+        obj.set('top', top3);
+        character.movementAvailable(0);
+      }
+      character.moveDistance(distance);
+    } else {
+      obj.set('left', prev['left']);
+      obj.set('top', prev['top']);
+    }
+  }
+}));
+
+token_changed.pipe(
+  filter((obj, prev) => obj.get('name').includes('spellMarker')),
+  map(function (obj, prev) {
+    var targets = MML.getAoESpellTargets(obj);
+    _.each(MML.characters, function (character) {
+      var token = MML.getCharacterToken(character.id);
+      if (!_.isUndefined(token)) {
+        if (targets.includes(character.id)) {
+          token.set('tint_color', '#00FF00');
+        } else {
+          token.set('tint_color', 'transparent');
+        }
+      }
+    });
+    state.MML.GM.currentAction.parameters.metaMagic['Modified AoE'] = MML.getAoESpellModifier(obj, state.MML.GM.currentAction.parameters.spell);
+    sendChat('GM',
+      'EP Cost: ' + MML.getModifiedEpCost() + '\n' +
+      'Chance to Cast: ' + MML.getModifiedCastingChance()
+    );
+    toBack(obj);
+  })
+);
+
+MML.buttonPressed = chat.pipe(
+  filter(({ type, content }) => type === 'api' && content.includes('!MML|')),
+  map(function (message) {
+    message.who = message.who.replace(' (GM)', '');
+    message.content = message.content.replace('!MML|', '');
+    message.selected = MML.getSelectedIds(message.selected);
+    return message;
+  }),
+  share(),
+  tap(() => log('button'))
+);
