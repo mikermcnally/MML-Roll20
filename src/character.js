@@ -835,6 +835,8 @@ MML.createCharacter = function (id) {
   );
 
   const game_state = MML.game_state.pipe(filter(effect => effect.object_id === id));
+  // Rx.add_attribute
+  // Rx.change_attribute_current
 
   // Object.defineProperty(character, 'player', {
   //   get: function () {
@@ -1232,7 +1234,7 @@ MML.createCharacter = function (id) {
   const character_moved = MML.character_moved.pipe(filter(character => character.id === id));
 
   const character_movement_blocked = character_moved.pipe(
-    
+
   );
 
   MML.combat_movement = MML.token_moved.pipe(map(function (obj, prev) {

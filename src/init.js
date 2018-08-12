@@ -1,12 +1,5 @@
 const MML = {};
 
-Rx.r20_ready
-Rx.add_attribute
-Rx.chat_message
-Rx.change_character_name
-
-Rx.change_attribute_current
-
 MML.players = Rx.change_player_online.pipe(
   startWith(findObjs({
     _type: 'player',
@@ -30,7 +23,7 @@ MML.player_list = MML.players.pipe(
 
 MML.GM = MML.players.pipe(filter(player => playerIsGM(player.get('id'))));
 
-MML.button_pressed = chat.pipe(
+MML.button_pressed = Rx.chat_message.pipe(
   filter(({ type, content }) => type === 'api' && content.includes('!MML|')),
   map(function (message) {
     message.who = message.who.replace(' (GM)', '');
