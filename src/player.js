@@ -1085,10 +1085,18 @@ MML.GmMenuUtilities = function GmMenuUtilities(player, input) {
   //edit states and other api stuff
 };
 
-MML.Player = function Player(name, isGM) {
+MML.Player = function Player(id) {
   const player = this;
   player.name = name;
-  player.characters = [];
+  player.characters = MML.characters.pipe(
+    mergeMap(character => Rx.combineLatest(character.player)),
+    filter(),
+    scan(function (list, character) {
+      list[character.id] = character;
+      return  character;
+    })
+  );
+
   // player.menu = MML.buttonPressed.pipe(
   //     filter(message => message.who === player.name),
   //     scan()

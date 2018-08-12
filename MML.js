@@ -1,25 +1,3 @@
-const MML = {};
-/**
- * Callbacks are terrible. This file lets us actually use events
- */
-
-const r20_ready = Rxify('ready').pipe(take(1));
-const character_added = r20_ready.pipe(switchMapTo(Rxify('add:character')));
-const attribute_added = r20_ready.pipe(switchMapTo(Rxify('add:attribute')));
-const chat = r20_ready.pipe(switchMapTo(Rxify('chat:message')));
-const token_changed = r20_ready.pipe(switchMapTo(Rxify('change:token')));
-const character_name_changed = r20_ready.pipe(switchMapTo(Rxify('change:character:name')));
-const current_attribute_changed_global = r20_ready.pipe(switchMapTo(Rxify('change:attribute:current')));
-// const  = r20_ready.pipe(switchMapTo(Rxify('')));
-
-function Rxify(event_name) {
-  return Rx.Observable.create(function (observer) {
-      on(event_name, function (event) {
-        observer.next(event);
-      });
-    })
-    .pipe(share());
-}
 MML.prepareAction = async function prepareAction(player, character) {
   try {
     var action = {
@@ -293,90 +271,6 @@ MML.endAction = function endAction(player, character, action, targets) {
     return player;
   }
 };
-MML.newRoundUpdate = async function newRoundUpdate(character) {
-  if (_.has(character.statusEffects, 'Melee This Round')) {
-    var fatigueRate = 1;
-    if (_.has(character.statusEffects, 'Pinned')) {
-      fatigueRate = 2;
-    }
-    character.roundsExertion += fatigueRate;
-    character.roundsRest = 0;
-
-    if (!_.has(character.statusEffects, 'Fatigue')) {
-      if (character.roundsExertion > character.fitness) {
-        await MML.fatigueCheck(player, character);
-      }
-    } else {
-      if (character.roundsExertion > Math.round(character.fitness / 2)) {
-        await MML.fatigueCheck(player, character);
-      }
-    }
-  } else if (_.has(character.statusEffects, 'Fatigue') || character.roundsExertion > 0) {
-    character.roundsRest++;
-    if (character.roundsRest > 5) {
-      await MML.fatigueRecovery(player, character);
-    }
-  }
-
-  // Reset knockdown number
-  character.knockdown = character.knockdownMax;
-  character.spentInitiative = 0;
-
-  character.action = {
-    ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
-    modifiers: [],
-    weapon: MML.getEquippedWeapon(character)
-  };
-  if (_.has(character.statusEffects, 'Observing')) {
-    MML.addStatusEffect(character, 'Observed', {
-      startingRound: state.MML.GM.currentRound
-    });
-  }
-  MML.updateCharacter(character);
-  MML.setReady(character, false);
-  return character;
-};
-
-MML.setAction = function setAction(character, action) {
-  var initBonus = 10;
-  if (action.name === 'Attack' || action.name === 'Aim') {
-    if (MML.isUnarmedAction(action) || action.weapon === 'unarmed') {
-      if (!_.isUndefined(character.weaponSkills['Brawling']) && character.weaponSkills['Brawling'].level > character.weaponSkills['Default Martial'].level) {
-        action.skill = character.weaponSkills['Brawling'].level;
-      } else {
-        action.skill = character.weaponSkills['Default Martial'].level;
-      }
-      // } else if (leftHand !== 'unarmed' && rightHand !== 'unarmed') {
-      //   var weaponInits = [character.inventory[character.leftHand._id].grips[character.leftHand.grip].initiative,
-      //     character.inventory[character.rightHand._id].grips[character.rightHand.grip].initiative
-      //   ];
-      //   initBonus = _.min(weaponInits);
-      // action.skill = character.weaponSkills.[character.inventory[character.leftHand._id].name].level or character.weaponSkills['Default Martial Skill'].level;
-      //Dual Wielding
-    } else {
-      initBonus = action.weapon.initiative;
-      action.skill = MML.getWeaponSkill(character, action.weapon);
-    }
-  } else if (action.name === 'Cast') {
-    var skillInfo = MML.getMagicSkill(character, action.spell);
-    action.skill = skillInfo.level;
-    action.skillName = skillInfo.name;
-  }
-  if (state.MML.GM.roundStarted === false) {
-    character.firstActionInitBonus = initBonus;
-  }
-
-  if (_.isUndefined(character.previousAction) || character.previousAction.ts !== action.ts) {
-    _.each(action.modifiers, function (modifier) {
-      MML.addStatusEffect(character, modifier, {
-        ts: action.ts,
-        startingRound: state.MML.GM.currentRound
-      });
-    });
-  }
-  character.action = action;
-};
-
 MML.displayMovement = function displayMovement(character) {
   var token = MML.getCharacterToken(character.id);
   var path = getObj('path', character.pathID);
@@ -643,50 +537,8 @@ MML.updateInventory = function updateInventory(character) {
   character.inventory = items;
 };
 
-MML.updateCharacterSheet = function updateCharacterSheet(character) {
-  // _.each(character, function(value, attribute) {
-  //   if (typeof(value) === 'object') {
-  //     return JSON.stringify(value);
-  //   MML.setCurrentAttribute(character.id, attribute, value);
-  // });
-};
-
-MML.updateCharacter = function updateCharacter(character) {
-  MML.applyStatusEffects(character);
-  MML.updateInventory(character);
-  MML.updateCharacterSheet(character);
-};
-
-MML.setPlayer = function setPlayer(character) {
-  const playerName = MML.getCurrentAttribute(character.id, 'player');
-  var newPlayer = MML.getPlayerFromName(playerName);
-  if (_.isUndefined(newPlayer)) {
-    sendChat('GM', 'Player ' + playerName + ' not found.');
-    newPlayer = MML.getPlayerFromName(state.MML.GM.name);
-    MML.setCurrentAttribute(character.id, 'player', state.MML.GM.name);
-  }
-  MML.getCharFromName(character.name).set('controlledby', newPlayer.id);
-
-  _.each(MML.players, function (player) {
-    if (player.name === MML.getCurrentAttribute(character.id, 'player')) {
-      player.characters.push(character);
-    } else {
-      player.characters = _.reject(player.characters, otherCharacter => otherCharacter.id !== character.id);
-    }
-  });
-};
-
 MML.isSensitiveArea = function isSensitiveArea(position) {
   return [2, 6, 33].includes(position);
-};
-
-MML.getWeaponFamily = function getWeaponFamily(character, hand) {
-  const item = character.inventory[character[hand]._id];
-  if (!_.isUndefined(item) && item.type === 'weapon') {
-    return item.grips[character[hand].grip].family;
-  } else {
-    return 'unarmed';
-  }
 };
 
 MML.equipItem = function equipItem(character, itemId, grip) {
@@ -710,176 +562,6 @@ MML.equipItem = function equipItem(character, itemId, grip) {
     character.rightHand._id = itemId;
     character.rightHand.grip = grip;
   }
-};
-
-MML.getShieldDefenseBonus = function getShieldDefenseBonus(character) {
-  const rightHand = character.inventory[character.rightHand._id];
-  const leftHand = character.inventory[character.leftHand._id];
-
-  if (!_.isUndefined(rightHand) && rightHand.type === 'shield') {
-    return rightHand.defenseMod;
-  } else if (!_.isUndefined(leftHand) && leftHand.type === 'shield' && leftHand.defenseMod > rightHand.defenseMod) {
-    return leftHand.defenseMod;
-  } else {
-    return 0;
-  }
-};
-
-MML.getWeaponGrip = function getWeaponGrip(character) {
-  if (character['rightHand'].grip !== 'unarmed') {
-    return character['rightHand'].grip;
-  } else if (character['leftHand'].grip !== 'unarmed') {
-    return character['leftHand'].grip;
-  } else {
-    return 'unarmed';
-  }
-};
-
-MML.getEquippedWeapon = function getEquippedWeapon(character) {
-  const grip = MML.getWeaponGrip(character);
-  var weapon;
-  var item;
-  var itemId;
-
-  if (MML.isUnarmed(character)) {
-    return 'unarmed';
-  } else if (character['rightHand'].grip !== 'unarmed') {
-    itemId = character.rightHand._id;
-    item = character.inventory[itemId];
-  } else {
-    itemId = character.leftHand._id;
-    item = character.inventory[itemId];
-  }
-  return MML.buildWeaponObject(item, grip);
-};
-
-MML.buildWeaponObject = function buildWeaponObject(item, grip) {
-  var weapon = {
-    _id: item._id,
-    name: item.name,
-    type: 'weapon',
-    weight: item.weight,
-    family: item.grips[grip].family,
-    hands: item.grips[grip].hands
-  };
-
-  if (['MWD', 'MWM', 'TWH', 'TWK', 'TWS', 'SLI'].includes(weapon.family)) {
-    _.extend(weapon, item.grips[grip]);
-    if (weapon.family === 'MWM') {
-      weapon.loaded = item.loaded;
-    }
-  } else {
-    _.extend(weapon, {
-      defense: item.grips[grip].defense,
-      initiative: item.grips[grip].initiative,
-      rank: item.grips[grip].rank,
-      primaryType: item.grips[grip].primaryType,
-      primaryTask: item.grips[grip].primaryTask,
-      primaryDamage: item.grips[grip].primaryDamage,
-      secondaryType: item.grips[grip].secondaryType,
-      secondaryTask: item.grips[grip].secondaryTask,
-      secondaryDamage: item.grips[grip].secondaryDamage
-    });
-  }
-  return weapon;
-};
-
-MML.getWeaponAndSkill = function getWeaponAndSkill(character) {
-  var itemId;
-  var grip;
-
-  if (MML.getWeaponFamily(character, 'rightHand') !== 'unarmed') {
-    itemId = character.rightHand._id;
-    grip = character.rightHand.grip;
-  } else {
-    itemId = character.leftHand._id;
-    grip = character.leftHand.grip;
-  }
-  var item = character.inventory[itemId];
-  var characterWeapon = MML.buildWeaponObject(item, grip);
-
-  if (!MML.isRangedWeapon(characterWeapon)) {
-    if (character.action.attackType === 'secondary') {
-      characterWeapon.damageType = item.grips[grip].secondaryType;
-      characterWeapon.task = item.grips[grip].secondaryTask;
-      characterWeapon.damage = item.grips[grip].secondaryDamage;
-    } else {
-      characterWeapon.damageType = item.grips[grip].primaryType;
-      characterWeapon.task = item.grips[grip].primaryTask;
-      characterWeapon.damage = item.grips[grip].primaryDamage;
-    }
-  }
-
-  return {
-    characterWeapon: characterWeapon,
-    skill: MML.getWeaponSkill(character, item)
-  };
-};
-
-MML.getWeaponSkill = function getWeaponSkill(character, weapon) {
-  var item = weapon;
-  var skill;
-
-  if (item.type !== 'weapon') {
-    log('Not a weapon');
-    MML.error();
-  }
-
-  const grip = MML.getWeaponGrip(character);
-  const skillName = item.name + ['War Spear', 'Boar Spear', 'Military Fork', 'Bastard Sword'].includes(item.name) ? ', ' + grip : '';
-
-  if (_.has(character.weaponSkills, skillName)) {
-    return character.weaponSkills[skillName].level;
-  } else {
-    var relatedSkills = [];
-    _.each(character.weaponSkills, function (relatedSkill, skillName) {
-      if (skillName !== 'Default Martial') {
-        _.each(MML.items[skillName.replace(', ' + grip, '')].grips, function (skillFamily) {
-          if (skillFamily.family === item.grips[grip].family) {
-            relatedSkills.push(relatedSkill);
-          }
-        });
-      }
-    }, character);
-
-    if (relatedSkills.length === 0) {
-      return character.weaponSkills['Default Martial'].level;
-    } else {
-      return _.max(relatedSkills, function (skill) {
-        return skill.level;
-      }).level - 10;
-    }
-  }
-};
-
-MML.isWieldingRangedWeapon = function isWieldingRangedWeapon(character) {
-  return MML.isWieldingMissileWeapon(character) || MML.isWieldingThrowingWeapon(character);
-};
-
-MML.isWieldingMissileWeapon = function isWieldingMissileWeapon(character) {
-  return MML.isWieldingWeaponFamily(character, ['MWD', 'MWM']);
-};
-
-MML.isWieldingThrowingWeapon = function isWieldingThrowingWeapon(character) {
-  return MML.isWieldingWeaponFamily(character, ['TWH', 'TWK', 'TWS', 'SLI']);
-};
-
-MML.isWieldingWeaponFamily = function isWieldingWeaponFamily(character, families) {
-  return families.includes(MML.getWeaponFamily(character, 'rightHand')) || rangedFamilies.includes(MML.getWeaponFamily(character, 'leftHand'));
-};
-
-MML.isRangedWeapon = function isRangedWeapon(weapon) {
-  return ['MWD', 'MWM', 'TWH', 'TWK', 'TWS', 'SLI'].includes(weapon.family);
-};
-
-MML.isUnarmed = function isUnarmed(character) {
-  return MML.getWeaponFamily(character, 'leftHand') === 'unarmed' && MML.getWeaponFamily(character, 'rightHand') === 'unarmed';
-};
-
-MML.isDualWielding = function isDualWielding(character) {
-  const leftHand = MML.getWeaponFamily(character, 'leftHand');
-  const rightHand = MML.getWeaponFamily(character, 'rightHand');
-  return character.leftHand._id !== character.rightHand._id && leftHand !== 'unarmed' && rightHand !== 'unarmed';
 };
 
 MML.hasStatusEffects = function hasStatusEffects(character, effects) {
@@ -1256,128 +938,128 @@ MML.validateAction = function validateAction(character) {
   return valid;
 };
 
-MML.buildApvMatrix = function buildApvMatrix (inventory, bodyType) {
-    const armor = inventory.values()
-      .filter(item => item.type === 'armor')
-      .reduce();
+MML.buildApvMatrix = function buildApvMatrix(inventory, bodyType) {
+  const armor = inventory.values()
+    .filter(item => item.type === 'armor')
+    .reduce();
 
-    var apvMatrix = {};
-    // Initialize APV Matrix
-    _.each(MML.hitPositions[bodyType], function (position) {
-      apvMatrix[position.name] = {
-        Surface: [{
-          value: 0,
-          coverage: 100
-        }],
-        Cut: [{
-          value: 0,
-          coverage: 100
-        }],
-        Chop: [{
-          value: 0,
-          coverage: 100
-        }],
-        Pierce: [{
-          value: 0,
-          coverage: 100
-        }],
-        Thrust: [{
-          value: 0,
-          coverage: 100
-        }],
-        Impact: [{
-          value: 0,
-          coverage: 100
-        }],
-        Flanged: [{
-          value: 0,
-          coverage: 100
-        }]
-      };
-    });
-    //Creates raw matrix of individual pieces of armor (no layering or partial coverage)
+  var apvMatrix = {};
+  // Initialize APV Matrix
+  _.each(MML.hitPositions[bodyType], function (position) {
+    apvMatrix[position.name] = {
+      Surface: [{
+        value: 0,
+        coverage: 100
+      }],
+      Cut: [{
+        value: 0,
+        coverage: 100
+      }],
+      Chop: [{
+        value: 0,
+        coverage: 100
+      }],
+      Pierce: [{
+        value: 0,
+        coverage: 100
+      }],
+      Thrust: [{
+        value: 0,
+        coverage: 100
+      }],
+      Impact: [{
+        value: 0,
+        coverage: 100
+      }],
+      Flanged: [{
+        value: 0,
+        coverage: 100
+      }]
+    };
+  });
+  //Creates raw matrix of individual pieces of armor (no layering or partial coverage)
 
-    _.each(armor, function (piece) {
-      var material = MML.APVList[piece.material];
+  _.each(armor, function (piece) {
+    var material = MML.APVList[piece.material];
 
-      _.each(piece.protection, function (protection) {
-        var position = MML.hitPositions[bodyType][protection.position].name;
-        var coverage = protection.coverage;
-        apvMatrix[position].Surface.push({
-          value: material.surface,
-          coverage: coverage
-        });
-        apvMatrix[position].Cut.push({
-          value: material.cut,
-          coverage: coverage
-        });
-        apvMatrix[position].Chop.push({
-          value: material.chop,
-          coverage: coverage
-        });
-        apvMatrix[position].Pierce.push({
-          value: material.pierce,
-          coverage: coverage
-        });
-        apvMatrix[position].Thrust.push({
-          value: material.thrust,
-          coverage: coverage
-        });
-        apvMatrix[position].Impact.push({
-          value: material.impact,
-          coverage: coverage
-        });
-        apvMatrix[position].Flanged.push({
-          value: material.flanged,
-          coverage: coverage
-        });
+    _.each(piece.protection, function (protection) {
+      var position = MML.hitPositions[bodyType][protection.position].name;
+      var coverage = protection.coverage;
+      apvMatrix[position].Surface.push({
+        value: material.surface,
+        coverage: coverage
+      });
+      apvMatrix[position].Cut.push({
+        value: material.cut,
+        coverage: coverage
+      });
+      apvMatrix[position].Chop.push({
+        value: material.chop,
+        coverage: coverage
+      });
+      apvMatrix[position].Pierce.push({
+        value: material.pierce,
+        coverage: coverage
+      });
+      apvMatrix[position].Thrust.push({
+        value: material.thrust,
+        coverage: coverage
+      });
+      apvMatrix[position].Impact.push({
+        value: material.impact,
+        coverage: coverage
+      });
+      apvMatrix[position].Flanged.push({
+        value: material.flanged,
+        coverage: coverage
       });
     });
+  });
 
-    //This loop accounts for layered armor and partial coverage and outputs final APVs
-    _.each(apvMatrix, function (position, positionName) {
-      _.each(position, function (rawAPVArray, type) {
-        var apvFinalArray = [];
-        var coverageArray = [];
+  //This loop accounts for layered armor and partial coverage and outputs final APVs
+  _.each(apvMatrix, function (position, positionName) {
+    _.each(position, function (rawAPVArray, type) {
+      var apvFinalArray = [];
+      var coverageArray = [];
 
-        //Creates an array of armor coverage in ascending order.
+      //Creates an array of armor coverage in ascending order.
+      _.each(rawAPVArray, function (armorProtectionValues) {
+        if (coverageArray.indexOf(armorProtectionValues.coverage) === -1) {
+          coverageArray.push(armorProtectionValues.coverage);
+        }
+      });
+      coverageArray = coverageArray.sort((a, b) => a - b);
+
+      //Creates APV array per damage type per position
+      _.each(coverageArray, function (apvCoverage) {
+        var apvToLayerArray = [];
+        var apvValue = 0;
+
+        //Builds an array of APVs that meet or exceed the coverage value
         _.each(rawAPVArray, function (armorProtectionValues) {
-          if (coverageArray.indexOf(armorProtectionValues.coverage) === -1) {
-            coverageArray.push(armorProtectionValues.coverage);
+          if (armorProtectionValues.coverage >= apvCoverage) {
+            apvToLayerArray.push(armorProtectionValues.value);
           }
         });
-        coverageArray = coverageArray.sort((a, b) => a - b);
-
-        //Creates APV array per damage type per position
-        _.each(coverageArray, function (apvCoverage) {
-          var apvToLayerArray = [];
-          var apvValue = 0;
-
-          //Builds an array of APVs that meet or exceed the coverage value
-          _.each(rawAPVArray, function (armorProtectionValues) {
-            if (armorProtectionValues.coverage >= apvCoverage) {
-              apvToLayerArray.push(armorProtectionValues.value);
-            }
-          });
-          apvToLayerArray = apvToLayerArray.sort(function (a, b) {
-            return b - a;
-          });
-
-          //Adds the values at coverage value with diminishing returns on layered armor
-          _.each(apvToLayerArray, function (value, index) {
-            apvValue += value * Math.pow(2, -index);
-            apvValue = Math.round(apvValue);
-          });
-          //Puts final APV and associated Coverage into final APV array for that damage type.
-          apvFinalArray.push({
-            value: apvValue,
-            coverage: apvCoverage
-          });
+        apvToLayerArray = apvToLayerArray.sort(function (a, b) {
+          return b - a;
         });
-        apvMatrix[positionName][type] = apvFinalArray;
+
+        //Adds the values at coverage value with diminishing returns on layered armor
+        _.each(apvToLayerArray, function (value, index) {
+          apvValue += value * Math.pow(2, -index);
+          apvValue = Math.round(apvValue);
+        });
+        //Puts final APV and associated Coverage into final APV array for that damage type.
+        apvFinalArray.push({
+          value: apvValue,
+          coverage: apvCoverage
+        });
       });
+      apvMatrix[positionName][type] = apvFinalArray;
     });
-    return apvMatrix;
+  });
+  return apvMatrix;
 };
 
 // Rx operators
@@ -1418,457 +1100,808 @@ MML.derivedAttribute = function derivedAttribute(compute, ...attributes) {
 
 // Character Creation
 MML.createCharacter = function (id) {
-  const character = {id};
+  const character = { id };
 
-  // const attribute_changed = current_attribute_changed_global.pipe(
-  //   filter(attribute => attribute.get('_characterid') === id),
-  //   share()
-  // );
+  const attribute_changed = Rx.change_attribute_current.pipe(
+    filter(attribute => attribute.get('_characterid') === id),
+    share()
+  );
 
-  // const game_state = MML.game_state.pipe(filter(effect => ));
+  const game_state = MML.game_state.pipe(filter(effect => effect.object_id === id));
 
-  // // Object.defineProperty(character, 'player', {
-  // //   get: function () {
-  // //     return MML.players[MML.getCurrentAttribute(character.id, 'player')];
-  // //   },
-
-  // // const hp = _.isUndefined(getAttrByName(character.id, 'hp', 'current')) ? MML.buildHpAttribute(character) : MML.getCurrentAttributeJSON(character.id, 'hp');
-  // // const epMax = evocation;
-
-  // // const ep = _.isUndefined(getAttrByName(character.id, 'ep', 'current')) ? character.evocation : MML.getCurrentAttributeAsFloat(character.id, 'ep');
-
-  // // const fatigueMax = fitness;
-  // // const fatigue = isNaN(parseFloat(MML.getCurrentAttribute(character.id, 'fatigue'))) ? character.fitness : MML.getCurrentAttributeAsFloat(character.id, 'fatigue');
-  // // const knockdown = isNaN(parseFloat(MML.getCurrentAttribute(character.id, 'knockdown'))) ? character.knockdownMax : MML.getCurrentAttributeAsFloat(character.id, 'knockdown');
-
-  // // #region Input Attributes
-  // const name = character_name_changed.pipe(filter(changed_character => changed_character.get('id') === id), map(changed_character => changed_character.get('name')));
-  // const stature_roll = attribute_changed.pipe(MML.rollAttributeChanged('stature_roll'));
-  // const strength_roll = attribute_changed.pipe(MML.rollAttributeChanged('strength_roll'));
-  // const coordination_roll = attribute_changed.pipe(MML.rollAttributeChanged('coordination_roll'));
-  // const health_roll = attribute_changed.pipe(MML.rollAttributeChanged('health_roll'));
-  // const beauty_roll = attribute_changed.pipe(MML.rollAttributeChanged('beauty_roll'));
-  // const intellect_roll = attribute_changed.pipe(MML.rollAttributeChanged('intellect_roll'));
-  // const reason_roll = attribute_changed.pipe(MML.rollAttributeChanged('reason_roll'));
-  // const creativity_roll = attribute_changed.pipe(MML.rollAttributeChanged('creativity_roll'));
-  // const presence_roll = attribute_changed.pipe(MML.rollAttributeChanged('presence_roll'));
-  // const race = attribute_changed.pipe(MML.inputAttributeChanged('race'));
-  // const gender = attribute_changed.pipe(MML.inputAttributeChanged('gender'));
-  // const handedness = attribute_changed.pipe(MML.inputAttributeChanged('handedness'));
-  
-  // // const inventory = MML.getCurrentAttributeJSON(character.id, 'inventory').pipe(startWith({
-  // //   emptyHand: {
-  // //     type: 'empty',
-  // //     weight: 0
-  // //   }));
-  // // const leftHand = _.isEmpty(MML.getCurrentAttributeJSON(character.id, 'leftHand')) ? JSON.stringify({
-  // //   _id: 'emptyHand',
-  // //   grip: 'unarmed'
-  // // }) : MML.getCurrentAttributeJSON(character.id, 'leftHand');
-
-  // // const rightHand = _.isEmpty(MML.getCurrentAttributeJSON(character.id, 'rightHand')) ? JSON.stringify({
-  // //   _id: 'emptyHand',
-  // //   grip: 'unarmed'
-  // // }) : MML.getCurrentAttributeJSON(character.id, 'rightHand');
-  // // const spells = MML.getCurrentAttributeAsArray(character.id, 'spells');
-  // // #endregion
-
-  // // #region Derived Attributes
-  // const bodyType = MML.derivedAttribute(race => MML.bodyTypes[race], race);
-  // const height = MML.derivedAttribute((race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].height, race, gender, stature_roll);
-  // const weight = MML.derivedAttribute((race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].weight, race, gender, stature_roll);
-  // const stature = MML.derivedAttribute((race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].stature, race, gender, stature_roll);
-  // const strength = MML.derivedAttribute((race, strength_roll) => MML.racialAttributeBonuses[race].strength + strength_roll, race, strength_roll);
-  // const coordination = MML.derivedAttribute((race, coordination_roll) => MML.racialAttributeBonuses[race].coordination + coordination_roll, race, coordination_roll);
-  // const health = MML.derivedAttribute((race, health_roll) => MML.racialAttributeBonuses[race].health + health_roll, race, health_roll);
-  // const beauty = MML.derivedAttribute((race, beauty_roll) => MML.racialAttributeBonuses[race].beauty + beauty_roll, race, beauty_roll);
-  // const intellect = MML.derivedAttribute((race, intellect_roll) => MML.racialAttributeBonuses[race].intellect + intellect_roll, race, intellect_roll);
-  // const reason = MML.derivedAttribute((race, reason_roll) => MML.racialAttributeBonuses[race].reason + reason_roll, race, reason_roll);
-  // const creativity = MML.derivedAttribute((race, creativity_roll) => MML.racialAttributeBonuses[race].creativity + creativity_roll, race, creativity_roll);
-  // const presence = MML.derivedAttribute((race, presence_roll) => MML.racialAttributeBonuses[race].presence + presence_roll, race, presence_roll);
-  // const willpower = MML.derivedAttribute((presence, health) => Math.round((2 * presence + health) / 3), presence, health);
-  // const perception = MML.derivedAttribute((race, intellect, reason, creativity) => Math.round((intellect + reason + creativity) / 3) + MML.racialAttributeBonuses[race].perception, race, intellect, reason, creativity);
-  // const systemStrength = MML.derivedAttribute((presence, health) => Math.round((presence + 2 * health) / 3), presence, health);
-  // const fitness = MML.derivedAttribute((race, health, strength) => Math.round((health + strength) / 2) + MML.racialAttributeBonuses[race].fitness, race, health, strength);
-  // const fitnessMod = MML.derivedAttribute(fitness => MML.fitnessModLookup[fitness], fitness);
-  // const load = MML.derivedAttribute((race, stature, fitnessMod) => Math.round(stature * fitnessMod) + MML.racialAttributeBonuses[race].load, race, stature, fitnessMod);
-  // const overhead = MML.derivedAttribute((load) => load * 2, load);
-  // const deadLift = MML.derivedAttribute((load) => load * 4, load);
-  // const hpMax = MML.derivedAttribute(MML.buildHpAttribute, race, stature, strength, health, willpower);
-  // const hpRecovery = MML.derivedAttribute(health => MML.recoveryMods[health].hp, health);
-  // const evocation = MML.derivedAttribute((race, intellect, reason, creativity, health, willpower) => intellect + reason + creativity + health + willpower + MML.racialAttributeBonuses[race].evocation,
-  //   race, 
-  //   intellect,
-  //   reason,
-  //   creativity,
-  //   health,
-  //   willpower
-  // );
-  // const epRecovery = MML.derivedAttribute(health => MML.recoveryMods[health].ep, health);
-  // const totalWeightCarried = MML.derivedAttribute(inventory => _.reduce(_.pluck(inventory, 'weight'), (sum, num) => sum + num, 0), inventory);
-  // const knockdownMax = MML.derivedAttribute(Math.round(stature + (totalWeightCarried / 10)), stature, totalWeightCarried);
-  // const armorProtectionValues = ML.derivedAttribute(MML.buildApvMatrix, bodyType, inventory);
-  // const movementRatio = MML.derivedAttribute(function (load, totalWeightCarried) {
-  //   const movementRatio = totalWeightCarried === 0 ? Math.round(10 * load) / 10 : Math.round(10 * load / totalWeightCarried) / 10;
-  //   return movementRatio > 4.0 ? 4.0 : movementRatio;
-  // }, load, totalWeightCarried);
-  
-  // const attributeDefenseMod = MML.derivedAttribute((strength, coordination) => MML.attributeMods.strength[strength] + MML.attributeMods.coordination[coordination], strength, coordination);
-  // const attributeMeleeAttackMod = MML.derivedAttribute((strength, coordination) => MML.attributeMods.strength[strength] + MML.attributeMods.coordination[coordination], strength, coordination);
-  // const attributeMissileAttackMod = MML.derivedAttribute((strength, coordination, perception) => MML.attributeMods.perception[perception] + MML.attributeMods.coordination[coordination] + MML.attributeMods.strength[strength], strength, coordination, perception);
-  // const meleeDamageMod = MML.derivedAttribute(_.find(MML.meleeDamageMods, ({high, low}) => load >= low && load <= high).value, load);
-  // const spellLearningMod = MML.derivedAttribute(intellect => MML.attributeMods.intellect[intellect], intellect);
-
-  // // const hitTable = MML.getHitTable(character);
-  // // #endregion
-  
-  // // #region Variable Attributes
-  // const movementAvailable = MML.getCurrentAttributeAsFloat(character.id, 'movementAvailable');
-  // const movementType = MML.getCurrentAttribute(character.id, 'movementType');
-  // const pathID = MML.getCurrentAttribute(character.id, 'pathID');
-  // const situationalMod = MML.getCurrentAttributeAsFloat(character.id, 'situationalMod');
-  // const meleeDefenseMod = MML.getCurrentAttributeAsFloat(character.id, 'meleeDefenseMod');
-  // const missileDefenseMod = MML.getCurrentAttributeAsFloat(character.id, 'missileDefenseMod');
-  // const meleeAttackMod = MML.getCurrentAttributeAsFloat(character.id, 'meleeAttackMod');
-  // const missileAttackMod = MML.getCurrentAttributeAsFloat(character.id, 'missileAttackMod');
-  // const castingMod = MML.getCurrentAttributeAsFloat(character.id, 'castingMod');
-  // const statureCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'statureCheckMod');
-  // const strengthCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'strengthCheckMod');
-  // const coordinationCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'coordinationCheckMod');
-  // const healthCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'healthCheckMod');
-  // const beautyCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'beautyCheckMod');
-  // const intellectCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'intellectCheckMod');
-  // const reasonCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'reasonCheckMod');
-  // const creativityCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'creativityCheckMod');
-  // const presenceCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'presenceCheckMod');
-  // const willpowerCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'willpowerCheckMod');
-  // const evocationCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'evocationCheckMod');
-  // const perceptionCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'perceptionCheckMod');
-  // const systemStrengthCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'systemStrengthCheckMod');
-  // const fitnessCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'fitnessCheckMod');
-  // const statusEffects = MML.getCurrentAttributeJSON(character.id, 'statusEffects');
-  // const initiativeRollValue = MML.getCurrentAttributeAsFloat(character.id, 'initiativeRollValue');
-  // const situationalInitBonus = MML.getCurrentAttributeAsFloat(character.id, 'situationalInitBonus');
-  // const actionInitCostMod = MML.getCurrentAttributeAsFloat(character.id, 'actionInitCostMod');
-  // // #endregion
-
-  //   const attributeCastingMod = 
-  //   function () {
-  //     var attributeCastingMod = MML.attributeMods.reason[character.reason];
-
-  //     if (character.senseInitBonus > 2) {} else if (character.senseInitBonus > 0) {
-  //       attributeCastingMod -= 10;
-  //     } else if (character.senseInitBonus > -2) {
-  //       attributeCastingMod -= 20;
-  //     } else {
-  //       attributeCastingMod -= 30;
-  //     }
-
-  //     if (character.fomInitBonus === 3 || character.fomInitBonus === 2) {
-  //       attributeCastingMod -= 5;
-  //     } else if (character.fomInitBonus === 1) {
-  //       attributeCastingMod -= 10;
-  //     } else if (character.fomInitBonus === 0) {
-  //       attributeCastingMod -= 15;
-  //     } else if (character.fomInitBonus === -1) {
-  //       attributeCastingMod -= 20;
-  //     } else if (character.fomInitBonus === -2) {
-  //       attributeCastingMod -= 30;
-  //     }
-  //     return attributeCastingMod;
+  // Object.defineProperty(character, 'player', {
+  //   get: function () {
+  //     return MML.players[MML.getCurrentAttribute(character.id, 'player')];
   //   },
 
-  // // #region Initaitive Attributes
-  //   const attributeInitBonus = MML.derivedAttribute(function (strength, coordination, reason, perception) {
-  //     const rankingAttribute = [strength, coordination, reason, perception].sort((a, b) => a - b)[0];
+  // const epMax = evocation;
 
-  //     if (rankingAttribute < 10) {
-  //       return -1;
-  //     } else if (rankingAttribute === 10 || rankingAttribute === 11) {
-  //       return 0;
-  //     } else if (rankingAttribute === 12 || rankingAttribute === 13) {
-  //       return 1;
-  //     } else if (rankingAttribute === 14 || rankingAttribute === 15) {
-  //       return 2;
-  //     } else if (rankingAttribute === 16 || rankingAttribute === 17) {
-  //       return 3;
-  //     } else if (rankingAttribute === 18 || rankingAttribute === 19) {
-  //       return 4;
-  //     } else {
-  //       return 5;
-  //     }
-  //   }, strength, coordination, reason, perception);
+  // const ep = _.isUndefined(getAttrByName(character.id, 'ep', 'current')) ? character.evocation : MML.getCurrentAttributeAsFloat(character.id, 'ep');
 
-  //   const movementRatioInitBonus = MML.derivedAttribute(function (movementRatio) {
-  //     if (movementRatio < 0.6) {
-  //       return 'No Combat';
-  //     } else if (movementRatio === 0.6) {
-  //       return -4;
-  //     } else if (movementRatio < 0.7 && movementRatio <= 0.8) {
-  //       return -3;
-  //     } else if (movementRatio > 0.8 && movementRatio <= 1.0) {
-  //       return -2;
-  //     } else if (movementRatio > 1.0 && movementRatio <= 1.2) {
-  //       return -1;
-  //     } else if (movementRatio > 1.2 && movementRatio <= 1.4) {
-  //       return 0;
-  //     } else if (movementRatio > 1.4 && movementRatio <= 1.7) {
-  //       return 1;
-  //     } else if (movementRatio > 1.7 && movementRatio <= 2.0) {
-  //       return 2;
-  //     } else if (movementRatio > 2.0 && movementRatio <= 2.5) {
-  //       return 3;
-  //     } else if (movementRatio > 2.5 && movementRatio <= 3.2) {
-  //       return 4;
-  //     } else(movementRatio > 3.2) {
-  //       return 5;
-  //     }
-  //   }, movementRatio);
+  // const fatigueMax = fitness;
+  // const fatigue = isNaN(parseFloat(MML.getCurrentAttribute(character.id, 'fatigue'))) ? character.fitness : MML.getCurrentAttributeAsFloat(character.id, 'fatigue');
+  // const knockdown = isNaN(parseFloat(MML.getCurrentAttribute(character.id, 'knockdown'))) ? character.knockdownMax : MML.getCurrentAttributeAsFloat(character.id, 'knockdown');
 
-  //   const initiative = MML.derivedAttribute(function (initiativeRollValue, situationalInitBonus, movementRatioInitBonus, attributeInitBonus, senseInitBonus, fomInitBonus, firstActionInitBonus, spentInitiative) {
-  //     if ([situationalInitBonus, movementRatioInitBonus].includes('No Combat')) {
-  //       return 0;
-  //     }
+  // #region Input Attributes
+  const name = Rx.change_character_name.pipe(
+    filter(changed_character => changed_character.get('id') === id),
+    map(changed_character => changed_character.get('name'))
+  );
 
-  //     const initiative = initiativeRollValue +
-  //       situationalInitBonus +
-  //       movementRatioInitBonus +
-  //       attributeInitBonus +
-  //       senseInitBonus +
-  //       fomInitBonus +
-  //       firstActionInitBonus +
-  //       spentInitiative;
-        
-  //     return initiative < 0 || state.MML.GM.roundStarted === false ? 0 : initiative;
-  //   }, initiativeRollValue, situationalInitBonus, movementRatioInitBonus, attributeInitBonus, senseInitBonus, fomInitBonus, firstActionInitBonus, spentInitiative);
+  const stature_roll = attribute_changed.pipe(MML.rollAttributeChanged('stature_roll'));
+  const strength_roll = attribute_changed.pipe(MML.rollAttributeChanged('strength_roll'));
+  const coordination_roll = attribute_changed.pipe(MML.rollAttributeChanged('coordination_roll'));
+  const health_roll = attribute_changed.pipe(MML.rollAttributeChanged('health_roll'));
+  const beauty_roll = attribute_changed.pipe(MML.rollAttributeChanged('beauty_roll'));
+  const intellect_roll = attribute_changed.pipe(MML.rollAttributeChanged('intellect_roll'));
+  const reason_roll = attribute_changed.pipe(MML.rollAttributeChanged('reason_roll'));
+  const creativity_roll = attribute_changed.pipe(MML.rollAttributeChanged('creativity_roll'));
+  const presence_roll = attribute_changed.pipe(MML.rollAttributeChanged('presence_roll'));
+  const race = attribute_changed.pipe(MML.inputAttributeChanged('race'));
+  const gender = attribute_changed.pipe(MML.inputAttributeChanged('gender'));
+  const handedness = attribute_changed.pipe(MML.inputAttributeChanged('handedness'));
 
-  //   const senseInitBonus = 
-  //   function () {
-  //     var value;
-  //     var armorList = _.where(character.inventory, {
-  //       type: 'armor'
-  //     });
-  //     var bitsOfHelm = ['Barbute Helm', 'Bascinet Helm', 'Camail', 'Camail-Conical', 'Cap', 'Cheeks', 'Conical Helm', 'Duerne Helm', 'Dwarven War Hood', 'Face Plate', 'Great Helm', 'Half-Face Plate', 'Hood', 'Nose Guard', 'Pot Helm', 'Sallet Helm', 'Throat Guard', 'War Hat'];
-  //     var senseArray = [];
+  // const inventory = MML.getCurrentAttributeJSON(character.id, 'inventory').pipe(startWith({
+  //   emptyHand: {
+  //     type: 'empty',
+  //     weight: 0
+  //   }));
+  // const leftHand = _.isEmpty(MML.getCurrentAttributeJSON(character.id, 'leftHand')) ? JSON.stringify({
+  //   _id: 'emptyHand',
+  //   grip: 'unarmed'
+  // }) : MML.getCurrentAttributeJSON(character.id, 'leftHand');
 
-  //     _.each(bitsOfHelm, function (bit) {
-  //       _.each(armorList, function (piece) {
-  //         if (piece.name.indexOf(bit) !== -1) {
-  //           senseArray.push(bit);
-  //         }
-  //       });
-  //     });
+  // const rightHand = _.isEmpty(MML.getCurrentAttributeJSON(character.id, 'rightHand')) ? JSON.stringify({
+  //   _id: 'emptyHand',
+  //   grip: 'unarmed'
+  // }) : MML.getCurrentAttributeJSON(character.id, 'rightHand');
+  // const spells = MML.getCurrentAttributeAsArray(character.id, 'spells');
+  // #endregion
 
-  //     //nothing on head
-  //     if (senseArray.length === 0) {
-  //       value = 4;
-  //     } else {
-  //       //Head fully encased in metal
-  //       if (senseArray.includes('Great Helm') || (senseArray.includes('Sallet Helm') && senseArray.includes('Throat Guard'))) {
-  //         value = -2;
-  //       }
-  //       //wearing a helm
-  //       else if (_.intersection(senseArray, ['Barbute Helm', 'Sallet Helm', 'Bascinet Helm', 'Duerne Helm', 'Cap', 'Pot Helm', 'Conical Helm', 'War Hat']).length > 0) {
-  //         //Has faceplate
-  //         if (senseArray.includes('Face Plate')) {
-  //           //Enclosed Sides
-  //           if (_.intersection(senseArray, ['Barbute Helm', 'Bascinet Helm', 'Duerne Helm']).length > 0) {
-  //             value = -2;
-  //           } else {
-  //             value = -1;
-  //           }
-  //         }
-  //         //These types of helms or half face plate
-  //         else if (_.intersection(senseArray, ['Barbute Helm', 'Sallet Helm', 'Bascinet Helm', 'Duerne Helm', 'Half-Face Plate']).length > 0) {
-  //           value = 0;
-  //         }
-  //         //has camail or cheeks
-  //         else if (_.intersection(senseArray, ['Camail', 'Camail-Conical', 'Cheeks']).length > 0) {
-  //           value = 1;
-  //         }
-  //         //Wearing a hood
-  //         else if (_.intersection(senseArray, ['Dwarven War Hood', 'Hood']).length > 0) {
-  //           _.each(armorList, function (piece) {
-  //             if (piece.name === 'Dwarven War Hood' || piece.name === 'Hood') {
-  //               if (piece.family === 'Cloth') {
-  //                 value = 2;
-  //               } else {
-  //                 value = 1;
-  //               }
-  //             }
-  //           });
-  //         }
-  //         //has nose guard
-  //         else if (senseArray.includes('Nose Guard')) {
-  //           value = 2;
-  //         }
-  //         // just a cap
-  //         else {
-  //           value = 3;
-  //         }
-  //       }
-  //       //Wearing a hood
-  //       else if (_.intersection(senseArray, ['Dwarven War Hood', 'Hood']).length > 0) {
-  //         _.each(armorList, function (piece) {
-  //           if (piece.name === 'Dwarven War Hood' || piece.name === 'Hood') {
-  //             if (piece.family === 'Cloth') {
-  //               value = 2;
-  //             } else {
-  //               value = 1;
-  //             }
-  //           }
-  //         });
-  //       }
-  //     }
-  //     return value;
-  //   },
+  // #region Derived Attributes
+  const bodyType = MML.derivedAttribute(race => MML.bodyTypes[race], race);
+  const height = MML.derivedAttribute((race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].height, race, gender, stature_roll);
+  const weight = MML.derivedAttribute((race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].weight, race, gender, stature_roll);
+  const stature = MML.derivedAttribute((race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].stature, race, gender, stature_roll);
+  const strength = MML.derivedAttribute((race, strength_roll) => MML.racialAttributeBonuses[race].strength + strength_roll, race, strength_roll);
+  const coordination = MML.derivedAttribute((race, coordination_roll) => MML.racialAttributeBonuses[race].coordination + coordination_roll, race, coordination_roll);
+  const health = MML.derivedAttribute((race, health_roll) => MML.racialAttributeBonuses[race].health + health_roll, race, health_roll);
+  const beauty = MML.derivedAttribute((race, beauty_roll) => MML.racialAttributeBonuses[race].beauty + beauty_roll, race, beauty_roll);
+  const intellect = MML.derivedAttribute((race, intellect_roll) => MML.racialAttributeBonuses[race].intellect + intellect_roll, race, intellect_roll);
+  const reason = MML.derivedAttribute((race, reason_roll) => MML.racialAttributeBonuses[race].reason + reason_roll, race, reason_roll);
+  const creativity = MML.derivedAttribute((race, creativity_roll) => MML.racialAttributeBonuses[race].creativity + creativity_roll, race, creativity_roll);
+  const presence = MML.derivedAttribute((race, presence_roll) => MML.racialAttributeBonuses[race].presence + presence_roll, race, presence_roll);
+  const willpower = MML.derivedAttribute((presence, health) => Math.round((2 * presence + health) / 3), presence, health);
+  const perception = MML.derivedAttribute((race, intellect, reason, creativity) => Math.round((intellect + reason + creativity) / 3) + MML.racialAttributeBonuses[race].perception, race, intellect, reason, creativity);
+  const systemStrength = MML.derivedAttribute((presence, health) => Math.round((presence + 2 * health) / 3), presence, health);
+  const fitness = MML.derivedAttribute((race, health, strength) => Math.round((health + strength) / 2) + MML.racialAttributeBonuses[race].fitness, race, health, strength);
+  const fitnessMod = MML.derivedAttribute(fitness => MML.fitnessModLookup[fitness], fitness);
+  const load = MML.derivedAttribute((race, stature, fitnessMod) => Math.round(stature * fitnessMod) + MML.racialAttributeBonuses[race].load, race, stature, fitnessMod);
+  const overhead = MML.derivedAttribute((load) => load * 2, load);
+  const deadLift = MML.derivedAttribute((load) => load * 4, load);
+  const hpMax = MML.derivedAttribute(MML.buildHpAttribute, race, stature, strength, health, willpower);
+  const hpRecovery = MML.derivedAttribute(health => MML.recoveryMods[health].hp, health);
+  const evocation = MML.derivedAttribute((race, intellect, reason, creativity, health, willpower) => intellect + reason + creativity + health + willpower + MML.racialAttributeBonuses[race].evocation,
+    race,
+    intellect,
+    reason,
+    creativity,
+    health,
+    willpower
+  );
+  const epRecovery = MML.derivedAttribute(health => MML.recoveryMods[health].ep, health);
+  const totalWeightCarried = MML.derivedAttribute(inventory => _.reduce(_.pluck(inventory, 'weight'), (sum, num) => sum + num, 0), inventory);
+  const knockdownMax = MML.derivedAttribute(Math.round(stature + (totalWeightCarried / 10)), stature, totalWeightCarried);
+  const armorProtectionValues = ML.derivedAttribute(MML.buildApvMatrix, bodyType, inventory);
+  const movementRatio = MML.derivedAttribute(function (load, totalWeightCarried) {
+    const movementRatio = totalWeightCarried === 0 ? Math.round(10 * load) / 10 : Math.round(10 * load / totalWeightCarried) / 10;
+    return movementRatio > 4.0 ? 4.0 : movementRatio;
+  }, load, totalWeightCarried);
 
-  //   const fomInitBonus = MML.getCurrentAttributeAsFloat(character.id, 'fomInitBonus');
-  //   const firstActionInitBonus = MML.getCurrentAttributeAsFloat(character.id, 'firstActionInitBonus');
-  //   const spentInitiative = MML.getCurrentAttributeAsFloat(character.id, 'spentInitiative');
+  const attributeDefenseMod = MML.derivedAttribute((strength, coordination) => MML.attributeMods.strength[strength] + MML.attributeMods.coordination[coordination], strength, coordination);
+  const attributeMeleeAttackMod = MML.derivedAttribute((strength, coordination) => MML.attributeMods.strength[strength] + MML.attributeMods.coordination[coordination], strength, coordination);
+  const attributeMissileAttackMod = MML.derivedAttribute((strength, coordination, perception) => MML.attributeMods.perception[perception] + MML.attributeMods.coordination[coordination] + MML.attributeMods.strength[strength], strength, coordination, perception);
+  const meleeDamageMod = MML.derivedAttribute(_.find(MML.meleeDamageMods, ({
+    high,
+    low
+  }) => load >= low && load <= high).value, load);
+  const spellLearningMod = MML.derivedAttribute(intellect => MML.attributeMods.intellect[intellect], intellect);
 
-  //   // #endregion
+  // const hitTable = MML.getHitTable(character);
+  // #endregion
 
-  //   const actionTempo = 
-  //   function () {
-  //     var tempo;
+  // #region Variable Attributes
+  const movementAvailable = MML.getCurrentAttributeAsFloat(character.id, 'movementAvailable');
+  const movementType = MML.getCurrentAttribute(character.id, 'movementType');
+  const pathID = MML.getCurrentAttribute(character.id, 'pathID');
+  const situationalMod = MML.getCurrentAttributeAsFloat(character.id, 'situationalMod');
+  const meleeDefenseMod = MML.getCurrentAttributeAsFloat(character.id, 'meleeDefenseMod');
+  const missileDefenseMod = MML.getCurrentAttributeAsFloat(character.id, 'missileDefenseMod');
+  const meleeAttackMod = MML.getCurrentAttributeAsFloat(character.id, 'meleeAttackMod');
+  const missileAttackMod = MML.getCurrentAttributeAsFloat(character.id, 'missileAttackMod');
+  const castingMod = MML.getCurrentAttributeAsFloat(character.id, 'castingMod');
+  const statureCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'statureCheckMod');
+  const strengthCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'strengthCheckMod');
+  const coordinationCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'coordinationCheckMod');
+  const healthCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'healthCheckMod');
+  const beautyCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'beautyCheckMod');
+  const intellectCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'intellectCheckMod');
+  const reasonCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'reasonCheckMod');
+  const creativityCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'creativityCheckMod');
+  const presenceCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'presenceCheckMod');
+  const willpowerCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'willpowerCheckMod');
+  const evocationCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'evocationCheckMod');
+  const perceptionCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'perceptionCheckMod');
+  const systemStrengthCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'systemStrengthCheckMod');
+  const fitnessCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'fitnessCheckMod');
+  const statusEffects = MML.getCurrentAttributeJSON(character.id, 'statusEffects');
+  const initiativeRollValue = MML.getCurrentAttributeAsFloat(character.id, 'initiativeRollValue');
+  const situationalInitBonus = MML.getCurrentAttributeAsFloat(character.id, 'situationalInitBonus');
+  const actionInitCostMod = MML.getCurrentAttributeAsFloat(character.id, 'actionInitCostMod');
+  const hp = game_state.pipe(
+      filter(effect => effect.attribute === 'hp'), 
+      scan(function (current, effect) {
+        current[effect.body_part] += effect.change;
+        return current;
+      }, _.isUndefined(getAttrByName(character.id, 'hp', 'current')) ? MML.buildHpAttribute(character) : MML.getCurrentAttributeJSON(id, 'hp')),
+      startWith()
+    );
+  // #endregion
 
-  //     if (_.isUndefined(character.action.skill) || character.action.skill < 30) {
-  //       tempo = 0;
-  //     } else if (character.action.skill < 40) {
-  //       tempo = 1;
-  //     } else if (character.action.skill < 50) {
-  //       tempo = 2;
-  //     } else if (character.action.skill < 60) {
-  //       tempo = 3;
-  //     } else if (character.action.skill < 70) {
-  //       tempo = 4;
-  //     } else {
-  //       tempo = 5;
-  //     }
+  // #region Saves
+  const major_wound_save = Rx.combineLatest(hpMax, hp.pipe(pairwise())).pipe(
+    filter(function ([max, [previous, current]]) {
+      return Object.keys(max).reduce(function (save_needed, body_part) {
+        const current_hp = current[body_part];
+        if (current_hp < Math.round(maxHP / 2) && currentHP >= 0) { //Major wound
+          if (initialHP >= Math.round(maxHP / 2)) { //Fresh wound
+            duration = Math.round(maxHP / 2) - currentHP;
+          } else if (!_.has(character.statusEffects, 'Major Wound, ' + bodyPart)) {
+            duration = -hpAmount;
+          } else { //Add damage to duration of effect
+            duration = parseInt(character.statusEffects['Major Wound, ' + bodyPart].duration) - hpAmount;
+          }
+          await MML.displayMenu(player, character.name + '\'s Major Wound Roll', ['Roll']);
+          const result = await MML.attributeCheckRoll(player, character.willpower);
+          if (result === 'Failure') {
+            MML.addStatusEffect(character, 'Major Wound, ' + bodyPart, {
+              duration: duration,
+              startingRound: state.MML.GM.currentRound,
+              bodyPart: bodyPart
+            });
+          }
+        }
+        return save_needed;
+      }, false)
+    })
+  )
+  // #endregion
 
-  //     // If Dual Wielding
-  //     if (character.action.name === 'Attack' && MML.isDualWielding(character)) {
-  //       var twfSkill = character.weaponskills['Two Weapon Fighting'].level;
-  //       if (twfSkill > 19 && twfSkill) {
-  //         tempo += 1;
-  //       } else if (twfSkill >= 40 && twfSkill < 60) {
-  //         tempo += 2;
-  //       } else if (twfSkill >= 60) {
-  //         tempo += 3;
-  //       }
-  //       // If Dual Wielding identical weapons
-  //       if (character.inventory[character.leftHand._id].name === character.inventory[character.rightHand._id].name) {
-  //         tempo += 1;
-  //       }
-  //     }
-  //     return MML.attackTempoTable[tempo];
-  //   },
+  // #region Initaitive Attributes
+  const attributeInitBonus = MML.derivedAttribute(function (strength, coordination, reason, perception) {
+    const rankingAttribute = [strength, coordination, reason, perception].sort((a, b) => a - b)[0];
 
-  //   const ready = MML.getCurrentAttributeAsBool(character.id, 'ready');
-  //   const action = MML.getCurrentAttributeJSON(character.id, 'action')
-  //   const previousAction = MML.getCurrentAttributeJSON(character.id, 'previousAction');
-  //   const roundsRest = MML.getCurrentAttributeAsFloat(character.id, 'roundsRest');
-  //   const roundsExertion = MML.getCurrentAttributeAsFloat(character.id, 'roundsExertion');
+    if (rankingAttribute < 10) {
+      return -1;
+    } else if (rankingAttribute === 10 || rankingAttribute === 11) {
+      return 0;
+    } else if (rankingAttribute === 12 || rankingAttribute === 13) {
+      return 1;
+    } else if (rankingAttribute === 14 || rankingAttribute === 15) {
+      return 2;
+    } else if (rankingAttribute === 16 || rankingAttribute === 17) {
+      return 3;
+    } else if (rankingAttribute === 18 || rankingAttribute === 19) {
+      return 4;
+    } else {
+      return 5;
+    }
+  }, strength, coordination, reason, perception);
 
-  //   const skills = 
-  //   function () {
-  //     var characterSkills = MML.getSkillAttributes(character.id, 'skills');
-  //     _.each(
-  //       characterSkills,
-  //       function (characterSkill, skillName) {
-  //         var level = characterSkill.input;
-  //         var attribute = MML.skills[skillName].attribute;
+  const movementRatioInitBonus = MML.derivedAttribute(function (movementRatio) {
+    if (movementRatio < 0.6) {
+      return 'No Combat';
+    } else if (movementRatio === 0.6) {
+      return -4;
+    } else if (movementRatio < 0.7 && movementRatio <= 0.8) {
+      return -3;
+    } else if (movementRatio > 0.8 && movementRatio <= 1.0) {
+      return -2;
+    } else if (movementRatio > 1.0 && movementRatio <= 1.2) {
+      return -1;
+    } else if (movementRatio > 1.2 && movementRatio <= 1.4) {
+      return 0;
+    } else if (movementRatio > 1.4 && movementRatio <= 1.7) {
+      return 1;
+    } else if (movementRatio > 1.7 && movementRatio <= 2.0) {
+      return 2;
+    } else if (movementRatio > 2.0 && movementRatio <= 2.5) {
+      return 3;
+    } else if (movementRatio > 2.5 && movementRatio <= 3.2) {
+      return 4;
+    } else(movementRatio > 3.2) {
+      return 5;
+    }
+  }, movementRatio);
 
-  //         level += MML.attributeMods[attribute][character[attribute]];
+  const initiative = MML.derivedAttribute(function (initiativeRollValue, situationalInitBonus, movementRatioInitBonus, attributeInitBonus, senseInitBonus, fomInitBonus, firstActionInitBonus, spentInitiative) {
+    if ([situationalInitBonus, movementRatioInitBonus].includes('No Combat')) {
+      return 0;
+    }
 
-  //         if (_.isUndefined(MML.skillMods[race]) === false && _.isUndefined(MML.skillMods[race][skillName]) === false) {
-  //           level += MML.skillMods[race][skillName];
-  //         }
-  //         if (_.isUndefined(MML.skillMods[character.gender]) === false && _.isUndefined(MML.skillMods[character.gender][skillName]) === false) {
-  //           level += MML.skillMods[character.gender][skillName];
-  //         }
-  //         characterSkill.level = level;
-  //         MML.setCurrentAttribute(character.id, 'repeating_skills_' + characterSkill._id + '_name', skillName);
-  //         MML.setCurrentAttribute(character.id, 'repeating_skills_' + characterSkill._id + '_input', characterSkill.input);
-  //         MML.setCurrentAttribute(character.id, 'repeating_skills_' + characterSkill._id + '_level', level);
-  //       },
-  //       character
-  //     );
+    const initiative = initiativeRollValue +
+      situationalInitBonus +
+      movementRatioInitBonus +
+      attributeInitBonus +
+      senseInitBonus +
+      fomInitBonus +
+      firstActionInitBonus +
+      spentInitiative;
 
-  //     return characterSkills;
-  //   },
+    return initiative < 0 || state.MML.GM.roundStarted === false ? 0 : initiative;
+  }, initiativeRollValue, situationalInitBonus, movementRatioInitBonus, attributeInitBonus, senseInitBonus, fomInitBonus, firstActionInitBonus, spentInitiative);
 
-  //   const weaponSkills = 
-  //   function () {
-  //     var characterSkills = MML.getSkillAttributes(character.id, "weaponskills");
-  //     var highestSkill;
+  const senseInitBonus = MML.derivedAttribute(function (inventory) {
+    var bitsOfHelm = [
+      'Barbute Helm',
+      'Bascinet Helm',
+      'Camail',
+      'Camail-Conical',
+      'Cap',
+      'Cheeks',
+      'Conical Helm',
+      'Duerne Helm',
+      'Dwarven War Hood',
+      'Face Plate',
+      'Great Helm',
+      'Half-Face Plate',
+      'Hood',
+      'Nose Guard',
+      'Pot Helm',
+      'Sallet Helm',
+      'Throat Guard',
+      'War Hat'
+    ];
+    var senseArray = _.filter(inventory, item => item.type === 'armor' && bitsOfHelm.includes(item.name));
 
-  //     _.each(
-  //       characterSkills,
-  //       function (characterSkill, skillName) {
-  //         var level = characterSkill.input;
+    if (senseArray.length === 0) {
+      //nothing on head
+      return 4;
+    } else {
+      if (senseArray.includes('Great Helm') || (senseArray.includes('Sallet Helm') && senseArray.includes('Throat Guard'))) {
+        //Head fully encased in metal
+        return -2;
+      } else if (_.intersection(senseArray, ['Barbute Helm',
+          'Sallet Helm',
+          'Bascinet Helm', 'Duerne Helm', 'Cap', 'Pot Helm', 'Conical Helm', 'War Hat'
+        ]).length > 0) {
+        //wearing a helm
+        if (senseArray.includes('Face Plate')) {
+          //Has faceplate
+          if (_.intersection(senseArray, ['Barbute Helm', 'Bascinet Helm', 'Duerne Helm']).length > 0) {
+            //Enclosed Sides
+            return -2;
+          } else {
+            return -1;
+          }
+        } else if (_.intersection(senseArray, ['Barbute Helm', 'Sallet Helm', 'Bascinet Helm', 'Duerne Helm', 'Half-Face Plate']).length > 0) {
+          //These types of helms or half face plate
+          return 0;
+        } else if (_.intersection(senseArray, ['Camail', 'Camail-Conical', 'Cheeks']).length > 0) {
+          //has camail or cheeks
+          return 1;
+        } else if (_.intersection(senseArray, ['Dwarven War Hood', 'Hood']).length > 0) {
+          //Wearing a hood
+          return senseArray.reduce(function (min, piece) {
+            if ((piece.name === 'Dwarven War Hood' || piece.name === 'Hood') && piece.family !== 'Cloth') {
+              return 1;
+            }
+            return min;
+          }, 2);
+        } else if (senseArray.includes('Nose Guard')) {
+          //has nose guard
+          return 2;
+        } else {
+          // just a cap
+          return 3;
+        }
+      } else if (_.intersection(senseArray, ['Dwarven War Hood', 'Hood']).length > 0) {
+        //Wearing a hood
+        return senseArray.reduce(function (min, piece) {
+          if ((piece.name === 'Dwarven War Hood' || piece.name === 'Hood') && piece.family !== 'Cloth') {
+            return 1;
+          }
+          return min;
+        }, 2);
+      }
+    }
+  });
 
-  //         // This may need to include other modifiers
-  //         if (_.isUndefined(MML.weaponSkillMods[race]) === false && _.isUndefined(MML.weaponSkillMods[race][skillName]) === false) {
-  //           level += MML.weaponSkillMods[race][skillName];
-  //         }
-  //         characterSkill.level = level;
-  //       },
-  //       character
-  //     );
+  const fomInitBonus = MML.getCurrentAttributeAsFloat(character.id, 'fomInitBonus');
+  const firstActionInitBonus = MML.getCurrentAttributeAsFloat(character.id, 'firstActionInitBonus');
+  const spentInitiative = MML.getCurrentAttributeAsFloat(character.id, 'spentInitiative');
 
-  //     highestSkill = _.max(characterSkills, skill => skill.level).level;
-  //     if (isNaN(highestSkill)) {
-  //       highestSkill = 0;
-  //     }
+  // #endregion
 
-  //     if (_.isUndefined(characterSkills["Default Martial"])) {
-  //       characterSkills["Default Martial"] = {
-  //         input: 0,
-  //         level: 0,
-  //         _id: MML.generateRowID()
-  //       };
-  //     }
+  const actionTempo = action.pipe(
+    withLatestFrom(isDualWielding),
+    map(function ([action, isDualWielding]) {
+      var tempo;
 
-  //     if (highestSkill < 20) {
-  //       characterSkills["Default Martial"].level = 1;
-  //     } else {
-  //       characterSkills["Default Martial"].level = Math.round(highestSkill / 2);
-  //     }
+      if (_.isUndefined(action.skill) || action.skill < 30) {
+        tempo = 0;
+      } else if (action.skill < 40) {
+        tempo = 1;
+      } else if (action.skill < 50) {
+        tempo = 2;
+      } else if (action.skill < 60) {
+        tempo = 3;
+      } else if (action.skill < 70) {
+        tempo = 4;
+      } else {
+        tempo = 5;
+      }
 
-  //     _.each(
-  //       characterSkills,
-  //       function (characterSkill, skillName) {
-  //         MML.setCurrentAttribute(character.id, "repeating_weaponskills_" + characterSkill._id + "_name", skillName);
-  //         MML.setCurrentAttribute(character.id, "repeating_weaponskills_" + characterSkill._id + "_input", characterSkill.input);
-  //         MML.setCurrentAttribute(character.id, "repeating_weaponskills_" + characterSkill._id + "_level", characterSkill.level);
-  //       },
-  //       character
-  //     );
-  //     return characterSkills;
-  //   },
+      // If Dual Wielding
+      if (action.name === 'Attack' && isDualWielding) {
+        var twfSkill = weaponskills['Two Weapon Fighting'].level;
+        if (twfSkill > 19 && twfSkill) {
+          tempo += 1;
+        } else if (twfSkill >= 40 && twfSkill < 60) {
+          tempo += 2;
+        } else if (twfSkill >= 60) {
+          tempo += 3;
+        }
+        // If Dual Wielding identical weapons
+        if (inventory[leftHand._id].name === inventory[rightHand._id].name) {
+          tempo += 1;
+        }
+      }
+      return MML.attackTempoTable[tempo];
+    }));
 
-  //   const fov = MML.derivedAttribute(function (senseInitBonus) {
-  //     switch (senseInitBonus) {
-  //       case 4:
-  //         return 180;
-  //       case 3:
-  //         return 170;
-  //       case 2:
-  //         return 160;
-  //       case 1:
-  //         return 150;
-  //       case 0:
-  //         return 140;
-  //       case -1:
-  //         return 130;
-  //       case -2:
-  //         return 120;
-  //       default:
-  //         return 180;
-  //     }
-  //   }, senseInitBonus);
+  const newRoundUpdate = MML.newRound.pipe(map(function (character) {
+    if (_.has(character.statusEffects, 'Melee This Round')) {
+      var fatigueRate = 1;
+      if (_.has(character.statusEffects, 'Pinned')) {
+        fatigueRate = 2;
+      }
+      character.roundsExertion += fatigueRate;
+      character.roundsRest = 0;
+
+      if (!_.has(character.statusEffects, 'Fatigue')) {
+        if (character.roundsExertion > character.fitness) {
+          await MML.fatigueCheck(player, character);
+        }
+      } else {
+        if (character.roundsExertion > Math.round(character.fitness / 2)) {
+          await MML.fatigueCheck(player, character);
+        }
+      }
+    } else if (_.has(character.statusEffects, 'Fatigue') || character.roundsExertion > 0) {
+      character.roundsRest++;
+      if (character.roundsRest > 5) {
+        await MML.fatigueRecovery(player, character);
+      }
+    }
+
+    // Reset knockdown number
+    character.knockdown = character.knockdownMax;
+    character.spentInitiative = 0;
+
+    character.action = {
+      ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
+      modifiers: [],
+      weapon: MML.getEquippedWeapon(character)
+    };
+    if (_.has(character.statusEffects, 'Observing')) {
+      MML.addStatusEffect(character, 'Observed', {
+        startingRound: state.MML.GM.currentRound
+      });
+    }
+    return character;
+  }));
+
+  const character_moved = MML.character_moved.pipe(filter(character => character.id === id));
+
+  const character_movement_blocked = character_moved.pipe(
+    
+  );
+
+  MML.combat_movement = MML.token_moved.pipe(map(function (obj, prev) {
+    const character = MML.characters[MML.getCharacterIdFromToken(obj)];
+    const left1 = prev['left'];
+    const left2 = obj.get('left');
+    const top1 = prev['top'];
+    const top2 = obj.get('top');
+    const distance = MML.getDistanceFeet(left1, left2, top1, top2);
+    const distanceAvailable = MML.movementRates[character.race][character.movementType] * character.movementAvailable;
+
+    if (state.MML.GM.actor === charName && distanceAvailable > 0) {
+      // If they move too far, move the maxium distance in the same direction
+      if (distance > distanceAvailable) {
+        const left3 = Math.floor(((left2 - left1) / distance) * distanceAvailable + left1 + 0.5);
+        const top3 = Math.floor(((top2 - top1) / distance) * distanceAvailable + top1 + 0.5);
+        obj.set('left', left3);
+        obj.set('top', top3);
+        character.movementAvailable(0);
+      }
+      character.moveDistance(distance);
+    } else {
+      obj.set('left', prev['left']);
+      obj.set('top', prev['top']);
+    }
+  }));
+
+  const ready = Rx.merge(
+      MML.newRound.pipe(mapTo(false)),
+      action.pipe(mapTo(true)),
+      MML.endCombat
+    )
+    .pipe(
+      tap(function (is_ready) {
+        const token = MML.getCharacterToken(id);
+        if (!_.isUndefined(token)) {
+          token.set('tint_color', is_ready ? 'transparent' : 'FF0000');
+        }
+      })
+    );
+
+  const action = function setAction(character, action) {
+    var initBonus = 10;
+    if (action.name === 'Attack' || action.name === 'Aim') {
+      if (MML.isUnarmedAction(action) || action.weapon === 'unarmed') {
+        if (!_.isUndefined(character.weaponSkills['Brawling']) && character.weaponSkills['Brawling'].level > character.weaponSkills['Default Martial'].level) {
+          action.skill = character.weaponSkills['Brawling'].level;
+        } else {
+          action.skill = character.weaponSkills['Default Martial'].level;
+        }
+        // } else if (leftHand !== 'unarmed' && rightHand !== 'unarmed') {
+        //   var weaponInits = [character.inventory[character.leftHand._id].grips[character.leftHand.grip].initiative,
+        //     character.inventory[character.rightHand._id].grips[character.rightHand.grip].initiative
+        //   ];
+        //   initBonus = _.min(weaponInits);
+        // action.skill = character.weaponSkills.[character.inventory[character.leftHand._id].name].level or character.weaponSkills['Default Martial Skill'].level;
+        //Dual Wielding
+      } else {
+        initBonus = action.weapon.initiative;
+        action.skill = MML.getWeaponSkill(character, action.weapon);
+      }
+    } else if (action.name === 'Cast') {
+      var skillInfo = MML.getMagicSkill(character, action.spell);
+      action.skill = skillInfo.level;
+      action.skillName = skillInfo.name;
+    }
+    if (state.MML.GM.roundStarted === false) {
+      character.firstActionInitBonus = initBonus;
+    }
+
+    if (_.isUndefined(character.previousAction) || character.previousAction.ts !== action.ts) {
+      _.each(action.modifiers, function (modifier) {
+        MML.addStatusEffect(character, modifier, {
+          ts: action.ts,
+          startingRound: state.MML.GM.currentRound
+        });
+      });
+    }
+    character.action = action;
+  };
+  const previousAction = MML.getCurrentAttributeJSON(character.id, 'previousAction');
+  const roundsRest = MML.getCurrentAttributeAsFloat(character.id, 'roundsRest');
+  const roundsExertion = MML.getCurrentAttributeAsFloat(character.id, 'roundsExertion');
+
+  const attributeCastingMod = MML.derivedAttribute(function (reason, fomInitBonus, senseInitBonus) {
+    var attributeCastingMod = MML.attributeMods.reason[reason];
+
+    if (senseInitBonus < 2 && senseInitBonus > 0) {
+      attributeCastingMod -= 10;
+    } else if (senseInitBonus > -2) {
+      attributeCastingMod -= 20;
+    } else {
+      attributeCastingMod -= 30;
+    }
+
+    if (fomInitBonus === 3 || fomInitBonus === 2) {
+      attributeCastingMod -= 5;
+    } else if (fomInitBonus === 1) {
+      attributeCastingMod -= 10;
+    } else if (fomInitBonus === 0) {
+      attributeCastingMod -= 15;
+    } else if (fomInitBonus === -1) {
+      attributeCastingMod -= 20;
+    } else if (fomInitBonus === -2) {
+      attributeCastingMod -= 30;
+    }
+    return attributeCastingMod;
+  }, reason, fomInitBonus, senseInitBonus);
+
+  const skills = 
+    function () {
+      var characterSkills = MML.getSkillAttributes(character.id, 'skills');
+      _.each(
+        characterSkills,
+        function (characterSkill, skillName) {
+          var level = characterSkill.input;
+          var attribute = MML.skills[skillName].attribute;
+
+          level += MML.attributeMods[attribute][character[attribute]];
+
+          if (_.isUndefined(MML.skillMods[race]) === false && _.isUndefined(MML.skillMods[race][skillName]) === false) {
+            level += MML.skillMods[race][skillName];
+          }
+          if (_.isUndefined(MML.skillMods[character.gender]) === false && _.isUndefined(MML.skillMods[character.gender][skillName]) === false) {
+            level += MML.skillMods[character.gender][skillName];
+          }
+          characterSkill.level = level;
+          MML.setCurrentAttribute(character.id, 'repeating_skills_' + characterSkill._id + '_name', skillName);
+          MML.setCurrentAttribute(character.id, 'repeating_skills_' + characterSkill._id + '_input', characterSkill.input);
+          MML.setCurrentAttribute(character.id, 'repeating_skills_' + characterSkill._id + '_level', level);
+        },
+        character
+      );
+
+      return characterSkills;
+    },
+
+    const weaponSkills =
+      function () {
+        var characterSkills = MML.getSkillAttributes(character.id, "weaponskills");
+        var highestSkill;
+
+        _.each(
+          characterSkills,
+          function (characterSkill, skillName) {
+            var level = characterSkill.input;
+
+            // This may need to include other modifiers
+            if (_.isUndefined(MML.weaponSkillMods[race]) === false && _.isUndefined(MML.weaponSkillMods[race][skillName]) === false) {
+              level += MML.weaponSkillMods[race][skillName];
+            }
+            characterSkill.level = level;
+          },
+          character
+        );
+
+        highestSkill = _.max(characterSkills, skill => skill.level).level;
+        if (isNaN(highestSkill)) {
+          highestSkill = 0;
+        }
+
+        if (_.isUndefined(characterSkills["Default Martial"])) {
+          characterSkills["Default Martial"] = {
+            input: 0,
+            level: 0,
+            _id: MML.generateRowID()
+          };
+        }
+
+        if (highestSkill < 20) {
+          characterSkills["Default Martial"].level = 1;
+        } else {
+          characterSkills["Default Martial"].level = Math.round(highestSkill / 2);
+        }
+
+        _.each(
+          characterSkills,
+          function (characterSkill, skillName) {
+            MML.setCurrentAttribute(character.id, "repeating_weaponskills_" + characterSkill._id + "_name", skillName);
+            MML.setCurrentAttribute(character.id, "repeating_weaponskills_" + characterSkill._id + "_input", characterSkill.input);
+            MML.setCurrentAttribute(character.id, "repeating_weaponskills_" + characterSkill._id + "_level", characterSkill.level);
+          },
+          character
+        );
+        return characterSkills;
+      },
+
+      const fov = MML.derivedAttribute(function (senseInitBonus) {
+        switch (senseInitBonus) {
+          case 4:
+            return 180;
+          case 3:
+            return 170;
+          case 2:
+            return 160;
+          case 1:
+            return 150;
+          case 0:
+            return 140;
+          case -1:
+            return 130;
+          case -2:
+            return 120;
+          default:
+            return 180;
+        }
+      }, senseInitBonus);
+
+  const getShieldDefenseBonus(character) {
+    const rightHand = character.inventory[character.rightHand._id];
+    const leftHand = character.inventory[character.leftHand._id];
+
+    if (!_.isUndefined(rightHand) && rightHand.type === 'shield') {
+      return rightHand.defenseMod;
+    } else if (!_.isUndefined(leftHand) && leftHand.type === 'shield' && leftHand.defenseMod > rightHand.defenseMod) {
+      return leftHand.defenseMod;
+    } else {
+      return 0;
+    }
+  };
+
+  const getWeaponGrip(character) {
+    if (character['rightHand'].grip !== 'unarmed') {
+      return character['rightHand'].grip;
+    } else if (character['leftHand'].grip !== 'unarmed') {
+      return character['leftHand'].grip;
+    } else {
+      return 'unarmed';
+    }
+  };
+
+  const getEquippedWeapon(character) {
+    const grip = MML.getWeaponGrip(character);
+    var weapon;
+    var item;
+    var itemId;
+
+    if (MML.isUnarmed(character)) {
+      return 'unarmed';
+    } else if (character['rightHand'].grip !== 'unarmed') {
+      itemId = character.rightHand._id;
+      item = character.inventory[itemId];
+    } else {
+      itemId = character.leftHand._id;
+      item = character.inventory[itemId];
+    }
+    return MML.buildWeaponObject(item, grip);
+  };
+
+  const buildWeaponObject(item, grip) {
+    var weapon = {
+      _id: item._id,
+      name: item.name,
+      type: 'weapon',
+      weight: item.weight,
+      family: item.grips[grip].family,
+      hands: item.grips[grip].hands
+    };
+
+    if (['MWD', 'MWM', 'TWH', 'TWK', 'TWS', 'SLI'].includes(weapon.family)) {
+      _.extend(weapon, item.grips[grip]);
+      if (weapon.family === 'MWM') {
+        weapon.loaded = item.loaded;
+      }
+    } else {
+      _.extend(weapon, {
+        defense: item.grips[grip].defense,
+        initiative: item.grips[grip].initiative,
+        rank: item.grips[grip].rank,
+        primaryType: item.grips[grip].primaryType,
+        primaryTask: item.grips[grip].primaryTask,
+        primaryDamage: item.grips[grip].primaryDamage,
+        secondaryType: item.grips[grip].secondaryType,
+        secondaryTask: item.grips[grip].secondaryTask,
+        secondaryDamage: item.grips[grip].secondaryDamage
+      });
+    }
+    return weapon;
+  };
+
+  const getWeaponAndSkill(character) {
+    var itemId;
+    var grip;
+
+    if (MML.getWeaponFamily(character, 'rightHand') !== 'unarmed') {
+      itemId = character.rightHand._id;
+      grip = character.rightHand.grip;
+    } else {
+      itemId = character.leftHand._id;
+      grip = character.leftHand.grip;
+    }
+    var item = character.inventory[itemId];
+    var characterWeapon = MML.buildWeaponObject(item, grip);
+
+    if (!MML.isRangedWeapon(characterWeapon)) {
+      if (character.action.attackType === 'secondary') {
+        characterWeapon.damageType = item.grips[grip].secondaryType;
+        characterWeapon.task = item.grips[grip].secondaryTask;
+        characterWeapon.damage = item.grips[grip].secondaryDamage;
+      } else {
+        characterWeapon.damageType = item.grips[grip].primaryType;
+        characterWeapon.task = item.grips[grip].primaryTask;
+        characterWeapon.damage = item.grips[grip].primaryDamage;
+      }
+    }
+
+    return {
+      characterWeapon: characterWeapon,
+      skill: MML.getWeaponSkill(character, item)
+    };
+  };
+
+  const getWeaponSkill(character, weapon) {
+    var item = weapon;
+    var skill;
+
+    if (item.type !== 'weapon') {
+      log('Not a weapon');
+      MML.error();
+    }
+
+    const grip = MML.getWeaponGrip(character);
+    const skillName = item.name + ['War Spear', 'Boar Spear', 'Military Fork', 'Bastard Sword'].includes(item.name) ? ', ' + grip : '';
+
+    if (_.has(character.weaponSkills, skillName)) {
+      return character.weaponSkills[skillName].level;
+    } else {
+      var relatedSkills = [];
+      _.each(character.weaponSkills, function (relatedSkill, skillName) {
+        if (skillName !== 'Default Martial') {
+          _.each(MML.items[skillName.replace(', ' + grip, '')].grips, function (skillFamily) {
+            if (skillFamily.family === item.grips[grip].family) {
+              relatedSkills.push(relatedSkill);
+            }
+          });
+        }
+      }, character);
+
+      if (relatedSkills.length === 0) {
+        return character.weaponSkills['Default Martial'].level;
+      } else {
+        return _.max(relatedSkills, function (skill) {
+          return skill.level;
+        }).level - 10;
+      }
+    }
+  };
+
+  const graspers = bodyType.pipe(map(function (type) {
+    switch (type) {
+      case 'humanoid':
+        return ['Left', 'Right'];
+      default:
+        return [];
+    }
+  }));
+
+  const wielded_weapon_families = function isWieldingWeaponFamily(character, families) {
+    return families.includes(getWeaponFamily(character, 'rightHand')) || rangedFamilies.includes(getWeaponFamily(character, 'leftHand'));
+  };
+
+  const getWeaponFamily(character, hand) {
+    const item = character.inventory[character[hand]._id];
+    if (!_.isUndefined(item) && item.type === 'weapon') {
+      return item.grips[character[hand].grip].family;
+    } else {
+      return 'unarmed';
+    }
+  };
+
+  const isWieldingRangedWeapon = function isWieldingRangedWeapon(character) {
+    return isWieldingMissileWeapon(character) || isWieldingThrowingWeapon(character);
+  };
+
+  const isWieldingMissileWeapon = function isWieldingMissileWeapon(character) {
+    return isWieldingWeaponFamily(character, ['MWD', 'MWM']);
+  };
+
+  const isWieldingThrowingWeapon = function isWieldingThrowingWeapon(character) {
+    return isWieldingWeaponFamily(character, ['TWH', 'TWK', 'TWS', 'SLI']);
+  };
+
+  const isRangedWeapon = function isRangedWeapon(weapon) {
+    return ['MWD', 'MWM', 'TWH', 'TWK', 'TWS', 'SLI'].includes(weapon.family);
+  };
+
+  const isUnarmed = function isUnarmed(character) {
+    return getWeaponFamily(character, 'leftHand') === 'unarmed' && getWeaponFamily(character, 'rightHand') === 'unarmed';
+  };
+
+  const isDualWielding = Rx.zip(left_hand, right_hand).pipe(map(function (character) {
+    const leftHand = getWeaponFamily(character, 'leftHand');
+    const rightHand = getWeaponFamily(character, 'rightHand');
+    return character.leftHand._id !== character.rightHand._id && leftHand !== 'unarmed' && rightHand !== 'unarmed';
+  }));
+
   return character;
 };
 // MML.game_state = MML.players.pipe();
@@ -2350,7 +2383,119 @@ MML.applyRegainFeet = function applyRegainFeet(character, defender) {
   MML.removeStatusEffect(character, 'Overborne');
   character.movementType = 'Walk';
 };
-MML.init = function() {
+const MML = {};
+
+Rx.r20_ready
+Rx.add_attribute
+Rx.chat_message
+Rx.change_character_name
+
+Rx.change_attribute_current
+
+MML.players = Rx.change_player_online.pipe(
+  startWith(findObjs({
+    _type: 'player',
+    online: true
+  }, {
+    caseInsensitive: false
+  }))
+);
+
+MML.player_list = MML.players.pipe(
+  scan(function (player_list, player) {
+    const id = player.get('id');
+    if (player.get('online')) {
+      player_list[id] = player;
+    } else if (!_.isUndefined(player_list[id])) {
+      delete player_list[id];
+    }
+    return player_list;
+  }, {})
+);
+
+MML.GM = MML.players.pipe(filter(player => playerIsGM(player.get('id'))));
+
+MML.button_pressed = chat.pipe(
+  filter(({ type, content }) => type === 'api' && content.includes('!MML|')),
+  map(function (message) {
+    message.who = message.who.replace(' (GM)', '');
+    message.content = message.content.replace('!MML|', '');
+    message.selected = MML.getSelectedIds(message.selected);
+    return message;
+  }),
+  // share(),
+  tap(() => log('button'))
+);
+
+MML.characters = Rx.add_character.pipe(
+  startWith(
+    findObjs({
+      _type: 'character',
+      archived: false
+    }, {
+      caseInsensitive: false
+    })
+  ),
+  map(character => MML.createCharacter(character.id))
+);
+
+MML.character_list = MML.characters.pipe(
+  scan(function (character_list, character) {
+    character_list[character.id] = character;
+    return character_list;
+  }, {})
+);
+
+MML.character_controlled_by = Rx.change_character_controlledby.pipe(
+  map(function (character) {
+    return {
+      character_id: character.id,
+      player_id_list: character.controlledby.split(',')
+    };
+  })
+);
+
+MML.character_controlled_by_error = MML.character_controlled_by.pipe(
+  filter(({ player_id_list }) => player_id_list.length === 0 || player_id_list.length > 1),
+  withLatestFrom(MML.GM),
+  tap(([controlled_by, gm]) => sendChat(gm.name, 'Character needs exactly 1 player'))
+)
+
+MML.token_moved = Rx.change_token.pipe(
+  filter(([curr, prev]) => curr.get('left') !== prev['left'] && curr.get('top') !== prev['top']),
+  map(([token]) => token)
+);
+
+MML.character_moved = MML.token_moved.pipe(
+  withLatestFrom(MML.character_list),
+  filter(([token, character_list]) => Object.keys(character_list).includes(token.get('represents'))),
+  map(([token, character_list]) => character_list[token.get('represents')])
+);
+
+MML.spell_marker_moved = Rx.change_token.pipe(
+  filter(token => token.get('name').includes('spellMarker')),
+  map(function (obj, prev) {
+    var targets = MML.getAoESpellTargets(obj);
+    _.each(MML.characters, function (character) {
+      var token = MML.getCharacterToken(character.id);
+      if (!_.isUndefined(token)) {
+        if (targets.includes(character.id)) {
+          token.set('tint_color', '#00FF00');
+        } else {
+          token.set('tint_color', 'transparent');
+        }
+      }
+    });
+    state.MML.GM.currentAction.parameters.metaMagic['Modified AoE'] = MML.getAoESpellModifier(obj, state.MML.GM.currentAction.parameters.spell);
+    sendChat('GM',
+      'EP Cost: ' + MML.getModifiedEpCost() + '\n' +
+      'Chance to Cast: ' + MML.getModifiedCastingChance()
+    );
+    toBack(obj);
+  })
+);
+
+MML.init = function () {
   state.MML = {};
   state.MML.GM = {
     player: new MML.Player('Robot', true),
@@ -2360,43 +2505,16 @@ MML.init = function() {
     currentRound: 0,
     roundStarted: false
   };
-  const playerObjects = findObjs({
-    _type: 'player',
-    online: true
-  }, {
-    caseInsensitive: false
-  });
-  MML.players = {};
-  MML.players[state.MML.GM.name] = state.MML.GM.player;
 
-  _.each(playerObjects, function(player) {
+  _.each(playerObjects, function (player) {
     if (player.get('displayname') !== state.MML.GM.name) {
       MML.players[player.get('displayname')] = new MML.Player(player.get('displayname'), false);
     }
   });
 
-  const characterObjects = findObjs({
-    _type: 'character',
-    archived: false
-  }, {
-    caseInsensitive: false
-  });
-
-  MML.characters = characterObjects.reduce(function(characters, characterObject) {
-    const id = characterObject.id;
-    const character = MML.createCharacter(id);
-    MML.setPlayer(character);
-    characters[id] = character;
-    return characters;
-  }, {});
-
   MML.initializeMenu(state.MML.GM.player);
 
-  MML.newCharacter = Rx.create(function (observer) {
-    
-  });
-
-  on('add:character', function(character) {
+  on('add:character', function (character) {
     const id = character.get('id');
     const name = character.get('name');
 
@@ -2428,7 +2546,7 @@ MML.init = function() {
     }, 2000);
   });
 
-  on('add:attribute', function(attribute) {
+  on('add:attribute', function (attribute) {
     var id = attribute.get('_characterid');
     var attrName = attribute.get('name');
 
@@ -2437,13 +2555,13 @@ MML.init = function() {
     }
   });
 
-  on('change:character:name', function(changedCharacter) {
+  on('change:character:name', function (changedCharacter) {
     const character = MML.characters[changedCharacter.get('id')];
     character.name = changedCharacter.get('name');
     MML.updateCharacterSheet(character);
   });
 
-  on('change:attribute:current', function(attribute) {
+  on('change:attribute:current', function (attribute) {
     var character = MML.characters[attribute.get('_characterid')];
     var attrName = attribute.get('name');
     var roll;
@@ -2456,7 +2574,8 @@ MML.init = function() {
       'intellectRoll',
       'reasonRoll',
       'creativityRoll',
-      'presenceRoll'];
+      'presenceRoll'
+    ];
 
     if (rollAttributes.includes(attrName)) {
       roll = parseFloat(attribute.get('current'));
@@ -2474,68 +2593,6 @@ MML.init = function() {
     }
   });
 };
-
-token_changed.pipe(map(function (obj, prev) {
-  if (obj.get('name').indexOf('spellMarker') === -1 && obj.get('left') !== prev['left'] && obj.get('top') !== prev['top'] && state.MML.GM.inCombat === true) {
-    const character = MML.characters[MML.getCharacterIdFromToken(obj)];
-    const left1 = prev['left'];
-    const left2 = obj.get('left');
-    const top1 = prev['top'];
-    const top2 = obj.get('top');
-    const distance = MML.getDistanceFeet(left1, left2, top1, top2);
-    const distanceAvailable = MML.movementRates[character.race][character.movementType] * character.movementAvailable;
-
-    if (state.MML.GM.actor === charName && distanceAvailable > 0) {
-      // If they move too far, move the maxium distance in the same direction
-      if (distance > distanceAvailable) {
-        const left3 = Math.floor(((left2 - left1) / distance) * distanceAvailable + left1 + 0.5);
-        const top3 = Math.floor(((top2 - top1) / distance) * distanceAvailable + top1 + 0.5);
-        obj.set('left', left3);
-        obj.set('top', top3);
-        character.movementAvailable(0);
-      }
-      character.moveDistance(distance);
-    } else {
-      obj.set('left', prev['left']);
-      obj.set('top', prev['top']);
-    }
-  }
-}));
-
-token_changed.pipe(
-  filter((obj, prev) => obj.get('name').includes('spellMarker')),
-  map(function (obj, prev) {
-    var targets = MML.getAoESpellTargets(obj);
-    _.each(MML.characters, function (character) {
-      var token = MML.getCharacterToken(character.id);
-      if (!_.isUndefined(token)) {
-        if (targets.includes(character.id)) {
-          token.set('tint_color', '#00FF00');
-        } else {
-          token.set('tint_color', 'transparent');
-        }
-      }
-    });
-    state.MML.GM.currentAction.parameters.metaMagic['Modified AoE'] = MML.getAoESpellModifier(obj, state.MML.GM.currentAction.parameters.spell);
-    sendChat('GM',
-      'EP Cost: ' + MML.getModifiedEpCost() + '\n' +
-      'Chance to Cast: ' + MML.getModifiedCastingChance()
-    );
-    toBack(obj);
-  })
-);
-
-MML.buttonPressed = chat.pipe(
-  filter(({type, content}) => type === 'api' && content.includes('!MML|')),
-  map(function (message) {
-    message.who = message.who.replace(' (GM)', '');
-    message.content = message.content.replace('!MML|', '');
-    message.selected = MML.getSelectedIds(message.selected);
-    return message;
-  }),
-  share(),
-  tap(() => log('button'))
-);
 MML.sendChatMenu = function sendChatMenu(name, message, buttons) {
   var toChat = '/w "' + name +
     '" &{template:charMenu} {{name=' + message + '}} ' +
@@ -3714,10 +3771,18 @@ MML.GmMenuUtilities = function GmMenuUtilities(player, input) {
   //edit states and other api stuff
 };
 
-MML.Player = function Player(name, isGM) {
+MML.Player = function Player(id) {
   const player = this;
   player.name = name;
-  player.characters = [];
+  player.characters = MML.characters.pipe(
+    mergeMap(character => Rx.combineLatest(character.player)),
+    filter(),
+    scan(function (list, character) {
+      list[character.id] = character;
+      return  character;
+    })
+  );
+
   // player.menu = MML.buttonPressed.pipe(
   //     filter(message => message.who === player.name),
   //     scan()
@@ -4364,7 +4429,7 @@ MML.spells['Hail of Stones'] = {
   }
 };
 MML.statusEffects = {
-  'Major Wound': function (effect, index) {
+  'Major Wound':  function (effect, index) {
     if (!state.MML.GM.inCombat) {
       this.statusEffects[index].duration = 0;
       effect.duration = 0;
@@ -4861,19 +4926,14 @@ MML.getCurrentAttributeJSON = function getCurrentAttributeJSON(id, attribute) {
 };
 
 MML.getSkillAttributes = function getSkillAttributes(id, skillType) {
-  const attributes = findObjs({
-    _type: 'attribute',
-    _characterid: id
-  }, {
-    caseInsensitive: false
-  });
+  const attributes = findObjs({_type: 'attribute', _characterid: id});
   const skills = {};
   const skill_data = {};
 
   _.each(attributes, function(attribute) {
     const attributeName = attribute.get('name');
 
-    if (attributeName.indexOf('repeating_' + skillType) !== -1) {
+    if (!attributeName.includes('repeating_' + skillType)) {
       const attributeString = attributeName.split('_');
       var _id = attributeString[2];
       const property = attributeString[3];
@@ -4925,9 +4985,7 @@ MML.getAttributeTableValue = function getAttributeTableValue(attribute, inputVal
 
 // Token Functions
 MML.getCharacterIdFromToken = function getCharacterIdFromToken(token) {
-  log(token);
   const tokenObject = getObj('graphic', token._id);
-  log(tokenObject);
   const characterObject = getObj('character', tokenObject.get('represents'));
 
   if (tokenObject.get('name').includes('spellMarker')) {
@@ -4964,9 +5022,9 @@ MML.getSelectedIds = function getSelectedIds(selected = []) {
   return selected.map(token => MML.getCharacterIdFromToken(token));
 };
 
-MML.displayAura = function displayAura(token, radius, auraNumber, color) {
-  token.set(auraNumber === 2 ? 'aura2_radius' : 'aura1_radius', radius);
-  token.set(auraNumber === 2 ? 'aura1_color' : 'aura1_color', color);
+MML.displayAura = function displayAura(token, radius, aura_number, color) {
+  token.set(aura_number === 2 ? 'aura2_radius' : 'aura1_radius', radius);
+  token.set(aura_number === 2 ? 'aura2_color' : 'aura1_color', color);
 };
 
 MML.getDistanceBetweenTokens = function getDistanceBetweenTokens(a, b) {
