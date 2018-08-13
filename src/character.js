@@ -1009,10 +1009,11 @@ MML.createCharacter = function (id) {
   const major_wound_save = Rx.combineLatest(hpMax, hp.pipe(pairwise())).pipe(
     filter(function ([max, [previous, current]]) {
       return Object.keys(max).reduce(function (save_needed, body_part) {
+        const half_max = Math.round(max[body_part] / 2);
         const current_hp = current[body_part];
-        if (current_hp < Math.round(maxHP / 2) && currentHP >= 0) { //Major wound
-          if (initialHP >= Math.round(maxHP / 2)) { //Fresh wound
-            duration = Math.round(maxHP / 2) - currentHP;
+        if (current_hp < half_max && current_hp >= 0) { //Major wound
+          if (initialHP >= half_max) { //Fresh wound
+            duration = half_max - current_hp;
           } else if (!_.has(character.statusEffects, 'Major Wound, ' + bodyPart)) {
             duration = -hpAmount;
           } else { //Add damage to duration of effect
@@ -1030,7 +1031,8 @@ MML.createCharacter = function (id) {
         }
         return save_needed;
       }, false)
-    })
+    }),
+    concatMap(MML.attributeCheckRoll)
   )
   // #endregion
 
