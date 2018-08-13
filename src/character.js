@@ -264,39 +264,6 @@ MML.updateInventory = function updateInventory(character) {
   character.inventory = items;
 };
 
-MML.updateCharacterSheet = function updateCharacterSheet(character) {
-  // _.each(character, function(value, attribute) {
-  //   if (typeof(value) === 'object') {
-  //     return JSON.stringify(value);
-  //   MML.setCurrentAttribute(character.id, attribute, value);
-  // });
-};
-
-MML.updateCharacter = function updateCharacter(character) {
-  MML.applyStatusEffects(character);
-  MML.updateInventory(character);
-  MML.updateCharacterSheet(character);
-};
-
-MML.setPlayer = function setPlayer(character) {
-  const playerName = MML.getCurrentAttribute(character.id, 'player');
-  var newPlayer = MML.getPlayerFromName(playerName);
-  if (_.isUndefined(newPlayer)) {
-    sendChat('GM', 'Player ' + playerName + ' not found.');
-    newPlayer = MML.getPlayerFromName(state.MML.GM.name);
-    MML.setCurrentAttribute(character.id, 'player', state.MML.GM.name);
-  }
-  MML.getCharFromName(character.name).set('controlledby', newPlayer.id);
-
-  _.each(MML.players, function (player) {
-    if (player.name === MML.getCurrentAttribute(character.id, 'player')) {
-      player.characters.push(character);
-    } else {
-      player.characters = _.reject(player.characters, otherCharacter => otherCharacter.id !== character.id);
-    }
-  });
-};
-
 MML.isSensitiveArea = function isSensitiveArea(position) {
   return [2, 6, 33].includes(position);
 };
@@ -862,13 +829,14 @@ MML.derivedAttribute = function derivedAttribute(compute, ...attributes) {
 MML.createCharacter = function (id) {
   const character = { id };
 
-  const attribute_changed = current_attribute_changed_global.pipe(
+  const attribute_changed = Rx.change_attribute_current.pipe(
     filter(attribute => attribute.get('_characterid') === id),
     share()
   );
 
   const game_state = MML.game_state.pipe(filter(effect => effect.object_id === id));
-
+  // Rx.add_attribute
+  // Rx.change_attribute_current
 
   // Object.defineProperty(character, 'player', {
   //   get: function () {
@@ -884,7 +852,11 @@ MML.createCharacter = function (id) {
   // const knockdown = isNaN(parseFloat(MML.getCurrentAttribute(character.id, 'knockdown'))) ? character.knockdownMax : MML.getCurrentAttributeAsFloat(character.id, 'knockdown');
 
   // #region Input Attributes
-  const name = character_name_changed.pipe(filter(changed_character => changed_character.get('id') === id), map(changed_character => changed_character.get('name')));
+  const name = Rx.change_character_name.pipe(
+    filter(changed_character => changed_character.get('id') === id),
+    map(changed_character => changed_character.get('name'))
+  );
+
   const stature_roll = attribute_changed.pipe(MML.rollAttributeChanged('stature_roll'));
   const strength_roll = attribute_changed.pipe(MML.rollAttributeChanged('strength_roll'));
   const coordination_roll = attribute_changed.pipe(MML.rollAttributeChanged('coordination_roll'));
@@ -1259,6 +1231,37 @@ MML.createCharacter = function (id) {
       });
     }
     return character;
+  }));
+
+  const character_moved = MML.character_moved.pipe(filter(character => character.id === id));
+
+  const character_movement_blocked = character_moved.pipe(
+
+  );
+
+  MML.combat_movement = MML.token_moved.pipe(map(function (obj, prev) {
+    const character = MML.characters[MML.getCharacterIdFromToken(obj)];
+    const left1 = prev['left'];
+    const left2 = obj.get('left');
+    const top1 = prev['top'];
+    const top2 = obj.get('top');
+    const distance = MML.getDistanceFeet(left1, left2, top1, top2);
+    const distanceAvailable = MML.movementRates[character.race][character.movementType] * character.movementAvailable;
+
+    if (state.MML.GM.actor === charName && distanceAvailable > 0) {
+      // If they move too far, move the maxium distance in the same direction
+      if (distance > distanceAvailable) {
+        const left3 = Math.floor(((left2 - left1) / distance) * distanceAvailable + left1 + 0.5);
+        const top3 = Math.floor(((top2 - top1) / distance) * distanceAvailable + top1 + 0.5);
+        obj.set('left', left3);
+        obj.set('top', top3);
+        character.movementAvailable(0);
+      }
+      character.moveDistance(distance);
+    } else {
+      obj.set('left', prev['left']);
+      obj.set('top', prev['top']);
+    }
   }));
 
   const ready = Rx.merge(

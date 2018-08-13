@@ -1,3 +1,108 @@
+const MML = {};
+
+MML.players = Rx.change_player_online.pipe(
+  startWith(findObjs({
+    _type: 'player',
+    online: true
+  }, {
+    caseInsensitive: false
+  }))
+);
+
+MML.player_list = MML.players.pipe(
+  scan(function (player_list, player) {
+    const id = player.get('id');
+    if (player.get('online')) {
+      player_list[id] = player;
+    } else if (!_.isUndefined(player_list[id])) {
+      delete player_list[id];
+    }
+    return player_list;
+  }, {})
+);
+
+MML.GM = MML.players.pipe(filter(player => playerIsGM(player.get('id'))));
+
+MML.button_pressed = Rx.chat_message.pipe(
+  filter(({ type, content }) => type === 'api' && content.includes('!MML|')),
+  map(function (message) {
+    message.who = message.who.replace(' (GM)', '');
+    message.content = message.content.replace('!MML|', '');
+    message.selected = MML.getSelectedIds(message.selected);
+    return message;
+  }),
+  // share(),
+  tap(() => log('button'))
+);
+
+MML.characters = Rx.add_character.pipe(
+  startWith(
+    findObjs({
+      _type: 'character',
+      archived: false
+    }, {
+      caseInsensitive: false
+    })
+  ),
+  map(character => MML.createCharacter(character.id))
+);
+
+MML.character_list = MML.characters.pipe(
+  scan(function (character_list, character) {
+    character_list[character.id] = character;
+    return character_list;
+  }, {})
+);
+
+MML.character_controlled_by = Rx.change_character_controlledby.pipe(
+  map(function (character) {
+    return {
+      character_id: character.id,
+      player_id_list: character.controlledby.split(',')
+    };
+  })
+);
+
+MML.character_controlled_by_error = MML.character_controlled_by.pipe(
+  filter(({ player_id_list }) => player_id_list.length === 0 || player_id_list.length > 1),
+  withLatestFrom(MML.GM),
+  tap(([controlled_by, gm]) => sendChat(gm.name, 'Character needs exactly 1 player'))
+)
+
+MML.token_moved = Rx.change_token.pipe(
+  filter(([curr, prev]) => curr.get('left') !== prev['left'] && curr.get('top') !== prev['top']),
+  map(([token]) => token)
+);
+
+MML.character_moved = MML.token_moved.pipe(
+  withLatestFrom(MML.character_list),
+  filter(([token, character_list]) => Object.keys(character_list).includes(token.get('represents'))),
+  map(([token, character_list]) => character_list[token.get('represents')])
+);
+
+MML.spell_marker_moved = Rx.change_token.pipe(
+  filter(token => token.get('name').includes('spellMarker')),
+  map(function (obj, prev) {
+    var targets = MML.getAoESpellTargets(obj);
+    _.each(MML.characters, function (character) {
+      var token = MML.getCharacterToken(character.id);
+      if (!_.isUndefined(token)) {
+        if (targets.includes(character.id)) {
+          token.set('tint_color', '#00FF00');
+        } else {
+          token.set('tint_color', 'transparent');
+        }
+      }
+    });
+    state.MML.GM.currentAction.parameters.metaMagic['Modified AoE'] = MML.getAoESpellModifier(obj, state.MML.GM.currentAction.parameters.spell);
+    sendChat('GM',
+      'EP Cost: ' + MML.getModifiedEpCost() + '\n' +
+      'Chance to Cast: ' + MML.getModifiedCastingChance()
+    );
+    toBack(obj);
+  })
+);
+
 MML.init = function () {
   state.MML = {};
   state.MML.GM = {
@@ -8,9 +113,6 @@ MML.init = function () {
     currentRound: 0,
     roundStarted: false
   };
-  const playerObjects = findObjs({ _type: 'player', online: true });
-  MML.players = {};
-  MML.players[state.MML.GM.name] = state.MML.GM.player;
 
   _.each(playerObjects, function (player) {
     if (player.get('displayname') !== state.MML.GM.name) {
@@ -18,21 +120,7 @@ MML.init = function () {
     }
   });
 
-  const characterObjects = findObjs({_type: 'character', archived: false});
-
-  MML.characters = characterObjects.reduce(function (characters, characterObject) {
-    const id = characterObject.id;
-    const character = MML.createCharacter(id);
-    MML.setPlayer(character);
-    characters[id] = character;
-    return characters;
-  }, {});
-
   MML.initializeMenu(state.MML.GM.player);
-
-  MML.newCharacter = Rx.create(function (observer) {
-
-  });
 
   on('add:character', function (character) {
     const id = character.get('id');
@@ -113,65 +201,3 @@ MML.init = function () {
     }
   });
 };
-
-token_changed.pipe(map(function (obj, prev) {
-  if (obj.get('name').indexOf('spellMarker') === -1 && obj.get('left') !== prev['left'] && obj.get('top') !== prev['top'] && state.MML.GM.inCombat === true) {
-    const character = MML.characters[MML.getCharacterIdFromToken(obj)];
-    const left1 = prev['left'];
-    const left2 = obj.get('left');
-    const top1 = prev['top'];
-    const top2 = obj.get('top');
-    const distance = MML.getDistanceFeet(left1, left2, top1, top2);
-    const distanceAvailable = MML.movementRates[character.race][character.movementType] * character.movementAvailable;
-
-    if (state.MML.GM.actor === charName && distanceAvailable > 0) {
-      // If they move too far, move the maxium distance in the same direction
-      if (distance > distanceAvailable) {
-        const left3 = Math.floor(((left2 - left1) / distance) * distanceAvailable + left1 + 0.5);
-        const top3 = Math.floor(((top2 - top1) / distance) * distanceAvailable + top1 + 0.5);
-        obj.set('left', left3);
-        obj.set('top', top3);
-        character.movementAvailable(0);
-      }
-      character.moveDistance(distance);
-    } else {
-      obj.set('left', prev['left']);
-      obj.set('top', prev['top']);
-    }
-  }
-}));
-
-token_changed.pipe(
-  filter((obj, prev) => obj.get('name').includes('spellMarker')),
-  map(function (obj, prev) {
-    var targets = MML.getAoESpellTargets(obj);
-    _.each(MML.characters, function (character) {
-      var token = MML.getCharacterToken(character.id);
-      if (!_.isUndefined(token)) {
-        if (targets.includes(character.id)) {
-          token.set('tint_color', '#00FF00');
-        } else {
-          token.set('tint_color', 'transparent');
-        }
-      }
-    });
-    state.MML.GM.currentAction.parameters.metaMagic['Modified AoE'] = MML.getAoESpellModifier(obj, state.MML.GM.currentAction.parameters.spell);
-    sendChat('GM',
-      'EP Cost: ' + MML.getModifiedEpCost() + '\n' +
-      'Chance to Cast: ' + MML.getModifiedCastingChance()
-    );
-    toBack(obj);
-  })
-);
-
-MML.buttonPressed = chat.pipe(
-  filter(({ type, content }) => type === 'api' && content.includes('!MML|')),
-  map(function (message) {
-    message.who = message.who.replace(' (GM)', '');
-    message.content = message.content.replace('!MML|', '');
-    message.selected = MML.getSelectedIds(message.selected);
-    return message;
-  }),
-  share(),
-  tap(() => log('button'))
-);
