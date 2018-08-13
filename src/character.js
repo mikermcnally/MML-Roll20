@@ -1265,9 +1265,9 @@ MML.createCharacter = function (id) {
   }));
 
   const ready = Rx.merge(
-      MML.newRound.pipe(mapTo(false)),
+      MML.new_round.pipe(mapTo(false)),
       action.pipe(mapTo(true)),
-      MML.endCombat
+      MML.end_combat
     )
     .pipe(
       tap(function (is_ready) {

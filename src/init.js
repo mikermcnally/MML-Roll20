@@ -1,4 +1,5 @@
 const MML = {};
+state.MML = state.MML || {};
 
 MML.players = Rx.change_player_online.pipe(
   startWith(findObjs({
@@ -103,6 +104,19 @@ MML.spell_marker_moved = Rx.change_token.pipe(
   })
 );
 
+MML.in_combat = Rx.merge(MML.startCombat)
+
+MML.new_round = Rx.of('idk yet');
+MML.gm_time_advance = Rx.of('idk yet');
+
+MML.current_round = Rx.merge(
+    Rx.of(state.MML.current_round || 0),
+    MML.new_round.pipe(count()),
+    MML.gm_time_advance)
+  .pipe(scan((sum, num) => sum + num));
+
+MML.current_round.subscribe(round => state.MML.current_round = round);
+
 MML.init = function () {
   state.MML = {};
   state.MML.GM = {
@@ -113,12 +127,6 @@ MML.init = function () {
     currentRound: 0,
     roundStarted: false
   };
-
-  _.each(playerObjects, function (player) {
-    if (player.get('displayname') !== state.MML.GM.name) {
-      MML.players[player.get('displayname')] = new MML.Player(player.get('displayname'), false);
-    }
-  });
 
   MML.initializeMenu(state.MML.GM.player);
 
