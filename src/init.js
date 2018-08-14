@@ -45,6 +45,31 @@ MML.characters = Rx.add_character.pipe(
       caseInsensitive: false
     })
   ),
+  tap(function (character) {
+    const id = character.get('id');
+    const name = character.get('name');
+
+    MML.createAttribute('id', id, '', character);
+    MML.createAttribute('name', name, '', character);
+    MML.createAttribute('race', 'Human', '', character);
+    MML.createAttribute('gender', 'Male', '', character);
+    MML.createAttribute('stature_roll', 6, '', character);
+    MML.createAttribute('strength_roll', 6, '', character);
+    MML.createAttribute('coordination_roll', 6, '', character);
+    MML.createAttribute('health_roll', 6, '', character);
+    MML.createAttribute('beauty_roll', 6, '', character);
+    MML.createAttribute('intellect_roll', 6, '', character);
+    MML.createAttribute('reason_roll', 6, '', character);
+    MML.createAttribute('creativity_roll', 6, '', character);
+    MML.createAttribute('presence_roll', 6, '', character);
+    MML.createAttribute('fom_init_bonus', 6, '', character);
+    MML.createAttribute('right_hand', JSON.stringify({
+      _id: 'emptyHand'
+    }), '', character);
+    MML.createAttribute('leftHand', JSON.stringify({
+      _id: 'emptyHand'
+    }), '', character);
+  }),
   map(character => MML.createCharacter(character.id))
 );
 
@@ -81,86 +106,48 @@ MML.character_moved = MML.token_moved.pipe(
   map(([token, character_list]) => character_list[token.get('represents')])
 );
 
-MML.spell_marker_moved = Rx.change_token.pipe(
-  filter(token => token.get('name').includes('spellMarker')),
-  map(function (obj, prev) {
-    var targets = MML.getAoESpellTargets(obj);
-    _.each(MML.characters, function (character) {
-      var token = MML.getCharacterToken(character.id);
-      if (!_.isUndefined(token)) {
-        if (targets.includes(character.id)) {
-          token.set('tint_color', '#00FF00');
-        } else {
-          token.set('tint_color', 'transparent');
-        }
-      }
-    });
-    state.MML.GM.currentAction.parameters.metaMagic['Modified AoE'] = MML.getAoESpellModifier(obj, state.MML.GM.currentAction.parameters.spell);
-    sendChat('GM',
-      'EP Cost: ' + MML.getModifiedEpCost() + '\n' +
-      'Chance to Cast: ' + MML.getModifiedCastingChance()
-    );
-    toBack(obj);
-  })
+MML.spell_marker_moved = Rx.change_token.pipe(filter(token => token.get('name').includes('spellMarker')));
+
+MML.spell_marker_moved.subscribe(token => toBack(token));
+
+MML.aoe_spell_targets = MML.spell_marker_moved.pipe(
+  map(([token]) => MML.getAoESpellTargets(token))
 );
 
-MML.in_combat = Rx.merge(MML.startCombat)
+MML.select_target = MML.button_pressed.pipe(filter(message => message.includes('selectTarget')));
+// _.each(MML.characters, function (character) {
+//   var token = MML.getCharacterToken(character.id);
+//   if (!_.isUndefined(token)) {
+//     if (targets.includes(character.id)) {
+//       token.set('tint_color', '#00FF00');
+//     } else {
+//       token.set('tint_color', 'transparent');
+//     }
+//   }
+// });
+// metaMagic['Modified AoE'] = MML.getAoESpellModifier(token, spell);
+// sendChat('GM',
+//   'EP Cost: ' + MML.getModifiedEpCost() + '\n' +
+//   'Chance to Cast: ' + MML.getModifiedCastingChance()
+// );
+
+MML.in_combat = Rx.merge(MML.start_combat.pipe(mapTo(true)), MML.end_combat.pipe(mapTo(false)));
 
 MML.new_round = Rx.of('idk yet');
 MML.gm_time_advance = Rx.of('idk yet');
 
 MML.current_round = Rx.merge(
-    Rx.of(state.MML.current_round || 0),
     MML.new_round.pipe(count()),
     MML.gm_time_advance)
-  .pipe(scan((sum, num) => sum + num));
+  .pipe(
+    startWith(state.MML.current_round || 0),
+    scan((sum, num) => sum + num)
+  );
 
 MML.current_round.subscribe(round => state.MML.current_round = round);
 
 MML.init = function () {
-  state.MML = {};
-  state.MML.GM = {
-    player: new MML.Player('Robot', true),
-    name: 'Robot',
-    currentAction: {},
-    inCombat: false,
-    currentRound: 0,
-    roundStarted: false
-  };
-
   MML.initializeMenu(state.MML.GM.player);
-
-  on('add:character', function (character) {
-    const id = character.get('id');
-    const name = character.get('name');
-
-    MML.createAttribute('id', id, '', character);
-    MML.createAttribute('player', state.MML.GM.player.name, '', character);
-    MML.createAttribute('name', name, '', character);
-    MML.createAttribute('race', 'Human', '', character);
-    MML.createAttribute('gender', 'Male', '', character);
-    MML.createAttribute('statureRoll', 6, '', character);
-    MML.createAttribute('strengthRoll', 6, '', character);
-    MML.createAttribute('coordinationRoll', 6, '', character);
-    MML.createAttribute('healthRoll', 6, '', character);
-    MML.createAttribute('beautyRoll', 6, '', character);
-    MML.createAttribute('intellectRoll', 6, '', character);
-    MML.createAttribute('reasonRoll', 6, '', character);
-    MML.createAttribute('creativityRoll', 6, '', character);
-    MML.createAttribute('presenceRoll', 6, '', character);
-    MML.createAttribute('fomInitBonus', 6, '', character);
-    MML.createAttribute('rightHand', JSON.stringify({
-      _id: 'emptyHand'
-    }), '', character);
-    MML.createAttribute('leftHand', JSON.stringify({
-      _id: 'emptyHand'
-    }), '', character);
-
-    setTimeout(function () {
-      MML.characters[id] = MML.createCharacter(character.id);
-      MML.updateCharacterSheet(characters[id]);
-    }, 2000);
-  });
 
   on('add:attribute', function (attribute) {
     var id = attribute.get('_characterid');
