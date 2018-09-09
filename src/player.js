@@ -1085,9 +1085,10 @@ MML.GmMenuUtilities = function GmMenuUtilities(player, input) {
   //edit states and other api stuff
 };
 
-MML.Player = function Player(id) {
+MML.Player = function Player(roll20_player_object) {
   const player = this;
-  player.name = name;
+  player.id = roll20_player_object.get('id');
+  player.name = roll20_player_object.get('name');
   player.characters = MML.characters.pipe(
     mergeMap(character => Rx.combineLatest(character.player)),
     filter(),
@@ -1097,9 +1098,13 @@ MML.Player = function Player(id) {
     })
   );
 
+  
+
   // player.menu = MML.buttonPressed.pipe(
   //     filter(message => message.who === player.name),
-  //     scan()
+  //     mergeScan(function (current, ) {
+        
+  //     })
 
   //   )
   //   .subscribe(menu => sendChat(player.name, menu, null, {

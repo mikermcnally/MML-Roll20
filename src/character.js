@@ -870,20 +870,20 @@ MML.createCharacter = function (id) {
   const gender = attribute_changed.pipe(MML.inputAttributeChanged('gender'));
   const handedness = attribute_changed.pipe(MML.inputAttributeChanged('handedness'));
 
-  // const inventory = MML.getCurrentAttributeJSON(character.id, 'inventory').pipe(startWith({
+  // const inventory = MML.getCurrentAttributeObject(character.id, 'inventory').pipe(startWith({
   //   emptyHand: {
   //     type: 'empty',
   //     weight: 0
   //   }));
-  // const leftHand = _.isEmpty(MML.getCurrentAttributeJSON(character.id, 'leftHand')) ? JSON.stringify({
+  // const leftHand = _.isEmpty(MML.getCurrentAttributeObject(character.id, 'leftHand')) ? JSON.stringify({
   //   _id: 'emptyHand',
   //   grip: 'unarmed'
-  // }) : MML.getCurrentAttributeJSON(character.id, 'leftHand');
+  // }) : MML.getCurrentAttributeObject(character.id, 'leftHand');
 
-  // const rightHand = _.isEmpty(MML.getCurrentAttributeJSON(character.id, 'rightHand')) ? JSON.stringify({
+  // const rightHand = _.isEmpty(MML.getCurrentAttributeObject(character.id, 'rightHand')) ? JSON.stringify({
   //   _id: 'emptyHand',
   //   grip: 'unarmed'
-  // }) : MML.getCurrentAttributeJSON(character.id, 'rightHand');
+  // }) : MML.getCurrentAttributeObject(character.id, 'rightHand');
   // const spells = MML.getCurrentAttributeAsArray(character.id, 'spells');
   // #endregion
 
@@ -963,7 +963,7 @@ MML.createCharacter = function (id) {
   const perceptionCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'perceptionCheckMod');
   const systemStrengthCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'systemStrengthCheckMod');
   const fitnessCheckMod = MML.getCurrentAttributeAsFloat(character.id, 'fitnessCheckMod');
-  const statusEffects = MML.getCurrentAttributeJSON(character.id, 'statusEffects');
+  const statusEffects = MML.getCurrentAttributeObject(character.id, 'statusEffects');
   const initiativeRollValue = MML.getCurrentAttributeAsFloat(character.id, 'initiativeRollValue');
   const situationalInitBonus = MML.getCurrentAttributeAsFloat(character.id, 'situationalInitBonus');
   const actionInitCostMod = MML.getCurrentAttributeAsFloat(character.id, 'actionInitCostMod');
@@ -972,7 +972,7 @@ MML.createCharacter = function (id) {
       scan(function (current, effect) {
         current[effect.body_part] += effect.change;
         return current;
-      }, _.isUndefined(getAttrByName(character.id, 'hp', 'current')) ? MML.buildHpAttribute(character) : MML.getCurrentAttributeJSON(id, 'hp')),
+      }, _.isUndefined(getAttrByName(character.id, 'hp', 'current')) ? MML.buildHpAttribute(character) : MML.getCurrentAttributeObject(id, 'hp')),
       startWith()
     );
   // #endregion
@@ -1317,7 +1317,7 @@ MML.createCharacter = function (id) {
     }
     character.action = action;
   };
-  const previousAction = MML.getCurrentAttributeJSON(character.id, 'previousAction');
+  const previousAction = MML.getCurrentAttributeObject(character.id, 'previousAction');
   const roundsRest = MML.getCurrentAttributeAsFloat(character.id, 'roundsRest');
   const roundsExertion = MML.getCurrentAttributeAsFloat(character.id, 'roundsExertion');
 

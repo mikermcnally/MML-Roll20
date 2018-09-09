@@ -25,21 +25,21 @@ MML.createAbility = function createAbility(id, name, action, istokenaction) {
     name: name,
     action: action,
     istokenaction: istokenaction,
-    characterid: character.id
+    characterid: id
   });
 };
 
-MML.getCharAttribute = function getCharAttribute(characterId, attribute) {
+MML.getCharAttribute = function getCharAttribute(character_id, attribute) {
   const attributeObject = findObjs({
     _type: 'attribute',
-    _characterid: characterId,
+    _characterid: character_id,
     name: attribute
   }, {
     caseInsensitive: false
   })[0];
 
   if (_.isUndefined(attributeObject)) {
-    return MML.createAttribute(attribute, '', '', characterId);
+    return MML.createAttribute(attribute, '', '', character_id);
   }
   return attributeObject;
 };
@@ -51,8 +51,8 @@ MML.getCurrentAttribute = function getCurrentAttribute(id, attribute) {
 MML.getCurrentAttributeAsFloat = function getCurrentAttributeAsFloat(id, attribute) {
   const result = parseFloat(MML.getCurrentAttribute(id, attribute));
   if (isNaN(result)) {
-    MML.setCurrentAttribute(id, attribute, 0);
-    return 0;
+    MML.setCurrentAttribute(id, attribute, 0.0);
+    return 0.0;
   }
   return result;
 };
@@ -60,8 +60,8 @@ MML.getCurrentAttributeAsFloat = function getCurrentAttributeAsFloat(id, attribu
 MML.getMaxAttributeAsFloat = function getMaxAttributeAsFloat(id, attribute) {
   const result = parseFloat(MML.getCharAttribute(id, attribute).get('max'));
   if (isNaN(result)) {
-    MML.setMaxAttribute(id, attribute, 0);
-    return 0;
+    MML.setMaxAttribute(id, attribute, 0.0);
+    return 0.0;
   }
   return result;
 };
@@ -86,14 +86,14 @@ MML.getCurrentAttributeAsArray = function getCurrentAttributeAsArray(id, attribu
   }
 };
 
-MML.getCurrentAttributeJSON = function getCurrentAttributeJSON(id, attribute) {
+MML.getCurrentAttributeObject = function getCurrentAttributeObject(id, attribute) {
   const result = MML.getCurrentAttribute(id, attribute);
   try {
     return JSON.parse(result);
   } catch (err) {
     log(err);
     MML.setCurrentAttribute(id, attribute, '{}');
-    return [];
+    return {};
   }
 };
 
@@ -264,7 +264,7 @@ MML.getPlayerFromName = function getPlayerFromName(playerName) {
 };
 
 // Code borrowed from The Aaron from roll20.net forums
-// This code is disgusting. Who codes like this?
+// I have no idea how it works because the variable names are terrible
 function generateUUID() {
   var a = 0;
   var b = [];
@@ -307,4 +307,22 @@ MML.clone = function clone(obj) {
     target[i] = this.clone(obj[i]);
   }
   return target;
+};
+
+MML.timeToRounds = function timeToRounds(round_length, time_string) {
+  const seconds = time_string.find(/(\d+)(\s|,|:)*(s|sec|seconds|Seconds|second|Second)(?![A-Za-z])/);
+  const minutes = time_string.find(/(\d+)(\s|,|:)*(m|min|minutes|Minutes|minute|Minute)(?![A-Za-z])/);
+  const hours = time_string.find(/(\d+)(\s|,|:)*(h|hours|Hours|hour|Hour)(?![A-Za-z])/);
+  const days = time_string.find(/(\d+)(\s|,|:)*(d|days|Days|day|Day)(?![A-Za-z])/);
+  // Months aren't a consistent unit of time and will vary between settings 
+  // const months = time_string.find(/(\d+)(\s|,|:)*(M|mon|Mon|months|Months|month|Months)(?![A-Za-z])/);
+  const years = time_string.find(/(\d+)(\s|,|:)*(y|years|Years|year|Year)(?![A-Za-z])/);
+
+  const total_seconds = seconds +
+    minutes * 60 +
+    hours * 60 * 60 +
+    days * 24 * 60 * 60 +
+    years * 365 * 24 * 60 * 60;
+
+  return Math.floor(total_seconds/round_length);
 };

@@ -2,19 +2,14 @@ const MML = {};
 state.MML = state.MML || {};
 
 MML.players = Rx.change_player_online.pipe(
-  startWith(findObjs({
-    _type: 'player',
-    online: true
-  }, {
-    caseInsensitive: false
-  }))
+  startWith(findObjs({ _type: 'player', online: true }))
 );
 
 MML.player_list = MML.players.pipe(
   scan(function (player_list, player) {
     const id = player.get('id');
     if (player.get('online')) {
-      player_list[id] = player;
+      player_list[id] = new MML.Player(player);
     } else if (!_.isUndefined(player_list[id])) {
       delete player_list[id];
     }
@@ -46,11 +41,6 @@ MML.characters = Rx.add_character.pipe(
     })
   ),
   tap(function (character) {
-    const id = character.get('id');
-    const name = character.get('name');
-
-    MML.createAttribute('id', id, '', character);
-    MML.createAttribute('name', name, '', character);
     MML.createAttribute('race', 'Human', '', character);
     MML.createAttribute('gender', 'Male', '', character);
     MML.createAttribute('stature_roll', 6, '', character);
@@ -89,11 +79,14 @@ MML.character_controlled_by = Rx.change_character_controlledby.pipe(
   })
 );
 
-MML.character_controlled_by_error = MML.character_controlled_by.pipe(
-  filter(({ player_id_list }) => player_id_list.length === 0 || player_id_list.length > 1),
-  withLatestFrom(MML.GM),
-  tap(([controlled_by, gm]) => sendChat(gm.name, 'Character needs exactly 1 player'))
-)
+MML.character_controlled_by_error = MML.GM.pipe(
+  switchMap(function (gm) {
+    return MML.character_controlled_by.pipe(
+      filter(({ player_id_list }) => player_id_list.length != 1),
+      tap(() => sendChat(gm.name, 'Character needs exactly 1 player'))
+    );
+  })
+);
 
 MML.token_moved = Rx.change_token.pipe(
   filter(([curr, prev]) => curr.get('left') !== prev['left'] && curr.get('top') !== prev['top']),
@@ -137,7 +130,7 @@ MML.new_round = Rx.of('idk yet');
 MML.gm_time_advance = Rx.of('idk yet');
 
 MML.current_round = Rx.merge(
-    MML.new_round.pipe(count()),
+    MML.new_round.pipe(mapTo(1)),
     MML.gm_time_advance)
   .pipe(
     startWith(state.MML.current_round || 0),
@@ -146,14 +139,16 @@ MML.current_round = Rx.merge(
 
 MML.current_round.subscribe(round => state.MML.current_round = round);
 
+MML.
+
 MML.init = function () {
   MML.initializeMenu(state.MML.GM.player);
 
   on('add:attribute', function (attribute) {
     var id = attribute.get('_characterid');
-    var attrName = attribute.get('name');
+    var attribute_name = attribute.get('name');
 
-    if (attrName.includes('repeating_skills') || attrName.includes('repeating_weaponskills')) {
+    if (attribute_name.includes('repeating_skills') || attribute_name.includes('repeating_weaponskills')) {
       MML.updateCharacterSheet(characters[id]);
     }
   });
@@ -166,7 +161,7 @@ MML.init = function () {
 
   on('change:attribute:current', function (attribute) {
     var character = MML.characters[attribute.get('_characterid')];
-    var attrName = attribute.get('name');
+    var attribute_name = attribute.get('name');
     var roll;
     var rollAttributes = [
       'statureRoll',
@@ -180,18 +175,18 @@ MML.init = function () {
       'presenceRoll'
     ];
 
-    if (rollAttributes.includes(attrName)) {
+    if (rollAttributes.includes(attribute_name)) {
       roll = parseFloat(attribute.get('current'));
       if (isNaN(roll) || roll < 6) {
         roll = 6;
       } else if (roll > 20) {
         roll = 20;
       }
-      MML.setCurrentAttribute(character.id, attrName, roll);
+      MML.setCurrentAttribute(character.id, attribute_name, roll);
       MML.updateCharacterSheet(character);
-    } else if (attrName === 'player') {
+    } else if (attribute_name === 'player') {
       character.setPlayer();
-    } else if (attrName != 'tab') {
+    } else if (attribute_name != 'tab') {
       MML.updateCharacterSheet(character);
     }
   });
