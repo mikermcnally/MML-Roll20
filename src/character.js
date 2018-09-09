@@ -805,8 +805,7 @@ MML.rollAttributeChanged = function rollAttributeChanged(name) {
         } else {
           return roll;
         }
-      }),
-      share()
+      })
     );
   };
 };
@@ -815,23 +814,37 @@ MML.inputAttributeChanged = function inputAttributeChanged(name) {
   return function (source) {
     return source.pipe(
       filter(attribute => attribute.get('name') === name),
-      map(attribute => attribute.get('current')),
-      share()
+      map(attribute => attribute.get('current'))
     );
   };
-}
+};
 
-MML.derivedAttribute = function derivedAttribute(compute, ...attributes) {
-  return Rx.combineLatest(attributes).pipe(map((attributes) => compute(...attributes)), share());
+MML.repeating_attribute_added = on('add:attribute', function (attribute) {
+  var id = attribute.get('_characterid');
+  var attrName = attribute.get('name');
+
+  if (attrName.includes('repeating_skills') || attrName.includes('repeating_weaponskills')) {
+    MML.updateCharacterSheet(characters[id]);
+  }
+});
+
+MML.derivedAttribute = function derivedAttribute(name, compute, ...attributes) {
+  const user_changed = MML.change_attribute_current.pipe(
+    filter(attribute => attribute.get('name') === name),
+    startWith(MML.getCurrentAttribute(attribute.get('_characterid'), name))
+  );
+  return Rx.combineLatest(attributes.concat(user_changed)).pipe(map((attributes) => compute(...attributes)));
 };
 
 // Character Creation
-MML.createCharacter = function (id) {
-  const character = { id };
+MML.createCharacter = function (r20_character) {
+  const id = r20_character.get('id');
+  const character = {
+    id
+  };
 
   const attribute_changed = Rx.change_attribute_current.pipe(
-    filter(attribute => attribute.get('_characterid') === id),
-    share()
+    filter(attribute => attribute.get('_characterid') === id)
   );
 
   const game_state = MML.game_state.pipe(filter(effect => effect.object_id === id));
@@ -854,7 +867,8 @@ MML.createCharacter = function (id) {
   // #region Input Attributes
   const name = Rx.change_character_name.pipe(
     filter(changed_character => changed_character.get('id') === id),
-    map(changed_character => changed_character.get('name'))
+    map(changed_character => changed_character.get('name')),
+    startWith()
   );
 
   const stature_roll = attribute_changed.pipe(MML.rollAttributeChanged('stature_roll'));
@@ -888,29 +902,29 @@ MML.createCharacter = function (id) {
   // #endregion
 
   // #region Derived Attributes
-  const bodyType = MML.derivedAttribute(race => MML.bodyTypes[race], race);
-  const height = MML.derivedAttribute((race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].height, race, gender, stature_roll);
-  const weight = MML.derivedAttribute((race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].weight, race, gender, stature_roll);
-  const stature = MML.derivedAttribute((race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].stature, race, gender, stature_roll);
-  const strength = MML.derivedAttribute((race, strength_roll) => MML.racialAttributeBonuses[race].strength + strength_roll, race, strength_roll);
-  const coordination = MML.derivedAttribute((race, coordination_roll) => MML.racialAttributeBonuses[race].coordination + coordination_roll, race, coordination_roll);
-  const health = MML.derivedAttribute((race, health_roll) => MML.racialAttributeBonuses[race].health + health_roll, race, health_roll);
-  const beauty = MML.derivedAttribute((race, beauty_roll) => MML.racialAttributeBonuses[race].beauty + beauty_roll, race, beauty_roll);
-  const intellect = MML.derivedAttribute((race, intellect_roll) => MML.racialAttributeBonuses[race].intellect + intellect_roll, race, intellect_roll);
-  const reason = MML.derivedAttribute((race, reason_roll) => MML.racialAttributeBonuses[race].reason + reason_roll, race, reason_roll);
-  const creativity = MML.derivedAttribute((race, creativity_roll) => MML.racialAttributeBonuses[race].creativity + creativity_roll, race, creativity_roll);
-  const presence = MML.derivedAttribute((race, presence_roll) => MML.racialAttributeBonuses[race].presence + presence_roll, race, presence_roll);
-  const willpower = MML.derivedAttribute((presence, health) => Math.round((2 * presence + health) / 3), presence, health);
-  const perception = MML.derivedAttribute((race, intellect, reason, creativity) => Math.round((intellect + reason + creativity) / 3) + MML.racialAttributeBonuses[race].perception, race, intellect, reason, creativity);
-  const systemStrength = MML.derivedAttribute((presence, health) => Math.round((presence + 2 * health) / 3), presence, health);
-  const fitness = MML.derivedAttribute((race, health, strength) => Math.round((health + strength) / 2) + MML.racialAttributeBonuses[race].fitness, race, health, strength);
-  const fitnessMod = MML.derivedAttribute(fitness => MML.fitnessModLookup[fitness], fitness);
-  const load = MML.derivedAttribute((race, stature, fitnessMod) => Math.round(stature * fitnessMod) + MML.racialAttributeBonuses[race].load, race, stature, fitnessMod);
-  const overhead = MML.derivedAttribute((load) => load * 2, load);
-  const deadLift = MML.derivedAttribute((load) => load * 4, load);
-  const hpMax = MML.derivedAttribute(MML.buildHpAttribute, race, stature, strength, health, willpower);
-  const hpRecovery = MML.derivedAttribute(health => MML.recoveryMods[health].hp, health);
-  const evocation = MML.derivedAttribute((race, intellect, reason, creativity, health, willpower) => intellect + reason + creativity + health + willpower + MML.racialAttributeBonuses[race].evocation,
+  const bodyType = MML.derivedAttribute('bodyType', race => MML.bodyTypes[race], race);
+  const height = MML.derivedAttribute('height', (race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].height, race, gender, stature_roll);
+  const weight = MML.derivedAttribute('weight', (race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].weight, race, gender, stature_roll);
+  const stature = MML.derivedAttribute('stature', (race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].stature, race, gender, stature_roll);
+  const strength = MML.derivedAttribute('strength', (race, strength_roll) => MML.racialAttributeBonuses[race].strength + strength_roll, race, strength_roll);
+  const coordination = MML.derivedAttribute('coordination', (race, coordination_roll) => MML.racialAttributeBonuses[race].coordination + coordination_roll, race, coordination_roll);
+  const health = MML.derivedAttribute('health', (race, health_roll) => MML.racialAttributeBonuses[race].health + health_roll, race, health_roll);
+  const beauty = MML.derivedAttribute('beauty', (race, beauty_roll) => MML.racialAttributeBonuses[race].beauty + beauty_roll, race, beauty_roll);
+  const intellect = MML.derivedAttribute('intellect', (race, intellect_roll) => MML.racialAttributeBonuses[race].intellect + intellect_roll, race, intellect_roll);
+  const reason = MML.derivedAttribute('reason', (race, reason_roll) => MML.racialAttributeBonuses[race].reason + reason_roll, race, reason_roll);
+  const creativity = MML.derivedAttribute('creativity', (race, creativity_roll) => MML.racialAttributeBonuses[race].creativity + creativity_roll, race, creativity_roll);
+  const presence = MML.derivedAttribute('presence', (race, presence_roll) => MML.racialAttributeBonuses[race].presence + presence_roll, race, presence_roll);
+  const willpower = MML.derivedAttribute('willpower', (presence, health) => Math.round((2 * presence + health) / 3), presence, health);
+  const perception = MML.derivedAttribute('perception', (race, intellect, reason, creativity) => Math.round((intellect + reason + creativity) / 3) + MML.racialAttributeBonuses[race].perception, race, intellect, reason, creativity);
+  const systemStrength = MML.derivedAttribute('systemStrength', (presence, health) => Math.round((presence + 2 * health) / 3), presence, health);
+  const fitness = MML.derivedAttribute('fitness', (race, health, strength) => Math.round((health + strength) / 2) + MML.racialAttributeBonuses[race].fitness, race, health, strength);
+  const fitnessMod = MML.derivedAttribute('fitnessMod', fitness => MML.fitnessModLookup[fitness], fitness);
+  const load = MML.derivedAttribute('load', (race, stature, fitnessMod) => Math.round(stature * fitnessMod) + MML.racialAttributeBonuses[race].load, race, stature, fitnessMod);
+  const overhead = MML.derivedAttribute('overhead', (load) => load * 2, load);
+  const deadLift = MML.derivedAttribute('deadLift', (load) => load * 4, load);
+  const hpMax = MML.derivedAttribute('hpMax', MML.buildHpAttribute, race, stature, strength, health, willpower);
+  const hpRecovery = MML.derivedAttribute('hpRecovery', health => MML.recoveryMods[health].hp, health);
+  const evocation = MML.derivedAttribute('evocation', (race, intellect, reason, creativity, health, willpower) => intellect + reason + creativity + health + willpower + MML.racialAttributeBonuses[race].evocation,
     race,
     intellect,
     reason,
@@ -918,23 +932,23 @@ MML.createCharacter = function (id) {
     health,
     willpower
   );
-  const epRecovery = MML.derivedAttribute(health => MML.recoveryMods[health].ep, health);
-  const totalWeightCarried = MML.derivedAttribute(inventory => _.reduce(_.pluck(inventory, 'weight'), (sum, num) => sum + num, 0), inventory);
-  const knockdownMax = MML.derivedAttribute(Math.round(stature + (totalWeightCarried / 10)), stature, totalWeightCarried);
+  const epRecovery = MML.derivedAttribute('epRecovery', health => MML.recoveryMods[health].ep, health);
+  const totalWeightCarried = MML.derivedAttribute('totalWeightCarried', inventory => _.reduce(_.pluck(inventory, 'weight'), (sum, num) => sum + num, 0), inventory);
+  const knockdownMax = MML.derivedAttribute('knockdownMax', Math.round(stature + (totalWeightCarried / 10)), stature, totalWeightCarried);
   const armorProtectionValues = ML.derivedAttribute(MML.buildApvMatrix, bodyType, inventory);
-  const movementRatio = MML.derivedAttribute(function (load, totalWeightCarried) {
+  const movementRatio = MML.derivedAttribute('movementRatio', function (load, totalWeightCarried) {
     const movementRatio = totalWeightCarried === 0 ? Math.round(10 * load) / 10 : Math.round(10 * load / totalWeightCarried) / 10;
     return movementRatio > 4.0 ? 4.0 : movementRatio;
   }, load, totalWeightCarried);
 
-  const attributeDefenseMod = MML.derivedAttribute((strength, coordination) => MML.attributeMods.strength[strength] + MML.attributeMods.coordination[coordination], strength, coordination);
-  const attributeMeleeAttackMod = MML.derivedAttribute((strength, coordination) => MML.attributeMods.strength[strength] + MML.attributeMods.coordination[coordination], strength, coordination);
-  const attributeMissileAttackMod = MML.derivedAttribute((strength, coordination, perception) => MML.attributeMods.perception[perception] + MML.attributeMods.coordination[coordination] + MML.attributeMods.strength[strength], strength, coordination, perception);
-  const meleeDamageMod = MML.derivedAttribute(_.find(MML.meleeDamageMods, ({
+  const attributeDefenseMod = MML.derivedAttribute('attributeDefenseMod', (strength, coordination) => MML.attributeMods.strength[strength] + MML.attributeMods.coordination[coordination], strength, coordination);
+  const attributeMeleeAttackMod = MML.derivedAttribute('attributeMeleeAttackMod', (strength, coordination) => MML.attributeMods.strength[strength] + MML.attributeMods.coordination[coordination], strength, coordination);
+  const attributeMissileAttackMod = MML.derivedAttribute('attributeMissileAttackMod', (strength, coordination, perception) => MML.attributeMods.perception[perception] + MML.attributeMods.coordination[coordination] + MML.attributeMods.strength[strength], strength, coordination, perception);
+  const meleeDamageMod = MML.derivedAttribute('meleeDamageMod', _.find(MML.meleeDamageMods, ({
     high,
     low
   }) => load >= low && load <= high).value, load);
-  const spellLearningMod = MML.derivedAttribute(intellect => MML.attributeMods.intellect[intellect], intellect);
+  const spellLearningMod = MML.derivedAttribute('spellLearningMod', intellect => MML.attributeMods.intellect[intellect], intellect);
 
   // const hitTable = MML.getHitTable(character);
   // #endregion
@@ -1009,7 +1023,7 @@ MML.createCharacter = function (id) {
   // #endregion
 
   // #region Initaitive Attributes
-  const attributeInitBonus = MML.derivedAttribute(function (strength, coordination, reason, perception) {
+  const attributeInitBonus = MML.derivedAttribute('attributeInitBonus', function (strength, coordination, reason, perception) {
     const rankingAttribute = [strength, coordination, reason, perception].sort((a, b) => a - b)[0];
 
     if (rankingAttribute < 10) {
@@ -1029,7 +1043,7 @@ MML.createCharacter = function (id) {
     }
   }, strength, coordination, reason, perception);
 
-  const movementRatioInitBonus = MML.derivedAttribute(function (movementRatio) {
+  const movementRatioInitBonus = MML.derivedAttribute('movementRatioInitBonus', function (movementRatio) {
     if (movementRatio < 0.6) {
       return 'No Combat';
     } else if (movementRatio === 0.6) {
@@ -1055,7 +1069,7 @@ MML.createCharacter = function (id) {
     }
   }, movementRatio);
 
-  const initiative = MML.derivedAttribute(function (initiativeRollValue, situationalInitBonus, movementRatioInitBonus, attributeInitBonus, senseInitBonus, fomInitBonus, firstActionInitBonus, spentInitiative) {
+  const initiative = MML.derivedAttribute('initiative', function (initiativeRollValue, situationalInitBonus, movementRatioInitBonus, attributeInitBonus, senseInitBonus, fomInitBonus, firstActionInitBonus, spentInitiative) {
     if ([situationalInitBonus, movementRatioInitBonus].includes('No Combat')) {
       return 0;
     }
@@ -1072,7 +1086,7 @@ MML.createCharacter = function (id) {
     return initiative < 0 || state.MML.GM.roundStarted === false ? 0 : initiative;
   }, initiativeRollValue, situationalInitBonus, movementRatioInitBonus, attributeInitBonus, senseInitBonus, fomInitBonus, firstActionInitBonus, spentInitiative);
 
-  const senseInitBonus = MML.derivedAttribute(function (inventory) {
+  const senseInitBonus = MML.derivedAttribute('senseInitBonus', function (inventory) {
     var bitsOfHelm = [
       'Barbute Helm',
       'Bascinet Helm',
@@ -1321,7 +1335,7 @@ MML.createCharacter = function (id) {
   const roundsRest = MML.getCurrentAttributeAsFloat(character.id, 'roundsRest');
   const roundsExertion = MML.getCurrentAttributeAsFloat(character.id, 'roundsExertion');
 
-  const attributeCastingMod = MML.derivedAttribute(function (reason, fomInitBonus, senseInitBonus) {
+  const attributeCastingMod = MML.derivedAttribute('attributeCastingMod', function (reason, fomInitBonus, senseInitBonus) {
     var attributeCastingMod = MML.attributeMods.reason[reason];
 
     if (senseInitBonus < 2 && senseInitBonus > 0) {
@@ -1346,7 +1360,7 @@ MML.createCharacter = function (id) {
     return attributeCastingMod;
   }, reason, fomInitBonus, senseInitBonus);
 
-  const skills = 
+  const skills =
     function () {
       var characterSkills = MML.getSkillAttributes(character.id, 'skills');
       _.each(
@@ -1424,7 +1438,7 @@ MML.createCharacter = function (id) {
         return characterSkills;
       },
 
-      const fov = MML.derivedAttribute(function (senseInitBonus) {
+      const fov = MML.derivedAttribute('fov', function (senseInitBonus) {
         switch (senseInitBonus) {
           case 4:
             return 180;
