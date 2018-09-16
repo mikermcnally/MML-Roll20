@@ -1360,6 +1360,9 @@ MML.createCharacter = function (r20_character) {
     return attributeCastingMod;
   }, reason, fomInitBonus, senseInitBonus);
 
+  const add_attribute = Rx.add_attribute.pipe(filter(attribute => attribute.get('_characterid') === id))
+  const skills = add_attribute.pipe(filter(attribute => attribute.get('name').includes('repeating_skills')));
+  const weapon_skills = add_attribute.pipe(filter(attribute => attribute.get('name').includes('repeating_weaponskills')));
   const skills =
     function () {
       var characterSkills = MML.getSkillAttributes(character.id, 'skills');
