@@ -68,11 +68,11 @@ function runTests() {
     });
     describe.only('Main Menu', function() {
       it('Checks that the menu initializes properly', function() {
-        initializeMenu(player)
-          .then(clickButton('Combat'))
-          .then(clickButton('Back'))
-          .then(clickButton('Combat'))
-          .then(clickButton('Start Combat'));
+        Rx.from(['initializeMenu',
+          'Combat',
+          'Back',
+          'Combat',
+          'Start Combat']);
       });
 
       it('Basic Weapon Attack', function() {

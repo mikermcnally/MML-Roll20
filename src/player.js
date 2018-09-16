@@ -1098,42 +1098,19 @@ MML.Player = function Player(roll20_player_object) {
     })
   );
 
-  
+  const button_pressed = MML.button_pressed.pipe(filter(message => player.name === message.who));
 
-  // player.menu = MML.buttonPressed.pipe(
-  //     filter(message => message.who === player.name),
-  //     mergeScan(function (current, ) {
-        
-  //     })
+  const router = button_pressed.pipe(
+    scan(function (path, next) {
+      path.push(next);
+      return path;
+    }, [])
+  );
 
-  //   )
-  //   .subscribe(menu => sendChat(player.name, menu, null, {
-  //     noarchive: true
-  //   }));
+  const main_menu = MML.in_combat.pipe(
+    switchMap(combat => combat ? Rx.never() : menu)
+  );
 };
 
-// MML.sendChatMenu = function sendChatMenu(player, message, buttons) {
-//   var toChat = '/w "' + player.name +
-//     '" &{template:charMenu} {{name=' + message + '}} ' +
-//     buttons.map(function (button) {
-//       return '{{' + button.replace(/\s+/g, '') + '=[' + button + '](!MML|' + button + ')}}';
-//     })
-//     .join(' ');
 
-//   sendChat();
-// };
 
-// IDEA-R: build an array of previous menus as an optional parameter to allow for backtracking
-MML.displayMenu = function displayMenu(player, message, buttons) {
-  MML.sendChatMenu(player, message, buttons);
-  return MML.setMenuButtons(player, buttons);
-};
-
-MML.initializeMenu = async function initializeMenu(player) {
-  await MML.setMenuButtons(player, ['initializeMenu']);
-  if (player.name === state.MML.GM.name) {
-    return await MML.menuMainGm(player);
-  } else {
-    return await MML.menuMainPlayer(player);
-  }
-};

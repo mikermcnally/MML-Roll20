@@ -39,7 +39,7 @@ MML.displayMenu = function displayMenu(player, message, buttons) {
 // };
 
 function initializeMenu(player) {
-  if (player.name === state.MML.GM.name) {
+  if (playerIsGM(player.id)) {
     return MML.menuMainGm(player);
   } else {
     return MML.menuMainPlayer(player);
@@ -47,7 +47,7 @@ function initializeMenu(player) {
 };
 
 MML.menuMainGm = function menuMainGm(player) {
-  return MML.displayMenu(message.who, 'Main Menu: ', ['Combat']).pipe(
+  return MML.displayMenu(player.name, 'Main Menu: ', ['Combat']).pipe(
     switchMap(function ({content}) {
       switch (content) {
         case 'Combat':
@@ -57,7 +57,13 @@ MML.menuMainGm = function menuMainGm(player) {
       }
     })
   );
-}
+};
+
+// button clicks
+
+// display next menu
+// update internal menu state
+// 
 
 // function menuMainGm(player) {
 //   const {pressedButton} = 

@@ -6,6 +6,7 @@ MML.players = Rx.change_player_online.pipe(
 );
 
 MML.player_list = MML.players.pipe(
+  filter(player => !playerIsGM(player.get('id'))),
   scan(function (player_list, player) {
     const id = player.get('id');
     if (player.get('online')) {

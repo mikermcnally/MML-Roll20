@@ -1,3 +1,30 @@
+MML.GM = function GM(roll20_player_object) {
+  const gm = this;
+  gm.id = roll20_player_object.get('id');
+  gm.name = roll20_player_object.get('name');
+  gm.characters = MML.characters.pipe(
+    mergeMap(character => Rx.combineLatest(character.gm)),
+    filter(),
+    scan(function (list, character) {
+      list[character.id] = character;
+      return character;
+    })
+  );
+
+  const button_pressed = MML.button_pressed.pipe(filter(message => gm.name === message.who));
+
+  const router = button_pressed.pipe(
+    scan(function (path, next) {
+      path.push(next);
+      return path;
+    }, [])
+  );
+
+  const main_menu = MML.in_combat.pipe(
+    switchMap(combat => combat ? Rx.never() : router.pipe(filter(path => path.length === 0)))
+  );
+};
+
 // MML.game_state = MML.players.pipe();
 
 // MML.gm_created_effects = MML.menuIdle.pipe(
