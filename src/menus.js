@@ -1,6 +1,6 @@
 MML.displayMenu = function displayMenu(player, message, buttons) {
   return Rx.defer(function () {
-    const whisper = '/w "' + player.name +'"';
+    const whisper = '/w "' + player.name + '"';
     const message_string = ' &{template:charMenu} {{name=' + message + '}} ';
     const button_string = buttons.map(button => '{{' + button.replace(/\s+/g, '') + '=[' + button + '](!MML|' + button + ')}}')
       .join(' ');
@@ -48,7 +48,7 @@ function initializeMenu(player) {
 
 MML.menuMainGm = function menuMainGm(player) {
   return MML.displayMenu(player.name, 'Main Menu: ', ['Combat']).pipe(
-    switchMap(function ({content}) {
+    switchMap(function ({ content }) {
       switch (content) {
         case 'Combat':
           return MML.menuGmCombat(player);
@@ -74,6 +74,19 @@ MML.menuMainGm = function menuMainGm(player) {
 //       return MML.menuselectDieSize(player);
 //   }
 // };
+
+expand(function (list_of_attribute_changes) {
+  return button_pressed.pipe(
+    function (button) {
+      switch (button) {
+        case 'Observe':
+          
+        default:
+
+      }
+    }
+  );
+})
 
 MML.menuGmCombat = function menuGmCombat(player) {
   const message = 'Select tokens and begin.';
@@ -101,3 +114,30 @@ MML.startCombat = MML.menuGmCombat.pipe(
   switchMapTo(MML.buttonPressed),
   filter(message => message.content === 'Start Combat' && message.selected.length > 0)
 );
+
+MML.characterMenu = function characterMenu(character_id, button_pressed) {
+  // this isn't real code. just seeing if data structures make sense
+  return MML.someMenu().pipe(
+    switchMap(function (button) {
+      switch (button) {
+        case 'button':
+          return button_pressed.pipe(filter(button => buttons.includes(button)));
+      }
+    }),
+    switchMap(function (button) {
+      switch (button) {
+        case 'button':
+          return MML.someOtherMenu(button_pressed);
+      }
+    }),
+    switchMapTo(Rx.from({
+      id: character_id,
+      attribute: 'fatigue',
+      value: Rx.combineLatest(character.fatigue).pipe(map(fatigue => fatigue + 1))
+    }, {
+      id: character_id,
+      attribute: 'hp',
+      value: Rx.of(10)
+    }))
+  );
+}

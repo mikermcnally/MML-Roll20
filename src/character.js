@@ -397,44 +397,44 @@ MML.getDistanceBetweenCharacters = function getDistanceBetweenCharacters(charact
   return MML.pixelsToFeet(MML.getDistanceBetweenTokens(MML.getCharacterToken(character.id), MML.getCharacterToken(target.id)));
 };
 
-MML.getAoESpellTargets = function getAoESpellTargets(spellMarker) {
-  switch (spellMarker.get('name')) {
+MML.getAoESpellTargets = function getAoESpellTargets(spell_marker) {
+  switch (spell_marker.get('name')) {
     case 'spellMarkerCircle':
-      return MML.getCharactersWithinRadius(spellMarker.get('left'), spellMarker.get('top'), spellMarker.get('width') / 2);
+      return MML.getCharactersWithinRadius(spell_marker.get('left'), spell_marker.get('top'), spell_marker.get('width') / 2);
     case 'spellMarkerRectangle':
-      return MML.getCharactersWithinRectangle(spellMarker.get('left'), spellMarker.get('top'), spellMarker.get('width'), spellMarker.get('height'), spellMarker.get('rotation'));
+      return MML.getCharactersWithinRectangle(spell_marker.get('left'), spell_marker.get('top'), spell_marker.get('width'), spell_marker.get('height'), spell_marker.get('rotation'));
     case 'spellMarkerTriangle':
-      return MML.getCharactersWithinTriangle(spellMarker.get('left'), spellMarker.get('top'), spellMarker.get('width'), spellMarker.get('height'), spellMarker.get('rotation'));
+      return MML.getCharactersWithinTriangle(spell_marker.get('left'), spell_marker.get('top'), spell_marker.get('width'), spell_marker.get('height'), spell_marker.get('rotation'));
     default:
   }
 };
 
 MML.getCharactersWithinRadius = function getCharactersWithinRadius(left, top, radius) {
   return _.filter(MML.characters, function (character) {
-    const charToken = MML.getCharacterToken(character.id);
-    return !_.isUndefined(charToken) && MML.getDistanceFeet(charToken.get('left'), left, charToken.get('top'), top) < MML.raceSizes[character.race].radius + MML.pixelsToFeet(radius);
+    const token = MML.getCharacterToken(character.id);
+    return !_.isUndefined(token) && MML.getDistanceFeet(token.get('left'), left, token.get('top'), top) < MML.raceSizes[character.race].radius + MML.pixelsToFeet(radius);
   });
 };
 
-MML.getCharactersWithinRectangle = function getCharactersWithinRectangle(leftOriginal, topOriginal, width, height, rotation) {
+MML.getCharactersWithinRectangle = function getCharactersWithinRectangle(left_original, top_original, width, height, rotation) {
   return _.filter(MML.characters, function (character) {
-    const charToken = MML.getCharacterToken(character.id);
-    const tokenCoordinates = MML.rotateAxes(charToken.get('left') - leftOriginal, charToken.get('top') - topOriginal, rotation);
-    const tokenRadius = MML.feetToPixels(MML.raceSizes[character.race].radius);
+    const token = MML.getCharacterToken(character.id);
+    const [token_left, token_top] = MML.rotateAxes(token.get('left') - left_original, token.get('top') - top_original, rotation);
+    const token_radius = MML.feetToPixels(MML.raceSizes[character.race].radius);
 
-    return !_.isUndefined(charToken) &&
-      tokenCoordinates[0] + tokenRadius > width / -2 &&
-      tokenCoordinates[0] - tokenRadius < width / 2 &&
-      tokenCoordinates[1] - tokenRadius < height / 2 &&
-      tokenCoordinates[1] + tokenRadius > height / -2
+    return !_.isUndefined(token) &&
+      token_left + token_radius > width / -2 &&
+      token_left - token_radius < width / 2 &&
+      token_top - token_radius < height / 2 &&
+      token_top + token_radius > height / -2
   });
 };
 
-MML.getCharactersWithinTriangle = function getCharactersWithinTriangle(leftOriginal, topOriginal, width, height, rotation) {
-  return _.filter(MML.characters, function (character) {
-    const charToken = MML.getCharacterToken(character.id);
-    const tokenCoordinates = MML.rotateAxes(charToken.get('left') - leftOriginal, charToken.get('top') - topOriginal, rotation);
-    const tokenRadius = MML.feetToPixels(MML.raceSizes[character.race].radius);
+MML.getCharactersWithinTriangle = function getCharactersWithinTriangle(left_original, top_original, width, height, rotation) {
+  return MML.character_list.pipe(map(character_list => _.filter(character_list, function (character) {
+    const token = MML.getCharacterToken(character.id);
+    const tokenCoordinates = MML.rotateAxes(token.get('left') - left_original, token.get('top') - top_original, rotation);
+    const token_radius = MML.feetToPixels(MML.raceSizes[character.race].radius);
     const ax = (-width * (tokenCoordinates[1] - (height / 2))) / (2 * height);
     const ay = tokenCoordinates[1];
     const bx = tokenCoordinates[0];
@@ -444,13 +444,13 @@ MML.getCharactersWithinTriangle = function getCharactersWithinTriangle(leftOrigi
     const dx = tokenCoordinates[0];
     const dy = ((2 * height * tokenCoordinates[0]) / width) + (height / 2);
 
-    return !_.isUndefined(charToken) &&
-      tokenCoordinates[1] - tokenRadius < height / 2 &&
-      tokenCoordinates[1] + tokenRadius > height / -2 &&
+    return !_.isUndefined(token) &&
+      tokenCoordinates[1] - token_radius < height / 2 &&
+      tokenCoordinates[1] + token_radius > height / -2 &&
       ((MML.getDistance(ax, tokenCoordinates[0], ay, tokenCoordinates[1]) * MML.getDistance(bx, tokenCoordinates[0], by, tokenCoordinates[1])) / MML.getDistance(ax, bx, ay, by) < tokenRadius ||
         (MML.getDistance(cx, tokenCoordinates[0], cy, tokenCoordinates[1]) * MML.getDistance(dx, tokenCoordinates[0], dy, tokenCoordinates[1])) / MML.getDistance(cx, dx, cy, dy) < tokenRadius ||
         (tokenCoordinates[0] < ax && tokenCoordinates[0] > cx));
-  });
+  })));
 };
 
 MML.getSkill = function getSkill(character, skill) {
@@ -536,20 +536,20 @@ MML.getModifiedEpCost = function getModifiedEpCost(metaMagic, epCost) {
   return _.reduce(_.pluck(metaMagic, 'epMod'), (sum, num) => sum + num, 1) * epCost;
 };
 
-MML.getAoESpellModifier = function getAoESpellModifier(spellMarker, spell) {
+MML.getAoESpellModifier = function getAoESpellModifier(spell_marker, spell) {
   var area;
   var areaModified;
   var castingMod;
 
   if (typeof spell.target === 'string' && spell.target.indexOf('\' Radius')) {
     const base_radius = parseInt(spell.target.replace('\' Radius', ''));
-    const modified_radius = MML.pixelsToFeet(spellMarker.get('width') / 2);
+    const modified_radius = MML.pixelsToFeet(spell_marker.get('width') / 2);
     area = Math.pow(base_radius, 2);
     areaModified = Math.pow(modified_radius, 2);
     castingMod = Math.round(Math.log2(modified_radius / base_radius) * 20);
   } else {
-    const height = spellMarker.get('height');
-    const width = spellMarker.get('width');
+    const height = spell_marker.get('height');
+    const width = spell_marker.get('width');
     area = spell.target[0] * spell.target[1];
     areaModified = width * height;
     castingMod = Math.round(Math.log2(width / spell.target[0]) * 10 + Math.log2(height / spell.target[1]) * 10);
@@ -592,8 +592,6 @@ MML.removeAimAndObserving = function removeAimAndObserving(character) {
 };
 
 MML.validateAction = function validateAction(character) {
-  var valid = true;
-
   switch (character.action.name) {
     case 'Attack':
       switch (character.action.attackType) {
@@ -604,7 +602,7 @@ MML.validateAction = function validateAction(character) {
             _.has(character.statusEffects, 'Pinned') &&
             _.has(character.statusEffects, 'Overborne')
           ) {
-            valid = false;
+            return false;
           }
           break;
         case 'Regain Feet':
@@ -612,7 +610,7 @@ MML.validateAction = function validateAction(character) {
               character.movementType === 'Prone') ||
             (!(_.has(character.statusEffects, 'Taken Down') || _.has(character.statusEffects, 'Overborne')) || _.has(character.statusEffects, 'Pinned'))
           ) {
-            valid = false;
+            return false;
           }
           break;
         case 'Place a Hold':
@@ -621,17 +619,17 @@ MML.validateAction = function validateAction(character) {
             _.has(character.statusEffects, 'Pinned') &&
             (_.has(character.statusEffects, 'Grappled') && character.statusEffects['Grappled'].targets.length > 1)
           ) {
-            valid = false;
+            return false;
           }
           break;
         case 'Break a Hold':
           if (!_.has(character.statusEffects, 'Held') && !_.has(character.statusEffects, 'Pinned')) {
-            valid = false;
+            return false;
           }
           break;
         case 'Break Grapple':
           if (!_.has(character.statusEffects, 'Grappled')) {
-            valid = false;
+            return false;
           }
           break;
         case 'Takedown':
@@ -641,7 +639,7 @@ MML.validateAction = function validateAction(character) {
             (_.has(character.statusEffects, 'Grappled') && _.has(character.statusEffects, 'Held')) ||
             character.movementType === 'Prone'
           ) {
-            valid = false;
+            return false;
           }
           break;
         case 'Head Butt':
@@ -653,7 +651,7 @@ MML.validateAction = function validateAction(character) {
             !_.has(character.statusEffects, 'Pinned') &&
             !_.has(character.statusEffects, 'Overborne')
           ) {
-            valid = false;
+            return false;
           }
           break;
         default:
@@ -662,7 +660,7 @@ MML.validateAction = function validateAction(character) {
     default:
   }
 
-  return valid;
+  return true;
 };
 
 MML.buildApvMatrix = function buildApvMatrix(inventory, bodyType) {
@@ -790,22 +788,21 @@ MML.buildApvMatrix = function buildApvMatrix(inventory, bodyType) {
 };
 
 // Rx operators
-MML.rollAttributeChanged = function rollAttributeChanged(name) {
+MML.rollAttributeChanged = function rollAttributeChanged(id, name) {
   return function (source) {
     return source.pipe(
       filter(attribute => attribute.get('name') === name),
       map(function (attribute) {
         const roll = parseFloat(attribute.get('current'));
         if (isNaN(roll) || roll < 6) {
-          MML.setCurrentAttribute(attribute.get('_characterid'), name, 6);
           return 6;
         } else if (roll > 20) {
-          MML.setCurrentAttribute(attribute.get('_characterid'), name, 20);
           return 20;
         } else {
           return roll;
         }
-      })
+      }),
+      startWith(MML.getRollAttribute(id, name))
     );
   };
 };
@@ -838,10 +835,24 @@ MML.derivedAttribute = function derivedAttribute(name, compute, ...attributes) {
 
 // Character Creation
 MML.createCharacter = function (r20_character) {
+  MML.createAttribute('race', 'Human', '', character);
+  MML.createAttribute('gender', 'Male', '', character);
+  MML.createAttribute('stature_roll', 6, '', character);
+  MML.createAttribute('strength_roll', 6, '', character);
+  MML.createAttribute('coordination_roll', 6, '', character);
+  MML.createAttribute('health_roll', 6, '', character);
+  MML.createAttribute('beauty_roll', 6, '', character);
+  MML.createAttribute('intellect_roll', 6, '', character);
+  MML.createAttribute('reason_roll', 6, '', character);
+  MML.createAttribute('creativity_roll', 6, '', character);
+  MML.createAttribute('presence_roll', 6, '', character);
+  MML.createAttribute('fom_init_bonus', 6, '', character);
+  MML.createAttribute('right_hand', JSON.stringify({ _id: 'empty_hand' }), '', character);
+  MML.createAttribute('left_hand', JSON.stringify({ _id: 'empty_hand' }), '', character);
+  MML.createAbility(character.get('id'), 'Menu', action, true);
+
   const id = r20_character.get('id');
-  const character = {
-    id
-  };
+  const character = { id };
 
   const attribute_changed = Rx.change_attribute_current.pipe(
     filter(attribute => attribute.get('_characterid') === id)
@@ -868,7 +879,33 @@ MML.createCharacter = function (r20_character) {
   const name = Rx.change_character_name.pipe(
     filter(changed_character => changed_character.get('id') === id),
     map(changed_character => changed_character.get('name')),
-    startWith()
+    startWith(r20_character.get('name'))
+  );
+
+  const current_player = Rx.combineLatest(
+      name,
+      Rx.change_character_controlledby.pipe(filter(changed_character => changed_character.get('id') === id)),
+      MML.player_list
+    )
+    .pipe(switchMap(function ([character_name, changed_character, player_list]) {
+      const controlled_by = changed_character.controlledby.split(',');
+      if (controlled_by.length === 1) {
+        return player_list[controlled_by[0]];
+      } else {
+        sendChat('Error', character_name + ' needs exactly 1 player');
+        return Rx.never();
+      }
+    }));
+  
+  const player_input = current_player.pipe(switchMap(function (player) {
+    return player.input.pipe(
+      filter(({ character_id }) => character_id === id)
+    );
+  }));
+
+  const action = player_input.pipe(
+    filter(({ attribute }) => attribute === 'action'),
+    switchMap(({ value }) => value)
   );
 
   const stature_roll = attribute_changed.pipe(MML.rollAttributeChanged('stature_roll'));
@@ -920,8 +957,8 @@ MML.createCharacter = function (r20_character) {
   const fitness = MML.derivedAttribute('fitness', (race, health, strength) => Math.round((health + strength) / 2) + MML.racialAttributeBonuses[race].fitness, race, health, strength);
   const fitnessMod = MML.derivedAttribute('fitnessMod', fitness => MML.fitnessModLookup[fitness], fitness);
   const load = MML.derivedAttribute('load', (race, stature, fitnessMod) => Math.round(stature * fitnessMod) + MML.racialAttributeBonuses[race].load, race, stature, fitnessMod);
-  const overhead = MML.derivedAttribute('overhead', (load) => load * 2, load);
-  const deadLift = MML.derivedAttribute('deadLift', (load) => load * 4, load);
+  const overhead = MML.derivedAttribute('overhead', load => load * 2, load);
+  const deadLift = MML.derivedAttribute('deadLift', load => load * 4, load);
   const hpMax = MML.derivedAttribute('hpMax', MML.buildHpAttribute, race, stature, strength, health, willpower);
   const hpRecovery = MML.derivedAttribute('hpRecovery', health => MML.recoveryMods[health].hp, health);
   const evocation = MML.derivedAttribute('evocation', (race, intellect, reason, creativity, health, willpower) => intellect + reason + creativity + health + willpower + MML.racialAttributeBonuses[race].evocation,
@@ -944,10 +981,7 @@ MML.createCharacter = function (r20_character) {
   const attributeDefenseMod = MML.derivedAttribute('attributeDefenseMod', (strength, coordination) => MML.attributeMods.strength[strength] + MML.attributeMods.coordination[coordination], strength, coordination);
   const attributeMeleeAttackMod = MML.derivedAttribute('attributeMeleeAttackMod', (strength, coordination) => MML.attributeMods.strength[strength] + MML.attributeMods.coordination[coordination], strength, coordination);
   const attributeMissileAttackMod = MML.derivedAttribute('attributeMissileAttackMod', (strength, coordination, perception) => MML.attributeMods.perception[perception] + MML.attributeMods.coordination[coordination] + MML.attributeMods.strength[strength], strength, coordination, perception);
-  const meleeDamageMod = MML.derivedAttribute('meleeDamageMod', _.find(MML.meleeDamageMods, ({
-    high,
-    low
-  }) => load >= low && load <= high).value, load);
+  const meleeDamageMod = MML.derivedAttribute('meleeDamageMod', load => _.find(MML.meleeDamageMods, ({ high, low }) => load >= low && load <= high).value, load);
   const spellLearningMod = MML.derivedAttribute('spellLearningMod', intellect => MML.attributeMods.intellect[intellect], intellect);
 
   // const hitTable = MML.getHitTable(character);
@@ -982,13 +1016,13 @@ MML.createCharacter = function (r20_character) {
   const situationalInitBonus = MML.getCurrentAttributeAsFloat(character.id, 'situationalInitBonus');
   const actionInitCostMod = MML.getCurrentAttributeAsFloat(character.id, 'actionInitCostMod');
   const hp = game_state.pipe(
-      filter(effect => effect.attribute === 'hp'), 
-      scan(function (current, effect) {
-        current[effect.body_part] += effect.change;
-        return current;
-      }, _.isUndefined(getAttrByName(character.id, 'hp', 'current')) ? MML.buildHpAttribute(character) : MML.getCurrentAttributeObject(id, 'hp')),
-      startWith()
-    );
+    filter(effect => effect.attribute === 'hp'),
+    scan(function (current, effect) {
+      current[effect.body_part] += effect.change;
+      return current;
+    }, _.isUndefined(getAttrByName(character.id, 'hp', 'current')) ? MML.buildHpAttribute(character) : MML.getCurrentAttributeObject(id, 'hp')),
+    startWith()
+  );
   // #endregion
 
   // #region Saves

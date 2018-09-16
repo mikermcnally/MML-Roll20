@@ -1,29 +1,27 @@
-MML.prepareAction = async function prepareAction(player, character) {
-  try {
-    var action = {
-      ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
-      modifiers: [],
-      weapon: MML.getEquippedWeapon(character)
-    };
+MML.prepareAction = function prepareAction(player, character) {
+  const action = {
+    ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
+    modifiers: [],
+    weapon: MML.getEquippedWeapon(character)
+  };
 
-    if (_.has(character.statusEffects, 'Stunned')) {
-      MML.applyStatusEffects(character);
-      _.extend(action, { ts: Date.now(), name: 'Movement Only' });
-      await MML.finalizeAction(player, character, action);
-    } else if (character.situationalInitBonus !== 'No Combat') {
-      action = await MML.buildAction(player, character, action);
-      await MML.finalizeAction(player, character, action);
-    } else {
-      _.extend(action, { ts: Date.now(), name: 'No Combat' });
-    }
-    MML.setReady(character, true);
-    return action;
-  } catch (err) {
-    log(err.stack);
+  if (_.has(character.statusEffects, 'Stunned')) {
+    _.extend(action, { ts: Date.now(), name: 'Movement Only' });
+    return MML.finalizeAction(player, character, action);
+  } else if (character.situationalInitBonus !== 'No Combat') {
+    return MML.buildAction(player, character, action).pipe(
+      switchMapTo(MML.finalizeAction(player, character, action))
+    );
+  } else {
+    return {
+      id: character.id,
+      attribute: 'action',
+      value: Rx.empty()
+    };
   }
 };
 
-MML.buildAction = async function buildAction(player, character, action) {
+MML.buildAction = function buildAction(player, character, action) {
   if (_.contains(action.modifiers, 'Ready Item')) {
     const weaponWithGrip = _.find(action.items, itemWithGrip => itemWithGrip.item.type === 'weapon');
     if (_.isUndefined(weaponWithGrip)) {
@@ -39,34 +37,56 @@ MML.buildAction = async function buildAction(player, character, action) {
     action.weapon = MML.getEquippedWeapon(character);
   }
 
-  const action_type = await MML.chooseActionType(player, character, action);
-  switch (action_type) {
-    case 'Observe':
-      return _.extend(action, { ts: Date.now(), name: 'Observe' });
-    case 'Movement Only':
-      return _.extend(action, { ts: Date.now(), name: 'Movement Only' });
-    case 'Attack':
-      return await MML.prepareAttackAction(player, character, action);
-    case 'Ready Item':
-      const itemArray = await MML.readyItem(player, character, action);
-      action.items = itemArray;
-      action.modifiers.push('Ready Item');
-      return MML.buildAction(player, character, action);
-    case 'Aim':
-      return _.extend(action, { ts: Date.now(), name: 'Aim' });
-    case 'Reload':
-      return _.extend(action, { ts: Date.now(), name: 'Reload' });
-    case 'Release Opponent':
-      action.modifiers.push('Release Opponent');
-      return MML.buildAction(player, character, action);
-    case 'Cast':
-      return await MML.prepareCastAction([player, character, action]);
-    case 'Continue Casting':
-      return MML.clone(character.previousAction);
-  }
+  const action_type = MML.chooseActionType(player, character, action);
+  const observe = action_type.pipe(
+    filter(action_type => action_type === 'Observe'),
+    mapTo({ name: 'Observe' })
+  );
+  const movement_only = action_type.pipe(
+    filter(action_type => action_type === 'Movement Only'),
+    mapTo({ name: 'Movement Only' })
+  );
+  const attack = action_type.pipe(
+    filter(action_type => action_type === 'Attack'),
+    switchMapTo(MML.prepareAttackAction(player, character, action))
+  );
+  const ready_item = action_type.pipe(
+    filter(action_type => action_type === 'Ready Item'),
+    switchMapTo(MML.readyItem(player, character, action))
+  );
+  const aim = action_type.pipe(
+    filter(action_type => action_type === 'Aim'), 
+    mapTo({ name: 'Aim' })
+  );
+  const reload = action_type.pipe(
+    filter(action_type => action_type === 'Reload'),
+    mapTo({ name: 'Reload' })
+  );
+  const release_opponent = action_type.pipe(
+    filter(action_type => action_type === 'Release Opponent'),
+    mapTo({ name: 'Release Opponent' })
+  );
+  const cast = action_type.pipe(
+    filter(action_type => action_type === 'Cast'),
+    swtichMapTo(MML.prepareCastAction([player, character, action]))
+  );
+
+  return Rx.empty().pipe(expand(function () {
+    return Rx.race(
+      observe,
+      movement_only,
+      attack,
+      ready_item,
+      aim,
+      reload,
+      release_opponent,
+      cast
+    )
+    .pipe(switchMap(MML.finalizeAction(player, character, action)));
+  }))
 };
 
-MML.chooseActionType = async function chooseActionType(player, character, action) {
+MML.chooseActionType = function chooseActionType(player, character, action) {
   const message = 'Prepare ' + character.name + '\'s action';
   var buttons = ['Movement Only', 'Observe', 'Ready Item', 'Attack'];
 
@@ -79,7 +99,7 @@ MML.chooseActionType = async function chooseActionType(player, character, action
   }
 
   if ((_.has(character.statusEffects, 'Holding') ||
-    (_.has(character.statusEffects, 'Grappled') && character.statusEffects['Grappled'].targets.length === 1)) &&
+      (_.has(character.statusEffects, 'Grappled') && character.statusEffects['Grappled'].targets.length === 1)) &&
     !_.has(character.statusEffects, 'Held') &&
     !_.contains(action.modifiers, 'Release Opponent')
   ) {
@@ -94,28 +114,29 @@ MML.chooseActionType = async function chooseActionType(player, character, action
     buttons.push('Continue Casting');
   }
 
-  const {pressedButton, selectedIds} = await MML.displayMenu(player, message, buttons);
+  const { pressedButton } = MML.displayMenu(player, message, buttons);
   return pressedButton;
 };
 
 MML.isUnarmedAction = function isUnarmedAction(action) {
   return _.contains([
-    'Punch',
-    'Kick',
-    'Head Butt',
-    'Bite',
-    'Grapple',
-    'Place a Hold',
-    'Break a Hold',
-    'Break Grapple',
-    'Takedown',
-    'Regain Feet'],
+      'Punch',
+      'Kick',
+      'Head Butt',
+      'Bite',
+      'Grapple',
+      'Place a Hold',
+      'Break a Hold',
+      'Break Grapple',
+      'Takedown',
+      'Regain Feet'
+    ],
     action.attackType);
 };
 
 MML.processAction = async function processAction(player, character, action) {
   if (_.contains(action.modifiers, 'Ready Item')) {
-    _.each(action.items, function(itemWithGrip) {
+    _.each(action.items, function (itemWithGrip) {
       MML.equipItem(character, itemWithGrip.item._id, itemWithGrip.grip);
     });
   }
@@ -261,7 +282,7 @@ MML.endAction = function endAction(player, character, action, targets) {
     (character.actionInitCostMod > -1 ? -1 : character.actionTempo + character.actionInitCostMod);
   character.previousAction = MML.clone(character.action);
   MML.updateCharacter(character);
-  _.each(action.targetArray || [], function(target) {
+  _.each(action.targetArray || [], function (target) {
     MML.updateCharacter(MML.characters[target]);
   });
 

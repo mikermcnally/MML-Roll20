@@ -1088,28 +1088,34 @@ MML.GmMenuUtilities = function GmMenuUtilities(player, input) {
 MML.Player = function Player(roll20_player_object) {
   const player = this;
   player.id = roll20_player_object.get('id');
-  player.name = roll20_player_object.get('name');
-  player.characters = MML.characters.pipe(
-    mergeMap(character => Rx.combineLatest(character.player)),
-    filter(),
-    scan(function (list, character) {
-      list[character.id] = character;
-      return  character;
+  player.name = Rx.change_player_displayname.pipe(
+    pluck('_displayname'),
+    startWith(roll20_player_object.get('name'))
+  );
+  // player.characters = MML.characters.pipe(
+  //   mergeMap(character => Rx.combineLatest(character.player)),
+  //   filter(),
+  //   scan(function (list, character) {
+  //     list[character.id] = character;
+  //     return  character;
+  //   })
+  // );
+
+  const button_pressed = player.name.pipe(switchMap(function (name) {
+    return MML.button_pressed.pipe(filter(message => name === message.who));
+  }));
+
+  player.character_menu = button_pressed.pipe(
+    filter(({ content }) => content.startsWith('menu|')),
+    switchMap(function ({ content }) {
+      return MML.characterMenu(content.replace('menu|', '')).pipe()
     })
   );
 
-  const button_pressed = MML.button_pressed.pipe(filter(message => player.name === message.who));
-
-  const router = button_pressed.pipe(
-    scan(function (path, next) {
-      path.push(next);
-      return path;
-    }, [])
-  );
-
-  const main_menu = MML.in_combat.pipe(
-    switchMap(combat => combat ? Rx.never() : menu)
-  );
+  player.input = Rx.merge(
+    MML.GM.prompt_player.pipe(filter(({player_id}) => player_id === id)),
+    player.character_menu
+  ).pipe(switchAll());
 };
 
 

@@ -48,6 +48,11 @@ MML.getCurrentAttribute = function getCurrentAttribute(id, attribute) {
   return MML.getCharAttribute(id, attribute).get('current');
 };
 
+MML.getRollAttribute = function getRollAttribute(id, attribute) {
+  const result = parseInt(MML.getCurrentAttribute(id, attribute));
+  return isNaN(result) ? 6 : result;
+}
+
 MML.getCurrentAttributeAsFloat = function getCurrentAttributeAsFloat(id, attribute) {
   const result = parseFloat(MML.getCurrentAttribute(id, attribute));
   if (isNaN(result)) {

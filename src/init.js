@@ -27,66 +27,20 @@ MML.button_pressed = Rx.chat_message.pipe(
     message.content = message.content.replace('!MML|', '');
     message.selected = MML.getSelectedIds(message.selected);
     return message;
-  }),
-  // share(),
-  tap(() => log('button'))
+  })
 );
 
-MML.characters = Rx.add_character.pipe(
-  startWith(
-    findObjs({
-      _type: 'character',
-      archived: false
-    }, {
-      caseInsensitive: false
-    })
-  ),
-  tap(function (character) {
-    MML.createAttribute('race', 'Human', '', character);
-    MML.createAttribute('gender', 'Male', '', character);
-    MML.createAttribute('stature_roll', 6, '', character);
-    MML.createAttribute('strength_roll', 6, '', character);
-    MML.createAttribute('coordination_roll', 6, '', character);
-    MML.createAttribute('health_roll', 6, '', character);
-    MML.createAttribute('beauty_roll', 6, '', character);
-    MML.createAttribute('intellect_roll', 6, '', character);
-    MML.createAttribute('reason_roll', 6, '', character);
-    MML.createAttribute('creativity_roll', 6, '', character);
-    MML.createAttribute('presence_roll', 6, '', character);
-    MML.createAttribute('fom_init_bonus', 6, '', character);
-    MML.createAttribute('right_hand', JSON.stringify({
-      _id: 'emptyHand'
-    }), '', character);
-    MML.createAttribute('leftHand', JSON.stringify({
-      _id: 'emptyHand'
-    }), '', character);
-  }),
-  map(character => MML.createCharacter(character.id))
-);
+MML.characters = Rx.merge(
+    Rx.from(findObjs({ _type: 'character', archived: false })),
+    Rx.add_character
+  )
+  .pipe(map(MML.createCharacter));
 
 MML.character_list = MML.characters.pipe(
   scan(function (character_list, character) {
     character_list[character.id] = character;
     return character_list;
   }, {})
-);
-
-MML.character_controlled_by = Rx.change_character_controlledby.pipe(
-  map(function (character) {
-    return {
-      character_id: character.id,
-      player_id_list: character.controlledby.split(',')
-    };
-  })
-);
-
-MML.character_controlled_by_error = MML.GM.pipe(
-  switchMap(function (gm) {
-    return MML.character_controlled_by.pipe(
-      filter(({ player_id_list }) => player_id_list.length != 1),
-      tap(() => sendChat(gm.name, 'Character needs exactly 1 player'))
-    );
-  })
 );
 
 MML.token_moved = Rx.change_token.pipe(
