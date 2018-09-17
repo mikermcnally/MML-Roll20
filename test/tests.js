@@ -21,15 +21,15 @@ _.each(lib_files, function(filename, index) {
   roll20String += fs.readFileSync(lib_path + filename, 'utf-8');
 });
 
-fs.writeFileSync('../r20/MML.txt', roll20String, 'utf8');
-fs.writeFileSync('../r20/MML_Test.js',
+fs.writeFileSync('../r20/dist/MML.txt', roll20String, 'utf8');
+fs.writeFileSync('../r20/dist/MML_Test.js',
   'import { * } from "rxjs";\n' + 
   'import { * } from "rxjs/operators";\n' + 
     roll20String + 
     'module.exports = { MML: MML };', 
   'utf8');
 
-var roll20 = require('../../Roll20-Emulation/Roll20');
+var roll20 = require('roll20-emulation');
 state = roll20.state;
 log = roll20.log;
 sendChat = roll20.sendChat;

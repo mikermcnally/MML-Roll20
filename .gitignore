@@ -1,10 +1,5 @@
-MML.txt
-MML_Test.js
+/node_modules
+/dist
 .gitignore
 .eslintrc
 .jshintrc
-.eslintrc
-/node_modules
-/Roll20-Emulation
-.remote-sync.json
-package-lock.json
