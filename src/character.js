@@ -24,7 +24,7 @@ MML.moveDistance = function moveDistance(character, distance) {
 
 MML.setCombatVision = function setCombatVision(character) {
   var token = MML.getCharacterToken(character.id);
-  if (state.MML.GM.inCombat || !_.has(character.statusEffects, 'Observing')) {
+  if (state.MML.gm.inCombat || !_.has(character.statusEffects, 'Observing')) {
     token.set('light_losangle', character.fov);
     token.set('light_hassight', true);
   } else {
@@ -56,7 +56,7 @@ MML.alterHP = async function alterHP(player, character, bodyPart, hpAmount) {
       if (result === 'Failure') {
         MML.addStatusEffect(character, 'Major Wound, ' + bodyPart, {
           duration: duration,
-          startingRound: state.MML.GM.currentRound,
+          startingRound: state.MML.gm.currentRound,
           bodyPart: bodyPart
         });
       }
@@ -78,7 +78,7 @@ MML.alterHP = async function alterHP(player, character, bodyPart, hpAmount) {
           character.statusEffects['Stunned'].duration = duration;
         } else {
           MML.addStatusEffect(character, 'Stunned', {
-            startingRound: state.MML.GM.currentRound,
+            startingRound: state.MML.gm.currentRound,
             duration: duration
           });
         }
@@ -127,7 +127,7 @@ MML.knockdownCheck = async function knockdownCheck(player, character, damage) {
       character.movementType = 'Prone';
     } else {
       MML.addStatusEffect(character, 'Stumbling', {
-        startingRound: state.MML.GM.currentRound
+        startingRound: state.MML.gm.currentRound
       });
     }
   }
@@ -139,7 +139,7 @@ MML.sensitiveAreaCheck = async function sensitiveAreaCheck(player, character, hi
     const result = await MML.attributeCheckRoll(player, character.willpower);
     if (result === 'Failure') {
       MML.addStatusEffect(character, 'Sensitive Area', {
-        startingRound: state.MML.GM.currentRound
+        startingRound: state.MML.gm.currentRound
       });
     }
   }
@@ -892,21 +892,6 @@ MML.createCharacter = function (global_game_state, r20_character) {
     startWith(r20_character.get('name'))
   );
 
-  // const current_player = Rx.combineLatest(
-  //     name,
-  //     Rx.change_character_controlledby.pipe(filter(changed_character => changed_character.get('id') === id)),
-  //     MML.player_list
-  //   )
-  //   .pipe(switchMap(function ([character_name, changed_character, player_list]) {
-  //     const controlled_by = changed_character.controlledby.split(',');
-  //     if (controlled_by.length === 1) {
-  //       return player_list[controlled_by[0]];
-  //     } else {
-  //       sendChat('Error', character_name + ' needs exactly 1 player');
-  //       return Rx.never();
-  //     }
-  //   }));
-
   const action = game_state.pipe(
     filter(({ attribute }) => attribute === 'action'),
     switchMap(({ value }) => value)
@@ -1048,7 +1033,7 @@ MML.createCharacter = function (global_game_state, r20_character) {
           if (result === 'Failure') {
             MML.addStatusEffect(character, 'Major Wound, ' + bodyPart, {
               duration: duration,
-              startingRound: state.MML.GM.currentRound,
+              startingRound: state.MML.gm.currentRound,
               bodyPart: bodyPart
             });
           }
@@ -1121,7 +1106,7 @@ MML.createCharacter = function (global_game_state, r20_character) {
       firstActionInitBonus +
       spentInitiative;
 
-    return initiative < 0 || state.MML.GM.roundStarted === false ? 0 : initiative;
+    return initiative < 0 || state.MML.gm.roundStarted === false ? 0 : initiative;
   }, initiativeRollValue, situationalInitBonus, movementRatioInitBonus, attributeInitBonus, senseInitBonus, fomInitBonus, firstActionInitBonus, spentInitiative);
 
   const senseInitBonus = MML.derivedAttribute('senseInitBonus', function (inventory) {
@@ -1279,7 +1264,7 @@ MML.createCharacter = function (global_game_state, r20_character) {
     };
     if (_.has(character.statusEffects, 'Observing')) {
       MML.addStatusEffect(character, 'Observed', {
-        startingRound: state.MML.GM.currentRound
+        startingRound: state.MML.gm.currentRound
       });
     }
     return character;
@@ -1300,7 +1285,7 @@ MML.createCharacter = function (global_game_state, r20_character) {
     const distance = MML.getDistanceFeet(left1, left2, top1, top2);
     const distanceAvailable = MML.movementRates[character.race][character.movementType] * character.movementAvailable;
 
-    if (state.MML.GM.actor === charName && distanceAvailable > 0) {
+    if (state.MML.gm.actor === charName && distanceAvailable > 0) {
       // If they move too far, move the maxium distance in the same direction
       if (distance > distanceAvailable) {
         const left3 = Math.floor(((left2 - left1) / distance) * distanceAvailable + left1 + 0.5);

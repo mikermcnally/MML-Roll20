@@ -75,13 +75,13 @@ MML.spells['Hail of Stones'] = {
         target.rangedDefense({ family: 'SLI' }, MML.getDistanceBetweenCharacters(character.id, target.id));
       } else if (_.isUndefined(rolls.hitPositionRoll)) {
         if (rolls.defenseRoll === 'Critical Success') {
-          state.MML.GM.currentAction.rolls.numberOfStonesRoll += -1;
-          delete state.MML.GM.currentAction.rolls.defenseRoll;
+          state.MML.gm.currentAction.rolls.numberOfStonesRoll += -1;
+          delete state.MML.gm.currentAction.rolls.defenseRoll;
           // target.criticalDefense();
         } else if (rolls.defenseRoll === 'Success') {
-          state.MML.GM.currentAction.rolls.numberOfStonesRoll += -1;
-          delete state.MML.GM.currentAction.rolls.defenseRoll;
-          MML[state.MML.GM.currentAction.callback]();
+          state.MML.gm.currentAction.rolls.numberOfStonesRoll += -1;
+          delete state.MML.gm.currentAction.rolls.defenseRoll;
+          MML[state.MML.gm.currentAction.callback]();
         } else {
           character.hitPositionRoll();
         }
@@ -93,9 +93,9 @@ MML.spells['Hail of Stones'] = {
         }
       }
     } else if (epModified !== true) {
-      state.MML.GM.currentAction.parameters.epModified = true;
+      state.MML.gm.currentAction.parameters.epModified = true;
     } else {
-      if (_.isUndefined(state.MML.GM.currentAction.targetArray[state.MML.GM.currentAction.targetIndex + 1])) {
+      if (_.isUndefined(state.MML.gm.currentAction.targetArray[state.MML.gm.currentAction.targetIndex + 1])) {
         MML.damageCharacter('endAction');
       } else {
         MML.damageCharacter('nextTarget');

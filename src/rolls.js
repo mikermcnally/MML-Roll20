@@ -27,7 +27,7 @@ MML.sumModifiers = function sumModifiers(modifiers) {
 MML.processRoll = async function processRoll(player, value, getResult, getMessage, changeValue) {
   const result = getResult(value);
   const message = getMessage(value, result);
-  if (player.name === state.MML.GM.name) {
+  if (player.name === state.MML.gm.name) {
     MML.displayGmRoll(player, message);
     const pressedButton = await MML.setRollButtons(player);
     if (pressedButton !== 'acceptRoll') {
@@ -312,10 +312,10 @@ MML.missileAttackRoll = async function missileAttackRoll(player, character, targ
     attackerWeapon.damage = item.grips[grip].range.extreme.damage;
   }
 
-  state.MML.GM.currentAction.callback = 'missileAttackAction';
-  state.MML.GM.currentAction.parameters.range = range;
-  state.MML.GM.currentAction.parameters.attackerWeapon = attackerWeapon;
-  state.MML.GM.currentAction.parameters.attackerSkill = MML.getWeaponSkill(character, item);
+  state.MML.gm.currentAction.callback = 'missileAttackAction';
+  state.MML.gm.currentAction.parameters.range = range;
+  state.MML.gm.currentAction.parameters.attackerWeapon = attackerWeapon;
+  state.MML.gm.currentAction.parameters.attackerSkill = MML.getWeaponSkill(character, item);
 
   await MML.displayMenu(player, character.name + '\'s Attack Roll', ['Roll']);
   return MML.universalRoll(player, mods);
@@ -387,8 +387,8 @@ MML.grappleDefenseWeaponRollApply = function grappleDefenseWeaponRollApply(chara
     }
 
   }
-  state.MML.GM.currentAction.rolls.weaponDefenseRoll = character.player.currentRoll.result;
-  MML[state.MML.GM.currentAction.callback]();
+  state.MML.gm.currentAction.rolls.weaponDefenseRoll = character.player.currentRoll.result;
+  MML[state.MML.gm.currentAction.callback]();
 };
 
 MML.grappleDefenseBrawlRoll = function grappleDefenseBrawlRoll(character, brawlChance) {
@@ -407,8 +407,8 @@ MML.grappleDefenseBrawlRollApply = function grappleDefenseBrawlRollApply(charact
       });
     }
   }
-  state.MML.GM.currentAction.rolls.brawlDefenseRoll = character.player.currentRoll.result;
-  MML[state.MML.GM.currentAction.callback]();
+  state.MML.gm.currentAction.rolls.brawlDefenseRoll = character.player.currentRoll.result;
+  MML[state.MML.gm.currentAction.callback]();
 };
 
 MML.holdAimRoll = async function holdAimRoll(player, character) {
@@ -491,7 +491,7 @@ MML.changeHitPosition = function changeHitPosition(hitPositions) {
 
 MML.processHitpositionRoll = async function processHitpositionRoll(player, value, getMessage, changeValue) {
   const message = getMessage(value);
-  if (player.name === state.MML.GM.name) {
+  if (player.name === state.MML.gm.name) {
     const {pressedButton} = await MML.displayMenu(player, message, ['Continue', 'Change']);
     if (pressedButton !== 'Continue') {
       const newValue = await changeValue(player, pressedButton);

@@ -267,7 +267,7 @@ function runTests() {
       it('Works with holding status effect', function() {
         var character = createCharacter(player, 'test');
         character.statusEffects['Holding'] = {};
-        state.MML.GM.inCombat = true;
+        state.MML.gm.inCombat = true;
         MML.newRoundUpdate(character);
         var result = MML.prepareActionMenu(player, character, createTestAction(character));
         expect(result.message).to.equal('Prepare test\'s action');
@@ -283,7 +283,7 @@ function runTests() {
         var character = createCharacter(player, 'test');
         createTestToken(character.name, character.id);
         character.statusEffects['Grappled'] = { targets: ['1'] };
-        state.MML.GM.inCombat = true;
+        state.MML.gm.inCombat = true;
         MML.newRoundUpdate(character);
         var result = MML.prepareActionMenu(player, character, createTestAction(character));
         expect(result.message).to.equal('Prepare test\'s action');
@@ -299,7 +299,7 @@ function runTests() {
         var character = createCharacter(player, 'test');
         createTestToken(character.name, character.id);
         character.statusEffects['Grappled'] = { targets: ['1', '2'] };
-        state.MML.GM.inCombat = true;
+        state.MML.gm.inCombat = true;
         MML.newRoundUpdate(character);
         var result = MML.prepareActionMenu(player, character, createTestAction(character));
         expect(result.message).to.equal('Prepare test\'s action');
@@ -315,7 +315,7 @@ function runTests() {
         createTestToken(character.name, character.id);
         character.statusEffects['Grappled'] = { targets: ['1'] };
         character.statusEffects['Held'] = { targets: ['2'] };
-        state.MML.GM.inCombat = true;
+        state.MML.gm.inCombat = true;
         MML.newRoundUpdate(character);
         var result = MML.prepareActionMenu(player, character, createTestAction(character));
         expect(result.message).to.equal('Prepare test\'s action');
@@ -330,7 +330,7 @@ function runTests() {
         var character = createCharacter(player, 'test');
         createTestToken(character.name, character.id);
         character.statusEffects['Grappled'] = { targets: ['1'] };
-        state.MML.GM.inCombat = true;
+        state.MML.gm.inCombat = true;
         MML.newRoundUpdate(character);
         var action = createTestAction(character);
         action.modifiers = ['Release Opponent'];
@@ -348,7 +348,7 @@ function runTests() {
         var character = createCharacter(player, 'test');
         createTestToken(character.name, character.id);
         MML.setCurrentAttribute('test', 'spells', JSON.stringify(['Dart']));
-        state.MML.GM.inCombat = true;
+        state.MML.gm.inCombat = true;
         MML.newRoundUpdate(character);
         var result = MML.prepareActionMenu(player, character, createTestAction(character));
         expect(result.message).to.equal('Prepare test\'s action');
@@ -372,7 +372,7 @@ function runTests() {
             actions: 1
           }
         };
-        state.MML.GM.inCombat = true;
+        state.MML.gm.inCombat = true;
         MML.newRoundUpdate(character);
         var result = MML.prepareActionMenu(player, character, createTestAction(character));
         expect(result.message).to.equal('Prepare test\'s action');
@@ -425,7 +425,7 @@ function resetEnvironment() {
   //   'Robot': player
   // };
   // state.MML = {};
-  // state.MML.GM = {
+  // state.MML.gm = {
   //   player: player,
   //   name: 'Robot',
   //   currentAction: {},
@@ -437,7 +437,7 @@ function resetEnvironment() {
   // return player;
   delete state.MML;
   MML.init();
-  return state.MML.GM.player;
+  return state.MML.gm.player;
 }
 
 function createCharacter(player, name) {
@@ -627,7 +627,7 @@ function pbcopy(data) {
 //   .then(executeObserve(player))
 //   .then(executeObserve(player))
 //   expect(MML.characters['test1'].statusEffects, 'observing previous round should add "Observed" status effect').to.have.property("Observed");
-//   expect(state.MML.GM.currentRound, 'currentRound should be incremented').to.equal(2);
+//   expect(state.MML.gm.currentRound, 'currentRound should be incremented').to.equal(2);
 //   expect(MML.characters['test0'].roundsExertion, 'punch action should add to roundsExertion').to.equal(1);
 //   expect(MML.characters['test1'].roundsExertion, 'forgoing defense should not add to roundsExertion').to.equal(0);
 //
@@ -691,7 +691,7 @@ function pbcopy(data) {
 //   expect(MML.characters['test1'].hp.Head, 'damage should accumlate').to.equal(MML.characters['test1'].hpMax.Head - 3);
 //   expect(MML.characters['test1'].hp['Wound Fatigue'], 'damage should accumlate').to.equal(MML.characters['test1'].hpMax['Wound Fatigue'] - 3);
 //   expect(MML.characters['test1'].knockdown, 'knockdown should only consider damage from this round').to.equal(MML.characters['test1'].knockdownMax);
-//   expect(state.MML.GM.currentRound, 'currentRound should be incremented').to.equal(3);
+//   expect(state.MML.gm.currentRound, 'currentRound should be incremented').to.equal(3);
 // .catch(console.log);
 // });
 //

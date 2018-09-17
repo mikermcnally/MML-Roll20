@@ -16,7 +16,6 @@ MML.players = Rx.change_player_online.pipe(
 );
 
 MML.player_list = MML.players.pipe(
-  filter(player => !playerIsGM(player.get('id'))),
   scan(function (player_list, player) {
     const id = player.get('id');
     if (player.get('online')) {
@@ -28,7 +27,7 @@ MML.player_list = MML.players.pipe(
   }, {})
 );
 
-MML.GM = MML.players.pipe(filter(player => playerIsGM(player.get('id'))));
+MML.gm = MML.players.pipe(filter(player => playerIsGM(player.get('id')), map(player => new MML.gm(player))));
 
 MML.player_input = MML.players.pipe(
   pluck('input'),
@@ -36,7 +35,8 @@ MML.player_input = MML.players.pipe(
 );
 
 MML.game_state = Rx.merge(
-  MML.player_input
+  MML.player_input,
+  MML.gm.input
 );
 
 MML.characters = Rx.merge(

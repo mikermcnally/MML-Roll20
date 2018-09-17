@@ -13,3 +13,5 @@ Character inputs should have this form
 }
 
 Expand is the key for action menu 
+
+game state => character menu => 

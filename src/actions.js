@@ -258,7 +258,7 @@ MML.observeAction = async function observeAction(player, character, action) {
   MML.addStatusEffect(character, 'Observing', {
     id: MML.generateRowID(),
     name: 'Observing',
-    startingRound: state.MML.GM.currentRound
+    startingRound: state.MML.gm.currentRound
   });
   await MML.displayMenu(player, character.name + ' observes the situation.', ['End Action']);
   return MML.endAction(player, character, action);
@@ -272,11 +272,11 @@ MML.aimAction = async function aimAction(player, character, action) {
       name: 'Taking Aim',
       level: 1,
       target: target,
-      startingRound: state.MML.GM.currentRound
+      startingRound: state.MML.gm.currentRound
     });
     await MML.displayMenu(player, character.name + ' aims at ' + target.name, ['End Action']);
     return MML.endAction(player, character, action);
-  } else if (character.statusEffects['Taking Aim'].startingRound !== state.MML.GM.currentRound && attackerWeapon.family === 'MWD') {
+  } else if (character.statusEffects['Taking Aim'].startingRound !== state.MML.gm.currentRound && attackerWeapon.family === 'MWD') {
     const holdAimRoll = await MML.holdAimRoll(player, character, target);
     if (MML.failure(holdAimRoll)) {
       return await MML.missileAttackAction(player, character, action);
@@ -286,7 +286,7 @@ MML.aimAction = async function aimAction(player, character, action) {
       } else {
         character.statusEffects['Taking Aim'].target = target;
         character.statusEffects['Taking Aim'].level = 1;
-        character.statusEffects['Taking Aim'].startingRound = state.MML.GM.currentRound;
+        character.statusEffects['Taking Aim'].startingRound = state.MML.gm.currentRound;
       }
       await MML.displayMenu(player, character.name + ' aims at ' + target.name, ['End Action']);
       return MML.endAction(player, character, action);

@@ -1,4 +1,4 @@
-MML.GM = function GM(roll20_player_object) {
+MML.gm = function GM(roll20_player_object) {
   const gm = this;
   gm.id = roll20_player_object.get('id');
   gm.name = roll20_player_object.get('name');
@@ -38,7 +38,7 @@ MML.GM = function GM(roll20_player_object) {
 
 
 // MML.startCombat = function startCombat(selectedIds) {
-//   var gm = state.MML.GM;
+//   var gm = state.MML.gm;
 //   gm.inCombat = true;
 //   const allCombatants = selectedIds.map(id => MML.characters[id]);
 //   _.each(MML.players, function(player) {
@@ -123,7 +123,7 @@ MML.checkReady = function checkReady(combatants) {
 };
 
 MML.displayThreatZones = function displayThreatZones(toggle) {
-  _.each(state.MML.GM.allCombatants, function(character) {
+  _.each(state.MML.gm.allCombatants, function(character) {
     var token = MML.getCharacterToken(character.id);
     var radius1 = '';
     var radius2 = '';
@@ -160,7 +160,7 @@ MML.assignNewItem = function assignNewItem(input) {
     input: {
       attribute: 'inventory',
       index: MML.generateRowID(),
-      value: state.MML.GM.newItem
+      value: state.MML.gm.newItem
     }
   });
   MML.processCommand({

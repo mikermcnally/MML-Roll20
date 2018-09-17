@@ -7,7 +7,7 @@ MML.displayPlayerRoll = function displayPlayerRoll(player, message) {
 };
 
 MML.displayRoll = function displayRoll(player, roll) {
-  if (player.name === state.MML.GM.name) {
+  if (player.name === state.MML.gm.name) {
     return MML.displayGmRoll(player, roll);
   } else {
     return MML.displayPlayerRoll(player, roll);
@@ -19,7 +19,7 @@ MML.setRollButtons = function setRollButtons(player) {
     player.buttonPressed = function (pressedButton) {
       if (pressedButton === 'acceptRoll') {
         resolve(pressedButton);
-      } else if (pressedButton.includes('changeRoll') && player.name === state.MML.GM.name) {
+      } else if (pressedButton.includes('changeRoll') && player.name === state.MML.gm.name) {
         resolve(pressedButton.replace('changeRoll ', ''));
       }
     };
@@ -110,7 +110,7 @@ MML.prepareAttackAction = async function prepareAttackAction(player, character, 
       action.modifiers.push(calledShot);
     }
   }
-  if (!state.MML.GM.roundStarted) {
+  if (!state.MML.gm.roundStarted) {
     const attackStance = await MML.chooseAttackStance(player);
     switch (attackStance) {
       case 'Defensive':
@@ -350,7 +350,7 @@ MML.menuGmNewWeapon = function menuGmNewWeapon(player, who) {
         text: item.name,
         nextMenu: 'menuGmItemQuality',
         callback: function (text) {
-          state.MML.GM.newItem = MML.items[text];
+          state.MML.gm.newItem = MML.items[text];
           MML.sendChatMenu(player);
         }
       });
@@ -369,7 +369,7 @@ MML.menuGmNewShield = function menuGmNewShield(player, who) {
         text: item.name,
         nextMenu: 'menuGmItemQuality',
         callback: function (text) {
-          state.MML.GM.newItem = MML.items[text];
+          state.MML.gm.newItem = MML.items[text];
           MML.sendChatMenu(player);
         }
       });
@@ -388,7 +388,7 @@ MML.menuGmNewArmor = function menuGmNewArmor(player, who) {
         text: item.name,
         nextMenu: 'menuGmArmorMaterial',
         callback: function (text) {
-          state.MML.GM.newItem = MML.items[text];
+          state.MML.gm.newItem = MML.items[text];
           MML.sendChatMenu(player);
         }
       });
@@ -407,9 +407,9 @@ MML.menuGmArmorMaterial = function menuGmArmorMaterial(player, who) {
       nextMenu: 'menuGmItemQuality',
       callback: function (text) {
         var material = MML.APVList[text];
-        state.MML.GM.newItem.material = material.name;
-        state.MML.GM.newItem.weight = material.weightPerPosition * state.MML.GM.newItem.totalPostitions;
-        state.MML.GM.newItem.name = material.name + ' ' + state.MML.GM.newItem.name;
+        state.MML.gm.newItem.material = material.name;
+        state.MML.gm.newItem.weight = material.weightPerPosition * state.MML.gm.newItem.totalPostitions;
+        state.MML.gm.newItem.name = material.name + ' ' + state.MML.gm.newItem.name;
         MML.sendChatMenu(player);
       }
     });
@@ -666,11 +666,11 @@ MML.menucharAddTarget = function menucharAddTarget(player, who) {
   player.who = who;
   player.buttons = [];
   var character = MML.characters[who];
-  state.MML.GM.currentAction.parameters.metaMagic['Increase Targets'] = {
-    epMod: state.MML.GM.currentAction.targetArray.length,
-    castingMod: -10 * state.MML.GM.currentAction.targetArray.length
+  state.MML.gm.currentAction.parameters.metaMagic['Increase Targets'] = {
+    epMod: state.MML.gm.currentAction.targetArray.length,
+    castingMod: -10 * state.MML.gm.currentAction.targetArray.length
   };
-  var parameters = state.MML.GM.currentAction.parameters;
+  var parameters = state.MML.gm.currentAction.parameters;
   var epProduct = _.reduce(_.pluck(parameters.metaMagic, 'epMod'), function (memo, num) {
     return memo * num;
   }) * parameters.epCost;
@@ -682,7 +682,7 @@ MML.menucharIncreasePotency = function menucharIncreasePotency(player, who) {
   player.message = 'Increase potency by how many times?';
   player.buttons = [];
   var character = MML.characters[who];
-  var parameters = state.MML.GM.currentAction.parameters;
+  var parameters = state.MML.gm.currentAction.parameters;
   var epProduct = _.reduce(_.pluck(parameters.metaMagic, 'epMod'), function (memo, num) {
     return memo * num;
   }) * parameters.epCost;
@@ -693,7 +693,7 @@ MML.menucharIncreasePotency = function menucharIncreasePotency(player, who) {
       text: 'Times: ' + i + ' EP Cost: ' + Math.pow(2, i - 1) * epProduct,
       nextMenu: 'menuPause',
       callback: function () {
-        state.MML.GM.currentAction.parameters.metaMagic['Increase Potency'] = {
+        state.MML.gm.currentAction.parameters.metaMagic['Increase Potency'] = {
           epMod: Math.pow(2, i - 1),
           castingMod: -10,
           level: i
@@ -719,7 +719,7 @@ MML.menucharIncreaseDuration = function menucharIncreaseDuration(player, who) {
   player.message = 'Increase duration by how many times?';
   player.buttons = [];
   var character = MML.characters[who];
-  var parameters = state.MML.GM.currentAction.parameters;
+  var parameters = state.MML.gm.currentAction.parameters;
   var epProduct = _.reduce(_.pluck(parameters.metaMagic, 'epMod'), function (memo, num) {
     return memo * num;
   }) * parameters.epCost;
@@ -730,7 +730,7 @@ MML.menucharIncreaseDuration = function menucharIncreaseDuration(player, who) {
       text: 'Times: ' + i + ' EP Cost: ' + i * epProduct,
       nextMenu: 'menuPause',
       callback: function () {
-        state.MML.GM.currentAction.parameters.metaMagic['Increase Duration'] = {
+        state.MML.gm.currentAction.parameters.metaMagic['Increase Duration'] = {
           epMod: i,
           castingMod: 0,
           level: i
@@ -830,7 +830,7 @@ MML.readyAdditionalItem = function readyAdditionalItem(player, character, itemMa
 MML.finalizeAction = async function finalizeAction(player, character, action) {
   var message;
   var buttons;
-  if (state.MML.GM.roundStarted === true) {
+  if (state.MML.gm.roundStarted === true) {
     message = 'Accept or edit action for ' + character.name;
     buttons = [
       'Accept',
@@ -957,7 +957,7 @@ MML.menucharGenericRoll = function menucharGenericRoll(player, who, message, dic
 
 MML.menucharReloadAction = function menucharReloadAction(player, who) {
   player.who = who;
-  player.message = player.who + ' reloads. ' + state.MML.GM.currentAction.parameters.attackerWeapon.loaded + '/' + state.MML.GM.currentAction.parameters.attackerWeapon.reload + ' done.';
+  player.message = player.who + ' reloads. ' + state.MML.gm.currentAction.parameters.attackerWeapon.loaded + '/' + state.MML.gm.currentAction.parameters.attackerWeapon.reload + ' done.';
   player.buttons = [player.menuButtons.endAction];
 };
 
@@ -975,8 +975,8 @@ MML.setCurrentCharacterTargets = function setCurrentCharacterTargets(player, inp
   } else {
     targetArray = input.targets;
   }
-  state.MML.GM.currentAction.targetArray = targetArray;
-  state.MML.GM.currentAction.targetIndex = 0;
+  state.MML.gm.currentAction.targetArray = targetArray;
+  state.MML.gm.currentAction.targetIndex = 0;
 };
 
 MML.menuButtons = {};
@@ -1033,7 +1033,7 @@ MML.menuButtons.itemQualityPoor = {
   text: 'Poor',
   nextMenu: 'GmMenuNewItemProperties',
   callback: function (text) {
-    state.MML.GM.newItem.quality = text;
+    state.MML.gm.newItem.quality = text;
     MML.sendChatMenu(player);
   }
 };
@@ -1042,7 +1042,7 @@ MML.menuButtons.itemQualityStandard = {
   text: 'Standard',
   nextMenu: 'GmMenuNewItemProperties',
   callback: function (text) {
-    state.MML.GM.newItem.quality = text;
+    state.MML.gm.newItem.quality = text;
     MML.sendChatMenu(player);
   }
 };
@@ -1051,7 +1051,7 @@ MML.menuButtons.itemQualityExcellent = {
   text: 'Excellent',
   nextMenu: 'GmMenuNewItemProperties',
   callback: function (text) {
-    state.MML.GM.newItem.quality = text;
+    state.MML.gm.newItem.quality = text;
     MML.sendChatMenu(player);
   }
 };
@@ -1060,7 +1060,7 @@ MML.menuButtons.itemQualityMasterWork = {
   text: 'Master Work',
   nextMenu: 'GmMenuNewItemProperties',
   callback: function (text) {
-    state.MML.GM.newItem.quality = text;
+    state.MML.gm.newItem.quality = text;
     MML.sendChatMenu(player);
   }
 };
@@ -1076,11 +1076,11 @@ MML.menuButtons.assignNewItem = {
 };
 
 
-MML.GmMenuWorld = function GmMenuWorld(player, input) {
+MML.gmMenuWorld = function GmMenuWorld(player, input) {
   //pass time, travel, other stuff
 };
 
-MML.GmMenuUtilities = function GmMenuUtilities(player, input) {
+MML.gmMenuUtilities = function GmMenuUtilities(player, input) {
   //edit states and other api stuff
 };
 
@@ -1099,11 +1099,11 @@ MML.Player = function Player(roll20_player_object) {
     filter(({ content }) => content.startsWith('menu|')),
     map(({ content }) => content.replace('menu|', '')),
     withLatestFrom(MML.character_list),
-    switchMap(([id, character_list]) => character_list[id].menu(button_pressed))
+    switchMap(([id, character_list]) => character_list[id].menu(player))
   );
 
   player.input = Rx.merge(
-    MML.GM.prompt_player.pipe(filter(({player_id}) => player_id === id)),
+    MML.gm.prompt_player.pipe(filter(({player_id}) => player_id === id)),
     player.character_menu
   )
   .pipe(switchAll());

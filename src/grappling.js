@@ -69,14 +69,14 @@ MML.resistRelease = function resistRelease(player, who, attacker) {
     text: 'Yes',
     nextMenu: 'menuIdle',
     callback: function() {
-      state.MML.GM.currentAction.parameters.targetAgreed = true;
+      state.MML.gm.currentAction.parameters.targetAgreed = true;
       MML.releaseOpponentAction();
     }
   }, {
     text: 'No',
     nextMenu: 'menuIdle',
     callback: function() {
-      state.MML.GM.currentAction.parameters.targetAgreed = false;
+      state.MML.gm.currentAction.parameters.targetAgreed = false;
       MML.releaseOpponentAction();
     }
   }];
@@ -171,9 +171,9 @@ MML.applyHold = function applyHold(character, defender) {
     id: MML.generateRowID(),
     name: 'Holding',
     targets: [defender.id],
-    bodyPart: state.MML.GM.currentAction.calledShot
+    bodyPart: state.MML.gm.currentAction.calledShot
   };
-  if (['Chest', 'Abdomen'].indexOf(state.MML.GM.currentAction.calledShot) > -1 && defender.movementType === 'Prone') {
+  if (['Chest', 'Abdomen'].indexOf(state.MML.gm.currentAction.calledShot) > -1 && defender.movementType === 'Prone') {
     defender.statusEffects['Pinned'] = {
       id: _.has(defender.statusEffects, 'Pinned') ? defender.statusEffects['Pinned'].id : MML.generateRowID(),
       name: 'Pinned',
@@ -182,7 +182,7 @@ MML.applyHold = function applyHold(character, defender) {
   } else {
     const holder = {
       name: character.id,
-      bodyPart: state.MML.GM.currentAction.calledShot
+      bodyPart: state.MML.gm.currentAction.calledShot
     };
     defender.statusEffects['Held'] = {
       id: _.has(defender.statusEffects, 'Held') ? defender.statusEffects['Held'].id : MML.generateRowID(),

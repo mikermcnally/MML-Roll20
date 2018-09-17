@@ -31,7 +31,7 @@ MML.displayMenu = function displayMenu(player, message, buttons) {
 
 // function initializeMenu(player) {
 //   await MML.setMenuButtons(player, ['initializeMenu']);
-//   if (player.name === state.MML.GM.name) {
+//   if (player.name === state.MML.gm.name) {
 //     return await MML.menuMainGm(player);
 //   } else {
 //     return await MML.menuMainPlayer(player);
