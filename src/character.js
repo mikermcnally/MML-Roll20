@@ -833,8 +833,18 @@ MML.derivedAttribute = function derivedAttribute(name, compute, ...attributes) {
   return Rx.combineLatest(attributes.concat(user_changed)).pipe(map((attributes) => compute(...attributes)));
 };
 
+MML.variableAttribute = function variableAttribute(name) {
+  return function (source) {
+    return source.pipe(
+      filter(effect => effect.attribute === name),
+      pluck('value'),
+      mergeAll()
+    );
+  };
+}
+
 // Character Creation
-MML.createCharacter = function (r20_character) {
+MML.createCharacter = function (global_game_state, r20_character) {
   MML.createAttribute('race', 'Human', '', character);
   MML.createAttribute('gender', 'Male', '', character);
   MML.createAttribute('stature_roll', 6, '', character);
@@ -858,7 +868,7 @@ MML.createCharacter = function (r20_character) {
     filter(attribute => attribute.get('_characterid') === id)
   );
 
-  const game_state = MML.game_state.pipe(filter(effect => effect.object_id === id));
+  const game_state = global_game_state.pipe(filter(effect => effect.object_id === id));
   // Rx.add_attribute
   // Rx.change_attribute_current
 
@@ -882,28 +892,22 @@ MML.createCharacter = function (r20_character) {
     startWith(r20_character.get('name'))
   );
 
-  const current_player = Rx.combineLatest(
-      name,
-      Rx.change_character_controlledby.pipe(filter(changed_character => changed_character.get('id') === id)),
-      MML.player_list
-    )
-    .pipe(switchMap(function ([character_name, changed_character, player_list]) {
-      const controlled_by = changed_character.controlledby.split(',');
-      if (controlled_by.length === 1) {
-        return player_list[controlled_by[0]];
-      } else {
-        sendChat('Error', character_name + ' needs exactly 1 player');
-        return Rx.never();
-      }
-    }));
-  
-  const player_input = current_player.pipe(switchMap(function (player) {
-    return player.input.pipe(
-      filter(({ character_id }) => character_id === id)
-    );
-  }));
+  // const current_player = Rx.combineLatest(
+  //     name,
+  //     Rx.change_character_controlledby.pipe(filter(changed_character => changed_character.get('id') === id)),
+  //     MML.player_list
+  //   )
+  //   .pipe(switchMap(function ([character_name, changed_character, player_list]) {
+  //     const controlled_by = changed_character.controlledby.split(',');
+  //     if (controlled_by.length === 1) {
+  //       return player_list[controlled_by[0]];
+  //     } else {
+  //       sendChat('Error', character_name + ' needs exactly 1 player');
+  //       return Rx.never();
+  //     }
+  //   }));
 
-  const action = player_input.pipe(
+  const action = game_state.pipe(
     filter(({ attribute }) => attribute === 'action'),
     switchMap(({ value }) => value)
   );
@@ -1326,45 +1330,7 @@ MML.createCharacter = function (r20_character) {
       })
     );
 
-  const action = function setAction(character, action) {
-    var initBonus = 10;
-    if (action.name === 'Attack' || action.name === 'Aim') {
-      if (MML.isUnarmedAction(action) || action.weapon === 'unarmed') {
-        if (!_.isUndefined(character.weaponSkills['Brawling']) && character.weaponSkills['Brawling'].level > character.weaponSkills['Default Martial'].level) {
-          action.skill = character.weaponSkills['Brawling'].level;
-        } else {
-          action.skill = character.weaponSkills['Default Martial'].level;
-        }
-        // } else if (leftHand !== 'unarmed' && rightHand !== 'unarmed') {
-        //   var weaponInits = [character.inventory[character.leftHand._id].grips[character.leftHand.grip].initiative,
-        //     character.inventory[character.rightHand._id].grips[character.rightHand.grip].initiative
-        //   ];
-        //   initBonus = _.min(weaponInits);
-        // action.skill = character.weaponSkills.[character.inventory[character.leftHand._id].name].level or character.weaponSkills['Default Martial Skill'].level;
-        //Dual Wielding
-      } else {
-        initBonus = action.weapon.initiative;
-        action.skill = MML.getWeaponSkill(character, action.weapon);
-      }
-    } else if (action.name === 'Cast') {
-      var skillInfo = MML.getMagicSkill(character, action.spell);
-      action.skill = skillInfo.level;
-      action.skillName = skillInfo.name;
-    }
-    if (state.MML.GM.roundStarted === false) {
-      character.firstActionInitBonus = initBonus;
-    }
-
-    if (_.isUndefined(character.previousAction) || character.previousAction.ts !== action.ts) {
-      _.each(action.modifiers, function (modifier) {
-        MML.addStatusEffect(character, modifier, {
-          ts: action.ts,
-          startingRound: state.MML.GM.currentRound
-        });
-      });
-    }
-    character.action = action;
-  };
+  
   const previousAction = MML.getCurrentAttributeObject(character.id, 'previousAction');
   const roundsRest = MML.getCurrentAttributeAsFloat(character.id, 'roundsRest');
   const roundsExertion = MML.getCurrentAttributeAsFloat(character.id, 'roundsExertion');

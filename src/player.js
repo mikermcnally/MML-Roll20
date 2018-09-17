@@ -1,10 +1,9 @@
 MML.displayGmRoll = function displayGmRoll(player, message) {
-  sendChat(player.name, '/w "' + player.name + '" &{template:rollMenuGM} {{title=' + message + "}}");
+  player.name.subscribe(name => sendChat(name, '/w "' + name + '" &{template:rollMenuGM} {{title=' + message + "}}"));
 };
 
 MML.displayPlayerRoll = function displayPlayerRoll(player, message) {
-  sendChat(player.name, '/w "' + player.name + '" &{template:rollMenu} {{title=' + message + "}}");
-  return player;
+  player.name.subscribe(name => sendChat(name, '/w "' + name + '" &{template:rollMenu} {{title=' + message + "}}"));
 };
 
 MML.displayRoll = function displayRoll(player, roll) {
@@ -1090,33 +1089,23 @@ MML.Player = function Player(roll20_player_object) {
   player.id = roll20_player_object.get('id');
   player.name = Rx.change_player_displayname.pipe(
     pluck('_displayname'),
-    startWith(roll20_player_object.get('name'))
+    startWith(roll20_player_object.get('name')),
+    switchMap(name => Rx.of(name))
   );
-  // player.characters = MML.characters.pipe(
-  //   mergeMap(character => Rx.combineLatest(character.player)),
-  //   filter(),
-  //   scan(function (list, character) {
-  //     list[character.id] = character;
-  //     return  character;
-  //   })
-  // );
 
-  const button_pressed = player.name.pipe(switchMap(function (name) {
-    return MML.button_pressed.pipe(filter(message => name === message.who));
-  }));
+  const button_pressed = player.name.pipe(switchMap(name => MML.button_pressed.pipe(filter(message => name === message.who))));
 
   player.character_menu = button_pressed.pipe(
     filter(({ content }) => content.startsWith('menu|')),
-    switchMap(function ({ content }) {
-      return MML.characterMenu(content.replace('menu|', '')).pipe()
-    })
+    map(({ content }) => content.replace('menu|', '')),
+    withLatestFrom(MML.character_list),
+    switchMap(([id, character_list]) => character_list[id].menu(button_pressed))
   );
 
   player.input = Rx.merge(
     MML.GM.prompt_player.pipe(filter(({player_id}) => player_id === id)),
     player.character_menu
-  ).pipe(switchAll());
+  )
+  .pipe(switchAll());
 };
-
-
 

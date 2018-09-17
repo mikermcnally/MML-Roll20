@@ -1,6 +1,16 @@
 const MML = {};
 state.MML = state.MML || {};
 
+MML.button_pressed = Rx.chat_message.pipe(
+  filter(({ type, content }) => type === 'api' && content.includes('!MML|')),
+  map(function (message) {
+    message.who = message.who.replace(' (GM)', '');
+    message.content = message.content.replace('!MML|', '');
+    message.selected = MML.getSelectedIds(message.selected);
+    return message;
+  })
+);
+
 MML.players = Rx.change_player_online.pipe(
   startWith(findObjs({ _type: 'player', online: true }))
 );
@@ -20,21 +30,20 @@ MML.player_list = MML.players.pipe(
 
 MML.GM = MML.players.pipe(filter(player => playerIsGM(player.get('id'))));
 
-MML.button_pressed = Rx.chat_message.pipe(
-  filter(({ type, content }) => type === 'api' && content.includes('!MML|')),
-  map(function (message) {
-    message.who = message.who.replace(' (GM)', '');
-    message.content = message.content.replace('!MML|', '');
-    message.selected = MML.getSelectedIds(message.selected);
-    return message;
-  })
+MML.player_input = MML.players.pipe(
+  pluck('input'),
+  mergeAll()
+);
+
+MML.game_state = Rx.merge(
+  MML.player_input
 );
 
 MML.characters = Rx.merge(
     Rx.from(findObjs({ _type: 'character', archived: false })),
     Rx.add_character
   )
-  .pipe(map(MML.createCharacter));
+  .pipe(map(character => MML.createCharacter(MML.game_state, character)));
 
 MML.character_list = MML.characters.pipe(
   scan(function (character_list, character) {

@@ -1,3 +1,18 @@
+class StatusEffect {
+  constructor(effect, end = Rx.never()) {
+    this = effect.pipe(
+      takeUntil(end)
+    );
+    this.id = id;
+    this.menu; // For manual removal
+  }
+  /**
+   * Emits {
+   *    
+   * }
+   */
+}
+
 MML.statusEffects = {
   'Major Wound':  function (effect, index) {
     if (!state.MML.GM.inCombat) {

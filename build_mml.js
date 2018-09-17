@@ -21,4 +21,4 @@ _.each(lib_files, function(file_name, index) {
   roll20_string += file_text;
 });
 
-fs.writeFileSync('../r20/dist/MML.js', roll20_string, 'utf8');
+fs.writeFileSync('../r20/MML.js', roll20_string, 'utf8');
