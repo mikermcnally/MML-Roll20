@@ -1330,7 +1330,18 @@ MML.createCharacter = function (global_game_state, r20_character) {
       })
     );
 
-  
+  const available_actions = Rx.combineLatest(
+    spells.pipe(map(spell_list => spell_list.length > 0 ? [] : ['Cast'])),
+    action_equipment.pipe(every(item => !MML.isRangedWeapon(item)), map(no_ranged => no_ranged ? ['Aim', 'Reload'] : [])),
+    status_effects.pipe(filter(effect => effect.attribute === 'available_actions'), pluck('effect'), reduce((forbidden_actions, forbid) => _.uniq(forbidden_actions, forbid))),
+
+  ).pipe(
+    map(forbidden_actions => _.difference(['Movement Only', 'Observe', 'Attack', 'Aim', 'Reload'], ...forbidden_actions)),
+    swtichMap(actions => Rx.of(actions))
+  );
+
+  const action_modifiers = ['Ready Item', 'Release Opponent'];
+
   const previousAction = MML.getCurrentAttributeObject(character.id, 'previousAction');
   const roundsRest = MML.getCurrentAttributeAsFloat(character.id, 'roundsRest');
   const roundsExertion = MML.getCurrentAttributeAsFloat(character.id, 'roundsExertion');

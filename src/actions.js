@@ -1,24 +1,32 @@
-MML.prepareAction = function prepareAction(player, character) {
-  const action = {
-    ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
-    modifiers: [],
-    weapon: MML.getEquippedWeapon(character)
-  };
 
-  if (_.has(character.statusEffects, 'Stunned')) {
-    _.extend(action, { ts: Date.now(), name: 'Movement Only' });
-    return MML.finalizeAction(player, character, action);
-  } else if (character.situationalInitBonus !== 'No Combat') {
-    return MML.buildAction(player, character, action).pipe(
-      switchMapTo(MML.finalizeAction(player, character, action))
-    );
-  } else {
-    return {
-      id: character.id,
-      attribute: 'action',
-      value: Rx.empty()
-    };
-  }
+
+MML.prepareAction = function prepareAction(button_pressed, character) {
+  // const action = {
+  //   ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,
+  //   modifiers: [],
+  //   weapon: MML.getEquippedWeapon(character)
+  // };
+
+  // if (_.has(character.statusEffects, 'Stunned')) {
+  //   _.extend(action, { ts: Date.now(), name: 'Movement Only' });
+  //   return MML.finalizeAction(player, character, action);
+  // } else if (character.situationalInitBonus !== 'No Combat') {
+  //   return MML.buildAction(player, character, action).pipe(
+  //     switchMapTo(MML.finalizeAction(player, character, action))
+  //   );
+  // } else {
+  //   return {
+  //     id: character.id,
+  //     attribute: 'action',
+  //     value: Rx.empty()
+  //   };
+  // }
+  return character.action.pipe(
+    isEmpty(),
+    switchMap(function (has_action) {
+      return has_action ? MML.changeAction(button_pressed, character) : MML.buildAction(button_pressed, character);
+    })
+  );
 };
 
 MML.buildAction = function buildAction(player, character, action) {
@@ -86,36 +94,53 @@ MML.buildAction = function buildAction(player, character, action) {
   }))
 };
 
-MML.chooseActionType = function chooseActionType(player, character, action) {
+MML.changeAction = function changeAction(button_pressed, character) {
+  return MML.displayMenu(player.name, 'Continue or Change Action: ', ['Continue', 'Change']).pipe(
+    switchMap(function ({ content }) {
+      switch (content) {
+        case 'Continue':
+          return Rx.empty();
+        case 'Change':
+          return MML.buildAction(button_pressed, character);
+        default:
+          return Rx.throwError('NANI?!');
+      }
+    })
+  );
+};
+
+MML.chooseActionType = function chooseActionType(button_pressed, character) {
   const message = 'Prepare ' + character.name + '\'s action';
-  var buttons = ['Movement Only', 'Observe', 'Ready Item', 'Attack'];
+  return Rx.combineLatest(character.name, character.available_actions).pipe(switchMap(function () {
+    MML.displayMenu(player, message, buttons)
+  }));
 
-  if (!_.isUndefined(action.weapon) && MML.isRangedWeapon(action.weapon)) {
-    if (action.weapon.family !== 'MWM' || action.weapon.loaded === action.weapon.reload) {
-      buttons.push('Aim');
-    } else {
-      buttons.push('Reload');
-    }
-  }
+  // if (!_.isUndefined(action.weapon) && MML.isRangedWeapon(action.weapon)) {
+  //   if (action.weapon.family !== 'MWM' || action.weapon.loaded === action.weapon.reload) {
+  //     buttons.push('Aim');
+  //   } else {
+  //     buttons.push('Reload');
+  //   }
+  // }
 
-  if ((_.has(character.statusEffects, 'Holding') ||
-      (_.has(character.statusEffects, 'Grappled') && character.statusEffects['Grappled'].targets.length === 1)) &&
-    !_.has(character.statusEffects, 'Held') &&
-    !_.contains(action.modifiers, 'Release Opponent')
-  ) {
-    buttons.push('Release Opponent');
-  }
+  // if ((_.has(character.statusEffects, 'Holding') ||
+  //     (_.has(character.statusEffects, 'Grappled') && character.statusEffects['Grappled'].targets.length === 1)) &&
+  //   !_.has(character.statusEffects, 'Held') &&
+  //   !_.contains(action.modifiers, 'Release Opponent')
+  // ) {
+  //   buttons.push('Release Opponent');
+  // }
 
-  if (character.spells.length > 0) {
-    buttons.push('Cast');
-  }
+  // if (character.spells.length > 0) {
+  //   buttons.push('Cast');
+  // }
 
-  if (!_.isUndefined(character.previousAction.spell) && character.previousAction.spell.actions > 0) {
-    buttons.push('Continue Casting');
-  }
+  // if (!_.isUndefined(character.previousAction.spell) && character.previousAction.spell.actions > 0) {
+  //   buttons.push('Continue Casting');
+  // }
 
-  const { pressedButton } = MML.displayMenu(player, message, buttons);
-  return pressedButton;
+  // const { button_pressed } = MML.displayMenu(player, message, buttons);
+  // return button_pressed;
 };
 
 MML.isUnarmedAction = function isUnarmedAction(action) {
