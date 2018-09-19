@@ -43,14 +43,17 @@ MML.characters = Rx.merge(
     Rx.from(findObjs({ _type: 'character', archived: false })),
     Rx.add_character
   )
-  .pipe(map(character => MML.createCharacter(MML.game_state, character)));
+  .pipe(
+    map(character => MML.createCharacter(MML.game_state, character)),
+    shareReplay()
+  );
 
-MML.character_list = MML.characters.pipe(
-  scan(function (character_list, character) {
-    character_list[character.id] = character;
-    return character_list;
-  }, {})
-);
+// MML.character_list = MML.characters.pipe(
+//   scan(function (character_list, character) {
+//     character_list[character.id] = character;
+//     return character_list;
+//   }, {})
+// );
 
 MML.token_moved = Rx.change_token.pipe(
   filter(([curr, prev]) => curr.get('left') !== prev['left'] && curr.get('top') !== prev['top']),

@@ -11,18 +11,60 @@ MML.gm = function GM(roll20_player_object) {
     })
   );
 
-  const button_pressed = MML.button_pressed.pipe(filter(message => gm.name === message.who));
+  const button_pressed = gm.name.pipe(switchMap(name => MML.button_pressed.pipe(filter(message => name === message.who))));
 
-  const router = button_pressed.pipe(
-    scan(function (path, next) {
-      path.push(next);
-      return path;
-    }, [])
+  const route = button_pressed.pipe(pluck('content'));
+  const selected_ids = button_pressed.pipe(pluck('selected'));
+
+  const idle = route.filter('/');
+
+  const main_menu = idle.pipe(switchMapTo(route.pipe(filter('/gm'))));
+  main_menu.pipe(switchMapTo(gm.name)).subscribe(function (name) {
+    const buttons = [
+      new Button('Combat', '/gm/combat'),
+      new Button('Exit', '/')
+    ];
+    MML.displayMenu(name, 'Main Menu: ', buttons);
+  });
+
+  const combat_menu = main_menu.pipe(switchMapTo(route.pipe(filter('/gm/combat'))));
+  combat_menu.pipe(switchMapTo(gm.name)).subscribe();
+  
+  const start_combat = combat_menu.pipe(switchMapTo(Rx.zip(selected_ids, route.pipe(filter('/gm/combat/start')))));
+  const end_combat = start_combat.pipe(switchMapTo(route.pipe(filter('/gm/combat/end'))));
+
+  const combatants = start_combat.pipe(
+    tap(function (ids) {
+      if (ids.length === 0) {
+        MML.displayGmCombatMenu()
+      }
+    }),
+    filter(ids => ids.length > 0),
+    switchMap(ids => MML.characters.pipe(filter(character => ids.includes(character.id))))
   );
 
-  const main_menu = MML.in_combat.pipe(
-    switchMap(combat => combat ? Rx.never() : router.pipe(filter(path => path.length === 0)))
+  const combatants_ready = combatants.pipe(
+    pluck('ready'),
+    toArray(),
+    switchMap(all_ready => Rx.combineLatest(all_ready)),
+    filter(all_ready => all_ready.every(ready => ready))
   );
+
+  const round_started = combatants_ready.switchMapTo(route.route.pipe(filter('/gm/combat/start_round')));
+  const round_ended = combatants.pipe(
+    pluck('action'),
+    toArray(),
+    switchMap(actions => Rx.combineLatest(actions.map(action => action.pipe(isEmpty())))),
+    filter(all_done => all_done.every(done => done))
+  );
+};
+
+MML.displayGmCombatMenu = function displayGmCombatMenu(name) {
+  const buttons = [
+    new Button('Start Combat', '/gm/combat/start'),
+    new Button('Back', '/gm')
+  ];
+  MML.displayMenu(name, 'Select tokens and begin.', buttons);
 };
 
 // MML.game_state = MML.players.pipe();
