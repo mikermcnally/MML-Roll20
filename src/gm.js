@@ -52,10 +52,11 @@ MML.gm = function GM(roll20_player_object) {
 
   const round_started = combatants_ready.switchMapTo(route.route.pipe(filter('/gm/combat/start_round')));
   const round_ended = combatants.pipe(
-    pluck('action'),
+    pluck('initiative'),
     toArray(),
-    switchMap(actions => Rx.combineLatest(actions.map(action => action.pipe(isEmpty())))),
-    filter(all_done => all_done.every(done => done))
+    switchMap(initiatives => Rx.combineLatest(initiatives)),
+    filter(initiatives => initiatives.every(initiative => initiative < 1)),
+    merge(end_combat)
   );
 };
 
