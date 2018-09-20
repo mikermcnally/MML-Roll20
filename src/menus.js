@@ -9,12 +9,12 @@ class Button {
   }
 }
 
-MML.displayMenu = function displayMenu(player, message, buttons) {
-  const whisper = '/w "' + player.name + '"';
+MML.displayMenu = function displayMenu(name, message, buttons) {
+  const whisper = '/w "' + name + '"';
   const message_string = ' &{template:charMenu} {{name=' + message + '}} ';
   const button_string = buttons.map(button => button.toString()).join(' ');
 
-  sendChat(player.name, whisper + message_string + button_string, null, { noarchive: true });
+  sendChat(name, whisper + message_string + button_string, null, { noarchive: true });
 };
 
 // IDEAR: build an array of previous menus as an optional parameter to allow for backtracking

@@ -12,19 +12,10 @@ MML.button_pressed = Rx.chat_message.pipe(
 );
 
 MML.players = Rx.change_player_online.pipe(
-  startWith(findObjs({ _type: 'player', online: true }))
-);
-
-MML.player_list = MML.players.pipe(
-  scan(function (player_list, player) {
-    const id = player.get('id');
-    if (player.get('online')) {
-      player_list[id] = new MML.Player(player);
-    } else if (!_.isUndefined(player_list[id])) {
-      delete player_list[id];
-    }
-    return player_list;
-  }, {})
+  switchMapTo(),
+  startWith(findObjs({ _type: 'player', online: true })),
+  map(player => new MML.Player(player)),
+  shareReplay()
 );
 
 MML.gm = MML.players.pipe(filter(player => playerIsGM(player.get('id')), map(player => new MML.gm(player))));

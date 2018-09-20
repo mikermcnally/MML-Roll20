@@ -17,40 +17,56 @@ MML.gm = function GM(roll20_player_object) {
   const selected_ids = button_pressed.pipe(pluck('selected'));
 
   const idle = route.filter('/');
+  const main_menu = idle.pipe(switchMapTo(route), filter('/gm'));
+  const combat_menu = main_menu.pipe(switchMapTo(route), filter('/gm/combat'));
+  const start_combat = combat_menu.pipe(switchMapTo(Rx.zip(
+    selected_ids.pipe(filter(ids => ids.length > 0)),
+    route.pipe(filter('/gm/combat/start'))
+  )));
+  const end_combat = start_combat.pipe(switchMapTo(route), filter('/gm/combat/end'));
+  const ex_machina_menu = main_menu.pipe(switchMapTo(route), filter('/gm/ex_machina'));
+  const add_status_effect = ex_machina_menu.pipe(switchMapTo(route), filter('/gm/ex_machina/add_status_effect'))
+  const remove_status_effect = ex_machina_menu.pipe(switchMapTo(route), filter('/gm/ex_machina/remove_status_effect'))
 
-  const main_menu = idle.pipe(switchMapTo(route.pipe(filter('/gm'))));
-  main_menu.pipe(switchMapTo(gm.name)).subscribe(function (name) {
-    const buttons = [
-      new Button('Combat', '/gm/combat'),
-      new Button('Exit', '/')
-    ];
-    MML.displayMenu(name, 'Main Menu: ', buttons);
-  });
-
-  const combat_menu = main_menu.pipe(switchMapTo(route.pipe(filter('/gm/combat'))));
-  combat_menu.pipe(switchMapTo(gm.name)).subscribe();
-  
-  const start_combat = combat_menu.pipe(switchMapTo(Rx.zip(selected_ids, route.pipe(filter('/gm/combat/start')))));
-  const end_combat = start_combat.pipe(switchMapTo(route.pipe(filter('/gm/combat/end'))));
-
+  const no_combatants = start_combat.pipe(filter(ids => ids.length > 0), tap);
   const combatants = start_combat.pipe(
-    tap(function (ids) {
-      if (ids.length === 0) {
-        MML.displayGmCombatMenu()
-      }
-    }),
     filter(ids => ids.length > 0),
-    switchMap(ids => MML.characters.pipe(filter(character => ids.includes(character.id))))
+    switchMap(ids => MML.characters.pipe(filter(character => ids.includes(character.id)))),
+    switchMap(ids => Rx.of(ids))
   );
 
   const combatants_ready = combatants.pipe(
     pluck('ready'),
-    toArray(),
-    switchMap(all_ready => Rx.combineLatest(all_ready)),
+    combineAll(),
     filter(all_ready => all_ready.every(ready => ready))
   );
 
-  const round_started = combatants_ready.switchMapTo(route.route.pipe(filter('/gm/combat/start_round')));
+  const turn_order = combatants_ready.pipe(
+    switchMapTo(combatants),
+    pluck('initiative'),
+    concatAll(),
+    zip(combatants),
+    toArray(),
+    map(function (characters) {
+      characters.sort((character_a, character_b) => character_b[0] - character_a[0]);
+      return characters.map(([initiative, character]) => character);
+    })
+  );
+
+  turn_order.pipe(
+      switchMap(characters => Rx.zip(characters.map(character => [character.token_id, character.initiative]))),
+      map(([token_id, initiative]) => ({ id: token_id, pr: initiative, custom: '' })),
+      toArray()
+    )
+    .subscribe(function (turn_order) {
+      Campaign().set('turnorder', JSON.stringify(turn_order));
+    })
+
+  const actor = turn_order.pipe(map(characters => characters[0]));
+
+  const current_action = actor.pipe(pluck('action'));
+
+  const round_started = combatants_ready.pipe(switchMapTo(route), filter('/gm/combat/start_round'));
   const round_ended = combatants.pipe(
     pluck('initiative'),
     toArray(),
@@ -58,27 +74,60 @@ MML.gm = function GM(roll20_player_object) {
     filter(initiatives => initiatives.every(initiative => initiative < 1)),
     merge(end_combat)
   );
-};
 
-MML.displayGmCombatMenu = function displayGmCombatMenu(name) {
-  const buttons = [
-    new Button('Start Combat', '/gm/combat/start'),
-    new Button('Back', '/gm')
-  ];
-  MML.displayMenu(name, 'Select tokens and begin.', buttons);
+  const game_state = Rx.merge(
+    current_action,
+    add_status_effect,
+    remove_status_effect
+  );
+
+  main_menu.pipe(switchMapTo(gm.name)).subscribe(function (name) {
+    const buttons = [
+      new Menu.Button('Combat', '/gm/combat'),
+      new Menu.Button('Ex Machina', '/gm/ex_machina'),
+      new Menu.Button('Pass Time', '/gm/pass_time'),
+      new Menu.Button('Exit', '/')
+    ];
+    MML.displayMenu(name, 'Main Menu: ', buttons);
+  });
+
+  Rx.merge(combat_menu, no_combatants).pipe(switchMapTo(gm.name)).subscribe(function (name) {
+    const buttons = [
+      new Menu.Button('Start', '/gm/combat/start'),
+      new Menu.Button('Exit', '/')
+    ];
+    MML.displayMenu(name, 'Main Menu: ', buttons);
+  });
+
+  round_ended.pipe(switchMapTo(gm.name)).subscribe(function (name) {
+    const buttons = [
+      new Menu.Button('Start Round', '/gm/combat/start_round'),
+      new Menu.Button('End Combat', '/')
+    ];
+    MML.displayMenu(name, 'Main Menu: ', buttons);
+  });
+
+  ex_machina_menu.pipe(switchMapTo(gm.name)).subscribe(function (name) {
+    const buttons = [
+      new Menu.Button('Add Status Effect', '/gm/ex_machina/add_status_effect'),
+      new Menu.Button('Remove Status Effect', '/gm/ex_machina/remove_status_effect'),
+      new Menu.Button('Back', '/gm/ex_machina'),
+      new Menu.Button('Exit', '/')
+    ];
+    MML.displayMenu(name, 'Main Menu: ', buttons);
+  });
 };
 
 // MML.game_state = MML.players.pipe();
 
 // MML.gm_created_effects = MML.menuIdle.pipe(
-  
+
 // );
 
 // MML.statusEffects = Rx.merge(
 //   MML.action_results,
 //   MML.gm_created_effects
 // );
-
 
 // MML.startCombat = function startCombat(selectedIds) {
 //   var gm = state.MML.gm;
@@ -117,11 +166,11 @@ async function newRound(gm, currentRound, combatants) {
 };
 
 MML.startRound = async function startRound(gm, currentRound, actions) {
-  const {pressedButton} = await MML.displayMenu(gm.player, 'Start round when all characters are ready.', ['Start Round', 'End Combat']);
+  const { pressedButton } = await MML.displayMenu(gm.player, 'Start round when all characters are ready.', ['Start Round', 'End Combat']);
   if (pressedButton === 'Start Round') {
     if (MML.checkReady(gm.allCombatants)) {
       gm.roundStarted = true;
-      _.each(gm.allCombatants, function(character) {
+      _.each(gm.allCombatants, function (character) {
         character.movementAvailable = character.movementRatio;
       });
       return await MML.nextAction(gm, currentRound, actions);
@@ -131,17 +180,6 @@ MML.startRound = async function startRound(gm, currentRound, actions) {
     }
   } else {
     return MML.endCombat(gm);
-  }
-};
-
-MML.endCombat = function endCombat(gm) {
-  if (gm.allCombatants.length > 0) {
-    _.each(gm.allCombatants, function(character) {
-      MML.setReady(character, true);
-      MML.setCombatVision(character);
-    });
-    gm.inCombat = false;
-    gm.allCombatants = [];
   }
 };
 
@@ -166,7 +204,7 @@ MML.checkReady = function checkReady(combatants) {
 };
 
 MML.displayThreatZones = function displayThreatZones(toggle) {
-  _.each(state.MML.gm.allCombatants, function(character) {
+  _.each(state.MML.gm.allCombatants, function (character) {
     var token = MML.getCharacterToken(character.id);
     var radius1 = '';
     var radius2 = '';
@@ -180,19 +218,6 @@ MML.displayThreatZones = function displayThreatZones(toggle) {
     MML.displayAura(token, radius1, 1, color1);
     MML.displayAura(token, radius2, 2, color2);
   });
-};
-
-MML.setTurnOrder = function setTurnOrder(combatants) {
-  combatants.sort((character_a, character_b) => character_b.initiative - character_a.initiative);
-  const turnorder = combatants.map(function (character) {
-    return {
-      id: MML.getCharacterToken(character.id).id,
-      pr: character.initiative,
-      custom: ''
-    };
-  });
-  Campaign().set('turnorder', JSON.stringify(turnorder));
-  return combatants;
 };
 
 MML.assignNewItem = function assignNewItem(input) {
