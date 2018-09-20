@@ -17,6 +17,17 @@ MML.displayMenu = function displayMenu(name, message, buttons) {
   sendChat(name, whisper + message_string + button_string, null, { noarchive: true });
 };
 
+MML.listenForRoute = function listenForRoute(router, route) {
+  return function (source) {
+    return source.pipe(switchMapTo(
+      router.pipe(
+        takeWhile(new_route => new_route.startsWith(route.slice(0, route.lastIndexOf('/') + 1))),
+        filter(new_route => new_route === route)
+      )
+    ))
+  };
+};
+
 // IDEAR: build an array of previous menus as an optional parameter to allow for backtracking
 // MML.displayMenu = function displayMenu(player, message, buttons) {
 //   MML.sendChatMenu(player, message, buttons);

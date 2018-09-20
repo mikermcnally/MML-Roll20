@@ -13,20 +13,20 @@ MML.gm = function GM(roll20_player_object) {
 
   const button_pressed = gm.name.pipe(switchMap(name => MML.button_pressed.pipe(filter(message => name === message.who))));
 
-  const route = button_pressed.pipe(pluck('content'));
+  const router = button_pressed.pipe(pluck('content'));
   const selected_ids = button_pressed.pipe(pluck('selected'));
 
-  const idle = route.filter('/');
-  const main_menu = idle.pipe(switchMapTo(route), filter('/gm'));
-  const combat_menu = main_menu.pipe(switchMapTo(route), filter('/gm/combat'));
+  const idle = router.filter('/');
+  const main_menu = idle.pipe(MML.listenForRoute(router, '/gm'));
+  const combat_menu = main_menu.pipe(MML.listenForRoute(router, '/gm/combat'));
   const start_combat = combat_menu.pipe(switchMapTo(Rx.zip(
     selected_ids.pipe(filter(ids => ids.length > 0)),
-    route.pipe(filter('/gm/combat/start'))
+    MML.listenForRoute(router, '/gm/combat/start')
   )));
-  const end_combat = start_combat.pipe(switchMapTo(route), filter('/gm/combat/end'));
-  const ex_machina_menu = main_menu.pipe(switchMapTo(route), filter('/gm/ex_machina'));
-  const add_status_effect = ex_machina_menu.pipe(switchMapTo(route), filter('/gm/ex_machina/add_status_effect'))
-  const remove_status_effect = ex_machina_menu.pipe(switchMapTo(route), filter('/gm/ex_machina/remove_status_effect'))
+  const end_combat = start_combat.pipe(MML.listenForRoute(router, '/gm/combat/end'));
+  const ex_machina_menu = main_menu.pipe(MML.listenForRoute(router, '/gm/ex_machina'));
+  const add_status_effect = ex_machina_menu.pipe(MML.listenForRoute(router, '/gm/ex_machina/add_status_effect'))
+  const remove_status_effect = ex_machina_menu.pipe(MML.listenForRoute(router, '/gm/ex_machina/remove_status_effect'))
 
   const no_combatants = start_combat.pipe(filter(ids => ids.length > 0), tap);
   const combatants = start_combat.pipe(
@@ -66,7 +66,7 @@ MML.gm = function GM(roll20_player_object) {
 
   const current_action = actor.pipe(pluck('action'));
 
-  const round_started = combatants_ready.pipe(switchMapTo(route), filter('/gm/combat/start_round'));
+  const round_started = combatants_ready.pipe(switchMapTo(router), filter('/gm/combat/start_round'));
   const round_ended = combatants.pipe(
     pluck('initiative'),
     toArray(),
