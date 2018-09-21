@@ -9,19 +9,6 @@ MML.displayMovement = function displayMovement(character) {
   character.pathID = pathID;
 };
 
-MML.moveDistance = function moveDistance(character, distance) {
-  var remainingMovement = character.movementAvailable - (distance) / (MML.movementRates[race][character.movementType]);
-  if (character.movementAvailable > 0) {
-    character.movementAvailable = remainingMovement;
-    MML.displayMovement(character);
-  } else {
-    var path = getObj('path', character.pathID);
-    if (!_.isUndefined(path)) {
-      path.remove();
-    }
-  }
-};
-
 MML.setCombatVision = function setCombatVision(character) {
   var token = MML.getCharacterToken(character.id);
   if (state.MML.gm.inCombat || !_.has(character.statusEffects, 'Observing')) {
@@ -892,6 +879,8 @@ MML.createCharacter = function (global_game_state, r20_character) {
     startWith(r20_character.get('name'))
   );
 
+  const token = Rx.token_represents.pipe(filter(token => token.get('represents') === id), switchMap(token => token));
+
   const action = game_state.pipe(
     filter(({ attribute }) => attribute === 'action'),
     switchMap(({ value }) => value)
@@ -1275,14 +1264,34 @@ MML.createCharacter = function (global_game_state, r20_character) {
   const character_movement_blocked = character_moved.pipe(
 
   );
+  
+  const moved = token.pipe(
+    map(token => token.get('id')),
+    switchMap(function (token_id) {
+      return Rx.change_token.pipe(
+        filter(([curr, prev]) => curr.get('id') === token_id && curr.get('left') !== prev['left'] || curr.get('top') !== prev['top'])
+      );
+    }),
+  );
 
-  MML.combat_movement = MML.token_moved.pipe(map(function (obj, prev) {
-    const character = MML.characters[MML.getCharacterIdFromToken(obj)];
-    const left1 = prev['left'];
-    const left2 = obj.get('left');
-    const top1 = prev['top'];
-    const top2 = obj.get('top');
-    const distance = MML.getDistanceFeet(left1, left2, top1, top2);
+  const distance_moved = moved.pipe(map(([curr, prev]) => MML.getDistanceFeet(prev['left'], curr.get('left'), prev['top'], curr.get('top'))));
+
+  // const velocity = Rx.zip(position).pipe()
+
+    // var remainingMovement = -(distance) / (MML.movementRates[race][character.movementType]);
+    Rx.combineLatest(character.movementAvailable)
+    if (character.movementAvailable > 0) {
+      character.movementAvailable = remainingMovement;
+      MML.displayMovement(character);
+    } else {
+      var path = getObj('path', character.pathID);
+      if (!_.isUndefined(path)) {
+        path.remove();
+      }
+    }
+  };
+
+  const combat_movement = distance_moved.pipe(map(function (distance) {
     const distanceAvailable = MML.movementRates[character.race][character.movementType] * character.movementAvailable;
 
     if (state.MML.gm.actor === charName && distanceAvailable > 0) {
@@ -1300,6 +1309,8 @@ MML.createCharacter = function (global_game_state, r20_character) {
       obj.set('top', prev['top']);
     }
   }));
+
+  const movement_available = 
 
   const ready = Rx.merge(
       MML.new_round.pipe(mapTo(false)),

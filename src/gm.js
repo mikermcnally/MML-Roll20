@@ -28,7 +28,7 @@ MML.gm = function GM(roll20_player_object) {
   const add_status_effect = ex_machina_menu.pipe(MML.listenForRoute(router, '/gm/ex_machina/add_status_effect'))
   const remove_status_effect = ex_machina_menu.pipe(MML.listenForRoute(router, '/gm/ex_machina/remove_status_effect'))
 
-  const no_combatants = start_combat.pipe(filter(ids => ids.length > 0), tap);
+  const no_combatants = start_combat.pipe(filter(ids => ids.length > 0), tap(() => sendChat('', 'No Tokens Selected')));
   const combatants = start_combat.pipe(
     filter(ids => ids.length > 0),
     switchMap(ids => MML.characters.pipe(filter(character => ids.includes(character.id)))),
@@ -84,6 +84,7 @@ MML.gm = function GM(roll20_player_object) {
   main_menu.pipe(switchMapTo(gm.name)).subscribe(function (name) {
     const buttons = [
       new Menu.Button('Combat', '/gm/combat'),
+      new Menu.Button('Exploration', '/gm/exploration'),
       new Menu.Button('Ex Machina', '/gm/ex_machina'),
       new Menu.Button('Pass Time', '/gm/pass_time'),
       new Menu.Button('Exit', '/')

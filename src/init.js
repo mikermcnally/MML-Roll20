@@ -12,7 +12,7 @@ MML.button_pressed = Rx.chat_message.pipe(
 );
 
 MML.players = Rx.change_player_online.pipe(
-  switchMapTo(),
+  switchMapTo(findObjs({ _type: 'player', online: true })),
   startWith(findObjs({ _type: 'player', online: true })),
   map(player => new MML.Player(player)),
   shareReplay()
@@ -30,32 +30,22 @@ MML.game_state = Rx.merge(
   MML.gm.input
 );
 
+MML.tokens = Rx.merge(
+    Rx.from(findObjs({ _type: 'graphic', archived: false })),
+    Rx.add_graphic
+  )
+  .pipe(
+    shareReplay()
+  );
+
 MML.characters = Rx.merge(
     Rx.from(findObjs({ _type: 'character', archived: false })),
     Rx.add_character
   )
   .pipe(
-    map(character => MML.createCharacter(MML.game_state, character)),
+    map(character => new MML.Character(MML.game_state, character)),
     shareReplay()
   );
-
-// MML.character_list = MML.characters.pipe(
-//   scan(function (character_list, character) {
-//     character_list[character.id] = character;
-//     return character_list;
-//   }, {})
-// );
-
-MML.token_moved = Rx.change_token.pipe(
-  filter(([curr, prev]) => curr.get('left') !== prev['left'] && curr.get('top') !== prev['top']),
-  map(([token]) => token)
-);
-
-MML.character_moved = MML.token_moved.pipe(
-  withLatestFrom(MML.character_list),
-  filter(([token, character_list]) => Object.keys(character_list).includes(token.get('represents'))),
-  map(([token, character_list]) => character_list[token.get('represents')])
-);
 
 MML.spell_marker_moved = Rx.change_token.pipe(filter(token => token.get('name').includes('spellMarker')));
 
