@@ -1,25 +1,3 @@
-MML.displayMovement = function displayMovement(character) {
-  var token = MML.getCharacterToken(character.id);
-  var path = getObj('path', character.pathID);
-
-  if (!_.isUndefined(path)) {
-    path.remove();
-  }
-  var pathID = MML.drawCirclePath(token.get('left'), token.get('top'), MML.movementRates[race][character.movementType] * character.movementAvailable).id;
-  character.pathID = pathID;
-};
-
-MML.setCombatVision = function setCombatVision(character) {
-  var token = MML.getCharacterToken(character.id);
-  if (state.MML.gm.inCombat || !_.has(character.statusEffects, 'Observing')) {
-    token.set('light_losangle', character.fov);
-    token.set('light_hassight', true);
-  } else {
-    token.set('light_losangle', 360);
-    token.set('light_hassight', true);
-  }
-};
-
 MML.alterHP = async function alterHP(player, character, bodyPart, hpAmount) {
   var initialHP = character.hp[bodyPart];
   var currentHP = initialHP + hpAmount;
@@ -1275,21 +1253,80 @@ MML.createCharacter = function (global_game_state, r20_character) {
   );
 
   const distance_moved = moved.pipe(map(([curr, prev]) => MML.getDistanceFeet(prev['left'], curr.get('left'), prev['top'], curr.get('top'))));
+  const is_acting = gm.actor.pipe(map(actor => actor.id === id));
+  const movement_type = game_state.pipe(filter(({ attribute }) => attribute === 'movement_type'), switchMap(({ value }) => value));
+  const movement_rate = MML.derivedAttribute('movement_rate', (race, movement_type) => MML.movementRates[race][movement_type], race, movement_type);
+  const movement_available = gm.round_started.pipe(
+    switchMapTo(movement_ratio),
+    switchMap(function (initial_movement) {
+      return distance_moved.pipe(
+        withLatestFrom(movement_rate, is_acting),
+        filter(([distance_moved, movement_rate, is_acting]) => is_acting),
+        scan(function (current, [distance, rate]) {
+          const remaining = current - (distance / rate);
+          return remaining > 0 ? remaining : 0;
+        }, initial_movement)
+      );
+    })
+  );
+  const movement_circle = is_acting.pipe(
+    filter(is_acting => is_acting),
+    switchMapTo(Rx.combineLatest(token, movement_rate, movement_available)),
+    map(function ([token, movement_rate, movement_available]) {
+      return MML.drawCirclePath(token.get('left'), token.get('top'), movement_rate * movement_available);
+    })
+  );
+
+  movement_circle.pipe(switchMap(function (path) {
+      return Rx.merge(
+          moved,
+          is_acting.pipe(filter(is_acting => !is_acting))
+        )
+        .pipe(mapTo(path));
+    }))
+    .subscribe(path => path.remove());
+
+  // Block movement when it isn't character's turn
+  in_combat.pipe(
+      filter(in_combat => in_combat),
+      switchMapTo(is_acting.pipe(
+        filter(is_acting => !is_acting),
+        switchMapTo(moved),
+        takeUntil(Rx.merge(
+          in_combat.pipe(filter(in_combat => !in_combat)),
+          is_acting.pipe(filter(is_acting => is_acting))
+        ))
+      ))
+    )
+    .subscribe(function ([token, prev]) {
+      token.set('left', prev['left']);
+      token.set('top', prev['top']);
+    });
+
+  // Send token back to edge of circle if moved beyond
+  in_combat.pipe(
+      filter(in_combat => in_combat),
+      switchMapTo(is_acting.pipe(
+        filter(is_acting => !is_acting),
+        switchMapTo(moved),
+        takeUntil(Rx.merge(
+          in_combat.pipe(filter(in_combat => !in_combat)),
+          is_acting.pipe(filter(is_acting => is_acting))
+        ))
+      ))
+    )
+    .subscribe(function ([token, prev]) {
+      if (distance > movement_available) {
+        const left3 = Math.floor(((left2 - left1) / distance) * distanceAvailable + left1 + 0.5);
+        const top3 = Math.floor(((top2 - top1) / distance) * distanceAvailable + top1 + 0.5);
+        obj.set('left', left3);
+        obj.set('top', top3);
+        character.movementAvailable(0);
+      }
+    });
 
   // const velocity = Rx.zip(position).pipe()
 
-    // var remainingMovement = -(distance) / (MML.movementRates[race][character.movementType]);
-    Rx.combineLatest(character.movementAvailable)
-    if (character.movementAvailable > 0) {
-      character.movementAvailable = remainingMovement;
-      MML.displayMovement(character);
-    } else {
-      var path = getObj('path', character.pathID);
-      if (!_.isUndefined(path)) {
-        path.remove();
-      }
-    }
-  };
 
   const combat_movement = distance_moved.pipe(map(function (distance) {
     const distanceAvailable = MML.movementRates[character.race][character.movementType] * character.movementAvailable;
@@ -1656,6 +1693,17 @@ MML.createCharacter = function (global_game_state, r20_character) {
     const rightHand = getWeaponFamily(character, 'rightHand');
     return character.leftHand._id !== character.rightHand._id && leftHand !== 'unarmed' && rightHand !== 'unarmed';
   }));
+
+  // set vision
+  Rx.combineLatest(token, in_combat, fov, observing).subscribe(function ([token, in_combat, fov, observing]) {
+    if (in_combat || !observing) {
+      token.set('light_losangle', fov);
+      token.set('light_hassight', true);
+    } else {
+      token.set('light_losangle', 360);
+      token.set('light_hassight', true);
+    }
+  });
 
   return character;
 };
