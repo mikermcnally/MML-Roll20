@@ -396,7 +396,7 @@ MML.getCharactersWithinRectangle = function getCharactersWithinRectangle(left_or
 };
 
 MML.getCharactersWithinTriangle = function getCharactersWithinTriangle(left_original, top_original, width, height, rotation) {
-  return MML.character_list.pipe(map(character_list => _.filter(character_list, function (character) {
+  return MML.characters.pipe(pluck('token'), filter(function (character) {
     const token = MML.getCharacterToken(character.id);
     const tokenCoordinates = MML.rotateAxes(token.get('left') - left_original, token.get('top') - top_original, rotation);
     const token_radius = MML.feetToPixels(MML.raceSizes[character.race].radius);
@@ -415,7 +415,7 @@ MML.getCharactersWithinTriangle = function getCharactersWithinTriangle(left_orig
       ((MML.getDistance(ax, tokenCoordinates[0], ay, tokenCoordinates[1]) * MML.getDistance(bx, tokenCoordinates[0], by, tokenCoordinates[1])) / MML.getDistance(ax, bx, ay, by) < tokenRadius ||
         (MML.getDistance(cx, tokenCoordinates[0], cy, tokenCoordinates[1]) * MML.getDistance(dx, tokenCoordinates[0], dy, tokenCoordinates[1])) / MML.getDistance(cx, dx, cy, dy) < tokenRadius ||
         (tokenCoordinates[0] < ax && tokenCoordinates[0] > cx));
-  })));
+  }));
 };
 
 MML.getSkill = function getSkill(character, skill) {

@@ -1,5 +1,3 @@
-
-
 MML.prepareAction = function prepareAction(button_pressed, character) {
   // const action = {
   //   ts: _.isUndefined(character.previousAction) ? Date.now() : character.previousAction.ts,

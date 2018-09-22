@@ -41,6 +41,8 @@ MML.gm = function GM(roll20_player_object) {
     filter(all_ready => all_ready.every(ready => ready))
   );
 
+  Rx.merge(start_combat.pipe(mapTo('true')), end_combat.pipe(mapTo('false'))).subscribe(show => Campaign().set('initiativepage', show));
+
   const turn_order = combatants_ready.pipe(
     switchMapTo(combatants),
     pluck('initiative'),
@@ -119,91 +121,6 @@ MML.gm = function GM(roll20_player_object) {
   });
 };
 
-// MML.game_state = MML.players.pipe();
-
-// MML.gm_created_effects = MML.menuIdle.pipe(
-
-// );
-
-// MML.statusEffects = Rx.merge(
-//   MML.action_results,
-//   MML.gm_created_effects
-// );
-
-// MML.startCombat = function startCombat(selectedIds) {
-//   var gm = state.MML.gm;
-//   gm.inCombat = true;
-//   const allCombatants = selectedIds.map(id => MML.characters[id]);
-//   _.each(MML.players, function(player) {
-//     player.combatants = player.characters.filter(character => selectedIds.includes(character.id));
-//   });
-//   _.each(allCombatants, function(character) {
-//     MML.setReady(character, false);
-//     MML.setCombatVision(character);
-//   });
-//   const sortedCombatants = MML.setTurnOrder(allCombatants);
-//   return MML.newRound(gm, 0, sortedCombatants);
-// };
-
-// Rx.merge(
-//   MML.startCombat.pipe(mapTo('true')),
-//   MML.endCombat.pipe(mapTo('false'))
-// )
-// .subscribe(show => Campaign().set('initiativepage', show));
-
-// MML.newRound = Rx.merge(MML.startCombat).pipe(
-
-// );
-
-async function newRound(gm, currentRound, combatants) {
-  try {
-    gm.roundStarted = false;
-    const updatedCombatants = await Promise.all(combatants.map(character => MML.newRoundUpdate(character)));
-    const actions = await Promise.all(_.values(MML.players).map(player => MML.prepareCharacters(player)));
-    return await MML.startRound(gm, currentRound, actions);
-  } catch (err) {
-    log(err.stack)
-  }
-};
-
-MML.startRound = async function startRound(gm, currentRound, actions) {
-  const { pressedButton } = await MML.displayMenu(gm.player, 'Start round when all characters are ready.', ['Start Round', 'End Combat']);
-  if (pressedButton === 'Start Round') {
-    if (MML.checkReady(gm.allCombatants)) {
-      gm.roundStarted = true;
-      _.each(gm.allCombatants, function (character) {
-        character.movementAvailable = character.movementRatio;
-      });
-      return await MML.nextAction(gm, currentRound, actions);
-    } else {
-      sendChat('Error', 'Not All Characters Are Ready');
-      return await MML.startRound(gm);
-    }
-  } else {
-    return MML.endCombat(gm);
-  }
-};
-
-MML.nextAction = async function nextAction(gm, currentRound, combatants) {
-  const sortedCombatants = MML.setTurnOrder(combatants);
-  if (MML.checkReady(sortedCombatants)) {
-    const character = sortedCombatants[0];
-    if (character.initiative > 0) {
-      gm.actor = character.id;
-      await MML.startAction(character.player, character, MML.validateAction(character));
-      return await MML.nextAction(gm, currentRound, sortedCombatants);
-    } else {
-      return MML.newRound(gm);
-    }
-  }
-};
-
-MML.checkReady = function checkReady(combatants) {
-  return _.every(combatants, function (character) {
-    return character.ready;
-  });
-};
-
 MML.displayThreatZones = function displayThreatZones(toggle) {
   _.each(state.MML.gm.allCombatants, function (character) {
     var token = MML.getCharacterToken(character.id);
@@ -220,22 +137,4 @@ MML.displayThreatZones = function displayThreatZones(toggle) {
     MML.displayAura(token, radius2, 2, color2);
   });
 };
-
-MML.assignNewItem = function assignNewItem(input) {
-  MML.processCommand({
-    type: 'character',
-    who: input.target,
-    callback: 'setApiCharAttributeJSON',
-    input: {
-      attribute: 'inventory',
-      index: MML.generateRowID(),
-      value: state.MML.gm.newItem
-    }
-  });
-  MML.processCommand({
-    type: 'player',
-    who: MML.characters[input.target].player,
-    callback: 'sendChatMenu',
-    input: {}
-  });
-};
+0
