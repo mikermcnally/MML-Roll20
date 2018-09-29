@@ -834,6 +834,21 @@ MML.createCharacter = function (global_game_state, r20_character) {
   );
 
   const game_state = global_game_state.pipe(filter(effect => effect.object_id === id));
+
+  const router = MML.button_pressed.pipe(
+    filter(({ content }) => content.startsWith('/character/' + id)),
+    map(function (message) {
+      message.content = message.content.replace('/character/' + id, '');
+      return message;
+    })
+  );
+
+  const idle = router.filter('/');
+  const action_menu = idle.pipe(MML.listenForRoute(router, '/action'));
+  const stance_menu = action_menu.pipe(MML.listenForRoute(router, '/action/stance'));
+  const called_shot_menu = action_menu.pipe(MML.listenForRoute(router, '/action/called_shot'));
+  const meta_magic_menu = action_menu.pipe(MML.listenForRoute(router, '/action/meta_magic'));
+
   // Rx.add_attribute
   // Rx.change_attribute_current
 
@@ -1273,7 +1288,8 @@ MML.createCharacter = function (global_game_state, r20_character) {
     switchMapTo(Rx.combineLatest(token, movement_rate, movement_available)),
     map(function ([token, movement_rate, movement_available]) {
       return MML.drawCirclePath(token.get('left'), token.get('top'), movement_rate * movement_available);
-    })
+    }),
+    takeUntil(is_acting.pipe(filter(is_acting => !is_acting)))
   );
 
   movement_circle.pipe(switchMap(function (path) {
@@ -1316,37 +1332,18 @@ MML.createCharacter = function (global_game_state, r20_character) {
     )
     .subscribe(function ([token, prev]) {
       if (distance > movement_available) {
-        const left3 = Math.floor(((left2 - left1) / distance) * distanceAvailable + left1 + 0.5);
-        const top3 = Math.floor(((top2 - top1) / distance) * distanceAvailable + top1 + 0.5);
-        obj.set('left', left3);
-        obj.set('top', top3);
-        character.movementAvailable(0);
+        const left_1 = prev['left'];
+        const top_1 = prev['left'];
+        const left_2 = token.get('left');
+        const top_2 = token.get('top');
+        const left_3 = Math.floor(((left_2 - left_1) / distance) * distanceAvailable + left_1 + 0.5);
+        const top_3 = Math.floor(((top_2 - top_1) / distance) * distanceAvailable + top_1 + 0.5);
+        token.set('left', left_3);
+        token.set('top', top_3);
       }
     });
 
   // const velocity = Rx.zip(position).pipe()
-
-
-  const combat_movement = distance_moved.pipe(map(function (distance) {
-    const distanceAvailable = MML.movementRates[character.race][character.movementType] * character.movementAvailable;
-
-    if (state.MML.gm.actor === charName && distanceAvailable > 0) {
-      // If they move too far, move the maxium distance in the same direction
-      if (distance > distanceAvailable) {
-        const left3 = Math.floor(((left2 - left1) / distance) * distanceAvailable + left1 + 0.5);
-        const top3 = Math.floor(((top2 - top1) / distance) * distanceAvailable + top1 + 0.5);
-        obj.set('left', left3);
-        obj.set('top', top3);
-        character.movementAvailable(0);
-      }
-      character.moveDistance(distance);
-    } else {
-      obj.set('left', prev['left']);
-      obj.set('top', prev['top']);
-    }
-  }));
-
-  const movement_available = 
 
   const ready = Rx.merge(
       MML.new_round.pipe(mapTo(false)),
