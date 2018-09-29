@@ -137,4 +137,3 @@ MML.displayThreatZones = function displayThreatZones(toggle) {
     MML.displayAura(token, radius2, 2, color2);
   });
 };
-0
