@@ -32,7 +32,7 @@ MML.spells['Dart'] = {
   cast: async function castDart(player, character, action) {
     const targets = await MML.getSpellTargets(player);
     _.findWhere(character.inventory, { name: 'Dart' }).quantity -= targets.length;
-    const castingRoll = await MML.castingRoll(player, character, [spell.task, casterSkill].concat(_.pluck(metaMagic, 'castingMod')));
+    const castingRoll = await MML.castingRoll(player, character, [spell.task, casterSkill].concat(_.pluck(metaMagic, 'casting_mod')));
     if (castingRoll === 'Critical Success' || castingRoll === 'Success') {
       targets.map(async function (target) {
         const defenseRoll = MML.missileDefense(target.player, target, { family: 'MWM' }, MML.getDistanceBetweenCharacters(character.id, target.id));
@@ -63,7 +63,7 @@ MML.spells['Hail of Stones'] = {
   metaMagic: ['Increase Potency'],
   cast: async function castHailOfStones(player, character, action) {
     const targets = await MML.getRadiusSpellTargets();
-    const castingRoll = await MML.castingRoll(player, character, [spell.task, casterSkill].concat(_.pluck(metaMagic, 'castingMod')));
+    const castingRoll = await MML.castingRoll(player, character, [spell.task, casterSkill].concat(_.pluck(metaMagic, 'casting_mod')));
     if (castingRoll === 'Critical Success' || castingRoll === 'Success') {
       targets.map(function (target) {
         const numberOfStones = MML.genericRoll(character.name, 'numberOfStonesRoll', '1d3', 'Number of stones cast at ' + target.name, 'genericRollResult');

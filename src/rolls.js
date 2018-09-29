@@ -175,17 +175,17 @@ MML.genericRollMessage = function genericRollMessage(low, high, modifiers, modif
 };
 
 MML.initiativeRoll = async function initiativeRoll(player, character) {
-  var modifiers = [character.situationalInitBonus,
-    character.movementRatioInitBonus,
-    character.attributeInitBonus,
-    character.senseInitBonus,
-    character.fomInitBonus,
-    character.firstActionInitBonus,
+  var modifiers = [character.situational_init_bonus,
+    character.movement_ratio_init_bonus,
+    character.attribute_init_bonus,
+    character.sense_init_bonus,
+    character.fom_init_bonus,
+    character.first_action_init_bonus,
     character.actionInitCostMod,
-    character.spentInitiative];
+    character.spent_initiative];
 
   const value = await MML.genericRoll(player, '1d10', modifiers);
-  character.initiativeRollValue = value;
+  character.initiative_roll_value = value;
   MML.setReady(character, true);
   return player;
 };
@@ -193,9 +193,9 @@ MML.initiativeRoll = async function initiativeRoll(player, character) {
 MML.meleeAttackRoll = async function meleeAttackRoll(player, character, task, skill) {
   await MML.displayMenu(player, character.name + '\'s Attack Roll', ['Roll']);
   return MML.universalRoll(player, [
-    character.situationalMod,
-    character.meleeAttackMod,
-    character.attributeMeleeAttackMod,
+    character.situational_mod,
+    character.melee_attack_mod,
+    character.attributemelee_attack_mod,
     task,
     skill
   ]);
@@ -206,7 +206,7 @@ MML.meleeDefenseRoll = async function meleeDefenseRoll(player, character, attack
   var grip;
   var defenderWeapon;
   const blockMods = [];
-  const defenseMods = [character.situationalMod, character.meleeDefenseMod, character.attributeDefenseMod];
+  const defenseMods = [character.situational_mod, character.melee_defense_mod, character.attributeDefenseMod];
   const defaultMartialSkill = weaponSkills['Default Martial'].level;
   const dodgeSkill = _.isUndefined(weaponSkills['Dodge']) ? 0 : weaponSkills['Dodge'].level;
   const dodgeMods = defenseMods.concat(dodgeSkill > defaultMartialSkill ? dodgeSkill : defaultMartialSkill);
@@ -218,7 +218,7 @@ MML.meleeDefenseRoll = async function meleeDefenseRoll(player, character, attack
   }
 
   if (!MML.isUnarmed(character) && !MML.isWieldingRangedWeapon(character)) {
-    if (MML.isDualWielding(character)) {
+    if (MML.is_dual_wielding(character)) {
       log('Dual Wield defense');
     } else if (MML.getWeaponFamily(character, 'rightHand') !== 'unarmed') {
       itemId = character.rightHand._id;
@@ -260,9 +260,9 @@ MML.meleeDamageRoll = async function meleeDamageRoll(player, character, weapon, 
 MML.missileAttackRoll = async function missileAttackRoll(player, character, target, weapon, skill) {
   const mods = [
     skill,
-    character.situationalMod,
-    character.missileAttackMod,
-    character.attributeMissileAttackMod
+    character.situational_mod,
+    character.missile_attack_mod,
+    character.attributemissile_attack_mod
   ];
   if (_.has(target.statusEffects, 'Shoot From Cover')) {
     mods.push(-20);
@@ -295,7 +295,7 @@ MML.missileAttackRoll = async function missileAttackRoll(player, character, targ
     hands: item.grips[grip].hands,
     initiative: item.grips[grip].initiative,
     reload: item.grips[grip].reload,
-    damageType: item.grips[grip].primaryType
+    damageType: item.grips[grip].primary_type
   };
 
   if (range <= item.grips[grip].range.pointBlank.range) {
@@ -328,9 +328,9 @@ MML.missileDamageRoll = async function missileDamageRoll(player, character, dama
 
 MML.missileDefenseRoll = async function missileDefenseRoll(player, character, attackerWeapon, range) {
   const dodgeMods = [
-    character.missileDefenseMod,
+    character.missile_defense_mod,
     character.attributeDefenseMod,
-    character.situationalMod,
+    character.situational_mod,
     MML.getShieldDefenseBonus(character)
   ];
   const defaultMartialSkill = character.weaponSkills['Default Martial'].level;
@@ -418,7 +418,7 @@ MML.holdAimRoll = async function holdAimRoll(player, character) {
 
 MML.castingRoll = async function castingRoll(player, character, task, skill, metaMagicMod) {
   await MML.displayMenu(player, character.name + '\'s Casting Roll', ['Roll']);
-  return MML.universalRoll(player, [task, skill, character.situationalMod, character.castingMod, character.attributeCastingMod, metaMagicMod]);
+  return MML.universalRoll(player, [task, skill, character.situational_mod, character.casting_mod, character.attributecasting_mod, metaMagicMod]);
 };
 
 MML.fatigueCheck= async function fatigueCheck(player, character) {
@@ -446,7 +446,7 @@ MML.fatigueRecovery = async function fatigueRecovery(player, character, modifier
 
 MML.hitPositionRoll = async function hitPositionRoll(player, character, target, action) {
   await MML.displayMenu(player, character.name + '\'s Hit Position Roll', ['Roll']);
-  const hitPositions = MML.hitPositions[target.bodyType];
+  const hitPositions = MML.hitPositions[target.body_type];
   if (_.contains(action.modifiers, 'Called Shot Specific')) {
     return _.findWhere(hitPositions, function(hitPosition) {
       return hitPosition.name === action.calledShot;

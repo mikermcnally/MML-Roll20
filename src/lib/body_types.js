@@ -1,4 +1,4 @@
-MML.bodyTypes = {
+MML.body_types = {
   "Dwarf": "humanoid",
   "Gnome": "humanoid",
   "Gray Elf": "humanoid",

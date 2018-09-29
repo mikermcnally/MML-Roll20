@@ -87,10 +87,10 @@ MML.grappleDefense = function grappleDefense(character, attackType) {
   const brawlSkill = _.isUndefined(character.weaponSkills['Brawling']) ? 0 : character.weaponSkills['Brawling'].level;
   const defaultMartialSkill = character.weaponSkills['Default Martial'].level;
   const brawlMods = [
-    character.meleeDefenseMod,
+    character.melee_defense_mod,
     character.attributeDefenseMod,
     attackType.defenseMod,
-    character.situationalMod,
+    character.situational_mod,
     brawlSkill < defaultMartialSkill ? defaultMartialSkill : brawlSkill
   ];
 
@@ -107,9 +107,9 @@ MML.grappleDefense = function grappleDefense(character, attackType) {
   const weaponMods = [
     characterWeaponInfo.characterWeapon.task,
     characterWeaponInfo.skill,
-    character.situationalMod,
-    character.meleeAttackMod,
-    character.attributeMeleeAttackMod
+    character.situational_mod,
+    character.melee_attack_mod,
+    character.attributemelee_attack_mod
   ];
 
   MML.addStatusEffect(character, 'Melee This Round', {});

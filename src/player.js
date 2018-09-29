@@ -127,26 +127,26 @@ MML.prepareAttackAction = async function prepareAttackAction(player, character, 
     action.weapon = MML.unarmedAttacks[attackType];
   } else {
     const weapon = action.weapon;
-    if (weapon.secondaryType !== '') {
+    if (weapon.secondary_type !== '') {
       const damageType = await MML.chooseDamageType(player);
       if (damageType === 'Secondary') {
         _.extend(weapon, {
-          damageType: weapon.secondaryType,
-          task: weapon.secondaryTask,
-          damage: weapon.secondaryDamage
+          damageType: weapon.secondary_type,
+          task: weapon.secondary_task,
+          damage: weapon.secondary_damage
         });
       } else {
         _.extend(weapon, {
-          damageType: weapon.primaryType,
-          task: weapon.primaryTask,
-          damage: weapon.primaryDamage
+          damageType: weapon.primary_type,
+          task: weapon.primary_task,
+          damage: weapon.primary_damage
         });
       }
     } else {
       _.extend(weapon, {
-        damageType: weapon.primaryType,
-        task: weapon.primaryTask,
-        damage: weapon.primaryDamage
+        damageType: weapon.primary_type,
+        task: weapon.primary_task,
+        damage: weapon.primary_damage
       });
     }
   }
@@ -668,7 +668,7 @@ MML.menucharAddTarget = function menucharAddTarget(player, who) {
   var character = MML.characters[who];
   state.MML.gm.currentAction.parameters.metaMagic['Increase Targets'] = {
     epMod: state.MML.gm.currentAction.targetArray.length,
-    castingMod: -10 * state.MML.gm.currentAction.targetArray.length
+    casting_mod: -10 * state.MML.gm.currentAction.targetArray.length
   };
   var parameters = state.MML.gm.currentAction.parameters;
   var epProduct = _.reduce(_.pluck(parameters.metaMagic, 'epMod'), function (memo, num) {
@@ -695,7 +695,7 @@ MML.menucharIncreasePotency = function menucharIncreasePotency(player, who) {
       callback: function () {
         state.MML.gm.currentAction.parameters.metaMagic['Increase Potency'] = {
           epMod: Math.pow(2, i - 1),
-          castingMod: -10,
+          casting_mod: -10,
           level: i
         };
         MML.chooseMetaMagic(player, who);
@@ -732,7 +732,7 @@ MML.menucharIncreaseDuration = function menucharIncreaseDuration(player, who) {
       callback: function () {
         state.MML.gm.currentAction.parameters.metaMagic['Increase Duration'] = {
           epMod: i,
-          castingMod: 0,
+          casting_mod: 0,
           level: i
         };
         MML.chooseMetaMagic(player, who);

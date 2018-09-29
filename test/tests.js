@@ -466,7 +466,7 @@ function createCharacter(player, name) {
     MML.createAttribute("reasonRoll", 10, "", id);
     MML.createAttribute("creativityRoll", 10, "", id);
     MML.createAttribute("presenceRoll", 10, "", id);
-    MML.createAttribute("fomInitBonus", 6, "", id);
+    MML.createAttribute("fom_init_bonus", 6, "", id);
     MML.createAttribute("rightHand", JSON.stringify({
       _id: "emptyHand"
     }), "", id);
@@ -592,7 +592,7 @@ function pbcopy(data) {
 //   expect(MML.characters['test1'].hp.Head, 'punch action should do 1 damage').to.equal(MML.characters['test1'].hpMax.Head - 1);
 //   expect(MML.characters['test1'].hp['Wound Fatigue'], 'punch action should do 1 damage').to.equal(MML.characters['test1'].hpMax['Wound Fatigue'] - 1);
 //   expect(MML.characters['test1'].knockdown, 'punch action should do 1 knockdown').to.equal(MML.characters['test1'].knockdownMax - 1);
-//   expect(MML.characters['test0'].spentInitiative, 'punch action should cost 25 initiative').to.equal(-25);
+//   expect(MML.characters['test0'].spent_initiative, 'punch action should cost 25 initiative').to.equal(-25);
 //   expect(MML.characters['test0'].statusEffects, 'punch action should create "Melee This Round" status effect for attacker').to.have.property("Melee This Round");
 //   expect(MML.characters['test1'].statusEffects, 'forgoing defense should not create "Melee This Round" status effect for defender').not.to.have.property("Melee This Round");
 //   expect(MML.characters['test1'].statusEffects, 'forgoing defense should not create "Number of Defenses" status effect for defender').not.to.have.property("Number of Defenses");
@@ -602,9 +602,9 @@ function pbcopy(data) {
 //   .then(clickButton('Accept'))
 //   .then(executeObserve(player))
 //   expect(MML.characters['test1'].statusEffects, 'observe action should create "Observing" status effect').to.have.property("Observing");
-//   expect(MML.characters['test1'].perceptionCheckMod, '"Observing" status effect should add 4 to perceptionCheckMod').to.equal(4);
-//   expect(MML.characters['test1'].missileDefenseMod, '"Observing" status effect should add -10 to missileDefenseMod').to.equal(-10);
-//   expect(MML.characters['test1'].meleeDefenseMod, '"Observing" status effect should add -10 to meleeDefenseMod').to.equal(-10);
+//   expect(MML.characters['test1'].perception_check_mod, '"Observing" status effect should add 4 to perception_check_mod').to.equal(4);
+//   expect(MML.characters['test1'].missile_defense_mod, '"Observing" status effect should add -10 to missile_defense_mod').to.equal(-10);
+//   expect(MML.characters['test1'].melee_defense_mod, '"Observing" status effect should add -10 to melee_defense_mod').to.equal(-10);
 //   expect(MML.characters['test1'].statusEffects, 'observe action should not create "Melee This Round" status effect').not.to.have.property("Melee This Round");
 //
 //   .then(executeObserve(player))
@@ -642,8 +642,8 @@ function pbcopy(data) {
 //   .then(clickButton('Roll'))
 //   .then(setTestRoll(player, 1);
 //   expect(MML.characters['test1'].statusEffects, 'observer should have "Observed" status effect').to.have.property("Observed");
-//   expect(MML.characters['test1'].situationalInitBonus, '"Observed" status effect should add 5 to situationalInitBonus').to.equal(5);
-//   expect(MML.characters['test1'].missileDefenseMod, '"Observed" status effect should not add 10 to missileAttackMod when not wielding ranged weapon').to.equal(0);
+//   expect(MML.characters['test1'].situational_init_bonus, '"Observed" status effect should add 5 to situational_init_bonus').to.equal(5);
+//   expect(MML.characters['test1'].missile_defense_mod, '"Observed" status effect should not add 10 to missile_attack_mod when not wielding ranged weapon').to.equal(0);
 //
 //   .then(clickButton('Start Round');
 //   .then(clickButton('Start Action');
@@ -651,15 +651,15 @@ function pbcopy(data) {
 //   .then(clickButton('selectTarget test1'))
 //   .then(setTestRoll(player, 5);
 //   expect(MML.characters['test1'].statusEffects, 'observer should not lose "Observed" status effect from previous round after being attacked').to.have.property("Observed");
-//   expect(MML.characters['test1'].situationalInitBonus, '"Observed" status effect should add 5 to situationalInitBonus').to.equal(5);
+//   expect(MML.characters['test1'].situational_init_bonus, '"Observed" status effect should add 5 to situational_init_bonus').to.equal(5);
 //
 //   .then(clickButton('Block: 16%');
 //   .then(setTestRoll(player, 5);
 //   expect(MML.characters['test1'].statusEffects, 'blocking should create "Melee This Round" status effect for defender').to.have.property("Melee This Round");
 //   expect(MML.characters['test1'].statusEffects, 'blocking should create "Number of Defenses" status effect for defender').to.have.property("Number of Defenses");
 //   expect(MML.characters['test1'].statusEffects["Number of Defenses"].number, 'blocking should add 1 to "Number of Defenses" status effect for defender').to.equal(1);
-//   expect(MML.characters['test1'].missileDefenseMod, '"Number of Defenses" status effect should add -20 to missileDefenseMod').to.equal(-20);
-//   expect(MML.characters['test1'].meleeDefenseMod, '"Number of Defenses" status effect should add -20 to meleeDefenseMod').to.equal(-20);
+//   expect(MML.characters['test1'].missile_defense_mod, '"Number of Defenses" status effect should add -20 to missile_defense_mod').to.equal(-20);
+//   expect(MML.characters['test1'].melee_defense_mod, '"Number of Defenses" status effect should add -20 to melee_defense_mod').to.equal(-20);
 //   .then(setActionPunchAttack(player))
 //   .then(clickButton('Accept');
 //   .then(executeObserve(player))
@@ -677,8 +677,8 @@ function pbcopy(data) {
 //   .then(setTestRoll(player, 1);
 //   .then(setTestRoll(player, 1);
 //   expect(MML.characters['test1'].statusEffects["Number of Defenses"].number, 'blocking should add 1 to "Number of Defenses" status effect for defender').to.equal(2);
-//   expect(MML.characters['test1'].missileDefenseMod, '2 defenses should add -40 to missileDefenseMod').to.equal(-40);
-//   expect(MML.characters['test1'].meleeDefenseMod, '2 defenses should add -40 to meleeDefenseMod').to.equal(-40);
+//   expect(MML.characters['test1'].missile_defense_mod, '2 defenses should add -40 to missile_defense_mod').to.equal(-40);
+//   expect(MML.characters['test1'].melee_defense_mod, '2 defenses should add -40 to melee_defense_mod').to.equal(-40);
 //   expect(MML.characters['test1'].hp.Head, 'damage should accumlate').to.equal(MML.characters['test1'].hpMax.Head - 3);
 //   expect(MML.characters['test1'].hp['Wound Fatigue'], 'damage should accumlate').to.equal(MML.characters['test1'].hpMax['Wound Fatigue'] - 3);
 //   expect(MML.characters['test1'].knockdown, 'knockdown should only consider damage from this round').to.equal(MML.characters['test1'].knockdownMax - 1);
@@ -686,8 +686,8 @@ function pbcopy(data) {
 //   .then(executeObserve(player))
 //   .then(executeObserve(player))
 //   expect(MML.characters['test1'].statusEffects, 'new rounds should remove "Number of Defenses" status effect for defender').not.to.have.property("Number of Defenses");
-//   expect(MML.characters['test1'].missileDefenseMod, 'new rounds should remove "Number of Defenses" status effect -40 penalty to missileDefenseMod').to.equal(0);
-//   expect(MML.characters['test1'].meleeDefenseMod, 'new rounds should remove "Number of Defenses" status effect -40 penalty to meleeDefenseMod').to.equal(0);
+//   expect(MML.characters['test1'].missile_defense_mod, 'new rounds should remove "Number of Defenses" status effect -40 penalty to missile_defense_mod').to.equal(0);
+//   expect(MML.characters['test1'].melee_defense_mod, 'new rounds should remove "Number of Defenses" status effect -40 penalty to melee_defense_mod').to.equal(0);
 //   expect(MML.characters['test1'].hp.Head, 'damage should accumlate').to.equal(MML.characters['test1'].hpMax.Head - 3);
 //   expect(MML.characters['test1'].hp['Wound Fatigue'], 'damage should accumlate').to.equal(MML.characters['test1'].hpMax['Wound Fatigue'] - 3);
 //   expect(MML.characters['test1'].knockdown, 'knockdown should only consider damage from this round').to.equal(MML.characters['test1'].knockdownMax);
@@ -726,17 +726,17 @@ function pbcopy(data) {
 //   .then(setTestRoll(player, 1);
 //   .then(clickButton('Start Round');
 //   expect(MML.characters['test0'].initiative).to.equal(21);
-//   expect(MML.characters['test0'].initiativeRollValue, 'initiativeRollValue should equal 10').to.equal(10);
-//   expect(MML.characters['test0'].situationalInitBonus, '"Ready Item" status effect should add -10 to situationalInitBonus').to.equal(-10);
-//   expect(MML.characters['test0'].movementRatioInitBonus, 'movementRatioInitBonus should be 5 for unencumbered').to.equal(5);
-//   expect(MML.characters['test0'].attributeInitBonus, 'attributeInitBonus should be 0 for character with 10 for all attributes').to.equal(0);
-//   expect(MML.characters['test0'].senseInitBonus, 'senseInitBonus should be 4 for character w/o headgear').to.equal(4);
-//   expect(MML.characters['test0'].fomInitBonus, 'fomInitBonus should be 6 for character w/o armor').to.equal(6);
-//   expect(MML.characters['test0'].firstActionInitBonus, 'firstActionInitBonus should be 6 for character attacking with hand axe').to.equal(6);
-//   expect(MML.characters['test0'].spentInitiative, 'spentInitiative should be 0 for character who has not acted').to.equal(0);
+//   expect(MML.characters['test0'].initiative_roll_value, 'initiative_roll_value should equal 10').to.equal(10);
+//   expect(MML.characters['test0'].situational_init_bonus, '"Ready Item" status effect should add -10 to situational_init_bonus').to.equal(-10);
+//   expect(MML.characters['test0'].movement_ratio_init_bonus, 'movement_ratio_init_bonus should be 5 for unencumbered').to.equal(5);
+//   expect(MML.characters['test0'].attribute_init_bonus, 'attribute_init_bonus should be 0 for character with 10 for all attributes').to.equal(0);
+//   expect(MML.characters['test0'].sense_init_bonus, 'sense_init_bonus should be 4 for character w/o headgear').to.equal(4);
+//   expect(MML.characters['test0'].fom_init_bonus, 'fom_init_bonus should be 6 for character w/o armor').to.equal(6);
+//   expect(MML.characters['test0'].first_action_init_bonus, 'first_action_init_bonus should be 6 for character attacking with hand axe').to.equal(6);
+//   expect(MML.characters['test0'].spent_initiative, 'spent_initiative should be 0 for character who has not acted').to.equal(0);
 //   expect(MML.characters['test0'].actionTempo, 'actionTempo should be -25 for unskilled character').to.equal(-25);
 //   expect(MML.characters['test0'].statusEffects, '"Ready Item" action should add "Ready Item" status effect').to.have.property("Ready Item");
-//   expect(MML.characters['test2'].firstActionInitBonus, 'firstActionInitBonus should be 10 for character observing').to.equal(10);
+//   expect(MML.characters['test2'].first_action_init_bonus, 'first_action_init_bonus should be 10 for character observing').to.equal(10);
 //   expect(MML.characters['test0'].rightHand._id, 'ready item should not take effect until action starts').to.equal('emptyHand');
 //   expect(MML.characters['test0'].leftHand._id, 'ready item should not take effect until action starts').to.equal('emptyHand');
 //   expect(MML.characters['test1'].rightHand._id, 'ready item should not take effect until action starts').to.equal('emptyHand');
@@ -766,7 +766,7 @@ function pbcopy(data) {
 //   expect(MML.characters['test1'].statusEffects, 'dodging should create "Melee This Round" status effect for defender').to.have.property("Melee This Round");
 //   expect(MML.characters['test1'].statusEffects, 'dodging should create "Number of Defenses" status effect for defender').to.have.property("Number of Defenses");
 //   expect(MML.characters['test1'].statusEffects["Number of Defenses"].number, 'dodging should add 1 to "Number of Defenses" status effect for defender').to.equal(1);
-//   expect(MML.characters['test0'].spentInitiative, 'spentInitiative should be -25 for character who has acted with default actionTempo').to.equal(-25);
+//   expect(MML.characters['test0'].spent_initiative, 'spent_initiative should be -25 for character who has acted with default actionTempo').to.equal(-25);
 //
 //   .then(clickButton('Start Action');
 //   expect(MML.characters['test1'].action.name, 'dodging should prevent a character from doing anything but movement').to.equal('Movement Only');
@@ -813,8 +813,8 @@ function pbcopy(data) {
 //   .then(clickButton('Roll Willpower');
 //   .then(setTestRoll(player, 11);
 //   expect(MML.characters['test2'].statusEffects, 'successful willpower roll should not add "Major Wound" status effect').to.have.property("Major Wound, Right Arm");
-//   expect(MML.characters['test2'].situationalInitBonus, '"Major Wound" status effect should add -5 to situationalInitBonus').to.equal(-5);
-//   expect(MML.characters['test2'].situationalMod, '"Major Wound" status effect should add -10 to situationalMod').to.equal(-10);
+//   expect(MML.characters['test2'].situational_init_bonus, '"Major Wound" status effect should add -5 to situational_init_bonus').to.equal(-5);
+//   expect(MML.characters['test2'].situational_mod, '"Major Wound" status effect should add -10 to situational_mod').to.equal(-10);
 //   expect(MML.characters['test2'].statusEffects["Major Wound, Right Arm"].duration, '"Major Wound" status effect duration should equal damage taken beyond half HP').to.equal(2);
 //   expect(MML.characters['test2'].statusEffects["Major Wound, Right Arm"].startingRound, '"Major Wound" status effect starting round should equal current round').to.equal(2);
 //   setActionStandardAttack(player);
@@ -868,8 +868,8 @@ function pbcopy(data) {
 //   .then(setTestRoll(player, 10);
 //   expect(MML.characters['test2'].statusEffects, 'wounds to the same body part stack effects').to.have.property("Major Wound, Right Arm");
 //   expect(MML.characters['test2'].statusEffects, 'successful systemStrength roll should not prevent adding "Disabling Wound" status effect').to.have.property("Disabling Wound, Right Arm");
-//   expect(MML.characters['test2'].situationalInitBonus, '"Disabling Wound" status effect should add -10 to situationalInitBonus').to.equal(-15);
-//   expect(MML.characters['test2'].situationalMod, '"Disabling Wound" status effect should add -25 to situationalMod').to.equal(-35);
+//   expect(MML.characters['test2'].situational_init_bonus, '"Disabling Wound" status effect should add -10 to situational_init_bonus').to.equal(-15);
+//   expect(MML.characters['test2'].situational_mod, '"Disabling Wound" status effect should add -25 to situational_mod').to.equal(-35);
 //   expect(MML.characters['test2'].statusEffects, 'successful systemStrength roll should not add "Stunned" status effect').not.to.have.property("Stunned");
 //   setActionStandardAttack(player);
 //   .then(clickButton('Accept');
@@ -884,8 +884,8 @@ function pbcopy(data) {
 //   .then(setTestRoll(player, 11);
 //   expect(MML.characters['test2'].statusEffects, 'wounds to the same body part stack effects').to.have.property("Major Wound, Right Arm");
 //   expect(MML.characters['test2'].statusEffects, 'successful systemStrength roll should not prevent adding "Disabling Wound" status effect').to.have.property("Disabling Wound, Right Arm");
-//   expect(MML.characters['test2'].situationalInitBonus, '"Disabling Wound" status effect should add -10 to situationalInitBonus').to.equal(-15);
-//   expect(MML.characters['test2'].situationalMod, '"Disabling Wound" status effect should add -25 to situationalMod').to.equal(-35);
+//   expect(MML.characters['test2'].situational_init_bonus, '"Disabling Wound" status effect should add -10 to situational_init_bonus').to.equal(-15);
+//   expect(MML.characters['test2'].situational_mod, '"Disabling Wound" status effect should add -25 to situational_mod').to.equal(-35);
 //   expect(MML.characters['test2'].statusEffects, 'failed systemStrength roll should add "Stunned" status effect').to.have.property("Stunned");
 //   expect(MML.characters['test2'].statusEffects["Stunned"].duration, 'duration of "Stunned" status effect should equal damage taken in from wound').to.equal(1);
 //   expect(MML.characters['test2'].action.name, '"Stunned" status effect should only allow movement during action').to.equal("Movement Only");
@@ -905,8 +905,8 @@ function pbcopy(data) {
 //   .then(setTestRoll(player, 10);
 //   expect(MML.characters['test2'].statusEffects, 'wounds to the same body part stack effects').to.have.property("Major Wound, Right Arm");
 //   expect(MML.characters['test2'].statusEffects, 'successful systemStrength roll should not prevent adding "Disabling Wound" status effect').to.have.property("Disabling Wound, Right Arm");
-//   expect(MML.characters['test2'].situationalInitBonus, '"Disabling Wound" status effect should add -10 to situationalInitBonus').to.equal(-15);
-//   expect(MML.characters['test2'].situationalMod, '"Disabling Wound" status effect should add -25 to situationalMod').to.equal(-35);
+//   expect(MML.characters['test2'].situational_init_bonus, '"Disabling Wound" status effect should add -10 to situational_init_bonus').to.equal(-15);
+//   expect(MML.characters['test2'].situational_mod, '"Disabling Wound" status effect should add -25 to situational_mod').to.equal(-35);
 //   expect(MML.characters['test2'].statusEffects, 'Character should still have "Stunned" status effect').to.have.property("Stunned");
 //   expect(MML.characters['test2'].statusEffects["Stunned"].duration, 'duration of "Stunned" status effect should not increase on successful systemStrength roll').to.equal(1);
 //   expect(MML.characters['test2'].action.name, '"Stunned" status effect should only allow movement during action').to.equal("Movement Only");
@@ -921,8 +921,8 @@ function pbcopy(data) {
 //   .then(setTestRoll(player, 11);
 //   expect(MML.characters['test2'].statusEffects, 'wounds to the same body part stack effects').to.have.property("Major Wound, Right Arm");
 //   expect(MML.characters['test2'].statusEffects, 'successful systemStrength roll should not prevent adding "Disabling Wound" status effect').to.have.property("Disabling Wound, Right Arm");
-//   expect(MML.characters['test2'].situationalInitBonus, '"Disabling Wound" status effect should add -10 to situationalInitBonus').to.equal(-15);
-//   expect(MML.characters['test2'].situationalMod, '"Disabling Wound" status effect should add -25 to situationalMod').to.equal(-35);
+//   expect(MML.characters['test2'].situational_init_bonus, '"Disabling Wound" status effect should add -10 to situational_init_bonus').to.equal(-15);
+//   expect(MML.characters['test2'].situational_mod, '"Disabling Wound" status effect should add -25 to situational_mod').to.equal(-35);
 //   expect(MML.characters['test2'].statusEffects, 'failed systemStrength roll should add "Stunned" status effect').to.have.property("Stunned");
 //   expect(MML.characters['test2'].statusEffects["Stunned"].duration, 'duration of "Stunned" status effect should add damage taken in from wound').to.equal(2);
 //   expect(MML.characters['test2'].action.name, '"Stunned" status effect should only allow movement during action').to.equal("Movement Only");
@@ -997,9 +997,9 @@ function pbcopy(data) {
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
 //   expect(MML.characters['test2'].statusEffects, 'wounds to the same body part stack effects').to.have.property("Major Wound, Right Arm");
-//   expect(MML.characters['test2'].situationalInitBonus, '"Major Wound" status effect should add -5 and "Disabling Wound" status effect should add -10 to situationalInitBonus').to.equal(-15);
+//   expect(MML.characters['test2'].situational_init_bonus, '"Major Wound" status effect should add -5 and "Disabling Wound" status effect should add -10 to situational_init_bonus').to.equal(-15);
 //   expect(MML.characters['test2'].statusEffects, 'Only healing can remove "Disabling Wound" status effect').to.have.property("Disabling Wound, Right Arm");
-//   expect(MML.characters['test2'].situationalMod, '"Disabling Wound" status effect should add -25 and "Major Wound" to status effect should expire').to.equal(-25);
+//   expect(MML.characters['test2'].situational_mod, '"Disabling Wound" status effect should add -25 and "Major Wound" to status effect should expire').to.equal(-25);
 //   expect(MML.characters['test2'].statusEffects, '"Stunned" status effect should expire').not.to.have.property("Stunned");
 //   setActionStandardAttack(player);
 //   .then(clickButton('Roll'))
@@ -1021,8 +1021,8 @@ function pbcopy(data) {
 //   expect(MML.characters['test2'].statusEffects, 'Only healing can remove "Major Wound" status effect').to.have.property("Major Wound, Right Arm");
 //   expect(MML.characters['test2'].statusEffects, 'Only healing can remove "Disabling Wound" status effect').to.have.property("Disabling Wound, Right Arm");
 //   expect(MML.characters['test2'].statusEffects, 'Taking over twice max HP should add "Mortal Wound" status effect').to.have.property("Mortal Wound, Right Arm");
-//   expect(MML.characters['test2'].situationalInitBonus, '"Mortal Wound" status effect should set situationalInitBonus to "No Combat"').to.equal("No Combat");
-//   expect(MML.characters['test2'].situationalMod, '"Disabling Wound" status effect should add -25 and "Major Wound"').to.equal(-25);
+//   expect(MML.characters['test2'].situational_init_bonus, '"Mortal Wound" status effect should set situational_init_bonus to "No Combat"').to.equal("No Combat");
+//   expect(MML.characters['test2'].situational_mod, '"Disabling Wound" status effect should add -25 and "Major Wound"').to.equal(-25);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
 //   .then(clickButton('Accept');
@@ -1235,12 +1235,12 @@ function pbcopy(data) {
 //   .then(setTestRoll(player, 11);
 //   expect(MML.characters['test0'].statusEffects, 'Failed fitness roll should add "Fatigue" status effect').to.have.property("Fatigue");
 //   expect(MML.characters['test0'].statusEffects["Fatigue"].level, '"Fatigue" status effect should have level 1 when created').to.equal(1);
-//   expect(MML.characters['test0'].situationalInitBonus, '"Fatigue" status effect level 1 should add -5 to situationalInitBonus').to.equal(-5);
-//   expect(MML.characters['test0'].situationalMod, '"Fatigue" status effect level 1 should add -10 to situationalMod').to.equal(-10);
+//   expect(MML.characters['test0'].situational_init_bonus, '"Fatigue" status effect level 1 should add -5 to situational_init_bonus').to.equal(-5);
+//   expect(MML.characters['test0'].situational_mod, '"Fatigue" status effect level 1 should add -10 to situational_mod').to.equal(-10);
 //   expect(MML.characters['test1'].statusEffects, 'Failed fitness roll should add "Fatigue" status effect').to.have.property("Fatigue");
 //   expect(MML.characters['test1'].statusEffects["Fatigue"].level, '"Fatigue" status effect should have level 1 when created').to.equal(1);
-//   expect(MML.characters['test1'].situationalInitBonus, '"Fatigue" status effect level 1 should add -5 to situationalInitBonus').to.equal(-5);
-//   expect(MML.characters['test1'].situationalMod, '"Fatigue" status effect level 1 should add -10 to situationalMod').to.equal(-10);
+//   expect(MML.characters['test1'].situational_init_bonus, '"Fatigue" status effect level 1 should add -5 to situational_init_bonus').to.equal(-5);
+//   expect(MML.characters['test1'].situational_mod, '"Fatigue" status effect level 1 should add -10 to situational_mod').to.equal(-10);
 //   setActionStandardAttack(player);
 //   .then(clickButton('Roll'))
 //   .then(setTestRoll(player, 10);
@@ -1387,14 +1387,14 @@ function pbcopy(data) {
 //   .then(setTestRoll(player, 7);
 //   expect(MML.characters['test0'].statusEffects, 'Only resting should remove "Fatigue" status effect').to.have.property("Fatigue");
 //   expect(MML.characters['test0'].statusEffects["Fatigue"].level, 'Failed fitness roll should increase level of "Fatigue" status effect').to.equal(2);
-//   expect(MML.characters['test0'].situationalInitBonus, '"Fatigue" status effect level 2 should add -10 to situationalInitBonus').to.equal(-10);
-//   expect(MML.characters['test0'].situationalMod, '"Fatigue" status effect level 2 should add -20 to situationalMod').to.equal(-20);
+//   expect(MML.characters['test0'].situational_init_bonus, '"Fatigue" status effect level 2 should add -10 to situational_init_bonus').to.equal(-10);
+//   expect(MML.characters['test0'].situational_mod, '"Fatigue" status effect level 2 should add -20 to situational_mod').to.equal(-20);
 //   .then(clickButton('Roll Fitness');
 //   .then(setTestRoll(player, 7);
 //   expect(MML.characters['test1'].statusEffects, 'Only resting should remove "Fatigue" status effect').to.have.property("Fatigue");
 //   expect(MML.characters['test1'].statusEffects["Fatigue"].level, 'Failed fitness roll should increase level of "Fatigue" status effect').to.equal(2);
-//   expect(MML.characters['test1'].situationalInitBonus, '"Fatigue" status effect level 2 should add -10 to situationalInitBonus').to.equal(-10);
-//   expect(MML.characters['test1'].situationalMod, '"Fatigue" status effect level 2 should add -20 to situationalMod').to.equal(-20);
+//   expect(MML.characters['test1'].situational_init_bonus, '"Fatigue" status effect level 2 should add -10 to situational_init_bonus').to.equal(-10);
+//   expect(MML.characters['test1'].situational_mod, '"Fatigue" status effect level 2 should add -20 to situational_mod').to.equal(-20);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Roll'))
 //   .then(setTestRoll(player, 10);
@@ -1467,14 +1467,14 @@ function pbcopy(data) {
 //   .then(setTestRoll(player, 11);
 //   expect(MML.characters['test1'].statusEffects, 'Only resting should remove "Fatigue" status effect').to.have.property("Fatigue");
 //   expect(MML.characters['test1'].statusEffects["Fatigue"].level, 'Failed health roll should not decrease level of "Fatigue" status effect').to.equal(2);
-//   expect(MML.characters['test1'].situationalInitBonus, '"Fatigue" status effect level 2 should add -10 to situationalInitBonus').to.equal(-10);
-//   expect(MML.characters['test1'].situationalMod, '"Fatigue" status effect level 2 should add -20 to situationalMod').to.equal(-20);
+//   expect(MML.characters['test1'].situational_init_bonus, '"Fatigue" status effect level 2 should add -10 to situational_init_bonus').to.equal(-10);
+//   expect(MML.characters['test1'].situational_mod, '"Fatigue" status effect level 2 should add -20 to situational_mod').to.equal(-20);
 //   .then(clickButton('Roll Health');
 //   .then(setTestRoll(player, 10);
 //   expect(MML.characters['test0'].statusEffects, 'Only resting should remove "Fatigue" status effect').to.have.property("Fatigue");
 //   expect(MML.characters['test0'].statusEffects["Fatigue"].level, 'Successful health roll should decrease level of "Fatigue" status effect').to.equal(1);
-//   expect(MML.characters['test0'].situationalInitBonus, '"Fatigue" status effect level 1 should add -5 to situationalInitBonus').to.equal(-5);
-//   expect(MML.characters['test0'].situationalMod, '"Fatigue" status effect level 1 should add -10 to situationalMod').to.equal(-10);
+//   expect(MML.characters['test0'].situational_init_bonus, '"Fatigue" status effect level 1 should add -5 to situational_init_bonus').to.equal(-5);
+//   expect(MML.characters['test0'].situational_mod, '"Fatigue" status effect level 1 should add -10 to situational_mod').to.equal(-10);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Roll'))
 //   .then(setTestRoll(player, 4);
@@ -1490,8 +1490,8 @@ function pbcopy(data) {
 //   .then(setTestRoll(player, 10);
 //   expect(MML.characters['test1'].statusEffects, 'Only resting should remove "Fatigue" status effect').to.have.property("Fatigue");
 //   expect(MML.characters['test1'].statusEffects["Fatigue"].level, 'Successful health roll should decrease level of "Fatigue" status effect').to.equal(1);
-//   expect(MML.characters['test1'].situationalInitBonus, '"Fatigue" status effect level 1 should add -5 to situationalInitBonus').to.equal(-5);
-//   expect(MML.characters['test1'].situationalMod, '"Fatigue" status effect level 1 should add -10 to situationalMod').to.equal(-10);
+//   expect(MML.characters['test1'].situational_init_bonus, '"Fatigue" status effect level 1 should add -5 to situational_init_bonus').to.equal(-5);
+//   expect(MML.characters['test1'].situational_mod, '"Fatigue" status effect level 1 should add -10 to situational_mod').to.equal(-10);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Roll'))
 //   .then(setTestRoll(player, 4);
@@ -1550,8 +1550,8 @@ function pbcopy(data) {
 //   .then(clickButton('Roll Health');
 //   .then(setTestRoll(player, 10);
 //   expect(MML.characters['test0'].statusEffects, 'Resting should remove "Fatigue" status effect').not.to.have.property("Fatigue");
-//   expect(MML.characters['test0'].situationalInitBonus, '"Fatigue" status effect level 0 should add 0 to situationalInitBonus').to.equal(0);
-//   expect(MML.characters['test0'].situationalMod, '"Fatigue" status effect level 0 should add 0 to situationalMod').to.equal(0);
+//   expect(MML.characters['test0'].situational_init_bonus, '"Fatigue" status effect level 0 should add 0 to situational_init_bonus').to.equal(0);
+//   expect(MML.characters['test0'].situational_mod, '"Fatigue" status effect level 0 should add 0 to situational_mod').to.equal(0);
 //   setActionStandardAttack(player);
 //   .then(clickButton('Roll'))
 //   .then(setTestRoll(player, 10);
@@ -1570,8 +1570,8 @@ function pbcopy(data) {
 //   .then(clickButton('Roll System Strength');
 //   .then(setTestRoll(player, 10);
 //   expect(MML.characters['test1'].statusEffects, 'successful systemStrength roll should not prevent adding "Disabling Wound" status effect').to.have.property("Disabling Wound, Right Arm");
-//   expect(MML.characters['test1'].situationalInitBonus, '"Disabling Wound" status effect should add -10 to situationalInitBonus').to.equal(-15);
-//   expect(MML.characters['test1'].situationalMod, '"Disabling Wound" status effect should add -25 to situationalMod').to.equal(-35);
+//   expect(MML.characters['test1'].situational_init_bonus, '"Disabling Wound" status effect should add -10 to situational_init_bonus').to.equal(-15);
+//   expect(MML.characters['test1'].situational_mod, '"Disabling Wound" status effect should add -25 to situational_mod').to.equal(-35);
 //   expect(MML.characters['test1'].rightHand._id, '"Disabling Wound, Right Arm" status effect should disarm character').to.equal('emptyHand');
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
@@ -1598,8 +1598,8 @@ function pbcopy(data) {
 //   .then(setTestRoll(player, 10);
 //   expect(MML.characters['test1'].statusEffects, 'successful systemStrength roll should not prevent adding "Disabling Wound" status effect').to.have.property("Disabling Wound, Right Arm");
 //   expect(MML.characters['test1'].statusEffects, 'successful systemStrength roll should not prevent adding "Disabling Wound" status effect').to.have.property("Disabling Wound, Head");
-//   expect(MML.characters['test1'].situationalInitBonus, '"Disabling Wound, Head" status effect should set situationalInitBonus to "No Combat"').to.equal("No Combat");
-//   expect(MML.characters['test1'].situationalMod, '"Disabling Wound" status effects on different body parts should stack').to.equal(-60);
+//   expect(MML.characters['test1'].situational_init_bonus, '"Disabling Wound, Head" status effect should set situational_init_bonus to "No Combat"').to.equal("No Combat");
+//   expect(MML.characters['test1'].situational_mod, '"Disabling Wound" status effects on different body parts should stack').to.equal(-60);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
@@ -1645,7 +1645,7 @@ function pbcopy(data) {
 //   expect(MML.characters['test0'].statusEffects, 'aim action should add "Taking Aim" status effect').to.have.property("Taking Aim");
 //   expect(MML.characters['test0'].statusEffects["Taking Aim"].level, 'level of "Taking Aim" status effect should initialize to 1').to.equal(1);
 //   expect(MML.characters['test0'].statusEffects["Taking Aim"].target.name, 'target of "Taking Aim" status effect should match selected target').to.equal('test2');
-//   expect(MML.characters['test0'].missileAttackMod, '"Taking Aim" status effect level 1 should add 30 to missileAttackMod').to.equal(30);
+//   expect(MML.characters['test0'].missile_attack_mod, '"Taking Aim" status effect level 1 should add 30 to missile_attack_mod').to.equal(30);
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
 //   .then(clickButton('selectTarget test2'))
@@ -1676,7 +1676,7 @@ function pbcopy(data) {
 //   expect(MML.characters['test0'].statusEffects, 'aim action should add "Taking Aim" status effect').to.have.property("Taking Aim");
 //   expect(MML.characters['test0'].statusEffects["Taking Aim"].level, 'aiming 2 rounds in a row should increment level of "Taking Aim" status effect').to.equal(2);
 //   expect(MML.characters['test0'].statusEffects["Taking Aim"].target.name, 'target of "Taking Aim" status effect should match selected target').to.equal('test2');
-//   expect(MML.characters['test0'].missileAttackMod, '"Taking Aim" status effect level 2 should add 40 to missileAttackMod').to.equal(40);
+//   expect(MML.characters['test0'].missile_attack_mod, '"Taking Aim" status effect level 2 should add 40 to missile_attack_mod').to.equal(40);
 //   .then(clickButton('Aim');
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
@@ -1686,7 +1686,7 @@ function pbcopy(data) {
 //   expect(MML.characters['test1'].statusEffects, 'aim action should add "Taking Aim" status effect').to.have.property("Taking Aim");
 //   expect(MML.characters['test1'].statusEffects["Taking Aim"].level, 'changing targets should reset level of "Taking Aim" status effect').to.equal(1);
 //   expect(MML.characters['test1'].statusEffects["Taking Aim"].target.name, 'target of "Taking Aim" status effect should match selected target').to.equal('test0');
-//   expect(MML.characters['test1'].missileAttackMod, '"Taking Aim" status effect level 1 should add 30 to missileAttackMod').to.equal(30);
+//   expect(MML.characters['test1'].missile_attack_mod, '"Taking Aim" status effect level 1 should add 30 to missile_attack_mod').to.equal(30);
 //   .then(clickButton('Aim');
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');
@@ -1699,7 +1699,7 @@ function pbcopy(data) {
 //   expect(MML.characters['test0'].statusEffects, 'aim action should add "Taking Aim" status effect').to.have.property("Taking Aim");
 //   expect(MML.characters['test0'].statusEffects["Taking Aim"].level, 'aiming 2 rounds in a row should increment level of "Taking Aim" status effect').to.equal(2);
 //   expect(MML.characters['test0'].statusEffects["Taking Aim"].target.name, 'target of "Taking Aim" status effect should match selected target').to.equal('test2');
-//   expect(MML.characters['test0'].missileAttackMod, '"Taking Aim" status effect level 2 should add 40 to missileAttackMod').to.equal(40);
+//   expect(MML.characters['test0'].missile_attack_mod, '"Taking Aim" status effect level 2 should add 40 to missile_attack_mod').to.equal(40);
 //   .then(setTestRoll(player, 56);
 //   .then(clickButton('Defend: 1%');
 //   .then(setTestRoll(player, 5);
@@ -1714,7 +1714,7 @@ function pbcopy(data) {
 //   expect(MML.characters['test1'].statusEffects, 'aim action should add "Taking Aim" status effect').to.have.property("Taking Aim");
 //   expect(MML.characters['test1'].statusEffects["Taking Aim"].level, 'aiming 2 rounds in a row should increment level of "Taking Aim" status effect').to.equal(2);
 //   expect(MML.characters['test1'].statusEffects["Taking Aim"].target.name, 'target of "Taking Aim" status effect should match selected target').to.equal('test0');
-//   expect(MML.characters['test1'].missileAttackMod, '"Taking Aim" status effect level 2 should add 40 to missileAttackMod').to.equal(40);
+//   expect(MML.characters['test1'].missile_attack_mod, '"Taking Aim" status effect level 2 should add 40 to missile_attack_mod').to.equal(40);
 //   .then(clickButton('Attack');
 //   .then(clickButton('Shoot From Cover');
 //   .then(clickButton('None');
@@ -1737,14 +1737,14 @@ function pbcopy(data) {
 //   .then(clickButton('End Movement');
 //   .then(clickButton('selectTarget test1'))
 //   expect(MML.characters['test0'].statusEffects, 'shooting from cover should add "Shoot From Cover" status effect').to.have.property("Shoot From Cover");
-//   expect(MML.characters['test0'].missileAttackMod, '"Shoot From Cover" status effect should add -10 to missileAttackMod').to.equal(-10);
+//   expect(MML.characters['test0'].missile_attack_mod, '"Shoot From Cover" status effect should add -10 to missile_attack_mod').to.equal(-10);
 //   .then(setTestRoll(player, 5);
 //   .then(clickButton('Take it');
 //   .then(setTestRoll(player, 8);
 //   .then(setTestRoll(player, 3);
 //   expect(MML.characters['test0'].statusEffects, 'shooting from cover should add "Shoot From Cover" status effect').to.have.property("Shoot From Cover");
 //   expect(MML.characters['test1'].statusEffects, 'taking damage should remove "Taking Aim" status effect').not.to.have.property("Taking Aim");
-//   expect(MML.characters['test1'].missileAttackMod, 'Removing "Taking Aim" status effect should set to missileAttackMod to 0').to.equal(0);
+//   expect(MML.characters['test1'].missile_attack_mod, 'Removing "Taking Aim" status effect should set to missile_attack_mod to 0').to.equal(0);
 //   .then(clickButton('Attack');
 //   .then(clickButton('Shoot From Cover');
 //   .then(clickButton('None');
@@ -1772,7 +1772,7 @@ function pbcopy(data) {
 //   .then(clickButton('End Movement');
 //   .then(clickButton('selectTarget test2'))
 //   expect(MML.characters['test0'].statusEffects, 'shooting from cover should add "Shoot From Cover" status effect').to.have.property("Shoot From Cover");
-//   expect(MML.characters['test0'].missileAttackMod, '"Shoot From Cover" status effect should add -10 to missileAttackMod').to.equal(-10);
+//   expect(MML.characters['test0'].missile_attack_mod, '"Shoot From Cover" status effect should add -10 to missile_attack_mod').to.equal(-10);
 //   .then(setTestRoll(player, 5);
 //   .then(clickButton('Take it');
 //   .then(setTestRoll(player, 8);
@@ -1816,7 +1816,7 @@ function pbcopy(data) {
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
 //   .then(clickButton('selectTarget test2'))
-//   expect(MML.characters['test0'].missileAttackMod, 'Shooting at a target other than the one aimed at should not grant bonus of "Taking Aim" status effect').to.equal(0);
+//   expect(MML.characters['test0'].missile_attack_mod, 'Shooting at a target other than the one aimed at should not grant bonus of "Taking Aim" status effect').to.equal(0);
 //   .then(setTestRoll(player, 16);
 //   .then(clickButton('Take it');
 //   .then(setTestRoll(player, 31);
@@ -1873,8 +1873,8 @@ function pbcopy(data) {
 //   .then(clickButton('Roll System Strength');
 //   .then(setTestRoll(player, 11);
 //   expect(MML.characters['test2'].statusEffects, 'failed System Strength roll should not add "Wound Fatigue" status effect').to.have.property("Wound Fatigue");
-//   expect(MML.characters['test2'].situationalInitBonus, '"Wound Fatigue" status effect should add -5 to situationalInitBonus').to.equal(-5);
-//   expect(MML.characters['test2'].situationalMod, '"Wound Fatigue" status effect should add -10 to situationalMod').to.equal(-10);
+//   expect(MML.characters['test2'].situational_init_bonus, '"Wound Fatigue" status effect should add -5 to situational_init_bonus').to.equal(-5);
+//   expect(MML.characters['test2'].situational_mod, '"Wound Fatigue" status effect should add -10 to situational_mod').to.equal(-10);
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
 //   .then(clickButton('selectTarget test2'))
@@ -1894,17 +1894,17 @@ function pbcopy(data) {
 //   .then(setTestRoll(player, 10);
 //   .then(clickButton('Start Round');
 //   expect(MML.characters['test0'].statusEffects, 'Choosing "Called Shot" modifier should add "Called Shot" status effect').to.have.property("Called Shot");
-//   expect(MML.characters['test0'].spentInitiative, '"Called Shot" status effect should add -5 to spentInitiative').to.equal(-5);
-//   expect(MML.characters['test0'].missileAttackMod, '"Called Shot" status effect should add -10 to missileAttackMod').to.equal(-10);
-//   expect(MML.characters['test0'].missileDefenseMod, '"Called Shot" status effect should add -10 to missileDefenseMod').to.equal(-10);
-//   expect(MML.characters['test0'].meleeAttackMod, '"Called Shot" status effect should add -10 to meleeAttackMod').to.equal(-10);
-//   expect(MML.characters['test0'].meleeDefenseMod, '"Called Shot" status effect should add -10 to missileAttackMod').to.equal(-10);
+//   expect(MML.characters['test0'].spent_initiative, '"Called Shot" status effect should add -5 to spent_initiative').to.equal(-5);
+//   expect(MML.characters['test0'].missile_attack_mod, '"Called Shot" status effect should add -10 to missile_attack_mod').to.equal(-10);
+//   expect(MML.characters['test0'].missile_defense_mod, '"Called Shot" status effect should add -10 to missile_defense_mod').to.equal(-10);
+//   expect(MML.characters['test0'].melee_attack_mod, '"Called Shot" status effect should add -10 to melee_attack_mod').to.equal(-10);
+//   expect(MML.characters['test0'].melee_defense_mod, '"Called Shot" status effect should add -10 to missile_attack_mod').to.equal(-10);
 //   expect(MML.characters['test1'].statusEffects, 'Choosing "Called Shot Specific" modifier should add "Called Shot Specific" status effect').to.have.property("Called Shot Specific");
-//   expect(MML.characters['test1'].spentInitiative, '"Called Shot Specific" status effect should add -5 to spentInitiative').to.equal(-5);
-//   expect(MML.characters['test1'].missileAttackMod, '"Called Shot Specific" status effect should add -30 and "Taking Aim" status effect level 1 should add 30 to missileAttackMod').to.equal(0);
-//   expect(MML.characters['test1'].missileDefenseMod, '"Called Shot Specific" status effect should add -30 to missileDefenseMod').to.equal(-30);
-//   expect(MML.characters['test1'].meleeAttackMod, '"Called Shot Specific" status effect should add -30 to meleeAttackMod').to.equal(-30);
-//   expect(MML.characters['test1'].meleeDefenseMod, '"Called Shot Specific" status effect should add -30 to missileAttackMod').to.equal(-30);
+//   expect(MML.characters['test1'].spent_initiative, '"Called Shot Specific" status effect should add -5 to spent_initiative').to.equal(-5);
+//   expect(MML.characters['test1'].missile_attack_mod, '"Called Shot Specific" status effect should add -30 and "Taking Aim" status effect level 1 should add 30 to missile_attack_mod').to.equal(0);
+//   expect(MML.characters['test1'].missile_defense_mod, '"Called Shot Specific" status effect should add -30 to missile_defense_mod').to.equal(-30);
+//   expect(MML.characters['test1'].melee_attack_mod, '"Called Shot Specific" status effect should add -30 to melee_attack_mod').to.equal(-30);
+//   expect(MML.characters['test1'].melee_defense_mod, '"Called Shot Specific" status effect should add -30 to missile_attack_mod').to.equal(-30);
 //   .then(clickButton('Start Action');
 //   .then(clickButton('End Movement');
 //   .then(clickButton('Movement Only');
@@ -1919,7 +1919,7 @@ function pbcopy(data) {
 //   .then(setTestRoll(player, 3);
 //   .then(clickButton('Roll Willpower');
 //   .then(setTestRoll(player, 10);
-//   expect(MML.characters['test0'].spentInitiative, '"Called Shot" status effect should add -5 to spentInitiative').to.equal(-30);
+//   expect(MML.characters['test0'].spent_initiative, '"Called Shot" status effect should add -5 to spent_initiative').to.equal(-30);
 //   expect(MML.characters['test2'].statusEffects, 'Successful Willpower roll should not add "Sensitive Area" status effect').not.to.have.property("Sensitive Area");
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
@@ -1937,8 +1937,8 @@ function pbcopy(data) {
 //   .then(clickButton('Roll Willpower');
 //   .then(setTestRoll(player, 11);
 //   expect(MML.characters['test2'].statusEffects, 'Failed Willpower roll should add "Sensitive Area" status effect').to.have.property("Sensitive Area");
-//   expect(MML.characters['test2'].situationalInitBonus, '"Sensitive Area" status effect should add -5 to situationalInitBonus').to.equal(-10);
-//   expect(MML.characters['test2'].situationalMod, '"Sensitive Area" status effect should add -10 to situationalMod').to.equal(-20);
+//   expect(MML.characters['test2'].situational_init_bonus, '"Sensitive Area" status effect should add -5 to situational_init_bonus').to.equal(-10);
+//   expect(MML.characters['test2'].situational_mod, '"Sensitive Area" status effect should add -10 to situational_mod').to.equal(-20);
 //   .then(clickButton('Movement Only');
 //   .then(clickButton('Accept');
 //   .then(clickButton('Start Action');

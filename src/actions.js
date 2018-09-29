@@ -8,7 +8,7 @@ MML.prepareAction = function prepareAction(button_pressed, character) {
   // if (_.has(character.statusEffects, 'Stunned')) {
   //   _.extend(action, { ts: Date.now(), name: 'Movement Only' });
   //   return MML.finalizeAction(player, character, action);
-  // } else if (character.situationalInitBonus !== 'No Combat') {
+  // } else if (character.situational_init_bonus !== 'No Combat') {
   //   return MML.buildAction(player, character, action).pipe(
   //     switchMapTo(MML.finalizeAction(player, character, action))
   //   );
@@ -42,7 +42,7 @@ MML.buildAction = function buildAction(player, character, action) {
   } else {
     action.weapon = MML.getEquippedWeapon(character);
   }
-
+  
   const action_type = MML.chooseActionType(player, character, action);
   const observe = action_type.pipe(
     filter(action_type => action_type === 'Observe'),
@@ -192,7 +192,7 @@ MML.processAction = async function processAction(player, character, action) {
   //         metaMagic: {
   //           base: {
   //             epMod: 1,
-  //             castingMod: 0
+  //             casting_mod: 0
   //           }
   //         }
   //     character.player.chooseMetaMagic(character.name);
@@ -206,7 +206,7 @@ MML.processAttack = async function processAttack(player, character, action) {
   var attackType = action.attackType;
   if (['Grapple', 'Place a Hold', 'Break a Hold', 'Break Grapple', 'Takedown', 'Regain Feet'].includes(attackType)) {
     return MML.grappleAttackAction(player, character, action);
-  } else if (MML.isDualWielding(character)) {
+  } else if (MML.is_dual_wielding(character)) {
     return MML.dualWieldAttackAction(player, character, action);
   } else if (MML.isWieldingMissileWeapon(character)) {
     return MML.missileAttackAction(player, character, action);
@@ -300,7 +300,7 @@ MML.reloadAction = async function reloadAction(player, character, action) {
 };
 
 MML.endAction = function endAction(player, character, action, targets) {
-  character.spentInitiative = character.spentInitiative +
+  character.spent_initiative = character.spent_initiative +
     character.actionTempo +
     (character.actionInitCostMod > -1 ? -1 : character.actionTempo + character.actionInitCostMod);
   character.previousAction = MML.clone(character.action);
