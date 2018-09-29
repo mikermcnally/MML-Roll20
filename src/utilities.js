@@ -314,20 +314,22 @@ MML.clone = function clone(obj) {
   return target;
 };
 
-MML.timeToRounds = function timeToRounds(round_length, time_string) {
-  const seconds = time_string.find(/(\d+)(\s|,|:)*(s|sec|seconds|Seconds|second|Second)(?![A-Za-z])/);
-  const minutes = time_string.find(/(\d+)(\s|,|:)*(m|min|minutes|Minutes|minute|Minute)(?![A-Za-z])/);
-  const hours = time_string.find(/(\d+)(\s|,|:)*(h|hours|Hours|hour|Hour)(?![A-Za-z])/);
-  const days = time_string.find(/(\d+)(\s|,|:)*(d|days|Days|day|Day)(?![A-Za-z])/);
-  // Months aren't a consistent unit of time and will vary between settings 
-  // const months = time_string.find(/(\d+)(\s|,|:)*(M|mon|Mon|months|Months|month|Months)(?![A-Za-z])/);
-  const years = time_string.find(/(\d+)(\s|,|:)*(y|years|Years|year|Year)(?![A-Za-z])/);
+MML.timeToRounds = function timeToRounds(round_length, time_string, months_to_rounds = () => 0) {
+  const seconds = parseInt(time_string.find(/(\d+)(\s|,|:)*(s|sec|seconds|Seconds|second|Second)(?![A-Za-z])/));
+  const minutes = parseInt(time_string.find(/(\d+)(\s|,|:)*(m|min|minutes|Minutes|minute|Minute)(?![A-Za-z])/));
+  const hours = parseInt(time_string.find(/(\d+)(\s|,|:)*(h|hours|Hours|hour|Hour)(?![A-Za-z])/));
+  const days = parseInt(time_string.find(/(\d+)(\s|,|:)*(d|days|Days|day|Day)(?![A-Za-z])/));
+  // Months aren't a consistent unit of time and will vary within the multiverse
+  const months = months_to_rounds((parseInt(time_string.find(/(\d+)(\s|,|:)*(M|mon|Mon|months|Months|month|Months)(?![A-Za-z])/))));
+  const years = parseInt(time_string.find(/(\d+)(\s|,|:)*(y|years|Years|year|Year)(?![A-Za-z])/));
+  const rounds = parseInt(time_string.find(/(\d+)(\s|,|:)*(r|rounds|Round|rounds|Rounds)(?![A-Za-z])/));
 
-  const total_seconds = seconds +
-    minutes * 60 +
-    hours * 60 * 60 +
-    days * 24 * 60 * 60 +
-    years * 365 * 24 * 60 * 60;
+  const total_seconds = isNaN(seconds) ? 0 : seconds +
+    (isNan(minutes) ? 0 : minutes * 60) +
+    (isNan(hours) ? 0 : hours * 60 * 60) +
+    (isNan(days) ? 0 : days * 24 * 60 * 60) +
+    isNaN(months) ? 0 : months +
+    (isNan(years) ? 0 : years * 365 * 24 * 60 * 60);
 
-  return Math.floor(total_seconds/round_length);
+  return Math.floor((total_seconds/round_length) + isNaN(rounds) ? rounds : 0);
 };
