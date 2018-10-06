@@ -591,7 +591,7 @@ function pbcopy(data) {
 //   .then(setTestRoll(player, 1))
 //   expect(MML.characters['test1'].hp.Head, 'punch action should do 1 damage').to.equal(MML.characters['test1'].hpMax.Head - 1);
 //   expect(MML.characters['test1'].hp['Wound Fatigue'], 'punch action should do 1 damage').to.equal(MML.characters['test1'].hpMax['Wound Fatigue'] - 1);
-//   expect(MML.characters['test1'].knockdown, 'punch action should do 1 knockdown').to.equal(MML.characters['test1'].knockdownMax - 1);
+//   expect(MML.characters['test1'].knockdown, 'punch action should do 1 knockdown').to.equal(MML.characters['test1'].knockdown_max - 1);
 //   expect(MML.characters['test0'].spent_initiative, 'punch action should cost 25 initiative').to.equal(-25);
 //   expect(MML.characters['test0'].statusEffects, 'punch action should create "Melee This Round" status effect for attacker').to.have.property("Melee This Round");
 //   expect(MML.characters['test1'].statusEffects, 'forgoing defense should not create "Melee This Round" status effect for defender').not.to.have.property("Melee This Round");
@@ -623,7 +623,7 @@ function pbcopy(data) {
 //   expect(MML.characters['test1'].statusEffects, 'being attacked should remove "Observing" status effect').not.to.have.property("Observing");
 //   expect(MML.characters['test1'].hp.Head, 'damage should accumlate').to.equal(MML.characters['test1'].hpMax.Head - 2);
 //   expect(MML.characters['test1'].hp['Wound Fatigue'], 'damage should accumlate').to.equal(MML.characters['test1'].hpMax['Wound Fatigue'] - 2);
-//   expect(MML.characters['test1'].knockdown, 'knockdown should accumlate damage taken this round').to.equal(MML.characters['test1'].knockdownMax - 2);
+//   expect(MML.characters['test1'].knockdown, 'knockdown should accumlate damage taken this round').to.equal(MML.characters['test1'].knockdown_max - 2);
 //   .then(executeObserve(player))
 //   .then(executeObserve(player))
 //   expect(MML.characters['test1'].statusEffects, 'observing previous round should add "Observed" status effect').to.have.property("Observed");
@@ -681,7 +681,7 @@ function pbcopy(data) {
 //   expect(MML.characters['test1'].melee_defense_mod, '2 defenses should add -40 to melee_defense_mod').to.equal(-40);
 //   expect(MML.characters['test1'].hp.Head, 'damage should accumlate').to.equal(MML.characters['test1'].hpMax.Head - 3);
 //   expect(MML.characters['test1'].hp['Wound Fatigue'], 'damage should accumlate').to.equal(MML.characters['test1'].hpMax['Wound Fatigue'] - 3);
-//   expect(MML.characters['test1'].knockdown, 'knockdown should only consider damage from this round').to.equal(MML.characters['test1'].knockdownMax - 1);
+//   expect(MML.characters['test1'].knockdown, 'knockdown should only consider damage from this round').to.equal(MML.characters['test1'].knockdown_max - 1);
 //   .then(executeObserve(player))
 //   .then(executeObserve(player))
 //   .then(executeObserve(player))
@@ -690,7 +690,7 @@ function pbcopy(data) {
 //   expect(MML.characters['test1'].melee_defense_mod, 'new rounds should remove "Number of Defenses" status effect -40 penalty to melee_defense_mod').to.equal(0);
 //   expect(MML.characters['test1'].hp.Head, 'damage should accumlate').to.equal(MML.characters['test1'].hpMax.Head - 3);
 //   expect(MML.characters['test1'].hp['Wound Fatigue'], 'damage should accumlate').to.equal(MML.characters['test1'].hpMax['Wound Fatigue'] - 3);
-//   expect(MML.characters['test1'].knockdown, 'knockdown should only consider damage from this round').to.equal(MML.characters['test1'].knockdownMax);
+//   expect(MML.characters['test1'].knockdown, 'knockdown should only consider damage from this round').to.equal(MML.characters['test1'].knockdown_max);
 //   expect(state.MML.gm.currentRound, 'currentRound should be incremented').to.equal(3);
 // .catch(console.log);
 // });

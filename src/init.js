@@ -79,7 +79,8 @@ MML.gm_time_advance = Rx.of('idk yet');
 
 MML.current_round = Rx.merge(
     MML.new_round.pipe(mapTo(1)),
-    MML.gm_time_advance)
+    MML.gm_time_advance
+  )
   .pipe(
     startWith(state.MML.current_round || 0),
     scan((sum, num) => sum + num)

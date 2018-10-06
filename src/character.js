@@ -117,6 +117,46 @@ MML.damageCharacter = async function damageCharacter(player, character, damage, 
   await MML.knockdownCheck(player, character, damage);
 };
 
+class StateChange {
+  constructor() {
+    
+  }
+}
+
+class Damage extends StateChange {
+  constructor(value, type, hit_position) {
+    this.value = value;
+    this.type = type;
+    this.hit_position = hit_position;
+  }
+}
+
+const receive_damage = game_state.filter(change => change instanceof Damage);
+
+const knockdown = Rx.of(MML.getCurrentAttributeAsFloat('knockdown')).pipe(
+  expand(function (current) {
+    return Rx.merge(
+      receive_damage.pipe(
+        pluck('value'),
+        map(damage => current - damage > 0 ? current - damage : 0),
+        take(1)
+      ),
+      current_round.pipe(switchMapTo(knockdown_max))
+    );
+  })
+);
+
+const sensitive_area_hit = sensitive_areas.pipe(
+  switchMap(function (sensitive_areas) {
+    return receive_damage.pipe(
+      pluck('hit_position'),
+      filter(hit_position => sensitive_areas.includes(hit_position))
+    );
+  })
+);
+
+const sensitive_area_save = sensitive_area_hit
+
 MML.alterEP = async function alterEP(player, character, epAmount) {
   character.ep += epAmount;
   if (character.ep < Math.round(0.25 * character.epMax)) {
@@ -809,7 +849,7 @@ MML.variableAttribute = function variableAttribute(name) {
 }
 
 // Character Creation
-MML.createCharacter = function (global_game_state, r20_character) {
+MML.createCharacter = function (r20_character, global_game_state, current_round) {
   MML.createAttribute('race', 'Human', '', character);
   MML.createAttribute('gender', 'Male', '', character);
   MML.createAttribute('stature_roll', 6, '', character);
@@ -863,7 +903,7 @@ MML.createCharacter = function (global_game_state, r20_character) {
 
   // const fatigueMax = fitness;
   // const fatigue = isNaN(parseFloat(MML.getCurrentAttribute(character.id, 'fatigue'))) ? character.fitness : MML.getCurrentAttributeAsFloat(character.id, 'fatigue');
-  // const knockdown = isNaN(parseFloat(MML.getCurrentAttribute(character.id, 'knockdown'))) ? character.knockdownMax : MML.getCurrentAttributeAsFloat(character.id, 'knockdown');
+  // const knockdown = isNaN(parseFloat(MML.getCurrentAttribute(character.id, 'knockdown'))) ? character.knockdown_max : MML.getCurrentAttributeAsFloat(character.id, 'knockdown');
 
   // #region Input Attributes
   const name = Rx.change_character_name.pipe(
@@ -942,7 +982,7 @@ MML.createCharacter = function (global_game_state, r20_character) {
   );
   const epRecovery = MML.derivedAttribute('epRecovery', health => MML.recoveryMods[health].ep, health);
   const totalWeightCarried = MML.derivedAttribute('totalWeightCarried', inventory => _.reduce(_.pluck(inventory, 'weight'), (sum, num) => sum + num, 0), inventory);
-  const knockdownMax = MML.derivedAttribute('knockdownMax', Math.round(stature + (totalWeightCarried / 10)), stature, totalWeightCarried);
+  const knockdown_max = MML.derivedAttribute('knockdown_max', Math.round(stature + (totalWeightCarried / 10)), stature, totalWeightCarried);
   const armorProtectionValues = ML.derivedAttribute(MML.buildApvMatrix, body_type, inventory);
   const movement_ratio = MML.derivedAttribute('movement_ratio', function (load, totalWeightCarried) {
     const movement_ratio = totalWeightCarried === 0 ? Math.round(10 * load) / 10 : Math.round(10 * load / totalWeightCarried) / 10;
@@ -1235,7 +1275,7 @@ MML.createCharacter = function (global_game_state, r20_character) {
     }
 
     // Reset knockdown number
-    character.knockdown = character.knockdownMax;
+    character.knockdown = character.knockdown_max;
     character.spent_initiative = 0;
 
     character.action = {
