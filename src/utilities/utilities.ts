@@ -1,19 +1,8 @@
-export class Util {
-  // Character Functions
-  static getCharFromName(name) {
-    const character = findObjs({
-      _type: 'character',
-      archived: false,
-      name: name
-    }, {
-        caseInsensitive: false
-      });
-    return character[0];
-  };
+import * as Roll20 from "../roll20/roll20";
 
   // Attribute and Ability Functions
-  static createAttribute(name, current, max, id) {
-    return createObj('attribute', {
+  export function createAttribute(name, current, max, id) {
+    return createObj(Roll20.ObjectType.Attribute, {
       name: name,
       current: current,
       max: max,
@@ -21,8 +10,8 @@ export class Util {
     });
   };
 
-  static createAbility(id, name, action, istokenaction) {
-    return createObj('ability', {
+  export function createAbility(id, name, action, istokenaction) {
+    return createObj(Roll20.ObjectType.Ability, {
       name: name,
       action: action,
       istokenaction: istokenaction,
@@ -30,7 +19,7 @@ export class Util {
     });
   };
 
-  static getCharAttribute(character_id, attribute) {
+  export function getCharAttribute(character_id, attribute) {
     const attributeObject = findObjs({
       _type: 'attribute',
       _characterid: character_id,
@@ -45,16 +34,16 @@ export class Util {
     return attributeObject;
   };
 
-  static getCurrentAttribute(id, attribute) {
+  export function getCurrentAttribute(id, attribute) {
     return this.getCharAttribute(id, attribute).get('current');
   };
 
-  static getRollAttribute(id, attribute) {
+  export function getRollAttribute(id, attribute) {
     const result = parseInt(this.getCurrentAttribute(id, attribute));
     return isNaN(result) ? 6 : result;
   }
 
-  static getCurrentAttributeAsFloat(id, attribute) {
+  export function getCurrentAttributeAsFloat(id, attribute) {
     const result = parseFloat(MML.getCurrentAttribute(id, attribute));
     if (isNaN(result)) {
       MML.setCurrentAttribute(id, attribute, 0.0);
@@ -63,7 +52,7 @@ export class Util {
     return result;
   };
 
-  static getMaxAttributeAsFloat(id, attribute) {
+  export function getMaxAttributeAsFloat(id, attribute) {
     const result = parseFloat(MML.getCharAttribute(id, attribute).get('max'));
     if (isNaN(result)) {
       MML.setMaxAttribute(id, attribute, 0.0);
@@ -72,7 +61,7 @@ export class Util {
     return result;
   };
 
-  static getCurrentAttributeAsBool(id, attribute) {
+  export function getCurrentAttributeAsBool(id, attribute) {
     const result = MML.getCurrentAttribute(id, attribute);
     if (result.toString() === 'true') {
       return true;
@@ -81,7 +70,7 @@ export class Util {
     }
   };
 
-  static getCurrentAttributeAsArray(id, attribute) {
+  export function getCurrentAttributeAsArray(id, attribute) {
     const result = MML.getCurrentAttribute(id, attribute);
     try {
       return JSON.parse(result);
@@ -92,7 +81,7 @@ export class Util {
     }
   };
 
-  static getCurrentAttributeObject(id, attribute) {
+  export function getCurrentAttributeObject(id, attribute) {
     const result = MML.getCurrentAttribute(id, attribute);
     try {
       return JSON.parse(result);
@@ -103,7 +92,7 @@ export class Util {
     }
   };
 
-  static getSkillAttributes(id, skillType) {
+  export function getSkillAttributes(id, skillType) {
     const attributes = findObjs({ _type: 'attribute', _characterid: id });
     const skills = {};
     const skill_data = {};
@@ -149,20 +138,20 @@ export class Util {
     return skills;
   };
 
-  static setCurrentAttribute(id, attribute, value) {
+  export function setCurrentAttribute(id, attribute, value) {
     MML.getCharAttribute(id, attribute).set('current', value);
   }
 
-  static setMaxAttribute(id, attribute, value) {
+  export function setMaxAttribute(id, attribute, value) {
     MML.getCharAttribute(id, attribute).set('max', value);
   }
 
-  static getAttributeTableValue(attribute, inputValue, table) {
+  export function getAttributeTableValue(attribute, inputValue, table) {
     return table[inputValue][attribute];
   }
 
   // Token Functions
-  static getCharacterIdFromToken(token) {
+  export function getCharacterIdFromToken(token) {
     const tokenObject = getObj('graphic', token._id);
     const characterObject = getObj('character', tokenObject.get('represents'));
 
@@ -176,7 +165,7 @@ export class Util {
     }
   }
 
-  static getCharacterToken(character_id) {
+  export function getCharacterToken(character_id) {
     const tokens = findObjs({
       _pageid: Campaign().get('playerpageid'),
       _type: 'graphic',
@@ -186,7 +175,7 @@ export class Util {
     return tokens[0];
   }
 
-  static getSpellMarkerToken(name) {
+  export function getSpellMarkerToken(name) {
     const tokens = findObjs({
       _pageid: Campaign().get('playerpageid'),
       _type: 'graphic',
@@ -196,39 +185,39 @@ export class Util {
     return tokens[0];
   }
 
-  static getSelectedIds(selected = []) {
+  export function getSelectedIds(selected = []) {
     return selected.map(token => MML.getCharacterIdFromToken(token));
   }
 
-  static displayAura(token, radius, aura_number, color) {
+  export function displayAura(token, radius, aura_number, color) {
     token.set(aura_number === 2 ? 'aura2_radius' : 'aura1_radius', radius);
     token.set(aura_number === 2 ? 'aura2_color' : 'aura1_color', color);
   }
 
-  static getDistanceBetweenTokens(a, b) {
+  export function getDistanceBetweenTokens(a, b) {
     return MML.getDistance(a.get('left'), b.get('left'), a.get('top'), b.get('top'));
   }
 
   // Geometry Functions
-  static feetToPixels(feet) {
+  export function feetToPixels(feet) {
     return feet * 14;
   }
 
-  static pixelsToFeet(pixels) {
+  export function pixelsToFeet(pixels) {
     return Math.floor((pixels / 14) + 0.5);
   }
 
-  static getDistance(left1, left2, top1, top2) {
+  export function getDistance(left1, left2, top1, top2) {
     const leftDistance = Math.abs(left2 - left1);
     const topDistance = Math.abs(top2 - top1);
     return Math.sqrt(Math.pow(leftDistance, 2) + Math.pow(topDistance, 2));
   }
 
-  static getDistanceFeet(left1, left2, top1, top2) {
+  export function getDistanceFeet(left1, left2, top1, top2) {
     return MML.pixelsToFeet(MML.getDistance(left1, left2, top1, top2));
   }
 
-  static drawCirclePath(left, top, radiusInFeet) {
+  export function drawCirclePath(left, top, radiusInFeet) {
     const radius = MML.feetToPixels(radiusInFeet);
     const pathArray = [
       ['M', left - radius, top],
@@ -251,14 +240,14 @@ export class Util {
     return path;
   }
 
-  static rotateAxes(left, top, angle) {
+  export function rotateAxes(left, top, angle) {
     const leftNew = left * Math.cos(angle * Math.PI / 180) + top * Math.sin(angle * Math.PI / 180);
     const topNew = -left * Math.sin(angle * Math.PI / 180) + top * Math.cos(angle * Math.PI / 180);
     return [leftNew, topNew];
   }
 
   // Player Functions
-  static getPlayerFromName(playerName) {
+  export function getPlayerFromName(playerName) {
     const player = findObjs({
       _type: 'player',
       online: true,
@@ -270,11 +259,11 @@ export class Util {
   }
 
 
-static generateRowID() {
+export function generateRowID() {
   return new Date().getUTCMilliseconds().toString();
 };
 
-static clone(obj) {
+export function clone(obj) {
   if (obj === null || typeof obj !== 'object')
     return obj;
   var target = obj instanceof Array ? [] : {};
@@ -284,7 +273,7 @@ static clone(obj) {
   return target;
 }
 
-static timeToRounds(round_length: number, time_string: string, months_to_rounds = number => 0) {
+export function timeToRounds(round_length: number, time_string: string, months_to_rounds = number => 0) {
   let seconds = parseInt(time_string.match(/(\d+)(\s|,|:)*(s|sec|seconds|Seconds|second|Second)(?![A-Za-z])/)[1]);
   let minutes = parseInt(time_string.match(/(\d+)(\s|,|:)*(m|min|minutes|Minutes|minute|Minute)(?![A-Za-z])/)[1]);
   let hours = parseInt(time_string.match(/(\d+)(\s|,|:)*(h|hours|Hours|hour|Hour)(?![A-Za-z])/)[1]);
@@ -305,5 +294,4 @@ static timeToRounds(round_length: number, time_string: string, months_to_rounds 
   const total_seconds = seconds + minutes + hours + days + months + years; 
 
   return Math.floor((total_seconds / round_length) + rounds);
-}
 }
