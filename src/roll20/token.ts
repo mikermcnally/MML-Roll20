@@ -1,6 +1,6 @@
 import * as Roll20 from "./roll20";
 
-export class Token implements Roll20.Object {
+export class Token extends Roll20.Graphic {
   readonly type = Roll20.ObjectType.Graphic;
   readonly id: Roll20.Id;
 
@@ -17,4 +17,8 @@ export class Token implements Roll20.Object {
   setWithWorker(properties: object) {
     Object.assign(this, properties);
   }
+}
+
+export interface IToken {
+
 }

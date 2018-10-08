@@ -1,6 +1,6 @@
 import * as Roll20 from "./roll20";
 
-export class Player implements Roll20.Object {
+export class Player implements Roll20.IObject, Roll20.IPlayer {
   readonly type = Roll20.ObjectType.Player;
   readonly id: Roll20.Id;
 
@@ -15,4 +15,8 @@ export class Player implements Roll20.Object {
   setWithWorker(properties: object) {
     Object.assign(this, properties);
   }
+}
+
+export interface IPlayer {
+
 }

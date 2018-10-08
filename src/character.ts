@@ -1,11 +1,11 @@
 import * as Roll20 from "../src/roll20/roll20";
 import Rx from "rxjs";
 import { Integer } from "./utilities/aliases";
-import TablePosition from "./utilities/table_position";
+import Point from "./utilities/coordinate";
 
 export class Character {
   readonly id: Roll20.Character['id'];
-  readonly position: Rx.Observable<TablePosition>;
+  readonly position: Rx.Observable<Point>;
   constructor(roll20_character: Roll20.Character) {
     this.id = roll20_character.id;
 
@@ -415,7 +415,7 @@ MML.buildHpAttribute = function buildHpAttribute(race, stature, strength, health
 };
 
 MML.getDistanceBetweenCharacters = function getDistanceBetweenCharacters(character, target) {
-  return MML.pixelsToFeet(MML.getDistanceBetweenTokens(MML.getCharacterToken(character.id), MML.getCharacterToken(target.id)));
+  return Point.pixelsToFeet(MML.getDistanceBetweenTokens(MML.getCharacterToken(character.id), MML.getCharacterToken(target.id)));
 };
 
 MML.getAoESpellTargets = function getAoESpellTargets(spell_marker) {

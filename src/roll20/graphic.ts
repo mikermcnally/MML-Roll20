@@ -1,6 +1,6 @@
 import * as Roll20 from "./roll20";
 
-export class Graphic implements Roll20.Object {
+export class Graphic implements Roll20.IObject {
   readonly type = Roll20.ObjectType.Graphic;
   readonly id: Roll20.Id;
 
@@ -8,7 +8,7 @@ export class Graphic implements Roll20.Object {
     return this[property];
   }
 
-  remove() {}
+  remove() { }
 
   set(property: string, value: any) {
     this[property] = value;
@@ -17,4 +17,16 @@ export class Graphic implements Roll20.Object {
   setWithWorker(properties: object) {
     Object.assign(this, properties);
   }
+}
+
+export enum GraphicTypes {
+  Token = 'token',
+  Card = 'card',
+}
+
+export enum Layers {
+  Gmlayer = "gmlayer",
+  Objects = "objects",
+  Map = "map",
+  Walls = "walls"
 }

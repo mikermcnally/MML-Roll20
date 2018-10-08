@@ -1,6 +1,6 @@
 import * as Roll20 from "./roll20";
 
-export interface Object {
+export interface IObject {
   readonly type: Roll20.ObjectType;
   readonly id: Roll20.Id;
   readonly get: (string) => any;
@@ -16,12 +16,19 @@ export enum ObjectType {
   Ability = 'ability',
   Attribute = 'attribute',
   Character = 'character',
+  Campaign = 'campaign',
+  Card = 'card',
+  CustomFX = 'custfx',
+  Deck = 'deck',
   Graphic = 'graphic',
+  Hand = 'hand',
   Handout = 'handout',
   Macro = 'macro',
+  Map = 'map',
+  Page = 'page',
   Path = 'path',
   Player = 'player',
-  Rollabletable = 'rollabletable',
-  Tableitem = 'tableitem',
   Text = 'text',
+  RollableTable = 'rollabletable',
+  TableItem = 'tableitem',
 }
