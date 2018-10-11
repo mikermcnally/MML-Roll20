@@ -1,4 +1,5 @@
-const MML = {};
+import * as Rx from "rxjs";
+
 state.MML = state.MML || {};
 
 MML.button_pressed = Rx.chat_message.pipe(

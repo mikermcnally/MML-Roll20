@@ -1,150 +1,136 @@
 import * as Roll20 from "../roll20/roll20";
+import * as _ from "underscore";
+import * as MML from "../mml/mml";
 import { Float, Integer } from "../utilities/aliases";
 
 // Attribute and Ability Functions
-export function createAttribute(name, current, max, id) {
-  return createObj(Roll20.ObjectType.Attribute, {
-    name: name,
-    current: current,
-    max: max,
-    characterid: id
-  });
+export function createAttribute(name: string, current: string, max: string, characterid: MML.Character['id']): Roll20.IAttribute {
+  return createObj(Roll20.ObjectType.Attribute, { name, current, max, characterid }) as Roll20.IAttribute;
 };
 
-export function createAbility(id, name, action, istokenaction) {
-  return createObj(Roll20.ObjectType.Ability, {
-    name: name,
-    action: action,
-    istokenaction: istokenaction,
-    characterid: id
-  });
+export function createAbility(name: string, action: string, characterid: MML.Character['id'], istokenaction: boolean = false): Roll20.IAbility {
+  return createObj(Roll20.ObjectType.Ability, { name, action, istokenaction, characterid }) as Roll20.IAbility;
 };
 
-export function getCharAttribute(character_id: , attribute) {
-  const attributeObject = findObjs({
-    _type: 'attribute',
-    _characterid: character_id,
-    name: attribute
-  }, {
-    caseInsensitive: false
-  })[0];
+export function getCharAttribute(characterid: MML.Character['id'], name: string): Roll20.IAttribute {
+  const attribute_object = findObjs({ type: Roll20.ObjectType.Attribute, characterid, name })[0];
 
-  if (_.isUndefined(attributeObject)) {
-    return this.createAttribute(attribute, '', '', character_id);
+  if (_.isUndefined(attribute_object)) {
+    return createAttribute(name, '', '', characterid);
   }
-  return attributeObject;
+  return attribute_object as Roll20.IAttribute;
 };
 
-export function getCurrentAttribute(id, attribute) {
-  return this.getCharAttribute(id, attribute).get('current');
+export function getCurrentAttribute(characterid: MML.Character['id'], attribute: string): Roll20.IAttribute['current'] {
+  return getCharAttribute(characterid, attribute).get(Roll20.AttributeProperties.Current);
 };
 
-export function getRollAttribute(id, attribute) {
-  const result = parseInt(this.getCurrentAttribute(id, attribute));
-  return isNaN(result) ? 6 : result;
+// export function getRollAttribute(id, attribute) {
+//   const result = parseInt(this.getCurrentAttribute(id, attribute));
+//   return isNaN(result) ? 6 : result;
+// }
+
+// export function getCurrentAttributeAsFloat(id: Roll20.Id, attribute: string): Float.Signed {
+//   const result = parseFloat(this.getCurrentAttribute(id, attribute));
+//   if (isNaN(result)) {
+//     this.setCurrentAttribute(id, attribute, 0.0);
+//     return 0.0 as Float.Signed;
+//   }
+//   return result as Float.Signed;
+// };
+
+// export function getMaxAttributeAsFloat(id, attribute) {
+//   const result = parseFloat(this.getCharAttribute(id, attribute).get('max'));
+//   if (isNaN(result)) {
+//     this.setMaxAttribute(id, attribute, 0.0);
+//     return 0.0;
+//   }
+//   return result;
+// };
+
+// export function getCurrentAttributeAsBool(id, attribute) {
+//   const result = this.getCurrentAttribute(id, attribute);
+//   if (result.toString() === 'true') {
+//     return true;
+//   } else {
+//     return false;
+//   }
+// };
+
+// export function getCurrentAttributeAsArray(id, attribute) {
+//   const result = this.getCurrentAttribute(id, attribute);
+//   try {
+//     return JSON.parse(result);
+//   } catch (err) {
+//     log(err);
+//     this.setCurrentAttribute(id, attribute, '[]');
+//     return [];
+//   }
+// };
+
+// export function getCurrentAttributeObject(id, attribute) {
+//   const result = this.getCurrentAttribute(id, attribute);
+//   try {
+//     return JSON.parse(result);
+//   } catch (err) {
+//     log(err);
+//     this.setCurrentAttribute(id, attribute, '{}');
+//     return {};
+//   }
+// };
+
+// export function getSkillAttributes(id, skillType) {
+//   const attributes = findObjs({ _type: 'attribute', _characterid: id });
+//   const skills = {};
+//   const skill_data = {};
+
+//   _.each(attributes, function (attribute) {
+//     const attributeName = attribute.get('name');
+
+//     if (!attributeName.includes('repeating_' + skillType)) {
+//       const attributeString = attributeName.split('_');
+//       var _id = attributeString[2];
+//       const property = attributeString[3];
+//       const value = attribute.get('current');
+//       _.each(skills, function (skill, key) {
+//         if (key.toLowerCase() === _id) {
+//           _id = key;
+//         }
+//       });
+//       if (_.isUndefined(skill_data[_id])) {
+//         skill_data[_id] = {
+//           name: '',
+//           input: 0,
+//           level: 0
+//         };
+//       }
+//       if (property === 'name') {
+//         skill_data[_id][property] = value;
+//       } else if (isNaN(parseFloat(value))) {
+//         skill_data[_id][property] = 0;
+//       } else {
+//         skill_data[_id][property] = parseFloat(value);
+//       }
+//     }
+//   });
+//   _.each(skill_data, function (skill, _id) {
+//     if (skill.name !== '') {
+//       skills[skill.name] = {
+//         level: skill.level,
+//         input: skill.input,
+//         _id: _id
+//       };
+//     }
+//   });
+//   return skills;
+// };
+
+export function setCurrentAttribute(characterid: MML.Character['id'], name: string, value) {
+  getCharAttribute(characterid, name).set(Roll20.AttributeProperties.Current, value);
 }
 
-export function getCurrentAttributeAsFloat(id: Roll20.Id, attribute: string): Float.Signed {
-  const result = parseFloat(this.getCurrentAttribute(id, attribute));
-  if (isNaN(result)) {
-    this.setCurrentAttribute(id, attribute, 0.0);
-    return 0.0 as Float.Signed;
-  }
-  return result as Float.Signed;
-};
-
-export function getMaxAttributeAsFloat(id, attribute) {
-  const result = parseFloat(this.getCharAttribute(id, attribute).get('max'));
-  if (isNaN(result)) {
-    this.setMaxAttribute(id, attribute, 0.0);
-    return 0.0;
-  }
-  return result;
-};
-
-export function getCurrentAttributeAsBool(id, attribute) {
-  const result = this.getCurrentAttribute(id, attribute);
-  if (result.toString() === 'true') {
-    return true;
-  } else {
-    return false;
-  }
-};
-
-export function getCurrentAttributeAsArray(id, attribute) {
-  const result = this.getCurrentAttribute(id, attribute);
-  try {
-    return JSON.parse(result);
-  } catch (err) {
-    log(err);
-    this.setCurrentAttribute(id, attribute, '[]');
-    return [];
-  }
-};
-
-export function getCurrentAttributeObject(id, attribute) {
-  const result = this.getCurrentAttribute(id, attribute);
-  try {
-    return JSON.parse(result);
-  } catch (err) {
-    log(err);
-    this.setCurrentAttribute(id, attribute, '{}');
-    return {};
-  }
-};
-
-export function getSkillAttributes(id, skillType) {
-  const attributes = findObjs({ _type: 'attribute', _characterid: id });
-  const skills = {};
-  const skill_data = {};
-
-  _.each(attributes, function (attribute) {
-    const attributeName = attribute.get('name');
-
-    if (!attributeName.includes('repeating_' + skillType)) {
-      const attributeString = attributeName.split('_');
-      var _id = attributeString[2];
-      const property = attributeString[3];
-      const value = attribute.get('current');
-      _.each(skills, function (skill, key) {
-        if (key.toLowerCase() === _id) {
-          _id = key;
-        }
-      });
-      if (_.isUndefined(skill_data[_id])) {
-        skill_data[_id] = {
-          name: '',
-          input: 0,
-          level: 0
-        };
-      }
-      if (property === 'name') {
-        skill_data[_id][property] = value;
-      } else if (isNaN(parseFloat(value))) {
-        skill_data[_id][property] = 0;
-      } else {
-        skill_data[_id][property] = parseFloat(value);
-      }
-    }
-  });
-  _.each(skill_data, function (skill, _id) {
-    if (skill.name !== '') {
-      skills[skill.name] = {
-        level: skill.level,
-        input: skill.input,
-        _id: _id
-      };
-    }
-  });
-  return skills;
-};
-
-export function setCurrentAttribute(id, attribute, value) {
-  this.getCharAttribute(id, attribute).set('current', value);
-}
-
-export function setMaxAttribute(id, attribute, value) {
-  this.getCharAttribute(id, attribute).set('max', value);
+export function setMaxAttribute(characterid: MML.Character['id'], attribute, value) {
+  getCharAttribute(characterid, attribute).set(Roll20.AttributeProperties.Max, value);
 }
 
 export function getAttributeTableValue(attribute, inputValue, table) {
@@ -152,35 +138,34 @@ export function getAttributeTableValue(attribute, inputValue, table) {
 }
 
 // Token Functions
-export function getCharacterIdFromToken(token) {
-  const tokenObject = getObj('graphic', token._id);
-  const characterObject = getObj('character', tokenObject.get('represents'));
+export function getCharacterIdFromToken(token: Roll20.IToken) {
+  const character_object = getObj(Roll20.ObjectType.Character, token.get(Roll20.TokenProperties.Represents) as Roll20.Id);
 
-  if (tokenObject.get('name').includes('spellMarker')) {
+  if (token.get(Roll20.TokenProperties.Name).includes('spellMarker')) {
     // Do nothing
-  } else if (_.isUndefined(characterObject)) {
-    tokenObject.set('tint_color', '#FFFF00');
+  } else if (_.isUndefined(character_object)) {
+    token.set(Roll20.TokenProperties.TintColor, '#FFFF00');
     sendChat('Error', 'Selected Token(s) not associated to a character.');
   } else {
-    return characterObject.get('id');
+    return character_object.id;
   }
 }
 
-export function getCharacterToken(character_id) {
+export function getCharacterToken(characterid: MML.Character['id']): Roll20.IToken {
   const tokens = findObjs({
-    _pageid: Campaign().get('playerpageid'),
-    _type: 'graphic',
-    _subtype: 'token',
-    represents: character_id
+    _pageid: Campaign().get(Roll20.CampaignProperties.Playerpageid),
+    _type: Roll20.ObjectType.Graphic,
+    _subtype: Roll20.GraphicTypes.Token,
+    represents: characterid
   });
-  return tokens[0];
+  return tokens[0] as Roll20.IToken;
 }
 
 export function getSpellMarkerToken(name) {
   const tokens = findObjs({
-    _pageid: Campaign().get('playerpageid'),
-    _type: 'graphic',
-    _subtype: 'token',
+    _pageid: Campaign().get(Roll20.CampaignProperties.Playerpageid),
+    _type: Roll20.ObjectType.Graphic,
+    _subtype: Roll20.GraphicTypes.Token,
     name: name
   });
   return tokens[0];
@@ -190,9 +175,9 @@ export function getSelectedIds(selected = []) {
   return selected.map(token => this.getCharacterIdFromToken(token));
 }
 
-export function displayAura(token, radius, aura_number, color) {
-  token.set(aura_number === 2 ? 'aura2_radius' : 'aura1_radius', radius);
-  token.set(aura_number === 2 ? 'aura2_color' : 'aura1_color', color);
+export function displayAura(token: Roll20.IToken, radius: Integer.Unsigned, aura_number: Integer.Unsigned, color: string) {
+  token.set(aura_number === 2 ? Roll20.TokenProperties.Aura2Radius : Roll20.TokenProperties.Aura1Radius, radius);
+  token.set(aura_number === 2 ? Roll20.TokenProperties.Aura2Color : Roll20.TokenProperties.Aura1Color, color);
 }
 
 export function getDistanceBetweenTokens(a, b) {
@@ -200,7 +185,7 @@ export function getDistanceBetweenTokens(a, b) {
 }
 
 // Geometry Functions
-export function drawCirclePath(left: Integer.Positive, top: Integer.Positive, radiusInFeet: Integer.Positive) {
+export function drawCirclePath(left: Integer.Unsigned, top: Integer.Unsigned, radiusInFeet: Integer.Unsigned) {
   const radius = this.feetToPixels(radiusInFeet);
   const pathArray = [
     ['M', left - radius, top],
@@ -211,14 +196,14 @@ export function drawCirclePath(left: Integer.Positive, top: Integer.Positive, ra
   ];
   const path = createObj(Roll20.ObjectType.Path, {
     _path: JSON.stringify(pathArray),
-    _pageid: Campaign().get('playerpageid'),
+    _pageid: Campaign().get(Roll20.CampaignProperties.Playerpageid),
     layer: Roll20.Layers.Map,
     stroke: '#FFFF00',
-    width: radius * 2 as Integer.Positive,
-    height: radius * 2 as Integer.Positive,
+    width: radius * 2 as Integer.Unsigned,
+    height: radius * 2 as Integer.Unsigned,
     top: top,
     left: left,
-  });
+  }) as Roll20.IPath;
   toFront(path);
   return path;
 }

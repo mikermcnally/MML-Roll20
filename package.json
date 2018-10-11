@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "scripts": {
     "start": "node ./tests.js",
-    "test": "mocha"
+    "test": "jest"
   },
   "dependencies": {
-    "rxjs": "^6.1.0",
-    "underscore": "^1.9.1"
+    "rxjs": "^6.1.0"
   },
   "devDependencies": {
+    "underscore": "^1.9.1",
+    "@types/underscore": "^1.8.9",
     "roll20-emulation": "https://github.com/mikermcnally/Roll20-Emulation"
   }
 }

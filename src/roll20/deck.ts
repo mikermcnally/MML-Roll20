@@ -1,24 +1,13 @@
 import * as Roll20 from "./roll20";
 
-export class Deck implements Roll20.IObject, Roll20.IDeck {
-  readonly type = Roll20.ObjectType.Deck;
-  readonly id: Roll20.Id;
-
-  get(property: string) {
-    return this[property];
-  }
-
-  remove() { }
-
-  set(property: string, value: any) {
-    this[property] = value;
-  }
-
-  setWithWorker(properties: object) {
-    Object.assign(this, properties);
-  }
+export interface IDeck extends Roll20.IObject {
+  readonly type?: Roll20.ObjectType.Deck;
+  readonly _type?: Roll20.ObjectType.Deck;
+  get(property: DeckProperties): string;
+  set(property: DeckProperties, value: any): void;
+  setWithWorker(properties: {[property in DeckProperties]}): void;
 }
 
-export interface IDeck {
+export enum DeckProperties {
 
 }

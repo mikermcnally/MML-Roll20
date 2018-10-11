@@ -1,16 +1,15 @@
 import * as Roll20 from "./roll20";
 
 export interface IObject {
-  readonly type: Roll20.ObjectType;
-  readonly id: Roll20.Id;
+  readonly type?: Roll20.ObjectType;
+  readonly id?: Roll20.Id;
   readonly get: (string) => any;
   readonly remove?: () => void;
   readonly set: (string, any) => void;
   readonly setWithWorker: (object) => void;
-  [property: string]: any;
 }
 
-export type Id = string;
+export type Id = string & { __type: Roll20.Id };
 
 export enum ObjectType {
   Ability = 'ability',
@@ -31,4 +30,9 @@ export enum ObjectType {
   Text = 'text',
   RollableTable = 'rollabletable',
   TableItem = 'tableitem',
+}
+
+export enum ObjectProperties {
+  Id = 'id',
+  Type = 'type',
 }

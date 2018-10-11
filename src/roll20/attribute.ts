@@ -1,36 +1,20 @@
 import * as Roll20 from "./roll20";
 
-export class Attribute implements Roll20.IObject, Roll20.IAttribute {
-  readonly id: Roll20.Id;
-  readonly _id: Roll20.Id;
+export interface IAttribute extends Roll20.IObject {
   readonly type: Roll20.ObjectType.Attribute;
   readonly _type: Roll20.ObjectType.Attribute;
-  readonly _characterid: Roll20.ICharacter['id'];
+  readonly _characterid: Roll20.Id;
   name: string;
-  max: string;
-  current: string;
-
-  get(property: string) {
-    return this[property];
-  }
-
-  remove() { }
-
-  set(property: string, value: any) {
-    this[property] = value;
-  }
-
-  setWithWorker(properties: object) {
-    Object.assign(this, properties);
-  }
+  max?: string;
+  current?: string;
+  get(property: AttributeProperties): string;
+  set(property: AttributeProperties, value: any): void;
+  setWithWorker(properties: {[property in AttributeProperties]}): void;
 }
 
-export enum AttributeValueType {
+export enum AttributeProperties {
+  CharacterId = 'characterid',
+  Name = 'name',
   Max = 'max',
-  Current = 'current'
-}
-
-export interface IAttribute {
-  _characterid:	Roll20.ICharacter['id'];
-  name:	string;
+  Current = 'current',
 }

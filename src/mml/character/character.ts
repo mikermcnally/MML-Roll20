@@ -1,16 +1,16 @@
-import * as Roll20 from "../src/roll20/roll20";
-import Rx from "rxjs";
-import { Integer } from "./utilities/aliases";
-import Point from "./utilities/coordinate";
+import * as Roll20 from "../../roll20/roll20";
+import * as Rx from "rxjs";
+import { Integer } from "../../utilities/aliases";
+import Point from "../../utilities/coordinate";
 
 export class Character {
-  readonly id: Roll20.Character['id'];
+  readonly id: Roll20.ICharacter['id'];
+  readonly token: Rx.Observable<Roll20.IToken>;
   readonly position: Rx.Observable<Point>;
-  constructor(roll20_character: Roll20.Character) {
+  constructor(roll20_character: Roll20.ICharacter) {
     this.id = roll20_character.id;
 
-    const character = new Roll20.Character();
-    character.type
+    
   }
 }
 

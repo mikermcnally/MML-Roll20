@@ -1,18 +1,22 @@
 import * as Roll20 from "./roll20";
 
-export class Campaign implements Roll20.IObject {
+export interface ICampaign extends Roll20.IObject {
   readonly type: Roll20.ObjectType.Campaign;
-  readonly id: Roll20.Id;
+  readonly _type: Roll20.ObjectType.Campaign;
+  turnorder: string;
+  initiativepage:	boolean;
+  playerpageid:	boolean;
+  playerspecificpages:	boolean;
+  readonly _journalfolder: string
+  get(property: CampaignProperties): string;
+  set(property: CampaignProperties, value: any): void;
+  setWithWorker(properties: {[property in CampaignProperties]}): void;
+}
 
-  get(property: string) {
-    return this[property];
-  }
-
-  set(property: string, value: any) {
-    this[property] = value;
-  }
-
-  setWithWorker(properties: object) {
-    Object.assign(this, properties);
-  }
+export enum CampaignProperties {
+  Turnorder = 'turnorder',
+  Initiativepage = 'initiativepage',
+  Playerpageid = 'playerpageid',
+  Playerspecificpages = 'playerspecificpages',
+  Journalfolder = 'journalfolder',
 }

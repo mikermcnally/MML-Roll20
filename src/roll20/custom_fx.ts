@@ -53,32 +53,14 @@ export class LineEffectType {
   }
 }
 
-export class CustomFX implements Roll20.IObject, Roll20.ICustomFX {
-  readonly type: Roll20.ObjectType.CustomFX;
-  readonly id: Roll20.Id;
-  readonly _id: Roll20.Id;
-  readonly definition: Roll20.ICustomFXDefinition;
-
-  get(property: string) {
-    return this[property];
-  }
-
-  remove() { }
-
-  set(property: string, value: any) {
-    this[property] = value;
-  }
-
-  setWithWorker(properties: object) {
-    Object.assign(this, properties);
-  }
-}
-
-export interface ICustomFX {
+export interface ICustomFX extends Roll20.IObject {
   _id?: Roll20.Id;
   _type?: Roll20.ObjectType.CustomFX;
   name?: string;
   definition?: Roll20.ICustomFXDefinition;
+  get(property: CustomFXProperties): string;
+  set(property: CustomFXProperties, value: any): void;
+  setWithWorker(properties: {[property in CustomFXProperties]}): void;
 }
 
 export interface ICustomFXDefinition {
@@ -103,4 +85,9 @@ export interface ICustomFXDefinition {
   startColourRandom?: Array<number>;
   endColourRandom?: Array<number>;
   onDeath?: string; //This is the only value that accepts a string, so make sure if you use it to wrap the value in "quotes" or it won't let you save. This is used, like in the Burst effect, to spawn an additional effect as soon as the original one finishes. The Burst effect is basically just the Burn effect with "onDeath": "explosion", so the Burn effect lasts until you let go of the mouse, after which it will spawn the Explosion effect at the same location. This the effect that is spawned in the onDeath sequence cannot be an "aimed" effect and must have a duration. If it has a -1 for either of these it will either be given a default or not work as intended. This also only works for other Custom FX, if multiple FX have the same name you are referencing it will only select the first one on the list.
+}
+
+export enum CustomFXProperties {
+  Name = 'name',
+  Definition = 'definition',
 }

@@ -1,24 +1,13 @@
 import * as Roll20 from "./roll20";
 
-export class Handout implements Roll20.IObject, Roll20.IHandout {
-  readonly type = Roll20.ObjectType.Handout;
-  readonly id: Roll20.Id;
-
-  get(property: string) {
-    return this[property];
-  }
-
-  remove() { }
-
-  set(property: string, value: any) {
-    this[property] = value;
-  }
-
-  setWithWorker(properties: object) {
-    Object.assign(this, properties);
-  }
+export interface IHandout extends Roll20.IObject {
+  readonly type?: Roll20.ObjectType.Handout;
+  readonly _type?: Roll20.ObjectType.Handout;
+  get(property: HandoutProperties): string;
+  set(property: HandoutProperties, value: any): void;
+  setWithWorker(properties: {[property in HandoutProperties]}): void;
 }
 
-export interface IHandout {
+export enum HandoutProperties {
 
 }

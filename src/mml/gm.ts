@@ -1,3 +1,12 @@
+import {  } from "module";
+
+export class GM {
+  id: rol
+  constructor(roll20_player_object) {
+
+  }
+}
+
 MML.gm = function GM(roll20_player_object) {
   const gm = this;
   gm.id = roll20_player_object.get('id');
