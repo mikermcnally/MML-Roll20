@@ -2,13 +2,14 @@ import * as Rx from "rxjs";
 import { filter,  } from "rxjs/operators";
 import * as Roll20 from "../../roll20/roll20";
 import { GameEvent, Round } from "../../mml/mml";
-import { Integer } from "../../utilities/aliases";
-import Point from "../../utilities/coordinate";
-import { createAbility, createAttribute, ChangeAttributeCurrent } from "../../utilities/utilities";
+import { createAbility, createAttribute, ChangeAttributeCurrent, Integer, Point } from "../../utilities/utilities";
+import { AttributeProperties } from "../../roll20/roll20";
+
+export type CharacterName = string & { __type: CharacterName };
 
 export class Character {
   readonly id: Roll20.ICharacter['id'];
-  readonly name: Rx.Observable<>;
+  readonly name: Rx.Observable<CharacterName>;
   readonly token: Rx.Observable<Roll20.IToken>;
   readonly position: Rx.Observable<Point>;
   constructor(roll20_character: Roll20.ICharacter, global_game_state: Rx.Observable<GameEvent>, current_round: Rx.Observable<Round>) {
@@ -31,7 +32,7 @@ export class Character {
     createAbility('Menu', '!MML /character/' + this.id, this.id, true);
 
     const attribute_changed = ChangeAttributeCurrent.pipe(
-      filter(attribute => attribute.get('_characterid') === this.id)
+      filter(attribute => attribute.get(AttributeProperties.CharacterId) === this.id)
     );
 
     const game_state = global_game_state.pipe(filter(effect => effect.object_id === this.id));

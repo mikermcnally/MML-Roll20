@@ -1,23 +1,26 @@
 import * as Rx from "rxjs";
-import { filter, map, switchMapTo, startWith } from "rxjs/operators";
-import { ChatMessage } from "../utilities/events";
+import { filter, map, shareReplay, switchMapTo, startWith } from "rxjs/operators";
+import { getSelectedIds } from "../utilities/utilities";
+import { ChatMessage, ChangePlayerOnline } from "../utilities/events";
+import { IPlayer } from "../roll20/player";
+import { Player } from "./player/player";
 
 state.MML = state.MML || {};
 
-MML.button_pressed = ChatMessage.pipe(
+export const ButtonPressed = ChatMessage.pipe(
   filter(({ type, content }) => type === 'api' && content.includes('!MML|')),
   map(function (message) {
     message.who = message.who.replace(' (GM)', '');
     message.content = message.content.replace('!MML|', '');
-    message.selected = MML.getSelectedIds(message.selected);
+    message.selected = getSelectedIds(message.selected);
     return message;
   })
 );
 
-MML.players = Rx.change_player_online.pipe(
-  switchMapTo(findObjs({ _type: 'player', online: true })),
-  startWith(findObjs({ _type: 'player', online: true })),
-  map(player => new MML.Player(player)),
+export const Players = ChangePlayerOnline.pipe(
+  // switchMapTo(findObjs({ _type: 'player', online: true })),
+  startWith(...findObjs({ _type: 'player', online: true }) as Array<IPlayer>),
+  map(player => new Player(player)),
   shareReplay()
 );
 
