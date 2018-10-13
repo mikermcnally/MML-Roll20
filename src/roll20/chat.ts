@@ -1,6 +1,6 @@
 import * as Roll20 from "./roll20";
 
-export interface ChatMessage {
+export interface IChatMessage {
   who: string, //	The display name of the player or character that sent the message.
   playerid: Roll20.Id, //		The ID of the player that sent the message.
   type: Roll20.MessageType, //	"general"	One of "general", "rollresult", "gmrollresult", "emote", "whisper", "desc", or "api".

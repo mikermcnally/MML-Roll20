@@ -1,6 +1,25 @@
+import { Float, Integer } from "../../../utilities/utilities";
+
+export interface APV {
+  readonly family: ArmorMaterialFamily;
+  readonly name: string;
+  readonly surface: Integer.Unsigned;
+  readonly cut: Integer.Unsigned;
+  readonly chop: Integer.Unsigned;
+  readonly pierce: Integer.Unsigned;
+  readonly thrust: Integer.Unsigned;
+  readonly impact: Integer.Unsigned;
+  readonly flanged: Integer.Unsigned;
+  readonly weight_per_position: Float.Signed;
+}
+
+export enum ArmorMaterialFamily {
+  None = 'none',
+}
+
 MML.APVList = {
   'None': {
-    family: 'None',
+    family: ArmorMaterialFamily.None,
     name: 'None',
     surface: 0,
     cut: 0,
@@ -9,7 +28,7 @@ MML.APVList = {
     thrust: 0,
     impact: 0,
     flanged: 0,
-    weightPerPosition: 0
+    weight_per_position: 0
   },
   'Greater Steel Coat of Lames, Leather, Medium': {
     family: 'Coat of Lames',
@@ -21,7 +40,7 @@ MML.APVList = {
     thrust: 19,
     impact: 18,
     flanged: 13,
-    weightPerPosition: 2.12
+    weight_per_position: 2.12
   },
   'Greater Steel Coat of Lames, Cloth, Medium': {
     family: 'Coat of Lames',
@@ -33,7 +52,7 @@ MML.APVList = {
     thrust: 19,
     impact: 16,
     flanged: 12,
-    weightPerPosition: 1.87
+    weight_per_position: 1.87
   },
   'Hardened Leather Coat of Lames, Leather, Medium': {
     family: 'Coat of Lames',
@@ -45,7 +64,7 @@ MML.APVList = {
     thrust: 10,
     impact: 10,
     flanged: 6,
-    weightPerPosition: 1.14
+    weight_per_position: 1.14
   },
   'Greater Steel Coat of Plates, Leather, Medium': {
     family: 'Coat of Plates',
@@ -57,7 +76,7 @@ MML.APVList = {
     thrust: 16,
     impact: 10,
     flanged: 9,
-    weightPerPosition: 1.81
+    weight_per_position: 1.81
   },
   'Greater Steel Coat of Plates, Cloth, Medium': {
     family: 'Coat of Plates',
@@ -69,7 +88,7 @@ MML.APVList = {
     thrust: 16,
     impact: 8,
     flanged: 8,
-    weightPerPosition: 1.55
+    weight_per_position: 1.55
   },
   'Mannish High Steel Coat of Plates, Leather, Medium': {
     family: 'Coat of Plates',
@@ -81,7 +100,7 @@ MML.APVList = {
     thrust: 19,
     impact: 11,
     flanged: 10,
-    weightPerPosition: 1.81
+    weight_per_position: 1.81
   },
   'Greater Steel Coat of Scales, Leather, Medium': {
     family: 'Coat of Scales',
@@ -93,7 +112,7 @@ MML.APVList = {
     thrust: 15,
     impact: 15,
     flanged: 10,
-    weightPerPosition: 1.91
+    weight_per_position: 1.91
   },
   'Greater Steel Coat of Scales, Cloth, Medium': {
     family: 'Coat of Scales',
@@ -105,7 +124,7 @@ MML.APVList = {
     thrust: 14,
     impact: 13,
     flanged: 9,
-    weightPerPosition: 1.66
+    weight_per_position: 1.66
   },
   'Hardened Leather Coat of Scales, Leather, Medium': {
     family: 'Coat of Scales',
@@ -117,7 +136,7 @@ MML.APVList = {
     thrust: 9,
     impact: 7,
     flanged: 5,
-    weightPerPosition: 1.05
+    weight_per_position: 1.05
   },
   'Mannish High Steel Coat of Scales, Leather, Medium': {
     family: 'Coat of Scales',
@@ -129,7 +148,7 @@ MML.APVList = {
     thrust: 17,
     impact: 17,
     flanged: 11,
-    weightPerPosition: 1.91
+    weight_per_position: 1.91
   },
   'Mannish Cloth, Light': {
     family: 'Cloth',
@@ -141,7 +160,7 @@ MML.APVList = {
     thrust: 2,
     impact: 1,
     flanged: 1,
-    weightPerPosition: 0.04
+    weight_per_position: 0.04
   },
   'Mannish Cloth, Medium': {
     family: 'Cloth',
@@ -153,7 +172,7 @@ MML.APVList = {
     thrust: 3,
     impact: 1,
     flanged: 2,
-    weightPerPosition: 0.08
+    weight_per_position: 0.08
   },
   'Mannish Cloth, Heavy': {
     family: 'Cloth',
@@ -165,7 +184,7 @@ MML.APVList = {
     thrust: 5,
     impact: 2,
     flanged: 2,
-    weightPerPosition: 0.24
+    weight_per_position: 0.24
   },
   'Mannish Quilt': {
     family: 'Cloth',
@@ -177,7 +196,7 @@ MML.APVList = {
     thrust: 5,
     impact: 8,
     flanged: 7,
-    weightPerPosition: 0.15
+    weight_per_position: 0.15
   },
   'Mannish Silk': {
     family: 'Cloth',
@@ -189,7 +208,7 @@ MML.APVList = {
     thrust: 4,
     impact: 2,
     flanged: 2,
-    weightPerPosition: 0.06
+    weight_per_position: 0.06
   },
   'Fur, Light': {
     family: 'Light Leather',
@@ -201,7 +220,7 @@ MML.APVList = {
     thrust: 5,
     impact: 6,
     flanged: 6,
-    weightPerPosition: 0.2
+    weight_per_position: 0.2
   },
   'Fur, Medium': {
     family: 'Light Leather',
@@ -213,7 +232,7 @@ MML.APVList = {
     thrust: 5,
     impact: 6,
     flanged: 7,
-    weightPerPosition: 0.4
+    weight_per_position: 0.4
   },
   'Fur, Heavy': {
     family: 'Heavy Leather',
@@ -225,7 +244,7 @@ MML.APVList = {
     thrust: 7,
     impact: 7,
     flanged: 8,
-    weightPerPosition: 0.6
+    weight_per_position: 0.6
   },
   'Hardened Leather, Medium': {
     family: 'Heavy Leather',
@@ -237,7 +256,7 @@ MML.APVList = {
     thrust: 8,
     impact: 5,
     flanged: 4,
-    weightPerPosition: 0.64
+    weight_per_position: 0.64
   },
   'Hardened Leather, Heavy': {
     family: 'Heavy Leather',
@@ -249,7 +268,7 @@ MML.APVList = {
     thrust: 10,
     impact: 7,
     flanged: 6,
-    weightPerPosition: 0.96
+    weight_per_position: 0.96
   },
   'Hardened Leather Lames, Medium': {
     family: 'Heavy Leather',
@@ -261,7 +280,7 @@ MML.APVList = {
     thrust: 6,
     impact: 6,
     flanged: 4,
-    weightPerPosition: 0.77
+    weight_per_position: 0.77
   },
   'Hardened Leather Lames, Heavy': {
     family: 'Heavy Leather',
@@ -273,7 +292,7 @@ MML.APVList = {
     thrust: 8,
     impact: 8,
     flanged: 6,
-    weightPerPosition: 1.15
+    weight_per_position: 1.15
   },
   'Hardened Leather Scales, Medium': {
     family: 'Heavy Leather',
@@ -285,7 +304,7 @@ MML.APVList = {
     thrust: 6,
     impact: 5,
     flanged: 4,
-    weightPerPosition: 0.68
+    weight_per_position: 0.68
   },
   'Hardened Leather Scales, Heavy': {
     family: 'Heavy Leather',
@@ -297,7 +316,7 @@ MML.APVList = {
     thrust: 8,
     impact: 7,
     flanged: 6,
-    weightPerPosition: 1.30
+    weight_per_position: 1.30
   },
   'Hide, Light': {
     family: 'Light Leather',
@@ -309,7 +328,7 @@ MML.APVList = {
     thrust: 2,
     impact: 2,
     flanged: 2,
-    weightPerPosition: 0.14
+    weight_per_position: 0.14
   },
   'Hide, Heavy': {
     family: 'Heavy Leather',
@@ -321,7 +340,7 @@ MML.APVList = {
     thrust: 3,
     impact: 4,
     flanged: 3,
-    weightPerPosition: 0.42
+    weight_per_position: 0.42
   },
   'Leather, Light': {
     family: 'Light Leather',
@@ -333,7 +352,7 @@ MML.APVList = {
     thrust: 3,
     impact: 4,
     flanged: 3,
-    weightPerPosition: 0.16
+    weight_per_position: 0.16
   },
   'Leather, Medium': {
     family: 'Light Leather',
@@ -345,7 +364,7 @@ MML.APVList = {
     thrust: 4,
     impact: 5,
     flanged: 4,
-    weightPerPosition: 0.32
+    weight_per_position: 0.32
   },
   'Leather, Heavy': {
     family: 'Heavy Leather',
@@ -357,7 +376,7 @@ MML.APVList = {
     thrust: 7,
     impact: 7,
     flanged: 7,
-    weightPerPosition: 0.48
+    weight_per_position: 0.48
   },
   'Mannish Padded': {
     family: 'Padded',
@@ -369,7 +388,7 @@ MML.APVList = {
     thrust: 7,
     impact: 10,
     flanged: 9,
-    weightPerPosition: 0.40
+    weight_per_position: 0.40
   },
   'Laced Mail of Common Steel, Medium': {
     family: 'Heavy Mail',
@@ -381,7 +400,7 @@ MML.APVList = {
     thrust: 10,
     impact: 5,
     flanged: 6,
-    weightPerPosition: 1.30
+    weight_per_position: 1.30
   },
   'Laced Mail of Greater Steel, Medium': {
     family: 'Heavy Mail',
@@ -393,7 +412,7 @@ MML.APVList = {
     thrust: 12,
     impact: 6,
     flanged: 7,
-    weightPerPosition: 1.30
+    weight_per_position: 1.30
   },
   'Laced Mail of Mannish High Steel, Medium': {
     family: 'Heavy Mail',
@@ -405,7 +424,7 @@ MML.APVList = {
     thrust: 15,
     impact: 7,
     flanged: 8,
-    weightPerPosition: 1.30
+    weight_per_position: 1.30
   },
   'Laced Mail of Wrought Iron, Medium': {
     family: 'Heavy Mail',
@@ -417,7 +436,7 @@ MML.APVList = {
     thrust: 6,
     impact: 3,
     flanged: 3,
-    weightPerPosition: 1.29
+    weight_per_position: 1.29
   },
   'Lames of Common Steel, Medium': {
     family: 'Lames',
@@ -429,7 +448,7 @@ MML.APVList = {
     thrust: 13,
     impact: 11,
     flanged: 9,
-    weightPerPosition: 1.70
+    weight_per_position: 1.70
   },
   'Lames of Greater Steel, Medium': {
     family: 'Lames',
@@ -441,7 +460,7 @@ MML.APVList = {
     thrust: 15,
     impact: 14,
     flanged: 11,
-    weightPerPosition: 1.70
+    weight_per_position: 1.70
   },
   'Lames of Mannish High Steel, Light': {
     family: 'Lames',
@@ -453,7 +472,7 @@ MML.APVList = {
     thrust: 13,
     impact: 12,
     flanged: 9,
-    weightPerPosition: 1.28
+    weight_per_position: 1.28
   },
   'Lames of Mannish High Steel, Medium': {
     family: 'Lames',
@@ -465,7 +484,7 @@ MML.APVList = {
     thrust: 18,
     impact: 16,
     flanged: 13,
-    weightPerPosition: 1.70
+    weight_per_position: 1.70
   },
   'Lames of Wrought Iron, Medium': {
     family: 'Lames',
@@ -477,7 +496,7 @@ MML.APVList = {
     thrust: 8,
     impact: 7,
     flanged: 6,
-    weightPerPosition: 1.68
+    weight_per_position: 1.68
   },
   'Brazed Mail of Greater Steel': {
     family: 'Light Mail',
@@ -489,7 +508,7 @@ MML.APVList = {
     thrust: 14,
     impact: 6,
     flanged: 6,
-    weightPerPosition: 1.30
+    weight_per_position: 1.30
   },
   'Brazed Mail of Mannish High Steel': {
     family: 'Light Mail',
@@ -501,7 +520,7 @@ MML.APVList = {
     thrust: 17,
     impact: 7,
     flanged: 7,
-    weightPerPosition: 1.30
+    weight_per_position: 1.30
   },
   'Butted Mail of Common Steel': {
     family: 'Light Mail',
@@ -513,7 +532,7 @@ MML.APVList = {
     thrust: 8,
     impact: 4,
     flanged: 4,
-    weightPerPosition: 0.95
+    weight_per_position: 0.95
   },
   'Butted Mail of Greater Steel': {
     family: 'Light Mail',
@@ -525,7 +544,7 @@ MML.APVList = {
     thrust: 9,
     impact: 5,
     flanged: 5,
-    weightPerPosition: 0.95
+    weight_per_position: 0.95
   },
   'Butted Mail of Wrought Iron': {
     family: 'Light Mail',
@@ -537,7 +556,7 @@ MML.APVList = {
     thrust: 5,
     impact: 2,
     flanged: 2,
-    weightPerPosition: 0.94
+    weight_per_position: 0.94
   },
   'Double Mail of Common Steel': {
     family: 'Light Mail',
@@ -549,7 +568,7 @@ MML.APVList = {
     thrust: 10,
     impact: 5,
     flanged: 4,
-    weightPerPosition: 1.30
+    weight_per_position: 1.30
   },
   'Double Mail of Greater Steel': {
     family: 'Light Mail',
@@ -561,7 +580,7 @@ MML.APVList = {
     thrust: 12,
     impact: 6,
     flanged: 5,
-    weightPerPosition: 1.30
+    weight_per_position: 1.30
   },
   'Double Mail of Mannish High Steel': {
     family: 'Light Mail',
@@ -573,7 +592,7 @@ MML.APVList = {
     thrust: 15,
     impact: 7,
     flanged: 6,
-    weightPerPosition: 1.30
+    weight_per_position: 1.30
   },
   'Single Mail of Common Steel': {
     family: 'Light Mail',
@@ -585,7 +604,7 @@ MML.APVList = {
     thrust: 10,
     impact: 4,
     flanged: 4,
-    weightPerPosition: 1
+    weight_per_position: 1
   },
   'Single Mail of Greater Steel': {
     family: 'Light Mail',
@@ -597,7 +616,7 @@ MML.APVList = {
     thrust: 12,
     impact: 5,
     flanged: 5,
-    weightPerPosition: 1
+    weight_per_position: 1
   },
   'Single Mail of Mannish High Steel': {
     family: 'Light Mail',
@@ -609,7 +628,7 @@ MML.APVList = {
     thrust: 13,
     impact: 6,
     flanged: 6,
-    weightPerPosition: 1
+    weight_per_position: 1
   },
   'Single Mail of Wrought Iron': {
     family: 'Light Mail',
@@ -621,7 +640,7 @@ MML.APVList = {
     thrust: 6,
     impact: 2,
     flanged: 2,
-    weightPerPosition: 0.99
+    weight_per_position: 0.99
   },
   'Plates of Common Steel, Medium': {
     family: 'Plates',
@@ -633,7 +652,7 @@ MML.APVList = {
     thrust: 16,
     impact: 10,
     flanged: 9,
-    weightPerPosition: 1.40
+    weight_per_position: 1.40
   },
   'Plates of Greater Steel, Medium': {
     family: 'Plates',
@@ -645,7 +664,7 @@ MML.APVList = {
     thrust: 19,
     impact: 12,
     flanged: 11,
-    weightPerPosition: 1.40
+    weight_per_position: 1.40
   },
   'Plates of Mannish High Steel, Light': {
     family: 'Plates',
@@ -657,7 +676,7 @@ MML.APVList = {
     thrust: 16,
     impact: 11,
     flanged: 9,
-    weightPerPosition: 1.05
+    weight_per_position: 1.05
   },
   'Plates of Mannish High Steel, Medium': {
     family: 'Plates',
@@ -669,7 +688,7 @@ MML.APVList = {
     thrust: 22,
     impact: 15,
     flanged: 12,
-    weightPerPosition: 1.40
+    weight_per_position: 1.40
   },
   'Plates of Mannish High Steel, Heavy': {
     family: 'Plates',
@@ -681,7 +700,7 @@ MML.APVList = {
     thrust: 30,
     impact: 18,
     flanged: 16,
-    weightPerPosition: 1.75
+    weight_per_position: 1.75
   },
   'Plates of Wrought Iron, Medium': {
     family: 'Plates',
@@ -693,7 +712,7 @@ MML.APVList = {
     thrust: 10,
     impact: 6,
     flanged: 5,
-    weightPerPosition: 1.39
+    weight_per_position: 1.39
   },
   'Plates of Wrought Iron, Heavy': {
     family: 'Plates',
@@ -705,7 +724,7 @@ MML.APVList = {
     thrust: 13,
     impact: 8,
     flanged: 7,
-    weightPerPosition: 1.73
+    weight_per_position: 1.73
   },
   'Hardened Leather, Medium, Studs': {
     family: 'Heavy Leather',
@@ -717,7 +736,7 @@ MML.APVList = {
     thrust: 7,
     impact: 4,
     flanged: 4,
-    weightPerPosition: 0.69
+    weight_per_position: 0.69
   },
   'Hardened Leather, Medium, Rings': {
     family: 'Heavy Leather',
@@ -729,7 +748,7 @@ MML.APVList = {
     thrust: 9,
     impact: 4,
     flanged: 5,
-    weightPerPosition: 0.75
+    weight_per_position: 0.75
   },
   'Hardened Leather, Medium, Splints': {
     family: 'Heavy Leather',
@@ -741,7 +760,7 @@ MML.APVList = {
     thrust: 9,
     impact: 8,
     flanged: 6,
-    weightPerPosition: 0.85
+    weight_per_position: 0.85
   },
   'Hardened Leather, Medium, Bezaints': {
     family: 'Heavy Leather',
@@ -753,7 +772,7 @@ MML.APVList = {
     thrust: 10,
     impact: 7,
     flanged: 6,
-    weightPerPosition: 0.94
+    weight_per_position: 0.94
   },
   'Leather, Medium, Rings': {
     family: 'Light Leather',
@@ -765,7 +784,7 @@ MML.APVList = {
     thrust: 6,
     impact: 4,
     flanged: 5,
-    weightPerPosition: 0.43
+    weight_per_position: 0.43
   },
   'Leather, Medium, Studs': {
     family: 'Light Leather',
@@ -777,7 +796,7 @@ MML.APVList = {
     thrust: 4,
     impact: 4,
     flanged: 4,
-    weightPerPosition: 0.37
+    weight_per_position: 0.37
   },
   'Leather, Heavy, Bezaints': {
     family: 'Heavy Leather',
@@ -789,7 +808,7 @@ MML.APVList = {
     thrust: 10,
     impact: 9,
     flanged: 9,
-    weightPerPosition: 0.78
+    weight_per_position: 0.78
   },
   'Leather, Heavy, Rings': {
     family: 'Heavy Leather',
@@ -801,7 +820,7 @@ MML.APVList = {
     thrust: 9,
     impact: 6,
     flanged: 8,
-    weightPerPosition: 0.59
+    weight_per_position: 0.59
   },
   'Leather, Heavy, Splints': {
     family: 'Heavy Leather',
@@ -813,7 +832,7 @@ MML.APVList = {
     thrust: 9,
     impact: 10,
     flanged: 9,
-    weightPerPosition: 0.69
+    weight_per_position: 0.69
   },
   'Leather, Heavy, Studs': {
     family: 'Heavy Leather',
@@ -825,7 +844,7 @@ MML.APVList = {
     thrust: 7,
     impact: 6,
     flanged: 7,
-    weightPerPosition: 0.53
+    weight_per_position: 0.53
   },
   'Padded, Bezaints': {
     family: 'Padded',
@@ -837,7 +856,7 @@ MML.APVList = {
     thrust: 10,
     impact: 12,
     flanged: 11,
-    weightPerPosition: 0.70
+    weight_per_position: 0.70
   },
   'Dwarven Quilt': {
     family: 'Cloth',
@@ -849,7 +868,7 @@ MML.APVList = {
     thrust: 9,
     impact: 13,
     flanged: 11,
-    weightPerPosition: 0.35
+    weight_per_position: 0.35
   },
   'Dwarven Padded': {
     family: 'Padded',
@@ -861,7 +880,7 @@ MML.APVList = {
     thrust: 12,
     impact: 16,
     flanged: 14,
-    weightPerPosition: 0.52
+    weight_per_position: 0.52
   },
   'Fine Mail, Dwarven Low Steel': {
     family: 'Light Mail',
@@ -873,7 +892,7 @@ MML.APVList = {
     thrust: 19,
     impact: 7,
     flanged: 7,
-    weightPerPosition: 0.95
+    weight_per_position: 0.95
   },
   'Brazed Mail of Gnomish Steel, Medium': {
     family: 'Light Mail',
@@ -885,7 +904,7 @@ MML.APVList = {
     thrust: 20,
     impact: 8,
     flanged: 8,
-    weightPerPosition: 1.29
+    weight_per_position: 1.29
   },
   'Double Mail of Gnomish Steel, Medium': {
     family: 'Light Mail',
@@ -897,7 +916,7 @@ MML.APVList = {
     thrust: 28,
     impact: 8,
     flanged: 7,
-    weightPerPosition: 1.29
+    weight_per_position: 1.29
   },
   'Laced Mail of Gnomish Steel, Medium': {
     family: 'Heavy Mail',
@@ -909,7 +928,7 @@ MML.APVList = {
     thrust: 18,
     impact: 9,
     flanged: 10,
-    weightPerPosition: 1.29
+    weight_per_position: 1.29
   },
   'Lames of Gnomish Steel, Medium': {
     family: 'Lames',
@@ -921,7 +940,7 @@ MML.APVList = {
     thrust: 22,
     impact: 19,
     flanged: 16,
-    weightPerPosition: 1.68
+    weight_per_position: 1.68
   },
   'Plates of Gnomish Steel, Medium': {
     family: 'Plates',
@@ -933,7 +952,7 @@ MML.APVList = {
     thrust: 27,
     impact: 18,
     flanged: 15,
-    weightPerPosition: 1.39
+    weight_per_position: 1.39
   },
   'Single Mail of Gnomish Steel, Medium': {
     family: 'Light Mail',
@@ -945,7 +964,7 @@ MML.APVList = {
     thrust: 16,
     impact: 7,
     flanged: 7,
-    weightPerPosition: 0.99
+    weight_per_position: 0.99
   },
   'Elven Cloth, Light': {
     family: 'Cloth',
@@ -957,7 +976,7 @@ MML.APVList = {
     thrust: 2,
     impact: 1,
     flanged: 1,
-    weightPerPosition: 0.03
+    weight_per_position: 0.03
   },
   'Elven Cloth, Medium': {
     family: 'Cloth',
@@ -969,7 +988,7 @@ MML.APVList = {
     thrust: 3,
     impact: 2,
     flanged: 2,
-    weightPerPosition: 0.06
+    weight_per_position: 0.06
   },
   'Elven Cloth, Heavy': {
     family: 'Cloth',
@@ -981,7 +1000,7 @@ MML.APVList = {
     thrust: 6,
     impact: 3,
     flanged: 3,
-    weightPerPosition: 0.18
+    weight_per_position: 0.18
   },
   'Elven Greater Steel Fine Coat of Scales': {
     family: 'Lames',
@@ -993,7 +1012,7 @@ MML.APVList = {
     thrust: 16,
     impact: 13,
     flanged: 8,
-    weightPerPosition: 1.53
+    weight_per_position: 1.53
   },
   'Elven Padded': {
     family: 'Padded',
@@ -1005,7 +1024,7 @@ MML.APVList = {
     thrust: 10,
     impact: 13,
     flanged: 11,
-    weightPerPosition: 0.36
+    weight_per_position: 0.36
   },
   'Elven Quilt': {
     family: 'Cloth',
@@ -1017,7 +1036,7 @@ MML.APVList = {
     thrust: 8,
     impact: 10,
     flanged: 9,
-    weightPerPosition: 0.12
+    weight_per_position: 0.12
   },
   'Elven Silk': {
     family: 'Cloth',
@@ -1029,7 +1048,7 @@ MML.APVList = {
     thrust: 6,
     impact: 3,
     flanged: 4,
-    weightPerPosition: 0.12
+    weight_per_position: 0.12
   },
   'Fine Mail, Elven Travel Steel': {
     family: 'Light Mail',
@@ -1041,7 +1060,7 @@ MML.APVList = {
     thrust: 19,
     impact: 7,
     flanged: 7,
-    weightPerPosition: 0.95
+    weight_per_position: 0.95
   },
   'Fine Mail, Mannish Greater Steel': {
     family: 'Light Mail',
@@ -1053,7 +1072,7 @@ MML.APVList = {
     thrust: 17,
     impact: 6,
     flanged: 6,
-    weightPerPosition: 0.95
+    weight_per_position: 0.95
   },
   'Lames of Elven Bronze': {
     family: 'Lames',
@@ -1065,6 +1084,6 @@ MML.APVList = {
     thrust: 14,
     impact: 13,
     flanged: 10,
-    weightPerPosition: 0.95
+    weight_per_position: 0.95
   }
 };

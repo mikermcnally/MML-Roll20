@@ -1,3 +1,41 @@
+import * as Rx from "rxjs";
+import { filter, map, pluck, startWith, switchMap, withLatestFrom } from "rxjs/operators";
+import { Id, IPlayer, IChatMessage } from "../../roll20/roll20";
+import { ChangePlayerDisplayname } from "../../utilities/events";
+import { ButtonPressed } from "../mml";
+
+export type PlayerName = string & { __type: PlayerName }
+
+export class Player {
+  readonly id: Id;
+  readonly name: Rx.Observable<PlayerName>;
+  private button_pressed: Rx.Observable<IChatMessage>;
+
+  constructor(roll20_player_object: IPlayer) {
+    this.id = roll20_player_object.id;
+    this.name = ChangePlayerDisplayname.pipe(
+      pluck('displayname'),
+      startWith(roll20_player_object.displayname),
+      switchMap(name => Rx.of(name as PlayerName))
+    );
+
+    this.button_pressed = this.name.pipe(switchMap(name => ButtonPressed.pipe(filter(message => name === message.who))));
+
+    // player.character_menu = this.button_pressed.pipe(
+    //   filter(({ content }) => content.startsWith('menu|')),
+    //   map(({ content }) => content.replace('menu|', '')),
+    //   withLatestFrom(MML.character_list),
+    //   switchMap(([id, character_list]) => character_list[id].menu(player))
+    // );
+
+    // player.input = Rx.merge(
+    //   MML.gm.prompt_player.pipe(filter(({ player_id }) => player_id === id)),
+    //   player.character_menu
+    // )
+    //   .pipe(switchAll());
+  }
+}
+
 MML.displayGmRoll = function displayGmRoll(player, message) {
   player.name.subscribe(name => sendChat(name, '/w "' + name + '" &{template:rollMenuGM} {{title=' + message + "}}"));
 };
@@ -98,13 +136,13 @@ MML.prepareAttackAction = async function prepareAttackAction(player, character, 
   }
 
   if (!_.contains([
-        'Grapple',
-        'Break a Hold',
-        'Break Grapple',
-        'Takedown',
-        'Regain Feet'
-      ],
-      action.attackType)) {
+    'Grapple',
+    'Break a Hold',
+    'Break Grapple',
+    'Takedown',
+    'Regain Feet'
+  ],
+    action.attackType)) {
     const calledShot = await MML.chooseCalledShot(player);
     if (calledShot !== 'None') {
       action.modifiers.push(calledShot);
@@ -198,8 +236,8 @@ MML.chooseAttackType = async function chooseAttackType(player, character, action
       buttons.push('Break Grapple');
     }
     if ((_.has(character.statusEffects, 'Holding') ||
-        (_.has(character.statusEffects, 'Grappled') && character.statusEffects['Grappled'].targets.length === 1) ||
-        (_.has(character.statusEffects, 'Held') && character.statusEffects['Held'].targets.length === 1)) &&
+      (_.has(character.statusEffects, 'Grappled') && character.statusEffects['Grappled'].targets.length === 1) ||
+      (_.has(character.statusEffects, 'Held') && character.statusEffects['Held'].targets.length === 1)) &&
       !(_.has(character.statusEffects, 'Grappled') && _.has(character.statusEffects, 'Held')) &&
       character.movementType !== 'Prone'
     ) {
@@ -207,8 +245,8 @@ MML.chooseAttackType = async function chooseAttackType(player, character, action
     }
     if (MML.hasStatusEffects(character, ['Grappled', 'Holding', 'Held', 'Taken Down', 'Pinned', 'Overborne'])) {
       if (_.has(character.statusEffects, 'Held') && _.filter(character.statusEffects['Held'].targets, function (target) {
-          return target.bodyPart === 'Head';
-        }).length === 0) {
+        return target.bodyPart === 'Head';
+      }).length === 0) {
         buttons.push('Head Butt');
       }
       buttons.push('Bite');
@@ -331,11 +369,11 @@ MML.menuGmNewItem = function menuGmNewItem(player, who) {
   player.who = who;
   player.message = 'Select item type:';
   player.buttons = [player.menuButtons.newWeapon,
-    player.menuButtons.newShield,
-    player.menuButtons.newArmor,
-    player.menuButtons.newSpellComponent,
-    player.menuButtons.newMiscItem,
-    player.menuButtons.menutoMainGm
+  player.menuButtons.newShield,
+  player.menuButtons.newArmor,
+  player.menuButtons.newSpellComponent,
+  player.menuButtons.newMiscItem,
+  player.menuButtons.menutoMainGm
   ];
 };
 
@@ -442,9 +480,9 @@ MML.menuGmItemQuality = function menuGmItemQuality(player, who) {
   player.who = who;
   player.message = 'Select a quality level:';
   player.buttons = [player.menuButtons.itemQualityPoor,
-    player.menuButtons.itemQualityStandard,
-    player.menuButtons.itemQualityExcellent,
-    player.menuButtons.itemQualityMasterWork
+  player.menuButtons.itemQualityStandard,
+  player.menuButtons.itemQualityExcellent,
+  player.menuButtons.itemQualityMasterWork
   ];
 };
 
@@ -815,9 +853,9 @@ MML.readyAdditionalItem = function readyAdditionalItem(player, character, itemMa
   var message = 'Choose another item or continue';
   var buttons = _.keys(itemMap).concat('Continue');
   return MML.displayMenu(player, {
-      message: message,
-      buttons: buttons
-    })
+    message: message,
+    buttons: buttons
+  })
     .then(function (player) {
       var item = character.inventory[itemMap[player.pressedButton]];
       return [previousItem, {
@@ -1083,29 +1121,3 @@ MML.gmMenuWorld = function GmMenuWorld(player, input) {
 MML.gmMenuUtilities = function GmMenuUtilities(player, input) {
   //edit states and other api stuff
 };
-
-MML.Player = function Player(roll20_player_object) {
-  const player = this;
-  player.id = roll20_player_object.get('id');
-  player.name = Rx.change_player_displayname.pipe(
-    pluck('_displayname'),
-    startWith(roll20_player_object.get('name')),
-    switchMap(name => Rx.of(name))
-  );
-
-  const button_pressed = player.name.pipe(switchMap(name => MML.button_pressed.pipe(filter(message => name === message.who))));
-
-  player.character_menu = button_pressed.pipe(
-    filter(({ content }) => content.startsWith('menu|')),
-    map(({ content }) => content.replace('menu|', '')),
-    withLatestFrom(MML.character_list),
-    switchMap(([id, character_list]) => character_list[id].menu(player))
-  );
-
-  player.input = Rx.merge(
-    MML.gm.prompt_player.pipe(filter(({player_id}) => player_id === id)),
-    player.character_menu
-  )
-  .pipe(switchAll());
-};
-

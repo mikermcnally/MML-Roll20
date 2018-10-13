@@ -1,8 +1,10 @@
 import * as Rx from "rxjs";
+import { filter, map, switchMapTo, startWith } from "rxjs/operators";
+import { ChatMessage } from "../utilities/events";
 
 state.MML = state.MML || {};
 
-MML.button_pressed = Rx.chat_message.pipe(
+MML.button_pressed = ChatMessage.pipe(
   filter(({ type, content }) => type === 'api' && content.includes('!MML|')),
   map(function (message) {
     message.who = message.who.replace(' (GM)', '');
