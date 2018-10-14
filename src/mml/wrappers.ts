@@ -1,28 +1,38 @@
-import * as Roll20 from "../roll20/roll20";
+import {
+  AttributeProperties,
+  CampaignProperties,
+  GraphicTypes,
+  Id,
+  IR20Ability, 
+  IR20Attribute,
+  IR20Token,
+  ObjectType,
+  TokenProperties,
+} from "../roll20/roll20";
 import * as _ from "underscore";
-import * as MML from "../mml/mml";
-import { Integer } from "../utilities/aliases";
+import { Character, } from "./mml";
+import { Integer } from "../utilities/utilities";
 
 // Attribute and Ability Functions
-export function createAttribute(name: string, current: string, max: string, characterid: MML.Character['id']): Roll20.IAttribute {
-  return createObj(Roll20.ObjectType.Attribute, { name, current, max, characterid }) as Roll20.IAttribute;
+export function createAttribute(name: string, current: string, max: string, characterid: Character['id']): IR20Attribute {
+  return createObj(ObjectType.Attribute, { name, current, max, characterid }) as IR20Attribute;
 };
 
-export function createAbility(name: string, action: string, characterid: MML.Character['id'], istokenaction: boolean = false): Roll20.IAbility {
-  return createObj(Roll20.ObjectType.Ability, { name, action, istokenaction, characterid }) as Roll20.IAbility;
+export function createAbility(name: string, action: string, characterid: Character['id'], istokenaction: boolean = false): IR20Ability {
+  return createObj(ObjectType.Ability, { name, action, istokenaction, characterid }) as IR20Ability;
 };
 
-export function getCharAttribute(characterid: MML.Character['id'], name: string): Roll20.IAttribute {
-  const attribute_object = findObjs({ type: Roll20.ObjectType.Attribute, characterid, name })[0];
+export function getCharAttribute(characterid: Character['id'], name: string): IR20Attribute {
+  const attribute_object = findObjs({ type: ObjectType.Attribute, characterid, name })[0];
 
   if (_.isUndefined(attribute_object)) {
     return createAttribute(name, '', '', characterid);
   }
-  return attribute_object as Roll20.IAttribute;
+  return attribute_object as IR20Attribute;
 };
 
-export function getCurrentAttribute(characterid: MML.Character['id'], attribute: string): Roll20.IAttribute['current'] {
-  return getCharAttribute(characterid, attribute).get(Roll20.AttributeProperties.Current);
+export function getCurrentAttribute(characterid: Character['id'], attribute: string): IR20Attribute['current'] {
+  return getCharAttribute(characterid, attribute).get(AttributeProperties.Current);
 };
 
 // export function getRollAttribute(id, attribute) {
@@ -30,7 +40,7 @@ export function getCurrentAttribute(characterid: MML.Character['id'], attribute:
 //   return isNaN(result) ? 6 : result;
 // }
 
-// export function getCurrentAttributeAsFloat(id: Roll20.Id, attribute: string): Float.Signed {
+// export function getCurrentAttributeAsFloat(id: Id, attribute: string): Float.Signed {
 //   const result = parseFloat(getCurrentAttribute(id, attribute));
 //   if (isNaN(result)) {
 //     setCurrentAttribute(id, attribute, 0.0);
@@ -125,12 +135,12 @@ export function getCurrentAttribute(characterid: MML.Character['id'], attribute:
 //   return skills;
 // };
 
-export function setCurrentAttribute(characterid: MML.Character['id'], name: string, value) {
-  getCharAttribute(characterid, name).set(Roll20.AttributeProperties.Current, value);
+export function setCurrentAttribute(characterid: Character['id'], name: string, value) {
+  getCharAttribute(characterid, name).set(AttributeProperties.Current, value);
 }
 
-export function setMaxAttribute(characterid: MML.Character['id'], attribute, value) {
-  getCharAttribute(characterid, attribute).set(Roll20.AttributeProperties.Max, value);
+export function setMaxAttribute(characterid: Character['id'], attribute, value) {
+  getCharAttribute(characterid, attribute).set(AttributeProperties.Max, value);
 }
 
 export function getAttributeTableValue(attribute, inputValue, table) {
@@ -138,34 +148,34 @@ export function getAttributeTableValue(attribute, inputValue, table) {
 }
 
 // Token Functions
-export function getCharacterIdFromToken(token: Roll20.IToken) {
-  const character_object = getObj(Roll20.ObjectType.Character, token.get(Roll20.TokenProperties.Represents) as Roll20.Id);
+export function getCharacterIdFromToken(token: IR20Token) {
+  const character_object = getObj(ObjectType.Character, token.get(TokenProperties.Represents) as Id);
 
-  if (token.get(Roll20.TokenProperties.Name).includes('spellMarker')) {
+  if (token.get(TokenProperties.Name).includes('spellMarker')) {
     // Do nothing
   } else if (_.isUndefined(character_object)) {
-    token.set(Roll20.TokenProperties.TintColor, '#FFFF00');
+    token.set(TokenProperties.TintColor, '#FFFF00');
     sendChat('Error', 'Selected Token(s) not associated to a character.');
   } else {
     return character_object.id;
   }
 }
 
-export function getCharacterToken(characterid: MML.Character['id']): Roll20.IToken {
+export function getCharacterToken(characterid: Character['id']): IR20Token {
   const tokens = findObjs({
-    _pageid: Campaign().get(Roll20.CampaignProperties.Playerpageid),
-    _type: Roll20.ObjectType.Graphic,
-    _subtype: Roll20.GraphicTypes.Token,
+    _pageid: Campaign().get(CampaignProperties.Playerpageid),
+    _type: ObjectType.Graphic,
+    _subtype: GraphicTypes.Token,
     represents: characterid
   });
-  return tokens[0] as Roll20.IToken;
+  return tokens[0] as IR20Token;
 }
 
 export function getSpellMarkerToken(name) {
   const tokens = findObjs({
-    _pageid: Campaign().get(Roll20.CampaignProperties.Playerpageid),
-    _type: Roll20.ObjectType.Graphic,
-    _subtype: Roll20.GraphicTypes.Token,
+    _pageid: Campaign().get(CampaignProperties.Playerpageid),
+    _type: ObjectType.Graphic,
+    _subtype: GraphicTypes.Token,
     name: name
   });
   return tokens[0];
@@ -175,9 +185,9 @@ export function getSelectedIds(selected = []) {
   return selected.map(token => getCharacterIdFromToken(token));
 }
 
-export function displayAura(token: Roll20.IToken, radius: Integer.Unsigned, aura_number: Integer.Unsigned, color: string) {
-  token.set(aura_number === 2 ? Roll20.TokenProperties.Aura2Radius : Roll20.TokenProperties.Aura1Radius, radius);
-  token.set(aura_number === 2 ? Roll20.TokenProperties.Aura2Color : Roll20.TokenProperties.Aura1Color, color);
+export function displayAura(token: IR20Token, radius: Integer.Unsigned, aura_number: Integer.Unsigned, color: string) {
+  token.set(aura_number === 2 ? TokenProperties.Aura2Radius : TokenProperties.Aura1Radius, radius);
+  token.set(aura_number === 2 ? TokenProperties.Aura2Color : TokenProperties.Aura1Color, color);
 }
 
 // Player Functions

@@ -1,6 +1,6 @@
-import { Id, IObject, ObjectType } from "./roll20";
+import { Id, IR20Object, ObjectType } from "./roll20";
 
-export interface IPlayer extends IObject {
+export interface IPlayer extends IR20Object {
   readonly type: ObjectType.Player;
   readonly _type: ObjectType.Player;
   readonly _d20userid: string;

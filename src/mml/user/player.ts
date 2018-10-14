@@ -1,129 +1,91 @@
 import * as Rx from "rxjs";
-import { filter, map, pluck, startWith, switchMap, withLatestFrom } from "rxjs/operators";
-import { Id, IPlayer, IChatMessage } from "../../roll20/roll20";
+import { filter, first, map, pluck, startWith, switchMap, withLatestFrom, expand } from "rxjs/operators";
+import { Id, IPlayer, IR20ChatMessage, ObjectType, Layers } from "../../roll20/roll20";
 import { ChangePlayerDisplayname } from "../../utilities/events";
-import { ButtonPressed } from "../mml";
+import { ButtonPressed, UserName } from "../mml";
+import { Route } from "../menu/routes";
+import Menu from "../menu/menu";
+import { IUser } from "./user";
+import { Characters } from "../main";
 
-export type PlayerName = string & { __type: PlayerName }
-
-export class Player {
+export class Player implements IUser {
   readonly id: Id;
-  readonly name: Rx.Observable<PlayerName>;
-  private button_pressed: Rx.Observable<IChatMessage>;
+  readonly name: Rx.Observable<UserName>;
+  readonly menu: Rx.Observable<Menu>;
+  readonly route: Rx.Observable<Route>;
+  readonly button_pressed: Rx.Observable<IR20ChatMessage>;
 
   constructor(roll20_player_object: IPlayer) {
     this.id = roll20_player_object.id;
     this.name = ChangePlayerDisplayname.pipe(
       pluck('displayname'),
       startWith(roll20_player_object.displayname),
-      switchMap(name => Rx.of(name as PlayerName))
+      switchMap(name => Rx.of(name as UserName))
     );
 
     this.button_pressed = this.name.pipe(switchMap(name => ButtonPressed.pipe(filter(message => name === message.who))));
+  }
 
-    // player.character_menu = this.button_pressed.pipe(
-    //   filter(({ content }) => content.startsWith('menu|')),
-    //   map(({ content }) => content.replace('menu|', '')),
-    //   withLatestFrom(MML.character_list),
-    //   switchMap(([id, character_list]) => character_list[id].menu(player))
-    // );
+  displayRoll(message) {
+    this.name.subscribe(name => sendChat(name, '/w "' + name + '" &{template:rollMenu} {{title=' + message + "}}"));
+  };
 
-    // player.input = Rx.merge(
-    //   MML.gm.prompt_player.pipe(filter(({ player_id }) => player_id === id)),
-    //   player.character_menu
-    // )
-    //   .pipe(switchAll());
+  displayTargetSelection() {
+    this.name.subscribe(name => sendChat(name, '/w "' + name + '" &{template:selectTarget}'));
+  }
+
+  selectTarget() {
+    this.displayTargetSelection();
+    return this.button_pressed.pipe(
+      pluck('content'),
+      filter((content: string) => content.includes('selectTarget')),
+      map(content => content.replace('selectTarget', '')),
+      switchMap(function (selected_name) {
+        const character_names = Characters.pipe(map(character => character.name));
+        return Rx.zip(Characters, character_names).pipe(
+          first(([character, name]) => name == selected_name),
+          map(([character]) => character)
+        );
+      })
+    );
+  }
+
+  getMultipleTargets() {
+    return this.selectTarget.pipe(
+      expand()
+    );
+  }
+
+  getRadiusSpellTargets(player, radius) {
+    var token = MML.getCharacterToken(this.id);
+    var spellMarker = createObj(ObjectType.Graphic, {
+      name: 'spellMarkerCircle',
+      _pageid: token.get('_pageid'),
+      layer: Layers.Objects,
+      left: token.get('left'),
+      top: token.get('top'),
+      width: MML.feetToPixels(radius * 2),
+      height: MML.feetToPixels(radius * 2),
+      imgsrc: 'https://s3.amazonaws.com/files.d20.io/images/27869253/ixTcySIkxTEEsbospj4PpA/thumb.png?1485314508',
+      controlledby: MML.getPlayerFromName(this.player.name).get('id')
+    });
+    toBack(spellMarker);
+
+    displaySpellMarker(player, spellMarker);
+  }
+
+  chooseSpellTargets = function chooseSpellTargets(player, character, target) {
+    if (['Caster', 'Touch', 'Single'].includes(target)) {
+      return MML.getMultipleTargets();
+    } else if (target.includes('\' Radius')) {
+      return MML.getRadiusSpellTargets(parseInt(target.replace('\' Radius', '')));
+    } else {
+      return [];
+    }
   }
 }
 
-MML.displayGmRoll = function displayGmRoll(player, message) {
-  player.name.subscribe(name => sendChat(name, '/w "' + name + '" &{template:rollMenuGM} {{title=' + message + "}}"));
-};
 
-MML.displayPlayerRoll = function displayPlayerRoll(player, message) {
-  player.name.subscribe(name => sendChat(name, '/w "' + name + '" &{template:rollMenu} {{title=' + message + "}}"));
-};
-
-MML.displayRoll = function displayRoll(player, roll) {
-  if (player.name === state.MML.gm.name) {
-    return MML.displayGmRoll(player, roll);
-  } else {
-    return MML.displayPlayerRoll(player, roll);
-  }
-};
-
-MML.setRollButtons = function setRollButtons(player) {
-  return new Promise(function (resolve, reject) {
-    player.buttonPressed = function (pressedButton) {
-      if (pressedButton === 'acceptRoll') {
-        resolve(pressedButton);
-      } else if (pressedButton.includes('changeRoll') && player.name === state.MML.gm.name) {
-        resolve(pressedButton.replace('changeRoll ', ''));
-      }
-    };
-  });
-};
-
-MML.displayTargetSelection = function displayTargetSelection(player) {
-  sendChat(player.name, '/w "' + player.name + '" &{template:selectTarget}');
-};
-
-MML.selectTarget = function selectTarget(player) {
-  return new Promise(function (resolve, reject) {
-    player.buttonPressed = function (pressedButton) {
-      if (pressedButton.includes('selectTarget')) {
-        resolve(pressedButton.replace('selectTarget ', ''));
-      }
-    };
-  });
-};
-
-MML.getSingleTarget = async function getSingleTarget(player) {
-  MML.displayTargetSelection(player);
-  const pressedButton = await MML.selectTarget(player);
-  return _.find(MML.characters, character => character.name === pressedButton);
-};
-
-MML.getMultipleTargets = async function getMultipleTargets(player, targets) {
-  const newTarget = await getSingleTarget(player);
-  targets.push(newTarget);
-  const {
-    pressedButton
-  } = displayMenu(player, 'Choose additional target?', ['Yes', 'No']);
-  if (pressedButton === 'Yes') {
-    return MML.getMultipleTargets(player, targets);
-  } else {
-    return targets
-  }
-};
-
-MML.getRadiusSpellTargets = function getRadiusSpellTargets(player, radius) {
-  var token = MML.getCharacterToken(this.id);
-  var spellMarker = createObj('graphic', {
-    name: 'spellMarkerCircle',
-    _pageid: token.get('_pageid'),
-    layer: 'objects',
-    left: token.get('left'),
-    top: token.get('top'),
-    width: MML.feetToPixels(radius * 2),
-    height: MML.feetToPixels(radius * 2),
-    imgsrc: 'https://s3.amazonaws.com/files.d20.io/images/27869253/ixTcySIkxTEEsbospj4PpA/thumb.png?1485314508',
-    controlledby: MML.getPlayerFromName(this.player.name).get('id')
-  });
-  toBack(spellMarker);
-
-  MML.displaySpellMarker(player, spellMarker);
-};
-
-MML.chooseSpellTargets = function chooseSpellTargets(player, character, target) {
-  if (['Caster', 'Touch', 'Single'].includes(target)) {
-    return MML.getMultipleTargets();
-  } else if (target.includes('\' Radius')) {
-    return MML.getRadiusSpellTargets(parseInt(target.replace('\' Radius', '')));
-  } else {
-    return [];
-  }
-};
 
 MML.prepareAttackAction = async function prepareAttackAction(player, character, action) {
   action.ts = Date.now();

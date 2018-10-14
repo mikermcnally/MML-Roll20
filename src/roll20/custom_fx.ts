@@ -53,7 +53,7 @@ export class LineEffectType {
   }
 }
 
-export interface ICustomFX extends Roll20.IObject {
+export interface IR20CustomFX extends Roll20.IR20Object {
   _id?: Roll20.Id;
   _type?: Roll20.ObjectType.CustomFX;
   name?: string;

@@ -1,9 +1,37 @@
-import {  } from "module";
+import { Id } from "../../roll20/object";
+import Menu from "../menu/menu";
+import * as Rx from "rxjs";
+import { pluck, startWith, switchMap } from "rxjs/operators";
 
-export class GM {
-  id: rol
-  constructor(roll20_player_object) {
+import { IR20Character, IR20ChatMessage, IPlayer } from "../../roll20/roll20";
+import { IUser, UserName } from "./user";
+import { Route } from "../menu/routes";
+import { ChangePlayerDisplayname } from "../../utilities/events";
 
+export class GM implements IUser {
+  readonly id: Id;
+  readonly name: Rx.Observable<UserName>;
+  readonly menu: Rx.Observable<Menu>;
+  readonly route: Rx.Observable<Route>;
+  readonly button_pressed: Rx.Observable<IR20ChatMessage>;
+
+  constructor(roll20_player_object: IPlayer, button_pressed: Rx.Observable<IR20ChatMessage>) {
+    this.id = roll20_player_object.id;
+    this.name = ChangePlayerDisplayname.pipe(
+      pluck('displayname'),
+      startWith(roll20_player_object.displayname),
+      switchMap(name => Rx.of(name as UserName))
+    );
+
+    this.button_pressed = this.name.pipe(switchMap(name => button_pressed.pipe(filter(message => name === message.who))));
+  }
+
+  displayRoll(message) {
+    this.name.subscribe(name => sendChat(name, '/w "' + name + '" &{template:rollMenu} {{title=' + message + "}}"));
+  };
+
+  displayTargetSelection = function displayTargetSelection() {
+    this.name.subscribe(name => sendChat(name, '/w "' + name + '" &{template:selectTarget}'));
   }
 }
 

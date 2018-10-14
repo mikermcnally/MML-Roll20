@@ -1,6 +1,6 @@
 import * as Roll20 from "./roll20";
 
-export interface ICard extends Roll20.IObject{
+export interface IR20Card extends Roll20.IR20Object{
   readonly type?: Roll20.ObjectType.Card;
   readonly _type?: Roll20.ObjectType.Card;
   get(property: CardProperties | Roll20.ObjectProperties): string;
@@ -12,7 +12,7 @@ export enum CardProperties {
 
 }
 
-export interface ICardGraphic extends Roll20.IObject {
+export interface IR20CardGraphic extends Roll20.IR20Object {
   readonly type?: Roll20.ObjectType.Graphic;
   readonly _type?: Roll20.ObjectType.Graphic;
   readonly subtype?: Roll20.GraphicTypes.Card;

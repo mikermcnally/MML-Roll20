@@ -1,7 +1,7 @@
 import * as Roll20 from "./roll20";
-import { Integer } from "../utilities/aliases"
+import { Integer } from "../utilities/utilities"
 
-export interface IToken extends Roll20.IObject{
+export interface IR20Token extends Roll20.IR20Object{
   readonly type?: Roll20.ObjectType.Graphic;
   readonly _type?: Roll20.ObjectType.Graphic;
   readonly subtype?: Roll20.GraphicTypes.Token;

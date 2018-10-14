@@ -1,6 +1,6 @@
 import * as Roll20 from "./roll20";
 
-export interface IHand extends Roll20.IObject {
+export interface IR20Hand extends Roll20.IR20Object {
   readonly type?: Roll20.ObjectType.Hand;
   readonly _type?: Roll20.ObjectType.Hand;
   get(property: HandProperties): string;

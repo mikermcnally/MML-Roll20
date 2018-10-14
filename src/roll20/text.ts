@@ -1,8 +1,8 @@
-import * as Roll20 from "./roll20";
+import { IR20Object, ObjectType } from "./roll20";
 
-export interface IText extends Roll20.IObject {
-  readonly type?: Roll20.ObjectType.Text;
-  readonly _type?: Roll20.ObjectType.Text;
+export interface IText extends IR20Object {
+  readonly type?: ObjectType.Text;
+  readonly _type?: ObjectType.Text;
   get(property: TextProperties): string;
   set(property: TextProperties, value: any): void;
   setWithWorker(properties: {[property in TextProperties]}): void;

@@ -1,9 +1,11 @@
 import * as Rx from "rxjs";
 import { filter, map, shareReplay, switchMapTo, startWith } from "rxjs/operators";
 import { getSelectedIds } from "../utilities/utilities";
-import { ChatMessage, ChangePlayerOnline } from "../utilities/events";
+import { ChatMessage, ChangePlayerOnline, AddCharacter } from "../utilities/events";
 import { IPlayer } from "../roll20/player";
-import { Player } from "./player/player";
+import { Player } from "./user/player";
+import { Character } from "./character/character";
+
 
 state.MML = state.MML || {};
 
@@ -17,39 +19,28 @@ export const ButtonPressed = ChatMessage.pipe(
   })
 );
 
-export const Players = ChangePlayerOnline.pipe(
-  // switchMapTo(findObjs({ _type: 'player', online: true })),
+export const Users = ChangePlayerOnline.pipe(
   startWith(...findObjs({ _type: 'player', online: true }) as Array<IPlayer>),
-  map(player => new Player(player)),
   shareReplay()
 );
 
-MML.gm = MML.players.pipe(filter(player => playerIsGM(player.get('id')), map(player => new MML.gm(player))));
+export const Players = Users.pipe(filter(user => !playerIsGM(user.id)), map(user => new Player(user)));
+export const CurrentGM = Users.pipe(filter(user => playerIsGM(user.id)), map(user => new GM(user)));
 
-MML.player_input = MML.players.pipe(
-  pluck('input'),
-  mergeAll()
-);
-
-MML.game_state = Rx.merge(
-  MML.player_input,
-  MML.gm.input
-);
-
-MML.tokens = Rx.merge(
+export const Tokens = Rx.merge(
     Rx.from(findObjs({ _type: 'graphic', archived: false })),
-    Rx.add_graphic
+    
   )
   .pipe(
     shareReplay()
   );
 
-MML.characters = Rx.merge(
+export const Characters = Rx.merge(
     Rx.from(findObjs({ _type: 'character', archived: false })),
-    Rx.add_character
+    AddCharacter
   )
   .pipe(
-    map(character => new MML.Character(MML.game_state, character)),
+    map(character => new Character(character, )),
     shareReplay()
   );
 

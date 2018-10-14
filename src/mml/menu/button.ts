@@ -1,4 +1,4 @@
-import { Route } from "./route";
+import { Route } from "./routes";
 
 export default class Button {
   readonly text: string;

@@ -1,6 +1,6 @@
 import * as Roll20 from "./roll20";
 
-export interface IObject {
+export interface IR20Object {
   readonly type?: Roll20.ObjectType;
   readonly id?: Roll20.Id;
   readonly get: (string) => any;

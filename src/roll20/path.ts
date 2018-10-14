@@ -1,8 +1,8 @@
 import * as Roll20 from "./roll20";
-import { Integer, Float } from "../utilities/aliases";
-import Point from "../utilities/coordinate";
+import { Integer, Float } from "../utilities/utilities";
+import { Point } from "../utilities/utilities";
 
-export interface IPath extends Roll20.IObject {
+export interface IR20Path extends Roll20.IR20Object {
   readonly type?: Roll20.ObjectType.Path;
   readonly _type?: Roll20.ObjectType.Path;
   readonly _pageid?: Roll20.Id;

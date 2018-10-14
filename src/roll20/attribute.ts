@@ -1,6 +1,6 @@
 import * as Roll20 from "./roll20";
 
-export interface IAttribute extends Roll20.IObject {
+export interface IR20Attribute extends Roll20.IR20Object {
   readonly type: Roll20.ObjectType.Attribute;
   readonly _type: Roll20.ObjectType.Attribute;
   readonly _characterid: Roll20.Id;

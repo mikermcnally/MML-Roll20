@@ -1,18 +1,20 @@
 import * as Rx from "rxjs";
-import { filter,  } from "rxjs/operators";
+import { filter, map,  } from "rxjs/operators";
 import * as Roll20 from "../../roll20/roll20";
 import { GameEvent, Round } from "../../mml/mml";
 import { createAbility, createAttribute, ChangeAttributeCurrent, Integer, Point } from "../../utilities/utilities";
 import { AttributeProperties } from "../../roll20/roll20";
+import { listenForRoute, Route } from "../menu/routes";
+import { ButtonPressed } from "../main";
 
 export type CharacterName = string & { __type: CharacterName };
 
 export class Character {
-  readonly id: Roll20.ICharacter['id'];
+  readonly id: Roll20.IR20Character['id'];
   readonly name: Rx.Observable<CharacterName>;
-  readonly token: Rx.Observable<Roll20.IToken>;
+  readonly token: Rx.Observable<Roll20.IR20Token>;
   readonly position: Rx.Observable<Point>;
-  constructor(roll20_character: Roll20.ICharacter, global_game_state: Rx.Observable<GameEvent>, current_round: Rx.Observable<Round>) {
+  constructor(roll20_character: Roll20.IR20Character, global_game_state: Rx.Observable<GameEvent>, current_round: Rx.Observable<Round>) {
     this.id = roll20_character.id;
 
     createAttribute('race', 'Human', '', this.id);
@@ -37,19 +39,16 @@ export class Character {
 
     const game_state = global_game_state.pipe(filter(effect => effect.object_id === this.id));
 
-    const router = MML.button_pressed.pipe(
+    const router = ButtonPressed.pipe(
       filter(({ content }) => content.startsWith('/character/' + this.id)),
-      map(function (message) {
-        message.content = message.content.replace('/character/' + this.id, '');
-        return message;
-      })
+      map(message => message.content.replace('/character/' + this.id, '') as Route)
     );
 
-    const idle = router.filter('/');
-    const action_menu = idle.pipe(MML.listenForRoute(router, '/action'));
-    const stance_menu = action_menu.pipe(MML.listenForRoute(router, '/action/stance'));
-    const called_shot_menu = action_menu.pipe(MML.listenForRoute(router, '/action/called_shot'));
-    const meta_magic_menu = action_menu.pipe(MML.listenForRoute(router, '/action/meta_magic'));
+    const idle = router.pipe(filter(route => route === '/'));
+    const action_menu = idle.pipe(listenForRoute(router, '/action' as Route));
+    const stance_menu = action_menu.pipe(listenForRoute(router, '/action/stance' as Route));
+    const called_shot_menu = action_menu.pipe(listenForRoute(router, '/action/called_shot' as Route));
+    const meta_magic_menu = action_menu.pipe(listenForRoute(router, '/action/meta_magic' as Route));
 
     // Rx.add_attribute
     // Rx.change_attribute_current

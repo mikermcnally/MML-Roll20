@@ -1,4 +1,4 @@
-import { CampaignProperties, IPath, IToken, Layers, ObjectType, TokenProperties } from "../roll20/roll20";
+import { CampaignProperties, IR20Path, IR20Token, Layers, ObjectType, TokenProperties } from "../roll20/roll20";
 import { Integer } from "./integer";
 import { Float } from "./float";
 
@@ -27,7 +27,7 @@ export class Distance {
   }
 }
 
-export function getDistanceBetweenTokens(a: IToken, b: IToken) {
+export function getDistanceBetweenTokens(a: IR20Token, b: IR20Token) {
   const top_a = parseInt(a.get(TokenProperties.Top)) as Integer.Signed;
   const left_a = parseInt(a.get(TokenProperties.Left)) as Integer.Signed;
   const point_a = new Point(top_a, left_a);
@@ -57,7 +57,7 @@ export function drawCirclePath(left: Point['top'], top: Point['left'], radiusInF
     height: radius * 2 as Integer.Unsigned,
     top: top,
     left: left,
-  }) as IPath;
+  }) as IR20Path;
   toFront(path);
   return path;
 }

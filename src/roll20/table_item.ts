@@ -1,6 +1,6 @@
 import * as Roll20 from "./roll20";
 
-export interface ITableItem extends Roll20.IObject {
+export interface ITableItem extends Roll20.IR20Object {
   readonly type?: Roll20.ObjectType.TableItem;
   readonly _type?: Roll20.ObjectType.TableItem;
   get(property: TableItemProperties): string;

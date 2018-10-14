@@ -1,4 +1,4 @@
-export enum Event {
+export enum R20Event {
   Add = 'add',
   AddAbility = 'add:ability',
   AddAttribute = 'add:attribute',
@@ -10,6 +10,7 @@ export enum Event {
   AddRollabletable = 'add:rollabletable',
   AddTableitem = 'add:tableitem',
   AddText = 'add:text',
+  AddToken = 'add:token',
   Destroy = 'destroy',
   DestroyAbility = 'add:ability',
   DestroyAttribute = 'add:attribute',

@@ -1,57 +1,61 @@
-import { Event, ICharacter, IChatMessage, IPlayer, IToken, IAttribute } from "../roll20/roll20";
+import { R20Event, IR20Character, IR20ChatMessage, IPlayer, IR20Token, IR20Attribute } from "../roll20/roll20";
 import * as Rx from "rxjs";
 import { share, switchMapTo, take } from "rxjs/operators";
 
-function fromR20Event(event_name: Event): Rx.Observable<any> {
+function fromR20Event(event_name: R20Event): Rx.Observable<any> {
   return Rx.Observable.create(observer => on(event_name, event => observer.next(event))).pipe(share());
 };
 
-export const Roll20Ready = fromR20Event(Event.Ready).pipe(take(1));
+export const Roll20Ready = fromR20Event(R20Event.Ready).pipe(take(1));
 
-export const ChatMessage: Rx.Observable<IChatMessage> = Roll20Ready.pipe(
-  switchMapTo(fromR20Event(Event.ChatMessage))
+export const ChatMessage: Rx.Observable<IR20ChatMessage> = Roll20Ready.pipe(
+  switchMapTo(fromR20Event(R20Event.ChatMessage))
 );
 
-export const ChangeToken: Rx.Observable<IToken> = Roll20Ready.pipe(
-  switchMapTo(fromR20Event(Event.ChangeToken))
+export const AddToken: Rx.Observable<IR20Token> = Roll20Ready.pipe(
+  switchMapTo(fromR20Event(R20Event.AddToken))
 );
 
-export const AddCharacter: Rx.Observable<ICharacter> = Roll20Ready.pipe(
-  switchMapTo(fromR20Event(Event.AddCharacter))
+export const ChangeToken: Rx.Observable<IR20Token> = Roll20Ready.pipe(
+  switchMapTo(fromR20Event(R20Event.ChangeToken))
 );
 
-export const ChangeCharacter: Rx.Observable<ICharacter> = Roll20Ready.pipe(
-  switchMapTo(fromR20Event(Event.ChangeCharacter))
+export const AddCharacter: Rx.Observable<IR20Character> = Roll20Ready.pipe(
+  switchMapTo(fromR20Event(R20Event.AddCharacter))
 );
 
-export const ChangeCharacterName: Rx.Observable<ICharacter> = Roll20Ready.pipe(
-  switchMapTo(fromR20Event(Event.ChangeCharacterName))
+export const ChangeCharacter: Rx.Observable<IR20Character> = Roll20Ready.pipe(
+  switchMapTo(fromR20Event(R20Event.ChangeCharacter))
 );
 
-export const ChangeCharacterControlledby: Rx.Observable<ICharacter> = Roll20Ready.pipe(
-  switchMapTo(fromR20Event(Event.ChangeCharacterControlledBy))
+export const ChangeCharacterName: Rx.Observable<IR20Character> = Roll20Ready.pipe(
+  switchMapTo(fromR20Event(R20Event.ChangeCharacterName))
 );
 
-export const AddAttribute: Rx.Observable<IAttribute> = Roll20Ready.pipe(
-  switchMapTo(fromR20Event(Event.AddAttribute))
+export const ChangeCharacterControlledby: Rx.Observable<IR20Character> = Roll20Ready.pipe(
+  switchMapTo(fromR20Event(R20Event.ChangeCharacterControlledBy))
 );
 
-export const ChangeAttribute: Rx.Observable<IAttribute> = Roll20Ready.pipe(
-  switchMapTo(fromR20Event(Event.ChangeAttribute))
+export const AddAttribute: Rx.Observable<IR20Attribute> = Roll20Ready.pipe(
+  switchMapTo(fromR20Event(R20Event.AddAttribute))
 );
 
-export const ChangeAttributeCurrent: Rx.Observable<IAttribute> = Roll20Ready.pipe(
-  switchMapTo(fromR20Event(Event.ChangeAttributeCurrent))
+export const ChangeAttribute: Rx.Observable<IR20Attribute> = Roll20Ready.pipe(
+  switchMapTo(fromR20Event(R20Event.ChangeAttribute))
 );
 
-export const ChangeAttributeMax: Rx.Observable<IAttribute> = Roll20Ready.pipe(
-  switchMapTo(fromR20Event(Event.ChangeAttributeMax))
+export const ChangeAttributeCurrent: Rx.Observable<IR20Attribute> = Roll20Ready.pipe(
+  switchMapTo(fromR20Event(R20Event.ChangeAttributeCurrent))
+);
+
+export const ChangeAttributeMax: Rx.Observable<IR20Attribute> = Roll20Ready.pipe(
+  switchMapTo(fromR20Event(R20Event.ChangeAttributeMax))
 );
 
 export const ChangePlayerOnline: Rx.Observable<IPlayer> = Roll20Ready.pipe(
-  switchMapTo(fromR20Event(Event.ChangePlayerIsOnline))
+  switchMapTo(fromR20Event(R20Event.ChangePlayerIsOnline))
 );
 
 export const ChangePlayerDisplayname: Rx.Observable<IPlayer> = Roll20Ready.pipe(
-  switchMapTo(fromR20Event(Event.ChangePlayerDisplayName))
+  switchMapTo(fromR20Event(R20Event.ChangePlayerDisplayName))
 );
