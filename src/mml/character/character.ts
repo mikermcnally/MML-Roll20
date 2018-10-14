@@ -1,54 +1,58 @@
 import * as Rx from "rxjs";
-import { filter, map,  } from "rxjs/operators";
+import { filter, map, first, shareReplay, startWith, switchMap, } from "rxjs/operators";
 import * as Roll20 from "../../roll20/roll20";
-import { GameEvent, Round } from "../../mml/mml";
-import { createAbility, createAttribute, ChangeAttributeCurrent, Integer, Point } from "../../utilities/utilities";
-import { AttributeProperties } from "../../roll20/roll20";
-import { listenForRoute, Route } from "../menu/routes";
+import { IGameEvent, Round } from "../../mml/mml";
+import { createAbility, createAttribute, ChangeAttributeCurrent, Integer, Point, ChangeCharacterName } from "../../utilities/utilities";
+import {
+  AttributeProperties,
+  Id,
+  IR20Campaign,
+  IR20Character,
+  IR20ChatMessage,
+  IR20Object,
+  IR20Path,
+  LineEffectType,
+  ObjectType,
+  PointEffectType,
+  IR20CustomFX,
+  IR20Token,
+  TokenProperties,
+  CharacterProperties,
+  IR20Attribute
+} from "../../roll20/roll20";
+import { listenForRoute, Routes } from "../routes";
 import { ButtonPressed } from "../main";
 
 export type CharacterName = string & { __type: CharacterName };
 
 export class Character {
-  readonly id: Roll20.IR20Character['id'];
+  readonly id: IR20Character['id'];
   readonly name: Rx.Observable<CharacterName>;
-  readonly token: Rx.Observable<Roll20.IR20Token>;
+  readonly token: Rx.Observable<IR20Token>;
   readonly position: Rx.Observable<Point>;
-  constructor(roll20_character: Roll20.IR20Character, global_game_state: Rx.Observable<GameEvent>, current_round: Rx.Observable<Round>) {
+  private attribute_changed: Rx.Observable<IR20Attribute>;
+  private game_events: Rx.Observable<IGameEvent>;
+  private 
+
+  constructor(roll20_character: IR20Character, game_events: Rx.Observable<IGameEvent>, token_represents: Rx.Observable<IR20Token>) {
     this.id = roll20_character.id;
 
-    createAttribute('race', 'Human', '', this.id);
-    createAttribute('gender', 'Male', '', this.id);
-    createAttribute('stature_roll', '6', '', this.id);
-    createAttribute('strength_roll', '6', '', this.id);
-    createAttribute('coordination_roll', '6', '', this.id);
-    createAttribute('health_roll', '6', '', this.id);
-    createAttribute('beauty_roll', '6', '', this.id);
-    createAttribute('intellect_roll', '6', '', this.id);
-    createAttribute('reason_roll', '6', '', this.id);
-    createAttribute('creativity_roll', '6', '', this.id);
-    createAttribute('presence_roll', '6', '', this.id);
-    createAttribute('fom_init_bonus', '6', '', this.id);
-    createAttribute('right_hand', JSON.stringify({ _id: 'empty_hand' }), '', this.id);
-    createAttribute('left_hand', JSON.stringify({ _id: 'empty_hand' }), '', this.id);
-    createAbility('Menu', '!MML /character/' + this.id, this.id, true);
-
-    const attribute_changed = ChangeAttributeCurrent.pipe(
+    this.attribute_changed = ChangeAttributeCurrent.pipe(
       filter(attribute => attribute.get(AttributeProperties.CharacterId) === this.id)
     );
 
-    const game_state = global_game_state.pipe(filter(effect => effect.object_id === this.id));
+    this.game_events = game_events.pipe(filter(effect => effect.object_id === this.id));
 
     const router = ButtonPressed.pipe(
-      filter(({ content }) => content.startsWith('/character/' + this.id)),
-      map(message => message.content.replace('/character/' + this.id, '') as Route)
+      filter(({ content }) => content.startsWith(this.id)),
+      map(message => message.content.replace(this.id, '') as Routes)
     );
 
-    const idle = router.pipe(filter(route => route === '/'));
-    const action_menu = idle.pipe(listenForRoute(router, '/action' as Route));
-    const stance_menu = action_menu.pipe(listenForRoute(router, '/action/stance' as Route));
-    const called_shot_menu = action_menu.pipe(listenForRoute(router, '/action/called_shot' as Route));
-    const meta_magic_menu = action_menu.pipe(listenForRoute(router, '/action/meta_magic' as Route));
+    const idle = router.pipe(filter(route => route === Routes.CharacterIndex));
+    const action_menu = idle.pipe(listenForRoute(router, Routes.CharacterAction));
+    const stance_menu = action_menu.pipe(listenForRoute(router, Routes.CharacterActionStance));
+    const called_shot_menu = action_menu.pipe(listenForRoute(router, Routes.CharacterActionCalledShot));
+    const meta_magic_menu = action_menu.pipe(listenForRoute(router, Routes.CharacterActionMetaMagic));
 
     // Rx.add_attribute
     // Rx.change_attribute_current
@@ -67,19 +71,39 @@ export class Character {
     // const knockdown = isNaN(parseFloat(MML.getCurrentAttribute(character.id, 'knockdown'))) ? character.knockdown_max : MML.getCurrentAttributeAsFloat(character.id, 'knockdown');
 
     // #region Input Attributes
-    const name = Rx.change_character_name.pipe(
-      filter(changed_character => changed_character.get('id') === id),
-      map(changed_character => changed_character.get('name')),
-      startWith(r20_character.get('name'))
+    this.name = ChangeCharacterName.pipe(
+      filter(changed_character => changed_character.id === this.id),
+      map(changed_character => changed_character.get(CharacterProperties.Name) as CharacterName),
+      startWith(roll20_character.get(CharacterProperties.Name) as CharacterName)
     );
 
-    const token = Rx.token_represents.pipe(filter(token => token.get('represents') === id), switchMap(token => token));
+    this.token = token_represents.pipe(
+      filter(token => token.get(TokenProperties.Represents) === this.id),
+      shareReplay(1)
+    );
+
+    this.position = 
 
     const action = game_state.pipe(
       filter(({ attribute }) => attribute === 'action'),
       switchMap(({ value }) => value)
     );
 
+    createAttribute('race', 'Human', '', this.id);
+    createAttribute('gender', 'Male', '', this.id);
+    createAttribute('stature_roll', '6', '', this.id);
+    createAttribute('strength_roll', '6', '', this.id);
+    createAttribute('coordination_roll', '6', '', this.id);
+    createAttribute('health_roll', '6', '', this.id);
+    createAttribute('beauty_roll', '6', '', this.id);
+    createAttribute('intellect_roll', '6', '', this.id);
+    createAttribute('reason_roll', '6', '', this.id);
+    createAttribute('creativity_roll', '6', '', this.id);
+    createAttribute('presence_roll', '6', '', this.id);
+    createAttribute('fom_init_bonus', '6', '', this.id);
+    createAttribute('right_hand', JSON.stringify({ _id: 'empty_hand' }), '', this.id);
+    createAttribute('left_hand', JSON.stringify({ _id: 'empty_hand' }), '', this.id);
+    createAbility('Menu', '!MML /character/' + this.id, this.id, true);
     const stature_roll = attribute_changed.pipe(MML.rollAttributeChanged('stature_roll'));
     const strength_roll = attribute_changed.pipe(MML.rollAttributeChanged('strength_roll'));
     const coordination_roll = attribute_changed.pipe(MML.rollAttributeChanged('coordination_roll'));

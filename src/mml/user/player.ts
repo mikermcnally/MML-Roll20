@@ -1,9 +1,9 @@
 import * as Rx from "rxjs";
 import { filter, first, map, pluck, startWith, switchMap, withLatestFrom, expand } from "rxjs/operators";
-import { Id, IPlayer, IR20ChatMessage, ObjectType, Layers } from "../../roll20/roll20";
+import { Id, IR20Player, IR20ChatMessage, ObjectType, Layers } from "../../roll20/roll20";
 import { ChangePlayerDisplayname } from "../../utilities/events";
 import { ButtonPressed, UserName } from "../mml";
-import { Route } from "../menu/routes";
+import { Routes } from "../menu/routes";
 import Menu from "../menu/menu";
 import { IUser } from "./user";
 import { Characters } from "../main";
@@ -12,10 +12,10 @@ export class Player implements IUser {
   readonly id: Id;
   readonly name: Rx.Observable<UserName>;
   readonly menu: Rx.Observable<Menu>;
-  readonly route: Rx.Observable<Route>;
+  readonly Routes: Rx.Observable<Routes>;
   readonly button_pressed: Rx.Observable<IR20ChatMessage>;
 
-  constructor(roll20_player_object: IPlayer) {
+  constructor(roll20_player_object: IR20Player) {
     this.id = roll20_player_object.id;
     this.name = ChangePlayerDisplayname.pipe(
       pluck('displayname'),
@@ -87,7 +87,7 @@ export class Player implements IUser {
 
 
 
-MML.prepareAttackAction = async function prepareAttackAction(player, character, action) {
+prepareAttackAction(player, character, action) {
   action.ts = Date.now();
   action.name = 'Attack';
   const attackType = await MML.chooseAttackType(player, character, action);

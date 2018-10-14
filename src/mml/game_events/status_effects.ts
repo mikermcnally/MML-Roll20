@@ -1,18 +1,36 @@
-class StatusEffect {
-  constructor(effect, end = Rx.never()) {
-    this = effect.pipe(
-      takeUntil(end)
-    );
-    this.id = id;
-    this.menu; // For manual removal
-  }
-  /**
-   * Emits {
-   *    
-   * }
-   */
+import * as Rx from "rxjs";
+import {  } from "rxjs/operators";
+import { IGameEvent } from "./game_events";
+
+export interface IStatusEffect extends IGameEvent {
+  readonly effect: Rx.Observable<any>;
+  [property: string]: any;
+  updateCharacterSheet(): void;
 }
 
+// class StatusEffect {
+//   constructor(effect, end = Rx.never()) {
+//     this = effect.pipe(
+//       takeUntil(end)
+//     );
+//     this.id = id;
+//     this.menu; // For manual removal
+//   }
+//   /**
+//    * Emits {
+//    *    
+//    * }
+//    */
+// }
+
+export class MajorWound implements IStatusEffect {
+  readonly effect: Rx.Observable<any>;
+  readonly body_part: IBodyPart;
+
+  constructor(parameters) {
+    
+  }
+}
 MML.statusEffects = {
   'Major Wound':  function (effect, index) {
     if (!state.MML.gm.inCombat) {

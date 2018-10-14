@@ -1,8 +1,8 @@
-import { Route } from "./routes";
+import { Routes } from "./routes";
 
 export default class Button {
   readonly text: string;
-  readonly route: Route;
+  readonly route: Routes;
   private no_spaces: string;
   constructor(text, route) {
     this.text = text;

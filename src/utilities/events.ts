@@ -1,4 +1,4 @@
-import { R20Event, IR20Character, IR20ChatMessage, IPlayer, IR20Token, IR20Attribute } from "../roll20/roll20";
+import { R20Event, IR20Character, IR20ChatMessage, IR20Player, IR20Token, IR20Attribute } from "../roll20/roll20";
 import * as Rx from "rxjs";
 import { share, switchMapTo, take } from "rxjs/operators";
 
@@ -52,10 +52,10 @@ export const ChangeAttributeMax: Rx.Observable<IR20Attribute> = Roll20Ready.pipe
   switchMapTo(fromR20Event(R20Event.ChangeAttributeMax))
 );
 
-export const ChangePlayerOnline: Rx.Observable<IPlayer> = Roll20Ready.pipe(
+export const ChangePlayerOnline: Rx.Observable<IR20Player> = Roll20Ready.pipe(
   switchMapTo(fromR20Event(R20Event.ChangePlayerIsOnline))
 );
 
-export const ChangePlayerDisplayname: Rx.Observable<IPlayer> = Roll20Ready.pipe(
+export const ChangePlayerDisplayname: Rx.Observable<IR20Player> = Roll20Ready.pipe(
   switchMapTo(fromR20Event(R20Event.ChangePlayerDisplayName))
 );

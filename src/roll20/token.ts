@@ -67,6 +67,7 @@ export interface IR20Token extends Roll20.IR20Object{
 }
 
 export enum TokenProperties {
+  PageID = '_pageid',
   Imgsrc = 'imgsrc',
   Bar1Link = 'bar1_link',
   Bar2Link = 'bar2_link',

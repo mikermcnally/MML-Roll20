@@ -1,19 +1,19 @@
-import { 
+import {
   AttributeProperties,
-  Id, 
+  Id,
   IR20Campaign,
   IR20Card,
   IR20ChatMessage,
   IR20Object,
   IR20Path,
   LineEffectType,
-  ObjectType, 
-  PointEffectType, 
-  R20Event, 
-  IR20CustomFX, 
-  IR20Token } from "./roll20/roll20";
-import { Point, 
-  Integer } from "./utilities/utilities";
+  ObjectType,
+  PointEffectType,
+  R20Event,
+  IR20CustomFX,
+  IR20Token
+} from "./roll20/roll20";
+import { Point, Integer } from "./utilities/utilities";
 import * as _ from "underscore";
 
 declare global {

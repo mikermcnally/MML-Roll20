@@ -1,10 +1,11 @@
 import { Id } from "../../roll20/object";
 import * as Rx from "rxjs";
 import Menu from "../menu/menu";
-import { Route } from "../menu/routes";
+import { Routes } from "../routes";
 import { IR20ChatMessage } from "../../roll20/chat";
-import { IPlayer } from "../../roll20/player";
+import { IR20Player } from "../../roll20/player";
 import { Character } from "../character/character";
+import { IGameEvent } from "../mml";
 
 export type UserName = string & { __type: UserName };
 
@@ -12,10 +13,11 @@ export interface IUser {
   readonly id: Id;
   readonly name: Rx.Observable<UserName>;
   readonly menu: Rx.Observable<Menu>;
-  readonly route: Rx.Observable<Route>;
+  readonly route: Rx.Observable<Routes>;
   readonly button_pressed: Rx.Observable<IR20ChatMessage>;
+  [property: string]: any;
 
-  constructor(roll20_player_object: IPlayer, button_pressed: Rx.Observable<IR20ChatMessage>)
+  constructor(roll20_player_object: IR20Player, button_pressed: Rx.Observable<IR20ChatMessage>, game_events: Rx.Observable<IGameEvent>)
 
   displayRoll(message: string): void;
   displayTargetSelection(): void;
@@ -25,9 +27,6 @@ export interface IUser {
   displaySpellMarker(player, spellMarker): void;
   chooseSpellTargets(player, character, target): Rx.Observable<Array<Character>>;
 }
-
-
-
 
 export * from "./player";
 export * from "./gm";
