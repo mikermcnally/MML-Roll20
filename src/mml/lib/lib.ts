@@ -8,40 +8,12 @@ import { Float } from "../../utilities/float";
 
 
 
-export const RecoveryRates: { [health: number]: { hp: Float.Positive, ep: Float.Positive } } = {
-	0: { hp: 0.33, ep:  1 },
-	1: { hp: 0.33, ep:  1 },
-	2: { hp: 0.33, ep:  1 },
-	3: { hp: 0.33, ep:  1 },
-	4: { hp: 0.33, ep:  1 },
-	5: { hp: 0.33, ep:  1 },
-	6: { hp: 0.33, ep:  1 },
-	7: { hp: 0.33, ep:  1 },
-	8: { hp: 0.5, ep:  2 },
-	9: { hp: 0.5, ep:  2 },
-	10: { hp: 1, ep:  3 },
-	11: { hp: 1, ep:  3 },
-	12: { hp: 1, ep:  3 },
-	13: { hp: 1.5, ep:  4 },
-	14: { hp: 1.5, ep:  4 },
-	15: { hp: 2, ep:  5 },
-	16: { hp: 2, ep:  5 },
-	17: { hp: 3, ep:  6 },
-	18: { hp: 3, ep:  6 },
-	19: { hp: 4, ep:  8 },
-	20: { hp: 4, ep:  8 },
-	21: { hp: 5, ep:  10 },
-	22: { hp: 5, ep:  10 },
-	23: { hp: 5, ep:  10 },
-	24: { hp: 5, ep:  10 },
-	25: { hp: 5, ep:  10 },	
-};
+
 
 MML.attackTempoTable = [-25, -22, -18, -16, -14, -12, -11, -10, -9, -9];
 
 //Spell Components
-MML.items["Dart"] = {name: "Dart", type: "spellComponent", spell: "Dart", weight: 0};
-MML.items["Drop of Mercury"] = {name: "Drop of Mercury", type: "spellComponent", spell: "Quick Action", weight: 0};
+
 
 //Miscellaneous Items
 

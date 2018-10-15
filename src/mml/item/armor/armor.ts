@@ -12,6 +12,10 @@ export class Armor implements IItem {
   modifiers?: Array<IItemModifiers>;
   constructor(style: IArmorStyle, material: IArmorMaterial, modifiers?: Array<IItemModifiers>) {
     this.id = generateRowID();
-    this.name
+    this.name = 
+  }
+
+  updateCharacterSheet() {
+
   }
 }
