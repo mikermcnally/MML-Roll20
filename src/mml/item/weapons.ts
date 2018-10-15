@@ -1,14 +1,6 @@
-class Item {
-  constructor(name, weight = 0, type = 'misc', description = '') {
-    this.name = name;
-    this.weight = weight;
-    this.type = type;
-    this.description = description;
-    this.id = generateRowID();
-  }
-}
+import { IItem } from "./item";
 
-class Weapon extends Item {
+export class Weapon implements IItem {
   constructor(name, weight, mods, description, grips) {
     super(name, weight, 'weapon', mods, description);
     this.grips = grips;

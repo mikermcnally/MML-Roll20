@@ -1,12 +1,13 @@
 import * as Rx from "rxjs";
-import { filter, first, map, pluck, startWith, switchMap, withLatestFrom, expand } from "rxjs/operators";
-import { Id, IR20Player, IR20ChatMessage, ObjectType, Layers } from "../../roll20/roll20";
+import { filter, first, map, pluck, startWith, switchMap, withLatestFrom, expand, zipAll } from "rxjs/operators";
+import { Id, IR20Player, IR20ChatMessage, ObjectType, Layers, IR20Token } from "../../roll20/roll20";
 import { ChangePlayerDisplayname } from "../../utilities/events";
 import { ButtonPressed, UserName } from "../mml";
-import { Routes } from "../menu/routes";
+import { Routes } from "../routes";
 import Menu from "../menu/menu";
 import { IUser } from "./user";
 import { Characters } from "../main";
+import { Distance } from "../../utilities/geometry";
 
 export class Player implements IUser {
   readonly id: Id;
@@ -41,8 +42,9 @@ export class Player implements IUser {
       filter((content: string) => content.includes('selectTarget')),
       map(content => content.replace('selectTarget', '')),
       switchMap(function (selected_name) {
-        const character_names = Characters.pipe(map(character => character.name));
-        return Rx.zip(Characters, character_names).pipe(
+        const character_names = Characters.pipe(map(character => character.name), zipAll());
+        return Characters.pipe(
+          withLatestFrom(character_names)
           first(([character, name]) => name == selected_name),
           map(([character]) => character)
         );
@@ -56,22 +58,22 @@ export class Player implements IUser {
     );
   }
 
-  getRadiusSpellTargets(player, radius) {
-    var token = MML.getCharacterToken(this.id);
-    var spellMarker = createObj(ObjectType.Graphic, {
+  getRadiusSpellTargets(player, radius: Distance) {
+    const token = MML.getCharacterToken(this.id);
+    const spell_marker = createObj(ObjectType.Graphic, {
       name: 'spellMarkerCircle',
       _pageid: token.get('_pageid'),
       layer: Layers.Objects,
       left: token.get('left'),
       top: token.get('top'),
-      width: MML.feetToPixels(radius * 2),
-      height: MML.feetToPixels(radius * 2),
+      width: radius.pixels * 2,
+      height: radius.pixels * 2,
       imgsrc: 'https://s3.amazonaws.com/files.d20.io/images/27869253/ixTcySIkxTEEsbospj4PpA/thumb.png?1485314508',
-      controlledby: MML.getPlayerFromName(this.player.name).get('id')
-    });
-    toBack(spellMarker);
+      controlledby: this.id
+    }) as IR20Token;
+    toBack(spell_marker);
 
-    displaySpellMarker(player, spellMarker);
+    displaySpellMarker(player, spell_marker);
   }
 
   chooseSpellTargets = function chooseSpellTargets(player, character, target) {
