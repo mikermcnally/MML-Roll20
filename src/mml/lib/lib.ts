@@ -1,244 +1,41 @@
+import { Float } from "../../utilities/float";
 
 
 
-MML.skillMods = {};
-MML.skillMods["Dwarf"] = {};
-MML.skillMods["Dwarf"]["Armorer"] = 10;
-MML.skillMods["Dwarf"]["Earth Elementalism"] = 3;
-MML.skillMods["Dwarf"]["Air Elementalism"] = 3;
-MML.skillMods["Dwarf"]["Fire Elementalism"] = 3;
-MML.skillMods["Dwarf"]["Water Elementalism"] = 3;
-MML.skillMods["Dwarf"]["Life Elementalism"] = 3;
-MML.skillMods["Dwarf"]["Engineering"] = 5;
-MML.skillMods["Dwarf"]["Forced March"] = 10;
-MML.skillMods["Dwarf"]["Gem Cutting"] = 10;
-MML.skillMods["Dwarf"]["Geology"] = 5;
-MML.skillMods["Dwarf"]["Jeweler"] = 10;
-MML.skillMods["Dwarf"]["Mathematics"] = 5;
-MML.skillMods["Dwarf"]["Metallurgy"] = 10;
-MML.skillMods["Dwarf"]["Musical Instrument"] = 5;
-MML.skillMods["Dwarf"]["Symbol Magic"] = 3;
-MML.skillMods["Dwarf"]["Weapon Smith"] = 10;
-MML.skillMods["Gnome"] = {};
-MML.skillMods["Gnome"]["Animal Husbandry"] = 5;
-MML.skillMods["Gnome"]["Armorer"] = 5;
-MML.skillMods["Gnome"]["Blacksmith"] = 10;
-MML.skillMods["Gnome"]["Diplomacy"] = 5;
-MML.skillMods["Gnome"]["Engineering"] = 10;
-MML.skillMods["Gnome"]["Gem Cutting"] = 5;
-MML.skillMods["Gnome"]["Jeweler"] = 10;
-MML.skillMods["Gnome"]["Mathematics"] = 3;
-MML.skillMods["Gnome"]["Negotiation"] = 10;
-MML.skillMods["Gnome"]["Teamster"] = 5;
-MML.skillMods["Gray Elf"] = {};
-MML.skillMods["Gray Elf"]["Animal Husbandry"] = 5;
-MML.skillMods["Gray Elf"]["Bowyer"] = 5;
-MML.skillMods["Gray Elf"]["Earth Elementalism"] = 5;
-MML.skillMods["Gray Elf"]["Air Elementalism"] = 5;
-MML.skillMods["Gray Elf"]["Fire Elementalism"] = 5;
-MML.skillMods["Gray Elf"]["Water Elementalism"] = 5;
-MML.skillMods["Gray Elf"]["Life Elementalism"] = 5;
-MML.skillMods["Gray Elf"]["Etiquette"] = 5;
-MML.skillMods["Gray Elf"]["Herbalism"] = 3;
-MML.skillMods["Gray Elf"]["History"] = 10;
-MML.skillMods["Gray Elf"]["Literacy"] = 10;
-MML.skillMods["Gray Elf"]["Lore"] = 10;
-MML.skillMods["Gray Elf"]["Musical Instrument"] = 5;
-MML.skillMods["Gray Elf"]["Navigation"] = 10;
-MML.skillMods["Gray Elf"]["Physician"] = 3;
-MML.skillMods["Gray Elf"]["Seamanship"] = 10;
-MML.skillMods["Gray Elf"]["Singing"] = 5;
-MML.skillMods["Gray Elf"]["Symbol Magic"] = 5;
-MML.skillMods["Gray Elf"]["Sword Smith"] = 3;
-MML.skillMods["Gray Elf"]["Wizardry"] = 5;
-MML.skillMods["Hobbit"] = {};
-MML.skillMods["Hobbit"]["Animal Husbandry"] = 3;
-MML.skillMods["Hobbit"]["Botany"] = 10;
-MML.skillMods["Hobbit"]["Brewing"] = 5;
-MML.skillMods["Hobbit"]["Bureaucracy"] = 3;
-MML.skillMods["Hobbit"]["Calligraphy"] = 5;
-MML.skillMods["Hobbit"]["Cooking"] = 5;
-MML.skillMods["Hobbit"]["Dancing"] = 10;
-MML.skillMods["Hobbit"]["Gambling"] = 10;
-MML.skillMods["Hobbit"]["Leatherworking"] = 3;
-MML.skillMods["Hobbit"]["Literacy"] = 10;
-MML.skillMods["Hobbit"]["Negotiation"] = 10;
-MML.skillMods["Hobbit"]["Oration"] = 3;
-MML.skillMods["Hobbit"]["Singing"] = 5;
-MML.skillMods["Hobbit"]["Stealth"] = 10;
-MML.skillMods["Hobbit"]["Sewing"] = 10;
-MML.skillMods["Human"] = {};
-MML.skillMods["Human"]["Animal Husbandry"] = 5;
-MML.skillMods["Human"]["Bureaucracy"] = 5;
-MML.skillMods["Human"]["Falconry"] = 3;
-MML.skillMods["Human"]["Foraging"] = 5;
-MML.skillMods["Human"]["Heraldry"] = 3;
-MML.skillMods["Human"]["Herbalism"] = 3;
-MML.skillMods["Human"]["Horsemanship"] = 10;
-MML.skillMods["Human"]["Leatherworking"] = 10;
-MML.skillMods["Human"]["Oration"] = 5;
-MML.skillMods["Human"]["Persuasion"] = 10;
-MML.skillMods["Human"]["Scrounging"] = 5;
-MML.skillMods["Human"]["Teamster"] = 5;
-MML.skillMods["Wood Elf"] = {};
-MML.skillMods["Wood Elf"]["Animal Husbandry"] = 10;
-MML.skillMods["Wood Elf"]["Bowyer"] = 10;
-MML.skillMods["Wood Elf"]["Air Elementalism"] = 5;
-MML.skillMods["Wood Elf"]["Life Elementalism"] = 5;
-MML.skillMods["Wood Elf"]["Falconry"] = 5;
-MML.skillMods["Wood Elf"]["Fletchery"] = 10;
-MML.skillMods["Wood Elf"]["Foraging"] = 5;
-MML.skillMods["Wood Elf"]["Hand Signalling"] = 5;
-MML.skillMods["Wood Elf"]["Herbalism"] = 5;
-MML.skillMods["Wood Elf"]["Hunting and Trapping"] = 10;
-MML.skillMods["Wood Elf"]["Navigation"] = 10;
-MML.skillMods["Wood Elf"]["Stealth"] = 10;
-MML.skillMods["Wood Elf"]["Survival"] = 10;
-MML.skillMods["Wood Elf"]["Tracking"] = 3;
-MML.skillMods["Female"] = {};
-MML.skillMods["Female"]["Life Elementalism"] = 5;
-MML.skillMods["Female"]["Symbol Magic"] = 5;
 
-MML.weaponSkillMods = {};
-MML.weaponSkillMods["Dwarf"] = {};
-MML.weaponSkillMods["Dwarf"]["Light Cross Bow"] = 3;
-MML.weaponSkillMods["Dwarf"]["Medium Cross Bow"] = 3;
-MML.weaponSkillMods["Dwarf"]["Heavy Cross Bow"] = 3;
-MML.weaponSkillMods["Dwarf"]["Battle Axe"] = 5;
-MML.weaponSkillMods["Dwarf"]["Two-Handed Axe"] = 5;
-MML.weaponSkillMods["Dwarf"]["Bardiche"] = 5;
-MML.weaponSkillMods["Dwarf"]["Pole Axe"] = 5;
-MML.weaponSkillMods["Dwarf"]["Maul"] = 5;
-MML.weaponSkillMods["Dwarf"]["War Hammer"] = 5;
-MML.weaponSkillMods["Dwarf"]["Glaive"] = 5;
-MML.weaponSkillMods["Dwarf"]["Halberd"] = 5;
-MML.weaponSkillMods["Dwarf"]["Brawling"] = 10;
-MML.weaponSkillMods["Dwarf"]["Round Target Shield"] = 10;
-MML.weaponSkillMods["Dwarf"]["Small Round Shield"] = 10;
-MML.weaponSkillMods["Dwarf"]["Medium Round Shield"] = 10;
-MML.weaponSkillMods["Dwarf"]["Large Round Shield"] = 10;
-MML.weaponSkillMods["Dwarf"]["Small Rectangular Shield"] = 10;
-MML.weaponSkillMods["Dwarf"]["Medium Rectangular Shield"] = 10;
-MML.weaponSkillMods["Dwarf"]["Large Rectangular Shield"] = 10;
-MML.weaponSkillMods["Dwarf"]["Heater Shield"] = 10;
-MML.weaponSkillMods["Gnome"] = {};
-MML.weaponSkillMods["Gnome"]["Fauchard"] = 5;
-MML.weaponSkillMods["Gnome"]["Bill"] = 5;
-MML.weaponSkillMods["Gnome"]["Glaive"] = 5;
-MML.weaponSkillMods["Gnome"]["Halberd"] = 5;
-MML.weaponSkillMods["Gnome"]["Pole Hammer"] = 5;
-MML.weaponSkillMods["Gnome"]["War Spear, One Hand"] = 5;
-MML.weaponSkillMods["Gnome"]["War Spear, Two Hands"] = 5;
-MML.weaponSkillMods["Gnome"]["Boar Spear, One Hand"] = 5;
-MML.weaponSkillMods["Gnome"]["Boar Spear, Two Hands"] = 5;
-MML.weaponSkillMods["Gnome"]["Military Fork, One Hand"] = 5;
-MML.weaponSkillMods["Gnome"]["Military Fork, Two Hands"] = 5;
-MML.weaponSkillMods["Gnome"]["Spetum"] = 5;
-MML.weaponSkillMods["Gnome"]["Pitch Fork"] = 5;
-MML.weaponSkillMods["Gray Elf"] = {};
-MML.weaponSkillMods["Gray Elf"]["Short Sword"] = 10;
-MML.weaponSkillMods["Gray Elf"]["Long Sword"] = 10;
-MML.weaponSkillMods["Gray Elf"]["Falchion"] = 10;
-MML.weaponSkillMods["Gray Elf"]["Broadsword"] = 10;
-MML.weaponSkillMods["Hobbit"] = {};
-MML.weaponSkillMods["Hobbit"]["Short Bow"] = 3;
-MML.weaponSkillMods["Hobbit"]["Medium Bow"] = 3;
-MML.weaponSkillMods["Hobbit"]["Long Bow"] = 3;
-MML.weaponSkillMods["Hobbit"]["Heavy Long Bow"] = 3;
-MML.weaponSkillMods["Hobbit"]["Short Composite Bow"] = 3;
-MML.weaponSkillMods["Hobbit"]["Medium Composite Bow"] = 3;
-// MML.weaponSkillMods["Hobbit"]["MissileWeaponThrown"] = 3;
-// MML.weaponSkillMods["Hobbit"]["Sling"] = 10;
-MML.weaponSkillMods["Wood Elf"] = {};
-MML.weaponSkillMods["Wood Elf"]["War Spear, One Hand"] = 5;
-MML.weaponSkillMods["Wood Elf"]["War Spear, Two Hands"] = 5;
-MML.weaponSkillMods["Wood Elf"]["Boar Spear, One Hand"] = 5;
-MML.weaponSkillMods["Wood Elf"]["Boar Spear, Two Hands"] = 5;
-MML.weaponSkillMods["Wood Elf"]["Short Bow"] = 10;
-MML.weaponSkillMods["Wood Elf"]["Medium Bow"] = 10;
-MML.weaponSkillMods["Wood Elf"]["Long Bow"] = 10;
-MML.weaponSkillMods["Wood Elf"]["Short Composite Bow"] = 10;
-MML.weaponSkillMods["Wood Elf"]["Medium Composite Bow"] = 10;
-//MML.weaponSkillMods["Wood Elf"]["thrownWeaponSpears"] = 3;
 
-MML.movementRates = {};
-MML.movementRates["Dwarf"] = {
-  Prone: 0,
-  Crawl: 1.75,
-	Stalk: 1.75,
-	Walk: 6,
-	Jog: 14,
-	Run: 34
+
+
+
+
+export const RecoveryRates: { [health: number]: { hp: Float.Positive, ep: Float.Positive } } = {
+	0: { hp: 0.33, ep:  1 },
+	1: { hp: 0.33, ep:  1 },
+	2: { hp: 0.33, ep:  1 },
+	3: { hp: 0.33, ep:  1 },
+	4: { hp: 0.33, ep:  1 },
+	5: { hp: 0.33, ep:  1 },
+	6: { hp: 0.33, ep:  1 },
+	7: { hp: 0.33, ep:  1 },
+	8: { hp: 0.5, ep:  2 },
+	9: { hp: 0.5, ep:  2 },
+	10: { hp: 1, ep:  3 },
+	11: { hp: 1, ep:  3 },
+	12: { hp: 1, ep:  3 },
+	13: { hp: 1.5, ep:  4 },
+	14: { hp: 1.5, ep:  4 },
+	15: { hp: 2, ep:  5 },
+	16: { hp: 2, ep:  5 },
+	17: { hp: 3, ep:  6 },
+	18: { hp: 3, ep:  6 },
+	19: { hp: 4, ep:  8 },
+	20: { hp: 4, ep:  8 },
+	21: { hp: 5, ep:  10 },
+	22: { hp: 5, ep:  10 },
+	23: { hp: 5, ep:  10 },
+	24: { hp: 5, ep:  10 },
+	25: { hp: 5, ep:  10 },	
 };
-MML.movementRates["Gnome"] = {
-	Prone: 0,
-	Crawl: 1.75,
-	Stalk: 1.75,
-	Walk: 6,
-	Jog: 14,
-	Run: 32
-};
-MML.movementRates["Gray Elf"] = {
-	Prone: 0,
-	Crawl: 2,
-	Stalk: 2,
-	Walk: 8,
-	Jog: 20,
-	Run: 36
-};
-MML.movementRates["Hobbit"] = {
-	Prone: 0,
-	Crawl: 2,
-	Stalk: 2,
-	Walk: 5,
-	Jog: 8,
-	Run: 18
-};
-MML.movementRates["Human"] = {
-	Prone: 0,
-	Crawl: 1.75,
-	Stalk: 1.75,
-	Walk: 6,
-	Jog: 16,
-	Run: 28
-};
-MML.movementRates["Wood Elf"] = {
-	Prone: 0,
-	Crawl: 2,
-	Stalk: 2,
-	Walk: 8,
-	Jog: 20,
-	Run: 34
-};
-
-
-MML.recoveryMods = []; //uses health stat
-MML.recoveryMods[0] = { hp: 0.33, ep:  1 };
-MML.recoveryMods[1] = { hp: 0.33, ep:  1 };
-MML.recoveryMods[2] = { hp: 0.33, ep:  1 };
-MML.recoveryMods[3] = { hp: 0.33, ep:  1 };
-MML.recoveryMods[4] = { hp: 0.33, ep:  1 };
-MML.recoveryMods[5] = { hp: 0.33, ep:  1 };
-MML.recoveryMods[6] = { hp: 0.33, ep:  1 };
-MML.recoveryMods[7] = { hp: 0.33, ep:  1 };
-MML.recoveryMods[8] = { hp: 0.5, ep:  2 };
-MML.recoveryMods[9] = { hp: 0.5, ep:  2 };
-MML.recoveryMods[10] = { hp: 1, ep:  3 };
-MML.recoveryMods[11] = { hp: 1, ep:  3 };
-MML.recoveryMods[12] = { hp: 1, ep:  3 };
-MML.recoveryMods[13] = { hp: 1.5, ep:  4 };
-MML.recoveryMods[14] = { hp: 1.5, ep:  4 };
-MML.recoveryMods[15] = { hp: 2, ep:  5 };
-MML.recoveryMods[16] = { hp: 2, ep:  5 };
-MML.recoveryMods[17] = { hp: 3, ep:  6 };
-MML.recoveryMods[18] = { hp: 3, ep:  6 };
-MML.recoveryMods[19] = { hp: 4, ep:  8 };
-MML.recoveryMods[20] = { hp: 4, ep:  8 };
-MML.recoveryMods[21] = { hp: 5, ep:  10 };
-MML.recoveryMods[22] = { hp: 5, ep:  10 };
-MML.recoveryMods[23] = { hp: 5, ep:  10 };
-MML.recoveryMods[24] = { hp: 5, ep:  10 };
-MML.recoveryMods[25] = { hp: 5, ep:  10 };
 
 MML.attackTempoTable = [-25, -22, -18, -16, -14, -12, -11, -10, -9, -9];
 

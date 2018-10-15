@@ -1,34 +1,57 @@
-MML.spells = {};
-MML.spells['Flame Bolt'] = {
-  name: 'Flame Bolt',
-  family: 'Fire',
-  components: ['Spoken'],
-  actions: 1,
-  task: 45,
-  ep: 20,
-  range: 0,
-  duration: 0,
-  target: [15, 1],
-  targetSizeMatters: false,
-  metaMagic: ['Increase Potency'],
-  cast: function() {
+import * as Rx from "rxjs";
+import { Character, IGameEvent, Round } from "../mml";
+import { SpellFamily } from "./spell_families";
+import { MetaMagic } from "./meta_magic";
+import { Component } from "./components";
+import { Integer } from "../../utilities/integer";
+
+export interface ISpell {
+  readonly name: string;
+  readonly family: SpellFamily;
+  components: Array<Component>;
+  actions: Integer.Unsigned;
+  task: Integer.Unsigned;
+  ep: Integer.Unsigned;
+  range: Integer.Unsigned;
+  duration: Round;
+  readonly target_size_matters: boolean;
+  readonly available_meta_magic: Array<MetaMagic>;
+  cast(): Rx.Observable<IGameEvent>;
+  getTargets(): Rx.Observable<Character>;
+}
+
+// export type GetSpellTargets = function(): Rx.Observable<Character>
+
+export class FlameBolt implements ISpell {
+  name: 'Flame Bolt';
+  family: SpellFamily.Fire;
+  components: [Component.Spoken];
+  actions: 1;
+  task: 45;
+  ep: 20;
+  range: 0;
+  duration: 0;
+  target: [15, 1];
+  target_size_matters: false;
+  metaMagic: [MetaMagic.IncreasePotency];
+  cast() {
 
   }
-};
+}
 
-MML.spells['Dart'] = {
-  name: 'Dart',
-  family: 'Air',
-  components: ['Spoken', 'Physical', 'Substantive'],
-  requiredItem: 'Dart',
-  actions: 1,
-  task: 55,
-  ep: 14,
-  range: 100,
-  duration: 0,
-  target: 'Single',
-  targetSizeMatters: false,
-  metaMagic: ['Increase Potency', 'Called Shot', 'Called Shot Specific'],
+export class Dart implements ISpell {
+  name: 'Dart';
+  family: SpellFamily.Air;
+  components: [Component.Spoken, Component.Physical, Component.Substantive];
+  requiredItem: 'Dart';
+  actions: 1;
+  task: 55;
+  ep: 14;
+  range: 100;
+  duration: 0;
+  target: 'Single';
+  target_size_matters: false;
+  metaMagic: ['Increase Potency', 'Called Shot', 'Called Shot Specific'];
   cast: async function castDart(player, character, action) {
     const targets = await MML.getSpellTargets(player);
     _.findWhere(character.inventory, { name: 'Dart' }).quantity -= targets.length;
@@ -47,20 +70,20 @@ MML.spells['Dart'] = {
     await MML.alterEP(player, character, -1 * epCost * _.pluck(metaMagic, 'epMod').reduce((product, num) => product * num));
     MML.endAction();
   }
-};
+}
 
-MML.spells['Hail of Stones'] = {
-  name: 'Hail of Stones',
-  family: 'Earth',
-  components: ['Spoken', 'Physical'],
-  actions: 2,
-  task: 35,
-  ep: 30,
-  range: 75,
-  duration: 0,
-  target: '5\' Radius',
-  targetSizeMatters: false,
-  metaMagic: ['Increase Potency'],
+export class HailOfStones implements ISpell {
+  name: 'Hail of Stones';
+  family: SpellFamily.Earth;
+  components: [Component.Spoken, Component.Physical];
+  actions: 2;
+  task: 35;
+  ep: 30;
+  range: 75;
+  duration: 0;
+  target: '5\' Radius';
+  target_size_matters: false;
+  metaMagic: ['Increase Potency'];
   cast: async function castHailOfStones(player, character, action) {
     const targets = await MML.getRadiusSpellTargets();
     const castingRoll = await MML.castingRoll(player, character, [spell.task, casterSkill].concat(_.pluck(metaMagic, 'casting_mod')));
@@ -104,4 +127,4 @@ MML.spells['Hail of Stones'] = {
     await MML.alterEP(player, character, -1 * epCost * _.reduce(_.pluck(metaMagic, 'epMod'), function(memo, num) { return memo * num; }));
     MML.endAction();
   }
-};
+}
