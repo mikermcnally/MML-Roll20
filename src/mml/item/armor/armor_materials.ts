@@ -1,8 +1,9 @@
 import { Float, Integer } from "../../../utilities/utilities";
 
-export interface APV {
-  readonly family: ArmorMaterialFamily;
+export interface IArmorMaterial {
   readonly name: string;
+  readonly family: ArmorMaterialFamily;
+  readonly metallic: boolean;
   readonly surface: Integer.Unsigned;
   readonly cut: Integer.Unsigned;
   readonly chop: Integer.Unsigned;
@@ -10,17 +11,29 @@ export interface APV {
   readonly thrust: Integer.Unsigned;
   readonly impact: Integer.Unsigned;
   readonly flanged: Integer.Unsigned;
-  readonly weight_per_position: Float.Signed;
+  readonly weight_per_position: Float.Positive;
 }
 
 export enum ArmorMaterialFamily {
   None = 'none',
+  Cloth = 'Cloth',
+  CoatOfLames = 'Coat of Lames',
+  CoatOfPlates = 'Coat of Plates',
+  CoatOfScales = 'Coat of Scales',
+  Lames = 'Lames',
+  LightLeather = 'Light Leather',
+  HeavyLeather = 'Heavy Leather',
+  LightMail = 'Light Mail',
+  HeavyMail = 'Heavy Mail',
+  Padded = 'Padded',
+  Plates = 'Plates',
 }
 
-MML.APVList = {
+export const Armor: { readonly [name: string]: IArmorMaterial } = {
   'None': {
-    family: ArmorMaterialFamily.None,
     name: 'None',
+    family: ArmorMaterialFamily.None,
+    metallic: false,
     surface: 0,
     cut: 0,
     chop: 0,
@@ -31,8 +44,9 @@ MML.APVList = {
     weight_per_position: 0
   },
   'Greater Steel Coat of Lames, Leather, Medium': {
-    family: 'Coat of Lames',
     name: 'Greater Steel Coat of Lames, Leather, Medium',
+    family: ArmorMaterialFamily.CoatOfLames,
+    metallic: true,
     surface: 34,
     cut: 29,
     chop: 19,
@@ -43,8 +57,9 @@ MML.APVList = {
     weight_per_position: 2.12
   },
   'Greater Steel Coat of Lames, Cloth, Medium': {
-    family: 'Coat of Lames',
     name: 'Greater Steel Coat of Lames, Cloth, Medium',
+    family: ArmorMaterialFamily.CoatOfLames,
+    metallic: true,
     surface: 33,
     cut: 28,
     chop: 18,
@@ -55,8 +70,9 @@ MML.APVList = {
     weight_per_position: 1.87
   },
   'Hardened Leather Coat of Lames, Leather, Medium': {
-    family: 'Coat of Lames',
     name: 'Hardened Leather Coat of Lames, Leather, Medium',
+    family: ArmorMaterialFamily.CoatOfLames,
+    metallic: false,
     surface: 15,
     cut: 14,
     chop: 10,
@@ -67,8 +83,9 @@ MML.APVList = {
     weight_per_position: 1.14
   },
   'Greater Steel Coat of Plates, Leather, Medium': {
-    family: 'Coat of Plates',
     name: 'Greater Steel Coat of Plates, Leather, Medium',
+    family: ArmorMaterialFamily.CoatOfPlates,
+    metallic: true,
     surface: 27,
     cut: 23,
     chop: 15,
@@ -79,8 +96,9 @@ MML.APVList = {
     weight_per_position: 1.81
   },
   'Greater Steel Coat of Plates, Cloth, Medium': {
-    family: 'Coat of Plates',
     name: 'Greater Steel Coat of Plates, Cloth, Medium',
+    family: ArmorMaterialFamily.CoatOfPlates,
+    metallic: true,
     surface: 26,
     cut: 25,
     chop: 14,
@@ -91,8 +109,9 @@ MML.APVList = {
     weight_per_position: 1.55
   },
   'Mannish High Steel Coat of Plates, Leather, Medium': {
-    family: 'Coat of Plates',
     name: 'Mannish High Steel Coat of Plates, Leather, Medium',
+    family: ArmorMaterialFamily.CoatOfPlates,
+    metallic: true,
     surface: 31,
     cut: 28,
     chop: 17,
@@ -103,8 +122,9 @@ MML.APVList = {
     weight_per_position: 1.81
   },
   'Greater Steel Coat of Scales, Leather, Medium': {
-    family: 'Coat of Scales',
     name: 'Greater Steel Coat of Scales, Leather, Medium',
+    family: ArmorMaterialFamily.CoatOfScales,
+    metallic: true,
     surface: 34,
     cut: 24,
     chop: 17,
@@ -115,8 +135,9 @@ MML.APVList = {
     weight_per_position: 1.91
   },
   'Greater Steel Coat of Scales, Cloth, Medium': {
-    family: 'Coat of Scales',
     name: 'Greater Steel Coat of Scales, Cloth, Medium',
+    family: ArmorMaterialFamily.CoatOfScales,
+    metallic: true,
     surface: 33,
     cut: 23,
     chop: 16,
@@ -127,8 +148,9 @@ MML.APVList = {
     weight_per_position: 1.66
   },
   'Hardened Leather Coat of Scales, Leather, Medium': {
-    family: 'Coat of Scales',
     name: 'Hardened Leather Coat of Scales, Leather, Medium',
+    family: ArmorMaterialFamily.CoatOfScales,
+    metallic: false,
     surface: 14,
     cut: 14,
     chop: 9,
@@ -139,8 +161,9 @@ MML.APVList = {
     weight_per_position: 1.05
   },
   'Mannish High Steel Coat of Scales, Leather, Medium': {
-    family: 'Coat of Scales',
     name: 'Mannish High Steel Coat of Scales, Leather, Medium',
+    family: ArmorMaterialFamily.CoatOfScales,
+    metallic: true,
     surface: 39,
     cut: 27,
     chop: 19,
@@ -151,8 +174,9 @@ MML.APVList = {
     weight_per_position: 1.91
   },
   'Mannish Cloth, Light': {
-    family: 'Cloth',
     name: 'Mannish Cloth, Light',
+    family: ArmorMaterialFamily.Cloth,
+    metallic: false,
     surface: 2,
     cut: 2,
     chop: 2,
@@ -163,8 +187,9 @@ MML.APVList = {
     weight_per_position: 0.04
   },
   'Mannish Cloth, Medium': {
-    family: 'Cloth',
     name: 'Mannish Cloth, Medium',
+    family: ArmorMaterialFamily.Cloth,
+    metallic: false,
     surface: 4,
     cut: 3,
     chop: 3,
@@ -175,8 +200,9 @@ MML.APVList = {
     weight_per_position: 0.08
   },
   'Mannish Cloth, Heavy': {
-    family: 'Cloth',
     name: 'Mannish Cloth, Heavy',
+    family: ArmorMaterialFamily.Cloth,
+    metallic: false,
     surface: 6,
     cut: 5,
     chop: 4,
@@ -187,8 +213,9 @@ MML.APVList = {
     weight_per_position: 0.24
   },
   'Mannish Quilt': {
-    family: 'Cloth',
     name: 'Mannish Quilt',
+    family: ArmorMaterialFamily.Cloth,
+    metallic: false,
     surface: 8,
     cut: 6,
     chop: 6,
@@ -199,8 +226,9 @@ MML.APVList = {
     weight_per_position: 0.15
   },
   'Mannish Silk': {
-    family: 'Cloth',
     name: 'Mannish Silk',
+    family: ArmorMaterialFamily.Cloth,
+    metallic: false,
     surface: 5,
     cut: 4,
     chop: 3,
@@ -211,8 +239,9 @@ MML.APVList = {
     weight_per_position: 0.06
   },
   'Fur, Light': {
-    family: 'Light Leather',
     name: 'Fur, Light',
+    family: ArmorMaterialFamily.LightLeather,
+    metallic: false,
     surface: 10,
     cut: 6,
     chop: 6,
@@ -223,8 +252,9 @@ MML.APVList = {
     weight_per_position: 0.2
   },
   'Fur, Medium': {
-    family: 'Light Leather',
     name: 'Fur, Medium',
+    family: ArmorMaterialFamily.LightLeather,
+    metallic: false,
     surface: 10,
     cut: 6,
     chop: 6,
@@ -235,8 +265,9 @@ MML.APVList = {
     weight_per_position: 0.4
   },
   'Fur, Heavy': {
-    family: 'Heavy Leather',
     name: 'Fur, Heavy',
+    family: ArmorMaterialFamily.HeavyLeather,
+    metallic: false,
     surface: 11,
     cut: 8,
     chop: 8,
@@ -247,8 +278,9 @@ MML.APVList = {
     weight_per_position: 0.6
   },
   'Hardened Leather, Medium': {
-    family: 'Heavy Leather',
     name: 'Hardened Leather, Medium',
+    family: ArmorMaterialFamily.HeavyLeather,
+    metallic: false,
     surface: 10,
     cut: 9,
     chop: 6,
@@ -259,8 +291,9 @@ MML.APVList = {
     weight_per_position: 0.64
   },
   'Hardened Leather, Heavy': {
-    family: 'Heavy Leather',
     name: 'Hardened Leather, Heavy',
+    family: ArmorMaterialFamily.HeavyLeather,
+    metallic: false,
     surface: 14,
     cut: 12,
     chop: 8,
@@ -271,8 +304,9 @@ MML.APVList = {
     weight_per_position: 0.96
   },
   'Hardened Leather Lames, Medium': {
-    family: 'Heavy Leather',
     name: 'Hardened Leather Lames, Medium',
+    family: ArmorMaterialFamily.HeavyLeather,
+    metallic: false,
     surface: 12,
     cut: 9,
     chop: 6,
@@ -283,8 +317,9 @@ MML.APVList = {
     weight_per_position: 0.77
   },
   'Hardened Leather Lames, Heavy': {
-    family: 'Heavy Leather',
     name: 'Hardened Leather Lames, Heavy',
+    family: ArmorMaterialFamily.HeavyLeather,
+    metallic: false,
     surface: 16,
     cut: 13,
     chop: 8,
@@ -295,8 +330,9 @@ MML.APVList = {
     weight_per_position: 1.15
   },
   'Hardened Leather Scales, Medium': {
-    family: 'Heavy Leather',
     name: 'Hardened Leather Scales, Medium',
+    family: ArmorMaterialFamily.HeavyLeather,
+    metallic: false,
     surface: 12,
     cut: 10,
     chop: 6,
@@ -307,8 +343,9 @@ MML.APVList = {
     weight_per_position: 0.68
   },
   'Hardened Leather Scales, Heavy': {
-    family: 'Heavy Leather',
     name: 'Hardened Leather Scales, Heavy',
+    family: ArmorMaterialFamily.HeavyLeather,
+    metallic: false,
     surface: 16,
     cut: 13,
     chop: 8,
@@ -319,8 +356,9 @@ MML.APVList = {
     weight_per_position: 1.30
   },
   'Hide, Light': {
-    family: 'Light Leather',
     name: 'Hide, Light',
+    family: ArmorMaterialFamily.LightLeather,
+    metallic: false,
     surface: 5,
     cut: 2,
     chop: 2,
@@ -331,8 +369,9 @@ MML.APVList = {
     weight_per_position: 0.14
   },
   'Hide, Heavy': {
-    family: 'Heavy Leather',
     name: 'Hide, Heavy',
+    family: ArmorMaterialFamily.HeavyLeather,
+    metallic: false,
     surface: 6,
     cut: 3,
     chop: 4,
@@ -343,8 +382,9 @@ MML.APVList = {
     weight_per_position: 0.42
   },
   'Leather, Light': {
-    family: 'Light Leather',
     name: 'Leather, Light',
+    family: ArmorMaterialFamily.LightLeather,
+    metallic: false,
     surface: 5,
     cut: 3,
     chop: 4,
@@ -355,8 +395,9 @@ MML.APVList = {
     weight_per_position: 0.16
   },
   'Leather, Medium': {
-    family: 'Light Leather',
     name: 'Leather, Medium',
+    family: ArmorMaterialFamily.LightLeather,
+    metallic: false,
     surface: 6,
     cut: 5,
     chop: 5,
@@ -367,8 +408,9 @@ MML.APVList = {
     weight_per_position: 0.32
   },
   'Leather, Heavy': {
-    family: 'Heavy Leather',
     name: 'Leather, Heavy',
+    family: ArmorMaterialFamily.HeavyLeather,
+    metallic: false,
     surface: 9,
     cut: 8,
     chop: 8,
@@ -379,8 +421,9 @@ MML.APVList = {
     weight_per_position: 0.48
   },
   'Mannish Padded': {
-    family: 'Padded',
     name: 'Mannish Padded',
+    family: ArmorMaterialFamily.Padded,
+    metallic: false,
     surface: 11,
     cut: 8,
     chop: 9,
@@ -391,8 +434,9 @@ MML.APVList = {
     weight_per_position: 0.40
   },
   'Laced Mail of Common Steel, Medium': {
-    family: 'Heavy Mail',
     name: 'Laced Mail of Common Steel, Medium',
+    family: ArmorMaterialFamily.HeavyMail,
+    metallic: true,
     surface: 20,
     cut: 17,
     chop: 9,
@@ -403,8 +447,9 @@ MML.APVList = {
     weight_per_position: 1.30
   },
   'Laced Mail of Greater Steel, Medium': {
-    family: 'Heavy Mail',
     name: 'Laced Mail of Greater Steel, Medium',
+    family: ArmorMaterialFamily.HeavyMail,
+    metallic: true,
     surface: 24,
     cut: 20,
     chop: 11,
@@ -415,8 +460,9 @@ MML.APVList = {
     weight_per_position: 1.30
   },
   'Laced Mail of Mannish High Steel, Medium': {
-    family: 'Heavy Mail',
     name: 'Laced Mail of Mannish High Steel, Medium',
+    family: ArmorMaterialFamily.HeavyMail,
+    metallic: true,
     surface: 28,
     cut: 23,
     chop: 13,
@@ -427,8 +473,9 @@ MML.APVList = {
     weight_per_position: 1.30
   },
   'Laced Mail of Wrought Iron, Medium': {
-    family: 'Heavy Mail',
     name: 'Laced Mail of Wrought Iron, Medium',
+    family: ArmorMaterialFamily.HeavyMail,
+    metallic: true,
     surface: 12,
     cut: 10,
     chop: 5,
@@ -439,8 +486,9 @@ MML.APVList = {
     weight_per_position: 1.29
   },
   'Lames of Common Steel, Medium': {
-    family: 'Lames',
     name: 'Lames of Common Steel, Medium',
+    family: ArmorMaterialFamily.Lames,
+    metallic: true,
     surface: 26,
     cut: 20,
     chop: 13,
@@ -451,8 +499,9 @@ MML.APVList = {
     weight_per_position: 1.70
   },
   'Lames of Greater Steel, Medium': {
-    family: 'Lames',
     name: 'Lames of Greater Steel, Medium',
+    family: ArmorMaterialFamily.Lames,
+    metallic: true,
     surface: 31,
     cut: 24,
     chop: 15,
@@ -463,8 +512,9 @@ MML.APVList = {
     weight_per_position: 1.70
   },
   'Lames of Mannish High Steel, Light': {
-    family: 'Lames',
     name: 'Lames of Mannish High Steel, Light',
+    family: ArmorMaterialFamily.Lames,
+    metallic: true,
     surface: 32,
     cut: 20,
     chop: 13,
@@ -475,8 +525,9 @@ MML.APVList = {
     weight_per_position: 1.28
   },
   'Lames of Mannish High Steel, Medium': {
-    family: 'Lames',
     name: 'Lames of Mannish High Steel, Medium',
+    family: ArmorMaterialFamily.Lames,
+    metallic: true,
     surface: 36,
     cut: 26,
     chop: 18,
@@ -487,8 +538,9 @@ MML.APVList = {
     weight_per_position: 1.70
   },
   'Lames of Wrought Iron, Medium': {
-    family: 'Lames',
     name: 'Lames of Wrought Iron, Medium',
+    family: ArmorMaterialFamily.Lames,
+    metallic: true,
     surface: 15,
     cut: 12,
     chop: 8,
@@ -499,8 +551,9 @@ MML.APVList = {
     weight_per_position: 1.68
   },
   'Brazed Mail of Greater Steel': {
-    family: 'Light Mail',
     name: 'Brazed Mail of Greater Steel',
+    family: ArmorMaterialFamily.LightMail,
+    metallic: true,
     surface: 22,
     cut: 19,
     chop: 12,
@@ -511,8 +564,9 @@ MML.APVList = {
     weight_per_position: 1.30
   },
   'Brazed Mail of Mannish High Steel': {
-    family: 'Light Mail',
     name: 'Brazed Mail of Mannish High Steel',
+    family: ArmorMaterialFamily.LightMail,
+    metallic: true,
     surface: 25,
     cut: 22,
     chop: 13,
@@ -523,8 +577,9 @@ MML.APVList = {
     weight_per_position: 1.30
   },
   'Butted Mail of Common Steel': {
-    family: 'Light Mail',
     name: 'Butted Mail of Common Steel',
+    family: ArmorMaterialFamily.LightMail,
+    metallic: true,
     surface: 16,
     cut: 14,
     chop: 8,
@@ -535,8 +590,9 @@ MML.APVList = {
     weight_per_position: 0.95
   },
   'Butted Mail of Greater Steel': {
-    family: 'Light Mail',
     name: 'Butted Mail of Greater Steel',
+    family: ArmorMaterialFamily.LightMail,
+    metallic: true,
     surface: 19,
     cut: 17,
     chop: 9,
@@ -547,8 +603,9 @@ MML.APVList = {
     weight_per_position: 0.95
   },
   'Butted Mail of Wrought Iron': {
-    family: 'Light Mail',
     name: 'Butted Mail of Wrought Iron',
+    family: ArmorMaterialFamily.LightMail,
+    metallic: true,
     surface: 10,
     cut: 8,
     chop: 5,
@@ -559,8 +616,9 @@ MML.APVList = {
     weight_per_position: 0.94
   },
   'Double Mail of Common Steel': {
-    family: 'Light Mail',
     name: 'Double Mail of Common Steel',
+    family: ArmorMaterialFamily.LightMail,
+    metallic: true,
     surface: 18,
     cut: 16,
     chop: 9,
@@ -571,8 +629,9 @@ MML.APVList = {
     weight_per_position: 1.30
   },
   'Double Mail of Greater Steel': {
-    family: 'Light Mail',
     name: 'Double Mail of Greater Steel',
+    family: ArmorMaterialFamily.LightMail,
+    metallic: true,
     surface: 22,
     cut: 19,
     chop: 11,
@@ -583,8 +642,9 @@ MML.APVList = {
     weight_per_position: 1.30
   },
   'Double Mail of Mannish High Steel': {
-    family: 'Light Mail',
     name: 'Double Mail of Mannish High Steel',
+    family: ArmorMaterialFamily.LightMail,
+    metallic: true,
     surface: 25,
     cut: 22,
     chop: 13,
@@ -595,8 +655,9 @@ MML.APVList = {
     weight_per_position: 1.30
   },
   'Single Mail of Common Steel': {
-    family: 'Light Mail',
     name: 'Single Mail of Common Steel',
+    family: ArmorMaterialFamily.LightMail,
+    metallic: true,
     surface: 17,
     cut: 15,
     chop: 8,
@@ -607,8 +668,9 @@ MML.APVList = {
     weight_per_position: 1
   },
   'Single Mail of Greater Steel': {
-    family: 'Light Mail',
     name: 'Single Mail of Greater Steel',
+    family: ArmorMaterialFamily.LightMail,
+    metallic: true,
     surface: 20,
     cut: 18,
     chop: 10,
@@ -619,8 +681,9 @@ MML.APVList = {
     weight_per_position: 1
   },
   'Single Mail of Mannish High Steel': {
-    family: 'Light Mail',
     name: 'Single Mail of Mannish High Steel',
+    family: ArmorMaterialFamily.LightMail,
+    metallic: true,
     surface: 24,
     cut: 21,
     chop: 12,
@@ -631,8 +694,9 @@ MML.APVList = {
     weight_per_position: 1
   },
   'Single Mail of Wrought Iron': {
-    family: 'Light Mail',
     name: 'Single Mail of Wrought Iron',
+    family: ArmorMaterialFamily.LightMail,
+    metallic: true,
     surface: 10,
     cut: 9,
     chop: 5,
@@ -643,8 +707,9 @@ MML.APVList = {
     weight_per_position: 0.99
   },
   'Plates of Common Steel, Medium': {
-    family: 'Plates',
     name: 'Plates of Common Steel, Medium',
+    family: ArmorMaterialFamily.Plates,
+    metallic: true,
     surface: 22,
     cut: 18,
     chop: 12,
@@ -655,8 +720,9 @@ MML.APVList = {
     weight_per_position: 1.40
   },
   'Plates of Greater Steel, Medium': {
-    family: 'Plates',
     name: 'Plates of Greater Steel, Medium',
+    family: ArmorMaterialFamily.Plates,
+    metallic: true,
     surface: 27,
     cut: 22,
     chop: 14,
@@ -667,8 +733,9 @@ MML.APVList = {
     weight_per_position: 1.40
   },
   'Plates of Mannish High Steel, Light': {
-    family: 'Plates',
     name: 'Plates of Mannish High Steel, Light',
+    family: ArmorMaterialFamily.Plates,
+    metallic: true,
     surface: 30,
     cut: 24,
     chop: 12,
@@ -679,8 +746,9 @@ MML.APVList = {
     weight_per_position: 1.05
   },
   'Plates of Mannish High Steel, Medium': {
-    family: 'Plates',
     name: 'Plates of Mannish High Steel, Medium',
+    family: ArmorMaterialFamily.Plates,
+    metallic: true,
     surface: 31,
     cut: 26,
     chop: 17,
@@ -691,8 +759,9 @@ MML.APVList = {
     weight_per_position: 1.40
   },
   'Plates of Mannish High Steel, Heavy': {
-    family: 'Plates',
     name: 'Plates of Mannish High Steel, Heavy',
+    family: ArmorMaterialFamily.Plates,
+    metallic: true,
     surface: 33,
     cut: 27,
     chop: 22,
@@ -703,8 +772,9 @@ MML.APVList = {
     weight_per_position: 1.75
   },
   'Plates of Wrought Iron, Medium': {
-    family: 'Plates',
     name: 'Plates of Wrought Iron, Medium',
+    family: ArmorMaterialFamily.Plates,
+    metallic: true,
     surface: 13,
     cut: 11,
     chop: 7,
@@ -715,8 +785,9 @@ MML.APVList = {
     weight_per_position: 1.39
   },
   'Plates of Wrought Iron, Heavy': {
-    family: 'Plates',
     name: 'Plates of Wrought Iron, Heavy',
+    family: ArmorMaterialFamily.Plates,
+    metallic: true,
     surface: 14,
     cut: 15,
     chop: 9,
@@ -727,8 +798,9 @@ MML.APVList = {
     weight_per_position: 1.73
   },
   'Hardened Leather, Medium, Studs': {
-    family: 'Heavy Leather',
     name: 'Hardened Leather, Medium, Studs',
+    family: ArmorMaterialFamily.HeavyLeather,
+    metallic: false,
     surface: 10,
     cut: 11,
     chop: 6,
@@ -739,8 +811,9 @@ MML.APVList = {
     weight_per_position: 0.69
   },
   'Hardened Leather, Medium, Rings': {
-    family: 'Heavy Leather',
     name: 'Hardened Leather, Medium, Rings',
+    family: ArmorMaterialFamily.HeavyLeather,
+    metallic: false,
     surface: 13,
     cut: 12,
     chop: 8,
@@ -751,8 +824,9 @@ MML.APVList = {
     weight_per_position: 0.75
   },
   'Hardened Leather, Medium, Splints': {
-    family: 'Heavy Leather',
     name: 'Hardened Leather, Medium, Splints',
+    family: ArmorMaterialFamily.HeavyLeather,
+    metallic: false,
     surface: 15,
     cut: 13,
     chop: 9,
@@ -763,8 +837,9 @@ MML.APVList = {
     weight_per_position: 0.85
   },
   'Hardened Leather, Medium, Bezaints': {
-    family: 'Heavy Leather',
     name: 'Hardened Leather, Medium, Bezaints',
+    family: ArmorMaterialFamily.HeavyLeather,
+    metallic: false,
     surface: 20,
     cut: 14,
     chop: 10,
@@ -775,8 +850,9 @@ MML.APVList = {
     weight_per_position: 0.94
   },
   'Leather, Medium, Rings': {
-    family: 'Light Leather',
     name: 'Leather, Medium, Rings',
+    family: ArmorMaterialFamily.LightLeather,
+    metallic: false,
     surface: 9,
     cut: 8,
     chop: 7,
@@ -787,8 +863,9 @@ MML.APVList = {
     weight_per_position: 0.43
   },
   'Leather, Medium, Studs': {
-    family: 'Light Leather',
     name: 'Leather, Medium, Studs',
+    family: ArmorMaterialFamily.LightLeather,
+    metallic: false,
     surface: 6,
     cut: 7,
     chop: 5,
@@ -799,8 +876,9 @@ MML.APVList = {
     weight_per_position: 0.37
   },
   'Leather, Heavy, Bezaints': {
-    family: 'Heavy Leather',
     name: 'Leather, Heavy, Bezaints',
+    family: ArmorMaterialFamily.HeavyLeather,
+    metallic: false,
     surface: 19,
     cut: 13,
     chop: 12,
@@ -811,8 +889,9 @@ MML.APVList = {
     weight_per_position: 0.78
   },
   'Leather, Heavy, Rings': {
-    family: 'Heavy Leather',
     name: 'Leather, Heavy, Rings',
+    family: ArmorMaterialFamily.HeavyLeather,
+    metallic: false,
     surface: 12,
     cut: 11,
     chop: 10,
@@ -823,8 +902,9 @@ MML.APVList = {
     weight_per_position: 0.59
   },
   'Leather, Heavy, Splints': {
-    family: 'Heavy Leather',
     name: 'Leather, Heavy, Splints',
+    family: ArmorMaterialFamily.HeavyLeather,
+    metallic: false,
     surface: 14,
     cut: 12,
     chop: 11,
@@ -835,8 +915,9 @@ MML.APVList = {
     weight_per_position: 0.69
   },
   'Leather, Heavy, Studs': {
-    family: 'Heavy Leather',
     name: 'Leather, Heavy, Studs',
+    family: ArmorMaterialFamily.HeavyLeather,
+    metallic: false,
     surface: 9,
     cut: 10,
     chop: 8,
@@ -847,8 +928,9 @@ MML.APVList = {
     weight_per_position: 0.53
   },
   'Padded, Bezaints': {
-    family: 'Padded',
     name: 'Padded, Bezaints',
+    family: ArmorMaterialFamily.Padded,
+    metallic: false,
     surface: 21,
     cut: 13,
     chop: 13,
@@ -859,8 +941,9 @@ MML.APVList = {
     weight_per_position: 0.70
   },
   'Dwarven Quilt': {
-    family: 'Cloth',
     name: 'Dwarven Quilt',
+    family: ArmorMaterialFamily.Cloth,
+    metallic: false,
     surface: 10,
     cut: 11,
     chop: 11,
@@ -871,8 +954,9 @@ MML.APVList = {
     weight_per_position: 0.35
   },
   'Dwarven Padded': {
-    family: 'Padded',
     name: 'Dwarven Padded',
+    family: ArmorMaterialFamily.Padded,
+    metallic: false,
     surface: 14,
     cut: 14,
     chop: 14,
@@ -883,8 +967,9 @@ MML.APVList = {
     weight_per_position: 0.52
   },
   'Fine Mail, Dwarven Low Steel': {
-    family: 'Light Mail',
     name: 'Fine Mail, Dwarven Low Steel',
+    family: ArmorMaterialFamily.LightMail,
+    metallic: true,
     surface: 28,
     cut: 25,
     chop: 15,
@@ -895,8 +980,9 @@ MML.APVList = {
     weight_per_position: 0.95
   },
   'Brazed Mail of Gnomish Steel, Medium': {
-    family: 'Light Mail',
     name: 'Brazed Mail of Gnomish Steel, Medium',
+    family: ArmorMaterialFamily.LightMail,
+    metallic: true,
     surface: 30,
     cut: 27,
     chop: 16,
@@ -907,8 +993,9 @@ MML.APVList = {
     weight_per_position: 1.29
   },
   'Double Mail of Gnomish Steel, Medium': {
-    family: 'Light Mail',
     name: 'Double Mail of Gnomish Steel, Medium',
+    family: ArmorMaterialFamily.LightMail,
+    metallic: true,
     surface: 30,
     cut: 27,
     chop: 15,
@@ -919,8 +1006,9 @@ MML.APVList = {
     weight_per_position: 1.29
   },
   'Laced Mail of Gnomish Steel, Medium': {
-    family: 'Heavy Mail',
     name: 'Laced Mail of Gnomish Steel, Medium',
+    family: ArmorMaterialFamily.HeavyMail,
+    metallic: true,
     surface: 34,
     cut: 28,
     chop: 15,
@@ -931,8 +1019,9 @@ MML.APVList = {
     weight_per_position: 1.29
   },
   'Lames of Gnomish Steel, Medium': {
-    family: 'Lames',
     name: 'Lames of Gnomish Steel, Medium',
+    family: ArmorMaterialFamily.Lames,
+    metallic: true,
     surface: 44,
     cut: 34,
     chop: 21,
@@ -943,8 +1032,9 @@ MML.APVList = {
     weight_per_position: 1.68
   },
   'Plates of Gnomish Steel, Medium': {
-    family: 'Plates',
     name: 'Plates of Gnomish Steel, Medium',
+    family: ArmorMaterialFamily.Plates,
+    metallic: true,
     surface: 38,
     cut: 31,
     chop: 20,
@@ -955,8 +1045,9 @@ MML.APVList = {
     weight_per_position: 1.39
   },
   'Single Mail of Gnomish Steel, Medium': {
-    family: 'Light Mail',
     name: 'Single Mail of Gnomish Steel, Medium',
+    family: ArmorMaterialFamily.LightMail,
+    metallic: true,
     surface: 29,
     cut: 25,
     chop: 14,
@@ -967,8 +1058,9 @@ MML.APVList = {
     weight_per_position: 0.99
   },
   'Elven Cloth, Light': {
-    family: 'Cloth',
     name: 'Elven Cloth, Light',
+    family: ArmorMaterialFamily.Cloth,
+    metallic: false,
     surface: 4,
     cut: 3,
     chop: 2,
@@ -979,8 +1071,9 @@ MML.APVList = {
     weight_per_position: 0.03
   },
   'Elven Cloth, Medium': {
-    family: 'Cloth',
     name: 'Elven Cloth, Medium',
+    family: ArmorMaterialFamily.Cloth,
+    metallic: false,
     surface: 5,
     cut: 4,
     chop: 3,
@@ -991,8 +1084,9 @@ MML.APVList = {
     weight_per_position: 0.06
   },
   'Elven Cloth, Heavy': {
-    family: 'Cloth',
     name: 'Elven Cloth, Heavy',
+    family: ArmorMaterialFamily.Cloth,
+    metallic: false,
     surface: 7,
     cut: 6,
     chop: 5,
@@ -1003,8 +1097,9 @@ MML.APVList = {
     weight_per_position: 0.18
   },
   'Elven Greater Steel Fine Coat of Scales': {
-    family: 'Lames',
     name: 'Elven Greater Steel Fine Coat of Scales',
+    family: ArmorMaterialFamily.Lames,
+    metallic: true,
     surface: 35,
     cut: 23,
     chop: 16,
@@ -1015,8 +1110,9 @@ MML.APVList = {
     weight_per_position: 1.53
   },
   'Elven Padded': {
-    family: 'Padded',
     name: 'Elven Padded',
+    family: ArmorMaterialFamily.Padded,
+    metallic: false,
     surface: 14,
     cut: 15,
     chop: 13,
@@ -1027,8 +1123,9 @@ MML.APVList = {
     weight_per_position: 0.36
   },
   'Elven Quilt': {
-    family: 'Cloth',
     name: 'Elven Quilt',
+    family: ArmorMaterialFamily.Cloth,
+    metallic: false,
     surface: 10,
     cut: 12,
     chop: 10,
@@ -1039,8 +1136,9 @@ MML.APVList = {
     weight_per_position: 0.12
   },
   'Elven Silk': {
-    family: 'Cloth',
     name: 'Elven Silk',
+    family: ArmorMaterialFamily.Cloth,
+    metallic: false,
     surface: 5,
     cut: 7,
     chop: 5,
@@ -1051,8 +1149,9 @@ MML.APVList = {
     weight_per_position: 0.12
   },
   'Fine Mail, Elven Travel Steel': {
-    family: 'Light Mail',
     name: 'Fine Mail, Elven Travel Steel',
+    family: ArmorMaterialFamily.LightMail,
+    metallic: true,
     surface: 28,
     cut: 25,
     chop: 15,
@@ -1063,8 +1162,9 @@ MML.APVList = {
     weight_per_position: 0.95
   },
   'Fine Mail, Mannish Greater Steel': {
-    family: 'Light Mail',
     name: 'Fine Mail, Mannish Greater Steel',
+    family: ArmorMaterialFamily.LightMail,
+    metallic: true,
     surface: 24,
     cut: 22,
     chop: 13,
@@ -1075,8 +1175,9 @@ MML.APVList = {
     weight_per_position: 0.95
   },
   'Lames of Elven Bronze': {
-    family: 'Lames',
     name: 'Lames of Elven Bronze',
+    family: ArmorMaterialFamily.Lames,
+    metallic: true,
     surface: 28,
     cut: 22,
     chop: 14,

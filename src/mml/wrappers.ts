@@ -203,7 +203,7 @@ export function getPlayerFromName(playerName) {
 }
 
 export function generateRowID() {
-  return new Date().getUTCMilliseconds().toString();
+  return new Date().getUTCMilliseconds().toString() as Id;
 };
 
 export function clone(obj) {
