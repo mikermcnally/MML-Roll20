@@ -1,4 +1,33 @@
-MML.rollDice = function rollDice(amount, size) {
+import * as Rx from "rxjs";
+import {  } from "rxjs/operators";
+import { Integer } from "../../utilities/integer";
+
+export * from "./dice";
+
+export interface IRoll {
+  readonly dice: Array<Dice>;
+  readonly modifiers: Array<RollModifier>;
+  readonly value: Rx.Observable<Integer.Unsigned>;
+  
+  getRoll(style: Rx.Observable<Integer.Unsigned>): void;
+}
+
+export class RollModifier {
+  readonly value: Integer.Unsigned;
+  readonly description: string;
+
+  constructor(value: Integer.Unsigned, description?: string) {
+    this.value = value;
+    this.description = description ? description + ': ' + value.toString() : value.toString();
+  }
+}
+
+export const RollStyle:  = {
+  PhysicalDice: ,
+  ThreeD: '3d',
+}
+
+MML.rollDice = function rollDice(amount: Integer.Unsigned, size: Integer.Unsigned) {
   switch (state.MML.rollStyle) {
     case 'physicalDice':
       break;

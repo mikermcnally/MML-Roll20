@@ -1,4 +1,6 @@
-MML.fitnessModLookup = [
+import { Float } from "../../utilities/float";
+
+export const FitnessModifier: ReadonlyArray<Float.Positive> = [
   1.5,
   1.6,
   1.7,

@@ -44,10 +44,9 @@ export enum R20Event {
   ChangeTableitem = 'change:tableitem',
   ChangeText = 'change:text',
   ChangeToken = 'change:token',
-  ChangeToken = 'change:token',
-  ChangeToken = 'change:token',
-  ChangeToken = 'change:token',
-  ChangeToken = 'change:token',
+  ChangeTokenLeft = 'change:token:left',
+  ChangeTokenTop = 'change:token:top',
+  ChangeTokenRepresents = 'change:token:represents',
   ChatMessage = 'chat:message',
   Ready = 'ready',
 }
