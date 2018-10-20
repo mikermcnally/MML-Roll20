@@ -2,57 +2,6 @@ import * as Rx from "rxjs";
 import {  } from "rxjs/operators";
 import { Integer } from "../../utilities/integer";
 
-export * from "./dice";
-
-export interface IRoll {
-  readonly dice: Array<Dice>;
-  readonly modifiers: Array<RollModifier>;
-  readonly value: Rx.Observable<Integer.Unsigned>;
-  
-  getRoll(style: Rx.Observable<Integer.Unsigned>): void;
-}
-
-export class RollModifier {
-  readonly value: Integer.Unsigned;
-  readonly description: string;
-
-  constructor(value: Integer.Unsigned, description?: string) {
-    this.value = value;
-    this.description = description ? description + ': ' + value.toString() : value.toString();
-  }
-}
-
-export const RollStyle:  = {
-  PhysicalDice: ,
-  ThreeD: '3d',
-}
-
-MML.rollDice = function rollDice(amount: Integer.Unsigned, size: Integer.Unsigned) {
-  switch (state.MML.rollStyle) {
-    case 'physicalDice':
-      break;
-    case '3d':
-      break;
-    default:
-      return Rx.range(amount).pipe(
-        map(() => randomInteger(size)), 
-        reduce((sum, value) => sum + value, 0)
-      );
-  }
-};
-
-MML.parseDice = function parseDice(dice) {
-  const diceArray = dice.split('d').map(num => parseInt(num));
-  return {
-    amount: diceArray[0],
-    size: diceArray[1]
-  };
-};
-
-MML.sumModifiers = function sumModifiers(modifiers) {
-  return modifiers ? modifiers.reduce((sum, value) => sum + value, 0) : 0;
-};
-
 MML.processRoll = async function processRoll(player, value, getResult, getMessage, changeValue) {
   const result = getResult(value);
   const message = getMessage(value, result);

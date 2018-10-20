@@ -1,3 +1,7 @@
+export interface IAction{
+  
+}
+
 
 MML.buildAction = function buildAction(player, character, action) {
   if (_.contains(action.modifiers, 'Ready Item')) {

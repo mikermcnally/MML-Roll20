@@ -5,12 +5,12 @@ import { Character } from "../mml";
 
 export interface IItem {
   readonly id: Id;
-  readonly character_id: Rx.Observable<Character['id']>;
+  // readonly character_id: Rx.Observable<Character['id']>;
   readonly weight: Float.Positive;
   readonly name: Rx.Observable<string>;
   readonly modifiers?: Rx.Observable<Array<IItemModifier>>;
 
-  updateCharacterSheet(): void;
+  // updateCharacterSheet(): void;
 }
 
 export interface IItemModifier {

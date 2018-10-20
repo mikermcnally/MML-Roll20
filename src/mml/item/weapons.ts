@@ -1,13 +1,37 @@
 import { IItem } from "./item";
+import {  } from "module";
+import { IDice } from "../../utilities/roll";
+import { Id } from "../../roll20/object";
+import { generateRowID } from "../wrappers";
 
-export class Weapon implements IItem {
-  constructor(name, weight, mods, description, grips) {
-    super(name, weight, 'weapon', mods, description);
-    this.grips = grips;
-  }
+export interface IWeaponAttack {
+  damage: IDice[];
+}
 
-  wield(grip) {
-    Object.assign(this, this.grips[grip]);
+export interface IWeaponModifier {
+
+}
+
+export interface IGrip {
+  attacks: IWeaponAttack[];
+}
+
+export interface IWeapon extends IItem {
+  grips: IGrip[];
+  mods: IWeaponModifier[];
+}
+
+export class WeaponFactory {
+  static HandAxe(mods: IWeaponModifier[] = [], description?: string) {
+    return {
+      name: 'Hand Axe',
+      id: generateRowID(),
+      weight: 3,
+      mods: mods,
+      grips: [
+
+      ] as IGrip[]
+    } as IWeapon;
   }
 }
 
