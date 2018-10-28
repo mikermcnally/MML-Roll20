@@ -1,11 +1,11 @@
-import * as Roll20 from "./roll20";
+import { Id, IR20Object, ObjectType } from "./roll20";
 
-export interface IR20Campaign extends Roll20.IR20Object {
-  readonly type: Roll20.ObjectType.Campaign;
-  readonly _type: Roll20.ObjectType.Campaign;
+export interface IR20Campaign extends IR20Object {,
+  readonly type: ObjectType.Campaign;
+  readonly _type: ObjectType.Campaign;
   turnorder: string;
   initiativepage:	boolean;
-  playerpageid:	boolean;
+  playerpageid:	Id;
   playerspecificpages:	boolean;
   readonly _journalfolder: string
   get(property: CampaignProperties): string;

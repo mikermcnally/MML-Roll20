@@ -1,4 +1,4 @@
-export interface IAction{
+export interface IAction {
   
 }
 

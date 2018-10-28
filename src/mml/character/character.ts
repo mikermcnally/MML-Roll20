@@ -2,7 +2,7 @@ import * as Rx from "rxjs";
 import { filter, map, first, shareReplay, startWith, switchMap, } from "rxjs/operators";
 import * as Roll20 from "../../roll20/roll20";
 import { IGameEvent, Round } from "../../mml/mml";
-import { createAbility, createAttribute, ChangeAttributeCurrent, Integer, Point, ChangeCharacterName } from "../../utilities/utilities";
+import { createAbility, createAttribute, ChangeAttributeCurrent, Integer, Point, ChangeCharacterName, AddAttribute } from "../../utilities/utilities";
 import {
   AttributeProperties,
   Id,
@@ -20,19 +20,43 @@ import {
   CharacterProperties,
   IR20Attribute
 } from "../../roll20/roll20";
-import { listenForRoute, Routes } from "../routes";
+import { listenForRoute, Routes, IRoute } from "../routes";
 import { ButtonPressed } from "../main";
-
-export type CharacterName = string & { __type: CharacterName };
+import { CharacterRouter } from "./router";
+import { BodyTypes } from "./bodies/bodies";
 
 export class Character {
-  readonly id: IR20Character['id'];
-  readonly name: Rx.Observable<CharacterName>;
-  readonly token: Rx.Observable<IR20Token>;
-  readonly position: Rx.Observable<Point>;
   private attribute_changed: Rx.Observable<IR20Attribute>;
   private game_events: Rx.Observable<IGameEvent>;
-  private 
+  private router: CharacterRouter;
+
+  readonly id: IR20Character['id'];
+  readonly name: Rx.Observable<string>;
+  readonly token: Rx.Observable<IR20Token>;
+  readonly position: Rx.Observable<Point> = this.token.pipe(map(token => new Point(token.top, token.left)));
+  readonly body_type: Rx.Observable<BodyTypes>;
+  readonly height: Rx.Observable<Integer.Unsigned>;
+  readonly weight: Rx.Observable<Integer.Unsigned>;
+  readonly stature: Rx.Observable<Integer.Unsigned>;
+  readonly strength: Rx.Observable<Integer.Unsigned>;
+  readonly coordination: Rx.Observable<Integer.Unsigned>;
+  readonly health: Rx.Observable<Integer.Unsigned>;
+  readonly beauty: Rx.Observable<Integer.Unsigned>;
+  readonly intellect: Rx.Observable<Integer.Unsigned>;
+  readonly reason: Rx.Observable<Integer.Unsigned>;
+  readonly creativity: Rx.Observable<Integer.Unsigned>;
+  readonly presence: Rx.Observable<Integer.Unsigned>;
+  readonly willpower: Rx.Observable<Integer.Unsigned>;
+  readonly perception: Rx.Observable<Integer.Unsigned>;
+  readonly evocation: Rx.Observable<Integer.Unsigned>;
+  readonly systemStrength: Rx.Observable<Integer.Unsigned>;
+  readonly fitness: Rx.Observable<Integer.Unsigned>;
+  readonly fitnessMod: Rx.Observable<Integer.Unsigned>;
+  readonly load: Rx.Observable<Integer.Unsigned>;
+  readonly overhead: Rx.Observable<Integer.Unsigned>;
+  readonly deadLift: Rx.Observable<Integer.Unsigned>;
+  readonly hpMax: Rx.Observable<>;
+  readonly hpRecovery: Rx.Observable<>;
 
   constructor(roll20_character: IR20Character, game_events: Rx.Observable<IGameEvent>, token_represents: Rx.Observable<IR20Token>) {
     this.id = roll20_character.id;
@@ -42,17 +66,9 @@ export class Character {
     );
 
     this.game_events = game_events.pipe(filter(effect => effect.object_id === this.id));
-
-    const router = ButtonPressed.pipe(
-      filter(({ content }) => content.startsWith(this.id)),
-      map(message => message.content.replace(this.id, '') as Routes)
-    );
-
-    const idle = router.pipe(filter(route => route === Routes.CharacterIndex));
-    const action_menu = idle.pipe(listenForRoute(router, Routes.CharacterAction));
-    const stance_menu = action_menu.pipe(listenForRoute(router, Routes.CharacterActionStance));
-    const called_shot_menu = action_menu.pipe(listenForRoute(router, Routes.CharacterActionCalledShot));
-    const meta_magic_menu = action_menu.pipe(listenForRoute(router, Routes.CharacterActionMetaMagic));
+    
+    this.router = new CharacterRouter(this.id);
+    
 
     // Rx.add_attribute
     // Rx.change_attribute_current
@@ -73,18 +89,18 @@ export class Character {
     // #region Input Attributes
     this.name = ChangeCharacterName.pipe(
       filter(changed_character => changed_character.id === this.id),
-      map(changed_character => changed_character.get(CharacterProperties.Name) as CharacterName),
-      startWith(roll20_character.get(CharacterProperties.Name) as CharacterName)
+      map(changed_character => changed_character.get(CharacterProperties.Name)),
+      startWith(roll20_character.get(CharacterProperties.Name))
     );
 
     this.token = token_represents.pipe(
-      filter(token => token.get(TokenProperties.Represents) === this.id),
+      filter(token => token.represents === this.id && token.pageid === Campaign().playerpageid),
       shareReplay(1)
     );
 
-    this.position = 
+    // this.position = this.token.pipe(map(token => new Point(token.top, token.left)));
 
-    const action = game_state.pipe(
+    this.action = this.game_events.pipe(
       filter(({ attribute }) => attribute === 'action'),
       switchMap(({ value }) => value)
     );
@@ -104,18 +120,18 @@ export class Character {
     createAttribute('right_hand', JSON.stringify({ _id: 'empty_hand' }), '', this.id);
     createAttribute('left_hand', JSON.stringify({ _id: 'empty_hand' }), '', this.id);
     createAbility('Menu', '!MML /character/' + this.id, this.id, true);
-    const stature_roll = attribute_changed.pipe(MML.rollAttributeChanged('stature_roll'));
-    const strength_roll = attribute_changed.pipe(MML.rollAttributeChanged('strength_roll'));
-    const coordination_roll = attribute_changed.pipe(MML.rollAttributeChanged('coordination_roll'));
-    const health_roll = attribute_changed.pipe(MML.rollAttributeChanged('health_roll'));
-    const beauty_roll = attribute_changed.pipe(MML.rollAttributeChanged('beauty_roll'));
-    const intellect_roll = attribute_changed.pipe(MML.rollAttributeChanged('intellect_roll'));
-    const reason_roll = attribute_changed.pipe(MML.rollAttributeChanged('reason_roll'));
-    const creativity_roll = attribute_changed.pipe(MML.rollAttributeChanged('creativity_roll'));
-    const presence_roll = attribute_changed.pipe(MML.rollAttributeChanged('presence_roll'));
-    const race = attribute_changed.pipe(MML.inputAttributeChanged('race'));
-    const gender = attribute_changed.pipe(MML.inputAttributeChanged('gender'));
-    const handedness = attribute_changed.pipe(MML.inputAttributeChanged('handedness'));
+    const stature_roll = this.attribute_changed.pipe(this.rollAttributeChanged('stature_roll'));
+    const strength_roll = this.attribute_changed.pipe(this.rollAttributeChanged('strength_roll'));
+    const coordination_roll = this.attribute_changed.pipe(this.rollAttributeChanged('coordination_roll'));
+    const health_roll = this.attribute_changed.pipe(this.rollAttributeChanged('health_roll'));
+    const beauty_roll = this.attribute_changed.pipe(this.rollAttributeChanged('beauty_roll'));
+    const intellect_roll = this.attribute_changed.pipe(this.rollAttributeChanged('intellect_roll'));
+    const reason_roll = this.attribute_changed.pipe(this.rollAttributeChanged('reason_roll'));
+    const creativity_roll = this.attribute_changed.pipe(this.rollAttributeChanged('creativity_roll'));
+    const presence_roll = this.attribute_changed.pipe(this.rollAttributeChanged('presence_roll'));
+    const race = this.attribute_changed.pipe(MML.inputAttributeChanged('race'));
+    const gender = this.attribute_changed.pipe(MML.inputAttributeChanged('gender'));
+    const handedness = this.attribute_changed.pipe(MML.inputAttributeChanged('handedness'));
 
     // const inventory = MML.getCurrentAttributeObject(character.id, 'inventory').pipe(startWith({
     //   emptyHand: {
@@ -135,29 +151,29 @@ export class Character {
     // #endregion
 
     // #region Derived Attributes
-    const body_type = MML.derivedAttribute('body_type', race => MML.body_types[race], race);
-    const height = MML.derivedAttribute('height', (race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].height, race, gender, stature_roll);
-    const weight = MML.derivedAttribute('weight', (race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].weight, race, gender, stature_roll);
-    const stature = MML.derivedAttribute('stature', (race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].stature, race, gender, stature_roll);
-    const strength = MML.derivedAttribute('strength', (race, strength_roll) => MML.racialAttributeBonuses[race].strength + strength_roll, race, strength_roll);
-    const coordination = MML.derivedAttribute('coordination', (race, coordination_roll) => MML.racialAttributeBonuses[race].coordination + coordination_roll, race, coordination_roll);
-    const health = MML.derivedAttribute('health', (race, health_roll) => MML.racialAttributeBonuses[race].health + health_roll, race, health_roll);
-    const beauty = MML.derivedAttribute('beauty', (race, beauty_roll) => MML.racialAttributeBonuses[race].beauty + beauty_roll, race, beauty_roll);
-    const intellect = MML.derivedAttribute('intellect', (race, intellect_roll) => MML.racialAttributeBonuses[race].intellect + intellect_roll, race, intellect_roll);
-    const reason = MML.derivedAttribute('reason', (race, reason_roll) => MML.racialAttributeBonuses[race].reason + reason_roll, race, reason_roll);
-    const creativity = MML.derivedAttribute('creativity', (race, creativity_roll) => MML.racialAttributeBonuses[race].creativity + creativity_roll, race, creativity_roll);
-    const presence = MML.derivedAttribute('presence', (race, presence_roll) => MML.racialAttributeBonuses[race].presence + presence_roll, race, presence_roll);
-    const willpower = MML.derivedAttribute('willpower', (presence, health) => Math.round((2 * presence + health) / 3), presence, health);
-    const perception = MML.derivedAttribute('perception', (race, intellect, reason, creativity) => Math.round((intellect + reason + creativity) / 3) + MML.racialAttributeBonuses[race].perception, race, intellect, reason, creativity);
-    const systemStrength = MML.derivedAttribute('systemStrength', (presence, health) => Math.round((presence + 2 * health) / 3), presence, health);
-    const fitness = MML.derivedAttribute('fitness', (race, health, strength) => Math.round((health + strength) / 2) + MML.racialAttributeBonuses[race].fitness, race, health, strength);
-    const fitnessMod = MML.derivedAttribute('fitnessMod', fitness => MML.fitnessModLookup[fitness], fitness);
-    const load = MML.derivedAttribute('load', (race, stature, fitnessMod) => Math.round(stature * fitnessMod) + MML.racialAttributeBonuses[race].load, race, stature, fitnessMod);
-    const overhead = MML.derivedAttribute('overhead', load => load * 2, load);
-    const deadLift = MML.derivedAttribute('deadLift', load => load * 4, load);
-    const hpMax = MML.derivedAttribute('hpMax', MML.buildHpAttribute, race, stature, strength, health, willpower);
-    const hpRecovery = MML.derivedAttribute('hpRecovery', health => MML.recoveryMods[health].hp, health);
-    const evocation = MML.derivedAttribute('evocation', (race, intellect, reason, creativity, health, willpower) => intellect + reason + creativity + health + willpower + MML.racialAttributeBonuses[race].evocation,
+    this.body_type = MML.derivedAttribute('body_type', race => MML.body_types[race], race);
+    this.height = MML.derivedAttribute('height', (race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].height, race, gender, stature_roll);
+    this.weight = MML.derivedAttribute('weight', (race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].weight, race, gender, stature_roll);
+    this.stature = MML.derivedAttribute('stature', (race, gender, stature_roll) => MML.statureTables[race][gender][stature_roll].stature, race, gender, stature_roll);
+    this.strength = MML.derivedAttribute('strength', (race, strength_roll) => MML.racialAttributeBonuses[race].strength + strength_roll, race, strength_roll);
+    this.coordination = MML.derivedAttribute('coordination', (race, coordination_roll) => MML.racialAttributeBonuses[race].coordination + coordination_roll, race, coordination_roll);
+    this.health = MML.derivedAttribute('health', (race, health_roll) => MML.racialAttributeBonuses[race].health + health_roll, race, health_roll);
+    this.beauty = MML.derivedAttribute('beauty', (race, beauty_roll) => MML.racialAttributeBonuses[race].beauty + beauty_roll, race, beauty_roll);
+    this.intellect = MML.derivedAttribute('intellect', (race, intellect_roll) => MML.racialAttributeBonuses[race].intellect + intellect_roll, race, intellect_roll);
+    this.reason = MML.derivedAttribute('reason', (race, reason_roll) => MML.racialAttributeBonuses[race].reason + reason_roll, race, reason_roll);
+    this.creativity = MML.derivedAttribute('creativity', (race, creativity_roll) => MML.racialAttributeBonuses[race].creativity + creativity_roll, race, creativity_roll);
+    this.presence = MML.derivedAttribute('presence', (race, presence_roll) => MML.racialAttributeBonuses[race].presence + presence_roll, race, presence_roll);
+    this.willpower = MML.derivedAttribute('willpower', (presence, health) => Math.round((2 * presence + health) / 3), presence, health);
+    this.perception = MML.derivedAttribute('perception', (race, intellect, reason, creativity) => Math.round((intellect + reason + creativity) / 3) + MML.racialAttributeBonuses[race].perception, race, intellect, reason, creativity);
+    this.systemStrength = MML.derivedAttribute('systemStrength', (presence, health) => Math.round((presence + 2 * health) / 3), presence, health);
+    this.fitness = MML.derivedAttribute('fitness', (race, health, strength) => Math.round((health + strength) / 2) + MML.racialAttributeBonuses[race].fitness, race, health, strength);
+    this.fitnessMod = MML.derivedAttribute('fitnessMod', fitness => MML.fitnessModLookup[fitness], fitness);
+    this.load = MML.derivedAttribute('load', (race, stature, fitnessMod) => Math.round(stature * fitnessMod) + MML.racialAttributeBonuses[race].load, race, stature, fitnessMod);
+    this.overhead = MML.derivedAttribute('overhead', load => load * 2, load);
+    this.deadLift = MML.derivedAttribute('deadLift', load => load * 4, load);
+    this.hpMax = MML.derivedAttribute('hpMax', MML.buildHpAttribute, race, stature, strength, health, willpower);
+    this.hpRecovery = MML.derivedAttribute('hpRecovery', health => MML.recoveryMods[health].hp, health);
+    this.evocation = MML.derivedAttribute('evocation', (race, intellect, reason, creativity, health, willpower) => intellect + reason + creativity + health + willpower + MML.racialAttributeBonuses[race].evocation,
       race,
       intellect,
       reason,
@@ -625,7 +641,7 @@ export class Character {
       return attributecasting_mod;
     }, reason, fom_init_bonus, sense_init_bonus);
 
-    const add_attribute = Rx.add_attribute.pipe(filter(attribute => attribute.get('_characterid') === id))
+    const add_attribute = AddAttribute.pipe(filter(attribute => attribute.get(AttributeProperties.CharacterId) === this.id))
     const skills = add_attribute.pipe(filter(attribute => attribute.get('name').includes('repeating_skills')));
     const weapon_skills = add_attribute.pipe(filter(attribute => attribute.get('name').includes('repeating_weaponskills')));
     const skills =
@@ -925,8 +941,25 @@ export class Character {
         token.set('light_hassight', true);
       }
     });
-  };
-}
+  }
+
+  rollAttributeChanged(name: string) {
+    return function (source: Rx.Observable<IR20Attribute>) {
+      return source.pipe(
+        filter(attribute => attribute.get(AttributeProperties.Name) === name),
+        map(function (attribute) {
+          const roll = parseFloat(attribute.get(AttributeProperties.Current));
+          if (isNaN(roll) || roll < 6) {
+            return 6;
+          } else if (roll > 20) {
+            return 20;
+          } else {
+            return roll;
+          }
+        }),
+        startWith(getRollAttribute(this.id, name))
+      );
+    }
 }
 
 MML.alterHP = async function alterHP(player, character, bodyPart, hpAmount) {
@@ -1724,24 +1757,7 @@ MML.buildApvMatrix = function buildApvMatrix(inventory, body_type) {
 };
 
 // Rx operators
-MML.rollAttributeChanged = function rollAttributeChanged(id, name) {
-  return function (source) {
-    return source.pipe(
-      filter(attribute => attribute.get('name') === name),
-      map(function (attribute) {
-        const roll = parseFloat(attribute.get('current'));
-        if (isNaN(roll) || roll < 6) {
-          return 6;
-        } else if (roll > 20) {
-          return 20;
-        } else {
-          return roll;
-        }
-      }),
-      startWith(MML.getRollAttribute(id, name))
-    );
-  };
-};
+
 
 MML.inputAttributeChanged = function inputAttributeChanged(name) {
   return function (source) {

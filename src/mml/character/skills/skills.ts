@@ -1,85 +1,85 @@
-MML.skills = {
-  'Acrobatics': { attribute: 'coordination' },
-  'Acting': { attribute: 'presence' },
-  'Alchemy': { attribute: 'intellect' },
-  'Animal Handling': { attribute: 'presence' },
-  'Animal Husbandry': { attribute: 'reason' },
-  'Armorer': { attribute: 'reason' },
-  'Blacksmith': { attribute: 'coordination' },
-  'Botany': { attribute: 'intellect' },
-  'Bowyer': { attribute: 'coordination' },
-  'Brawling': { attribute: 'combat' },
-  'Brewing': { attribute: 'reason' },
-  'Bureaucracy': { attribute: 'creativity' },
-  'Caligraphy': { attribute: 'creativity' },
-  'Camouflage': { attribute: 'reason' },
-  'Carpentry': { attribute: 'coordination' },
-  'Cartography': { attribute: 'reason' },
-  'Climbing': { attribute: 'coordination' },
-  'Cooking': { attribute: 'reason' },
-  'Dancing': { attribute: 'creativity' },
-  'Diplomacy': { attribute: 'presence' },
-  'Disguise': { attribute: 'creativity' },
-  'Dowsing': { attribute: 'reason' },
-  'Ecology, Specific': { attribute: 'intellect' },
-  'Earth Elementalism': { attribute: 'intellect' },
-  'Air Elementalism': { attribute: 'intellect' },
-  'Fire Elementalism': { attribute: 'intellect' },
-  'Water Elementalism': { attribute: 'intellect' },
-  'Life Elementalism': { attribute: 'intellect' },
-  'Engineering': { attribute: 'intellect' },
-  'Etiquette': { attribute: 'presence' },
-  'Falconry': { attribute: 'reason' },
-  'First Aid': { attribute: 'reason' },
-  'Fishing': { attribute: 'reason' },
-  'Fletchery': { attribute: 'coordination' },
-  'Foraging': { attribute: 'reason' },
-  'Forced March': { attribute: 'Health' },
-  'Forgery': { attribute: 'creativity' },
-  'Gambling': { attribute: 'reason' },
-  'Gem Cutting': { attribute: 'reason' },
-  'Geology': { attribute: 'intellect' },
-  'Hand Signalling': { attribute: 'coordination' },
-  'Heraldry': { attribute: 'reason' },
-  'Herbalism': { attribute: 'reason' },
-  'History': { attribute: 'intellect' },
-  'Horsemanship': { attribute: 'coordination' },
-  'Hunting and Trapping': { attribute: 'reason' },
-  'Jeweler': { attribute: 'creativity' },
-  'Knowledge': { attribute: 'intellect' },
-  'Language': { attribute: 'creativity' },
-  'Leatherworking': { attribute: 'coordination' },
-  'Literacy': { attribute: 'intellect' },
-  'Literature': { attribute: 'intellect' },
-  'Lock Picking': { attribute: 'coordination' },
-  'Lore': { attribute: 'reason' },
-  'Mathematics': { attribute: 'intellect' },
-  'Metallurgy': { attribute: 'intellect' },
-  'Mimicry': { attribute: 'presence' },
-  'Musical Instrument': { attribute: 'creativity' },
-  'Navigation': { attribute: 'reason' },
-  'Negotiation': { attribute: 'presence' },
-  'Oration': { attribute: 'presence' },
-  'Persuasion': { attribute: 'presence' },
-  'Physician': { attribute: 'reason' },
-  'Pick Pocket': { attribute: 'coordination' },
-  'Running': { attribute: 'health' },
-  'Scrounging': { attribute: 'reason' },
-  'Sculpture': { attribute: 'creativity' },
-  'Seamanship': { attribute: 'reason' },
-  'Sewing': { attribute: 'coordination' },
-  'Singing': { attribute: 'presence' },
-  'Sleight of Hand': { attribute: 'coordination' },
-  'Stalking': { attribute: 'coordination' },
-  'Stealth': { attribute: 'coordination' },
-  'Survival': { attribute: 'reason' },
-  'Swimming': { attribute: 'coordination' },
-  'Symbol Magic': { attribute: 'intellect' },
-  'Tactical': { attribute: 'reason' },
-  'Teamster': { attribute: 'reason' },
-  'Tracking': { attribute: 'reason' },
-  'Veterinary': { attribute: 'reason' },
-  'Weapon Smith': { attribute: 'coordination' },
-  'Sword Smith': { attribute: 'coordination' },
-  'Wizardry': { attribute: 'intellect' },
-};
+export class Skills {
+  static 'Acrobatics' = { attribute: 'coordination' };
+  static 'Acting' = { attribute: 'presence' };
+  static 'Alchemy' = { attribute: 'intellect' };
+  static 'Animal Handling' = { attribute: 'presence' };
+  static 'Animal Husbandry' = { attribute: 'reason' };
+  static 'Armorer' = { attribute: 'reason' };
+  static 'Blacksmith' = { attribute: 'coordination' };
+  static 'Botany' = { attribute: 'intellect' };
+  static 'Bowyer' = { attribute: 'coordination' };
+  static 'Brawling' = { attribute: 'combat' };
+  static 'Brewing' = { attribute: 'reason' };
+  static 'Bureaucracy' = { attribute: 'creativity' };
+  static 'Caligraphy' = { attribute: 'creativity' };
+  static 'Camouflage' = { attribute: 'reason' };
+  static 'Carpentry' = { attribute: 'coordination' };
+  static 'Cartography' = { attribute: 'reason' };
+  static 'Climbing' = { attribute: 'coordination' };
+  static 'Cooking' = { attribute: 'reason' };
+  static 'Dancing' = { attribute: 'creativity' };
+  static 'Diplomacy' = { attribute: 'presence' };
+  static 'Disguise' = { attribute: 'creativity' };
+  static 'Dowsing' = { attribute: 'reason' };
+  static 'Ecology, Specific' = { attribute: 'intellect' };
+  static 'Earth Elementalism' = { attribute: 'intellect' };
+  static 'Air Elementalism' = { attribute: 'intellect' };
+  static 'Fire Elementalism' = { attribute: 'intellect' };
+  static 'Water Elementalism' = { attribute: 'intellect' };
+  static 'Life Elementalism' = { attribute: 'intellect' };
+  static 'Engineering' = { attribute: 'intellect' };
+  static 'Etiquette' = { attribute: 'presence' };
+  static 'Falconry' = { attribute: 'reason' };
+  static 'First Aid' = { attribute: 'reason' };
+  static 'Fishing' = { attribute: 'reason' };
+  static 'Fletchery' = { attribute: 'coordination' };
+  static 'Foraging' = { attribute: 'reason' };
+  static 'Forced March' = { attribute: 'Health' };
+  static 'Forgery' = { attribute: 'creativity' };
+  static 'Gambling' = { attribute: 'reason' };
+  static 'Gem Cutting' = { attribute: 'reason' };
+  static 'Geology' = { attribute: 'intellect' };
+  static 'Hand Signalling' = { attribute: 'coordination' };
+  static 'Heraldry' = { attribute: 'reason' };
+  static 'Herbalism' = { attribute: 'reason' };
+  static 'History' = { attribute: 'intellect' };
+  static 'Horsemanship' = { attribute: 'coordination' };
+  static 'Hunting and Trapping' = { attribute: 'reason' };
+  static 'Jeweler' = { attribute: 'creativity' };
+  static 'Knowledge' = { attribute: 'intellect' };
+  static 'Language' = { attribute: 'creativity' };
+  static 'Leatherworking' = { attribute: 'coordination' };
+  static 'Literacy' = { attribute: 'intellect' };
+  static 'Literature' = { attribute: 'intellect' };
+  static 'Lock Picking' = { attribute: 'coordination' };
+  static 'Lore' = { attribute: 'reason' };
+  static 'Mathematics' = { attribute: 'intellect' };
+  static 'Metallurgy' = { attribute: 'intellect' };
+  static 'Mimicry' = { attribute: 'presence' };
+  static 'Musical Instrument' = { attribute: 'creativity' };
+  static 'Navigation' = { attribute: 'reason' };
+  static 'Negotiation' = { attribute: 'presence' };
+  static 'Oration' = { attribute: 'presence' };
+  static 'Persuasion' = { attribute: 'presence' };
+  static 'Physician' = { attribute: 'reason' };
+  static 'Pick Pocket' = { attribute: 'coordination' };
+  static 'Running' = { attribute: 'health' };
+  static 'Scrounging' = { attribute: 'reason' };
+  static 'Sculpture' = { attribute: 'creativity' };
+  static 'Seamanship' = { attribute: 'reason' };
+  static 'Sewing' = { attribute: 'coordination' };
+  static 'Singing' = { attribute: 'presence' };
+  static 'Sleight of Hand' = { attribute: 'coordination' };
+  static 'Stalking' = { attribute: 'coordination' };
+  static 'Stealth' = { attribute: 'coordination' };
+  static 'Survival' = { attribute: 'reason' };
+  static 'Swimming' = { attribute: 'coordination' };
+  static 'Symbol Magic' = { attribute: 'intellect' };
+  static 'Tactical' = { attribute: 'reason' };
+  static 'Teamster' = { attribute: 'reason' };
+  static 'Tracking' = { attribute: 'reason' };
+  static 'Veterinary' = { attribute: 'reason' };
+  static 'Weapon Smith' = { attribute: 'coordination' };
+  static 'Sword Smith' = { attribute: 'coordination' };
+  static 'Wizardry' = { attribute: 'intellect' };
+}
