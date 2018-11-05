@@ -25,7 +25,7 @@ export interface IStatusEffect extends IGameEvent {
 
 export class MajorWound implements IStatusEffect {
   readonly effect: Rx.Observable<any>;
-  readonly body_part: IBodyPart;
+  readonly body_part: string;
 
   constructor(parameters) {
     

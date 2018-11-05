@@ -65,7 +65,7 @@ export class Character {
       filter(attribute => attribute.get(AttributeProperties.CharacterId) === this.id)
     );
 
-    this.game_events = game_events.pipe(filter(effect => effect.object_id === this.id));
+    this.game_events = game_events.pipe(filter(effect => effect.entity_id === this.id));
     
     this.router = new CharacterRouter(this.id);
     
@@ -1026,26 +1026,7 @@ MML.alterHP = async function alterHP(player, character, bodyPart, hpAmount) {
   await MML.setWoundFatigue(player, character);
 };
 
-MML.setWoundFatigue = async function setWoundFatigue(player, character) {
-  const currentHP = character.hp;
-  currentHP['Wound Fatigue'] = character.hpMax['Wound Fatigue'];
 
-  _.each(MML.getBodyParts(character), function (bodyPart) {
-    if (currentHP[bodyPart] >= Math.round(character.hpMax[bodyPart] / 2)) { //Only minor wounds apply
-      currentHP['Wound Fatigue'] -= character.hpMax[bodyPart] - currentHP[bodyPart];
-    } else {
-      currentHP['Wound Fatigue'] -= character.hpMax[bodyPart] - Math.round(character.hpMax[bodyPart] / 2);
-    }
-  });
-
-  if (currentHP['Wound Fatigue'] < 0 && !_.has(character.statusEffects, 'Wound Fatigue')) {
-    await MML.displayMenu(player, character.name + '\'s Wound Fatigue Roll', ['Roll']);
-    const result = await MML.attributeCheckRoll(player, character.systemStrength);
-    if (result === 'Failure') {
-      MML.addStatusEffect(character, 'Wound Fatigue', {});
-    }
-  }
-};
 
 MML.knockdownCheck = async function knockdownCheck(player, character, damage) {
   character.knockdown += damage;

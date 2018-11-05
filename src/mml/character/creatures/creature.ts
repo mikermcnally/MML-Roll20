@@ -7,7 +7,6 @@ import WoodElf from "./humanoid/wood_elf";
 import GrayElf from "./humanoid/gray_elf";
 import Human from "./humanoid/human";
 import Hobbit from "./humanoid/hobbit";
-import { IBodyPart } from "../bodies/body_part";
 import { HitPoints } from "../bodies/hit_points";
 import { IHitTable } from "../bodies/hit_table";
 import { Gender } from "../genders";
@@ -35,7 +34,8 @@ export enum CreatureSize {
 }
 
 export interface ICreature {
-  body_parts(): { [name: string]: IBodyPart };
+  type: string;
+  hit_points(): HitPoints[];
   hit_positions(): { [number: number]: IHitPosition };
   multiple_wounds(): HitPoints;
   hit_table(): Rx.Observable<IHitTable>;
@@ -44,5 +44,5 @@ export interface ICreature {
   movement_rates: IMovementRate;
   hp_table: { [attribute_average: number]: Integer.Unsigned };
   stature_table: { [gender in Gender]: { [value in d20]: { height: string, weight: number, stature: number } } };
-  sensitive_areas: HitPosition[];
+  sensitive_areas: IHitPosition[];
 }
